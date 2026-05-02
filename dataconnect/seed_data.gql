@@ -1,0 +1,122 @@
+mutation SeedData @transaction @auth(level: USER, insecureReason: "Seed data operations are for development environments, where an authenticated user is sufficient.") {
+  user_insertMany(data: [
+    {
+      id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+      username: "john_doe",
+      email: "john.doe@example.com",
+      displayName: "John Doe",
+      createdAt: "2023-01-01T12:00:00Z",
+      bio: "A passionate software engineer.",
+      profilePictureUrl: "https://example.com/john.jpg",
+      linkedInUrl: "https://linkedin.com/in/john",
+      githubUrl: "https://github.com/john",
+      personalWebsiteUrl: "https://john.dev",
+      twitterUrl: "https://twitter.com/john",
+      skills: ["JavaScript", "React", "Node.js", "GraphQL"]
+    },
+    {
+      id: "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+      username: "jane_smith",
+      email: "jane.smith@example.com",
+      displayName: "Jane Smith",
+      createdAt: "2023-02-15T09:30:00Z",
+      bio: "Frontend developer with a love for UI/UX.",
+      profilePictureUrl: "https://example.com/jane.jpg",
+      linkedInUrl: "https://linkedin.com/in/jane",
+      githubUrl: "https://github.com/jane",
+      personalWebsiteUrl: "https://jane.design",
+      twitterUrl: "https://twitter.com/jane",
+      skills: ["HTML", "CSS", "Vue.js", "TypeScript"]
+    }
+  ])
+  blogPost_insertMany(data: [
+    {
+      id: "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+      title: "Getting Started with Firebase Data Connect",
+      content: "Firebase Data Connect makes building scalable backends incredibly easy. This post covers the basics.",
+      createdAt: "2023-03-10T10:00:00Z",
+      publishedAt: "2023-03-10T10:00:00Z",
+      imageUrl: "https://example.com/blog/fdc.png",
+      isPublished: true,
+      authorId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+    },
+    {
+      id: "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+      title: "The Future of Web Development with AI",
+      content: "AI is revolutionizing how we build web applications. Explore the exciting possibilities.",
+      createdAt: "2023-04-05T14:15:00Z",
+      publishedAt: "2023-04-05T14:15:00Z",
+      imageUrl: "https://example.com/blog/ai.png",
+      isPublished: true,
+      authorId: "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
+    }
+  ])
+  project_insertMany(data: [
+    {
+      id: "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+      title: "E-commerce Platform",
+      description: "A full-stack e-commerce solution with modern features.",
+      createdAt: "2023-01-20T16:00:00Z",
+      demoUrl: "https://demo.ecommerce.com",
+      githubRepoUrl: "https://github.com/john/ecommerce",
+      technologiesUsed: ["React", "Node.js", "PostgreSQL"],
+      imageUrl: "https://example.com/project/ecommerce.jpg",
+      authorId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+    },
+    {
+      id: "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+      title: "Personal Portfolio",
+      description: "A sleek and responsive portfolio website.",
+      createdAt: "2023-02-28T11:00:00Z",
+      demoUrl: "https://jane.design",
+      githubRepoUrl: "https://github.com/jane/portfolio",
+      technologiesUsed: ["Vue.js", "Tailwind CSS"],
+      imageUrl: "https://example.com/project/portfolio.jpg",
+      authorId: "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
+    }
+  ])
+  tag_insertMany(data: [
+    {
+      id: "1a2b3c4d-5e6f-7890-1234-567890abcdef",
+      name: "Firebase"
+    },
+    {
+      id: "2b3c4d5e-6f7a-8901-2345-67890abcdef0",
+      name: "Web Development"
+    },
+    {
+      id: "3c4d5e6f-7a8b-9012-3456-7890abcdef01",
+      name: "AI"
+    },
+    {
+      id: "4d5e6f7a-8b9c-0123-4567-890abcdef012",
+      name: "Frontend"
+    },
+    {
+      id: "5e6f7a8b-9c0d-1234-5678-90abcdef0123",
+      name: "Backend"
+    }
+  ])
+  blogPostTag_insertMany(data: [
+    {
+      blogPostId: "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+      tagId: "1a2b3c4d-5e6f-7890-1234-567890abcdef",
+      createdAt: "2023-03-10T10:05:00Z"
+    },
+    {
+      blogPostId: "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+      tagId: "2b3c4d5e-6f7a-8901-2345-67890abcdef0",
+      createdAt: "2023-03-10T10:06:00Z"
+    },
+    {
+      blogPostId: "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+      tagId: "2b3c4d5e-6f7a-8901-2345-67890abcdef0",
+      createdAt: "2023-04-05T14:20:00Z"
+    },
+    {
+      blogPostId: "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+      tagId: "3c4d5e6f-7a8b-9012-3456-7890abcdef01",
+      createdAt: "2023-04-05T14:21:00Z"
+    }
+  ])
+}

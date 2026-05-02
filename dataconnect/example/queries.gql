@@ -1,0 +1,70 @@
+query GetPublishedBlogPosts @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it only retrieves published blog posts.") {
+  blogPosts(where: {isPublished: {eq: true}}, orderBy: [{publishedAt: DESC}]) {
+    id
+    title
+    content
+    publishedAt
+    imageUrl
+    author {
+      displayName
+      profilePictureUrl
+    }
+    blogPostTags_on_blogPost {
+      tag {
+        name
+      }
+    }
+  }
+}
+
+query GetUserProjects @auth(level: USER) {
+  projects(where: {author: {id: {eq_expr: "auth.uid"}}}, orderBy: [{createdAt: DESC}]) {
+    id
+    title
+    description
+    demoUrl
+    githubRepoUrl
+    technologiesUsed
+    imageUrl
+    createdAt
+  }
+}
+
+mutation CreateNewBlogPost($title: String!, $content: String!, $imageUrl: String, $tags: [String!]) @auth(level: USER) {
+  blogPost: blogPost_insert(data: {
+    title: $title,
+    content: $content,
+    imageUrl: $imageUrl,
+    isPublished: false,
+    createdAt_expr: "request.time",
+    authorId_expr: "auth.uid"
+  }) {
+    id
+  }
+  # Optionally insert tags if provided
+  insertTags: tag_insertMany(data: $tags) @include(if: $tags) {
+    id
+  }
+  # Create BlogPostTag entries to link the new blog post with its tags
+  blogPostTags: blogPostTag_insertMany(data: $tags) @include(if: $tags) {
+    blogPostId_expr: "blogPost.id",
+    tagId_expr: "insertTags.id",
+    createdAt_expr: "request.time"
+  }
+}
+
+
+mutation UpdateUserProfile($displayName: String!, $bio: String, $profilePictureUrl: String, $linkedInUrl: String, $githubUrl: String, $personalWebsiteUrl: String, $twitterUrl: String, $skills: [String!]) @auth(level: USER) {
+  user_update(key: {id_expr: "auth.uid"}, data: {
+    displayName: $displayName,
+    bio: $bio,
+    profilePictureUrl: $profilePictureUrl,
+    linkedInUrl: $linkedInUrl,
+    githubUrl: $githubUrl,
+    personalWebsiteUrl: $personalWebsiteUrl,
+    twitterUrl: $twitterUrl,
+    skills: $skills
+  }) {
+    id
+  }
+}

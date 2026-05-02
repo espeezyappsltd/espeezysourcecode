@@ -1,0 +1,378 @@
+{
+  "schemaVersion": 1,
+  "databaseId": "espeezydb",
+  "collections": [
+    {
+      "name": "profiles",
+      "description": "User profile documents keyed by Firebase Auth uid.",
+      "idStrategy": "auth_uid"
+    },
+    {
+      "name": "tasks",
+      "description": "Core collaborative task records for dashboards and workflows.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "activity_log",
+      "description": "Immutable activity events emitted by core workflows.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "notifications",
+      "description": "User-facing notification records.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "payments",
+      "description": "Payment and invoice records created by payment workflows.",
+      "idStrategy": "mixed"
+    },
+    {
+      "name": "marketplace_listings",
+      "description": "Peer marketplace listing records.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "user_game_stats",
+      "description": "Aggregated per-user game statistics.",
+      "idStrategy": "auth_uid"
+    },
+    {
+      "name": "commits",
+      "description": "Game and task commit history.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "groups",
+      "description": "Academic groups, teams, or cohorts.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "group_join_requests",
+      "description": "Pending requests to join groups.",
+      "idStrategy": "composite"
+    },
+    {
+      "name": "messages",
+      "description": "In-app messaging payloads.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "quiz_categories",
+      "description": "Quiz and games category catalog.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "donations",
+      "description": "Donation checkout records keyed by Stripe session id.",
+      "idStrategy": "external"
+    },
+    {
+      "name": "p2p_transfers",
+      "description": "Peer-to-peer transfer ledger.",
+      "idStrategy": "mixed"
+    },
+    {
+      "name": "posts",
+      "description": "Feed posts and associated engagement metadata.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "hustle_tasks",
+      "description": "Marketplace-style hustle task postings.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "pre_registrations",
+      "description": "Launch waitlist email registrations.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "artifacts",
+      "description": "User-uploaded artifacts referenced by account deletion and workflows.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "user_connections",
+      "description": "Network graph edges between users.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "quiz_sessions",
+      "description": "Quiz session attempts and scoring data.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "certificates",
+      "description": "Student certificate issuance records.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "support_tickets",
+      "description": "User support ticket submissions.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "student_verifications",
+      "description": "Student verification requests and approval status.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "app_config",
+      "description": "Public launch configuration entries keyed by config key.",
+      "idStrategy": "config_key"
+    },
+    {
+      "name": "platform_config",
+      "description": "Admin-managed platform setting entries keyed by config key.",
+      "idStrategy": "config_key"
+    },
+    {
+      "name": "support_messages",
+      "description": "AI support message transcripts.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "reward_ledger",
+      "description": "Reward and payout ledger entries.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "ai_usage",
+      "description": "AI feature usage tracking entries.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "quiz_tournaments",
+      "description": "Tournament definitions for quiz competition.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "quiz_tournament_participants",
+      "description": "Tournament participant state and scoring.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "quiz_questions",
+      "description": "Question bank for games and quiz routes.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "agents",
+      "description": "Seeded AI agent registry for orchestration and admin tooling.",
+      "idStrategy": "slug"
+    },
+    {
+      "name": "agent_tasks",
+      "description": "Agent task queue and execution records.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "server_error_log",
+      "description": "Server-side error telemetry entries.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "audit_logs",
+      "description": "Admin audit trail entries.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "user_feedback",
+      "description": "Contact and feedback submissions.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "marketing_campaigns",
+      "description": "Admin email campaign definitions and delivery tracking.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "system_announcements",
+      "description": "Admin-authored announcement records.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "admin_payouts",
+      "description": "Administrative payout records.",
+      "idStrategy": "auto"
+    },
+    {
+      "name": "system_logs",
+      "description": "Client and server operational logging collection.",
+      "idStrategy": "auto"
+    }
+  ],
+  "seedDocuments": {
+    "app_config": [
+      {
+        "id": "launch_date",
+        "data": {
+          "key": "launch_date",
+          "value": "2026-12-31T00:00:00.000Z",
+          "description": "Public launch date used by marketing surfaces."
+        }
+      },
+      {
+        "id": "launch_message",
+        "data": {
+          "key": "launch_message",
+          "value": "Espeezy is opening access in waves. Pre-register to secure early access.",
+          "description": "Hero message shown on launch and preregistration surfaces."
+        }
+      },
+      {
+        "id": "preregister_goal",
+        "data": {
+          "key": "preregister_goal",
+          "value": "5000000",
+          "description": "Target number of preregistrations for the launch counter."
+        }
+      },
+      {
+        "id": "preregister_open",
+        "data": {
+          "key": "preregister_open",
+          "value": "true",
+          "description": "Controls whether public preregistration is open."
+        }
+      },
+      {
+        "id": "brand_name",
+        "data": {
+          "key": "brand_name",
+          "value": "Espeezy",
+          "description": "Brand label used on public launch surfaces."
+        }
+      },
+      {
+        "id": "platform_version",
+        "data": {
+          "key": "platform_version",
+          "value": "firebase-v1",
+          "description": "Current platform schema label for public display."
+        }
+      }
+    ],
+    "agents": [
+      {
+        "id": "apex",
+        "data": {
+          "name": "Apex",
+          "specialisation": "orchestrator",
+          "role": "orchestrator",
+          "status": "active",
+          "pair_id": null,
+          "capabilities": [
+            "Task decomposition",
+            "Build verification",
+            "Cross-domain orchestration"
+          ],
+          "system_prompt": "You are Apex, the orchestration layer. Break requests into the minimum viable task graph, route work to the specialist agents, and do not report success until validation passes."
+        }
+      },
+      {
+        "id": "alpha",
+        "data": {
+          "name": "Alpha",
+          "specialisation": "frontend",
+          "role": "builder",
+          "status": "active",
+          "pair_id": "beta",
+          "capabilities": [
+            "React",
+            "Next.js",
+            "Accessibility",
+            "Framer Motion"
+          ],
+          "system_prompt": "You are Alpha, the frontend UI architect. Build React and Next.js interfaces that are accessible, mobile-first, and aligned with the Espeezy design system."
+        }
+      },
+      {
+        "id": "beta",
+        "data": {
+          "name": "Beta",
+          "specialisation": "frontend",
+          "role": "validator",
+          "status": "active",
+          "pair_id": "alpha",
+          "capabilities": [
+            "Playwright",
+            "Lighthouse",
+            "WCAG",
+            "Visual regression"
+          ],
+          "system_prompt": "You are Beta, the frontend validator. Validate UI work with Playwright, Lighthouse, and accessibility checks before anything ships."
+        }
+      },
+      {
+        "id": "gamma",
+        "data": {
+          "name": "Gamma",
+          "specialisation": "backend",
+          "role": "builder",
+          "status": "active",
+          "pair_id": "delta",
+          "capabilities": [
+            "Next.js API routes",
+            "Firestore",
+            "Auth",
+            "Webhooks"
+          ],
+          "system_prompt": "You are Gamma, the backend builder. Implement API routes, data access, and schema changes following the project security patterns."
+        }
+      },
+      {
+        "id": "delta",
+        "data": {
+          "name": "Delta",
+          "specialisation": "backend",
+          "role": "validator",
+          "status": "active",
+          "pair_id": "gamma",
+          "capabilities": [
+            "OWASP",
+            "Security review",
+            "Rate limiting",
+            "Load validation"
+          ],
+          "system_prompt": "You are Delta, the backend validator. Audit routes and backend logic for security, correctness, and abuse resistance."
+        }
+      },
+      {
+        "id": "epsilon",
+        "data": {
+          "name": "Epsilon",
+          "specialisation": "devops",
+          "role": "builder",
+          "status": "active",
+          "pair_id": "zeta",
+          "capabilities": [
+            "CI/CD",
+            "Vercel",
+            "Environment configuration",
+            "Deployment verification"
+          ],
+          "system_prompt": "You are Epsilon, the infrastructure builder. Own build reliability, deployment configuration, and release verification."
+        }
+      },
+      {
+        "id": "zeta",
+        "data": {
+          "name": "Zeta",
+          "specialisation": "devops",
+          "role": "validator",
+          "status": "active",
+          "pair_id": "epsilon",
+          "capabilities": [
+            "Secret scanning",
+            "Bundle analysis",
+            "Uptime checks",
+            "Reliability review"
+          ],
+          "system_prompt": "You are Zeta, the infrastructure validator. Check secrets, runtime health, and deployment quality before release."
+        }
+      }
+    ]
+  }
+}

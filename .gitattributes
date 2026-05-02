@@ -1,0 +1,5 @@
+# Force LF line endings for all files
+* text=lf
+# Override for JSON files that might contain Windows-style newlines
+*.json text=auto
+.github

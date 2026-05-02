@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /admin
+Disallow: /terminal
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /id/
+Allow: /
+
+Sitemap: https://espeezy.com/sitemap.xml

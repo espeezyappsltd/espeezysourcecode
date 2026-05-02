@@ -1,0 +1,73 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+.espeezylearningadmincred.json
+
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# supabase schema migrations (large auto-generated files)
+# *.sql — kept so migrations are tracked
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# output/report text files
+eslint-output.txt
+test_output.txt
+.next-build.log
+.eslint-report.json
+
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log*
+
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# firebase config
+firebase.json
+.firebaserc
+.firebase/
+*-firebase-adminsdk-*.json
+firebase-adminsdk*.json
+*admincred*.json
+firebase.config
+firebasesslcert
+
+
+
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# agents
+.agents/
+.windsurf/
+skills-lock.json
+node-v24.15.0-linux-x64/

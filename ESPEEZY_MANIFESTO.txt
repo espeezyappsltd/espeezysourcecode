@@ -1,0 +1,123 @@
+
+
+Date: 24 April 2026.
+Time: 12.31 a.m.
+Weather: Hot & Sunny, Lovely British, Summer Weather. 
+Location: Northampton, UK.
+
+
+
+
+"
+""" iNTERNAL documents formatting Standards """
+""" pLease adhere strictly to these internal document access control protocols while accessing internal documents """
+""" Meant For Use By internal TEAM members at ESPEEZY ONLINE ACADEMY """
+
+PLEASE NOTE: THESE POCICIES AND PROCEDURES ARE PUT IN PLACE TO ENSURE CONTROLLED ACCESS OF INTERNAL MEMO, COMMUNICATIONS AND BRAND REPUTATION.
+They are meant to be used as the go to tool for checking in on latest updates and information.
+
+
+
+
+1.
+
+2.
+
+
+"
+
+
+
+DOCUMENT TITLE: MICROSOFT WINDOWS POWERSHELL CLI TOOLS & FUNCTIONS!
+
+
+Date:
+https://www.commandinline.com/cheat-sheet/
+
+
+
+
+
+
+
+
+CANVA WEB DESIGN IDEAS URLs
+
+https://www.canva.com/templates
+https://www.canva.com/templates/EAGf2zVDT1M/
+
+BRAND LOGO DESIGN IDEAS FROM CANVA
+
+
+https://www.canva.com/templates/EAGbVr0Sdg4/
+https://www.canva.com/templates/EAGrJpnoh8Q/
+https://www.canva.com/templates/EAGwwL5upFE/
+
+
+What is ESPEEZY STUDENT Online Academy Learning PLatform?
+
+
+Online learning platform designed for students to study and collaborate on group projects through a real-time, shared environment. ALL students with verifiable student account details are able to sign up through the pre-registration website and be among the first 100 lucky individuals to sign up for the free 30 day premium truial, will get to enjoy ALL premium platform Features and Benefits for FREE for LIFE for REAL at a one-time cost of only £149.
+
+
+
+
+
+
+
+********* PA TASK **********
+
+BUILD SMALL EXPRESS JS GET ENDPOINT TO THIS URL [https://www.commandinline.com/cheat-sheet/] AND BUILD A SIMPLE HTML FRONT END WITH A LIST OF ALL COMMANDS NEATLY ORGANISED AND DESCRIBED IN THIS FORMAT:
+
+Command Desc Usage	Wildcards
+1.
+
+
+
+
+
+Alias Information
+
+Unlike some cmdlets that come with widely recognized built-in aliases, Stop-Process is typically used by its full name to maintain clarity. However, you can create your own custom alias if you frequently use this cmdlet.
+Example: Set-Alias -Name sp -Value Stop-Process
+After setting this custom alias, you can simply type sp -Name "notepad" to stop the Notepad process quickly.
+
+
+
+
+
+
+
+
+Here are several inline examples illustrating different ways to use Stop-Process:
+
+    To stop all instances of Notepad, type:
+    Example: Stop-Process -Name "notepad"
+
+    To terminate a process using its process ID, type:
+    Example: Stop-Process -Id 1234
+
+    To stop all processes with names containing “chrome,” type:
+    Example: Stop-Process -Name *chrome*
+
+    To remotely stop Notepad on a computer named Server01, type:
+    Example: Invoke-Command -ComputerName Server01 -ScriptBlock { Stop-Process -Name "notepad" }
+
+    To create and use a custom alias for Stop-Process, type:
+    Example: Set-Alias -Name sp -Value Stop-Process and then use sp -Name “notepad”
+
+
+Command To Quickly Shut Down a Process by it's process id in Windows Powershell
+WINDOWS PS: Stop-Process -Id 1234
+
+
+
+
+
+
+
+
+
+
+
+

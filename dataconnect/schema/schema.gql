@@ -1,0 +1,44 @@
+type User @table {
+  username: String!
+  email: String!
+  displayName: String!
+  createdAt: Timestamp!
+  bio: String
+  profilePictureUrl: String
+  linkedInUrl: String
+  githubUrl: String
+  personalWebsiteUrl: String
+  twitterUrl: String
+  skills: [String]
+}
+
+type Project @table {
+  title: String!
+  description: String!
+  createdAt: Timestamp!
+  demoUrl: String
+  githubRepoUrl: String
+  technologiesUsed: [String]
+  imageUrl: String
+  author: User
+}
+
+type BlogPost @table {
+  title: String!
+  content: String!
+  createdAt: Timestamp!
+  publishedAt: Timestamp!
+  imageUrl: String
+  isPublished: Boolean
+  author: User
+}
+
+type Tag @table {
+  name: String!
+}
+
+type BlogPostTag @table(key: ["blogPost", "tag"]) {
+  blogPost: BlogPost!
+  tag: Tag!
+  createdAt: Timestamp!
+}

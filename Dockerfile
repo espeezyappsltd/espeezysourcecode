@@ -1,0 +1,26 @@
+﻿# ──────────────────────────────────────────────────────────────────────────────
+# espeezy.com — Cloud Dev Container
+# Next.js 16 · Node 20 Alpine · Hot Reload via volume mount
+# ──────────────────────────────────────────────────────────────────────────────
+FROM node:24-alpine AS dev
+
+# Required for some native deps (canvas, sharp, etc.)
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /app
+
+# ── Install deps as a separate layer so code changes don't bust cache ──────────
+COPY package.json package-lock.json* ./
+
+# ── Source files are volume-mounted at runtime; nothing else to copy ──────────
+
+EXPOSE 3000
+
+# Disable telemetry in container
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=development
+# Required for hot-module reload across Docker bind mounts
+ENV WATCHPACK_POLLING=true
+ENV CHOKIDAR_USEPOLLING=true
+
+CMD ["npm", "run", "dev"]
