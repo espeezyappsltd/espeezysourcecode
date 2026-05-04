@@ -9,53 +9,9 @@ import {
   GraduationCap, TrendingUp, Heart, Award
 } from 'lucide-react'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-interface TimeLeft { days: number; hours: number; minutes: number; seconds: number }
-interface LaunchConfig {
-  launch_date: string
-  launch_message: string
-  preregister_goal: string
-  brand_name: string
-}
-
-// ─── Countdown Hook ───────────────────────────────────────────────────────────
-function useCountdown(targetDate: string): TimeLeft {
-  const calc = useCallback(() => {
-    const diff = new Date(targetDate).getTime() - Date.now()
-    if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
-    return {
-      days: Math.floor(diff / 86_400_000),
-      hours: Math.floor((diff % 86_400_000) / 3_600_000),
-      minutes: Math.floor((diff % 3_600_000) / 60_000),
-      seconds: Math.floor((diff % 60_000) / 1000),
-    }
-  }, [targetDate])
-
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calc)
-  useEffect(() => {
-    const id = setInterval(() => setTimeLeft(calc()), 1000)
-    return () => clearInterval(id)
-  }, [calc])
-  return timeLeft
-}
-
-// ─── Animated Counter ─────────────────────────────────────────────────────────
-function AnimatedNumber({ value }: { value: number }) {
-  const [display, setDisplay] = useState(0)
-  useEffect(() => {
-    let start = display
-    const end = value
-    if (start === end) return
-    const step = Math.max(1, Math.floor((end - start) / 60))
-    const id = setInterval(() => {
-      start = Math.min(start + step, end)
-      setDisplay(start)
-      if (start >= end) clearInterval(id)
-    }, 16)
-    return () => clearInterval(id)
-  }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
-  return <>{display.toLocaleString()}</>
-}
+import { useLaunchData } from '@/hooks/useLaunchData'
+import SharedCountdown from '@/components/SharedCountdown'
+import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 
 // ─── Coming Features ─────────────────────────────────────────────────────────
 const COMING_FEATURES = [
@@ -66,20 +22,6 @@ const COMING_FEATURES = [
   { icon: <BookOpen size={20} />, title: 'Syncs with Your School', desc: 'Connects right into Canvas, Blackboard, or Moodle so you don’t have to copy-paste your work everywhere.', tag: 'Integrations' },
   { icon: <Globe size={20} />, title: 'Global Student Network', desc: 'Join forces with students around the world. Share awesome resources, find study buddies, and collaborate globally.', tag: 'Community' },
 ]
-
-
-
-// ─── Countdown Block ─────────────────────────────────────────────────────────
-function CountBlock({ value, label }: { value: number; label: string }) {
-  return (
-    <div style={{ textAlign: 'center', minWidth: '70px' }}>
-      <div style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 950, color: 'white', letterSpacing: '-0.06em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-        {String(value).padStart(2, '0')}
-      </div>
-      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.18em', marginTop: '6px' }}>{label}</div>
-    </div>
-  )
-}
 
 // ─── Nav Items ────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
@@ -92,14 +34,7 @@ const NAV_LINKS = [
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function PreRegisterPage() {
-  const [config, setConfig] = useState<LaunchConfig>({
-    launch_date: '2025-09-01T00:00:00.000Z',
-    launch_message: 'Something big is coming. Join 5 million students shaping the future of collaborative education.',
-    preregister_goal: '5000000',
-    brand_name: 'Espeezy',
-  })
-  const [registeredCount, setRegisteredCount] = useState(0)
-  const [configLoaded, setConfigLoaded] = useState(false)
+  const { config, registeredCount, configLoaded, timeLeft, setRegisteredCount } = useLaunchData()
 
   // Form state
   const [email, setEmail] = useState('')
@@ -107,27 +42,7 @@ export default function PreRegisterPage() {
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  // Load launch config + count
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [cfgRes, countRes] = await Promise.all([
-          fetch('/api/launch-config'),
-          fetch('/api/preregister'),
-        ])
-        const { config: cfg } = await cfgRes.json()
-        const { count } = await countRes.json()
-        if (cfg) setConfig(prev => ({ ...prev, ...cfg }))
-        if (count) setRegisteredCount(count)
-      } catch (_) { /* use defaults */ }
-      setConfigLoaded(true)
-    }
-    load()
-  }, [])
-
-  const timeLeft = useCountdown(config.launch_date)
   const goal = parseInt(config.preregister_goal ?? '5000000', 10)
-  const progressPct = Math.min(100, Math.round((registeredCount / goal) * 100))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -218,38 +133,10 @@ export default function PreRegisterPage() {
         </motion.p>
 
         {/* Countdown */}
-        {configLoaded && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.35 }}
-            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'clamp(1rem, 4vw, 2.5rem)', marginBottom: '3.5rem', flexWrap: 'wrap' }}>
-            <CountBlock value={timeLeft.days} label="Days" />
-            <div style={{ fontSize: '2.5rem', fontWeight: 950, color: 'var(--brand)', opacity: 0.4, marginBottom: '1rem' }}>:</div>
-            <CountBlock value={timeLeft.hours} label="Hours" />
-            <div style={{ fontSize: '2.5rem', fontWeight: 950, color: 'var(--brand)', opacity: 0.4, marginBottom: '1rem' }}>:</div>
-            <CountBlock value={timeLeft.minutes} label="Min" />
-            <div style={{ fontSize: '2.5rem', fontWeight: 950, color: 'var(--brand)', opacity: 0.4, marginBottom: '1rem' }}>:</div>
-            <CountBlock value={timeLeft.seconds} label="Sec" />
-          </motion.div>
-        )}
+        {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
 
-        {/* Progress bar */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          style={{ maxWidth: '520px', margin: '0 auto 4rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>
-              <AnimatedNumber value={registeredCount} /> registered
-            </span>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>
-              Goal: {goal.toLocaleString()}
-            </span>
-          </div>
-          <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
-            <motion.div initial={{ width: 0 }} animate={{ width: `${progressPct}%` }} transition={{ duration: 1.5, delay: 0.6, ease: 'easeOut' }}
-              style={{ height: '100%', background: 'linear-gradient(90deg, var(--brand) 0%, #34d399 100%)', borderRadius: '100px' }} />
-          </div>
-          <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', marginTop: '0.5rem', textAlign: 'center' }}>
-            {progressPct < 1 ? 'Be among the first.' : `${progressPct}% of the way to launch goal`}
-          </p>
-        </motion.div>
+        {/* User Counter */}
+        <UserRegistrationCounter registeredCount={registeredCount} goal={goal} />
       </section>
 
       {/* ── REGISTRATION FORM ─────────────────────────────────────────────── */}
@@ -311,6 +198,40 @@ export default function PreRegisterPage() {
                 </motion.form>
               )}
             </AnimatePresence>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRODUCT GALLERY ──────────────────────────────────────────────── */}
+      <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <div style={{ display: 'inline-flex', padding: '5px 14px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '100px', marginBottom: '1.5rem' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Experience the Future</span>
+            </div>
+            <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '1rem' }}>
+              A powerful interface for<br />high-performance students.
+            </h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+            {[
+              { src: '/screenshots/dashboard.png', title: 'Smart Dashboard', desc: 'Real-time velocity tracking and team heatmaps.' },
+              { src: '/screenshots/admin.png', title: 'Institutional Control', desc: 'Powerful tools for educators to monitor engagement.' },
+              { src: '/screenshots/terminal.png', title: 'The Gateway', desc: 'Institutional-grade data orchestration and security.' },
+              { src: '/screenshots/mobile.png', title: 'Go Mobile', desc: 'Sync your tasks and collaborate from anywhere.' }
+            ].map((img, i) => (
+              <motion.div key={i} initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }}
+                style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}>
+                <img src={img.src} alt={img.title} style={{ width: '100%', height: 'auto', display: 'block', transition: 'transform 0.4s ease' }} 
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                <div style={{ padding: '1.5rem', background: 'linear-gradient(to top, #0a0a0a 0%, transparent 100%)', position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 0.25rem' }}>{img.title}</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', margin: 0 }}>{img.desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

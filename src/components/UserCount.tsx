@@ -1,71 +1,43 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { db, createBrowserSupabaseClient } from '@/lib/db-client'
+import React, { useState, useEffect } from 'react'
 import { Users } from 'lucide-react'
 
 export default function UserCount() {
   const [count, setCount] = useState<number | null>(null)
   const [isLive, setIsLive] = useState(false)
-  const db = createBrowserSupabaseClient()
 
   const fetchCount = async () => {
-    const { count: total, error } = await db
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-    
-    if (!error && total !== null) {
-      setCount(total)
-      setIsLive(true)
-      // Small pulse effect when count updates
-      setTimeout(() => setIsLive(false), 2000)
+    try {
+      const res = await fetch('/api/preregister')
+      const data = await res.json()
+      if (data.count !== undefined) {
+        setCount(data.count)
+        setIsLive(true)
+        setTimeout(() => setIsLive(false), 2000)
+      }
+    } catch (err) {
+      console.error('Failed to fetch user count:', err)
     }
   }
 
   useEffect(() => {
-    let mounted = true
-
-    const initializeCount = async () => {
-      if (mounted) {
-        await fetchCount()
-      }
-    }
-
-    initializeCount()
-
-    // Realtime subscription to profiles table
-    const channel = db
-      .channel('public:profiles_count')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'profiles' },
-        () => {
-          if (mounted) {
-            fetchCount()
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'profiles' },
-        () => {
-          if (mounted) {
-            fetchCount()
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      mounted = false
-      db.removeChannel(channel)
-    }
+    fetchCount()
+    // Poll for updates every 30 seconds since we don't have real-time listeners for this simple count
+    const interval = setInterval(fetchCount, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   if (count === null) return <span style={{ opacity: 0.5 }}>...</span>
 
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.3s ease', transform: isLive ? 'scale(1.1)' : 'scale(1)' }}>
+    <div style={{ 
+      display: 'inline-flex', 
+      alignItems: 'center', 
+      gap: '0.4rem', 
+      transition: 'all 0.3s ease', 
+      transform: isLive ? 'scale(1.1)' : 'scale(1)' 
+    }}>
       <Users size={16} style={{ color: isLive ? '#10b981' : 'inherit' }} />
       <span style={{ fontWeight: 700 }}>
         {(count + 1200).toLocaleString()}
