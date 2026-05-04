@@ -1,5 +1,5 @@
 :root {
-  /* High-Fidelity Technical Theme Variables (Premium Style) */
+  /* Premium Design Tokens - Modern & Sophisticated */
   --bg-main: #0a0a0a;
   --bg-sub: #111111;
   --text-main: #ededed;
@@ -16,54 +16,63 @@
   --warning: #f59e0b;
   --overlay: rgba(0, 0, 0, 0.7);
 
-  --radius: 8px;
-  --radius-lg: 12px;
+  /* Glassmorphism Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 12px;
+
+  /* Spacing & Layout */
+  --radius: 12px;
+  --radius-lg: 18px;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
   
-  /* HIGH DENSITY Spacing & Layout Tokens */
-  --h-nav: 52px;
+  --h-nav: 56px;
   --h-mobile-bottom: 64px;
-  --p-safe: 0.75rem;
-  --section-p: 1rem;
-  --card-p: 0.75rem;
-  --gap-md: 0.5rem;
-  --gap-lg: 0.75rem;
+  --p-safe: 1rem;
+  --section-p: 2rem;
+  --card-p: 1.25rem;
+  --gap-md: 0.75rem;
+  --gap-lg: 1rem;
   --vh-dynamic: 100dvh;
 }
 
-/* Mobile Overrides */
-@media (max-width: 768px) {
+/* Light Mode Overrides (Explicit or Preferred) */
+@media (prefers-color-scheme: light) {
   :root {
-    --h-nav: 48px;
-    --h-mobile-bottom: 56px;
-    --p-safe: 0.5rem;
-    --section-p: 0.75rem;
-    --card-p: 0.6rem;
-    --gap-md: 0.4rem;
-    --gap-lg: 0.6rem;
+    --bg-main: #fcfcfc;
+    --bg-sub: #f3f4f6;
+    --text-main: #111827;
+    --text-sub: #6b7280;
+    --brand: #059669;
+    --brand-rgb: 5, 150, 105;
+    --brand-hover: #047857;
+    --accent: #111827;
+    --border: rgba(0,0,0,0.08);
+    --surface: #ffffff;
+    --overlay: rgba(255, 255, 255, 0.7);
+    
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.05);
   }
 }
 
-/* Native Dark Mode Fallback (ThemeProvider overrides this) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-main: #0f172a;
-    --bg-sub: #1e293b;
-    --text-main: #f8fafc;
-    --text-sub: #cbd5e1;
-    --brand: #38bdf8;
-    --brand-hover: #7dd3fc;
-    --accent: #0ea5e9;
-    --border: #334155;
-    --surface: #1e293b;
-    --error: #f87171;
-    --success: #34d399;
-    --warning: #f59e0b;
-    --overlay: rgba(0, 0, 0, 0.6);
-  }
+.light-theme {
+  --bg-main: #fcfcfc;
+  --bg-sub: #f3f4f6;
+  --text-main: #111827;
+  --text-sub: #6b7280;
+  --brand: #059669;
+  --brand-rgb: 5, 150, 105;
+  --brand-hover: #047857;
+  --accent: #111827;
+  --border: rgba(0,0,0,0.08);
+  --surface: #ffffff;
+  --overlay: rgba(255, 255, 255, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.05);
 }
 
 html {

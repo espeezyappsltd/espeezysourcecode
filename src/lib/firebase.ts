@@ -2,6 +2,7 @@ import { initializeApp, getApps } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
+import { getDatabase } from 'firebase/database'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? 'AIzaSyA90GDtsLFRPAHr01DDhIm0QZGJMO1DSzU',
@@ -25,5 +26,6 @@ export const auth = getAuth(app)
 export const db = firestoreDatabaseId && firestoreDatabaseId !== '(default)'
   ? getFirestore(app, firestoreDatabaseId)
   : getFirestore(app)
+export const database = getDatabase(app)
 export const storage = getStorage(app)
 export default app

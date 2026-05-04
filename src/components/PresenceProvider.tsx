@@ -1,23 +1,19 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef, useTransition } from 'react'
-import { db, auth } from '@/lib/firebase'
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useTransition } from 'react'
+import { database, auth } from '@/lib/firebase'
 import { 
-  doc, 
-  setDoc, 
-  onSnapshot, 
-  collection, 
-  query, 
-  where, 
-  updateDoc, 
-  serverTimestamp,
-  deleteDoc,
-  getDocs
-} from 'firebase/firestore'
-import { PresenceContextType, PresenceState } from '@/types/ui'
+  ref, 
+  onValue, 
+  set, 
+  onDisconnect, 
+  serverTimestamp, 
+  remove,
+  update
+} from 'firebase/database'
+import { PresenceContextType } from '@/types/ui'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
-import { hasFeature } from '@/utils/feature-gate'
 
 const PresenceContext = createContext<PresenceContextType>({
   onlineUsers: new Set(),
@@ -48,7 +44,8 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const setTypingStatus = useCallback(async (isTyping: boolean) => {
     if (!userId) return
     try {
-      await updateDoc(doc(db, 'presence', userId), { is_typing: isTyping })
+      const presenceRef = ref(database, `presence/global/${userId}`)
+      await update(presenceRef, { is_typing: isTyping, last_seen: serverTimestamp() })
     } catch (err: any) {
       console.error('Typing status error:', err.message)
     }
@@ -57,83 +54,57 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   useEffect(() => {
     if (!userId) return
 
-    let unsubscribePresence: (() => void) | null = null
+    const presenceRef = ref(database, `presence/global/${userId}`)
+    const allPresenceRef = ref(database, 'presence/global')
 
+    // 1. Setup local presence with automatic cleanup
     const setupPresence = async () => {
-      // 1. Initial tracking
-      await setDoc(doc(db, 'presence', userId), {
+      await set(presenceRef, {
         user_id: userId,
-        full_name: userName,
-        group_id: groupId,
+        full_name: userName || 'Anonymous',
+        group_id: groupId || 'none',
         online_at: new Date().toISOString(),
         is_typing: false,
         last_seen: serverTimestamp()
       })
-
-      // 2. Listen to all presence
-      const q = query(collection(db, 'presence'))
-      unsubscribePresence = onSnapshot(q, (snap) => {
-        const onlineIds = new Set<string>()
-        const typingIds = new Set<string>()
-
-        snap.docs.forEach(d => {
-          const data = d.data()
-          const key = d.id
-          onlineIds.add(key)
-          if (data.is_typing) {
-            typingIds.add(key)
-          }
-
-          // Check for join notifications (scoped to group)
-          if (key !== userId && data.group_id === groupId && groupId) {
-            const now = Date.now()
-            const lastTime = lastNotified.current.get(key) || 0
-            if (now - lastTime > 60000) {
-              addToast('Teammate Online', `${data.full_name || 'A teammate'} is online now`, 'success')
-              lastNotified.current.set(key, now)
-            }
-          }
-        })
-
-        startTransition(() => {
-          setOnlineUsers(onlineIds)
-          setTypingUsers(typingIds)
-        })
-      })
+      onDisconnect(presenceRef).remove()
     }
 
     setupPresence()
 
-    const updateLastSeen = async () => {
-      if (!userId) return
-      try {
-        await updateDoc(doc(db, 'profiles', userId), { last_seen: new Date().toISOString() })
-      } catch (err: any) {
-        console.error('Heartbeat error:', err.message)
-      }
-    }
+    // 2. Listen to all presence
+    const unsubscribe = onValue(allPresenceRef, (snap) => {
+      const data = snap.val() || {}
+      const onlineIds = new Set<string>()
+      const typingIds = new Set<string>()
 
-    const heartbeat = setInterval(updateLastSeen, 60000)
+      Object.keys(data).forEach(key => {
+        const item = data[key]
+        onlineIds.add(key)
+        if (item.is_typing) {
+          typingIds.add(key)
+        }
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        void updateLastSeen()
-      }
-    }
+        // Check for join notifications (scoped to group)
+        if (key !== userId && item.group_id === groupId && groupId && groupId !== 'none') {
+          const now = Date.now()
+          const lastTime = lastNotified.current.get(key) || 0
+          if (now - lastTime > 60000) {
+            addToast('Teammate Online', `${item.full_name || 'A teammate'} is online now`, 'success')
+            lastNotified.current.set(key, now)
+          }
+        }
+      })
 
-    window.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('beforeunload', () => {
-      if (userId) {
-        deleteDoc(doc(db, 'presence', userId))
-        updateLastSeen()
-      }
+      startTransition(() => {
+        setOnlineUsers(onlineIds)
+        setTypingUsers(typingIds)
+      })
     })
 
     return () => {
-      clearInterval(heartbeat)
-      window.removeEventListener('visibilitychange', handleVisibilityChange)
-      if (unsubscribePresence) unsubscribePresence()
-      if (userId) deleteDoc(doc(db, 'presence', userId))
+      unsubscribe()
+      remove(presenceRef)
     }
   }, [userId, userName, groupId, addToast])
 

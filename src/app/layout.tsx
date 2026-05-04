@@ -34,6 +34,8 @@ export const viewport: Viewport = {
   userScalable: true,
 };
 
+import { RealtimeProvider } from '@/lib/realtime-provider';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -50,13 +52,15 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ConnectivityProvider>
-          <ToasterModeManager />
-          <NotificationProvider>
-            <PWARegistry />
-            {children}
-            <ClientShell />
-            <SessionGuard />
-          </NotificationProvider>
+          <RealtimeProvider>
+            <ToasterModeManager />
+            <NotificationProvider>
+              <PWARegistry />
+              {children}
+              <ClientShell />
+              <SessionGuard />
+            </NotificationProvider>
+          </RealtimeProvider>
         </ConnectivityProvider>
 
         {/* PREMIUM SVG FILTERS */}

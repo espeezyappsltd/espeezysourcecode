@@ -17,50 +17,63 @@ async function checkRateLimit(
   limit: number,
   windowSecs: number
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number; retryAfter: number }> {
-  const redisUrl  = process.env.UPSTASH_REDIS_REST_URL
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+  const firebaseProject = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  const firebaseKey = process.env.FIREBASE_DATABASE_URL // Should be the REST URL e.g. https://project.firebaseio.com
 
-  if (redisUrl && redisToken) {
-    // ── Upstash sliding-window via REST API (edge-compatible, no Node.js SDK) ──
-    const now   = Math.floor(Date.now() / 1000)
-    const slot  = Math.floor(now / windowSecs)
-    const rKey  = `rl:${key}:${slot}`
-    const resetAt = (slot + 1) * windowSecs
+  const now = Math.floor(Date.now() / 1000)
+  const slot = Math.floor(now / windowSecs)
+  const rKey = `rl/${key.replace(/[:.]/g, '_')}/${slot}`
+  const resetAt = (slot + 1) * windowSecs
 
-    const res = await fetch(`${redisUrl}/pipeline`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify([
-        ['INCR', rKey],
-        ['EXPIRE', rKey, windowSecs + 5],
-      ]),
-    }).catch(() => null)
+  // ── Hybrid: Local burst check to save on DB hits ──
+  const local = _localBuckets.get(rKey)
+  if (local && local.count > limit) {
+    return { allowed: false, remaining: 0, resetAt: resetAt * 1000, retryAfter: resetAt - now }
+  }
 
-    if (res?.ok) {
-      const [[, count]] = (await res.json()) as [[string, number]]
-      const remaining = Math.max(limit - count, 0)
-      return {
-        allowed: count <= limit,
-        remaining,
-        resetAt: resetAt * 1000,
-        retryAfter: resetAt - now,
+  if (firebaseKey) {
+    try {
+      const url = `${firebaseKey}/${rKey}.json`
+      // Atomic increment via RTDB REST API
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: { ".sv": { "increment": 1 } }, last_updated: { ".sv": "timestamp" } }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        const count = data.count || 0
+        
+        // Update local cache
+        _localBuckets.set(rKey, { count, resetAt: resetAt * 1000 })
+        
+        // Cleanup old local buckets periodically
+        if (_localBuckets.size > 1000) _localBuckets.clear()
+
+        return {
+          allowed: count <= limit,
+          remaining: Math.max(limit - count, 0),
+          resetAt: resetAt * 1000,
+          retryAfter: resetAt - now,
+        }
       }
+    } catch (err) {
+      console.error('Rate limit DB error:', err)
     }
-    // Redis unavailable — fail open (don't block real users if Redis is down)
-    return { allowed: true, remaining: limit, resetAt: Date.now() + windowSecs * 1000, retryAfter: windowSecs }
   }
 
-  // ── In-process fallback (local dev / single instance) ──────────────────────
-  const now = Date.now()
-  const entry = _localBuckets.get(key)
-  if (!entry || now > entry.resetAt) {
-    _localBuckets.set(key, { count: 1, resetAt: now + windowSecs * 1000 })
-    return { allowed: true, remaining: limit - 1, resetAt: now + windowSecs * 1000, retryAfter: windowSecs }
-  }
+  // ── Fallback to local memory (fail-open or local dev) ──
+  const entry = _localBuckets.get(rKey) || { count: 0, resetAt: resetAt * 1000 }
   entry.count++
-  const remaining = Math.max(limit - entry.count, 0)
-  const retryAfter = Math.ceil((entry.resetAt - now) / 1000)
-  return { allowed: entry.count <= limit, remaining, resetAt: entry.resetAt, retryAfter }
+  _localBuckets.set(rKey, entry)
+  
+  return { 
+    allowed: entry.count <= limit, 
+    remaining: Math.max(limit - entry.count, 0), 
+    resetAt: resetAt * 1000, 
+    retryAfter: resetAt - now 
+  }
 }
 
 // ─── CSP NONCE-FREE POLICY ────────────────────────────────────────────────────

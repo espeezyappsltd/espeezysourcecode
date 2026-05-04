@@ -1,14 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import {
-  RoomProvider,
-  useStorage,
-  useMutation,
-  useOthers,
-  useUpdateMyPresence
-} from '@/liveblocks.config'
-import { LiveList } from '@liveblocks/client'
+import { usePresence, useSyncedList } from '@/lib/realtime-provider'
 import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare } from 'lucide-react'
 
 import { db } from '@/lib/firebase'
@@ -39,16 +32,21 @@ interface ChatRoomProps {
 }
 
 export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
-  const messages = useStorage((root) => root.messages);
+  const { list: liveMessages, pushItem: sendLiveMessage } = useSyncedList<{
+    senderId: string;
+    senderName: string;
+    text: string;
+    timestamp: string;
+  }>(`rooms/${roomId}/chat`);
+  
+  const { others, me, updateMyState } = usePresence(roomId);
   const [history, setHistory] = useState<ChatHistoryMessage[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [text, setText] = useState("");
-  const updateMyPresence = useUpdateMyPresence();
-  const others = useOthers();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { withLoading } = useSmartLoading();
 
-  const isTyping = others.some((other) => other.presence.isTyping);
+  const isTyping = others.some((other) => other.status === 'typing');
 
   const fetchHistory = async () => {
     setLoadingHistory(true);
@@ -85,27 +83,22 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, history]);
+  }, [liveMessages, history]);
 
-  const sendMessage = useMutation(({ storage }, text: string) => {
-    const messages = storage.get("messages");
-    messages.push({
-      id: Math.random().toString(36).substr(2, 9),
+  const handleSend = async () => {
+    if (!text.trim()) return;
+
+    // 1. Instant Real-time Broadcast via RTDB
+    sendLiveMessage({
       senderId: currentUser.id,
       senderName: currentUser.name,
       text,
       timestamp: new Date().toISOString(),
     });
-  }, [currentUser]);
 
-  const handleSend = async () => {
-    if (!text.trim()) return;
-
-    // 1. Instant Real-time Broadcast via Liveblocks
-    sendMessage(text);
     const messageContent = text;
     setText("");
-    updateMyPresence({ isTyping: false });
+    updateMyState({ status: 'online' });
 
     // 2. Permanent Archival via Firebase + Notification Trigger
     await withLoading(async () => {
@@ -201,7 +194,7 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
         })}
 
         {/* Separator if live messages exist */}
-        {(messages?.length || 0) > 0 && history.length > 0 && (
+        {(liveMessages?.length || 0) > 0 && history.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)', opacity: 0.3 }} />
             <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase' }}>Live Updates</span>
@@ -209,9 +202,9 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
           </div>
         )}
 
-        {/* Render Live Messages from Liveblocks */}
-        {messages?.map((msg) => {
-          const isMe = msg.senderId === currentUser.id;
+        {/* Render Live Messages from RTDB */}
+        {liveMessages?.map((msg) => {
+          const isMe = msg.data.senderId === currentUser.id;
           return (
             <div
               key={msg.id}
@@ -235,9 +228,9 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
                 fontWeight: 600,
                 boxShadow: 'var(--shadow-sm)'
               }}>
-                {msg.text}
+                {msg.data.text}
                 <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '0.4rem', textAlign: isMe ? 'right' : 'left' }}>
-                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
             </div>
@@ -264,7 +257,7 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
             value={text}
             onChange={(e) => {
               setText(e.target.value);
-              updateMyPresence({ isTyping: e.target.value.length > 0 });
+              updateMyState({ status: e.target.value.length > 0 ? 'typing' : 'online' });
             }}
             onKeyDown={handleKeyDown}
             style={{ flex: 1, height: '3rem', borderRadius: '16px', paddingLeft: '1rem', border: '1px solid var(--border)', background: 'var(--surface)' }}

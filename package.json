@@ -19,17 +19,11 @@
     "deploy:app-only": "bash ./scripts/deploy-resilient.sh --no-edge"
   },
   "dependencies": {
-    "@liveblocks/client": "^3.18.2",
-    "@liveblocks/node": "^3.18.2",
-    "@liveblocks/react": "^3.18.2",
     "@stripe/react-stripe-js": "^6.2.0",
     "@stripe/stripe-js": "^9.2.0",
-    "@upstash/ratelimit": "^2.0.8",
-    "@upstash/redis": "^1.37.0",
     "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
     "country-flag-icons": "^1.6.16",
-    "date-fns": "^4.1.0",
     "firebase": "^12.12.1",
     "firebase-admin": "^13.0.0",
     "framer-motion": "^12.38.0",

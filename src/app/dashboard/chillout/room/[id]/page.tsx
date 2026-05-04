@@ -1,15 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { 
-  RoomProvider, 
-  useStorage, 
-  useMutation, 
-  useMyPresence, 
-  useOthers
-} from '@/liveblocks.config'
-import { LiveList, LiveObject } from '@liveblocks/client'
+import { usePresence, useSyncedList, useSyncedObject } from '@/lib/realtime-provider'
+import { ref, update, set, remove, push, onValue } from 'firebase/database'
+import { database } from '@/lib/firebase'
 import { 
   Trophy, 
   Crown, 
@@ -31,25 +26,7 @@ export default function QuizRoomPage() {
   if (!roomId) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="animate-spin" /></div>
 
   return (
-    <RoomProvider 
-      id={roomId} 
-      initialStorage={{ 
-        tasks: new LiveList([]),
-        messages: new LiveList([]),
-        quizQuestions: new LiveList([]),
-        quizScores: new LiveList([]),
-        quizStatus: 'setup',
-        currentQuestionIndex: 0,
-        activeTurnUserId: null,
-        gameId: roomId,
-        roundStartTime: 0,
-        timerDuration: 20,
-        config: new LiveObject({ difficulty: 'Medium', mode: 'Speed Recall' })
-      }}
-      initialPresence={{ draggingTaskId: null, isThinking: false, lastAction: null }}
-    >
-      <QuizGameContainer roomId={roomId} />
-    </RoomProvider>
+    <QuizGameContainer roomId={roomId} />
   )
 }
 
@@ -57,17 +34,27 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const { profile } = useProfile()
   const { addToast } = useNotifications()
   const router = useRouter()
-  useMyPresence()
-  const others = useOthers()
   
-  const quizStatus = useStorage(s => s.quizStatus)
-  const questions = useStorage(s => s.quizQuestions)
-  const currentIdx = useStorage(s => s.currentQuestionIndex) ?? 0
-  const scores = useStorage(s => s.quizScores)
-  const activeTurnId = useStorage(s => s.activeTurnUserId)
-  const roundStartTime = useStorage(s => s.roundStartTime)
-  const timerDuration = useStorage(s => s.timerDuration) ?? 20
-  const config = useStorage(s => s.config)
+  const { others, me, updateMyState } = usePresence(roomId);
+  
+  const [storage, updateStorage] = useSyncedObject<any>(`rooms/${roomId}/state`, {
+    quizStatus: 'setup',
+    quizQuestions: [],
+    currentQuestionIndex: 0,
+    quizScores: [],
+    roundStartTime: 0,
+    timerDuration: 20,
+    config: { difficulty: 'Medium', mode: 'Speed Recall' }
+  });
+  
+  const quizStatus = storage?.quizStatus || 'setup'
+  const questions = storage?.quizQuestions || []
+  const currentIdx = storage?.currentQuestionIndex ?? 0
+  const scores = storage?.quizScores || []
+  const activeTurnId = storage?.activeTurnUserId
+  const roundStartTime = storage?.roundStartTime
+  const timerDuration = storage?.timerDuration ?? 20
+  const config = storage?.config || { difficulty: 'Medium', mode: 'Speed Recall' }
   
   const [showIntro, setShowIntro] = useState(true)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
@@ -82,43 +69,34 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   })
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const handleStartSkirmish = useMutation(({ storage }) => {
+  const handleStartSkirmish = useCallback(async () => {
     const setupRaw = sessionStorage.getItem(`skirmish_setup_${roomId}`)
     if (!setupRaw) return
 
     try {
         const { questions: newQs, config: setupConfig } = JSON.parse(setupRaw)
         
-        // Populate Storage
-        const qList = storage.get('quizQuestions')
-        qList.clear()
-        newQs.forEach((q: any) => qList.push(q))
-        
-        storage.set('quizStatus', 'playing')
-        storage.set('currentQuestionIndex', 0)
-        storage.set('roundStartTime', Date.now())
-        storage.set('activeTurnUserId', profile?.id ?? null)
-        
-        const firstQ = newQs[0]
-        const firstDuration = (firstQ?.difficulty_multiplier || 2) * 10
-        storage.set('timerDuration', firstDuration)
-        
-        const conf = storage.get('config')
-        conf.set('difficulty', setupConfig.difficulty)
-        conf.set('mode', setupConfig.mode)
+        await updateStorage({
+          quizQuestions: newQs,
+          quizStatus: 'playing',
+          currentQuestionIndex: 0,
+          roundStartTime: Date.now(),
+          activeTurnUserId: profile?.id ?? null,
+          timerDuration: (newQs[0]?.difficulty_multiplier || 2) * 10,
+          config: {
+            difficulty: setupConfig.difficulty,
+            mode: setupConfig.mode
+          }
+        })
 
         addToast('Skirmish Injected', 'AI shards synchronized. Battle started!', 'success')
         sessionStorage.removeItem(`skirmish_setup_${roomId}`)
     } catch (err) {
         addToast('Critical Failure', 'Mental sync aborted.', 'error')
     }
-  }, [roomId, profile])
-
-  // ── TIMER LOGIC ──────────────────────────────────────────────────
-  // Timer controlled by SkirmishTimer component now
+  }, [roomId, profile, updateStorage, addToast])
 
   // ── RESET UI ON QUESTION CHANGE ──────────────────────────────────
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     queueMicrotask(() => {
       setSelectedOption(null)
@@ -129,72 +107,75 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     })
   }, [currentIdx, timerDuration])
 
-  async function handleFinalizeStats() {
+  const handleFinalizeStats = useCallback(async () => {
     if (!profile?.id || !scores) return
-    const myScore = scores.find(s => s.userId === profile.id)?.points || 0
-    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map(s => s.points))
+    const myScore = scores.find((s: any) => s.userId === profile.id)?.points || 0
+    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map((s: any) => s.points))
 
     await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
-  }
+  }, [profile, scores])
 
-  // ── MUTATIONS ───────────────────────────────────────────────────
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const submitActionResult = useMutation(({ storage }, isCorrect: boolean, bonusXp = 0) => {
+
+  const submitActionResult = useCallback(async (isCorrect: boolean, bonusXp = 0) => {
     const userId = profile?.id
-    if (!userId) return
+    if (!userId || !storage) return
 
     // Update Scores
-    const scoresList = storage.get('quizScores')
+    const currentScores = [...(storage.quizScores || [])]
     let found = false
     const pointsToAdd = isCorrect ? (100 + bonusXp) : -50
 
-    for (let i = 0; i < scoresList.length; i++) {
-        const item = scoresList.get(i)
+    for (let i = 0; i < currentScores.length; i++) {
+        const item = currentScores[i]
         if (item && item.userId === userId) {
-            scoresList.set(i, { ...item, points: Math.max(0, item.points + pointsToAdd) })
+            currentScores[i] = { ...item, points: Math.max(0, item.points + pointsToAdd) }
             found = true
             break
         }
     }
     if (!found) {
-        scoresList.push({ userId, userName: profile?.full_name || 'Anonymous', points: Math.max(0, pointsToAdd) })
+        currentScores.push({ userId, userName: profile?.full_name || 'Anonymous', points: Math.max(0, pointsToAdd) })
     }
 
     // Next Round Setup
-    const currentQList = storage.get('quizQuestions')
-    const nextIdx = storage.get('currentQuestionIndex') + 1
+    const currentQList = storage.quizQuestions || []
+    const nextIdx = (storage.currentQuestionIndex || 0) + 1
     
     if (nextIdx < currentQList.length) {
-      storage.set('currentQuestionIndex', nextIdx)
-      storage.set('roundStartTime', Date.now())
+      const nextQ = currentQList[nextIdx]
+      const nextDuration = (nextQ?.difficulty_multiplier || 2) * 10
+      const players = [userId, ...others.map((o: any) => o.userId)].filter(Boolean)
       
-      const nextQ = currentQList.get(nextIdx)
-      if (nextQ) {
-          const nextDuration = (nextQ.difficulty_multiplier || 2) * 10
-          storage.set('timerDuration', nextDuration)
-      }
-
-      const players = [userId, ...others.map(o => o.id)].filter(Boolean)
-      storage.set('activeTurnUserId', players[nextIdx % players.length])
+      await updateStorage({
+        quizScores: currentScores,
+        currentQuestionIndex: nextIdx,
+        roundStartTime: Date.now(),
+        timerDuration: nextDuration,
+        activeTurnUserId: players[nextIdx % players.length]
+      })
     } else {
-      storage.set('quizStatus', 'results')
-      // eslint-disable-next-line react-hooks/immutability
+      await updateStorage({
+        quizScores: currentScores,
+        quizStatus: 'results'
+      })
       handleFinalizeStats()
     }
-  }, [profile, others])
+  }, [profile, others, storage, updateStorage, handleFinalizeStats])
 
-  const handleSkipRound = () => {
+  const handleSkipRound = useCallback(() => {
     submitActionResult(false)
     addToast('Time Out!', 'The round was skipped due to temporal flux.', 'warning')
-  }
+  }, [submitActionResult, addToast])
 
-  const handleResetSkirmish = useMutation(({ storage }) => {
-    storage.set('quizStatus', 'setup')
-    storage.set('currentQuestionIndex', 0)
-    storage.get('quizQuestions').clear()
-    storage.set('activeTurnUserId', null)
+  const handleResetSkirmish = useCallback(async () => {
+    await updateStorage({
+      quizStatus: 'setup',
+      currentQuestionIndex: 0,
+      quizQuestions: [],
+      activeTurnUserId: null
+    })
     addToast('Archives Reset', 'Neural buffer cleared. Ready for a new iteration.', 'info')
-  }, [])
+  }, [updateStorage, addToast])
 
   // ── COLLECTIVE CELEBRATION ────────────────────────────────────
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -394,7 +375,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                      transition={{ repeat: Infinity, duration: 1.5 }}
                      style={{ padding: '6px 16px', background: isMyTurn ? 'var(--brand)' : 'var(--bg-sub)', color: isMyTurn ? 'white' : 'var(--text-sub)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                    >
-                      {isMyTurn ? '⚡ IT IS YOUR TURN TO SYNTHESIZE' : `🔍 ${others.find(o => o.id === activeTurnId)?.info?.name || 'A Peer'} is currently being evaluated...`}
+                      {isMyTurn ? '⚡ IT IS YOUR TURN TO SYNTHESIZE' : `🔍 ${(others as any[]).find(o => o.userId === activeTurnId)?.name || 'A Peer'} is currently being evaluated...`}
                    </motion.div>
                 </div>
              </div>
@@ -525,9 +506,9 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                   <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--brand)', padding: '2px', border: activeTurnId === profile?.id ? '2px solid var(--success)' : 'none' }}>
                      <img src={profile?.avatar_url || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                   </div>
-                   {others.map(o => (
-                    <div key={o.id} style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--bg-sub)', padding: '2px', border: activeTurnId === o.id ? '2px solid var(--success)' : 'none' }}>
-                      <img src={o.info?.avatar || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
+                   {others.map((o: any) => (
+                    <div key={o.userId} style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--bg-sub)', padding: '2px', border: activeTurnId === o.userId ? '2px solid var(--success)' : 'none' }}>
+                      <img src={o.avatar || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                     </div>
                   ))}
                </div>

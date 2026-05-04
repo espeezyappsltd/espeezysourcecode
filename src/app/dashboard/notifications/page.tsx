@@ -14,7 +14,7 @@ import {
 import { useNotifications } from '@/components/NotificationProvider'
 import type { Notification } from '@/types/ui'
 import { Bell, UserPlus, Check, X, Shield, Clock, Inbox, Mail, MessageSquare } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { DateTime } from '@/utils/dateTime'
 
 type InboxNotification = Notification & { metadata?: { sender_id?: string } }
 
@@ -184,7 +184,7 @@ export default function NotificationsPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                       <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.title}</h4>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600 }}>{formatDistanceToNow(new Date(n.created_at))} ago</span>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600 }}>{DateTime.format(n.created_at, 'relative')}</span>
                         {n.type === 'connection_request' && !n.read && (
                           <div style={{ display: 'flex', gap: '0.35rem' }}>
                             <button 

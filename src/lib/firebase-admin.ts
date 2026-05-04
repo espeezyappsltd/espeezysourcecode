@@ -183,4 +183,9 @@ export const getAdminStorage = () => {
   return admin.storage()
 }
 
+export const getAdminDatabase = () => {
+  if (!initAdmin()) return null
+  return admin.database()
+}
+
 export default admin
