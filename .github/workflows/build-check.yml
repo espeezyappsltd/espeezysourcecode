@@ -25,15 +25,15 @@ jobs:
     - name: Build project
       run: npm run build
       env:
-        NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-build-placeholder-anon-key
-        SUPABASE_SERVICE_ROLE_KEY: ci-build-placeholder-service-role
+        NEXT_PUBLIC_FIREBASE_URL: https://placeholder.supabase.co
+        NEXT_PUBLIC_FIREBASE_API_KEY: ci-build-placeholder-anon-key
+        FIREBASE_SERVICE_ACCOUNT_KEY=: ci-build-placeholder-service-role
         STRIPE_SECRET_KEY: sk_test_ci_build_placeholder
 
     - name: Run tests
       run: npm run test
       env:
-        NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-build-placeholder-anon-key
+        NEXT_PUBLIC_FIREBASE_URL: https://placeholder.supabase.co
+        NEXT_PUBLIC_FIREBASE_API_KEY: ci-build-placeholder-anon-key
         SUPABASE_SERVICE_ROLE_KEY: ci-build-placeholder-service-role
         STRIPE_SECRET_KEY: sk_test_ci_build_placeholder
