@@ -2,13 +2,21 @@ import 'react-native-url-polyfill/auto'
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/firestore';
 
-// Since this is purely a read-only live demo, we hardcode the ENV keys here 
-// using the same keys from your Next.js purely for the Mobile Viva Expo environment.
-const supabaseUrl = 'https://othntbcrtmemavfsslrb.supabase.co';
-const supabaseAnonKey = 'sb_publishable_zZqG4OGyIYfmQad2vecvPA_9r7N_EX3';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Firebase configuration from the main project
+const firebaseConfig = {
+  apiKey: "AIzaSyA90GDtsLFRPAHr01DDhIm0QZGJMO1DSzU",
+  authDomain: "espeezylearning.firebaseapp.com",
+  projectId: "espeezylearning",
+  storageBucket: "espeezylearning.firebasestorage.app",
+  messagingSenderId: "521867130243",
+  appId: "1:521867130243:web:eb09572762faeccee832b6",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const COLUMNS = ['To Do', 'In Progress', 'In Review', 'Done'];
 
@@ -19,20 +27,23 @@ export default function App() {
 
   const syncTasks = async () => {
     try {
-      // Attempt Network Fetch
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      // Attempt Firestore Fetch
+      const tasksRef = collection(db, 'tasks');
+      const q = query(tasksRef, orderBy('created_at', 'desc'));
+      const querySnapshot = await getDocs(q);
       
-      // Update State & Cache securely!
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // Update State & Cache
       setTasks(data);
       setIsOffline(false);
       await AsyncStorage.setItem('OFFLINE_TASKS', JSON.stringify(data));
       
-    } catch {
+    } catch (err) {
+      console.error('Firebase Sync Error:', err);
       // Network Failed -> Boot from Cache
       setIsOffline(true);
       const cached = await AsyncStorage.getItem('OFFLINE_TASKS');
@@ -41,9 +52,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    (async () => {
-      await syncTasks();
-    })();
+    syncTasks();
   }, []);
 
   const advanceTask = async (task) => {
@@ -55,12 +64,17 @@ export default function App() {
     // Optimistic UI update
     const updatedTasks = tasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
     setTasks(updatedTasks);
-    // Write optimistic state to cache immediately so offline works flawlessly
     await AsyncStorage.setItem('OFFLINE_TASKS', JSON.stringify(updatedTasks));
 
     if (!isOffline) {
-       // Attempt to sync to cloud if online
-       await supabase.from('tasks').update({ status: newStatus }).eq('id', task.id);
+       // Attempt to sync to Firestore
+       try {
+         const taskRef = doc(db, 'tasks', task.id);
+         await updateDoc(taskRef, { status: newStatus, updated_at: new Date().toISOString() });
+       } catch (err) {
+         console.error('Firebase Update Error:', err);
+         Alert.alert('Update Failed', 'Could not sync change to Firebase.');
+       }
     } else {
        Alert.alert('Offline Mode', 'Task advanced locally. Will synchronize with Espeezy cloud when connection is restored.');
     }

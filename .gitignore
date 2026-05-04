@@ -50,10 +50,12 @@ yarn-error.log*
 firebase.json
 .firebaserc
 .firebase/
-*-firebase-adminsdk-*.json
+*-firebase-adminsdk*.json
 firebase-adminsdk*.json
 *admincred*.json
 firebase.config
+espeezydb-firebase-adminsdk.json
+espeezylearning-firebase-adminsdk-*.json
 
 
 

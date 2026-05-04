@@ -3,32 +3,24 @@ import { DATA_API_DATASETS } from '@/config/dataApiCatalog'
 
 export const dynamic = 'force-dynamic'
 
-const FALLBACK_DATA_API = 'https://othntbcrtmemavfsslrb.db.co/rest/v1'
-
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1`
-    : FALLBACK_DATA_API
-
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'espeezylearning'
+  
   return NextResponse.json({
-    schema: 'api',
-    baseUrl,
+    platform: 'Firebase',
+    service: 'Data Connect',
     generatedAt: new Date().toISOString(),
     endpoints: DATA_API_DATASETS.map((dataset) => ({
       ...dataset,
-      method: 'GET',
-      url: `${baseUrl}/${dataset.table}?${dataset.filterHint}`,
+      protocol: 'GraphQL',
+      hint: `Use Firebase Data Connect SDK to query the ${dataset.table} collection.`
     })),
     usage: {
-      browser: {
-        apikey: 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-        authorization: 'Bearer <user_jwt_or_anon_key>',
+      client: {
+        method: 'Firebase SDK',
+        auth: 'Firebase Auth (Identity Platform)',
       },
-      server: {
-        apikey: 'SUPABASE_SERVICE_ROLE_KEY',
-        authorization: 'Bearer <SUPABASE_SERVICE_ROLE_KEY>',
-      },
-      note: 'Keep service-role keys server-side only. Do not expose service-role credentials in browser code.',
+      note: 'The legacy Supabase REST API has been decommissioned. Please migrate to the Firebase Data Connect GraphQL interface.',
     },
   })
 }
