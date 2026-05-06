@@ -41,6 +41,18 @@ export default function PreRegisterPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [referrerCode, setReferrerCode] = useState<string | null>(null)
+  const [myReferralCode, setMyReferralCode] = useState<string | null>(null)
+  const [myReferralCount, setMyReferralCount] = useState(0)
+
+  // Extract ?ref= parameter on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const ref = params.get('ref')
+      if (ref) setReferrerCode(ref)
+    }
+  }, [])
 
   const goal = parseInt(config.preregister_goal ?? '5000000', 10)
 
@@ -58,13 +70,19 @@ export default function PreRegisterPage() {
       const res = await fetch('/api/preregister', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'preregister_page' }),
+        body: JSON.stringify({ 
+          email, 
+          source: 'preregister_page',
+          referrer_code: referrerCode,
+        }),
       })
       const data = await res.json()
       if (!res.ok) {
         setSubmitError(data.error ?? 'Registration failed. Please try again.')
       } else {
         setSubmitted(true)
+        setMyReferralCode(data.referral_code || null)
+        setMyReferralCount(data.referral_count || 0)
         if (data.count) setRegisteredCount(data.count)
       }
     } catch (_) {
@@ -152,8 +170,42 @@ export default function PreRegisterPage() {
                   </div>
                   <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>You are on the list.</h2>
                   <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.95rem' }}>
-                    We will email you the moment {config.brand_name} opens its doors. Share your link to move up the waitlist.
+                    We will email you the moment {config.brand_name} opens its doors.
                   </p>
+
+                  {/* Referral Section */}
+                  {myReferralCode && (
+                    <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', textAlign: 'left' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                        <Users size={18} color="var(--brand)" />
+                        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Share & Get Rewards</span>
+                      </div>
+                      <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                        Refer friends and climb the leaderboard. Top referrers get 6 months free when we launch.
+                      </p>
+                      <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+                        <div style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <code style={{ fontSize: '0.8rem', color: 'white', wordBreak: 'break-all', flex: 1 }}>
+                            https://espeezy.com/preregister?ref={myReferralCode}
+                          </code>
+                          <button
+                            onClick={() => {
+                              const url = `https://espeezy.com/preregister?ref=${myReferralCode}`
+                              navigator.clipboard.writeText(url).catch(() => alert('Failed to copy'))
+                            }}
+                            style={{ marginLeft: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--brand)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                          >
+                            Copy Link
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                          <span style={{ color: 'rgba(255,255,255,0.6)' }}>You've referred:</span>
+                          <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{myReferralCount} {myReferralCount === 1 ? 'friend' : 'friends'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <Link href="/" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
                       Back to Home

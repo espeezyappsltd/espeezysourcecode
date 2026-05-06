@@ -25,3 +25,5 @@ runConfig:
 env:
   - variable: IP_HASH_SALT
     secret: IP_HASH_SALT
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
