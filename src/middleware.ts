@@ -79,11 +79,11 @@ async function checkRateLimit(
 // ─── CSP NONCE-FREE POLICY ────────────────────────────────────────────────────
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel-insights.com https://va.vercel-scripts.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel-insights.com https://va.vercel-scripts.com https://*.firebaseio.com https://*.googleapis.com https://www.gstatic.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.githubusercontent.com https://lh3.googleusercontent.com https://images.unsplash.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://api.openai.com https://api.stripe.com https://*.vercel-insights.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.firebaseio.com https://*.googleapis.com",
+  "connect-src 'self' https://api.openai.com https://api.stripe.com https://*.vercel-insights.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com wss://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com",
   "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'self'",

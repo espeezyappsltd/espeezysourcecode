@@ -49,16 +49,29 @@ export function useLaunchData() {
   const [configLoaded, setConfigLoaded] = useState(false)
 
   useEffect(() => {
+    const withTimeout = async (url: string, timeoutMs = 3500) => {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+      try {
+        const res = await fetch(url, { signal: controller.signal, cache: 'no-store' })
+        return res.ok ? await res.json() : null
+      } catch {
+        return null
+      } finally {
+        clearTimeout(timeoutId)
+      }
+    }
+
     const load = async () => {
       try {
-        const [cfgRes, countRes] = await Promise.all([
-          fetch('/api/launch-config'),
-          fetch('/api/preregister'),
+        const [cfgPayload, countPayload] = await Promise.all([
+          withTimeout('/api/launch-config'),
+          withTimeout('/api/preregister'),
         ])
-        const { config: cfg } = await cfgRes.json()
-        const { count } = await countRes.json()
+        const cfg = cfgPayload?.config
+        const count = countPayload?.count
         if (cfg) setConfig(prev => ({ ...prev, ...cfg }))
-        if (count) setRegisteredCount(count)
+        if (typeof count === 'number') setRegisteredCount(count)
       } catch (_) {
         // Fallback to defaults
       }

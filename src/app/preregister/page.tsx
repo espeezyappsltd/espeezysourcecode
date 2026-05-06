@@ -93,6 +93,9 @@ export default function PreRegisterPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white', overflowX: 'hidden', fontFamily: 'inherit' }}>
+      <a href="#register" style={{ position: 'absolute', left: 8, top: 8, zIndex: 2000, background: '#111', color: '#fff', padding: '0.5rem 0.75rem', borderRadius: 8, transform: 'translateY(-200%)' }} onFocus={(e) => (e.currentTarget.style.transform = 'translateY(0)')} onBlur={(e) => (e.currentTarget.style.transform = 'translateY(-200%)')}>
+        Skip to registration form
+      </a>
 
       {/* ── Grid overlay ─────────────────────────────────────────────────── */}
       <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(16,185,129,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.025) 1px, transparent 1px)', backgroundSize: '64px 64px', pointerEvents: 'none', zIndex: 0 }} />
@@ -100,7 +103,7 @@ export default function PreRegisterPage() {
       <div style={{ position: 'fixed', bottom: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }} />
 
       {/* ── Navigation ───────────────────────────────────────────────────── */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(10,10,10,0.85)' }}>
+      <nav aria-label="Primary" style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(10,10,10,0.85)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
           <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Sparkles size={16} color="white" />
@@ -128,7 +131,8 @@ export default function PreRegisterPage() {
       </nav>
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section id="hero" style={{ padding: 'clamp(4rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+      <main id="main-content">
+      <section id="hero" aria-label="Pre-register overview" style={{ padding: 'clamp(4rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1 }}>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
@@ -158,7 +162,7 @@ export default function PreRegisterPage() {
       </section>
 
       {/* ── REGISTRATION FORM ─────────────────────────────────────────────── */}
-      <section id="register" style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(4rem, 8vw, 7rem)', position: 'relative', zIndex: 1 }}>
+      <section id="register" aria-label="Registration form" style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(4rem, 8vw, 7rem)', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '560px', margin: '0 auto' }}>
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: 'clamp(2rem, 5vw, 3rem)', backdropFilter: 'blur(20px)', boxShadow: '0 40px 80px rgba(0,0,0,0.4)' }}>
 
@@ -216,7 +220,7 @@ export default function PreRegisterPage() {
                   </div>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit}>
+                <motion.form key="form" onSubmit={handleSubmit} noValidate>
                   <div style={{ marginBottom: '0.5rem', display: 'inline-flex', padding: '4px 12px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '100px' }}>
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Free Forever Plan · Early Access</span>
                   </div>
@@ -229,16 +233,19 @@ export default function PreRegisterPage() {
                   </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <input type="email" placeholder="Email Address *" value={email} onChange={e => setEmail(e.target.value)} required
+                    <label htmlFor="preregister-email" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>
+                      Email address
+                    </label>
+                    <input id="preregister-email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required aria-required="true" aria-invalid={Boolean(submitError)} aria-describedby={submitError ? 'preregister-error' : undefined}
                       style={{ width: '100%', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }} />
 
                     {submitError && (
-                      <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#fca5a5', fontSize: '0.85rem' }}>
+                      <div id="preregister-error" role="alert" aria-live="polite" style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#fca5a5', fontSize: '0.85rem' }}>
                         {submitError}
                       </div>
                     )}
 
-                    <button type="submit" disabled={submitting}
+                    <button type="submit" disabled={submitting} aria-busy={submitting}
                       style={{ width: '100%', padding: '0.95rem', borderRadius: '10px', background: submitting ? 'rgba(16,185,129,0.5)' : 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '0.95rem', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}>
                       {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist — It&apos;s Free</>}
                     </button>
@@ -255,7 +262,7 @@ export default function PreRegisterPage() {
       </section>
 
       {/* ── PRODUCT GALLERY ──────────────────────────────────────────────── */}
-      <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <section aria-label="Product gallery" style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <div style={{ display: 'inline-flex', padding: '5px 14px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '100px', marginBottom: '1.5rem' }}>
@@ -275,7 +282,7 @@ export default function PreRegisterPage() {
             ].map((img, i) => (
               <motion.div key={i} initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }}
                 style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}>
-                <img src={img.src} alt={img.title} style={{ width: '100%', height: 'auto', display: 'block', transition: 'transform 0.4s ease' }} 
+                <img src={img.src} alt={img.title} loading="lazy" decoding="async" style={{ width: '100%', height: 'auto', display: 'block', transition: 'transform 0.4s ease' }} 
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
                 <div style={{ padding: '1.5rem', background: 'linear-gradient(to top, #0a0a0a 0%, transparent 100%)', position: 'absolute', bottom: 0, left: 0, right: 0 }}>
@@ -392,6 +399,7 @@ export default function PreRegisterPage() {
           </div>
         </motion.div>
       </section>
+      </main>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1 }}>
