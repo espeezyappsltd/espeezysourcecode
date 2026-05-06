@@ -44,6 +44,7 @@ export default function PreRegisterPage() {
   const [referrerCode, setReferrerCode] = useState<string | null>(null)
   const [myReferralCode, setMyReferralCode] = useState<string | null>(null)
   const [myReferralCount, setMyReferralCount] = useState(0)
+  const [confirmMessage, setConfirmMessage] = useState('')
 
   // Extract ?ref= parameter on mount
   useEffect(() => {
@@ -83,6 +84,7 @@ export default function PreRegisterPage() {
         setSubmitted(true)
         setMyReferralCode(data.referral_code || null)
         setMyReferralCount(data.referral_count || 0)
+        setConfirmMessage(data.message || '')
         if (data.count) setRegisteredCount(data.count)
       }
     } catch (_) {
@@ -172,9 +174,16 @@ export default function PreRegisterPage() {
                   <div style={{ width: '64px', height: '64px', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
                     <CheckCircle size={28} color="var(--brand)" />
                   </div>
-                  <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>You are on the list.</h2>
-                  <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.95rem' }}>
-                    We will email you the moment {config.brand_name} opens its doors.
+                  <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>
+                    {confirmMessage === 'You are already registered!' ? 'Already on the list.' : "You're on the list."}
+                  </h2>
+                  <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '0.75rem', fontSize: '0.95rem' }}>
+                    {confirmMessage === 'You are already registered!'
+                      ? 'This email is already registered. We will reach out when we launch.'
+                      : `We will email you the moment ${config.brand_name} opens its doors.`}
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', marginBottom: '2rem' }}>
+                    What would you like to do next?
                   </p>
 
                   {/* Referral Section */}
@@ -203,7 +212,7 @@ export default function PreRegisterPage() {
                           </button>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                          <span style={{ color: 'rgba(255,255,255,0.6)' }}>You've referred:</span>
+                          <span style={{ color: 'rgba(255,255,255,0.6)' }}>You&apos;ve referred:</span>
                           <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{myReferralCount} {myReferralCount === 1 ? 'friend' : 'friends'}</span>
                         </div>
                       </div>
@@ -211,11 +220,11 @@ export default function PreRegisterPage() {
                   )}
 
                   <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link href="/" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
-                      Back to Home
+                    <Link href="/" style={{ padding: '0.875rem 1.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                      ← Back to Home
                     </Link>
-                    <Link href="/fund" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
-                      Support the Mission →
+                    <Link href="/docs" style={{ padding: '0.875rem 1.75rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                      Explore the Docs →
                     </Link>
                   </div>
                 </motion.div>
