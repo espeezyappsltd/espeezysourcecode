@@ -1,29 +1,64 @@
 # Settings for Backend (on Cloud Run).
 # See https://firebase.google.com/docs/app-hosting/configure#cloud-run
 runConfig:
-  minInstances: 0
-  # maxInstances: 100
-  # concurrency: 80
-  # cpu: 1
-  # memoryMiB: 512
+  minInstances: 0        # Scale to zero when idle — zero cost during quiet periods
+  maxInstances: 10       # Cap spend during early growth
+  concurrency: 80        # Cloud Run default — handles 80 requests per instance
+  cpu: 1                 # 1 vCPU — sufficient for Next.js SSR at this scale
+  memoryMiB: 1024        # 1 GiB — Next.js 16 + Firebase admin SDK needs headroom
 
-  # Environment variables and secrets.
-  # env:
-  # Configure environment variables.
-  # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
-  # - variable: MESSAGE
-  #   value: Hello world!
-  #   availability:
-  #     - BUILD
-  #     - RUNTIME
-
-  # Grant access to secrets in Cloud Secret Manager.
-  # You can create secrets with the CLI command `firebase apphosting:secrets:set <secretName>`.
-  # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
-  # - variable: MY_SECRET
-  #   secret: mySecretRef
 env:
-  - variable: IP_HASH_SALT
-    secret: IP_HASH_SALT
+  # ── Secrets (stored in Cloud Secret Manager via `firebase apphosting:secrets:set`) ──
   - variable: RESEND_API_KEY
     secret: RESEND_API_KEY
+    availability:
+      - RUNTIME
+
+  - variable: IP_HASH_SALT
+    secret: IP_HASH_SALT
+    availability:
+      - RUNTIME
+
+  - variable: FIREBASE_SERVICE_ACCOUNT_KEY
+    secret: FIREBASE_SERVICE_ACCOUNT_KEY
+    availability:
+      - RUNTIME
+
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+    availability:
+      - RUNTIME
+
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
+    availability:
+      - RUNTIME
+
+  - variable: OPENAI_API_KEY
+    secret: OPENAI_API_KEY
+    availability:
+      - RUNTIME
+
+  - variable: AGENT_API_KEY
+    secret: AGENT_API_KEY
+    availability:
+      - RUNTIME
+
+  # ── Public build-time values (safe to include here) ──
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyA90GDtsLFRPAHr01DDhIm0QZGJMO1DSzU
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_URL
+    value: https://espeezylearning-default-rtdb.europe-west1.firebasedatabase.app
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: APP_URL
+    value: https://espeezy.com
+    availability:
+      - BUILD
+      - RUNTIME
