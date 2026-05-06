@@ -131,7 +131,7 @@ export default function DynamicDocPage() {
 
       <div style={{ marginTop: '4rem', padding: '2rem 0', borderTop: '1px solid #222', display: 'flex', justifyContent: 'space-between' }}>
         <Link href="/docs" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>← Return to Home</Link>
-        <Link href="/login?signup=true" style={{ color: '#10b981', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>Try it in the App →</Link>
+        <Link href="/preregister" style={{ color: '#10b981', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>Try it in the App →</Link>
       </div>
 
       <style jsx>{`

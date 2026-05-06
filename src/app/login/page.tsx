@@ -17,6 +17,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 
 function LoginContent() {
+  const SIGNUP_ENABLED = false
   const router = useRouter()
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
@@ -25,7 +26,7 @@ function LoginContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState<string | null>(error)
-  const [isSignUp, setIsSignUp] = useState(searchParams.get('signup') === 'true')
+  const [isSignUp, setIsSignUp] = useState(SIGNUP_ENABLED && searchParams.get('signup') === 'true')
   const [legalAccepted, setLegalAccepted] = useState(false)
   const [activePolicy, setActivePolicy] = useState<'privacy' | 'terms' | 'cookies' | null>(null)
   const [phone, setPhone] = useState('')
@@ -330,13 +331,15 @@ function LoginContent() {
               </button>
             )}
             
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 800 }}
-            >
-              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-            </button>
+            {SIGNUP_ENABLED && (
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 800 }}
+              >
+                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+              </button>
+            )}
           </div>
         </form>
 

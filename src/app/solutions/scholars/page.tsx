@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -14,7 +14,7 @@ export default function ScholarsPage() {
         padding: '0 2rem', position: 'sticky', top: 0, zIndex: 1000,
         background: 'rgba(10,10,10,0.8)', backdropFilter: 'blur(12px)'
       }}>
-        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>← Back</Link>
+        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>{'<- Back'}</Link>
         <span style={{ fontWeight: 700 }}>For Scholars & Researchers</span>
       </nav>
 
@@ -59,7 +59,7 @@ export default function ScholarsPage() {
         </div>
 
         <div style={{ marginTop: '10rem', textAlign: 'center' }}>
-           <Link href="/login?signup=true" style={{ 
+           <Link href="/preregister" style={{ 
              background: 'var(--brand)', color: 'white', padding: '1.25rem 3rem', 
              borderRadius: '16px', textDecoration: 'none', fontWeight: 900,
              display: 'inline-flex', alignItems: 'center', gap: '1rem',
@@ -72,3 +72,4 @@ export default function ScholarsPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ export default function TeamsPage() {
         padding: '0 2rem', position: 'sticky', top: 0, zIndex: 1000,
         background: 'rgba(10,10,10,0.8)', backdropFilter: 'blur(12px)'
       }}>
-        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>← Back</Link>
+        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>{'<- Back'}</Link>
         <span style={{ fontWeight: 700 }}>For Team Collaboration</span>
       </nav>
 
@@ -59,7 +59,7 @@ export default function TeamsPage() {
 
         <div style={{ marginTop: '10rem', padding: '6rem', borderRadius: '32px', background: 'linear-gradient(135deg, #111, #0a0a0a)', border: '1px solid #222', textAlign: 'center' }}>
            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '2rem' }}>Accelerate your team output.</h2>
-           <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem 3rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
+           <Link href="/preregister" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem 3rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
               Create a Group <ArrowRight size={20} />
            </Link>
         </div>
@@ -67,3 +67,4 @@ export default function TeamsPage() {
     </div>
   )
 }
+

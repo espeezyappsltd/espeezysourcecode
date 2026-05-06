@@ -30,7 +30,7 @@ export default function SyncPage() {
             to a presence update—is propagated across your whole team in milliseconds.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem 2.5rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 900 }}>Get Started</Link>
+            <Link href="/preregister" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem 2.5rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 900 }}>Get Started</Link>
             <Link href="/docs/infra/sync" style={{ color: '#f3f4f6', border: '1px solid #222', padding: '1rem 2.5rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 700 }}>Technical Manual</Link>
           </div>
         </section>

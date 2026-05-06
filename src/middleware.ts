@@ -135,6 +135,12 @@ export default async function middleware(request: NextRequest) {
     if (stripped) return NextResponse.redirect(cloned)
   }
 
+  // ── 2b. Route signup entrypoint to preregistration ───────────────────────
+  if (pathname === '/login' && request.nextUrl.searchParams.get('signup') === 'true') {
+    const target = new URL('/preregister', request.url)
+    return NextResponse.redirect(target)
+  }
+
   // ── 3. Distributed rate limiting (production only) ───────────────────────
   if (!isDev) {
     let tier: { key: string; limit: number; window: number; label: string }

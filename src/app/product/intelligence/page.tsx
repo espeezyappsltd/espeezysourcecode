@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -15,7 +15,7 @@ export default function IntelligencePage() {
         padding: '0 2rem', position: 'sticky', top: 0, zIndex: 1000,
         background: 'rgba(10,10,10,0.8)', backdropFilter: 'blur(12px)'
       }}>
-        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>← Back</Link>
+        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>{'<- Back'}</Link>
         <span style={{ fontWeight: 700 }}>Project Intelligence</span>
       </nav>
 
@@ -30,7 +30,7 @@ export default function IntelligencePage() {
             The Kanban Project Intelligence engine is the heart of Espeezy. It transform static task lists into a living, 
             breathing representation of your contribution history with real-time state persistence.
           </p>
-          <Link href="/login?signup=true" style={{ 
+          <Link href="/preregister" style={{ 
             background: '#10b981', color: '#0a0a0a', padding: '1rem 2.5rem', 
             borderRadius: '12px', textDecoration: 'none', fontWeight: 900,
             display: 'inline-flex', alignItems: 'center', gap: '0.75rem'
@@ -69,8 +69,9 @@ export default function IntelligencePage() {
 
       <footer style={{ padding: '8rem 2rem', borderTop: '1px solid #222', textAlign: 'center' }}>
          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '3rem' }}>Ready to professionalize?</h2>
-         <Link href="/login?signup=true" style={{ background: '#f3f4f6', color: '#0a0a0a', padding: '1rem 3rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 800 }}>Start for Free</Link>
+         <Link href="/preregister" style={{ background: '#f3f4f6', color: '#0a0a0a', padding: '1rem 3rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 800 }}>Start for Free</Link>
       </footer>
     </div>
   )
 }
+

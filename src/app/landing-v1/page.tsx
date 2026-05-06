@@ -177,7 +177,7 @@ export default function Home() {
             </p>
             <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap', position: 'relative' }}>
               <button onClick={() => setIsModalOpen(true)} style={{ background: 'var(--brand)', color: '#0a0a0a', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 950, border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px rgba(var(--brand-rgb), 0.3)', transition: '0.3s' }}>Learn More</button>
-              <a href="/login?signup=true" style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 800, textDecoration: 'none', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', transition: '0.3s' }}>Get Started</a>
+              <a href="/preregister" style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 800, textDecoration: 'none', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', transition: '0.3s' }}>Get Started</a>
             </div>
           </div>
         </section>
@@ -233,3 +233,4 @@ export default function Home() {
     </div>
   )
 }
+

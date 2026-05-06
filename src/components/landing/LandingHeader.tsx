@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { auth } from '@/lib/firebase'
@@ -232,7 +232,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Search size={14} /> Search...
           </div>
-          <div style={{ padding: '2px 4px', background: '#222222', borderRadius: '4px', fontSize: '0.65rem' }}>⌘K</div>
+          <div style={{ padding: '2px 4px', background: '#222222', borderRadius: '4px', fontSize: '0.65rem' }}>Ctrl+K</div>
         </Link>
 
         <Link
@@ -267,7 +267,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
           <>
             <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, padding: '0.5rem 0.75rem' }}>Sign in</Link>
             <Link
-              href="/login?signup=true"
+              href="/preregister"
               style={{
                 background: '#10b981',
                 color: '#0a0a0a',
@@ -344,7 +344,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                 ) : (
                   <>
                     <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Sign in</Link>
-                    <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Start Project</Link>
+                    <Link href="/preregister" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Start Project</Link>
                   </>
                 )}
               </div>
@@ -355,3 +355,4 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
     </header>
   )
 }
+

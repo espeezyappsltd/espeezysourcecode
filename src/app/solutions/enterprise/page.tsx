@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ export default function EnterprisePage() {
         padding: '0 2rem', position: 'sticky', top: 0, zIndex: 1000,
         background: 'rgba(10,10,10,0.8)', backdropFilter: 'blur(12px)'
       }}>
-        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>← Back</Link>
+        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>{'<- Back'}</Link>
         <span style={{ fontWeight: 700 }}>Institutional Flow</span>
       </nav>
 
@@ -58,7 +58,7 @@ export default function EnterprisePage() {
         </div>
 
         <div style={{ marginTop: '10rem', textAlign: 'center' }}>
-           <Link href="/login?signup=true&plan=premium" style={{ 
+           <Link href="/preregister" style={{ 
              background: 'white', color: '#0a0a0a', padding: '1.25rem 3.5rem', 
              borderRadius: '20px', textDecoration: 'none', fontWeight: 900,
              display: 'inline-flex', alignItems: 'center', gap: '1rem',
@@ -71,3 +71,4 @@ export default function EnterprisePage() {
     </div>
   )
 }
+

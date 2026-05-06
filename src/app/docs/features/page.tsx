@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -95,7 +95,7 @@ export default function FeaturesDocs() {
       </div>
 
       <div style={{ marginTop: '4rem', padding: '2rem 0', borderTop: '1px solid #222', display: 'flex', justifyContent: 'center' }}>
-        <Link href="/login?signup=true" style={{ 
+        <Link href="/preregister" style={{ 
           background: '#10b981', color: '#0a0a0a', padding: '1rem 2.5rem', 
           borderRadius: '12px', textDecoration: 'none', fontWeight: 900,
           boxShadow: '0 10px 30px rgba(16, 185, 129, 0.2)'
@@ -106,3 +106,4 @@ export default function FeaturesDocs() {
     </div>
   )
 }
+

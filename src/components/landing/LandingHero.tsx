@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { Sparkles, Zap, ArrowRight, ShieldCheck, Globe, Cpu } from 'lucide-react'
@@ -96,7 +96,7 @@ export default function LandingHero() {
           letterSpacing: '0.2em',
           opacity: 0.8
         }}>
-          <ShieldCheck size={14} /> SECURE FOR STUDENTS • ALWAYS SAVED
+          <ShieldCheck size={14} /> SECURE FOR STUDENTS - ALWAYS SAVED
         </span>
       </motion.p>
 
@@ -107,7 +107,7 @@ export default function LandingHero() {
         style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}
       >
         <Link
-          href="/login?signup=true&plan=pro"
+          href="/preregister"
           style={{
             background: 'var(--brand)',
             color: '#0a0a0a',
@@ -127,7 +127,7 @@ export default function LandingHero() {
           Upgrade to Pro <Zap size={20} fill="#0a0a0a" />
         </Link>
         <Link
-          href="/login?signup=true"
+          href="/preregister"
           style={{
             background: 'rgba(255,255,255,0.02)',
             color: 'white',
@@ -170,3 +170,4 @@ export default function LandingHero() {
     </section>
   )
 }
+
