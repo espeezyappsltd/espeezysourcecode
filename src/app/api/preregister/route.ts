@@ -108,21 +108,17 @@ async function readRequestPayload(req: Request): Promise<Record<string, unknown>
 }
 
 export async function GET() {
+	if (!getSupabaseConfig()) {
+		return NextResponse.json({ error: 'Supabase is not configured.', count: 0 }, { status: 503 })
+	}
+
 	try {
 		const { ok, data } = await supaRest('pre_registrations?select=id', 'GET')
 		if (ok && Array.isArray(data)) return NextResponse.json({ count: data.length })
-	} catch { /* ignore */ }
-	try {
-		const { getAdminDb } = await import('@/lib/firebase-admin')
-		const db = getAdminDb()
-		if (db) {
-			const snap = await db.collection('pre_registrations').get()
-			return NextResponse.json({ count: snap.size })
-		}
 	} catch (err) {
 		console.error('[preregister GET]', err)
 	}
-	return NextResponse.json({ count: 0 })
+	return NextResponse.json({ error: 'Unable to read pre-registrations right now.', count: 0 }, { status: 503 })
 }
 
 export async function POST(req: Request) {
@@ -147,89 +143,29 @@ export async function POST(req: Request) {
 	const ipRaw = (req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim()
 	const ipHash = createHash('sha256').update(ipRaw + (process.env.IP_HASH_SALT ?? 'fallback')).digest('hex').slice(0, 16)
 	const ua = (req.headers.get('user-agent') ?? '').slice(0, 500)
+	const supabaseConfig = getSupabaseConfig()
 
-	// Supabase path
-	if (getSupabaseConfig()) {
-		try {
-			const { ok: lookOk, data: lookData } = await supaRest(
-				`pre_registrations?email=eq.${encodeURIComponent(cleanEmail)}&select=referral_code,referral_count&limit=1`,
-				'GET',
-			)
-			if (lookOk && Array.isArray(lookData) && lookData.length > 0) {
-				const ex = lookData[0] as Record<string, unknown>
-				return NextResponse.json({
-					success: true,
-					message: 'You are already registered! We will be in touch.',
-					referral_code: ex.referral_code ?? null,
-					referral_count: ex.referral_count ?? 0,
-				})
-			}
-			const newCode = generateReferralCode()
-			const { ok: insOk, data: insData, status: insStatus } = await supaRest('pre_registrations', 'POST', {
-				email: cleanEmail,
-				source: cleanSource,
-				full_name: cleanFullName,
-				institution: cleanInstitution,
-				role: cleanRole,
-				ip_hash: ipHash,
-				user_agent: ua,
-				referral_code: newCode,
-				referrer_code: cleanReferrerCode,
-				referral_count: 0,
-			})
-			if (!insOk) {
-				if (insStatus === 409 || JSON.stringify(insData).includes('23505')) {
-					return NextResponse.json({ success: true, message: 'You are already registered!', referral_code: null, referral_count: 0 })
-				}
-				console.error('[preregister] Supabase insert failed:', insStatus, insData)
-				throw new Error('supabase_insert_failed')
-			}
-			if (cleanReferrerCode) {
-				const { data: refData } = await supaRest(
-					`pre_registrations?referral_code=eq.${cleanReferrerCode}&select=id,referral_count&limit=1`,
-					'GET',
-				)
-				if (Array.isArray(refData) && refData.length > 0) {
-					const ref = refData[0] as Record<string, unknown>
-					await supaRest(`pre_registrations?id=eq.${ref.id}`, 'PATCH', {
-						referral_count: ((ref.referral_count as number) ?? 0) + 1,
-					})
-				}
-			}
-			sendWelcomeEmail(cleanEmail, newCode)
-			const { data: allData } = await supaRest('pre_registrations?select=id', 'GET')
-			return NextResponse.json({
-				success: true,
-				message: 'You are on the list! We will notify you at launch.',
-				referral_code: newCode,
-				referral_count: 0,
-				count: Array.isArray(allData) ? allData.length : 0,
-			})
-		} catch (supaErr) {
-			console.warn('[preregister] Supabase failed, falling back to Firestore:', supaErr)
-		}
+	if (!supabaseConfig) {
+		return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
 	}
 
-	// Firestore fallback
 	try {
-		const { getAdminDb } = await import('@/lib/firebase-admin')
-		const db = getAdminDb()
-		if (!db) {
-			console.error('[preregister] No DB configured.')
-			return NextResponse.json({ error: 'Service temporarily unavailable.' }, { status: 503 })
-		}
-		const existingSnap = await db.collection('pre_registrations').where('email', '==', cleanEmail).limit(1).get()
-		if (!existingSnap.empty) {
-			const ex = existingSnap.docs[0].data()
+		const { ok: lookOk, data: lookData } = await supaRest(
+			`pre_registrations?email=eq.${encodeURIComponent(cleanEmail)}&select=referral_code,referral_count&limit=1`,
+			'GET',
+		)
+		if (lookOk && Array.isArray(lookData) && lookData.length > 0) {
+			const ex = lookData[0] as Record<string, unknown>
 			return NextResponse.json({
 				success: true,
-				message: 'You are already registered!',
+				message: 'You are already registered! We will be in touch.',
 				referral_code: ex.referral_code ?? null,
 				referral_count: ex.referral_count ?? 0,
 			})
 		}
+
 		const newCode = generateReferralCode()
-		await db.collection('pre_registrations').add({
+		const { ok: insOk, data: insData, status: insStatus } = await supaRest('pre_registrations', 'POST', {
 			email: cleanEmail,
 			source: cleanSource,
 			full_name: cleanFullName,
@@ -240,29 +176,39 @@ export async function POST(req: Request) {
 			referral_code: newCode,
 			referrer_code: cleanReferrerCode,
 			referral_count: 0,
-			created_at: new Date().toISOString(),
 		})
+		if (!insOk) {
+			if (insStatus === 409 || JSON.stringify(insData).includes('23505')) {
+				return NextResponse.json({ success: true, message: 'You are already registered!', referral_code: null, referral_count: 0 })
+			}
+			console.error('[preregister] Supabase insert failed:', insStatus, insData)
+			return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
+		}
+
 		if (cleanReferrerCode) {
-			const refSnap = await db
-				.collection('pre_registrations')
-				.where('referral_code', '==', cleanReferrerCode)
-				.limit(1)
-				.get()
-			if (!refSnap.empty) {
-				await refSnap.docs[0].ref.update({ referral_count: (refSnap.docs[0].data().referral_count ?? 0) + 1 })
+			const { data: refData } = await supaRest(
+				`pre_registrations?referral_code=eq.${cleanReferrerCode}&select=id,referral_count&limit=1`,
+				'GET',
+			)
+			if (Array.isArray(refData) && refData.length > 0) {
+				const ref = refData[0] as Record<string, unknown>
+				await supaRest(`pre_registrations?id=eq.${ref.id}`, 'PATCH', {
+					referral_count: ((ref.referral_count as number) ?? 0) + 1,
+				})
 			}
 		}
+
 		sendWelcomeEmail(cleanEmail, newCode)
-		const allSnap = await db.collection('pre_registrations').get()
+		const { data: allData } = await supaRest('pre_registrations?select=id', 'GET')
 		return NextResponse.json({
 			success: true,
-			message: 'You are on the list!',
+			message: 'You are on the list! We will notify you at launch.',
 			referral_code: newCode,
 			referral_count: 0,
-			count: allSnap.size,
+			count: Array.isArray(allData) ? allData.length : 0,
 		})
 	} catch (err) {
-		console.error('[preregister] Firestore fallback error:', err)
+		console.error('[preregister] Supabase error:', err)
 		return NextResponse.json({ error: 'Service temporarily unavailable.' }, { status: 503 })
 	}
 }
