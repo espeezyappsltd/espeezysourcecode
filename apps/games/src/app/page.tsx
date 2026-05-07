@@ -368,7 +368,7 @@ export default function GamesPage() {
               fontSize: '1rem',
             }}
           >
-            <span aria-hidden="true">✓</span> You&apos;re on the list! We&apos;ll notify you at launch.
+            <span aria-hidden="true">🙂</span> You are in the list 🙂
           </div>
         ) : (
           <form
