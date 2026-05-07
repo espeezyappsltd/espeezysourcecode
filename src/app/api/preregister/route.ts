@@ -53,10 +53,8 @@ async function getRegistrationCount() {
 	const cfg = getSupabaseConfig()
 	if (!cfg) return null
 
-	
-
-	const res = await fetch(`${cfg.url}/rest/v1/pre_registrations?select=id`, {
-		method: 'HEAD',
+	const res = await fetch(`${cfg.url}/rest/v1/pre_registrations?select=*&limit=0`, {
+		method: 'GET',
 		headers: {
 			apikey: cfg.key,
 			Authorization: `Bearer ${cfg.key}`,
