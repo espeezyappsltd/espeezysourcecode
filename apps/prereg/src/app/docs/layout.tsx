@@ -115,6 +115,104 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
           <div className="docs-content-inner">{children}</div>
         </main>
       </div>
+
+      <style jsx>{`
+        .docs-container {
+          min-height: 100vh;
+          background: #0a0a0a;
+          color: #f3f4f6;
+        }
+
+        .docs-header {
+          height: 64px;
+          border-bottom: 1px solid #222;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 2rem;
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+          background: rgba(10, 10, 10, 0.9);
+          backdrop-filter: blur(12px);
+        }
+
+        .docs-layout {
+          display: flex;
+          max-width: 1440px;
+          margin: 0 auto;
+          position: relative;
+        }
+
+        .docs-sidebar {
+          width: 260px;
+          flex-shrink: 0;
+          height: calc(100vh - 64px);
+          border-right: 1px solid #222;
+          padding: 2rem 1.5rem;
+          position: sticky;
+          top: 64px;
+          overflow-y: auto;
+          background: #0a0a0a;
+        }
+
+        .docs-main {
+          flex: 1;
+          min-width: 0;
+          padding: 3rem 4rem;
+          background: #0a0a0a;
+        }
+
+        .docs-content-inner {
+          max-width: 860px;
+        }
+
+        .docs-link:hover {
+          color: #f3f4f6 !important;
+        }
+
+        .hide-mobile {
+          display: block;
+        }
+
+        .hide-desktop {
+          display: none !important;
+        }
+
+        @media (max-width: 1024px) {
+          .docs-header {
+            padding: 0 1.25rem;
+          }
+
+          .docs-sidebar {
+            position: fixed;
+            left: -100%;
+            top: 64px;
+            z-index: 900;
+            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 280px;
+            max-width: 85vw;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            height: calc(100vh - 64px);
+          }
+
+          .docs-sidebar.open {
+            left: 0;
+          }
+
+          .docs-main {
+            padding: 2rem 1.25rem;
+          }
+
+          .hide-mobile {
+            display: none;
+          }
+
+          .hide-desktop {
+            display: block !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
