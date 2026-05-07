@@ -17,7 +17,10 @@
     "deploy:resilient": "bash ./scripts/deploy-resilient.sh",
     "deploy:edge": "bash ./scripts/deploy-resilient.sh --with-edge",
     "deploy:app-only": "bash ./scripts/deploy-resilient.sh --no-edge",
-    "predeploy:prereg": "npm --prefix apps/prereg run predeploy:check"
+    "predeploy:prereg": "npm --prefix apps/prereg run predeploy:check",
+    "predeploy:games": "npm --prefix apps/games run predeploy:check",
+    "predeploy:kanban": "npm --prefix apps/kanban run predeploy:check",
+    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.2.0",
