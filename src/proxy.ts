@@ -115,6 +115,20 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(target, 308)
   }
 
+  // ── 0. Vercel-only: serve ONLY the preregister surface ───────────────────
+  // On Vercel (VERCEL=1), every route outside of preregister + static assets
+  // returns 404. The VPS (where VERCEL is unset) is unaffected.
+  if (process.env.VERCEL) {
+    const ALLOWED = ['/', '/preregister', '/api/preregister']
+    const isAllowed =
+      ALLOWED.includes(pathname) ||
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/api/preregister')
+    if (!isAllowed) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+  }
+
   // ── 1. Block TRACE/TRACK ──────────────────────────────────────────────────
   if (request.method === 'TRACE' || request.method === 'TRACK') {
     return new NextResponse('Method Not Allowed', { status: 405 })
