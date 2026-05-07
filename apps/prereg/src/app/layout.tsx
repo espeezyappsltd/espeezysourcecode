@@ -6,7 +6,11 @@ import PreregFooter from '@/components/PreregFooter'
 export const metadata: Metadata = {
   title: 'Espeezy: Early Access',
   description: 'Join 5 million students shaping the future of collaborative education.',
-  icons: { icon: '/favicon.png', shortcut: '/favicon.png', apple: '/favicon.png' },
+  manifest: '/manifest.json',
+  icons: {
+    icon: [{ url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Espeezy: Early Access',
     description: 'The platform that gives every student a fair voice.',
