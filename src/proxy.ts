@@ -94,7 +94,7 @@ const CSP = [
 const REDIRECT_PARAMS   = ['next', 'redirect', 'redirectTo', 'to', 'returnTo', 'url', 'return']
 const SENSITIVE_PREFIXES = ['/login', '/auth', '/api/auth']
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const ip = (request.headers.get('x-forwarded-for') ?? 'anonymous').split(',')[0].trim()
   const { pathname } = request.nextUrl
   const isDev = process.env.NODE_ENV === 'development'

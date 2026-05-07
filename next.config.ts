@@ -65,6 +65,15 @@ const nextConfig: NextConfig = {
   },
 
   typescript: { ignoreBuildErrors: false },
+
+  webpack(config) {
+    config.ignoreWarnings = [
+      // Firebase/Firestore pulls in protobufjs which uses dynamic require.
+      // This is a false-positive — it does not affect runtime behaviour.
+      { module: /node_modules\/@protobufjs\/inquire/ },
+    ]
+    return config
+  },
 }
 
 export default nextConfig
