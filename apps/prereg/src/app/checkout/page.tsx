@@ -141,7 +141,7 @@ function CheckoutFlow() {
                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: '14px', marginBottom: '1rem' }}>
                 <Gift size={16} color={BRAND} style={{ flexShrink: 0 }} />
                 <div>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>14-day free trial — no charge today</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>14-day free trial, no charge today</span>
                   <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.5)', fontWeight: 500, marginTop: '1px' }}>Cancel anytime before the trial ends and pay nothing.</span>
                 </div>
               </motion.div>
@@ -201,7 +201,7 @@ function CheckoutFlow() {
 
                 {plan.hasTrial && (
                   <p style={{ textAlign: 'center', margin: '0.6rem 0 0', fontSize: '0.72rem', color: 'rgba(15,23,42,0.4)', fontWeight: 500 }}>
-                    Then {plan.price}{plan.period} — cancel anytime before trial ends
+                    Then {plan.price}{plan.period}. Cancel anytime before trial ends.
                   </p>
                 )}
 
