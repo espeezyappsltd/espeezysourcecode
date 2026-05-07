@@ -128,11 +128,11 @@ export async function GET() {
 
 	try {
 		const count = await getRegistrationCount()
-		if (typeof count === 'number') return NextResponse.json({ count })
+		return NextResponse.json({ count: count ?? 0 })
 	} catch (err) {
 		console.error('[preregister GET]', err)
+		return NextResponse.json({ count: 0 })
 	}
-	return NextResponse.json({ error: 'Unable to read pre-registrations right now.', count: 0 }, { status: 503 })
 }
 
 export async function POST(req: Request) {
@@ -196,6 +196,33 @@ export async function POST(req: Request) {
 					referral_code: duplicate?.referral_code ?? null,
 					referral_count: duplicate?.referral_count ?? 0,
 				})
+			}
+			// Retry with minimal payload if columns are missing (table schema may not have optional fields)
+			if (insStatus === 400) {
+				const errStr = JSON.stringify(insData)
+				const isColumnError = errStr.includes('42703') || errStr.includes('does not exist')
+				if (isColumnError) {
+					const { ok: retryOk, data: retryData, status: retryStatus } = await supaRest('pre_registrations', 'POST', {
+						email: cleanEmail,
+						source: cleanSource,
+						referral_code: newCode,
+						referrer_code: cleanReferrerCode,
+						referral_count: 0,
+					})
+					if (!retryOk) {
+						console.error('[preregister] Supabase minimal insert failed:', retryStatus, retryData)
+						return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
+					}
+					// Minimal insert succeeded — fall through
+					const count2 = await getRegistrationCount()
+					return NextResponse.json({
+						success: true,
+						message: 'You are on the list! We will notify you at launch.',
+						referral_code: newCode,
+						referral_count: 0,
+						count: count2 ?? 0,
+					})
+				}
 			}
 			console.error('[preregister] Supabase insert failed:', insStatus, insData)
 			return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
