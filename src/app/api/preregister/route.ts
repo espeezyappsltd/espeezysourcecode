@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'crypto'
 import { z } from 'zod'
+import { sendPreregistrationConfirmationEmail } from '@/services/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +11,7 @@ const preregSchema = z.object({
 	fullName: z.string().trim().max(120).optional(),
 	institution: z.string().trim().max(120).optional(),
 	role: z.string().trim().max(50).optional(),
-	referrer_code: z.string().trim().optional(),
+	referrer_code: z.string().trim().max(8).optional(),
 })
 
 function isValidReferralCode(code: unknown): code is string {
@@ -21,8 +22,8 @@ function generateReferralCode(): string {
 	return randomBytes(4).toString('hex').toUpperCase().slice(0, 8)
 }
 function getSupabaseConfig() {
-	const url = process.env.PROJECT_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
-	const key = process.env.SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.PUBLISHABLE_KEY
+	const url = process.env.PROJECT_URL?.trim() ?? process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+	const key = process.env.SECRET_KEY?.trim() ?? process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 	if (!url || !key) return null
 	return { url, key }
 }
@@ -48,22 +49,35 @@ async function supaRest(
 	try { data = JSON.parse(text) } catch { data = text }
 	return { ok: res.ok, data, status: res.status }
 }
-function sendWelcomeEmail(email: string, referralCode: string) {
-	if (!process.env.RESEND_API_KEY) return
-	const shareUrl = `https://espeezy.com/preregister?ref=${referralCode}`
-	fetch('https://api.resend.com/emails', {
-		method: 'POST',
+async function getRegistrationCount() {
+	const cfg = getSupabaseConfig()
+	if (!cfg) return null
+
+	const res = await fetch(`${cfg.url}/rest/v1/pre_registrations?select=id`, {
+		method: 'HEAD',
 		headers: {
-			Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-			'Content-Type': 'application/json',
+			apikey: cfg.key,
+			Authorization: `Bearer ${cfg.key}`,
+			Prefer: 'count=exact',
 		},
-		body: JSON.stringify({
-			from: 'Espeezy <hello@espeezy.com>',
-			to: email,
-			subject: "You're on the list 🚀 + share your link",
-			html: `<div style="font-family:-apple-system,sans-serif;padding:20px;max-width:600px;"><h1>You're on the list! 🎉</h1><p>Share your link to get perks at launch:</p><code>${shareUrl}</code></div>`,
-		}),
-	}).catch(err => console.warn('[preregister] Resend failed:', err))
+	})
+
+	if (!res.ok) return null
+
+	const range = res.headers.get('content-range')
+	if (!range) return 0
+
+	const total = Number(range.split('/')[1] ?? '0')
+	return Number.isFinite(total) ? total : 0
+}
+
+async function findExistingRegistrationByEmail(email: string) {
+	const { ok, data } = await supaRest(
+		`pre_registrations?email=eq.${encodeURIComponent(email)}&select=id,referral_code,referral_count&limit=1`,
+		'GET',
+	)
+	if (!ok || !Array.isArray(data) || data.length === 0) return null
+	return data[0] as Record<string, unknown>
 }
 
 async function readRequestPayload(req: Request): Promise<Record<string, unknown> | null> {
@@ -113,8 +127,8 @@ export async function GET() {
 	}
 
 	try {
-		const { ok, data } = await supaRest('pre_registrations?select=id', 'GET')
-		if (ok && Array.isArray(data)) return NextResponse.json({ count: data.length })
+		const count = await getRegistrationCount()
+		if (typeof count === 'number') return NextResponse.json({ count })
 	} catch (err) {
 		console.error('[preregister GET]', err)
 	}
@@ -150,17 +164,13 @@ export async function POST(req: Request) {
 	}
 
 	try {
-		const { ok: lookOk, data: lookData } = await supaRest(
-			`pre_registrations?email=eq.${encodeURIComponent(cleanEmail)}&select=referral_code,referral_count&limit=1`,
-			'GET',
-		)
-		if (lookOk && Array.isArray(lookData) && lookData.length > 0) {
-			const ex = lookData[0] as Record<string, unknown>
+		const existing = await findExistingRegistrationByEmail(cleanEmail)
+		if (existing) {
 			return NextResponse.json({
 				success: true,
 				message: 'You are already registered! We will be in touch.',
-				referral_code: ex.referral_code ?? null,
-				referral_count: ex.referral_count ?? 0,
+				referral_code: existing.referral_code ?? null,
+				referral_count: existing.referral_count ?? 0,
 			})
 		}
 
@@ -179,7 +189,13 @@ export async function POST(req: Request) {
 		})
 		if (!insOk) {
 			if (insStatus === 409 || JSON.stringify(insData).includes('23505')) {
-				return NextResponse.json({ success: true, message: 'You are already registered!', referral_code: null, referral_count: 0 })
+				const duplicate = await findExistingRegistrationByEmail(cleanEmail)
+				return NextResponse.json({
+					success: true,
+					message: 'You are already registered!',
+					referral_code: duplicate?.referral_code ?? null,
+					referral_count: duplicate?.referral_count ?? 0,
+				})
 			}
 			console.error('[preregister] Supabase insert failed:', insStatus, insData)
 			return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
@@ -198,14 +214,20 @@ export async function POST(req: Request) {
 			}
 		}
 
-		sendWelcomeEmail(cleanEmail, newCode)
-		const { data: allData } = await supaRest('pre_registrations?select=id', 'GET')
+		void sendPreregistrationConfirmationEmail({
+			to: cleanEmail,
+			referralCode: newCode,
+		}).catch(err => {
+			console.error('[preregister] Confirmation email failed:', err)
+		})
+
+		const count = await getRegistrationCount()
 		return NextResponse.json({
 			success: true,
 			message: 'You are on the list! We will notify you at launch.',
 			referral_code: newCode,
 			referral_count: 0,
-			count: Array.isArray(allData) ? allData.length : 0,
+			count: count ?? 0,
 		})
 	} catch (err) {
 		console.error('[preregister] Supabase error:', err)

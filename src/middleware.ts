@@ -17,7 +17,6 @@ async function checkRateLimit(
   limit: number,
   windowSecs: number
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number; retryAfter: number }> {
-  const firebaseProject = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
   const firebaseKey = process.env.FIREBASE_DATABASE_URL // Should be the REST URL e.g. https://project.firebaseio.com
 
   const now = Math.floor(Date.now() / 1000)
@@ -186,7 +185,7 @@ export default async function middleware(request: NextRequest) {
   // ── 6. Supabase session refresh (fail-open for public availability) ──────
   // If Supabase/session refresh fails, keep public pages online so marketing
   // and business-verification crawlers can still access the site.
-  let response: NextResponse = NextResponse.next({ request })
+  const response = NextResponse.next({ request })
 
   // ── 7. Security + performance headers ────────────────────────────────────
   response.headers.set('Content-Security-Policy', CSP)

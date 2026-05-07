@@ -114,6 +114,36 @@ export async function sendWelcomeEmail(opts: {
   })
 }
 
+export async function sendPreregistrationConfirmationEmail(opts: {
+  to: string
+  referralCode: string
+}): Promise<void> {
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com').replace(/\/$/, '')
+  const shareUrl = `${appUrl}/preregister?ref=${encodeURIComponent(opts.referralCode)}`
+
+  await sendEmail({
+    to: opts.to,
+    subject: "You're on the Espeezy early-access list",
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
+        <div style="background:linear-gradient(135deg,#10b981,#059669);padding:32px;border-radius:16px 16px 0 0;text-align:center">
+          <h1 style="color:white;margin:0;font-size:28px;letter-spacing:-0.03em">You're on the list</h1>
+        </div>
+        <div style="background:#fff;padding:32px;border:1px solid #eee;border-top:none;border-radius:0 0 16px 16px">
+          <p style="font-size:18px;color:#111;margin-top:0">Thanks for pre-registering for Espeezy.</p>
+          <p style="color:#444;line-height:1.6">Share your personal link to invite friends and climb the early-access leaderboard.</p>
+          <div style="background:#f0fdf4;border:1px solid #10b981;border-radius:10px;padding:16px;margin:24px 0">
+            <p style="margin:0 0 8px;font-size:12px;color:#065f46;font-weight:700;text-transform:uppercase;letter-spacing:1px">Your referral link</p>
+            <code style="font-size:14px;color:#064e3b;word-break:break-all">${shareUrl}</code>
+          </div>
+          <a href="${shareUrl}" style="display:inline-block;background:#10b981;color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700">Share your invite link</a>
+        </div>
+      </div>
+    `,
+    text: `Thanks for pre-registering for Espeezy.\n\nShare your invite link: ${shareUrl}`,
+  })
+}
+
 /** Notification when a student certificate is generated */
 export async function sendCertificateEmail(opts: {
   to: string

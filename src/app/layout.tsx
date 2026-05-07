@@ -1,12 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './prestige.css';
-import { NotificationProvider } from '../components/NotificationProvider';
-import PWARegistry from '../components/PWARegistry';
-import SessionGuard from '@/components/SessionGuard';
 import { ConnectivityProvider } from '@/context/ConnectivityContext';
-import ToasterModeManager from '@/components/ToasterModeManager';
-import ClientShell from '@/components/ClientShell';
+import AppRuntimeShell from '@/components/AppRuntimeShell';
 import type { Viewport } from 'next';
 
 export const metadata: Metadata = {
@@ -34,8 +30,6 @@ export const viewport: Viewport = {
   userScalable: true,
 };
 
-import { RealtimeProvider } from '@/lib/realtime-provider';
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,15 +46,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ConnectivityProvider>
-          <RealtimeProvider>
-            <ToasterModeManager />
-            <NotificationProvider>
-              <PWARegistry />
-              {children}
-              <ClientShell />
-              <SessionGuard />
-            </NotificationProvider>
-          </RealtimeProvider>
+          <AppRuntimeShell>{children}</AppRuntimeShell>
         </ConnectivityProvider>
 
         {/* PREMIUM SVG FILTERS */}

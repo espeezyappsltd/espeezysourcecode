@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { type ComponentPropsWithoutRef, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Sparkles, ArrowRight, CheckCircle, Users, Globe, ShieldCheck,
+  Sparkles, ArrowRight, CheckCircle, Users, Globe,
   BookOpen, Cpu, Zap, BarChart2, Mail,
-  GraduationCap, TrendingUp, Heart, Award
+  GraduationCap, TrendingUp, Heart
 } from 'lucide-react'
 
 import { useLaunchData } from '@/hooks/useLaunchData'
@@ -25,11 +25,9 @@ const COMING_FEATURES = [
 
 // ─── Nav Items ────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
-  { href: '/', label: 'Home' },
+  { href: '/', label: 'Early Access' },
   { href: '/#features', label: 'Features' },
-  { href: '/#pricing', label: 'Pricing' },
-  { href: '/fund', label: 'Support Us' },
-  { href: '/docs', label: 'Docs' },
+  { href: '/#register', label: 'Register' },
 ]
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
@@ -57,7 +55,7 @@ export default function PreRegisterPage() {
 
   const goal = parseInt(config.preregister_goal ?? '5000000', 10)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit: NonNullable<ComponentPropsWithoutRef<'form'>['onSubmit']> = async (e) => {
     e.preventDefault()
     setSubmitError('')
 
@@ -223,9 +221,9 @@ export default function PreRegisterPage() {
                     <Link href="/" style={{ padding: '0.875rem 1.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                       ← Back to Home
                     </Link>
-                    <Link href="/docs" style={{ padding: '0.875rem 1.75rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                      Explore the Docs →
-                    </Link>
+                    <a href="#features" style={{ padding: '0.875rem 1.75rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                      Explore What&apos;s Coming →
+                    </a>
                   </div>
                 </motion.div>
               ) : (
@@ -402,9 +400,9 @@ export default function PreRegisterPage() {
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               Register Now <ArrowRight size={18} />
             </a>
-            <Link href="/fund" style={{ padding: '1rem 2.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: '1rem', textDecoration: 'none' }}>
-              Support the Mission
-            </Link>
+            <a href="#features" style={{ padding: '1rem 2.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: '1rem', textDecoration: 'none' }}>
+              See the Product Vision
+            </a>
           </div>
         </motion.div>
       </section>
@@ -427,7 +425,7 @@ export default function PreRegisterPage() {
               <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '-0.02em' }}>{config.brand_name}</span>
             </div>
             <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              {[['/', 'Home'], ['/#features', 'Features'], ['/fund', 'Support'], ['/docs', 'Docs']].map(([href, label]) => (
+              {[['/', 'Early Access'], ['/#features', 'Features'], ['/#register', 'Register']].map(([href, label]) => (
                 <Link key={href} href={href} style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none', fontWeight: 600, transition: 'color 0.15s' }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                   onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}>
