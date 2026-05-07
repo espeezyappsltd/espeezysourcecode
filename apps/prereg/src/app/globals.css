@@ -1,19 +1,23 @@
 :root {
-  --bg-main: #0a0a0a;
-  --bg-sub: #111111;
-  --text-main: #ededed;
-  --text-sub: #a1a1a1;
-  --brand: #10b981;
-  --brand-rgb: 16, 185, 129;
-  --brand-hover: #0d9668;
-  --accent: #ffffff;
-  --border: rgba(255,255,255,0.06);
-  --surface: #141414;
+  --bg-main: #ffffff;
+  --bg-sub: #f8fafc;
+  --text-main: #0f172a;
+  --text-sub: #64748b;
+  --brand: #6366f1;
+  --brand-rgb: 99, 102, 241;
+  --brand-hover: #4f46e5;
+  --brand-2: #06b6d4;
+  --brand-3: #10b981;
+  --accent: #0f172a;
+  --border: rgba(15,23,42,0.08);
+  --surface: #f1f5f9;
   --error: #ef4444;
   --success: #10b981;
   --warning: #f59e0b;
   --radius: 12px;
   --radius-lg: 18px;
+  /* gradient used across hero sections */
+  --hero-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,6 +30,7 @@ body {
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 a { color: inherit; }
@@ -49,12 +54,12 @@ input, button, textarea, select {
 }
 
 /* ── Docs styles ─────────────────────────────────────────────────────────────── */
-.docs-container { color: #f3f4f6; background: #0a0a0a; min-height: 100vh; }
+.docs-container { color: #0f172a; background: #ffffff; min-height: 100vh; }
 .docs-header {
   z-index: 1000;
   backdrop-filter: blur(12px);
-  background: rgba(10,10,10,0.8);
-  border-bottom: 1px solid #222;
+  background: rgba(255,255,255,0.9);
+  border-bottom: 1px solid rgba(15,23,42,0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -65,8 +70,8 @@ input, button, textarea, select {
 }
 .docs-layout { max-width: 1440px; margin: 0 auto; display: flex; position: relative; }
 .docs-sidebar {
-  background: #0a0a0a;
-  border-right: 1px solid #222;
+  background: #f8fafc;
+  border-right: 1px solid rgba(15,23,42,0.08);
   width: 280px;
   height: calc(100vh - 64px);
   padding: 2rem;
@@ -76,7 +81,7 @@ input, button, textarea, select {
 }
 .docs-main { flex: 1; min-width: 0; padding: 3rem 4rem; }
 .docs-content-inner { max-width: 900px; }
-.docs-link:hover { color: #f3f4f6 !important; }
+.docs-link:hover { color: #0f172a !important; }
 .docs-content { animation: fadeIn 0.4s ease-out; }
 .docs-hero { margin-bottom: 4rem; }
 .docs-badge {
