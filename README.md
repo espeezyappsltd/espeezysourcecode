@@ -1,144 +1,179 @@
-# Espeezy
+# Espeezy Monorepo
 
-Espeezy is a student-focused workspace that combines task coordination, social presence, creator tools, marketplace flows, payments, and agent-assisted operations in a single Next.js application.
+This repository contains the main Espeezy platform, three standalone marketing/product apps, shared UI fragments, Firebase support packages, and a mobile client. The codebase mixes Next.js, Firebase, Supabase-compatible abstractions, Cloud Functions, and supporting scripts, so this README is intended to be the single entry point that explains what lives where.
 
-## What It Does
+## Workspace Map
 
-- Team dashboards for projects, activity, analytics, and shared coordination
-- Social and community surfaces including feed, network, presence, chat, and profile systems
-- Marketplace and funding flows with Stripe checkout, billing portal, donations, and payment workflows
-- Supabase-backed auth, persistence, RLS policies, and real-time collaboration
-- Internal agent orchestration for task routing, validation, and admin operations
+| Path | Purpose | Local command | Default port |
+| --- | --- | --- | --- |
+| `.` | Main Espeezy web platform and shared backend routes | `npm run dev` | `3000` |
+| `apps/prereg` | Early-access / preregistration site | `npm --prefix apps/prereg run dev` | `3001` |
+| `apps/games` | Games landing app with Supabase auth | `npm --prefix apps/games run dev` | `3002` |
+| `apps/kanban` | Kanban landing app with Supabase auth | `npm --prefix apps/kanban run dev` | `3003` |
+| `apps/shared` | Shared app-level components used by sub-apps | n/a | n/a |
+| `functions` | Firebase Cloud Functions package | `npm --prefix functions run serve` | emulator-managed |
+| `mobile-app` | Expo / React Native client | `npm --prefix mobile-app run start` | Expo-managed |
+| `espeezydbcodebase` | Secondary Firebase/TS package kept in-repo | package-specific | n/a |
 
-## Stack
+## Architecture At A Glance
 
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- Stripe
-- Playwright
-- Upstash Redis rate limiting
-- Liveblocks
+- The root app in `src/` is the main product surface and also hosts shared backend routes such as `src/app/api/preregister/route.ts`.
+- `apps/prereg`, `apps/games`, and `apps/kanban` are standalone Next.js apps with their own `package.json` files and build pipelines.
+- `apps/shared` currently holds shared cross-app UI fragments. The sub-apps import from here or from `apps/prereg/src` depending on the component.
+- The main preregistration backend lives in the root app and is reused by the prereg sub-app via a thin proxy route.
+- Auth is not fully unified internally: parts of the root app still rely on Firebase flows, while the games and kanban apps use Supabase auth directly.
+- Firebase support code lives in both the root app and the `functions` package.
 
-## Prerequisites
+## Root App Responsibilities
 
-- Node.js 24.x recommended
-- npm 11.x recommended
-- Supabase project credentials
-- Stripe account and webhook configuration for billing flows
+The root application is where the broadest product surface exists today.
 
-## Getting Started
+- Main marketing and registration pages
+- Dashboard and authenticated product areas
+- API routes for preregistration, billing, support, student flows, agents, and integrations
+- Stripe payment flows
+- Playwright test suite and deployment scripts
 
-1. Install dependencies.
+Important source areas:
+
+```text
+src/app/           App Router pages and API routes
+src/components/    Shared web UI
+src/context/       React providers
+src/services/      Server/client service helpers
+src/utils/         Infrastructure and auth helpers
+src/workflows/     Business workflows
+tests/             Playwright tests
+messages/          i18n catalogs
+scripts/           Deployment and migration helpers
+```
+
+## Quick Start
+
+### 1. Install root dependencies
 
 ```bash
 npm install
 ```
 
-2. Configure environment variables for Supabase, Stripe, email, and any agent or Redis services used in your deployment.
-
-3. Start local development.
+Install dependencies for any standalone packages you plan to run locally:
 
 ```bash
+npm --prefix apps/prereg install
+npm --prefix apps/games install
+npm --prefix apps/kanban install
+npm --prefix functions install
+npm --prefix mobile-app install
+```
+
+### 2. Configure environment
+
+There is no single authoritative `.env.example` at the root yet, so treat environment setup as package-specific.
+
+At minimum, expect to configure:
+
+- Supabase URL and anon/service credentials
+- Firebase client/admin credentials
+- Stripe secrets and webhook secrets
+- SMTP credentials for email delivery
+- Optional websocket / agent / Redis infrastructure variables
+
+The games and kanban apps already ship local examples for their browser-side values.
+
+### 3. Run the package you care about
+
+```bash
+# main app
 npm run dev
+
+# prereg app
+npm --prefix apps/prereg run dev
+
+# games app
+npm --prefix apps/games run dev
+
+# kanban app
+npm --prefix apps/kanban run dev
 ```
 
-4. Open the app in your browser.
+## Common Commands
 
-```text
-http://localhost:3000
-```
-
-## Core Scripts
+### Root app
 
 ```bash
 npm run dev
 npm run build
+npm run lint
 npm test
-npx playwright test tests/security-adversarial.spec.ts --project=security --reporter=list
-npx tsc --noEmit
 ```
 
-## Resilient VPS Deployment
+### Sub-app predeploy checks
 
-Use the hardened deploy script to avoid common rollout blockers (stale `node_modules`, port 80/443 collisions, unhealthy app startup):
+```bash
+npm run predeploy:prereg
+npm run predeploy:games
+npm run predeploy:kanban
+npm run predeploy:apps
+```
+
+### Security / quality checks
+
+```bash
+npx tsc --noEmit
+npx next build
+npx playwright test --reporter=list
+npx playwright test tests/security-adversarial.spec.ts --project=security --reporter=list
+```
+
+## Deployment Notes
+
+The root app has a hardened deployment path intended for VPS rollouts:
 
 ```bash
 npm run deploy:resilient
 ```
 
-Optional modes:
+Other modes:
 
 ```bash
-# Force edge proxy startup (Caddy profile)
 npm run deploy:edge
-
-# Always deploy app only on port 3000
 npm run deploy:app-only
 ```
 
-What it does automatically:
+The script is designed to:
 
-- Pulls latest code with fast-forward only
-- Rebuilds and starts the app container
-- Waits for container health
-- Skips Caddy when host ports 80/443 are already occupied
-- Keeps the app live on port 3000 even if edge proxy cannot bind
+- pull with fast-forward only
+- rebuild and restart the app container
+- wait for health before switching over
+- tolerate 80/443 conflicts by falling back to app-only mode
 
-## Stripe Setup
+## Current Repo Conventions
 
-The application expects Stripe to be configured for:
+- Next.js App Router is the default for web apps.
+- Dynamic server routes should export `dynamic = 'force-dynamic'` when runtime behavior requires it.
+- Server-side writes should stay on privileged server paths.
+- `apps/prereg` proxies preregistration requests to the root app instead of owning the canonical backend.
+- Games and Kanban builds should pass from inside each package before cross-app changes are considered done.
 
-- Subscription checkout
-- One-time purchases and donations
-- Billing portal sessions
-- Signed webhook delivery
+## README Index
 
-Typical required variables include:
+Package-specific docs live here:
 
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `STRIPE_SUCCESS_URL`
-- `STRIPE_CANCEL_URL`
-- `STRIPE_PRICE_PRO_ID`
-- `STRIPE_PRICE_PREMIUM_ID`
-- `STRIPE_PRICE_LIFETIME_ID`
-- `STRIPE_PORTAL_CONFIGURATION_ID` (optional, but recommended)
+- `apps/prereg/README.md`
+- `apps/games/README.md`
+- `apps/kanban/README.md`
+- `apps/shared/README.md`
+- `functions/README.md`
+- `mobile-app/README.md`
+- `espeezydbcodebase/README.md`
 
-Webhook handling lives under the App Router Stripe API endpoints in `src/app/api/stripe/` and payment state transitions are coordinated by `src/workflows/paymentWorkflow.ts`.
+## Sanity Rules For Working In This Repo
 
-## Project Structure
+If you are onboarding or returning after time away, start with this sequence:
 
-```text
-src/
-	app/           App Router pages and API routes
-	components/    Reusable UI and layout pieces
-	context/       React context providers
-	services/      Server/client service helpers
-	utils/         Shared infrastructure utilities
-	workflows/     Long-running business workflows
-supabase/        SQL schema and migration history
-tests/           Playwright coverage
-messages/        Locale message catalogs
-mobile-app/      React Native companion app
-```
+1. Read this file.
+2. Read the package README for the area you are editing.
+3. Run only the package-level build or typecheck that matches your change.
+4. Only run the full root build/test suite when your change actually touches the root app or shared backend behavior.
 
-## Quality Gates
-
-Before shipping changes, the repo is expected to pass:
-
-- `npx tsc --noEmit`
-- `npx next build`
-- `npx playwright test --reporter=list`
-
-For security-sensitive work, also run:
-
-```bash
-npx playwright test tests/security-adversarial.spec.ts --project=security --reporter=list
-```
-
-## Notes
-
-- App Router server routes should export `dynamic = 'force-dynamic'` when required by runtime behavior.
-- Supabase writes should use the admin client only on the server.
-- Stripe and auth failures should return safe JSON responses without leaking internals.
+That is the fastest path to avoiding cross-package confusion in this repository.
