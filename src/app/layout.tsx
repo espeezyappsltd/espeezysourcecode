@@ -4,6 +4,7 @@ import './prestige.css';
 import { ConnectivityProvider } from '@/context/ConnectivityContext';
 import AppRuntimeShell from '@/components/AppRuntimeShell';
 import type { Viewport } from 'next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'Espeezy - Team Projects Made Simple',
@@ -63,6 +64,8 @@ export default function RootLayout({
             </filter>
           </defs>
         </svg>
+
+        <SpeedInsights />
       </body>
     </html>
   );
