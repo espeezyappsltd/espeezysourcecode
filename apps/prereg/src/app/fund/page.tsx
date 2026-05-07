@@ -239,12 +239,16 @@ export default function FundPage() {
                 <div>
                   <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '0.625rem' }}>Choose amount</label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                    {PRESETS.map(p => (
-                      <button key={p} type="button" onClick={() => { setSelectedPreset(p); setCustomAmount('') }}
-                        style={{ padding: '0.625rem', borderRadius: '8px', border: `1px solid ${selectedPreset === p ? '#10b981' : 'rgba(255,255,255,0.1)'}`, background: selectedPreset === p ? 'rgba(16,185,129,0.1)' : 'transparent', color: selectedPreset === p ? '#10b981' : 'rgba(255,255,255,0.55)', fontWeight: 750, fontSize: '0.9rem', cursor: 'pointer' }}>
-                        ${p}
-                      </button>
-                    ))}
+                    {PRESETS.map(p => {
+                      const enabled = p === 5 || p === 10
+                      return (
+                        <button key={p} type="button" disabled={!enabled}
+                          onClick={() => { if (enabled) { setSelectedPreset(p); setCustomAmount('') } }}
+                          style={{ padding: '0.625rem', borderRadius: '8px', border: `1px solid ${selectedPreset === p ? '#10b981' : 'rgba(255,255,255,0.1)'}`, background: selectedPreset === p ? 'rgba(16,185,129,0.1)' : 'transparent', color: selectedPreset === p ? '#10b981' : enabled ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)', fontWeight: 750, fontSize: '0.9rem', cursor: enabled ? 'pointer' : 'not-allowed', opacity: enabled ? 1 : 0.35 }}>
+                          ${p}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 

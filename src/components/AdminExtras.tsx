@@ -255,7 +255,7 @@ export default function AdminExtras() {
                     <td style={{ padding: '0.7rem 1rem', color: 'rgba(255,255,255,0.4)' }}>{u.email}</td>
                     <td style={{ padding: '0.7rem 1rem' }}><span style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981', fontSize: '0.65rem', fontWeight: 900, padding: '2px 6px', borderRadius: '5px', textTransform: 'uppercase' }}>{u.subscription_plan ?? 'free'}</span></td>
                     <td style={{ padding: '0.7rem 1rem' }}><span style={{ color: statusColor[u.account_status] ?? '#888', fontWeight: 800, fontSize: '0.75rem' }}>{u.account_status ?? 'active'}</span></td>
-                    <td style={{ padding: '0.7rem 1rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>{u.stripe_account_status ?? '—'}</td>
+                    <td style={{ padding: '0.7rem 1rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>{u.stripe_account_status ?? '-'}</td>
                     <td style={{ padding: '0.7rem 1rem' }}>
                       {actionLoading === u.id ? <Loader2 size={14} style={{ display: 'inline', animation: 'spin 1s linear infinite' }} /> : (
                         <div style={{ display: 'flex', gap: '0.4rem' }}>
@@ -297,7 +297,7 @@ export default function AdminExtras() {
                   <td style={{ padding: '0.6rem 1rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>{new Date(a.created_at).toLocaleTimeString()}</td>
                   <td style={{ padding: '0.6rem 1rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.user_id.slice(0, 8)}…</td>
                   <td style={{ padding: '0.6rem 1rem', color: '#E5E7EB', fontWeight: 700 }}>{a.action}</td>
-                  <td style={{ padding: '0.6rem 1rem', color: 'rgba(255,255,255,0.4)' }}>{a.resource_type ?? '—'}</td>
+                  <td style={{ padding: '0.6rem 1rem', color: 'rgba(255,255,255,0.4)' }}>{a.resource_type ?? '-'}</td>
                   <td style={{ padding: '0.6rem 1rem' }}><span style={{ color: severityColor[a.severity] ?? 'rgba(255,255,255,0.3)', fontWeight: 800, fontSize: '0.65rem', textTransform: 'uppercase' }}>{a.severity}</span></td>
                 </tr>
               ))}

@@ -70,7 +70,7 @@ export default function PreRegisterPage() {
         setSubmitted(true)
         setMyReferralCode(data.referral_code || null)
         setMyReferralCount(data.referral_count || 0)
-        if (data.count) setRegisteredCount(data.count)
+        if (typeof data.count === 'number') setRegisteredCount(data.count)
       }
     } catch (_) {
       setSubmitError('Network error. Please check your connection and try again.')
@@ -160,9 +160,9 @@ export default function PreRegisterPage() {
                   <div style={{ width: '64px', height: '64px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
                     <CheckCircle size={28} color="var(--brand)" />
                   </div>
-                  <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>You are on the list.</h2>
+                  <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>You are in the list 🙂</h2>
                   <p style={{ color: '#64748b', lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.95rem' }}>
-                    We will email you the moment {config.brand_name} opens its doors.
+                    We will be in touch the moment {config.brand_name} launches.
                   </p>
                   {myReferralCode && (
                     <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', textAlign: 'left' }}>

@@ -83,7 +83,7 @@ export default function PreRegisterPage() {
         setMyReferralCode(data.referral_code || null)
         setMyReferralCount(data.referral_count || 0)
         setConfirmMessage(data.message || '')
-        if (data.count) setRegisteredCount(data.count)
+        if (typeof data.count === 'number') setRegisteredCount(data.count)
       }
     } catch (_) {
       setSubmitError('Network error. Please check your connection and try again.')
@@ -173,12 +173,10 @@ export default function PreRegisterPage() {
                     <CheckCircle size={28} color="var(--brand)" />
                   </div>
                   <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>
-                    {confirmMessage === 'You are already registered!' ? 'Already on the list.' : "You're on the list."}
+                    You are in the list 🙂
                   </h2>
                   <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '0.75rem', fontSize: '0.95rem' }}>
-                    {confirmMessage === 'You are already registered!'
-                      ? 'This email is already registered. We will reach out when we launch.'
-                      : `We will email you the moment ${config.brand_name} opens its doors.`}
+                    We will be in touch the moment {config.brand_name} launches.
                   </p>
                   <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', marginBottom: '2rem' }}>
                     What would you like to do next?

@@ -506,7 +506,7 @@ export default function AgentControlCentre() {
           </FormField>
           <FormField label="Assign to Agent">
             <select value={newTask.assigned_agent_id} onChange={e => setNewTask(p => ({ ...p, assigned_agent_id: e.target.value }))} style={inputStyle}>
-              <option value="">— Unassigned —</option>
+              <option value="">(Unassigned)</option>
               {agents.map(a => (
                 <option key={a.id} value={a.id}>{a.name} ({a.specialisation} / {a.role})</option>
               ))}

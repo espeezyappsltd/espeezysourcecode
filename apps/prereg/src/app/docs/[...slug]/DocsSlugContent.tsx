@@ -14,6 +14,7 @@ type DocSection = {
   heading: string
   body: string
   items?: string[]
+  mapEmbed?: string
 }
 
 type DocEntry = {
@@ -346,15 +347,24 @@ const docsContent: Record<string, DocEntry> = {
   'vision': {
     title: 'Research Vision',
     icon: <Flag size={40} />,
-    tagline: 'Espeezy originated as a dissertation study in web development and cybersecurity. This page documents the research problem, methodology, and verified findings that prove contribution visibility measurably improves student output quality.',
+    tagline: 'Espeezy began as an undergraduate dissertation project at the University of Northampton, focused on web development and cybersecurity. This page outlines the research question, approach, and evidence showing that visible individual contribution can measurably improve the quality of student work.',
     sections: [
       {
         heading: 'Research context and origin',
-        body: 'Espeezy was designed and built as the primary artefact of an undergraduate dissertation examining the intersection of web application architecture, data security, and educational psychology. The central research question was: does making individual contribution data visible in real time cause students to exert measurably higher effort in collaborative academic work? The application itself served as both the experimental tool and the engineering deliverable, evaluated simultaneously on technical merit and empirical educational impact.',
+        body: 'Espeezy was designed and built as the primary artefact of an undergraduate dissertation at the University of Northampton, examining the intersection of web application architecture, data security, and educational psychology. The central research question was: does making individual contribution data visible in real time cause students to exert measurably higher effort in collaborative academic work? The application itself served as both the experimental tool and the engineering deliverable, evaluated simultaneously on technical merit and empirical educational impact.',
+      },
+      {
+        heading: 'University and map location',
+        body: 'Institution: University of Northampton. Primary campus location used for project context: Waterside Campus, University Drive, Northampton, NN1 5PH, United Kingdom.',
+        items: [
+          'Google Maps: https://maps.google.com/?q=University+of+Northampton+Waterside+Campus',
+          'Coordinates (approx.): 52.2419, -0.8808',
+        ],
+        mapEmbed: 'https://maps.google.com/maps?q=University+of+Northampton+Waterside+Campus&t=&z=15&ie=UTF8&iwloc=&output=embed',
       },
       {
         heading: 'The problem statement: evidence from literature',
-        body: 'The dissertation identified a structural failure in how group project work is assessed at undergraduate level. Existing literature establishes this clearly. Maiden & Hacks (2019) found that in 68% of surveyed undergraduate group projects, peer-perceived contribution was significantly unequal yet grades were identical across the group. Johnson & Reynolds (2021) demonstrated that students in anonymised contribution environments self-report 40% lower personal accountability than those in visible contribution environments. Brooks et al. (2020) showed that free-rider incidence — defined as a team member contributing fewer than 25% of agreed deliverables — occurred in 54% of undergraduate group projects studied across four UK universities. Critically, none of the platforms in common use (Moodle, Canvas, Blackboard) provided individual contribution tracking at the task level. The absence of this feature was identified as the direct enabling condition for free-riding and grade inflation.',
+        body: 'The dissertation identified a structural failure in how group project work is assessed at undergraduate level. Existing literature establishes this clearly. Maiden & Hacks (2019) found that in 68% of surveyed undergraduate group projects, peer-perceived contribution was significantly unequal yet grades were identical across the group. Johnson & Reynolds (2021) demonstrated that students in anonymised contribution environments self-report 40% lower personal accountability than those in visible contribution environments. Brooks et al. (2020) showed that free-rider incidence, defined as a team member contributing fewer than 25% of agreed deliverables, occurred in 54% of undergraduate group projects studied across four UK universities. Critically, none of the platforms in common use (Moodle, Canvas, Blackboard) provided individual contribution tracking at the task level. The absence of this feature was identified as the direct enabling condition for free-riding and grade inflation.',
         items: [
           'Maiden & Hacks (2019): 68% of group projects showed unequal contribution with equal grading',
           'Johnson & Reynolds (2021): 40% drop in self-reported accountability in anonymous contribution settings',
@@ -371,7 +381,7 @@ const docsContent: Record<string, DocEntry> = {
         body: 'The experimental group (Espeezy) produced final reports scoring an average of 14.3 percentage points higher on the standardised output quality rubric than the control group. The breakdown by rubric dimension showed the largest gains in depth of analysis (+18.2 pp) and evidence of individual contribution (+22.7 pp). Structural coherence improved by +9.4 pp. Reference quality showed the smallest but still statistically significant gain at +6.8 pp. Both markers scored independently and reached consistent conclusions. The inter-rater agreement (Cohen\'s kappa) was 0.81, indicating strong reliability. The effect size (Cohen\'s d = 0.74) was classified as a medium-to-large effect, exceeding the threshold typically required for practical significance in educational intervention research.',
         items: [
           'Overall report quality: +14.3 percentage points vs. control group',
-          'Depth of analysis: +18.2 pp — the single largest improvement dimension',
+          'Depth of analysis: +18.2 pp, the single largest improvement dimension',
           'Evidence of individual contribution: +22.7 pp',
           'Structural coherence: +9.4 pp',
           'Reference quality: +6.8 pp',
@@ -381,7 +391,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Finding 2: contribution visibility as the causal mechanism',
-        body: 'Post-study interviews (n=24 randomly sampled from both cohorts) isolated contribution visibility as the primary reported behavioural driver in the experimental group. 87% of Espeezy participants stated that knowing their task completions were visible to their team changed how they approached their individual sections. Qualitatively, participants described a shift from "get it done" to "make it good enough that teammates can see the quality." Three representative quotes: "I rewrote my section twice because I could see my teammates had already done theirs and theirs looked solid." — Participant 14. "I stopped leaving things until the night before because the dashboard shows when you last updated a task." — Participant 31. "It felt like being in the room together even though we weren\'t. You could see who was doing what." — Participant 07.',
+        body: 'Post-study interviews (n=24 randomly sampled from both cohorts) isolated contribution visibility as the primary reported behavioural driver in the experimental group. 87% of Espeezy participants stated that knowing their task completions were visible to their team changed how they approached their individual sections. Qualitatively, participants described a shift from "get it done" to "make it good enough that teammates can see the quality." Three representative quotes: "I rewrote my section twice because I could see my teammates had already done theirs and theirs looked solid." (Participant 14). "I stopped leaving things until the night before because the dashboard shows when you last updated a task." (Participant 31). "It felt like being in the room together even though we weren\'t. You could see who was doing what." (Participant 07).',
         items: [
           '87% of Espeezy participants: contribution visibility changed their individual approach',
           '79% reported writing or revising their section more than once (vs. 31% in control group)',
@@ -391,7 +401,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Finding 3: personal motivation and effort escalation',
-        body: 'Pre-study, both cohorts reported similar baseline motivation scores on a validated academic motivation scale (AMS-C28, Vallerand et al.). Post-study, the experimental group showed a statistically significant increase in identified regulation (+1.4 on a 7-point scale, p < 0.01) and intrinsic motivation (+0.9, p < 0.05). Identified regulation — the form of motivation where a student genuinely values the task as personally important — is the strongest predictor of sustained effort and high-quality output in academic literature. The control group showed no significant change in any motivation subscale. Critically, effort intent scores (measured as hours students reported planning to invest in their individual sections) rose from a pre-study mean of 4.2 hours to a post-study mean of 7.8 hours in the experimental group, a 1.86x increase. The control group showed no significant change (4.1 to 4.4 hours).',
+        body: 'Pre-study, both cohorts reported similar baseline motivation scores on a validated academic motivation scale (AMS-C28, Vallerand et al.). Post-study, the experimental group showed a statistically significant increase in identified regulation (+1.4 on a 7-point scale, p < 0.01) and intrinsic motivation (+0.9, p < 0.05). Identified regulation, the form of motivation where a student genuinely values the task as personally important, is the strongest predictor of sustained effort and high-quality output in academic literature. The control group showed no significant change in any motivation subscale. Critically, effort intent scores (measured as hours students reported planning to invest in their individual sections) rose from a pre-study mean of 4.2 hours to a post-study mean of 7.8 hours in the experimental group, a 1.86x increase. The control group showed no significant change (4.1 to 4.4 hours).',
         items: [
           'Identified regulation (AMS-C28): +1.4 points in experimental group (p < 0.01)',
           'Intrinsic motivation: +0.9 points (p < 0.05)',
@@ -404,19 +414,19 @@ const docsContent: Record<string, DocEntry> = {
         heading: 'Cybersecurity dimension of the research',
         body: 'As a cybersecurity component, the dissertation evaluated the threat model for a contribution-tracking platform handling authenticated student activity data. Key threats analysed included contribution data tampering (a student or administrator altering timestamps or task assignments retroactively), session hijacking in shared student network environments, and data exposure via misconfigured Firebase security rules. Mitigations implemented and evaluated: all contribution events are write-once and server-timestamped via Firebase Admin SDK, preventing client-side timestamp manipulation. Row-level security rules restrict each user to read/write only their own profile and contribution records. The penetration testing phase (using OWASP ZAP and manual testing against the OWASP Top 10) returned zero critical or high-severity vulnerabilities in the final build. This security model is directly relevant to academic integrity: an immutable audit trail means contribution records cannot be disputed or altered after assessment.',
         items: [
-          'Threat: contribution data tampering — mitigated via write-once server-timestamps',
-          'Threat: session hijacking — mitigated via short-lived Firebase ID tokens + HTTPS-only cookies',
-          'Threat: data exposure — mitigated via row-level Firestore security rules',
+          'Threat: contribution data tampering. Mitigated via write-once server-timestamps',
+          'Threat: session hijacking. Mitigated via short-lived Firebase ID tokens + HTTPS-only cookies',
+          'Threat: data exposure. Mitigated via row-level Firestore security rules',
           'OWASP ZAP scan result: 0 critical, 0 high-severity findings in final build',
           'Academic integrity implication: immutable audit trail = contribution records cannot be altered post-assessment',
         ],
       },
       {
         heading: 'Why the findings matter beyond the dissertation',
-        body: 'The research demonstrated that a relatively simple architectural decision — making contribution data visible in real time to all team members — produces a measurable and practically significant improvement in the quality of student work. This is not a motivational poster effect. It is a structural behavioural change driven by social accountability. Students who know their work is visible to peers they respect invest more effort, revise more carefully, and produce outputs that markers consistently score higher. Espeezy is the operationalisation of this finding at scale: a platform designed from the evidence up, not from feature requests down.',
+        body: 'The research demonstrated that a relatively simple architectural decision, making contribution data visible in real time to all team members, produces a measurable and practically significant improvement in the quality of student work. This is not a motivational poster effect. It is a structural behavioural change driven by social accountability. Students who know their work is visible to peers they respect invest more effort, revise more carefully, and produce outputs that markers consistently score higher. Espeezy is the operationalisation of this finding at scale: a platform designed from the evidence up, not from feature requests down.',
       },
     ],
-    eli12: 'For my university project, I actually tested whether the app made students work harder. I had two groups: one used normal tools, the other used Espeezy where everyone could see who had done what. The Espeezy group scored 14 points higher on average and worked nearly twice as many hours on their individual sections. Knowing your teammates can see your work makes you care a lot more about how good it is.',
+    eli12: 'For my university project at the University of Northampton, I actually tested whether the app made students work harder. I had two groups: one used normal tools, the other used Espeezy where everyone could see who had done what. The Espeezy group scored 14 points higher on average and worked nearly twice as many hours on their individual sections. Knowing your teammates can see your work makes you care a lot more about how good it is.',
   },
 
 
@@ -475,6 +485,20 @@ function SectionBlock({ section }: { section: DocSection }) {
             </li>
           ))}
         </ul>
+      )}
+      {section.mapEmbed && (
+        <div style={{ marginTop: '1.25rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1f2937' }}>
+          <iframe
+            src={section.mapEmbed}
+            width="100%"
+            height="360"
+            style={{ border: 0, display: 'block' }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="University of Northampton Waterside Campus map"
+          />
+        </div>
       )}
     </div>
   )
