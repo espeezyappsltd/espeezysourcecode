@@ -16,10 +16,12 @@ export interface LaunchConfig {
   brand_name: string
 }
 
+const ZERO_TIME: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 }
+
 export function useCountdown(targetDate: string): TimeLeft {
   const calc = useCallback(() => {
     const diff = new Date(targetDate).getTime() - Date.now()
-    if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+    if (diff <= 0) return ZERO_TIME
     return {
       days: Math.floor(diff / 86_400_000),
       hours: Math.floor((diff % 86_400_000) / 3_600_000),
@@ -28,9 +30,11 @@ export function useCountdown(targetDate: string): TimeLeft {
     }
   }, [targetDate])
 
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calc)
+  // Start with zeros so SSR and client initial render match, then hydrate on client
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(ZERO_TIME)
 
   useEffect(() => {
+    setTimeLeft(calc())
     const id = setInterval(() => setTimeLeft(calc()), 1000)
     return () => clearInterval(id)
   }, [calc])
@@ -38,10 +42,11 @@ export function useCountdown(targetDate: string): TimeLeft {
   return timeLeft
 }
 
-const twoWeeksFromNowISO = new Date(Date.now() + (14 * 24 * 60 * 60 * 1000)).toISOString()
+// Fixed launch date — update manually when the date changes
+const DEFAULT_LAUNCH_DATE = '2026-06-01T00:00:00.000Z'
 
 const DEFAULTS: LaunchConfig = {
-  launch_date: twoWeeksFromNowISO,
+  launch_date: DEFAULT_LAUNCH_DATE,
   launch_message: 'Something big is coming. Join the first 5,000 students shaping the future of collaborative education.',
   preregister_goal: '5000',
   brand_name: 'Espeezy',
@@ -65,7 +70,7 @@ export function useLaunchData() {
           setConfig(prev => ({
             ...prev,
             ...cfg,
-            launch_date: twoWeeksFromNowISO,
+            launch_date: cfg.launch_date ?? DEFAULT_LAUNCH_DATE,
             preregister_goal: '5000',
           }))
         }

@@ -72,7 +72,7 @@ export default function PreRegisterPage() {
         body: JSON.stringify({ 
           email, 
           source: 'preregister_page',
-          referrer_code: referrerCode,
+          ...(referrerCode != null ? { referrer_code: referrerCode } : {}),
         }),
       })
       const data = await res.json()
@@ -433,7 +433,7 @@ export default function PreRegisterPage() {
                 </Link>
               ))}
             </div>
-            <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
+            <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', margin: 0 }} suppressHydrationWarning>
               © {new Date().getFullYear()} {config.brand_name}. All rights reserved.
             </p>
           </div>
