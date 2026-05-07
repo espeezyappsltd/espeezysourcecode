@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { User } from 'firebase/auth'
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import { auth } from '@/lib/firebase-client'
+import type { User } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase-client'
 
 const FEATURES = [
   {
@@ -49,19 +48,29 @@ export default function GamesPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
-  const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'error' | 'signup-done'>('idle')
   const [authError, setAuthError] = useState('')
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser)
-      if (nextUser) {
+    let active = true
+
+    void supabase.auth.getUser().then(({ data }) => {
+      if (active) setUser(data.user)
+    })
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      if (session?.user) {
         setAuthError('')
         setLoginStatus('idle')
       }
     })
-    return () => unsub()
+
+    return () => {
+      active = false
+      sub.subscription.unsubscribe()
+    }
   }, [])
 
   async function handleLogin(e: React.FormEvent) {
@@ -71,7 +80,11 @@ export default function GamesPage() {
     setAuthError('')
 
     try {
-      await signInWithEmailAndPassword(auth, loginEmail.trim(), loginPassword)
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail.trim(),
+        password: loginPassword,
+      })
+      if (error) throw error
       setLoginStatus('idle')
       setLoginPassword('')
     } catch {
@@ -80,8 +93,31 @@ export default function GamesPage() {
     }
   }
 
+  async function handleCreateAccount() {
+    if (!loginEmail.trim() || !loginPassword) return
+    setLoginStatus('loading')
+    setAuthError('')
+
+    const { error } = await supabase.auth.signUp({
+      email: loginEmail.trim(),
+      password: loginPassword,
+      options: {
+        emailRedirectTo: 'https://games.espeezy.com',
+      },
+    })
+
+    if (error) {
+      setLoginStatus('error')
+      setAuthError(error.message || 'Could not create account right now.')
+      return
+    }
+
+    setLoginStatus('signup-done')
+    setAuthError('Account created. Check your inbox for verification, then sign in.')
+  }
+
   async function handleLogout() {
-    await signOut(auth).catch(() => undefined)
+    await supabase.auth.signOut().catch(() => undefined)
   }
 
   async function handleNotify(e: React.FormEvent) {
@@ -284,6 +320,22 @@ export default function GamesPage() {
                 }}
               >
                 {loginStatus === 'loading' ? 'Logging in…' : 'Log In'}
+                <button
+                  type="button"
+                  onClick={handleCreateAccount}
+                  style={{
+                    padding: '0.55rem 0.9rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.22)',
+                    background: 'transparent',
+                    color: '#f8fafc',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Create Account
+                </button>
               </button>
               {authError && (
                 <p role="alert" style={{ margin: 0, width: '100%', color: '#fca5a5', fontSize: '0.8rem' }}>
