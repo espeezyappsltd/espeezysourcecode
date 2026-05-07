@@ -24,6 +24,8 @@ const COMING_FEATURES = [
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
+  { href: 'https://games.espeezy.com', label: 'Games', external: true },
+  { href: 'https://kanban.espeezy.com', label: 'Kanban', external: true },
   { href: '/fund', label: 'Support Us' },
   { href: '/docs', label: 'Docs' },
   { href: '/checkout', label: 'Pricing' },
@@ -99,13 +101,22 @@ export default function PreRegisterPage() {
           <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a', letterSpacing: '-0.03em' }}>{config.brand_name}</span>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="hide-mobile">
-          {NAV_LINKS.map(link => (
-            <Link key={link.href} href={link.href} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#0f172a')}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(15,23,42,0.55)')}>  
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map(link =>
+            link.external ? (
+              <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer"
+                style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#0f172a')}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(15,23,42,0.55)')}>
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.href} href={link.href} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#0f172a')}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(15,23,42,0.55)')}>  
+                {link.label}
+              </Link>
+            )
+          )}
         </div>
         <a href="#register" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none', whiteSpace: 'nowrap' }}>
           Join Early Access

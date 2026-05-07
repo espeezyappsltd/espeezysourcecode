@@ -10,6 +10,11 @@ const PLATFORM_LINKS = [
   { href: '/contact', label: 'Contact' },
 ]
 
+const APPS_LINKS = [
+  { href: 'https://games.espeezy.com', label: 'Espeezy Games', external: true },
+  { href: 'https://kanban.espeezy.com', label: 'Espeezy Kanban', external: true },
+]
+
 const DOCS_LINKS = [
   { href: '/docs', label: 'Introduction' },
   { href: '/docs/getting-started', label: 'Quick Start' },
@@ -142,6 +147,30 @@ export default function PreregFooter() {
                 >
                   {label}
                 </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Apps */}
+        <div>
+          <h3 style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', marginBottom: '1.25rem' }}>
+            Apps
+          </h3>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            {APPS_LINKS.map(({ href, label }) => (
+              <li key={href}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
+                >
+                  {label}
+                  <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>↗</span>
+                </a>
               </li>
             ))}
           </ul>
