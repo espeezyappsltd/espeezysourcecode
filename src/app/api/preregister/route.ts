@@ -11,7 +11,7 @@ const preregSchema = z.object({
 	fullName: z.string().trim().max(120).optional(),
 	institution: z.string().trim().max(120).optional(),
 	role: z.string().trim().max(50).optional(),
-	referrer_code: z.string().trim().max(8).optional(),
+	referrer_code: z.string().trim().max(8).nullish(),
 })
 
 function isValidReferralCode(code: unknown): code is string {
@@ -52,6 +52,8 @@ async function supaRest(
 async function getRegistrationCount() {
 	const cfg = getSupabaseConfig()
 	if (!cfg) return null
+
+	
 
 	const res = await fetch(`${cfg.url}/rest/v1/pre_registrations?select=id`, {
 		method: 'HEAD',

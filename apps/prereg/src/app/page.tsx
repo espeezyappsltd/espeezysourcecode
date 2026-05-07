@@ -59,7 +59,7 @@ export default function PreRegisterPage() {
       const res = await fetch('/api/preregister', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'preregister_page', referrer_code: referrerCode }),
+        body: JSON.stringify({ email, source: 'preregister_page', ...(referrerCode != null ? { referrer_code: referrerCode } : {}) }),
       })
       const data = await res.json()
       if (!res.ok) {
