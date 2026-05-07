@@ -160,7 +160,7 @@ export default function KanbanPage() {
         }}
       >
         <a
-          href="https://espeezy.com/preregister"
+          href="https://espeezy.com"
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
           aria-label="Back to Espeezy"
         >
@@ -183,7 +183,7 @@ export default function KanbanPage() {
           </span>
         </a>
         <a
-          href="https://espeezy.com/preregister"
+          href="https://espeezy.com"
           style={{
             fontSize: '0.85rem',
             color: '#94a3b8',
@@ -229,7 +229,7 @@ export default function KanbanPage() {
               </p>
               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                 <a
-                  href="https://espeezy.com/login"
+                  href="https://espeezy.com/docs/features/kanban"
                   style={{ color: '#a7f3d0', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
                 >
                   Open Main App
