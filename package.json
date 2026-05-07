@@ -16,7 +16,8 @@
     "firebase:migrate:dry": "node ./scripts/migrate-firestore-schema.mjs --dry-run --verbose",
     "deploy:resilient": "bash ./scripts/deploy-resilient.sh",
     "deploy:edge": "bash ./scripts/deploy-resilient.sh --with-edge",
-    "deploy:app-only": "bash ./scripts/deploy-resilient.sh --no-edge"
+    "deploy:app-only": "bash ./scripts/deploy-resilient.sh --no-edge",
+    "predeploy:prereg": "npm --prefix apps/prereg run predeploy:check"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.2.0",

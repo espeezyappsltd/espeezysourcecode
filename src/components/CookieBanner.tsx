@@ -27,14 +27,13 @@ export default function CookieBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
+          initial={{ y: 100, opacity: 0, x: '-50%' }}
+          animate={{ y: 0, opacity: 1, x: '-50%' }}
+          exit={{ y: 100, opacity: 0, x: '-50%' }}
           style={{
             position: 'fixed',
             bottom: '2rem',
             left: '50%',
-            transform: 'translateX(-50%)',
             zIndex: 5000,
             width: '90%',
             maxWidth: '600px',
@@ -60,11 +59,12 @@ export default function CookieBanner() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
             <button 
               onClick={() => handleAccept('speed')}
               style={{ 
-                flex: 1, 
+                flex: '1 1 220px',
+                minWidth: 0,
                 background: 'rgba(255,255,255,0.03)', 
                 border: '1px solid #222', 
                 color: '#f3f4f6', 
@@ -84,7 +84,8 @@ export default function CookieBanner() {
             <button 
               onClick={() => handleAccept('all')}
               style={{ 
-                flex: 1, 
+                flex: '1 1 220px',
+                minWidth: 0,
                 background: '#10b981', 
                 border: 'none', 
                 color: '#0a0a0a', 

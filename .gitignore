@@ -46,6 +46,15 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# google site verification
+google*.html
+
+# sub-app build artifacts
+apps/**/.next/
+apps/**/node_modules/
+apps/**/out/
+apps/**/*.tsbuildinfo
+
 # firebase config
 firebase.json
 .firebaserc
