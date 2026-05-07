@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import NavigationProgress from '@/components/NavigationProgress'
+import PreregFooter from '@/components/PreregFooter'
 
 export const metadata: Metadata = {
   title: 'Espeezy: Early Access',
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <NavigationProgress />
         {children}
+        <PreregFooter />
       </body>
     </html>
   )

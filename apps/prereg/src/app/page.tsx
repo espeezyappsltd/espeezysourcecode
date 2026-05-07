@@ -356,34 +356,6 @@ export default function PreRegisterPage() {
       </section>
 
       </main>
-
-      {/* Footer */}
-      <footer style={{ borderTop: '1px solid rgba(15,23,42,0.07)', padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, background: '#f8fafc' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '2.5rem', maxWidth: '600px' }}>
-            <h3 style={{ color: '#0f172a', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.75rem' }}>About the Project</h3>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6 }}>
-              We&apos;re building Espeezy to make student collaboration fairer and completely stress-free. It&apos;s an open, fast, and secure platform powered by Next.js and Firebase. By signing up now, you help us understand how many students need this, which speeds up development.
-            </p>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid rgba(15,23,42,0.07)', paddingTop: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src="/brand_logo2.svg" style={{ width: '18px', height: '18px', objectFit: 'contain' }} alt="" aria-hidden="true" />
-              </div>
-              <span style={{ fontWeight: 900, fontSize: '0.9rem', color: '#0f172a' }}>{config.brand_name}</span>
-            </div>
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              {[['/', 'Home'], ['/fund', 'Support'], ['/docs', 'Docs'], ['/terms', 'Terms'], ['/privacy', 'Privacy']].map(([href, label]) => (
-                <Link key={href} href={href} style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'none', fontWeight: 600 }}>{label}</Link>
-              ))}
-            </div>
-            <p style={{ fontSize: '0.72rem', color: '#94a3b8', margin: 0 }}>
-              © {new Date().getFullYear()} {config.brand_name}. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
       </div>
     </>
     </MotionConfig>
