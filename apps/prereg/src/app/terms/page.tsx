@@ -37,7 +37,7 @@ export default function TermsPage() {
           },
           {
             title: 'Intellectual Property',
-            body: 'Espeezy and its original content, features, and functionality are owned by Espeezy Ltd and are protected by international intellectual property laws. Your data remains yours — you grant us a limited licence to store and process it to provide the service.',
+            body: 'Espeezy and its original content, features, and functionality are owned by Espeezy Ltd and are protected by international intellectual property laws. Your data remains yours. We hold a limited licence to store and process it solely to provide the service.',
           },
           {
             title: 'Limitation of Liability',

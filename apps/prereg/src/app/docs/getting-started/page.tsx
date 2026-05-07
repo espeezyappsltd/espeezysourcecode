@@ -3,7 +3,7 @@ export default function GettingStartedPage() {
     {
       step: '01',
       title: 'Initialize Your Workspace',
-      desc: 'Sign up at espeezy.com — it takes under 60 seconds. Set your institution, your role (student, educator, or admin), and your timezone. That\'s it.',
+      desc: 'Sign up at espeezy.com. It takes under 60 seconds. Set your institution, your role (student, educator, or admin), and your timezone. Done.',
     },
     {
       step: '02',

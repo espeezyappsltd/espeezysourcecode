@@ -49,7 +49,7 @@ const PLANS = {
     name: 'Lifetime Founding Scholar',
     price: '$149',
     period: 'one-time',
-    badge: 'Limited — 100 seats',
+    badge: 'Limited: 100 seats',
     color: '#f59e0b',
     stripeLink: 'https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05',
     features: [

@@ -118,7 +118,7 @@ export default function PreRegisterPage() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Early Access — Now Open</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Early Access: Now Open</span>
           </div>
         </motion.div>
 
@@ -223,10 +223,10 @@ export default function PreRegisterPage() {
                     )}
                     <button type="submit" disabled={submitting}
                       style={{ width: '100%', padding: '0.95rem', borderRadius: '10px', background: submitting ? 'rgba(99,102,241,0.5)' : 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', color: 'white', fontWeight: 800, fontSize: '0.95rem', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', transition: 'opacity 0.15s' }}>
-                      {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist — It&apos;s Free</>}
+                      {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist. It&apos;s Free.</>}
                     </button>
                     <p style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
-                      By registering you agree to our <Link href="/privacy" style={{ color: '#64748b', textDecoration: 'underline' }}>Privacy Policy</Link>. No spam — ever.
+                      By registering you agree to our <Link href="/privacy" style={{ color: '#64748b', textDecoration: 'underline' }}>Privacy Policy</Link>. No spam. Ever.
                     </p>
                   </div>
                 </motion.form>
@@ -277,7 +277,7 @@ export default function PreRegisterPage() {
             Group work is broken.<br /><span style={{ color: 'var(--brand)' }}>We are fixing it.</span>
           </h2>
           <p style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-            Every year millions of students receive the same grade despite wildly different contributions. {config.brand_name} ends this cycle — with data, transparency, and fairness at its core.
+            Every year millions of students receive the same grade despite wildly different contributions. {config.brand_name} ends this cycle with data, transparency, and fairness at its core.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
@@ -342,7 +342,7 @@ export default function PreRegisterPage() {
             Be part of the<br /><span style={{ color: 'var(--brand)' }}>founding generation.</span>
           </h2>
           <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            5 million pre-registrations. One mission. Free, fair, and powerful education infrastructure — for every student on the planet.
+            5 million pre-registrations. One mission. Free, fair, and powerful education infrastructure for every student on the planet.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

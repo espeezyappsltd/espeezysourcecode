@@ -40,7 +40,7 @@ const FUND_FEATURES = [
     need: '$18,500',
     tag: 'Trust & Verification',
     why: 'Issuing W3C-compliant Verifiable Credentials requires integration with credential registries, legal review for academic recognition, and smart contract deployment and auditing costs.',
-    deliverable: 'Tamper-proof PDF and digital certificates students can share on LinkedIn — backed by a public blockchain record.',
+    deliverable: 'Tamper-proof PDF and digital certificates students can share on LinkedIn, backed by a public blockchain record.',
   },
   {
     icon: <BarChart2 size={22} />,
@@ -63,7 +63,7 @@ const FUND_FEATURES = [
 const PRESETS = [5, 10, 25, 50, 100, 250]
 
 const TESTIMONIALS = [
-  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for — a tool that actually sees my students as individuals, not just a group grade.' },
+  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
   { name: 'Kenji T., Computer Science, Tokyo', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
   { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
@@ -155,7 +155,7 @@ export default function FundPage() {
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
           style={{ color: 'rgba(255,255,255,0.5)', maxWidth: '620px', margin: '0 auto 3rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65 }}>
-          Espeezy is free for every student — always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
+          Espeezy is free for every student, always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
         </motion.p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
@@ -319,9 +319,9 @@ export default function FundPage() {
           <h2 style={{ textAlign: 'center', fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '2.5rem' }}>Frequently asked</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
-              { q: 'Is Espeezy really free?', a: 'Yes. The core platform — group workspaces, kanban boards, roadmaps, peer network — is free forever for all students. Premium features (AI coach, analytics, credentials) are funded by this campaign and Pro subscriptions.' },
+              { q: 'Is Espeezy really free?', a: 'Yes. The core platform (group workspaces, kanban boards, roadmaps, peer network) is free forever for all students. Premium features (AI coach, analytics, credentials) are funded by this campaign and Pro subscriptions.' },
               { q: 'Where does my donation go?', a: 'Directly to engineering. No salaries, no office, no marketing. Every dollar is tracked against the feature roadmap above and reported back to supporters monthly.' },
-              { q: 'Can I get a receipt?', a: 'Yes — enter your email in the form and Stripe will send a receipt automatically. For corporate/institutional donations requiring an invoice, email support@espeezy.com.' },
+              { q: 'Can I get a receipt?', a: 'Yes. Enter your email in the form and Stripe will send a receipt automatically. For corporate/institutional donations requiring an invoice, email support@espeezy.com.' },
               { q: 'What if the goal is not reached?', a: 'Donations are non-refundable. If a specific feature\'s goal is not met, funds roll into general infrastructure which benefits all features.' },
             ].map((faq, i) => (
               <div key={i} style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px' }}>

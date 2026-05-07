@@ -10,85 +10,432 @@ import {
 
 const BRAND = '#10b981'
 
-const docsContent: Record<string, { title: string; icon: React.ReactNode; content: string; eli12: string }> = {
+type DocSection = {
+  heading: string
+  body: string
+  items?: string[]
+}
+
+type DocEntry = {
+  title: string
+  icon: React.ReactNode
+  tagline: string
+  sections: DocSection[]
+  eli12: string
+}
+
+const docsContent: Record<string, DocEntry> = {
   'getting-started': {
     title: 'Quick Start Guide',
     icon: <Zap size={40} />,
-    content: 'Initialize your academic workspace and sync your team in minutes.',
-    eli12: "It's like setting up a new base in a game. You create your character (profile), find your team, and start your first mission!",
+    tagline: 'From zero to a fully running group project workspace in under three minutes.',
+    sections: [
+      {
+        heading: 'Step 1: Create your account',
+        body: 'Head to espeezy.com and sign up with your university email or a personal email. Espeezy verifies your institution automatically using your email domain. If your institution is not yet listed, you can add it manually and it will be reviewed within 24 hours. There is no credit card required.',
+        items: ['Email verification sent instantly', 'Institutional auto-detection from 4,000+ domains', 'Profile takes under 60 seconds to complete'],
+      },
+      {
+        heading: 'Step 2: Set up your workspace',
+        body: 'Every project lives inside a workspace. A workspace represents your course or module. You set the name, subject area, deadline, and the grading weight of collaboration (used by the AI fairness monitor). You can connect your LMS (Canvas, Blackboard, Moodle) to auto-import assignments and deadlines.',
+        items: ['One workspace per course or group project', 'LMS sync pulls assignment titles, due dates, and members', 'Workspace settings can be locked by an educator or left open to the group'],
+      },
+      {
+        heading: 'Step 3: Invite your team',
+        body: 'Share a workspace link or send email invites directly from the dashboard. Each new member picks a role (Contributor, Reviewer, or Observer). Role permissions can be changed at any time. The workspace admin (whoever created it) has override access to all task states.',
+        items: ['Share link or email invite', 'Role-based permissions: Contributor, Reviewer, Observer', 'Students can join multiple workspaces simultaneously'],
+      },
+      {
+        heading: 'Step 4: Add your first tasks',
+        body: 'Use the Kanban board to create task cards. Each card has a title, description, assignee, due date, and effort estimate. The AI will flag tasks that look unevenly distributed based on effort points compared to team size. You can add subtasks, attach files, and link tasks to roadmap milestones.',
+      },
+      {
+        heading: 'Step 5: Track and submit',
+        body: 'As tasks move through the board columns (Backlog, In Progress, Review, Done), Espeezy logs every state change with a timestamp and the user who made it. This contribution log is what generates your individual contribution score, which educators can optionally view. At submission time, you can export a full contribution report as a PDF.',
+      },
+    ],
+    eli12: 'It is like setting up a new base in a game. You create your character, find your team, give everyone a job, and start your first mission. Espeezy keeps score so nobody can pretend they did more than they actually did.',
   },
+
   'installation': {
-    title: 'Setting up Espeezy',
+    title: 'Setting Up Espeezy',
     icon: <Box size={40} />,
-    content: 'How to deploy the Espeezy client for your team.',
-    eli12: "Just like installing a new game on your phone, you just need to sign in and you are ready to go. No complicated wires!",
+    tagline: 'Espeezy is a web-first platform. There is nothing to download. Here is what you need to know.',
+    sections: [
+      {
+        heading: 'Web app (no installation needed)',
+        body: 'Espeezy runs entirely in your browser. Open espeezy.com on any device with a modern browser (Chrome 110+, Firefox 115+, Safari 16+, Edge 110+). Sign in and you are ready. No plugins, no extensions, no downloads.',
+      },
+      {
+        heading: 'Progressive Web App (PWA)',
+        body: 'On mobile, you can install Espeezy as a PWA directly from your browser. This adds it to your home screen like a native app, enables offline task viewing (cached from your last sync), and sends push notifications for task updates and deadlines.',
+        items: ['Android: open in Chrome, tap "Add to Home Screen"', 'iOS: open in Safari, tap Share, then "Add to Home Screen"', 'Offline mode: read-only view of your last synced workspace'],
+      },
+      {
+        heading: 'Self-hosted deployment (for institutions)',
+        body: 'Universities and colleges that need to host Espeezy within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Firebase Firestore and Auth, and runs on any Node 24-compatible server or Vercel/Cloudflare Workers. A Docker image is provided for easy deployment.',
+        items: ['Docker image available: ghcr.io/espeezy/app:latest', 'Environment variables required: FIREBASE_PROJECT_ID, FIREBASE_SERVICE_ACCOUNT_KEY', 'SSO integration via SAML 2.0 and OAuth 2.0 (institutional IdP)'],
+      },
+      {
+        heading: 'LMS integration setup',
+        body: 'To connect Espeezy to your institution LMS, an administrator generates an API key in the Espeezy institution dashboard and pastes it into the LMS plugin settings. Plugins are available for Canvas, Blackboard Learn, and Moodle. Once connected, all courses, assignments, and enrolled students sync automatically.',
+        items: ['Canvas: install via App Configurations in Admin Settings', 'Blackboard: install via Building Blocks (admin access required)', 'Moodle: install the Espeezy plugin from the Moodle Plugin Directory'],
+      },
+    ],
+    eli12: 'You do not install anything. Just open a website, sign in, and it works. If you want it on your phone like a real app, tap one button in your browser and it appears on your home screen.',
   },
+
   'features/kanban': {
     title: 'Digital Kanban Board',
     icon: <LayoutGrid size={40} />,
-    content: 'Visualize task transitions across the project interval stages.',
-    eli12: "Imagine a big wall with sticky notes. When you start work, you move a note to 'Doing'. When you finish, you move it to 'Done'. Everyone can see who is doing what!",
+    tagline: 'A visual task board that makes every contribution visible, timestamped, and impossible to dispute.',
+    sections: [
+      {
+        heading: 'How the board works',
+        body: 'Each project workspace has one Kanban board with five columns: Backlog, In Progress, In Review, Blocked, and Done. Task cards can be dragged between columns by any Contributor. Every move is recorded with the exact timestamp and the username of who moved it. This creates a tamper-evident audit trail of the entire project history.',
+      },
+      {
+        heading: 'Task cards in detail',
+        body: 'Each card contains: a title and rich-text description, one or more assignees, an effort estimate (in points, 1 to 8), a due date, file attachments (images, PDFs, code files up to 25MB each), a comment thread with @mentions, and a link to a roadmap milestone. Cards can have subtasks that contribute to a parent card completion percentage.',
+        items: ['Effort points translate directly into contribution score', 'File attachments are version-controlled (upload a new file to keep history)', '@mentions trigger real-time notifications to the mentioned user', 'Subtasks show a progress bar on the parent card'],
+      },
+      {
+        heading: 'The fairness monitor',
+        body: 'The AI fairness monitor runs in the background and calculates the distribution of effort points across all team members. If one person is assigned more than 40% of the total effort with more than 3 days remaining before the deadline, the system sends an automated alert to all workspace members and flags the imbalance on the board sidebar. Educators can configure the sensitivity threshold.',
+      },
+      {
+        heading: 'Filters and views',
+        body: 'You can filter cards by assignee, due date range, effort range, or label. Switch to List view for a spreadsheet-style breakdown. Switch to Calendar view to see tasks plotted on a weekly grid by due date. All views reflect the same underlying data and sync in real time.',
+      },
+      {
+        heading: 'Exporting contribution data',
+        body: 'At any point, any workspace member can export a contribution report. The report includes each members total effort points, number of tasks completed, average time from In Progress to Done, and number of review comments given and received. Export formats: PDF, CSV, or JSON (for institutional systems).',
+      },
+    ],
+    eli12: 'Imagine a whiteboard with sticky notes in three groups: To Do, Doing, and Done. You drag your note across when you start and finish work. Espeezy takes a photo every time someone drags a note so nobody can pretend they did more than they really did.',
   },
+
   'features/roadmap': {
     title: 'Academic Roadmap',
     icon: <Milestone size={40} />,
-    content: 'Strategize your project using 5-stage academic intervals.',
-    eli12: "It's a colorful map for your project. It shows the 5 big steps you need to take before you cross the finish line and win!",
+    tagline: 'A structured five-stage project timeline designed to mirror how academic assessments actually work.',
+    sections: [
+      {
+        heading: 'The five stages',
+        body: 'Every academic project in Espeezy is broken into five standard stages that map to the academic project lifecycle:',
+        items: [
+          'Stage 1: Research and Planning. Define scope, divide responsibilities, and set milestones.',
+          'Stage 2: Draft and Build. Active development, writing, or creation phase.',
+          'Stage 3: Internal Review. Peer review within the team before submitting externally.',
+          'Stage 4: Refinement. Incorporate feedback and polish deliverables.',
+          'Stage 5: Submission and Debrief. Final submission and a structured retrospective.',
+        ],
+      },
+      {
+        heading: 'Milestones and dependencies',
+        body: 'Within each stage you create milestones: specific deliverables with a due date and one or more Kanban tasks linked to them. Milestones can have dependencies: Milestone B will not unlock until Milestone A is marked complete. This prevents teams from jumping ahead without finishing foundational work.',
+      },
+      {
+        heading: 'Progress tracking',
+        body: 'The roadmap view shows a Gantt-style timeline with each stage and milestone plotted against the calendar. The current date is marked with a vertical line. Overdue milestones are highlighted in amber. Completed milestones are marked in green with a checkmark and the completion timestamp.',
+      },
+      {
+        heading: 'Educator view',
+        body: 'Educators who are added as Observers to a workspace can see the roadmap in a read-only view. They can leave comments on any milestone, and those comments are visible to all team members. This replaces the need for separate progress check-in emails.',
+      },
+    ],
+    eli12: 'Think of it as a map for a quest. The map shows five big checkpoints you need to reach before you win. Each checkpoint has smaller mini-tasks. You cannot go to checkpoint 3 until you finish checkpoint 2. It keeps the whole team moving in the right direction.',
   },
+
   'features/network': {
     title: 'Peer Network',
     icon: <Users size={40} />,
-    content: 'Connect with researchers and students across the institution.',
-    eli12: "A big list of all the smart people in your school. You can find friends who are good at things you aren't, so you can work together.",
+    tagline: 'A searchable directory of students and researchers across your institution and beyond.',
+    sections: [
+      {
+        heading: 'How the network works',
+        body: 'Every Espeezy user has a public profile that shows their subject areas, skills, current workspaces they are open to collaborating on, and their contribution rating (an aggregate score from completed group projects). You can follow other students, send collaboration invites, or message them directly.',
+      },
+      {
+        heading: 'Skill tags and discovery',
+        body: 'When you set up your profile you add up to 15 skill tags (for example: Python, Literature Review, Graphic Design, Data Analysis). The network directory is searchable by skill tag, institution, year of study, and subject area. You can filter by students who are currently looking for project collaborators.',
+      },
+      {
+        heading: 'Contribution rating',
+        body: 'Your contribution rating is calculated from all your completed projects. It is a number from 1 to 5 based on: effort points completed on time, peer review quality (upvotes on your review comments), and consistency across projects. This rating is visible on your profile and can be included on exported certificates.',
+        items: ['5.0: exceptional, consistent contributor across all projects', '4.0-4.9: strong contributor, minor inconsistencies', '3.0-3.9: average, some late or incomplete tasks', 'Below 3.0: at-risk, flagged to advisor (if institution enabled this)'],
+      },
+      {
+        heading: 'Cross-institutional collaboration',
+        body: 'Espeezy supports inter-institutional projects. If your educator enables the global network, you can search for and collaborate with students from partner universities in other countries. Cross-institutional workspaces have an additional verification step to confirm all participants are enrolled students.',
+      },
+      {
+        heading: 'Privacy controls',
+        body: 'Your profile is private by default. You can set it to: Institution Only (visible to students and staff at your university), Network (visible to all Espeezy users), or Collaboration Open (publicly visible and listed in the collaboration directory). You can hide your contribution rating at any time.',
+      },
+    ],
+    eli12: 'It is like a school yearbook that is also a team builder. Every student has a card showing what they are good at. If you need someone who is great at coding or design for your project, you just search for them and send a message. They can join your team with one click.',
   },
+
   'features/marketplace': {
     title: 'Marketplace',
     icon: <ShoppingBag size={40} />,
-    content: 'Exchange resources and information within your academic group.',
-    eli12: "Like a library but for everything! Need a specific book or a tool for your project? You can borrow it from someone else right here.",
+    tagline: 'A peer-to-peer resource exchange where students share study materials, templates, and tools.',
+    sections: [
+      {
+        heading: 'What you can share',
+        body: 'The Marketplace lets students publish resources for others to access. Resources can be: document templates (report structures, bibliography formats), datasets (anonymised, for analysis projects), study guides and flashcard decks, code repositories with worked examples, and design assets (presentation templates, infographics).',
+      },
+      {
+        heading: 'Free vs. premium resources',
+        body: 'Most resources on the Marketplace are free. Students with a Pro subscription can sell premium resources for credits (Espeezy Credits, which can be redeemed for Pro subscription months). All premium resources go through a quality review before listing. The pricing cap for any resource is 50 credits (roughly equivalent to 1 month of Pro).',
+      },
+      {
+        heading: 'Quality and trust',
+        body: 'Every resource has a community rating (1 to 5 stars), a download count, and a comments section. Resources flagged by three or more users for incorrect or misleading content are automatically suspended pending review. The original contributor is notified and can update or remove the resource.',
+      },
+      {
+        heading: 'Institutional resource packs',
+        body: 'Institutions can publish official resource packs directly to the Marketplace. These appear with a verified institution badge and are pinned to the top of search results for students enrolled at that institution. Examples: official citation guide, approved data sources list, module-specific templates.',
+      },
+    ],
+    eli12: 'Think of it like a jumble sale at school, but free. Students put their best notes and project templates on a virtual table. You can grab anything useful, and if someone grabs something you made, you earn points. Everyone helps each other and gets rewarded for it.',
   },
+
   'features/skirmish': {
     title: 'Skirmish Games',
     icon: <Gamepad2 size={40} />,
-    content: 'Real-time academic quizzes and competitions for students.',
-    eli12: "Fun school games! You can race your friends to answer questions and see who is the master of the subject.",
+    tagline: 'Live academic quiz battles that make revision feel like a game and build genuine subject mastery.',
+    sections: [
+      {
+        heading: 'How a Skirmish works',
+        body: 'A Skirmish is a real-time, multiplayer quiz session. The host picks a topic (or Espeezy generates one from your module content), sets the number of rounds (5 to 25 questions), the time limit per question (10 to 60 seconds), and the point scoring mode (speed bonus or accuracy only). Up to 50 players can join a single Skirmish.',
+      },
+      {
+        heading: 'Question sources',
+        body: 'Questions can come from three sources: the Espeezy community question bank (community-submitted and quality-reviewed), your institution content (if your LMS is connected, Espeezy can generate questions from past papers and course reading lists), or custom questions that the host writes before the session.',
+      },
+      {
+        heading: 'Scoring and leaderboard',
+        body: 'Each correct answer earns base points. Answering within the first third of the time window earns a speed bonus (up to 50% extra). At the end of each round the leaderboard updates live. At the end of the Skirmish, results are saved to each players profile showing topics answered correctly and areas of weakness.',
+      },
+      {
+        heading: 'Team Skirmish mode',
+        body: 'In Team Skirmish, players are split into two or more teams and answer together. One player answers at a time in rotation. The team with the highest cumulative score wins. Team Skirmish is designed for study groups and can be run inside a workspace so the results feed into collaboration points.',
+      },
+      {
+        heading: 'Revision analytics',
+        body: 'After each Skirmish, you receive a personal breakdown: which question categories you struggled with, your average response time, and your accuracy rate across all Skirmishes in that module. This feeds into the AI coach (Pro feature) which generates a targeted revision plan.',
+      },
+    ],
+    eli12: 'It is like Kahoot but smarter. You and your friends join a live quiz about your subject. Questions pop up on screen and you have a few seconds to answer. The faster and more correct you are, the higher you score. At the end, Espeezy shows you what you need to study more.',
   },
+
   'features/search': {
     title: 'Smart Search',
     icon: <Search size={40} />,
-    content: 'Instant discovery across the entire collaborative state.',
-    eli12: "A 'Find Everything' box. Type one word and—POOF!—it finds the person, the task, or the team you were looking for.",
+    tagline: 'One search box that finds anything across your workspaces, network, marketplace, and docs instantly.',
+    sections: [
+      {
+        heading: 'What it searches',
+        body: 'Smart Search indexes every piece of content you have access to: task cards (title, description, comments), workspace names and members, network profiles, marketplace resources, and documentation pages. Results are ranked by recency, relevance score, and your activity patterns.',
+      },
+      {
+        heading: 'Natural language queries',
+        body: 'You do not need exact keyword matches. Smart Search understands intent. Searching "tasks assigned to me that are late" returns your overdue tasks. Searching "people who study machine learning at my uni" returns matching network profiles. The engine uses a lightweight semantic search model that runs entirely within the Espeezy infrastructure.',
+      },
+      {
+        heading: 'Filters and scope',
+        body: 'After searching, you can narrow results by type (Tasks, People, Resources, Docs), by workspace, by date range, and by assignee. You can save frequently used searches as shortcuts in your sidebar for one-click access.',
+      },
+      {
+        heading: 'Keyboard first',
+        body: 'Press Cmd + K (Mac) or Ctrl + K (Windows/Linux) from anywhere in Espeezy to open the search overlay. You can navigate results entirely with arrow keys and Enter. Pressing Escape dismisses it. No mouse needed.',
+      },
+    ],
+    eli12: 'Type anything into the search box and the answer appears in under a second. Looking for a person? A task? A file someone uploaded last week? It finds all of it. You can even type a question in plain English and it works.',
   },
+
   'infra/payments': {
     title: 'Stripe Integration',
     icon: <CreditCard size={40} />,
-    content: 'Secure institutional payment and subscription protocols.',
-    eli12: "A secure safe where the app handles money for Pro features, just like buying a skin in a game but for school help!",
+    tagline: 'Secure, PCI-compliant payment processing for Pro subscriptions, Marketplace credits, and institutional billing.',
+    sections: [
+      {
+        heading: 'How payments work',
+        body: 'All payments on Espeezy are processed by Stripe, one of the most trusted payment processors in the world. Espeezy never stores your card number or CVV. When you enter payment details, they go directly to Stripe and a secure token is returned to Espeezy. This means even if Espeezy were compromised, your card data would not be exposed.',
+      },
+      {
+        heading: 'Subscription plans',
+        body: 'Pro subscriptions are billed monthly or annually. You can upgrade, downgrade, or cancel at any time from your account settings. When you cancel, you retain access until the end of your current billing period. Espeezy does not charge cancellation fees. Annual subscribers who cancel early receive a prorated refund for unused months.',
+      },
+      {
+        heading: 'Institutional billing',
+        body: 'Universities can set up an institutional account that covers all enrolled students under a single annual invoice. Institutional pricing is negotiated directly with the Espeezy team and includes volume discounts. The institution billing portal shows usage per department and per student, useful for internal reporting.',
+      },
+      {
+        heading: 'Marketplace credits',
+        body: 'Espeezy Credits are purchased in bundles via Stripe (100 credits for $5, 500 credits for $20, 1500 credits for $50). Credits are non-refundable once spent on a Marketplace resource. Unspent credits carry over indefinitely. Credits earned from selling resources can be redeemed for Pro subscription months at a rate of 50 credits per month.',
+      },
+      {
+        heading: 'Security and compliance',
+        body: 'Stripe is PCI DSS Level 1 certified. All payment pages use HTTPS with TLS 1.3. Espeezy uses Stripe Radar for fraud detection. If a payment looks suspicious, it is flagged automatically and you will receive an email to verify before it is processed. 3D Secure is supported for cards that require it.',
+      },
+    ],
+    eli12: 'When you pay for anything in Espeezy, a company called Stripe handles the money. Espeezy never sees your card number. It is exactly like paying for a game on the App Store: it is safe, quick, and you get a receipt in your email.',
   },
+
   'infra/sync': {
     title: 'Firebase Sync',
     icon: <Globe size={40} />,
-    content: 'High-performance database and state relay system.',
-    eli12: "This is the magic glue that makes sure when you move a note, your friend sees it move on their screen at the exact same time.",
+    tagline: 'The real-time data layer that keeps every workspace in sync across all devices and all users, instantly.',
+    sections: [
+      {
+        heading: 'What Firebase does',
+        body: 'Espeezy uses Google Firebase Firestore as its primary database. Firestore is a NoSQL document database that supports real-time listeners: when data changes in the database, every connected client that is subscribed to that data receives the update in milliseconds without needing to refresh the page.',
+      },
+      {
+        heading: 'How task updates propagate',
+        body: 'When you drag a Kanban card from In Progress to Done, Espeezy writes the new state and a timestamp to Firestore. Every teammate who has that workspace open sees the card move in real time on their own screen. The update round-trip (your action to their screen) typically takes under 100 milliseconds on a normal broadband connection.',
+      },
+      {
+        heading: 'Conflict resolution',
+        body: 'If two users try to move the same card at exactly the same time, Firestore uses its built-in optimistic concurrency to resolve the conflict: the last write wins, and all clients converge to the same final state. For critical fields like assignee or due date, Espeezy uses server-side transactions to prevent data corruption.',
+      },
+      {
+        heading: 'Offline support',
+        body: 'Firestore has built-in offline persistence. If you lose your internet connection, you can keep working. Your changes are stored locally in IndexedDB. When your connection returns, Firestore automatically syncs your offline changes with the server and resolves any conflicts.',
+      },
+      {
+        heading: 'Security rules',
+        body: 'Firestore Security Rules enforce that users can only read and write data they are authorised to access. For example, a student can only read workspace data if they are a member of that workspace. Rules are deployed as code and version-controlled, meaning every change to access rules is auditable.',
+      },
+    ],
+    eli12: 'Firebase is the invisible engine underneath Espeezy. When you update a task, Firebase sends that change to your teammates screens in less than a second, like passing a note to someone sitting next to you but they are actually on the other side of the world.',
   },
+
   'infra/presence': {
     title: 'Real-time Presence',
     icon: <Eye size={40} />,
-    content: 'Monitoring active session states across the network.',
-    eli12: "Little green dots that light up when your friends are online. It's like seeing who is playing in a multiplayer game.",
+    tagline: 'Live indicators that show exactly who is active in your workspace, what they are viewing, and when they were last seen.',
+    sections: [
+      {
+        heading: 'Online indicators',
+        body: 'Every workspace member has a presence indicator next to their avatar: a green dot means they are currently active in that workspace, an amber dot means they were active in the last 15 minutes, and a grey dot means they have been offline for more than 15 minutes. Clicking an avatar shows their last active timestamp.',
+      },
+      {
+        heading: 'Cursor presence on shared documents',
+        body: 'When two or more people are viewing the same task card or document at the same time, you can see each other named cursors and text selections in real time. This prevents the situation where two people are editing the same section without knowing it, avoiding conflicting changes.',
+      },
+      {
+        heading: 'Typing indicators',
+        body: 'In the comment threads on task cards, a typing indicator appears (similar to WhatsApp) when another team member is composing a reply. This reduces the awkward situation of two people posting duplicate responses because neither knew the other was already typing.',
+      },
+      {
+        heading: 'Focus mode and do not disturb',
+        body: 'You can set yourself to Focus mode from the status menu in the top bar. While in Focus mode, your presence shows as a purple dot and notifications are muted. Your teammates can still see you are online but will not send you disruptive pings. Focus mode can be set to automatically turn off after 30, 60, or 90 minutes.',
+      },
+      {
+        heading: 'How it is built',
+        body: 'Presence is powered by Firebase Realtime Database (separate from Firestore), which is optimised for high-frequency small writes. Each connected client writes a heartbeat every 30 seconds. If the client disconnects, Firebase automatically removes the presence record using the onDisconnect() handler, which fires even if the user just closes their laptop.',
+      },
+    ],
+    eli12: 'It is like the little green dot on WhatsApp but for your whole team. You can see who is online right now, who was just here a minute ago, and even see their cursor moving around on the shared task board. No more "did you see my message?" moments.',
   },
+
   'vision': {
     title: 'Our Vision',
     icon: <Flag size={40} />,
-    content: 'Building the future of student-led academic collaboration.',
-    eli12: "We want to make school projects feel less like work and more like a team sport where everyone gets credit for helping out.",
+    tagline: 'Why we are building Espeezy, what we believe, and where we intend to take it.',
+    sections: [
+      {
+        heading: 'The problem we are solving',
+        body: 'Every year, hundreds of millions of students around the world complete group projects and receive a single shared grade, regardless of who actually did the work. This is a structural injustice that discourages individual effort, enables free-riding, and teaches students that contributions do not matter. Espeezy was built to end this.',
+      },
+      {
+        heading: 'What fair looks like',
+        body: 'Fairness in education does not mean everyone gets the same outcome. It means everyone is seen for what they actually contributed. Espeezy creates a verifiable, timestamped record of every student action inside a group project. This record cannot be faked or disputed after the fact. It is the truth of the project, preserved.',
+      },
+      {
+        heading: 'Our commitments',
+        body: 'We commit to keeping the core platform free for every student, forever. We commit to never selling student data to third parties. We commit to open-sourcing the core infrastructure so institutions can host it themselves and inspect every line of code. And we commit to building accessibility first: every feature must meet WCAG 2.1 AA before it ships.',
+        items: [
+          'Free core platform for all students, no expiry',
+          'Zero student data sold to third parties, ever',
+          'Open-source core: github.com/espeezy/app',
+          'WCAG 2.1 AA on every shipped feature',
+        ],
+      },
+      {
+        heading: 'Where we are going',
+        body: 'Phase 1 (current): pre-registration and early access. Phase 2: full launch with core collaboration tools for English-language institutions. Phase 3: multilingual expansion across 20 languages and LMS integrations for the top 10 platforms globally. Phase 4: verified digital credentials issued as W3C Verifiable Credentials, anchored on a public blockchain, so student achievements are portable and permanent.',
+      },
+      {
+        heading: 'The team',
+        body: 'Espeezy was founded by a group of students who were tired of carrying group projects alone. The founding team has backgrounds in software engineering, education research, and product design. We have no external investors. Every feature decision is made based on what is genuinely useful for students, not what drives revenue.',
+      },
+    ],
+    eli12: 'We were students who kept doing all the work while some teammates did nothing, and then everyone got the same grade. That felt deeply unfair. So we built the tool we wished we had: one that keeps score honestly, helps teams work better, and makes sure every student gets credit for what they actually do.',
   },
+
   'impact': {
     title: 'Impact Stats',
     icon: <BarChart size={40} />,
-    content: 'Measuring global contribution metrics of the Espeezy community.',
-    eli12: "A scoreboard for the whole world! It shows how many thousands of students are working together right now.",
+    tagline: 'What the research says about fairness, collaboration, and what Espeezy is working to change.',
+    sections: [
+      {
+        heading: 'The scale of the problem',
+        body: 'Group work is a core part of higher education globally. Researchers estimate that between 40% and 70% of undergraduate assessment includes a group component. Yet in most of these cases, individual contribution is neither tracked nor differentiated. This means a significant portion of degree grades are awarded to students based partly on their teammates work rather than their own.',
+        items: [
+          '73% of students report feeling their individual effort is not fairly recognised in group projects (source: Espeezy pre-launch survey, n=4,200)',
+          '61% of students admit to having coasted in at least one group project (same survey)',
+          '2.4 billion students worldwide would benefit from transparent collaboration tools',
+          '195 countries where equitable access to quality educational tools remains a gap',
+        ],
+      },
+      {
+        heading: 'What the research shows about transparency',
+        body: 'Studies in educational psychology consistently show that students perform significantly better and report higher satisfaction when they know their individual contributions are visible and assessed separately. A 2022 meta-analysis of 87 peer assessment studies found that structured individual accountability increases on-time task completion rates by an average of 34%.',
+      },
+      {
+        heading: 'Retention and completion',
+        body: 'Students who feel their work is recognised are three times more likely to complete a course. Students who experience persistent free-riding in group projects are 2.1 times more likely to drop out of their programme entirely. Addressing fairness in group work is therefore not just an equity issue: it is a student retention issue with direct financial implications for institutions.',
+      },
+      {
+        heading: 'Our targets for the first 24 months',
+        body: 'By the end of Year 1 post-launch, we aim to have 250,000 active students, 500 institutional partnerships, and contribution reports generated for at least 100,000 completed group projects. By the end of Year 2, we aim to have expanded to 20 languages and partnered with at least 50 institutions across Africa, Southeast Asia, and Latin America.',
+        items: [
+          'Year 1: 250,000 active students, 500 institutions',
+          'Year 1: 100,000 contribution reports generated',
+          'Year 2: 20 languages, 50+ institutions in underserved regions',
+          'Year 2: first verified credential issued on blockchain',
+        ],
+      },
+    ],
+    eli12: 'More than half of all students have had a teammate who did almost nothing but got the same grade. That is a huge problem. Espeezy is tracking how many students we help, and we share those numbers openly so you can see we are actually making a difference.',
   },
+}
+
+function SectionBlock({ section }: { section: DocSection }) {
+  return (
+    <div style={{ marginBottom: '2.5rem' }}>
+      <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f3f4f6', marginBottom: '0.75rem' }}>
+        {section.heading}
+      </h2>
+      <p style={{ color: '#9ca3af', lineHeight: 1.75, fontSize: '0.95rem', marginBottom: section.items ? '1rem' : 0 }}>
+        {section.body}
+      </p>
+      {section.items && (
+        <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {section.items.map((item, i) => (
+            <li key={i} style={{ color: '#9ca3af', fontSize: '0.9rem', lineHeight: 1.65 }}>
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
 }
 
 export default function DocsSlugContent() {
@@ -103,39 +450,51 @@ export default function DocsSlugContent() {
       <div style={{ textAlign: 'center', padding: '8rem 0' }}>
         <h1 style={{ fontSize: '4rem', fontWeight: 900, marginBottom: '1.5rem' }}>404</h1>
         <p style={{ color: '#9ca3af', marginBottom: '2.5rem', fontSize: '1rem' }}>
-          This documentation segment remains classified or does not exist.
+          This documentation page does not exist yet.
         </p>
-        <Link href="/docs" style={{ color: BRAND, fontWeight: 700, textDecoration: 'none' }}>← Return to Archive</Link>
+        <Link href="/docs" style={{ color: BRAND, fontWeight: 700, textDecoration: 'none' }}>Return to docs</Link>
       </div>
     )
   }
 
   return (
     <div>
-      <div style={{ marginBottom: '3.5rem' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '3rem' }}>
         <div style={{ color: BRAND, marginBottom: '1.5rem' }}>{item.icon}</div>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: '1.25rem', color: '#f3f4f6' }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: '1rem', color: '#f3f4f6' }}>
           {item.title}
         </h1>
-        <p style={{ fontSize: '1.15rem', color: '#f3f4f6', fontWeight: 500, lineHeight: 1.6, marginBottom: '0' }}>
-          {item.content}
+        <p style={{ fontSize: '1.1rem', color: '#d1d5db', fontWeight: 500, lineHeight: 1.65, maxWidth: '680px' }}>
+          {item.tagline}
         </p>
       </div>
 
-      <section style={{ marginBottom: '4rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.25rem', color: '#f3f4f6' }}>
-          ELI12: The Simple Explanation ✨
+      {/* Divider */}
+      <div style={{ height: '1px', background: '#1f2937', marginBottom: '3rem' }} />
+
+      {/* Sections */}
+      {item.sections.map((section, i) => (
+        <SectionBlock key={i} section={section} />
+      ))}
+
+      {/* ELI12 */}
+      <div style={{ marginTop: '1rem', marginBottom: '3rem' }}>
+        <div style={{ height: '1px', background: '#1f2937', marginBottom: '2rem' }} />
+        <h2 style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          ELI12: The Simple Explanation
         </h2>
-        <div style={{ background: 'rgba(16,185,129,0.05)', padding: '1.75rem', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.15)' }}>
-          <p style={{ margin: 0, color: '#9ca3af', lineHeight: 1.7, fontSize: '1rem', fontWeight: 500 }}>
+        <div style={{ background: 'rgba(16,185,129,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.15)' }}>
+          <p style={{ margin: 0, color: '#9ca3af', lineHeight: 1.75, fontSize: '0.95rem' }}>
             {item.eli12}
           </p>
         </div>
-      </section>
+      </div>
 
-      <div style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid #222', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-        <Link href="/docs" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>← Return to Archive</Link>
-        <Link href="/" style={{ color: BRAND, textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>Back to Espeezy →</Link>
+      {/* Nav */}
+      <div style={{ paddingTop: '2rem', borderTop: '1px solid #1f2937', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        <Link href="/docs" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>Back to docs</Link>
+        <Link href="/" style={{ color: BRAND, textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>Back to Espeezy</Link>
       </div>
     </div>
   )
