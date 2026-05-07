@@ -1,0 +1,27 @@
+:root {
+  --bg: #070a0a;
+  --panel: #0d1413;
+  --text: #f8fdfc;
+  --muted: #9ab1ad;
+  --brand: #10b981;
+  --brand-2: #0a8f64;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.16), transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.08), transparent 35%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+a {
+  color: inherit;
+}
