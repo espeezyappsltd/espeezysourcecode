@@ -341,9 +341,8 @@ export default function KanbanPage() {
               >
                 {loginStatus === 'loading' ? 'Logging in…' : 'Log In'}
               </button>
-              <button
-                type="button"
-                onClick={handleCreateAccount}
+              <a
+                href="https://espeezy.com/#register"
                 style={{
                   padding: '0.55rem 0.9rem',
                   borderRadius: '8px',
@@ -353,10 +352,12 @@ export default function KanbanPage() {
                   fontWeight: 700,
                   fontSize: '0.8rem',
                   cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'inline-block',
                 }}
               >
                 Create Account
-              </button>
+              </a>
               {authError && (
                 <p role="alert" style={{ margin: 0, width: '100%', color: '#fca5a5', fontSize: '0.8rem' }}>
                   {authError}
