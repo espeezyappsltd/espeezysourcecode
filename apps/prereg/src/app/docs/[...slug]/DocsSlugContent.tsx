@@ -14,6 +14,7 @@ type DocSection = {
   heading: string
   body: string
   items?: string[]
+  mapEmbed?: string
 }
 
 type DocEntry = {
@@ -346,7 +347,7 @@ const docsContent: Record<string, DocEntry> = {
   'vision': {
     title: 'Research Vision',
     icon: <Flag size={40} />,
-    tagline: 'Espeezy originated as a dissertation study at the University of Northampton in web development and cybersecurity. This page documents the research problem, methodology, and verified findings that prove contribution visibility measurably improves student output quality.',
+    tagline: 'Espeezy began as an undergraduate dissertation project at the University of Northampton, focused on web development and cybersecurity. This page outlines the research question, approach, and evidence showing that visible individual contribution can measurably improve the quality of student work.',
     sections: [
       {
         heading: 'Research context and origin',
@@ -359,6 +360,7 @@ const docsContent: Record<string, DocEntry> = {
           'Google Maps: https://maps.google.com/?q=University+of+Northampton+Waterside+Campus',
           'Coordinates (approx.): 52.2419, -0.8808',
         ],
+        mapEmbed: 'https://maps.google.com/maps?q=University+of+Northampton+Waterside+Campus&t=&z=15&ie=UTF8&iwloc=&output=embed',
       },
       {
         heading: 'The problem statement: evidence from literature',
@@ -483,6 +485,20 @@ function SectionBlock({ section }: { section: DocSection }) {
             </li>
           ))}
         </ul>
+      )}
+      {section.mapEmbed && (
+        <div style={{ marginTop: '1.25rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1f2937' }}>
+          <iframe
+            src={section.mapEmbed}
+            width="100%"
+            height="360"
+            style={{ border: 0, display: 'block' }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="University of Northampton Waterside Campus map"
+          />
+        </div>
       )}
     </div>
   )
