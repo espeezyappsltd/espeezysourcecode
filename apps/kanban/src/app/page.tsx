@@ -615,7 +615,7 @@ export default function KanbanPage() {
           Join the Espeezy early-access list and be first to try Kanban when it launches.
         </p>
         <a
-          href="https://espeezy.com/preregister"
+          href="https://espeezy.com/#reregister"
           style={{
             display: 'inline-block',
             padding: '0.9rem 2.25rem',
