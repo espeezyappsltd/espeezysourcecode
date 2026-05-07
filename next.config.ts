@@ -66,6 +66,10 @@ const nextConfig: NextConfig = {
 
   typescript: { ignoreBuildErrors: false },
 
+  // Silence Turbopack's "webpack config present" warning — the webpack callback
+  // below only suppresses a false-positive protobufjs warning and is harmless.
+  turbopack: {},
+
   webpack(config) {
     config.ignoreWarnings = [
       // Firebase/Firestore pulls in protobufjs which uses dynamic require.
