@@ -1,14 +1,17 @@
 export default function Loading() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      gap: '1.25rem',
-    }}>
+    <div
+      role="status"
+      aria-label="Loading page"
+      style={{
+        minHeight: '100vh',
+        background: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '1.25rem',
+      }}>
       {/* Spinning ring */}
       <div style={{
         width: '48px',

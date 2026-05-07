@@ -65,6 +65,7 @@ export default function NavigationProgress() {
 
   return (
     <div
+      aria-hidden="true"
       style={{
         position: 'fixed',
         top: 0,

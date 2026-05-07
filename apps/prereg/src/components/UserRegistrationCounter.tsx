@@ -26,14 +26,20 @@ export default function UserRegistrationCounter({ registeredCount, goal }: { reg
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
       style={{ maxWidth: '520px', margin: '0 auto 4rem', width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+        <span style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 600 }}>
           <AnimatedNumber value={registeredCount} /> registered
         </span>
-        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.25)', fontWeight: 500 }}>
+        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
           Goal: {(goal).toLocaleString()}
         </span>
       </div>
-      <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
+      <div
+        role="progressbar"
+        aria-valuenow={progressPct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Registration progress: ${registeredCount.toLocaleString()} of ${goal.toLocaleString()} registered (${progressPct}%)`}
+        style={{ height: '6px', background: 'rgba(15,23,42,0.08)', borderRadius: '100px', overflow: 'hidden' }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${progressPct}%` }}
@@ -42,7 +48,7 @@ export default function UserRegistrationCounter({ registeredCount, goal }: { reg
         />
       </div>
       <div style={{ textAlign: 'right', marginTop: '0.4rem' }}>
-        <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontWeight: 600 }}>{progressPct}% of goal</span>
+        <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>{progressPct}% of goal</span>
       </div>
     </motion.div>
   )
