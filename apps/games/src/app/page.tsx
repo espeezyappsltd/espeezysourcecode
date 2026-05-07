@@ -1,6 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { User } from 'firebase/auth'
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { auth } from '@/lib/firebase-client'
 
 const FEATURES = [
   {
@@ -44,6 +47,42 @@ const FEATURES = [
 export default function GamesPage() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [authError, setAuthError] = useState('')
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser)
+      if (nextUser) {
+        setAuthError('')
+        setLoginStatus('idle')
+      }
+    })
+    return () => unsub()
+  }, [])
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    if (!loginEmail.trim() || !loginPassword) return
+    setLoginStatus('loading')
+    setAuthError('')
+
+    try {
+      await signInWithEmailAndPassword(auth, loginEmail.trim(), loginPassword)
+      setLoginStatus('idle')
+      setLoginPassword('')
+    } catch {
+      setLoginStatus('error')
+      setAuthError('Login failed. Use the email/password from your Espeezy account.')
+    }
+  }
+
+  async function handleLogout() {
+    await signOut(auth).catch(() => undefined)
+  }
 
   async function handleNotify(e: React.FormEvent) {
     e.preventDefault()
@@ -147,6 +186,114 @@ export default function GamesPage() {
           ← Early Access
         </a>
       </nav>
+
+      <section
+        aria-label="Account access"
+        style={{
+          maxWidth: '980px',
+          margin: '1rem auto 0',
+          padding: '0 1rem',
+        }}
+      >
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            padding: '0.9rem 1rem',
+          }}
+        >
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.9rem' }}>
+                Logged in as <strong style={{ color: '#fff' }}>{user.email}</strong>
+              </p>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                <a
+                  href="https://espeezy.com/login"
+                  style={{ color: '#fcd34d', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
+                >
+                  Open Main App
+                </a>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  style={{
+                    padding: '0.45rem 0.8rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: 'transparent',
+                    color: '#fff',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleLogin} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.25rem' }}>
+                Log in with your Espeezy account
+              </span>
+              <input
+                type="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                required
+                placeholder="Email"
+                style={{
+                  flex: '1 1 180px',
+                  minWidth: 0,
+                  padding: '0.6rem 0.7rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                }}
+              />
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                required
+                placeholder="Password"
+                style={{
+                  flex: '1 1 160px',
+                  minWidth: 0,
+                  padding: '0.6rem 0.7rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                }}
+              />
+              <button
+                type="submit"
+                disabled={loginStatus === 'loading'}
+                style={{
+                  padding: '0.6rem 0.9rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  cursor: loginStatus === 'loading' ? 'wait' : 'pointer',
+                }}
+              >
+                {loginStatus === 'loading' ? 'Logging in…' : 'Log In'}
+              </button>
+              {authError && (
+                <p role="alert" style={{ margin: 0, width: '100%', color: '#fca5a5', fontSize: '0.8rem' }}>
+                  {authError}
+                </p>
+              )}
+            </form>
+          )}
+        </div>
+      </section>
 
       {/* Hero */}
       <section

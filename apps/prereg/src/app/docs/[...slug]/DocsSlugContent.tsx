@@ -346,11 +346,19 @@ const docsContent: Record<string, DocEntry> = {
   'vision': {
     title: 'Research Vision',
     icon: <Flag size={40} />,
-    tagline: 'Espeezy originated as a dissertation study in web development and cybersecurity. This page documents the research problem, methodology, and verified findings that prove contribution visibility measurably improves student output quality.',
+    tagline: 'Espeezy originated as a dissertation study at the University of Northampton in web development and cybersecurity. This page documents the research problem, methodology, and verified findings that prove contribution visibility measurably improves student output quality.',
     sections: [
       {
         heading: 'Research context and origin',
-        body: 'Espeezy was designed and built as the primary artefact of an undergraduate dissertation examining the intersection of web application architecture, data security, and educational psychology. The central research question was: does making individual contribution data visible in real time cause students to exert measurably higher effort in collaborative academic work? The application itself served as both the experimental tool and the engineering deliverable, evaluated simultaneously on technical merit and empirical educational impact.',
+        body: 'Espeezy was designed and built as the primary artefact of an undergraduate dissertation at the University of Northampton, examining the intersection of web application architecture, data security, and educational psychology. The central research question was: does making individual contribution data visible in real time cause students to exert measurably higher effort in collaborative academic work? The application itself served as both the experimental tool and the engineering deliverable, evaluated simultaneously on technical merit and empirical educational impact.',
+      },
+      {
+        heading: 'University and map location',
+        body: 'Institution: University of Northampton. Primary campus location used for project context: Waterside Campus, University Drive, Northampton, NN1 5PH, United Kingdom.',
+        items: [
+          'Google Maps: https://maps.google.com/?q=University+of+Northampton+Waterside+Campus',
+          'Coordinates (approx.): 52.2419, -0.8808',
+        ],
       },
       {
         heading: 'The problem statement: evidence from literature',
@@ -416,7 +424,7 @@ const docsContent: Record<string, DocEntry> = {
         body: 'The research demonstrated that a relatively simple architectural decision — making contribution data visible in real time to all team members — produces a measurable and practically significant improvement in the quality of student work. This is not a motivational poster effect. It is a structural behavioural change driven by social accountability. Students who know their work is visible to peers they respect invest more effort, revise more carefully, and produce outputs that markers consistently score higher. Espeezy is the operationalisation of this finding at scale: a platform designed from the evidence up, not from feature requests down.',
       },
     ],
-    eli12: 'For my university project, I actually tested whether the app made students work harder. I had two groups: one used normal tools, the other used Espeezy where everyone could see who had done what. The Espeezy group scored 14 points higher on average and worked nearly twice as many hours on their individual sections. Knowing your teammates can see your work makes you care a lot more about how good it is.',
+    eli12: 'For my university project at the University of Northampton, I actually tested whether the app made students work harder. I had two groups: one used normal tools, the other used Espeezy where everyone could see who had done what. The Espeezy group scored 14 points higher on average and worked nearly twice as many hours on their individual sections. Knowing your teammates can see your work makes you care a lot more about how good it is.',
   },
 
 

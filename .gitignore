@@ -80,3 +80,6 @@ skills-lock.json
 node-v24.15.0-linux-x64/
 .vercel
 .env*.local
+
+# local extracted repos
+prereg-repo/
