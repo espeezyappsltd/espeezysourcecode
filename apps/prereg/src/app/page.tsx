@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Sparkles, ArrowRight, CheckCircle, Users, Globe, ShieldCheck,
+  ArrowRight, CheckCircle, Users, Globe, ShieldCheck,
   BookOpen, Cpu, Zap, BarChart2, Mail,
   GraduationCap, TrendingUp, Heart, Award
 } from 'lucide-react'
@@ -218,6 +218,40 @@ export default function PreRegisterPage() {
         </div>
       </section>
 
+      {/* Product Gallery */}
+      <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '1rem' }}>
+              Get a first look at the product.
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '620px', margin: '0 auto', fontSize: '1rem', lineHeight: 1.6 }}>
+              Built for students, educators, and institutions who need transparency and speed.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+            {[
+              { src: '/screenshots/dashboard.png', title: 'Smart Dashboard', desc: 'Track contribution, deadlines, and progress in one place.' },
+              { src: '/screenshots/admin.png', title: 'Institutional Control', desc: 'Educator-grade visibility and actionable insights for teams.' },
+              { src: '/screenshots/terminal.png', title: 'Secure Core', desc: 'Fast, dependable infrastructure designed for real workloads.' },
+              { src: '/screenshots/mobile.png', title: 'Mobile Experience', desc: 'Collaborate and stay synced from anywhere.' }
+            ].map((img, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}>
+                <div style={{ aspectRatio: '16 / 10', overflow: 'hidden' }}>
+                  <img src={img.src} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+                <div style={{ padding: '1rem' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: '0 0 0.35rem' }}>{img.title}</h3>
+                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.5 }}>{img.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Why This Matters */}
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
@@ -315,7 +349,7 @@ export default function PreRegisterPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <div style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Sparkles size={13} color="white" />
+                <img src="/brand_logo2.svg" style={{ width: '18px', height: '18px', objectFit: 'contain' }} alt="Espeezy" />
               </div>
               <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>{config.brand_name}</span>
             </div>
