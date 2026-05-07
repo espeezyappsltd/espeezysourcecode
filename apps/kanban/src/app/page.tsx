@@ -10,7 +10,7 @@ const FEATURES = [
     icon: '📋',
     title: 'Academic Kanban Boards',
     description:
-      'Drag-and-drop boards built for coursework. Organize tasks by subject, deadline priority, or custom workflow — exactly how your brain works.',
+      'Drag-and-drop boards built for coursework. Organize tasks by subject, deadline priority, or custom workflow. Exactly how your brain works.',
   },
   {
     icon: '👥',
@@ -366,7 +366,7 @@ export default function KanbanPage() {
             lineHeight: 1.7,
           }}
         >
-          Visual boards, smart deadlines, group task tracking, and contribution analytics — 
+          Visual boards, smart deadlines, group task tracking, and contribution analytics. 
           built for the way students and academic teams actually work.
         </p>
 

@@ -22,7 +22,7 @@ const FEATURES = [
     icon: '🤝',
     title: 'Co-op Challenges',
     description:
-      'Team up with classmates to tackle collaborative boss battles. Shared goals, shared glory — group learning that actually sticks.',
+      'Team up with classmates to tackle collaborative boss battles. Shared goals, shared glory. Group learning that actually sticks.',
   },
   {
     icon: '📊',
@@ -347,7 +347,7 @@ export default function GamesPage() {
             lineHeight: 1.7,
           }}
         >
-          Real-time skirmishes, ranked leagues, and co-op boss battles — all tied directly to your curriculum.
+          Real-time skirmishes, ranked leagues, and co-op boss battles tied directly to your curriculum.
           Espeezy Games turns studying into something you actually want to do.
         </p>
 
