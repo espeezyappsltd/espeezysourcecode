@@ -118,12 +118,14 @@ export default async function proxy(request: NextRequest) {
   // ── 0. Vercel-only: serve ONLY the preregister surface ───────────────────
   // On Vercel (VERCEL=1), every route outside of preregister + static assets
   // returns 404. The VPS (where VERCEL is unset) is unaffected.
+  // Legal/public pages are always allowed regardless of environment.
   if (process.env.VERCEL) {
-    const ALLOWED = ['/', '/preregister', '/api/preregister']
+    const ALLOWED = ['/', '/preregister', '/api/preregister', '/terms', '/privacy', '/contact', '/docs', '/fund']
     const isAllowed =
       ALLOWED.includes(pathname) ||
       pathname.startsWith('/_next/') ||
-      pathname.startsWith('/api/preregister')
+      pathname.startsWith('/api/preregister') ||
+      pathname.startsWith('/docs/')
     if (!isAllowed) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
