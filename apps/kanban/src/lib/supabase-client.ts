@@ -4,12 +4,9 @@ let _instance: SupabaseClient | null = null
 
 function getInstance(): SupabaseClient {
   if (!_instance) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-    if (!url || !key) {
-      console.error('[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY')
-    }
-    _instance = createClient(url || 'https://placeholder.supabase.co', key || 'placeholder')
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
+    _instance = createClient(url, key)
   }
   return _instance
 }

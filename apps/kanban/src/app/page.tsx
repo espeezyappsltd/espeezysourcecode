@@ -685,37 +685,147 @@ export default function KanbanPage() {
 
       {/* Footer */}
       <footer
+        aria-label="Site footer"
         style={{
-          padding: '2rem clamp(1rem, 4vw, 2.5rem)',
+          background: '#0f172a',
           borderTop: '1px solid rgba(255,255,255,0.06)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
+          color: '#94a3b8',
         }}
       >
-        <p style={{ fontSize: '0.8rem', color: '#475569' }}>
-          © 2026 Espeezy. All rights reserved.
-        </p>
-        <nav aria-label="Footer links" style={{ display: 'flex', gap: '1.5rem' }}>
-          {[
-            { href: 'https://espeezy.com/preregister', label: 'Early Access' },
-            { href: 'https://games.espeezy.com', label: 'Games' },
-            { href: 'https://espeezy.com/preregister/privacy', label: 'Privacy' },
-            { href: 'https://espeezy.com/preregister/terms', label: 'Terms' },
-          ].map(({ href, label }) => (
-            <a
-              key={label}
-              href={href}
-              style={{ fontSize: '0.8rem', color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#94a3b8' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#475569' }}
-            >
-              {label}
-            </a>
-          ))}
-        </nav>
+        {/* Sitemap columns */}
+        <div
+          style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: 'clamp(3rem, 6vw, 5rem) clamp(1.25rem, 4vw, 2.5rem) clamp(2rem, 4vw, 3rem)',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '3rem 2.5rem',
+          }}
+        >
+          {/* Brand */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
+              <div style={{
+                width: '32px', height: '32px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <span style={{ fontSize: '1rem' }} aria-hidden="true">📋</span>
+              </div>
+              <span style={{ fontWeight: 900, fontSize: '1rem', color: '#f1f5f9', letterSpacing: '-0.01em' }}>Espeezy Kanban</span>
+            </div>
+            <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: '#64748b', maxWidth: '240px', marginBottom: '1.25rem' }}>
+              Visual task boards with live collaboration, smart deadlines, and contribution
+              analytics built for students and academic teams.
+            </p>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.6rem', background: 'rgba(16,185,129,0.12)', color: '#10b981', borderRadius: '4px', letterSpacing: '0.05em' }}>COMING SOON</span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.6rem', background: 'rgba(99,102,241,0.12)', color: '#818cf8', borderRadius: '4px', letterSpacing: '0.05em' }}>REALTIME</span>
+            </div>
+          </div>
+
+          {/* Platform */}
+          <div>
+            <h3 style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', marginBottom: '1.25rem' }}>Platform</h3>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {[
+                { href: 'https://espeezy.com', label: 'Main App' },
+                { href: 'https://espeezy.com/preregister', label: 'Early Access' },
+                { href: 'https://espeezy.com/#features', label: 'Features' },
+                { href: 'https://espeezy.com/checkout', label: 'Pricing' },
+                { href: 'https://espeezy.com/contact', label: 'Contact' },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <a href={href} style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Kanban Features */}
+          <div>
+            <h3 style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', marginBottom: '1.25rem' }}>Features</h3>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {[
+                { href: '#boards', label: 'Visual Boards' },
+                { href: '#collaboration', label: 'Live Collaboration' },
+                { href: '#analytics', label: 'Analytics' },
+                { href: '#deadlines', label: 'Smart Deadlines' },
+                { href: '#mvp', label: 'Open MVP' },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <a href={href} style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Other Apps + Legal */}
+          <div>
+            <h3 style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', marginBottom: '1.25rem' }}>Other Apps</h3>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '2rem' }}>
+              {[
+                { href: 'https://games.espeezy.com', label: 'Espeezy Games' },
+                { href: 'https://espeezy.com/dashboard', label: 'Dashboard' },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <a href={href} style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}>
+                    {label} <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            <h3 style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', marginBottom: '1.25rem' }}>Legal</h3>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {[
+                { href: 'https://espeezy.com/preregister/privacy', label: 'Privacy Policy' },
+                { href: 'https://espeezy.com/preregister/terms', label: 'Terms of Service' },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <a href={href} style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            padding: '1.5rem clamp(1.25rem, 4vw, 2.5rem)',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.75rem',
+          }}
+        >
+          <p style={{ fontSize: '0.78rem', color: '#334155', margin: 0 }}>
+            &copy; {new Date().getFullYear()} Espeezy. All rights reserved.
+          </p>
+          <p style={{ fontSize: '0.78rem', color: '#1e293b', margin: 0, fontWeight: 600 }}>
+            Free forever for students &middot; No data sold &middot; Open roadmap
+          </p>
+        </div>
       </footer>
     </main>
   )
