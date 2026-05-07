@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  ArrowRight, CheckCircle, Users, Globe, ShieldCheck,
-  BookOpen, Cpu, Zap, BarChart2, Mail,
+  ArrowRight, CheckCircle, Users, Globe,
+  Cpu, Zap, BarChart2, Mail,
   GraduationCap, TrendingUp, Heart, Award
 } from 'lucide-react'
 
@@ -41,9 +41,11 @@ export default function Home() {
   const [fullName, setFullName] = useState('')
   const [institution, setInstitution] = useState('')
   const [role, setRole] = useState('student')
+  const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [loginReady, setLoginReady] = useState(false)
 
   const goal = parseInt(config.preregister_goal ?? '5000000', 10)
 
@@ -55,16 +57,18 @@ export default function Home() {
       const res = await fetch('/api/preregister', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fullName, institution, role, source: 'home_preregister' }),
+        body: JSON.stringify({ email, password, fullName, institution, role, source: 'home_preregister' }),
       })
       const data = await res.json()
       if (!res.ok) {
         setSubmitError(data.error ?? 'Registration failed. Please try again.')
       } else {
         setSubmitted(true)
+        setLoginReady(Boolean(data.login_ready))
+        setPassword('')
         if (data.count) setRegisteredCount(data.count)
       }
-    } catch (_) {
+    } catch {
       setSubmitError('Network error. Please check your connection and try again.')
     }
     setSubmitting(false)
@@ -149,7 +153,9 @@ export default function Home() {
                   </div>
                   <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>You are on the list.</h2>
                   <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.95rem' }}>
-                    We will email you the moment {config.brand_name} opens its doors. We will be in touch soon.
+                    {loginReady
+                      ? `Your Espeezy login is ready. Use the same email and password on Espeezy, Games, and Kanban.`
+                      : `We will email you the moment ${config.brand_name} opens its doors. We will be in touch soon.`}
                   </p>
                   <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button onClick={() => setSubmitted(false)} style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', background: 'transparent', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700 }}>
@@ -170,13 +176,15 @@ export default function Home() {
                     <span style={{ color: 'var(--brand)' }}>No credit card required.</span>
                   </h2>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                    Register your interest today and get priority access, exclusive early features, and founding member recognition.
+                    Register your interest today, set your shared Espeezy password once, and use that same login on Espeezy, Games, and Kanban.
                   </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <input type="text" placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)}
                       style={{ width: '100%', padding: '0.875rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
                     <input type="email" placeholder="Email Address *" value={email} onChange={e => setEmail(e.target.value)} required
+                      style={{ width: '100%', padding: '0.875rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
+                    <input type="password" placeholder="Create a shared password *" value={password} onChange={e => setPassword(e.target.value)} required minLength={8}
                       style={{ width: '100%', padding: '0.875rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
                     <input type="text" placeholder="Institution / University (optional)" value={institution} onChange={e => setInstitution(e.target.value)}
                       style={{ width: '100%', padding: '0.875rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
@@ -201,7 +209,7 @@ export default function Home() {
                     </button>
 
                     <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
-                      By registering you agree to our Privacy Policy. No spam — ever. Unsubscribe any time.
+                      By registering you agree to our Privacy Policy. Your password will be used to prepare your login across Espeezy, Games, and Kanban.
                     </p>
                   </div>
                 </motion.form>
