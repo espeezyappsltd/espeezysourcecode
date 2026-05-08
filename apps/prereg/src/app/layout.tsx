@@ -9,22 +9,38 @@ export const metadata: Metadata = {
   description: 'Join 5 million students shaping the future of collaborative education.',
   manifest: '/manifest.json',
   icons: {
-    icon: [{ url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
-    apple: '/apple-touch-icon.png',
+    icon: '/icon.svg',
+    apple: '/apple-icon.svg',
+    other: [
+      { rel: 'mask-icon', url: '/icon.svg', color: '#6366f1' },
+    ],
   },
+  keywords: ['education', 'collaboration', 'students', 'early access', 'learning platform'],
+  authors: [{ name: 'Espeezy' }],
+  creator: 'Espeezy',
+  robots: { index: true, follow: true },
   openGraph: {
     title: 'Espeezy: Early Access',
     description: 'The platform that gives every student a fair voice.',
     url: 'https://espeezy.com/preregister',
     siteName: 'Espeezy',
     type: 'website',
+    images: [{ url: '/icon.svg', width: 64, height: 64, alt: 'Espeezy' }],
   },
+  twitter: {
+    card: 'summary',
+    title: 'Espeezy: Early Access',
+    description: 'The platform that gives every student a fair voice.',
+    creator: '@espeezy',
+  },
+  appLinks: [],
 }
 
 export const viewport: Viewport = {
-  themeColor: '#10b981',
+  themeColor: '#6366f1',
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 5,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

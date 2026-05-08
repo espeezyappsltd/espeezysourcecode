@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Espeezy Kanban">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="url(#bg)" />
+  <rect x="36" y="42" width="120" height="108" rx="18" fill="#ffffff" opacity="0.95" />
+  <rect x="48" y="60" width="27" height="30" rx="6" fill="#0f172a" />
+  <rect x="82.5" y="60" width="27" height="48" rx="6" fill="#0f172a" />
+  <rect x="117" y="60" width="27" height="66" rx="6" fill="#0f172a" />
+</svg>
