@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Espeezy Games',
     description: 'Game-based learning platform for students.',
-    creator: '@espeezy',
+    creator: '@sospeterkedogo',
   },
 }
 
