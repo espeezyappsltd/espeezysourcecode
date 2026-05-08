@@ -1,5 +1,5 @@
-@import '../../../../shared/design/tokens.css';
-@import '../../../../shared/design/base.css';
+@import '../shared/design/tokens.css';
+@import '../shared/design/base.css';
 
 :root {
   --accent: #f59e0b;
