@@ -1,20 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-
-export interface TimeLeft {
-  days: number
-  hours: number
-  minutes: number
-  seconds: number
-}
-
-export interface LaunchConfig {
-  launch_date: string
-  launch_message: string
-  preregister_goal: string
-  brand_name: string
-}
+import type { LaunchConfig, TimeLeft } from '@shared-types/launch'
 
 const ZERO_TIME: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 }
 
