@@ -33,7 +33,7 @@ const NAV_LINKS = [
 ]
 
 export default function PreRegisterPage() {
-  const { config, registeredCount, configLoaded, timeLeft, setRegisteredCount } = useLaunchData()
+  const { config, registeredCount, authUserCount, configLoaded, timeLeft, setRegisteredCount } = useLaunchData()
 
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -143,7 +143,7 @@ export default function PreRegisterPage() {
         </motion.p>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
-        <UserRegistrationCounter registeredCount={registeredCount} goal={goal} />
+        <UserRegistrationCounter registeredCount={registeredCount} goal={goal} authUserCount={authUserCount} />
       </section>
 
       {/* Registration Form */}

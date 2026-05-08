@@ -20,7 +20,7 @@ function AnimatedNumber({ value }: { value: number }) {
   return <>{display.toLocaleString()}</>
 }
 
-export default function UserRegistrationCounter({ registeredCount, goal }: { registeredCount: number; goal: number }) {
+export default function UserRegistrationCounter({ registeredCount, goal, authUserCount = 0 }: { registeredCount: number; goal: number; authUserCount?: number }) {
   const progressPct = Math.min(100, Math.round((registeredCount / goal) * 100))
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
@@ -50,6 +50,13 @@ export default function UserRegistrationCounter({ registeredCount, goal }: { reg
       <div style={{ textAlign: 'right', marginTop: '0.4rem' }}>
         <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>{progressPct}% of goal</span>
       </div>
+      {authUserCount > 0 && (
+        <div style={{ textAlign: 'right', marginTop: '0.2rem' }}>
+          <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600 }}>
+            Includes {authUserCount.toLocaleString()} Supabase account{authUserCount === 1 ? '' : 's'}
+          </span>
+        </div>
+      )}
     </motion.div>
   )
 }

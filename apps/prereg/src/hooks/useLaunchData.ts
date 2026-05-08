@@ -42,6 +42,7 @@ const DEFAULTS: LaunchConfig = {
 export function useLaunchData() {
   const [config, setConfig] = useState<LaunchConfig>(DEFAULTS)
   const [registeredCount, setRegisteredCount] = useState(0)
+  const [authUserCount, setAuthUserCount] = useState(0)
   const [configLoaded, setConfigLoaded] = useState(false)
 
   const setCountAndPersist = useCallback((count: number) => {
@@ -57,6 +58,9 @@ export function useLaunchData() {
       const data = await res.json()
       if (typeof data.registered_count === 'number') {
         setCountAndPersist(data.registered_count)
+      }
+      if (typeof data.auth_user_count === 'number') {
+        setAuthUserCount(data.auth_user_count)
       }
     } catch {
       // Keep previous value if live refresh fails.
@@ -90,6 +94,9 @@ export function useLaunchData() {
         if (typeof metrics.registered_count === 'number') {
           setCountAndPersist(metrics.registered_count)
         }
+        if (typeof metrics.auth_user_count === 'number') {
+          setAuthUserCount(metrics.auth_user_count)
+        }
       } catch {
         // Use defaults on failure
       }
@@ -109,5 +116,5 @@ export function useLaunchData() {
 
   const timeLeft = useCountdown(config.launch_date)
 
-  return { config, registeredCount, configLoaded, timeLeft, setRegisteredCount, refreshCount }
+  return { config, registeredCount, authUserCount, configLoaded, timeLeft, setRegisteredCount, refreshCount }
 }

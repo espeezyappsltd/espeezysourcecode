@@ -6,6 +6,8 @@ const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').rep
 
 type LiveMetrics = {
   registered_count: number
+  preregistration_count: number
+  auth_user_count: number
   donation_total_cents: number
   donation_count: number
   lifetime_seats_used: number
@@ -16,6 +18,8 @@ type LiveMetrics = {
 
 const ZERO_METRICS: LiveMetrics = {
   registered_count: 0,
+  preregistration_count: 0,
+  auth_user_count: 0,
   donation_total_cents: 0,
   donation_count: 0,
   lifetime_seats_used: 0,
@@ -90,20 +94,80 @@ async function fetchDonationTotals(cfg: { url: string; key: string }): Promise<{
   }
 }
 
+async function fetchDonationTotalsFromTable(cfg: { url: string; key: string }): Promise<{ total_cents: number; count: number } | null> {
+  try {
+    const res = await fetch(`${cfg.url}/rest/v1/donations?select=amount_cents,status&status=eq.completed&limit=2000`, {
+      method: 'GET',
+      headers: {
+        apikey: cfg.key,
+        Authorization: `Bearer ${cfg.key}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (!res.ok) return null
+    const rows = await res.json()
+    if (!Array.isArray(rows)) return { total_cents: 0, count: 0 }
+
+    let total = 0
+    for (const row of rows as Array<Record<string, unknown>>) {
+      const cents = row.amount_cents
+      if (typeof cents === 'number' && Number.isFinite(cents)) total += cents
+    }
+
+    return { total_cents: total, count: rows.length }
+  } catch {
+    return null
+  }
+}
+
+async function fetchAuthUserCount(cfg: { url: string; key: string }): Promise<number | null> {
+  try {
+    const res = await fetch(`${cfg.url}/auth/v1/admin/users?page=1&per_page=1`, {
+      method: 'GET',
+      headers: {
+        apikey: cfg.key,
+        Authorization: `Bearer ${cfg.key}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (!res.ok) return null
+    const data = await res.json()
+    const total = (data && typeof data === 'object') ? (data as Record<string, unknown>).total : null
+    if (typeof total === 'number' && Number.isFinite(total)) return total
+
+    const users = (data && typeof data === 'object') ? (data as Record<string, unknown>).users : null
+    if (Array.isArray(users)) return users.length
+
+    return null
+  } catch {
+    return null
+  }
+}
+
 async function fetchFromSupabase(): Promise<LiveMetrics | null> {
   const cfg = getSupabaseConfig()
   if (!cfg) return null
 
-  const [registeredCount, lifetimeUsed, donations] = await Promise.all([
+  const [preregCount, authUserCount, lifetimeUsed, donationsRpc, donationsTable] = await Promise.all([
     fetchCount(cfg, 'pre_registrations'),
+    fetchAuthUserCount(cfg),
     fetchCount(cfg, 'profiles', 'subscription_plan=eq.lifetime'),
     fetchDonationTotals(cfg),
+    fetchDonationTotalsFromTable(cfg),
   ])
 
-  if (registeredCount === null || lifetimeUsed === null || donations === null) return null
+  if (preregCount === null || lifetimeUsed === null) return null
+
+  const donations = donationsRpc ?? donationsTable ?? { total_cents: 0, count: 0 }
+  const authCount = authUserCount ?? 0
+  const effectiveRegistered = Math.max(preregCount, authCount)
 
   return {
-    registered_count: registeredCount,
+    registered_count: effectiveRegistered,
+    preregistration_count: preregCount,
+    auth_user_count: authCount,
     donation_total_cents: donations.total_cents,
     donation_count: donations.count,
     lifetime_seats_used: lifetimeUsed,
@@ -142,6 +206,8 @@ async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
 
     return {
       registered_count: registered,
+      preregistration_count: registered,
+      auth_user_count: 0,
       donation_total_cents: donationTotal,
       donation_count: donationCount,
       lifetime_seats_used: lifetimeUsed,

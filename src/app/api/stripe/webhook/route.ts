@@ -37,7 +37,11 @@ export async function POST(req: Request) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    if (session.metadata?.type === 'donation') {
+    const isDonationLike =
+      session.metadata?.type === 'donation'
+      || (session.mode === 'payment' && !session.subscription && session.metadata?.type !== 'p2p_transfer')
+
+    if (isDonationLike) {
       await handleDonationWebhook(session)
       return NextResponse.json({ ok: true, handled: 'donation' }, { status: 200 })
     }
@@ -52,6 +56,64 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ ok: true, handled: 'ignored' }, { status: 200 })
+}
+
+function getSupabaseConfig() {
+  const url = (process.env.PROJECT_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').trim()
+  const key = (process.env.SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
+  if (!url || !key) return null
+  return { url, key }
+}
+
+async function upsertDonationToSupabase(session: Stripe.Checkout.Session) {
+  const cfg = getSupabaseConfig()
+  if (!cfg) return
+
+  const meta = session.metadata ?? {}
+  const basePayload = {
+    stripe_session_id: session.id,
+    stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
+    amount_cents: session.amount_total ?? 0,
+    currency: session.currency ?? 'gbp',
+    donor_email: meta.is_anonymous === 'true' ? null : (meta.donor_email || session.customer_email || null),
+    donor_name: meta.is_anonymous === 'true' ? null : (meta.donor_name || null),
+    message: meta.message || null,
+    feature_tag: meta.feature_tag || 'general',
+    is_anonymous: meta.is_anonymous === 'true',
+    status: session.payment_status === 'paid' ? 'completed' : 'pending',
+    completed_at: session.payment_status === 'paid' ? new Date().toISOString() : null,
+    metadata: meta,
+    updated_at: new Date().toISOString(),
+  }
+
+  const richInsert = await fetch(`${cfg.url}/rest/v1/donations`, {
+    method: 'POST',
+    headers: {
+      apikey: cfg.key,
+      Authorization: `Bearer ${cfg.key}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify(basePayload),
+  })
+
+  if (richInsert.ok) return
+
+  // Fallback insert for minimal schemas.
+  await fetch(`${cfg.url}/rest/v1/donations`, {
+    method: 'POST',
+    headers: {
+      apikey: cfg.key,
+      Authorization: `Bearer ${cfg.key}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({
+      stripe_session_id: session.id,
+      amount_cents: session.amount_total ?? 0,
+      status: session.payment_status === 'paid' ? 'completed' : 'pending',
+    }),
+  })
 }
 
 async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
@@ -76,22 +138,25 @@ async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
 async function handleDonationWebhook(session: Stripe.Checkout.Session) {
   try {
     const adminDb = getAdminDb()
-    if (!adminDb) return
     const meta = session.metadata ?? {}
-    await adminDb.collection('donations').doc(session.id).set({
-      stripe_session_id: session.id,
-      stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
-      amount_cents: session.amount_total ?? 0,
-      currency: session.currency ?? 'usd',
-      donor_email: meta.is_anonymous === 'true' ? null : (meta.donor_email || session.customer_email || null),
-      donor_name: meta.is_anonymous === 'true' ? null : (meta.donor_name || null),
-      message: meta.message || null,
-      feature_tag: meta.feature_tag || 'general',
-      is_anonymous: meta.is_anonymous === 'true',
-      status: session.payment_status === 'paid' ? 'completed' : 'pending',
-      completed_at: session.payment_status === 'paid' ? new Date().toISOString() : null,
-      metadata: meta,
-    })
+    if (adminDb) {
+      await adminDb.collection('donations').doc(session.id).set({
+        stripe_session_id: session.id,
+        stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
+        amount_cents: session.amount_total ?? 0,
+        currency: session.currency ?? 'usd',
+        donor_email: meta.is_anonymous === 'true' ? null : (meta.donor_email || session.customer_email || null),
+        donor_name: meta.is_anonymous === 'true' ? null : (meta.donor_name || null),
+        message: meta.message || null,
+        feature_tag: meta.feature_tag || 'general',
+        is_anonymous: meta.is_anonymous === 'true',
+        status: session.payment_status === 'paid' ? 'completed' : 'pending',
+        completed_at: session.payment_status === 'paid' ? new Date().toISOString() : null,
+        metadata: meta,
+      })
+    }
+
+    await upsertDonationToSupabase(session)
   } catch (err) {
     console.error('[webhook] donation upsert error:', err)
   }

@@ -68,6 +68,31 @@ async function fetchTotalsFromSupabase(): Promise<DonationTotals | null> {
     const payload = Array.isArray(data) ? data[0] : data
     return normalizeTotals(payload, 'supabase')
   } catch {
+    // Fall through to direct table aggregation.
+  }
+
+  try {
+    const rowsRes = await fetch(`${cfg.url}/rest/v1/donations?select=amount_cents,status&status=eq.completed&limit=2000`, {
+      method: 'GET',
+      headers: {
+        apikey: cfg.key,
+        Authorization: `Bearer ${cfg.key}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (!rowsRes.ok) return null
+    const rows = await rowsRes.json()
+    if (!Array.isArray(rows)) return normalizeTotals({ total_cents: 0, count: 0 }, 'supabase')
+
+    let total = 0
+    for (const row of rows as Array<Record<string, unknown>>) {
+      const cents = row.amount_cents
+      if (typeof cents === 'number' && Number.isFinite(cents)) total += cents
+    }
+
+    return normalizeTotals({ total_cents: total, count: rows.length }, 'supabase')
+  } catch {
     return null
   }
 }
