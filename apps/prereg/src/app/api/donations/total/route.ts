@@ -18,9 +18,7 @@ let lastKnownTotals: DonationTotals = {
   updated_at: new Date(0).toISOString(),
 }
 
-function getMainApi(req: Request): string | null {
-  const currentOrigin = new URL(req.url).origin
-  if (API_ORIGIN === currentOrigin) return null
+function getMainApi(): string {
   return `${API_ORIGIN}/api/donations/total`
 }
 
@@ -83,14 +81,8 @@ export async function GET(req: Request) {
     })
   }
 
-  const mainApi = getMainApi(req)
-  if (!mainApi) {
-    return NextResponse.json({ ...lastKnownTotals, source: 'snapshot' }, {
-      status: 503,
-      headers: { 'Cache-Control': 'no-store, max-age=0' },
-    })
-  }
-
+  const mainApi = getMainApi()
+  
   try {
     const res = await fetch(mainApi, { method: 'GET', cache: 'no-store' })
     const data = await res.json()

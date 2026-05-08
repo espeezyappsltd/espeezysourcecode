@@ -4,9 +4,7 @@ export const dynamic = 'force-dynamic'
 
 const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
 
-function getMainApi(req: Request): string | null {
-  const currentOrigin = new URL(req.url).origin
-  if (API_ORIGIN === currentOrigin) return null
+function getMainApi(): string {
   return `${API_ORIGIN}/api/lifetime-seats`
 }
 
@@ -53,13 +51,7 @@ export async function GET(req: Request) {
     )
   }
 
-  const mainApi = getMainApi(req)
-  if (!mainApi) {
-    return NextResponse.json(
-      { error: 'Service unavailable.', count: 0, source: 'fallback' },
-      { status: 503, headers: { 'Cache-Control': 'no-store, max-age=0' } },
-    )
-  }
+  const mainApi = getMainApi()
 
   try {
     const res = await fetch(mainApi, { method: 'GET', cache: 'no-store' })

@@ -26,9 +26,7 @@ const ZERO_METRICS: LiveMetrics = {
 
 let lastKnownMetrics: LiveMetrics = ZERO_METRICS
 
-function getMainApi(req: Request, path: string): string | null {
-  const currentOrigin = new URL(req.url).origin
-  if (API_ORIGIN === currentOrigin) return null
+function getMainApi(path: string): string {
   return `${API_ORIGIN}${path}`
 }
 
@@ -117,12 +115,10 @@ async function fetchFromSupabase(): Promise<LiveMetrics | null> {
 
 async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
   const [preregisterApi, donationsApi, lifetimeApi] = [
-    getMainApi(req, '/api/preregister'),
-    getMainApi(req, '/api/donations/total'),
-    getMainApi(req, '/api/lifetime-seats'),
+    getMainApi('/api/preregister'),
+    getMainApi('/api/donations/total'),
+    getMainApi('/api/lifetime-seats'),
   ]
-
-  if (!preregisterApi || !donationsApi || !lifetimeApi) return null
 
   try {
     const [preregisterRes, donationsRes, lifetimeRes] = await Promise.all([

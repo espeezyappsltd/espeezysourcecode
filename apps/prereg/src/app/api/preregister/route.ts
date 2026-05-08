@@ -4,9 +4,7 @@ export const dynamic = 'force-dynamic'
 
 const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
 
-function getMainApi(req: Request): string | null {
-  const currentOrigin = new URL(req.url).origin
-  if (API_ORIGIN === currentOrigin) return null
+function getMainApi(): string {
   return `${API_ORIGIN}/api/preregister`
 }
 
@@ -47,10 +45,7 @@ export async function GET(req: Request) {
   }
 
   // Fall back to proxying to root app
-  const mainApi = getMainApi(req)
-  if (!mainApi) {
-    return NextResponse.json({ error: 'API proxy origin misconfigured.', count: 0 }, { status: 503 })
-  }
+  const mainApi = getMainApi()
 
   try {
     const res = await fetch(mainApi, { method: 'GET' })
@@ -62,10 +57,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const mainApi = getMainApi(req)
-  if (!mainApi) {
-    return NextResponse.json({ error: 'API proxy origin misconfigured.' }, { status: 503 })
-  }
+  const mainApi = getMainApi()
 
   try {
     const body = await req.text()
