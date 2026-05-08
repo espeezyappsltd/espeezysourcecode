@@ -33,7 +33,6 @@ export const metadata: Metadata = {
     description: 'The platform that gives every student a fair voice.',
     creator: '@espeezy',
   },
-  appLinks: [],
 }
 
 export const viewport: Viewport = {

@@ -30,7 +30,6 @@ export const metadata: Metadata = {
     description: 'Visual task management for students and teams.',
     creator: '@espeezy',
   },
-  appLinks: [],
 }
 
 export const viewport: Viewport = {

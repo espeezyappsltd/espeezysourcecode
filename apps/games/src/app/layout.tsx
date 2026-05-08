@@ -30,7 +30,6 @@ export const metadata: Metadata = {
     description: 'Game-based learning platform for students.',
     creator: '@espeezy',
   },
-  appLinks: [],
 }
 
 export const viewport: Viewport = {
