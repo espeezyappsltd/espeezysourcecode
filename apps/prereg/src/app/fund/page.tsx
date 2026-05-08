@@ -65,22 +65,20 @@ const PRESETS = [5, 10, 25, 50, 100, 250]
 
 const DONATION_TIER_CONTENT = [
   {
-    amount: 15,
-    name: 'Builder Donation',
-    tag: 'Feature Sprint',
-    description: 'A low-friction way to directly fund a meaningful slice of product work.',
+    amount: 5,
+    name: 'Starter Donation',
+    tag: 'Quick Support',
+    description: 'A lightweight way to back Espeezy and help fund active development.',
+    paymentLinkId: 'plink_1TSHkjGi695k7CdbTKSmS1Np',
+    fallbackHref: 'https://donate.stripe.com/00w8wPbhO16wfdufa07wA08',
   },
   {
-    amount: 50,
-    name: 'Sponsor Donation',
-    tag: 'Higher Intent',
-    description: 'Back a larger chunk of engineering, infrastructure, or AI feature delivery.',
-  },
-  {
-    amount: 100,
-    name: 'Patron Donation',
-    tag: 'Mission Support',
-    description: 'A strong supporter tier for people who want to materially move the roadmap forward.',
+    amount: 10,
+    name: 'Supporter Donation',
+    tag: 'Most Popular',
+    description: 'A stronger contribution tier to accelerate feature delivery and platform reliability.',
+    paymentLinkId: 'plink_1TUeuhGi695k7CdbNIbyJ0AD',
+    fallbackHref: 'https://donate.stripe.com/aFacN55Xu5mM6GYbXO7wA09',
   },
 ] as const
 
@@ -149,20 +147,14 @@ function getFeaturedSupportLink() {
 }
 
 function getTierDonationOptions() {
-  return [
-    {
-      ...DONATION_TIER_CONTENT[0],
-      href: process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_15?.trim() || '',
-    },
-    {
-      ...DONATION_TIER_CONTENT[1],
-      href: process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_50?.trim() || '',
-    },
-    {
-      ...DONATION_TIER_CONTENT[2],
-      href: process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_100?.trim() || '',
-    },
-  ] as const
+  return DONATION_TIER_CONTENT.map((tier) => {
+    const envKey = `NEXT_PUBLIC_STRIPE_DONATION_LINK_${tier.amount}` as const
+    const envHref = process.env[envKey]?.trim() || ''
+    return {
+      ...tier,
+      href: envHref || tier.fallbackHref,
+    }
+  })
 }
 
 export default function FundPage() {
@@ -494,7 +486,7 @@ export default function FundPage() {
               Quick Stripe links for larger support tiers.
             </h2>
             <p style={{ margin: 0, color: '#64748b', fontSize: '0.92rem', lineHeight: 1.65 }}>
-              Configure dedicated Stripe payment links for GBP 15, 50, and 100 donations. If a link is not configured yet, the card falls back to the custom donation form with the amount preselected.
+              Support via dedicated Stripe payment links for GBP 5 and 10 donations. If needed, these links can still be overridden via NEXT_PUBLIC_STRIPE_DONATION_LINK_5 and NEXT_PUBLIC_STRIPE_DONATION_LINK_10.
             </p>
           </div>
 
