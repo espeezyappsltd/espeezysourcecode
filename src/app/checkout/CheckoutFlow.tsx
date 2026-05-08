@@ -224,7 +224,7 @@ export default function CheckoutFlow() {
 
             {/* Back link */}
             <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-              <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}>
+              <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}>
                 ← Go back
               </button>
             </div>

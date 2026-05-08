@@ -29,7 +29,7 @@ export default function TermsPage() {
           },
           {
             title: 'Payments',
-            body: 'Paid features are billed through Stripe. Pricing, billing intervals, and cancellation policies are shown at checkout. All charges are in USD unless otherwise stated. Refunds are issued at our discretion in accordance with our refund policy.',
+            body: 'Paid features are billed through Stripe. Pricing, billing intervals, and cancellation policies are shown at checkout. All charges are in GBP unless otherwise stated. Refunds are issued at our discretion in accordance with our refund policy.',
           },
           {
             title: 'Acceptable Use',

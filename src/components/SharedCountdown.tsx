@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { TimeLeft } from '@/hooks/useLaunchData'
+import type { TimeLeft } from '@shared-types/launch'
 
 interface CountBlockProps {
   value: number

@@ -26,9 +26,9 @@ const DOCS_LINKS = [
 ]
 
 const INFRA_LINKS = [
+  { href: '/docs/infra/presence', label: 'Real-time Presence'  },
+  { href: '/docs/infra/sync', label: 'Firebase Sync'  },
   { href: '/docs/infra/payments', label: 'Stripe Integration' },
-  { href: '/docs/infra/sync', label: 'Firebase Sync' },
-  { href: '/docs/infra/presence', label: 'Real-time Presence' },
   { href: '/docs/vision', label: 'Our Vision' },
   { href: '/docs/impact', label: 'Impact Stats' },
 ]

@@ -37,9 +37,8 @@ Copilot builds continuously.
 - [ ] Add `IP_HASH_SALT=<random-secret>` to `.env.local` and Vercel environment variables
 - [ ] Configure Stripe webhook in Stripe Dashboard to forward `checkout.session.completed`
 - [ ] Set Stripe webhook secret in Vercel env as `STRIPE_WEBHOOK_SECRET`
-- [ ] Choose final brand name from `BRAND_IDENTITY.md`
-- [ ] Register domain for chosen brand name
-- [ ] Create Google Workspace account for chosen domain (admin@ / team@ email)
+- [ ] Register additional brand domains as needed
+- [ ] Create Google Workspace accounts for team email addresses (admin@ / team@)
 
 ---
 
