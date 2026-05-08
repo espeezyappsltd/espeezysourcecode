@@ -70,42 +70,36 @@ const STRIPE_DONATION_TIERS = [
     name: 'Supporter Donation',
     tag: 'Low Friction',
     description: 'A fast, low-friction way to keep Espeezy online and moving.',
-    href: 'https://donate.stripe.com/00w8wPbhO16wfdufa07wA08',
   },
   {
     amount: 10,
     name: 'Momentum Donation',
     tag: 'Roadmap Boost',
     description: 'A simple step up that helps fund infrastructure and short development pushes.',
-    href: 'https://donate.stripe.com/aFacN55Xu5mM6GYbXO7wA09',
   },
   {
     amount: 15,
     name: 'Builder Donation',
     tag: 'Feature Sprint',
     description: 'A low-friction way to directly fund a meaningful slice of product work.',
-    href: 'https://donate.stripe.com/00wdR91He02s5CU5zq7wA0a',
   },
   {
     amount: 25,
     name: 'Sprint Donation',
     tag: 'Roadmap Boost',
     description: 'Push a roadmap item forward faster with a stronger one-off contribution.',
-    href: 'https://donate.stripe.com/5kQdR92Li5mM9Ta1ja7wA0b',
   },
   {
     amount: 50,
     name: 'Sponsor Donation',
     tag: 'Higher Intent',
     description: 'Back a larger chunk of engineering, infrastructure, or AI feature delivery.',
-    href: 'https://donate.stripe.com/aFa8wP0Da7uU0iA6Du7wA0c',
   },
   {
     amount: 100,
     name: 'Patron Donation',
     tag: 'Mission Support',
     description: 'A strong supporter tier for people who want to materially move the roadmap forward.',
-    href: 'https://donate.stripe.com/dRm6oH3Pm9D23uM1ja7wA0d',
   },
 ] as const
 
@@ -166,7 +160,7 @@ async function fetchDonationTotal(): Promise<{ total_cents: number; count: numbe
 }
 
 function getDonationFallbackLink() {
-  return process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK?.trim() || STRIPE_DONATION_TIERS[0].href
+  return process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK?.trim() || null
 }
 
 function getFeaturedSupportLink() {
@@ -214,7 +208,7 @@ export default function FundPage() {
     e.preventDefault()
     setSubmitError('')
     const amountCents = getFinalAmount()
-    if (amountCents < 100) { setSubmitError('Minimum donation is $1.00'); return }
+    if (amountCents < 100) { setSubmitError('Minimum donation is £1.00'); return }
     setSubmitting(true)
 
     // Try the Stripe Checkout Sessions API first
@@ -248,7 +242,7 @@ export default function FundPage() {
   }
 
   const displayAmount = getFinalAmount() / 100
-  const totalRaised = (donationTotal.total_cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  const totalRaised = (donationTotal.total_cents / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 })
 
   const useDonationTier = (amount: number) => {
     if (PRESETS.includes(amount)) {
@@ -521,14 +515,11 @@ export default function FundPage() {
                   <div>
                     <div style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '999px', background: 'rgba(16,185,129,0.08)', color: '#059669', fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>{tier.tag}</div>
                     <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a' }}>{tier.name}</h3>
-                    <div style={{ marginTop: '0.25rem', fontSize: '0.95rem', fontWeight: 800, color: '#059669' }}>GBP {tier.amount}</div>
+                    <div style={{ marginTop: '0.25rem', fontSize: '0.95rem', fontWeight: 800, color: '#059669' }}>£{tier.amount}</div>
                   </div>
                   <p style={{ margin: 0, color: '#64748b', fontSize: '0.84rem', lineHeight: 1.6 }}>{tier.description}</p>
-                  <a href={tier.href} aria-label={`Open the ${tier.name} Stripe payment link`} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: 'var(--brand)', color: '#ffffff', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 800 }}>
-                    Open Stripe payment link <ArrowRight size={14} />
-                  </a>
-                  <button type="button" onClick={() => useDonationTier(tier.amount)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid rgba(15,23,42,0.1)', color: '#0f172a', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}>
-                    Use custom checkout instead <ArrowRight size={14} />
+                  <button type="button" onClick={() => useDonationTier(tier.amount)} aria-label={`Donate £${tier.amount} via ${tier.name}`} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: 'var(--brand)', color: '#ffffff', border: 'none', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}>
+                    Donate £{tier.amount} <ArrowRight size={14} />
                   </button>
                 </div>
               ))}
