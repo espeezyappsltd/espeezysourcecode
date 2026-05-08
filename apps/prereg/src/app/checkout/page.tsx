@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ShieldCheck, Sparkles, Lock, CheckCircle2, ArrowRight, Loader2,
   Users, CreditCard, Building2, Gift
 } from 'lucide-react'
 import Link from 'next/link'
+import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 
 const PLANS = {
   pro: {
@@ -16,7 +17,6 @@ const PLANS = {
     period: '/month',
     badge: 'Best Place To Start',
     hasTrial: true,
-    stripeLink: 'https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04',
     features: [
       'Unlimited group workspaces',
       'Deeper contribution analytics',
@@ -34,7 +34,6 @@ const PLANS = {
     period: '/month',
     badge: 'Power Users',
     hasTrial: true,
-    stripeLink: 'https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06',
     features: [
       'Everything in Pro',
       'Advanced AI Study Coach access',
@@ -53,7 +52,6 @@ const PLANS = {
     period: 'one-time',
     badge: 'Limited: 100 seats',
     hasTrial: false,
-    stripeLink: 'https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05',
     features: [
       'Everything in Premium, forever',
       'Founding supporter badge',
@@ -66,8 +64,6 @@ const PLANS = {
   },
 } as const
 
-type PlanKey = keyof typeof PLANS
-
 const BRAND = '#6366f1'
 
 const TRUST = [
@@ -79,8 +75,7 @@ const TRUST = [
 
 function CheckoutFlow() {
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const planKey = (searchParams.get('plan') ?? 'pro') as PlanKey
+  const planKey = getPlanKey(searchParams.get('plan'))
   const coupon = searchParams.get('coupon') ?? ''
   const userId = searchParams.get('uid') ?? ''
 
@@ -91,11 +86,10 @@ function CheckoutFlow() {
 
   const handlePay = () => {
     setStep('processing')
-    const params = new URLSearchParams()
-    if (userId) params.set('client_reference_id', userId)
-    if (coupon) params.set('prefilled_promo_code', coupon)
-    const qs = params.toString()
-    window.location.href = `${plan.stripeLink}${qs ? `?${qs}` : ''}`
+    window.location.href = buildStripePaymentLink(planKey, {
+      client_reference_id: userId || undefined,
+      prefilled_promo_code: coupon || undefined,
+    })
   }
 
   return (
@@ -231,7 +225,7 @@ function CheckoutFlow() {
             </div>
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-              <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(15,23,42,0.35)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}>
+              <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', color: 'rgba(15,23,42,0.35)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}>
                 ← Go back
               </button>
             </div>

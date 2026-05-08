@@ -9,6 +9,7 @@ import {
   BarChart2, Smartphone, ShieldCheck, Lock,
   ChevronDown, ChevronUp, Users, ArrowRight,
 } from 'lucide-react'
+import { PLAN_PAYMENT_LINKS } from '@/lib/stripe-payment-links'
 
 const FUND_FEATURES = [
   {
@@ -63,24 +64,48 @@ const FUND_FEATURES = [
 
 const PRESETS = [5, 10, 25, 50, 100, 250]
 
-const DONATION_TIER_CONTENT = [
+const STRIPE_DONATION_TIERS = [
+  {
+    amount: 5,
+    name: 'Supporter Donation',
+    tag: 'Low Friction',
+    description: 'A fast, low-friction way to keep Espeezy online and moving.',
+    href: 'https://donate.stripe.com/00w8wPbhO16wfdufa07wA08',
+  },
+  {
+    amount: 10,
+    name: 'Momentum Donation',
+    tag: 'Roadmap Boost',
+    description: 'A simple step up that helps fund infrastructure and short development pushes.',
+    href: 'https://donate.stripe.com/aFacN55Xu5mM6GYbXO7wA09',
+  },
   {
     amount: 15,
     name: 'Builder Donation',
     tag: 'Feature Sprint',
     description: 'A low-friction way to directly fund a meaningful slice of product work.',
+    href: 'https://donate.stripe.com/00wdR91He02s5CU5zq7wA0a',
+  },
+  {
+    amount: 25,
+    name: 'Sprint Donation',
+    tag: 'Roadmap Boost',
+    description: 'Push a roadmap item forward faster with a stronger one-off contribution.',
+    href: 'https://donate.stripe.com/5kQdR92Li5mM9Ta1ja7wA0b',
   },
   {
     amount: 50,
     name: 'Sponsor Donation',
     tag: 'Higher Intent',
     description: 'Back a larger chunk of engineering, infrastructure, or AI feature delivery.',
+    href: 'https://donate.stripe.com/aFa8wP0Da7uU0iA6Du7wA0c',
   },
   {
     amount: 100,
     name: 'Patron Donation',
     tag: 'Mission Support',
     description: 'A strong supporter tier for people who want to materially move the roadmap forward.',
+    href: 'https://donate.stripe.com/dRm6oH3Pm9D23uM1ja7wA0d',
   },
 ] as const
 
@@ -98,7 +123,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
     name: 'Espeezy Pro',
     price: 'GBP 4.99 / month',
     tag: 'Best Place To Start',
-    href: '/checkout?plan=pro',
+    href: PLAN_PAYMENT_LINKS.pro,
     cta: 'Choose Pro',
     description: 'The main paid plan for students who want better execution, deeper analytics, and a measurable academic edge.',
     features: ['Unlimited workspaces', 'AI Study Coach credits', 'Personal performance insights'],
@@ -107,7 +132,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
     name: 'Espeezy Premium',
     price: 'GBP 14.99 / month',
     tag: 'Advanced Workflows',
-    href: '/checkout?plan=premium',
+    href: PLAN_PAYMENT_LINKS.premium,
     cta: 'Choose Premium',
     description: 'For team leads and heavier collaboration workflows that need deeper analytics and intervention tools.',
     features: ['Everything in Pro', 'Advanced AI access', 'Academic integrity reports'],
@@ -116,14 +141,14 @@ const STRIPE_SUPPORT_PRODUCTS = [
     name: 'Premium Lifetime Access',
     price: 'GBP 49.00 one-time',
     tag: 'Founder Offer',
-    href: '/checkout?plan=lifetime',
+    href: PLAN_PAYMENT_LINKS.lifetime,
     cta: 'Claim Lifetime',
     description: 'A limited early-supporter product for permanent Premium access without recurring billing.',
     features: ['Everything in Premium', 'Founder badge', 'Legacy pricing protection'],
   },
 ] as const
 
-const DEFAULT_FEATURED_SUPPORT_LINK = 'https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04'
+const DEFAULT_FEATURED_SUPPORT_LINK = PLAN_PAYMENT_LINKS.pro
 
 const TESTIMONIALS = [
   { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
@@ -141,32 +166,15 @@ async function fetchDonationTotal(): Promise<{ total_cents: number; count: numbe
 }
 
 function getDonationFallbackLink() {
-  return process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK?.trim() || ''
+  return process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK?.trim() || STRIPE_DONATION_TIERS[0].href
 }
 
 function getFeaturedSupportLink() {
   return process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK?.trim() || DEFAULT_FEATURED_SUPPORT_LINK
 }
 
-function getTierDonationOptions() {
-  return [
-    {
-      ...DONATION_TIER_CONTENT[0],
-      href: process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_15?.trim() || '',
-    },
-    {
-      ...DONATION_TIER_CONTENT[1],
-      href: process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_50?.trim() || '',
-    },
-    {
-      ...DONATION_TIER_CONTENT[2],
-      href: process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_100?.trim() || '',
-    },
-  ] as const
-}
-
 export default function FundPage() {
-  const donationTierOptions = getTierDonationOptions()
+  const donationTierOptions = STRIPE_DONATION_TIERS
   const [customAmount, setCustomAmount] = useState('')
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
   const [donorName, setDonorName] = useState('')
@@ -185,10 +193,14 @@ export default function FundPage() {
 
   useEffect(() => {
     refreshTotals()
+    const interval = setInterval(refreshTotals, 30_000)
     // Re-fetch when user returns to tab (e.g. after Stripe redirect back)
     const onFocus = () => refreshTotals()
     window.addEventListener('focus', onFocus)
-    return () => window.removeEventListener('focus', onFocus)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocus)
+    }
   }, [refreshTotals])
 
   const getFinalAmount = () => {
@@ -239,8 +251,13 @@ export default function FundPage() {
   const totalRaised = (donationTotal.total_cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
   const useDonationTier = (amount: number) => {
-    setSelectedPreset(amount)
-    setCustomAmount('')
+    if (PRESETS.includes(amount)) {
+      setSelectedPreset(amount)
+      setCustomAmount('')
+    } else {
+      setSelectedPreset(null)
+      setCustomAmount(String(amount))
+    }
     document.getElementById('donate-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -487,21 +504,19 @@ export default function FundPage() {
       <section style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(4rem, 7vw, 5rem)', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ maxWidth: '720px', marginBottom: '2rem' }}>
-            <div style={{ marginBottom: '0.5rem', display: 'inline-flex', padding: '4px 12px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '100px' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Donation Tiers</span>
+              <div style={{ marginBottom: '0.5rem', display: 'inline-flex', padding: '4px 12px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '100px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Donation Tiers</span>
+              </div>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '0.875rem 0 0.5rem', color: '#0f172a' }}>
+                Live Stripe support links for the supporter ladder.
+              </h2>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.92rem', lineHeight: 1.65 }}>
+                These are wired directly to the current GBP 5, 10, 15, 25, 50, and 100 Stripe payment links so supporters can jump straight into checkout from the fund page.
+              </p>
             </div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '0.875rem 0 0.5rem', color: '#0f172a' }}>
-              Quick Stripe links for larger support tiers.
-            </h2>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '0.92rem', lineHeight: 1.65 }}>
-              Configure dedicated Stripe payment links for GBP 15, 50, and 100 donations. If a link is not configured yet, the card falls back to the custom donation form with the amount preselected.
-            </p>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-            {donationTierOptions.map((tier) => {
-              const hasLink = Boolean(tier.href)
-              return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+              {donationTierOptions.map((tier) => (
                 <div key={tier.amount} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', padding: '1.25rem', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '16px', boxShadow: '0 1px 4px rgba(15,23,42,0.05)' }}>
                   <div>
                     <div style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '999px', background: 'rgba(16,185,129,0.08)', color: '#059669', fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>{tier.tag}</div>
@@ -509,21 +524,17 @@ export default function FundPage() {
                     <div style={{ marginTop: '0.25rem', fontSize: '0.95rem', fontWeight: 800, color: '#059669' }}>GBP {tier.amount}</div>
                   </div>
                   <p style={{ margin: 0, color: '#64748b', fontSize: '0.84rem', lineHeight: 1.6 }}>{tier.description}</p>
-                  {hasLink ? (
-                    <a href={tier.href} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: 'var(--brand)', color: '#ffffff', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 800 }}>
-                      Open Stripe payment link <ArrowRight size={14} />
-                    </a>
-                  ) : (
-                    <button type="button" onClick={() => useDonationTier(tier.amount)} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid rgba(15,23,42,0.1)', color: '#0f172a', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}>
-                      Use custom checkout instead <ArrowRight size={14} />
-                    </button>
-                  )}
+                  <a href={tier.href} aria-label={`Open the ${tier.name} Stripe payment link`} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: 'var(--brand)', color: '#ffffff', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 800 }}>
+                    Open Stripe payment link <ArrowRight size={14} />
+                  </a>
+                  <button type="button" onClick={() => useDonationTier(tier.amount)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid rgba(15,23,42,0.1)', color: '#0f172a', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}>
+                    Use custom checkout instead <ArrowRight size={14} />
+                  </button>
                 </div>
-              )
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       <section style={{ padding: 'clamp(4rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem)', borderTop: '1px solid rgba(15,23,42,0.07)', position: 'relative', zIndex: 1, background: '#f8fafc' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
