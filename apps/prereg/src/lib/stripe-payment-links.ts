@@ -2,7 +2,7 @@
 const LIVE_LINKS = {
   pro:      'https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04',
   premium:  'https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06',
-  lifetime: 'https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05',
+  lifetime: 'https://buy.stripe.com/aFacN5bhO02s7L25zq7wA0e',
 } as const
 
 export const PLAN_PAYMENT_LINKS = {

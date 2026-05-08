@@ -48,7 +48,7 @@ const PLANS = {
   },
   lifetime: {
     name: 'Premium Lifetime Access',
-    price: 'GBP 49.00',
+    price: 'GBP 149.00',
     period: 'one-time',
     badge: 'First 100 Only — Limited Forever',
     hasTrial: false,

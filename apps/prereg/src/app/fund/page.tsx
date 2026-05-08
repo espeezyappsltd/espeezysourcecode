@@ -133,7 +133,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
   },
   {
     name: 'Premium Lifetime Access',
-    price: 'GBP 49.00 one-time',
+    price: 'GBP 149.00 one-time',
     tag: 'First 100 Only \u2014 Limited',
     href: PLAN_PAYMENT_LINKS.lifetime,
     cta: 'Claim Lifetime',
