@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   turbopack: {
+    root: path.resolve(__dirname),
     resolveAlias: {
       '@shared': path.resolve(__dirname, '../prereg/src'),
     },

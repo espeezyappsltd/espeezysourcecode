@@ -80,7 +80,7 @@ async function findExistingRegistrationByEmail(email: string) {
   return data[0] as Record<string, unknown>
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   if (!getSupabaseConfig()) {
     return NextResponse.json({ count: 0 })
   }
