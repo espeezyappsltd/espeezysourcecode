@@ -69,18 +69,17 @@ const DONATION_TIER_CONTENT = [
     name: 'Starter Donation',
     tag: 'Quick Support',
     description: 'A lightweight way to back Espeezy and help fund active development.',
-    paymentLinkId: 'plink_1TSHkjGi695k7CdbTKSmS1Np',
-    fallbackHref: 'https://donate.stripe.com/00w8wPbhO16wfdufa07wA08',
   },
   {
     amount: 10,
     name: 'Supporter Donation',
     tag: 'Most Popular',
     description: 'A stronger contribution tier to accelerate feature delivery and platform reliability.',
-    paymentLinkId: 'plink_1TUeuhGi695k7CdbNIbyJ0AD',
-    fallbackHref: 'https://donate.stripe.com/aFacN55Xu5mM6GYbXO7wA09',
   },
 ] as const
+
+const DONATION_LINK_5 = process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_5?.trim() || 'https://donate.stripe.com/00w8wPbhO16wfdufa07wA08'
+const DONATION_LINK_10 = process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_10?.trim() || 'https://donate.stripe.com/aFacN55Xu5mM6GYbXO7wA09'
 
 const STRIPE_SUPPORT_PRODUCTS = [
   {
@@ -147,14 +146,16 @@ function getFeaturedSupportLink() {
 }
 
 function getTierDonationOptions() {
-  return DONATION_TIER_CONTENT.map((tier) => {
-    const envKey = `NEXT_PUBLIC_STRIPE_DONATION_LINK_${tier.amount}` as const
-    const envHref = process.env[envKey]?.trim() || ''
-    return {
-      ...tier,
-      href: envHref || tier.fallbackHref,
-    }
-  })
+  return [
+    {
+      ...DONATION_TIER_CONTENT[0],
+      href: DONATION_LINK_5,
+    },
+    {
+      ...DONATION_TIER_CONTENT[1],
+      href: DONATION_LINK_10,
+    },
+  ]
 }
 
 export default function FundPage() {
@@ -486,7 +487,7 @@ export default function FundPage() {
               Quick Stripe links for larger support tiers.
             </h2>
             <p style={{ margin: 0, color: '#64748b', fontSize: '0.92rem', lineHeight: 1.65 }}>
-              Support via dedicated Stripe payment links for GBP 5 and 10 donations. If needed, these links can still be overridden via NEXT_PUBLIC_STRIPE_DONATION_LINK_5 and NEXT_PUBLIC_STRIPE_DONATION_LINK_10.
+              Support via dedicated Stripe payment links for GBP 5 and GBP 10 donations. If needed, these links can still be overridden via NEXT_PUBLIC_STRIPE_DONATION_LINK_5 and NEXT_PUBLIC_STRIPE_DONATION_LINK_10.
             </p>
           </div>
 
