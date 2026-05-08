@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import Image from 'next/image'
 
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
@@ -77,7 +77,7 @@ export default function PreregFooter() {
                 flexShrink: 0,
               }}
             >
-              <img src="/brand_logo2.svg" style={{ width: '20px', height: '20px', objectFit: 'contain' }} alt="" aria-hidden="true" />
+              <Image src="/brand_logo2.svg" width={20} height={20} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" />
             </div>
             <span style={{ fontWeight: 900, fontSize: '1rem', color: '#f1f5f9', letterSpacing: '-0.01em' }}>Espeezy</span>
           </div>
@@ -118,14 +118,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {PLATFORM_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -139,14 +139,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {DOCS_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -184,14 +184,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '2rem' }}>
             {INFRA_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -202,14 +202,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {LEGAL_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>

@@ -11,56 +11,58 @@ import Link from 'next/link'
 
 const PLANS = {
   pro: {
-    name: 'Pro Scholar',
-    price: '$9',
+    name: 'Espeezy Pro',
+    price: 'GBP 4.99',
     period: '/month',
-    badge: 'Most Popular',
+    badge: 'Best Place To Start',
     hasTrial: true,
     stripeLink: 'https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04',
     features: [
       'Unlimited group workspaces',
-      'AI Study Coach (100 queries/month)',
-      'Priority task assignment',
+      'Deeper contribution analytics',
+      'AI Study Coach credits each month',
+      'Priority task templates and smarter planning',
       'Verified contributor badge',
-      'Real-time co-editing',
-      'Stripe earnings payout',
+      'Better export formats for proof of work',
+      'Personal performance insights',
     ],
-    description: 'For serious students who want to maximise every collaboration session.',
+    description: 'The default paid plan for serious students who want better execution, clearer contribution visibility, and a measurable academic edge.',
   },
   premium: {
-    name: 'Premium Scholar',
-    price: '$19',
+    name: 'Espeezy Premium',
+    price: 'GBP 14.99',
     period: '/month',
-    badge: 'Best Value',
+    badge: 'Power Users',
     hasTrial: true,
     stripeLink: 'https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06',
     features: [
       'Everything in Pro',
-      'Unlimited AI queries',
+      'Advanced AI Study Coach access',
+      'Group health score and intervention suggestions',
+      'High-depth contribution analytics',
       'Academic integrity reports',
-      'Custom group branding',
+      'Advanced reporting and presentation-ready exports',
       'Priority support (48h SLA)',
-      'Annual digital certificate',
       'Early access to new features',
     ],
-    description: 'For team leads and students who need every edge available.',
+    description: 'For team leads and high-intensity collaborators running larger, higher-stakes academic workflows.',
   },
   lifetime: {
-    name: 'Lifetime Founding Scholar',
-    price: '$149',
+    name: 'Premium Lifetime Access',
+    price: 'GBP 49.00',
     period: 'one-time',
     badge: 'Limited: 100 seats',
     hasTrial: false,
     stripeLink: 'https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05',
     features: [
       'Everything in Premium, forever',
-      'Founding Scholar badge',
-      'All future features included',
-      'Direct roadmap input',
-      'Blockchain-anchored certificate',
-      'Priority institutional onboarding',
+      'Founding supporter badge',
+      'All future protocol updates included',
+      'Beta feature access as they ship',
+      'Permanent legacy pricing protection',
+      'Early supporter identity inside the product',
     ],
-    description: 'Secure your seat before the community grows. No renewal, ever.',
+    description: 'A limited founder-style offer for early supporters who want permanent access without recurring billing.',
   },
 } as const
 
@@ -85,6 +87,7 @@ function CheckoutFlow() {
   const plan = PLANS[planKey] ?? PLANS.pro
   const [step, setStep] = useState<'review' | 'processing'>('review')
   const [hovered, setHovered] = useState(false)
+  const isProPlan = planKey === 'pro'
 
   const handlePay = () => {
     setStep('processing')
@@ -142,7 +145,18 @@ function CheckoutFlow() {
                 <Gift size={16} color={BRAND} style={{ flexShrink: 0 }} />
                 <div>
                   <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>14-day free trial, no charge today</span>
-                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.5)', fontWeight: 500, marginTop: '1px' }}>Cancel anytime before the trial ends and pay nothing.</span>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.5)', fontWeight: 500, marginTop: '1px' }}>Start with Pro first. Cancel anytime before the trial ends and pay nothing.</span>
+                </div>
+              </motion.div>
+            )}
+
+            {isProPlan && (
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '14px', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(15,23,42,0.04)' }}>
+                <Sparkles size={16} color={BRAND} style={{ flexShrink: 0 }} />
+                <div>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>Pro is the main paid plan</span>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.55)', fontWeight: 500, marginTop: '1px' }}>Premium is for heavier workflows later. Pro is the cleanest starting point for most students.</span>
                 </div>
               </motion.div>
             )}
@@ -224,7 +238,7 @@ function CheckoutFlow() {
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1.5rem', color: 'rgba(15,23,42,0.3)', fontSize: '0.75rem', fontWeight: 600 }}>
               <Users size={13} />
-              <span>Join thousands of students already on Espeezy</span>
+              <span>{isProPlan ? 'Most students should start with Pro' : 'Upgrade when your workflow needs more depth'}</span>
             </div>
           </motion.div>
         ) : (

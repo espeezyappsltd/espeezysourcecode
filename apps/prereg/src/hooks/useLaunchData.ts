@@ -57,6 +57,16 @@ export function useLaunchData() {
   const [registeredCount, setRegisteredCount] = useState(0)
   const [configLoaded, setConfigLoaded] = useState(false)
 
+  const refreshCount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/preregister')
+      const { count } = await res.json()
+      if (typeof count === 'number') setRegisteredCount(count)
+    } catch {
+      // silently ignore
+    }
+  }, [])
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -74,16 +84,25 @@ export function useLaunchData() {
             preregister_goal: '5000',
           }))
         }
-        if (count) setRegisteredCount(count)
-      } catch (_) {
+        if (typeof count === 'number') setRegisteredCount(count)
+      } catch {
         // Use defaults on failure
       }
       setConfigLoaded(true)
     }
     load()
-  }, [])
+
+    // Poll every 30s so count stays fresh
+    const pollId = setInterval(refreshCount, 30_000)
+    // Re-fetch when the tab regains focus (e.g. returning from Stripe)
+    window.addEventListener('focus', refreshCount)
+    return () => {
+      clearInterval(pollId)
+      window.removeEventListener('focus', refreshCount)
+    }
+  }, [refreshCount])
 
   const timeLeft = useCountdown(config.launch_date)
 
-  return { config, registeredCount, configLoaded, timeLeft, setRegisteredCount }
+  return { config, registeredCount, configLoaded, timeLeft, setRegisteredCount, refreshCount }
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import NavigationProgress from '@/components/NavigationProgress'
 import PreregFooter from '@/components/PreregFooter'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: 'Espeezy: Early Access',
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NavigationProgress />
         {children}
         <PreregFooter />
+        <Analytics />
       </body>
     </html>
   )
