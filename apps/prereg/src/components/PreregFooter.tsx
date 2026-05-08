@@ -1,7 +1,5 @@
 'use client'
 
-import Image from 'next/image'
-
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
@@ -77,7 +75,15 @@ export default function PreregFooter() {
                 flexShrink: 0,
               }}
             >
-              <Image src="/brand_logo2.svg" width={20} height={20} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand_logo2.svg"
+                width={20}
+                height={20}
+                style={{ objectFit: 'contain' }}
+                alt=""
+                aria-hidden="true"
+              />
             </div>
             <span style={{ fontWeight: 900, fontSize: '1rem', color: '#f1f5f9', letterSpacing: '-0.01em' }}>Espeezy</span>
           </div>

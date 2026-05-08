@@ -322,7 +322,10 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
 	if (!getSupabaseConfig()) {
-		return jsonWithCors(req, { error: 'Supabase is not configured.', count: 0 }, { status: 503 })
+		return jsonWithCors(req, {
+			count: 0,
+			warning: 'Supabase is not configured.',
+		})
 	}
 
 	try {

@@ -10,10 +10,10 @@ export const metadata: Metadata = {
   description: 'The easiest way for students to work together on group projects.',
   icons: {
     icon: [
-      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.ico', type: 'image/x-icon' },
     ],
-    shortcut: '/favicon.png',
-    apple: '/favicon.png',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
   appleWebApp: {
     capable: true,

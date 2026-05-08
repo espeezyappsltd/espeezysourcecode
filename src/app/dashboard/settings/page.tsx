@@ -38,6 +38,7 @@ import { logActivity } from '@/utils/logging'
 import { TabName } from '@/types/ui'
 import { Profile } from '@/types/auth'
 import { Group, Achievement } from '@/types/database'
+import { buildStripePaymentLink } from '@/lib/stripe-payment-links'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 
@@ -249,12 +250,12 @@ export default function SettingsPage() {
     }
 
     if (plan === 'pro') {
-      window.location.href = `https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04?client_reference_id=${profile.id}`
+      window.location.href = buildStripePaymentLink('pro', { client_reference_id: profile.id })
       return
     }
 
     if (plan === 'premium') {
-      window.location.href = `https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06?client_reference_id=${profile.id}`
+      window.location.href = buildStripePaymentLink('premium', { client_reference_id: profile.id })
       return
     }
   }

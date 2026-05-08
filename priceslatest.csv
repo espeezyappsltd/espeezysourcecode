@@ -1,0 +1,24 @@
+Price ID,Product ID,Product Name,Product Statement Descriptor,Product Tax Code,Description,Created (UTC),Amount,Currency,Interval,Interval Count,Usage Type,Aggregate Usage,Billing Scheme,Trial Period Days,Tax Behavior
+price_1TUfF7Gi695k7CdbqkRb5MR7,prod_UTcUDluVDTKyMs,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:38,50.00,gbp,,,,,per_unit,,unspecified
+price_1TUfAmGi695k7Cdbug9ReSsM,prod_UTcPKHdmE0syPk,Espeezy Donation,,txcd_10103000,,2026-05-08 03:33,100.00,gbp,,,,,per_unit,,unspecified
+price_1TUf9uGi695k7CdbUyHGVSDT,prod_UTcO5CNy5uP6N2,Espeezy Donation,,txcd_10103000,,2026-05-08 03:33,50.00,gbp,,,,,per_unit,,unspecified
+price_1TUf8sGi695k7Cdb5kKIUFqf,prod_UTcNJMCMmAD0BI,Espeezy Donation,,txcd_10103000,,2026-05-08 03:31,25.00,gbp,,,,,per_unit,,unspecified
+price_1TUf7pGi695k7Cdbv6toq1qn,prod_UTcMNVZmMbY1Sj,Espeezy Donation,,txcd_10103000,,2026-05-08 03:30,15.00,gbp,,,,,per_unit,,unspecified
+price_1TUf6rGi695k7Cdb6uwxOsQb,prod_UTcL7kkUhUUHZO,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:29,10.00,gbp,,,,,per_unit,,unspecified
+price_1TUf6dGi695k7CdbiLCmhIaT,prod_UTcL1Xc1QqyUJu,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:29,10.00,gbp,,,,,per_unit,,unspecified
+price_1TUf6RGi695k7Cdb6ERwuxXb,prod_UTcLVmr2IRv7M1,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:29,10.00,gbp,,,,,per_unit,,unspecified
+price_1TUf6FGi695k7CdbxMmVg6wg,prod_UTcK4ria2yHpKe,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:29,10.00,gbp,,,,,per_unit,,unspecified
+price_1TUf0dGi695k7CdbWg3TETjm,prod_UTcFBk4tCaSzd8,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:23,5.00,gbp,,,,,per_unit,,unspecified
+price_1TUf0NGi695k7Cdbn64jkC7L,prod_UTcENlMHWW5eDA,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:23,5.00,gbp,,,,,per_unit,,unspecified
+price_1TUexYGi695k7Cdb7QE3ZGeM,prod_UTcBMHfTdtab7m,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:20,5.00,gbp,,,,,per_unit,,unspecified
+price_1TUexIGi695k7Cdb2gtZlv4p,prod_UTcBUpykRb2rL7,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:20,5.00,gbp,,,,,per_unit,,unspecified
+price_1TUex2Gi695k7CdbMvaDPrji,prod_UTcBKevOWgm0xx,(Copy) Espeezy Donation,,txcd_10103000,,2026-05-08 03:19,5.00,gbp,,,,,per_unit,,unspecified
+price_1TUetcGi695k7CdbMcBcaxpL,prod_UTc7lUVAgbu1QM,Espeezy Donation,,txcd_10103000,,2026-05-08 03:16,10.00,gbp,,,,,per_unit,,unspecified
+price_1TSHbDGi695k7CdbLRtkEKIZ,prod_UR9v7Y4p1RdHxK,Espeezy Donation,,txcd_10103000,,2026-05-01 13:59,5.00,gbp,,,,,per_unit,,unspecified
+price_1TSGK9Gi695k7CdbIKAdoprv,prod_UR8bi78VS0ksXv,Espeezy Standard,,txcd_10103000,,2026-05-01 12:37,0.00,gbp,,,,,per_unit,,unspecified
+price_1TRirIGi695k7CdbYVZqH32w,prod_UQa17CiNJCu3OV,Espeezy Premium Lifetime Access (Limited),,txcd_10103000,,2026-04-30 00:53,49.00,gbp,,,,,per_unit,,unspecified
+price_1TNoFhGi695k7CdbNn5FQuHf,prod_UMXKHMDzwJAu69,Espeezy Premium,,txcd_10103000,,2026-04-19 05:50,14.99,gbp,month,1,licensed,,per_unit,,unspecified
+price_1TNoBfGi695k7CdbYCcZIHIT,prod_UMXGwhpYWX0mgR,Espeezy Pro,,txcd_10103000,,2026-04-19 05:46,4.99,gbp,month,1,licensed,,per_unit,,unspecified
+price_1TNgZZGi695k7Cdbg4bTZeFq,prod_UMPO0MghQQrB6B,GroupFlow2026 Premium Lifetime Access,,txcd_10103000,,2026-04-18 21:38,99.00,gbp,,,,,per_unit,,unspecified
+price_1SMV8gGi695k7CdbLHP3fJJZ,prod_TJ7N3M4HVGTiER,Lifetime Access,,,,2025-10-26 14:41,24.99,gbp,,,,,per_unit,,unspecified
+price_1SMV7EGi695k7CdbvHBedmyl,prod_TJ7LvsUlkHFN4n,GroupFlow2026 Pro Features,,txcd_10103000,,2025-10-26 14:40,2.99,gbp,month,1,licensed,,per_unit,,unspecified

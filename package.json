@@ -43,6 +43,7 @@
     "react-is": "^19.2.5",
     "recharts": "^3.8.1",
     "stripe": "^18.5.0",
+    "typecheck": "^0.1.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
