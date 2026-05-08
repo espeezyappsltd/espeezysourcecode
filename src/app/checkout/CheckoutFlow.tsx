@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ShieldCheck, Sparkles, Lock, CheckCircle2, ArrowRight, Loader2,
@@ -72,6 +72,7 @@ const TRUST = [
 ]
 
 export default function CheckoutFlow() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const planKey = getPlanKey(searchParams.get('plan'))
   const coupon = searchParams.get('coupon') ?? ''
