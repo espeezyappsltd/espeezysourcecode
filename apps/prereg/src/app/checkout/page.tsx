@@ -86,6 +86,9 @@ function CheckoutFlow() {
 
   const handlePay = () => {
     setStep('processing')
+    // NOTE: Each Stripe Payment Link must be configured in the Stripe dashboard to
+    // redirect to: https://{your-prereg-domain}/checkout/success?plan={pro|premium|lifetime}
+    // after a successful payment. The ?plan= param drives the per-tier success page.
     window.location.href = buildStripePaymentLink(planKey, {
       client_reference_id: userId || undefined,
       prefilled_promo_code: coupon || undefined,
