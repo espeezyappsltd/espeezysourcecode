@@ -143,6 +143,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
 ] as const
 
 const DEFAULT_FEATURED_SUPPORT_LINK = PLAN_PAYMENT_LINKS.pro
+const LIFETIME_LIMIT = 100
 
 const TESTIMONIALS = [
   { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
@@ -157,6 +158,15 @@ async function fetchDonationTotal(): Promise<{ total_cents: number; count: numbe
     if (typeof d.total_cents === 'number') return d
   } catch {}
   return { total_cents: 0, count: 0 }
+}
+
+async function fetchLifetimeSeats(): Promise<number | null> {
+  try {
+    const res = await fetch('/api/lifetime-seats', { cache: 'no-store' })
+    const data = await res.json()
+    if (typeof data.count === 'number') return data.count
+  } catch {}
+  return null
 }
 
 function getDonationFallbackLink() {
@@ -180,22 +190,33 @@ export default function FundPage() {
   const [submitError, setSubmitError] = useState('')
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
   const [donationTotal, setDonationTotal] = useState({ total_cents: 0, count: 0 })
+  const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
 
   const refreshTotals = useCallback(() => {
     fetchDonationTotal().then(setDonationTotal)
   }, [])
 
+  const refreshLifetimeSeats = useCallback(() => {
+    fetchLifetimeSeats().then(setLifetimeSeatsUsed)
+  }, [])
+
   useEffect(() => {
     refreshTotals()
+    refreshLifetimeSeats()
     const interval = setInterval(refreshTotals, 30_000)
+    const seatsInterval = setInterval(refreshLifetimeSeats, 30_000)
     // Re-fetch when user returns to tab (e.g. after Stripe redirect back)
-    const onFocus = () => refreshTotals()
+    const onFocus = () => {
+      refreshTotals()
+      refreshLifetimeSeats()
+    }
     window.addEventListener('focus', onFocus)
     return () => {
       clearInterval(interval)
+      clearInterval(seatsInterval)
       window.removeEventListener('focus', onFocus)
     }
-  }, [refreshTotals])
+  }, [refreshTotals, refreshLifetimeSeats])
 
   const getFinalAmount = () => {
     if (selectedPreset) return selectedPreset * 100
@@ -243,6 +264,8 @@ export default function FundPage() {
 
   const displayAmount = getFinalAmount() / 100
   const totalRaised = (donationTotal.total_cents / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 })
+  const lifetimeSoldOut = lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= LIFETIME_LIMIT
+  const lifetimeSeatsLeft = lifetimeSeatsUsed !== null ? Math.max(0, LIFETIME_LIMIT - lifetimeSeatsUsed) : null
 
   const useDonationTier = (amount: number) => {
     if (PRESETS.includes(amount)) {
@@ -465,11 +488,24 @@ export default function FundPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
             {STRIPE_SUPPORT_PRODUCTS.map((product) => (
+              (() => {
+                const isLifetime = product.name === 'Premium Lifetime Access'
+                const soldOut = isLifetime && lifetimeSoldOut
+                const lifetimeBadge = isLifetime && lifetimeSeatsLeft !== null
+                  ? (soldOut ? `Sold out (${LIFETIME_LIMIT}/${LIFETIME_LIMIT})` : `${lifetimeSeatsLeft} spots left`)
+                  : null
+
+                return (
               <div key={product.name} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem', background: '#ffffff', border: `1px solid ${product.name === 'Espeezy Pro' ? 'rgba(99,102,241,0.25)' : 'rgba(15,23,42,0.08)'}`, borderRadius: '16px', boxShadow: product.name === 'Espeezy Pro' ? '0 8px 30px rgba(99,102,241,0.08)' : '0 1px 4px rgba(15,23,42,0.05)' }}>
                 <div>
                   <div style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '999px', background: product.name === 'Espeezy Pro' ? 'rgba(99,102,241,0.08)' : 'rgba(15,23,42,0.05)', color: product.name === 'Espeezy Pro' ? 'var(--brand)' : '#64748b', fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>{product.tag}</div>
                   <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a' }}>{product.name}</h3>
                   <div style={{ marginTop: '0.25rem', fontSize: '0.92rem', fontWeight: 800, color: product.name === 'Espeezy Pro' ? 'var(--brand)' : '#059669' }}>{product.price}</div>
+                  {lifetimeBadge && (
+                    <div style={{ marginTop: '0.35rem', fontSize: '0.74rem', fontWeight: 700, color: soldOut ? '#dc2626' : '#059669' }}>
+                      {lifetimeBadge}
+                    </div>
+                  )}
                 </div>
                 <p style={{ margin: 0, color: '#64748b', fontSize: '0.84rem', lineHeight: 1.6 }}>{product.description}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -480,10 +516,18 @@ export default function FundPage() {
                     </div>
                   ))}
                 </div>
-                <Link href={product.href} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: product.name === 'Espeezy Pro' ? 'var(--brand)' : '#f8fafc', border: product.name === 'Espeezy Pro' ? 'none' : '1px solid rgba(15,23,42,0.1)', color: product.name === 'Espeezy Pro' ? '#ffffff' : '#0f172a', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 800 }}>
-                  {product.cta} <ArrowRight size={14} />
-                </Link>
+                {soldOut ? (
+                  <div style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: '#e2e8f0', border: '1px solid #cbd5e1', color: '#64748b', fontSize: '0.82rem', fontWeight: 800 }}>
+                    Offer Expired
+                  </div>
+                ) : (
+                  <Link href={product.href} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: product.name === 'Espeezy Pro' ? 'var(--brand)' : '#f8fafc', border: product.name === 'Espeezy Pro' ? 'none' : '1px solid rgba(15,23,42,0.1)', color: product.name === 'Espeezy Pro' ? '#ffffff' : '#0f172a', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 800 }}>
+                    {product.cta} <ArrowRight size={14} />
+                  </Link>
+                )}
               </div>
+                )
+              })()
             ))}
           </div>
 
