@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase-client'
-import PreregFooter from '@shared/components/PreregFooter'
+import PreregFooter from '@/components/PreregFooter'
 
 const FEATURES = [
   {

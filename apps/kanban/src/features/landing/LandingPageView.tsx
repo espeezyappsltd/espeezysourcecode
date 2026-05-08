@@ -1,7 +1,7 @@
 'use client'
 
 import type { User } from '@supabase/supabase-js'
-import PreregFooter from '@shared/components/PreregFooter'
+import PreregFooter from '@/components/PreregFooter'
 import { BOARD_PREVIEW, FEATURES } from './content'
 import type { LoginStatus, WaitlistStatus } from './useLandingPage'
 
