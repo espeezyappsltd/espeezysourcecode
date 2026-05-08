@@ -2,9 +2,15 @@
 
 import { LandingPageView } from '@/features/landing/LandingPageView'
 import { useLandingPage } from '@/features/landing/useLandingPage'
+import LiveChatWidget from '@/components/LiveChatWidget'
 
 export default function KanbanPage() {
   const landingPage = useLandingPage()
 
-  return <LandingPageView {...landingPage} onLogin={landingPage.handleLogin} onLogout={landingPage.handleLogout} onNotify={landingPage.handleNotify} />
+  return (
+    <>
+      <LandingPageView {...landingPage} onLogin={landingPage.handleLogin} onLogout={landingPage.handleLogout} onNotify={landingPage.handleNotify} />
+      <LiveChatWidget appScope='kanban' />
+    </>
+  )
 }

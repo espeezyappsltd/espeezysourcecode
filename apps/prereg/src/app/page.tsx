@@ -12,6 +12,7 @@ import {
 import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
+import LiveChatWidget from '@/components/LiveChatWidget'
 
 const COMING_FEATURES = [
   { icon: <Cpu size={20} />, title: 'Your Personal AI Coach', desc: 'Imagine having a smart tutor that knows your course content, adapts to how you learn best, and helps you crush your assignments.', tag: 'Smart Learning' },
@@ -362,6 +363,7 @@ export default function PreRegisterPage() {
         </motion.div>
       </section>
 
+      <LiveChatWidget appScope='prereg' />
       </main>
       </div>
     </>

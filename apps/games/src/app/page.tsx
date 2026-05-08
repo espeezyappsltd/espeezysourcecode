@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase-client'
 import PreregFooter from '@/components/PreregFooter'
+import LiveChatWidget from '@/components/LiveChatWidget'
 
 const FEATURES = [
   {
@@ -601,6 +602,7 @@ export default function GamesPage() {
         </a>
       </section>
 
+      <LiveChatWidget appScope='games' />
       <PreregFooter />
     </main>
   )
