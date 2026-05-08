@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'crypto'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
+const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
 
 const preregSchema = z.object({
   email: z.string().email().max(254),
@@ -24,6 +25,38 @@ function isValidReferralCode(code: unknown): code is string {
 
 function generateReferralCode(): string {
   return randomBytes(4).toString('hex').toUpperCase().slice(0, 8)
+}
+
+function getMainApi(req: Request): string | null {
+  const currentOrigin = new URL(req.url).origin
+  if (API_ORIGIN === currentOrigin) return null
+  return `${API_ORIGIN}/api/preregister`
+}
+
+async function proxyToMainApi(req: Request, method: 'GET' | 'POST') {
+  const mainApi = getMainApi(req)
+  if (!mainApi) return null
+
+  try {
+    const body = method === 'POST' ? await req.text() : undefined
+    const res = await fetch(mainApi, {
+      method,
+      headers: method === 'POST'
+        ? {
+            'Content-Type': req.headers.get('content-type') ?? 'application/json',
+            'x-forwarded-for': req.headers.get('x-forwarded-for') ?? '',
+            'user-agent': req.headers.get('user-agent') ?? '',
+          }
+        : undefined,
+      body,
+      cache: method === 'GET' ? 'no-store' : undefined,
+    })
+
+    const data = await res.json().catch(() => ({ error: 'Unexpected upstream response.' }))
+    return NextResponse.json(data, { status: res.status })
+  } catch {
+    return null
+  }
 }
 
 async function supaRest(
@@ -80,8 +113,10 @@ async function findExistingRegistrationByEmail(email: string) {
   return data[0] as Record<string, unknown>
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   if (!getSupabaseConfig()) {
+    const proxied = await proxyToMainApi(req, 'GET')
+    if (proxied) return proxied
     return NextResponse.json({ count: 0 })
   }
 
@@ -94,6 +129,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const supabaseConfig = getSupabaseConfig()
+  if (!supabaseConfig) {
+    const proxied = await proxyToMainApi(req, 'POST')
+    if (proxied) return proxied
+    return NextResponse.json({ error: 'Registration service temporarily unavailable.' }, { status: 503 })
+  }
+
   const body = await req.json().catch(() => null)
   const parsed = preregSchema.safeParse(body)
 
@@ -109,12 +151,6 @@ export async function POST(req: Request) {
   const ipRaw = (req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim()
   const ipHash = createHash('sha256').update(ipRaw + (process.env.IP_HASH_SALT ?? 'fallback')).digest('hex').slice(0, 16)
   const ua = (req.headers.get('user-agent') ?? '').slice(0, 500)
-  const supabaseConfig = getSupabaseConfig()
-
-  if (!supabaseConfig) {
-    return NextResponse.json({ error: 'Registration service not configured.' }, { status: 503 })
-  }
-
   try {
     const existing = await findExistingRegistrationByEmail(cleanEmail)
     if (existing) {
