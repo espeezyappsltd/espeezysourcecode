@@ -27,7 +27,7 @@
         "./src/*"
       ],
       "@shared-types/*": [
-        "../../shared/types/*"
+        "./src/types/*"
       ]
     }
   },
