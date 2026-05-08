@@ -103,6 +103,16 @@ const STRIPE_DONATION_TIERS = [
   },
 ] as const
 
+// Amount-specific Stripe links for direct checkout (preferred for preset buttons)
+const DONATION_PAYMENT_LINKS: Record<number, string> = {
+  5: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_5 ?? 'https://donate.stripe.com/00w8wPbhO16wfdufa07wA08').trim(),
+  10: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_10 ?? 'https://donate.stripe.com/aFacN55Xu5mM6GYbXO7wA09').trim(),
+  15: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_15 ?? 'https://donate.stripe.com/00wdR91He02s5CU5zq7wA0a').trim(),
+  25: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_25 ?? 'https://donate.stripe.com/5kQdR92Li5mM9Ta1ja7wA0b').trim(),
+  50: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_50 ?? 'https://donate.stripe.com/aFa8wP0Da7uU0iA6Du7wA0c').trim(),
+  100: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_100 ?? 'https://donate.stripe.com/dRm6oH3Pm9D23uM1ja7wA0d').trim(),
+}
+
 const STRIPE_SUPPORT_PRODUCTS = [
   {
     name: 'Espeezy Standard',
@@ -171,8 +181,16 @@ async function fetchLifetimeSeats(): Promise<number | null> {
   return null
 }
 
-function getDonationFallbackLink() {
-  return process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK?.trim() || null
+function getDonationFallbackLink(amount?: number, email?: string) {
+  const base = (amount ? DONATION_PAYMENT_LINKS[amount] : null)
+    || process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK?.trim()
+    || null
+
+  if (!base) return null
+  if (!email?.trim()) return base
+
+  const separator = base.includes('?') ? '&' : '?'
+  return `${base}${separator}prefilled_email=${encodeURIComponent(email.trim())}`
 }
 
 function getFeaturedSupportLink() {
@@ -263,6 +281,16 @@ export default function FundPage() {
     setSubmitError('')
     const amountCents = getFinalAmount()
     if (amountCents < 100) { setSubmitError('Minimum donation is £1.00'); return }
+
+    // For preset tiers, use direct Stripe payment links first (no API dependency).
+    if (selectedPreset && selectedPreset >= 5 && selectedPreset <= 100) {
+      const directLink = getDonationFallbackLink(selectedPreset, donorEmail)
+      if (directLink) {
+        window.location.href = directLink
+        return
+      }
+    }
+
     setSubmitting(true)
 
     // Try the Stripe Checkout Sessions API first
@@ -278,14 +306,14 @@ export default function FundPage() {
         return
       }
       // If API is unavailable (Stripe not configured) fall back to Payment Link
-      const paymentLink = getDonationFallbackLink()
+      const paymentLink = getDonationFallbackLink(selectedPreset ?? undefined, donorEmail)
       if (paymentLink) {
         window.location.href = paymentLink
         return
       }
       setSubmitError(data.error ?? 'Failed to start checkout. Please try again.')
     } catch {
-      const paymentLink = getDonationFallbackLink()
+      const paymentLink = getDonationFallbackLink(selectedPreset ?? undefined, donorEmail)
       if (paymentLink) {
         window.location.href = paymentLink
         return
@@ -598,7 +626,19 @@ export default function FundPage() {
                     <div style={{ marginTop: '0.25rem', fontSize: '0.95rem', fontWeight: 800, color: '#059669' }}>£{tier.amount}</div>
                   </div>
                   <p style={{ margin: 0, color: '#64748b', fontSize: '0.84rem', lineHeight: 1.6 }}>{tier.description}</p>
-                  <button type="button" onClick={() => useDonationTier(tier.amount)} aria-label={`Donate £${tier.amount} via ${tier.name}`} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: 'var(--brand)', color: '#ffffff', border: 'none', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const paymentLink = getDonationFallbackLink(tier.amount, donorEmail)
+                      if (paymentLink) {
+                        window.location.href = paymentLink
+                        return
+                      }
+                      useDonationTier(tier.amount)
+                    }}
+                    aria-label={`Donate £${tier.amount} via ${tier.name}`}
+                    style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: 'var(--brand)', color: '#ffffff', border: 'none', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}
+                  >
                     Donate £{tier.amount} <ArrowRight size={14} />
                   </button>
                 </div>
