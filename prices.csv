@@ -1,0 +1,9 @@
+Price ID,Product ID,Product Name,Product Statement Descriptor,Product Tax Code,Description,Created (UTC),Amount,Currency,Interval,Interval Count,Usage Type,Aggregate Usage,Billing Scheme,Trial Period Days,Tax Behavior
+price_1TSHbDGi695k7CdbLRtkEKIZ,prod_UR9v7Y4p1RdHxK,Espeezy Donation,,txcd_10103000,,2026-05-01 13:59,5.00,gbp,,,,,per_unit,,unspecified
+price_1TSGK9Gi695k7CdbIKAdoprv,prod_UR8bi78VS0ksXv,Espeezy Standard,,txcd_10103000,,2026-05-01 12:37,0.00,gbp,,,,,per_unit,,unspecified
+price_1TRirIGi695k7CdbYVZqH32w,prod_UQa17CiNJCu3OV,Espeezy Premium Lifetime Access (Limited),,txcd_10103000,,2026-04-30 00:53,49.00,gbp,,,,,per_unit,,unspecified
+price_1TNoFhGi695k7CdbNn5FQuHf,prod_UMXKHMDzwJAu69,Espeezy Premium,,txcd_10103000,,2026-04-19 05:50,14.99,gbp,month,1,licensed,,per_unit,,unspecified
+price_1TNoBfGi695k7CdbYCcZIHIT,prod_UMXGwhpYWX0mgR,Espeezy Pro,,txcd_10103000,,2026-04-19 05:46,4.99,gbp,month,1,licensed,,per_unit,,unspecified
+price_1TNgZZGi695k7Cdbg4bTZeFq,prod_UMPO0MghQQrB6B,GroupFlow2026 Premium Lifetime Access,,txcd_10103000,,2026-04-18 21:38,99.00,gbp,,,,,per_unit,,unspecified
+price_1SMV8gGi695k7CdbLHP3fJJZ,prod_TJ7N3M4HVGTiER,Lifetime Access,,,,2025-10-26 14:41,24.99,gbp,,,,,per_unit,,unspecified
+price_1SMV7EGi695k7CdbvHBedmyl,prod_TJ7LvsUlkHFN4n,GroupFlow2026 Pro Features,,txcd_10103000,,2025-10-26 14:40,2.99,gbp,month,1,licensed,,per_unit,,unspecified

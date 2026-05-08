@@ -2,17 +2,30 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const MAIN_API = 'https://espeezy.com/api/stripe/donate'
+const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
+
+function getMainApi(req: Request): string | null {
+  const currentOrigin = new URL(req.url).origin
+  if (API_ORIGIN === currentOrigin) return null
+  return `${API_ORIGIN}/api/stripe/donate`
+}
 
 export async function POST(req: Request) {
+  const mainApi = getMainApi(req)
+  if (!mainApi) {
+    return NextResponse.json({ error: 'API proxy origin misconfigured.' }, { status: 503 })
+  }
+
   try {
     const body = await req.text()
-    const res = await fetch(MAIN_API, {
+    const currentOrigin = new URL(req.url).origin
+    const res = await fetch(mainApi, {
       method: 'POST',
       headers: {
         'Content-Type': req.headers.get('content-type') ?? 'application/json',
         'x-forwarded-for': req.headers.get('x-forwarded-for') ?? '',
         'user-agent': req.headers.get('user-agent') ?? '',
+        'x-app-origin': currentOrigin,
       },
       body,
     })

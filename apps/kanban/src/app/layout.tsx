@@ -4,7 +4,11 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Espeezy Kanban: Coming Soon',
   description: 'Visual task management built for students and teams. Track coursework, manage group projects, and hit every deadline.',
-  icons: { icon: '/favicon.png', shortcut: '/favicon.png', apple: '/favicon.png' },
+  manifest: '/manifest.json',
+  icons: {
+    icon: [{ url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Espeezy Kanban: Coming Soon',
     description: 'The smartest academic kanban board is almost here.',

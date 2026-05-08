@@ -2,11 +2,16 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import NavigationProgress from '@/components/NavigationProgress'
 import PreregFooter from '@/components/PreregFooter'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: 'Espeezy: Early Access',
   description: 'Join 5 million students shaping the future of collaborative education.',
-  icons: { icon: '/favicon.png', shortcut: '/favicon.png', apple: '/favicon.png' },
+  manifest: '/manifest.json',
+  icons: {
+    icon: [{ url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Espeezy: Early Access',
     description: 'The platform that gives every student a fair voice.',
@@ -29,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NavigationProgress />
         {children}
         <PreregFooter />
+        <Analytics />
       </body>
     </html>
   )

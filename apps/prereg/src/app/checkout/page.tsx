@@ -1,72 +1,71 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ShieldCheck, Sparkles, Lock, CheckCircle2, ArrowRight, Loader2,
   Users, CreditCard, Building2, Gift
 } from 'lucide-react'
 import Link from 'next/link'
+import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 
 const PLANS = {
   pro: {
-    name: 'Pro Scholar',
-    price: '$9',
+    name: 'Espeezy Pro',
+    price: 'GBP 4.99',
     period: '/month',
-    badge: 'Most Popular',
+    badge: 'Best Place To Start',
     hasTrial: true,
-    stripeLink: 'https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04',
     features: [
       'Unlimited group workspaces',
-      'AI Study Coach (100 queries/month)',
-      'Priority task assignment',
+      'Deeper contribution analytics',
+      'AI Study Coach credits each month',
+      'Priority task templates and smarter planning',
       'Verified contributor badge',
-      'Real-time co-editing',
-      'Stripe earnings payout',
+      'Better export formats for proof of work',
+      'Personal performance insights',
     ],
-    description: 'For serious students who want to maximise every collaboration session.',
+    description: 'The default paid plan for serious students who want better execution, clearer contribution visibility, and a measurable academic edge.',
   },
   premium: {
-    name: 'Premium Scholar',
-    price: '$19',
+    name: 'Espeezy Premium',
+    price: 'GBP 14.99',
     period: '/month',
-    badge: 'Best Value',
+    badge: 'Power Users',
     hasTrial: true,
-    stripeLink: 'https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06',
     features: [
       'Everything in Pro',
-      'Unlimited AI queries',
+      'Advanced AI Study Coach access',
+      'Group health score and intervention suggestions',
+      'High-depth contribution analytics',
       'Academic integrity reports',
-      'Custom group branding',
+      'Advanced reporting and presentation-ready exports',
       'Priority support (48h SLA)',
-      'Annual digital certificate',
       'Early access to new features',
     ],
-    description: 'For team leads and students who need every edge available.',
+    description: 'For team leads and high-intensity collaborators running larger, higher-stakes academic workflows.',
   },
   lifetime: {
-    name: 'Lifetime Founding Scholar',
-    price: '$149',
+    name: 'Premium Lifetime Access',
+    price: 'GBP 149.00',
     period: 'one-time',
-    badge: 'Limited: 100 seats',
+    badge: 'First 100 Only — Limited Forever',
     hasTrial: false,
-    stripeLink: 'https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05',
     features: [
       'Everything in Premium, forever',
-      'Founding Scholar badge',
-      'All future features included',
-      'Direct roadmap input',
-      'Blockchain-anchored certificate',
-      'Priority institutional onboarding',
+      'Founding supporter badge',
+      'All future protocol updates included',
+      'Beta feature access as they ship',
+      'Permanent legacy pricing protection',
+      'Early supporter identity inside the product',
     ],
-    description: 'Secure your seat before the community grows. No renewal, ever.',
+    description: 'Reserved exclusively for the first 100 early supporters. One payment, permanent Premium access — no recurring billing, ever.',
   },
 } as const
 
-type PlanKey = keyof typeof PLANS
-
 const BRAND = '#6366f1'
+const LIFETIME_LIMIT = 100
 
 const TRUST = [
   { icon: <Lock size={14} />, label: 'SSL encrypted' },
@@ -77,22 +76,69 @@ const TRUST = [
 
 function CheckoutFlow() {
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const planKey = (searchParams.get('plan') ?? 'pro') as PlanKey
+  const planKey = getPlanKey(searchParams.get('plan'))
   const coupon = searchParams.get('coupon') ?? ''
   const userId = searchParams.get('uid') ?? ''
 
   const plan = PLANS[planKey] ?? PLANS.pro
   const [step, setStep] = useState<'review' | 'processing'>('review')
   const [hovered, setHovered] = useState(false)
+  const isProPlan = planKey === 'pro'
+  const isLifetimePlan = planKey === 'lifetime'
+  const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
+  const [metricsUpdatedAt, setMetricsUpdatedAt] = useState<string>('')
+
+  useEffect(() => {
+    if (!isLifetimePlan) return
+
+    let cancelled = false
+
+    const refreshLifetimeSeats = async () => {
+      try {
+        const res = await fetch('/api/live-metrics', { cache: 'no-store' })
+        const data = await res.json()
+        if (!cancelled && typeof data.lifetime_seats_used === 'number') {
+          setLifetimeSeatsUsed(data.lifetime_seats_used)
+          setMetricsUpdatedAt(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))
+        }
+      } catch {
+        if (!cancelled) {
+          setLifetimeSeatsUsed(null)
+        }
+      }
+    }
+
+    refreshLifetimeSeats()
+    const interval = setInterval(refreshLifetimeSeats, 30_000)
+    const onFocus = () => {
+      refreshLifetimeSeats()
+    }
+
+    window.addEventListener('focus', onFocus)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [isLifetimePlan])
+
+  const isLifetimeSoldOut = isLifetimePlan && lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= LIFETIME_LIMIT
+  const lifetimeSeatsLeft = isLifetimePlan && lifetimeSeatsUsed !== null
+    ? Math.max(0, LIFETIME_LIMIT - lifetimeSeatsUsed)
+    : null
 
   const handlePay = () => {
+    if (isLifetimeSoldOut) return
+
     setStep('processing')
-    const params = new URLSearchParams()
-    if (userId) params.set('client_reference_id', userId)
-    if (coupon) params.set('prefilled_promo_code', coupon)
-    const qs = params.toString()
-    window.location.href = `${plan.stripeLink}${qs ? `?${qs}` : ''}`
+    // NOTE: Each Stripe Payment Link must be configured in the Stripe dashboard to
+    // redirect to: https://{your-prereg-domain}/checkout/success?plan={pro|premium|lifetime}
+    // after a successful payment. The ?plan= param drives the per-tier success page.
+    window.location.href = buildStripePaymentLink(planKey, {
+      client_reference_id: userId || undefined,
+      prefilled_promo_code: coupon || undefined,
+    })
   }
 
   return (
@@ -141,10 +187,60 @@ function CheckoutFlow() {
                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: '14px', marginBottom: '1rem' }}>
                 <Gift size={16} color={BRAND} style={{ flexShrink: 0 }} />
                 <div>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>14-day free trial, no charge today</span>
-                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.5)', fontWeight: 500, marginTop: '1px' }}>Cancel anytime before the trial ends and pay nothing.</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>14-day free trial · No credit card required</span>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.5)', fontWeight: 500, marginTop: '1px' }}>Start free. Cancel anytime before the trial ends and pay absolutely nothing.</span>
                 </div>
               </motion.div>
+            )}
+
+            {isProPlan && (
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '14px', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(15,23,42,0.04)' }}>
+                <Sparkles size={16} color={BRAND} style={{ flexShrink: 0 }} />
+                <div>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>Pro is the main paid plan</span>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.55)', fontWeight: 500, marginTop: '1px' }}>Premium is for heavier workflows later. Pro is the cleanest starting point for most students.</span>
+                </div>
+              </motion.div>
+            )}
+
+            {isLifetimePlan && lifetimeSeatsUsed !== null && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.6rem',
+                  padding: '0.75rem 1.25rem',
+                  background: isLifetimeSoldOut ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)',
+                  border: isLifetimeSoldOut ? '1px solid rgba(239,68,68,0.18)' : '1px solid rgba(16,185,129,0.18)',
+                  borderRadius: '14px',
+                  marginBottom: '1rem',
+                }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>
+                  {isLifetimeSoldOut
+                    ? `All ${LIFETIME_LIMIT} founding spots have been claimed`
+                    : `${lifetimeSeatsLeft} of ${LIFETIME_LIMIT} founding spots remaining`}
+                </span>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  color: isLifetimeSoldOut ? '#dc2626' : '#059669',
+                }}>
+                  {isLifetimeSoldOut ? 'Sold Out' : 'Live'}
+                </span>
+              </motion.div>
+            )}
+
+            {isLifetimePlan && metricsUpdatedAt && (
+              <p style={{ margin: '0 0 1rem', textAlign: 'center', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
+                Live Supabase count · updated {metricsUpdatedAt}
+              </p>
             )}
 
             {/* Card */}
@@ -188,16 +284,23 @@ function CheckoutFlow() {
               <div style={{ padding: '0 2rem 2rem' }}>
                 <motion.button
                   onClick={handlePay}
+                  disabled={isLifetimeSoldOut}
                   onHoverStart={() => setHovered(true)}
                   onHoverEnd={() => setHovered(false)}
                   whileTap={{ scale: 0.97 }}
-                  style={{ width: '100%', padding: '1.1rem', background: BRAND, border: 'none', borderRadius: '14px', color: 'white', fontSize: '0.95rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', boxShadow: `0 8px 24px rgba(99,102,241,0.3)`, letterSpacing: '-0.01em' }}>
+                  style={{ width: '100%', padding: '1.1rem', background: isLifetimeSoldOut ? '#94a3b8' : BRAND, border: 'none', borderRadius: '14px', color: 'white', fontSize: '0.95rem', fontWeight: 800, cursor: isLifetimeSoldOut ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', boxShadow: isLifetimeSoldOut ? 'none' : `0 8px 24px rgba(99,102,241,0.3)`, letterSpacing: '-0.01em' }}>
                   <CreditCard size={18} />
-                  {plan.hasTrial ? 'Start your 14-day free trial' : 'Continue to secure payment'}
+                  {isLifetimeSoldOut ? 'Founding Spots Sold Out' : plan.hasTrial ? 'Start your 14-day free trial' : 'Continue to secure payment'}
                   <motion.span animate={{ x: hovered ? 4 : 0 }} transition={{ duration: 0.15 }}>
                     <ArrowRight size={16} />
                   </motion.span>
                 </motion.button>
+
+                {isLifetimeSoldOut && (
+                  <p style={{ textAlign: 'center', margin: '0.6rem 0 0', fontSize: '0.72rem', color: '#dc2626', fontWeight: 600 }}>
+                    This offer is permanently closed after the first 100 supporters.
+                  </p>
+                )}
 
                 {plan.hasTrial && (
                   <p style={{ textAlign: 'center', margin: '0.6rem 0 0', fontSize: '0.72rem', color: 'rgba(15,23,42,0.4)', fontWeight: 500 }}>
@@ -217,14 +320,14 @@ function CheckoutFlow() {
             </div>
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-              <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(15,23,42,0.35)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}>
+              <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', color: 'rgba(15,23,42,0.35)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}>
                 ← Go back
               </button>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1.5rem', color: 'rgba(15,23,42,0.3)', fontSize: '0.75rem', fontWeight: 600 }}>
               <Users size={13} />
-              <span>Join thousands of students already on Espeezy</span>
+              <span>{isProPlan ? 'Most students should start with Pro' : 'Upgrade when your workflow needs more depth'}</span>
             </div>
           </motion.div>
         ) : (

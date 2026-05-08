@@ -6,6 +6,7 @@ import { db, auth } from '@/lib/firebase'
 import { collection, query, where, getCountFromServer } from 'firebase/firestore'
 import { onAuthStateChanged, User } from 'firebase/auth'
 import TransientError from '@/components/TransientError'
+import { buildStripePaymentLink, type PlanKey } from '@/lib/stripe-payment-links'
 
 interface PricingSectionProps {
   showTitle?: boolean
@@ -61,7 +62,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
     }, 600)
   }
 
-  const handleCheckout = async (plan: 'pro' | 'premium' | 'lifetime') => {
+  const handleCheckout = async (plan: PlanKey) => {
     setError(null)
     setLoadingPlan(plan)
 
@@ -73,10 +74,10 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
         return
       }
 
-      // Route through pre-checkout interstitial
-      const params = new URLSearchParams({ plan, uid: currentUser.uid })
-      if (discountActive && coupon) params.set('coupon', coupon)
-      window.location.href = `/checkout?${params.toString()}`
+      window.location.href = buildStripePaymentLink(plan, {
+        client_reference_id: currentUser.uid,
+        prefilled_promo_code: discountActive && coupon ? coupon : undefined,
+      })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Checkout initiation failed.')
     } finally {
@@ -445,7 +446,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
 
             <div style={{ marginBottom: '3rem' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£49</span>
+                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£149</span>
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/once</span>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 700 }}>

@@ -2,11 +2,46 @@ import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'crypto'
 import { z } from 'zod'
 import { sendPreregistrationConfirmationEmail } from '@/services/email'
+import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
 
 export const dynamic = 'force-dynamic'
 
+const allowedOrigins = new Set([
+	'https://espeezy.com',
+	'https://www.espeezy.com',
+	'https://games.espeezy.com',
+	'https://kanban.espeezy.com',
+	'http://localhost:3000',
+	'http://localhost:3001',
+	'http://localhost:3002',
+	'http://localhost:3003',
+])
+
+function getCorsHeaders(req: Request): Record<string, string> {
+	const origin = req.headers.get('origin') ?? ''
+	const allowOrigin = allowedOrigins.has(origin) ? origin : 'https://espeezy.com'
+	return {
+		'Access-Control-Allow-Origin': allowOrigin,
+		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+		'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+		'Access-Control-Max-Age': '86400',
+		Vary: 'Origin',
+	}
+}
+
+function jsonWithCors(req: Request, body: unknown, init?: ResponseInit) {
+	return NextResponse.json(body, {
+		...init,
+		headers: {
+			...(init?.headers ?? {}),
+			...getCorsHeaders(req),
+		},
+	})
+}
+
 const preregSchema = z.object({
 	email: z.string().email().max(254),
+	password: z.string().min(8).max(72).optional(),
 	source: z.string().trim().max(50).optional(),
 	fullName: z.string().trim().max(120).optional(),
 	institution: z.string().trim().max(120).optional(),
@@ -71,6 +106,163 @@ async function getRegistrationCount() {
 	return Number.isFinite(total) ? total : 0
 }
 
+type ProvisionResult = {
+	supabaseReady: boolean
+	firebaseReady: boolean
+	errorMessage: string | null
+}
+
+async function authAdminRequest(
+	path: string,
+	method: string,
+	body?: object,
+): Promise<{ ok: boolean; data: unknown; status: number }> {
+	const cfg = getSupabaseConfig()
+	if (!cfg) return { ok: false, data: null, status: 0 }
+
+	const res = await fetch(`${cfg.url}/auth/v1/admin/${path}`, {
+		method,
+		headers: {
+			apikey: cfg.key,
+			Authorization: `Bearer ${cfg.key}`,
+			'Content-Type': 'application/json',
+		},
+		body: body ? JSON.stringify(body) : undefined,
+	})
+
+	let data: unknown = null
+	const text = await res.text()
+	try { data = JSON.parse(text) } catch { data = text }
+	return { ok: res.ok, data, status: res.status }
+}
+
+function looksLikeExistingAuthUserError(data: unknown) {
+	const text = JSON.stringify(data).toLowerCase()
+	return text.includes('already') || text.includes('exists') || text.includes('registered') || text.includes('duplicate')
+}
+
+async function provisionSupabaseAccount(opts: {
+	email: string
+	password: string
+	fullName: string | null
+	source: string
+	role: string | null
+	institution: string | null
+}): Promise<{ ok: boolean; created: boolean; message?: string }> {
+	const { ok, data, status } = await authAdminRequest('users', 'POST', {
+		email: opts.email,
+		password: opts.password,
+		email_confirm: true,
+		user_metadata: {
+			full_name: opts.fullName,
+			source: opts.source,
+			role: opts.role,
+			institution: opts.institution,
+		},
+		app_metadata: {
+			provider: 'email',
+			providers: ['email'],
+		},
+	})
+
+	if (ok) return { ok: true, created: true }
+	if (status === 422 || status === 400 || status === 409) {
+		if (looksLikeExistingAuthUserError(data)) return { ok: true, created: false }
+	}
+
+	return { ok: false, created: false, message: typeof data === 'string' ? data : 'Unable to create Supabase login.' }
+}
+
+async function provisionFirebaseAccount(opts: {
+	email: string
+	password: string
+	fullName: string | null
+	role: string | null
+	institution: string | null
+}): Promise<{ ok: boolean; created: boolean; message?: string }> {
+	const adminAuth = getAdminAuth()
+	if (!adminAuth) {
+		return { ok: false, created: false, message: 'Firebase auth is not configured.' }
+	}
+
+	let uid: string | null = null
+	let created = false
+
+	try {
+		const userRecord = await adminAuth.createUser({
+			email: opts.email,
+			password: opts.password,
+			emailVerified: true,
+			displayName: opts.fullName ?? undefined,
+		})
+		uid = userRecord.uid
+		created = true
+	} catch (error) {
+		const err = error as { code?: string; message?: string }
+		if (err.code !== 'auth/email-already-exists') {
+			return { ok: false, created: false, message: err.message ?? 'Unable to create Firebase login.' }
+		}
+
+		try {
+			const existing = await adminAuth.getUserByEmail(opts.email)
+			uid = existing.uid
+		} catch (lookupError) {
+			const errLookup = lookupError as { message?: string }
+			return { ok: false, created: false, message: errLookup.message ?? 'Unable to load Firebase login.' }
+		}
+	}
+
+	if (!uid) return { ok: false, created, message: 'Firebase user id was not available.' }
+
+	const adminDb = getAdminDb()
+	if (!adminDb) return { ok: true, created }
+
+	const profileRef = adminDb.collection('profiles').doc(uid)
+	const existingProfile = await profileRef.get()
+	if (!existingProfile.exists) {
+		await profileRef.set({
+			id: uid,
+			email: opts.email,
+			full_name: opts.fullName,
+			institution: opts.institution,
+			role: opts.role,
+			legal_accepted: true,
+			total_score: 0,
+			created_at: new Date().toISOString(),
+		})
+	}
+
+	return { ok: true, created }
+}
+
+async function provisionUnifiedLogin(opts: {
+	email: string
+	password: string
+	fullName: string | null
+	role: string | null
+	institution: string | null
+	source: string
+}): Promise<ProvisionResult> {
+	const [supabaseResult, firebaseResult] = await Promise.all([
+		provisionSupabaseAccount(opts),
+		provisionFirebaseAccount(opts),
+	])
+
+	if (!supabaseResult.ok || !firebaseResult.ok) {
+		return {
+			supabaseReady: supabaseResult.ok,
+			firebaseReady: firebaseResult.ok,
+			errorMessage: supabaseResult.message ?? firebaseResult.message ?? 'Unable to prepare your login on every Espeezy app.',
+		}
+	}
+
+	return {
+		supabaseReady: true,
+		firebaseReady: true,
+		errorMessage: null,
+	}
+}
+
 async function findExistingRegistrationByEmail(email: string) {
 	const { ok, data } = await supaRest(
 		`pre_registrations?email=eq.${encodeURIComponent(email)}&select=id,referral_code,referral_count&limit=1`,
@@ -121,17 +313,27 @@ async function readRequestPayload(req: Request): Promise<Record<string, unknown>
 	return null
 }
 
-export async function GET() {
+export async function OPTIONS(req: Request) {
+	return new NextResponse(null, {
+		status: 204,
+		headers: getCorsHeaders(req),
+	})
+}
+
+export async function GET(req: Request) {
 	if (!getSupabaseConfig()) {
-		return NextResponse.json({ error: 'Supabase is not configured.', count: 0 }, { status: 503 })
+		return jsonWithCors(req, {
+			count: 0,
+			warning: 'Supabase is not configured.',
+		})
 	}
 
 	try {
 		const count = await getRegistrationCount()
-		return NextResponse.json({ count: count ?? 0 })
+		return jsonWithCors(req, { count: count ?? 0 })
 	} catch (err) {
 		console.error('[preregister GET]', err)
-		return NextResponse.json({ count: 0 })
+		return jsonWithCors(req, { count: 0 })
 	}
 }
 
@@ -139,7 +341,7 @@ export async function POST(req: Request) {
 	const body = await readRequestPayload(req)
 	const parsed = preregSchema.safeParse(body)
 	if (!parsed.success) {
-		return NextResponse.json({
+		return jsonWithCors(req, {
 			error: 'Invalid request body.',
 			details: parsed.error.issues.map(issue => ({
 				path: issue.path.join('.'),
@@ -149,6 +351,7 @@ export async function POST(req: Request) {
 	}
 
 	const cleanEmail = parsed.data.email.trim().toLowerCase()
+	const cleanPassword = parsed.data.password
 	const cleanSource = (parsed.data.source ?? 'organic').slice(0, 50)
 	const cleanReferrerCode = isValidReferralCode(parsed.data.referrer_code) ? parsed.data.referrer_code : null
 	const cleanFullName = parsed.data.fullName ?? null
@@ -160,17 +363,41 @@ export async function POST(req: Request) {
 	const supabaseConfig = getSupabaseConfig()
 
 	if (!supabaseConfig) {
-		return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
+		return jsonWithCors(req, { error: 'Supabase is not configured.' }, { status: 503 })
 	}
 
 	try {
+		let authProvisionResult: ProvisionResult | null = null
+		if (cleanPassword) {
+			authProvisionResult = await provisionUnifiedLogin({
+				email: cleanEmail,
+				password: cleanPassword,
+				fullName: cleanFullName,
+				institution: cleanInstitution,
+				role: cleanRole,
+				source: cleanSource,
+			})
+		}
+
 		const existing = await findExistingRegistrationByEmail(cleanEmail)
 		if (existing) {
-			return NextResponse.json({
+			if (authProvisionResult && authProvisionResult.errorMessage) {
+				return jsonWithCors(req, {
+					error: authProvisionResult.errorMessage,
+					registration_saved: true,
+					supabase_ready: authProvisionResult.supabaseReady,
+					firebase_ready: authProvisionResult.firebaseReady,
+				}, { status: 503 })
+			}
+
+			return jsonWithCors(req, {
 				success: true,
-				message: 'You are already registered! We will be in touch.',
+				message: cleanPassword
+					? 'You are already registered and your Espeezy login is ready.'
+					: 'You are already registered! We will be in touch.',
 				referral_code: existing.referral_code ?? null,
 				referral_count: existing.referral_count ?? 0,
+				login_ready: Boolean(cleanPassword),
 			})
 		}
 
@@ -190,7 +417,7 @@ export async function POST(req: Request) {
 		if (!insOk) {
 			if (insStatus === 409 || JSON.stringify(insData).includes('23505')) {
 				const duplicate = await findExistingRegistrationByEmail(cleanEmail)
-				return NextResponse.json({
+				return jsonWithCors(req, {
 					success: true,
 					message: 'You are already registered!',
 					referral_code: duplicate?.referral_code ?? null,
@@ -211,11 +438,11 @@ export async function POST(req: Request) {
 					})
 					if (!retryOk) {
 						console.error('[preregister] Supabase minimal insert failed:', retryStatus, retryData)
-						return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
+						return jsonWithCors(req, { error: 'Unable to register right now.' }, { status: 503 })
 					}
 					// Minimal insert succeeded — fall through
 					const count2 = await getRegistrationCount()
-					return NextResponse.json({
+					return jsonWithCors(req, {
 						success: true,
 						message: 'You are on the list! We will notify you at launch.',
 						referral_code: newCode,
@@ -225,7 +452,16 @@ export async function POST(req: Request) {
 				}
 			}
 			console.error('[preregister] Supabase insert failed:', insStatus, insData)
-			return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
+			return jsonWithCors(req, { error: 'Unable to register right now.' }, { status: 503 })
+		}
+
+		if (authProvisionResult && authProvisionResult.errorMessage) {
+			return jsonWithCors(req, {
+				error: authProvisionResult.errorMessage,
+				registration_saved: true,
+				supabase_ready: authProvisionResult.supabaseReady,
+				firebase_ready: authProvisionResult.firebaseReady,
+			}, { status: 503 })
 		}
 
 		if (cleanReferrerCode) {
@@ -249,15 +485,18 @@ export async function POST(req: Request) {
 		})
 
 		const count = await getRegistrationCount()
-		return NextResponse.json({
+		return jsonWithCors(req, {
 			success: true,
-			message: 'You are on the list! We will notify you at launch.',
+			message: cleanPassword
+				? 'You are on the list and your login now works across Espeezy, Games, and Kanban.'
+				: 'You are on the list! We will notify you at launch.',
 			referral_code: newCode,
 			referral_count: 0,
 			count: count ?? 0,
+			login_ready: Boolean(cleanPassword),
 		})
 	} catch (err) {
 		console.error('[preregister] Supabase error:', err)
-		return NextResponse.json({ error: 'Service temporarily unavailable.' }, { status: 503 })
+		return jsonWithCors(req, { error: 'Service temporarily unavailable.' }, { status: 503 })
 	}
 }

@@ -17,7 +17,10 @@
     "deploy:resilient": "bash ./scripts/deploy-resilient.sh",
     "deploy:edge": "bash ./scripts/deploy-resilient.sh --with-edge",
     "deploy:app-only": "bash ./scripts/deploy-resilient.sh --no-edge",
-    "predeploy:prereg": "npm --prefix apps/prereg run predeploy:check"
+    "predeploy:prereg": "npm --prefix apps/prereg run predeploy:check",
+    "predeploy:games": "npm --prefix apps/games run predeploy:check",
+    "predeploy:kanban": "npm --prefix apps/kanban run predeploy:check",
+    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.2.0",
@@ -40,6 +43,7 @@
     "react-is": "^19.2.5",
     "recharts": "^3.8.1",
     "stripe": "^18.5.0",
+    "typecheck": "^0.1.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -56,6 +60,7 @@
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.5.0",
     "playwright": "^1.59.1",
+    "sharp": "^0.34.5",
     "typescript": "^5",
     "typescript-eslint": "^8.59.0"
   },

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/firebase'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,27 +15,14 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(msg)}`)
   }
 
-  // Firebase handles OAuth redirect automatically — check if user is now authenticated
-  const currentUser = auth.currentUser
+  // Check if this is a password recovery flow
+  const isRecovery = searchParams.get('type') === 'recovery'
 
-  if (currentUser) {
-    // User is authenticated after OAuth redirect
-    // Check if this is a password recovery flow
-    const isRecovery = searchParams.get('type') === 'recovery' || !currentUser.metadata.lastSignInTime
+  // Validate redirect path — must be a relative path on same origin (open redirect prevention)
+  const isSafeRedirect = next.startsWith('/') && !next.startsWith('//') && !next.includes(':')
+  const safePath = isSafeRedirect ? next : '/dashboard'
 
-    // Validate redirect path — must be a relative path on same origin (open redirect prevention)
-    const rawNext = next
-    const isSafeRedirect = rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.includes(':')
-    const safePath = isSafeRedirect ? rawNext : '/dashboard'
-
-    const redirectPath = isRecovery ? '/auth/reset-password' : safePath
-    const redirectUrl = new URL(redirectPath, origin).toString()
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  // If not authenticated yet, Firebase will handle the redirect naturally.
-  // Redirect to login as fallback
-  return NextResponse.redirect(
-    `${origin}/login?error=${encodeURIComponent('Authentication failed. Please try again.')}`
-  )
+  const redirectPath = isRecovery ? '/auth/reset-password' : safePath
+  const redirectUrl = new URL(redirectPath, origin).toString()
+  return NextResponse.redirect(redirectUrl)
 }

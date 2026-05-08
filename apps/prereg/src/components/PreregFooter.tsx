@@ -1,7 +1,5 @@
 'use client'
 
-import Link from 'next/link'
-
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
@@ -77,7 +75,15 @@ export default function PreregFooter() {
                 flexShrink: 0,
               }}
             >
-              <img src="/brand_logo2.svg" style={{ width: '20px', height: '20px', objectFit: 'contain' }} alt="" aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand_logo2.svg"
+                width={20}
+                height={20}
+                style={{ objectFit: 'contain' }}
+                alt=""
+                aria-hidden="true"
+              />
             </div>
             <span style={{ fontWeight: 900, fontSize: '1rem', color: '#f1f5f9', letterSpacing: '-0.01em' }}>Espeezy</span>
           </div>
@@ -91,6 +97,28 @@ export default function PreregFooter() {
             Built on Next.js and Firebase. Integrates with Canvas, Blackboard, and Moodle.
             Payments via Stripe. Real-time sync across all your devices.
           </p>
+
+          <div
+            style={{
+              border: '1px solid rgba(148,163,184,0.2)',
+              background: 'rgba(15,23,42,0.5)',
+              borderRadius: '10px',
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              maxWidth: '260px',
+            }}
+          >
+            <p style={{ margin: 0, fontSize: '0.72rem', color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              Important Info
+            </p>
+            <p style={{ margin: '0.45rem 0 0', fontSize: '0.76rem', lineHeight: 1.5, color: '#94a3b8' }}>
+              Support: support@espeezy.com
+              <br />
+              Payments are processed by Stripe.
+              <br />
+              Core student tier stays free.
+            </p>
+          </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <span style={{
@@ -118,14 +146,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {PLATFORM_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -139,14 +167,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {DOCS_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -184,14 +212,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '2rem' }}>
             {INFRA_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -202,14 +230,14 @@ export default function PreregFooter() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {LEGAL_LINKS.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <a
                   href={href}
                   style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import {
-  ArrowRight, CheckCircle, Users, Globe, ShieldCheck,
+  ArrowRight, CheckCircle, Users, Globe,
   BookOpen, Cpu, Zap, BarChart2, Mail,
-  GraduationCap, TrendingUp, Heart, Award
+  GraduationCap, TrendingUp, Heart
 } from 'lucide-react'
 import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
@@ -38,17 +39,12 @@ export default function PreRegisterPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [referrerCode, setReferrerCode] = useState<string | null>(null)
+  const [referrerCode] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return new URLSearchParams(window.location.search).get('ref')
+  })
   const [myReferralCode, setMyReferralCode] = useState<string | null>(null)
   const [myReferralCount, setMyReferralCount] = useState(0)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const ref = params.get('ref')
-      if (ref) setReferrerCode(ref)
-    }
-  }, [])
 
   const goal = parseInt(config.preregister_goal ?? '5000', 10)
 
@@ -72,7 +68,7 @@ export default function PreRegisterPage() {
         setMyReferralCount(data.referral_count || 0)
         if (typeof data.count === 'number') setRegisteredCount(data.count)
       }
-    } catch (_) {
+    } catch {
       setSubmitError('Network error. Please check your connection and try again.')
     }
     setSubmitting(false)
@@ -96,7 +92,7 @@ export default function PreRegisterPage() {
       <nav aria-label="Primary navigation" style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(15,23,42,0.07)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(255,255,255,0.9)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
           <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/brand_logo2.svg" style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="" aria-hidden="true" />
+            <Image src="/brand_logo2.svg" width={22} height={22} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" />
           </div>
           <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a', letterSpacing: '-0.03em' }}>{config.brand_name}</span>
         </Link>
@@ -268,8 +264,8 @@ export default function PreRegisterPage() {
             ].map((img, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
                 style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(15,23,42,0.09)', background: 'white', boxShadow: '0 2px 12px rgba(15,23,42,0.06)' }}>
-                <div style={{ aspectRatio: '16 / 10', overflow: 'hidden' }}>
-                  <img src={img.src} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <div style={{ aspectRatio: '16 / 10', overflow: 'hidden', position: 'relative' }}>
+                  <Image src={img.src} alt={img.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover', display: 'block' }} />
                 </div>
                 <div style={{ padding: '1rem' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: '0 0 0.35rem' }}>{img.title}</h3>

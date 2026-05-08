@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ShieldCheck, Sparkles, Lock, CheckCircle2, ArrowRight, Loader2,
   Users, Zap, Globe, Star, CreditCard, Building2
 } from 'lucide-react'
 import Link from 'next/link'
+import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 
 // ─── Plan definitions ──────────────────────────────────────────────────────────
 const PLANS = {
@@ -17,7 +18,6 @@ const PLANS = {
     period: '/month',
     badge: 'Most Popular',
     color: '#10b981',
-    stripeLink: 'https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04',
     features: [
       'Unlimited group workspaces',
       'AI Study Coach (100 queries/month)',
@@ -34,7 +34,6 @@ const PLANS = {
     period: '/month',
     badge: 'Best Value',
     color: '#6366f1',
-    stripeLink: 'https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06',
     features: [
       'Everything in Pro',
       'Unlimited AI queries',
@@ -52,7 +51,6 @@ const PLANS = {
     period: 'one-time',
     badge: 'Limited — 100 seats',
     color: '#f59e0b',
-    stripeLink: 'https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05',
     features: [
       'Everything in Premium, forever',
       'Founding Scholar badge',
@@ -65,8 +63,6 @@ const PLANS = {
   },
 }
 
-type PlanKey = keyof typeof PLANS
-
 // ─── Trust badges ──────────────────────────────────────────────────────────────
 const TRUST = [
   { icon: <Lock size={14} />, label: 'SSL encrypted' },
@@ -77,8 +73,7 @@ const TRUST = [
 
 export default function CheckoutFlow() {
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const planKey = (searchParams.get('plan') ?? 'pro') as PlanKey
+  const planKey = getPlanKey(searchParams.get('plan'))
   const coupon = searchParams.get('coupon') ?? ''
   const userId = searchParams.get('uid') ?? ''
 
@@ -88,11 +83,10 @@ export default function CheckoutFlow() {
 
   const handlePay = () => {
     setStep('processing')
-    const params = new URLSearchParams()
-    if (userId) params.set('client_reference_id', userId)
-    if (coupon) params.set('prefilled_promo_code', coupon)
-    const qs = params.toString()
-    window.location.href = `${plan.stripeLink}${qs ? `?${qs}` : ''}`
+    window.location.href = buildStripePaymentLink(planKey, {
+      client_reference_id: userId || undefined,
+      prefilled_promo_code: coupon || undefined,
+    })
   }
 
   return (
