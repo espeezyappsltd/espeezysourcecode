@@ -8,6 +8,8 @@ import type { LoginStatus, WaitlistStatus } from './useLandingPage'
 type LandingPageViewProps = {
   authError: string
   email: string
+  fullName: string
+  institution: string
   loginEmail: string
   loginPassword: string
   loginStatus: LoginStatus
@@ -15,11 +17,17 @@ type LandingPageViewProps = {
   onLogout: () => Promise<void>
   onNotify: (event: React.FormEvent<HTMLFormElement>) => void
   registeredCount: number | null
+  role: string
   setEmail: (value: string) => void
+  setFullName: (value: string) => void
+  setInstitution: (value: string) => void
   setLoginEmail: (value: string) => void
   setLoginPassword: (value: string) => void
+  setRole: (value: string) => void
+  setWaitlistPassword: (value: string) => void
   status: WaitlistStatus
   user: User | null
+  waitlistPassword: string
 }
 
 function SkipLink() {
@@ -265,11 +273,19 @@ function AccountAccessSection({
 
 function HeroSection({
   email,
+  fullName,
+  institution,
   onNotify,
   registeredCount,
+  role,
   setEmail,
+  setFullName,
+  setInstitution,
+  setRole,
+  setWaitlistPassword,
   status,
-}: Pick<LandingPageViewProps, 'email' | 'onNotify' | 'registeredCount' | 'setEmail' | 'status'>) {
+  waitlistPassword,
+}: Pick<LandingPageViewProps, 'email' | 'fullName' | 'institution' | 'onNotify' | 'registeredCount' | 'role' | 'setEmail' | 'setFullName' | 'setInstitution' | 'setRole' | 'setWaitlistPassword' | 'status' | 'waitlistPassword'>) {
   return (
     <section
       id="main-content"
@@ -351,12 +367,34 @@ function HeroSection({
           style={{
             display: 'flex',
             gap: '0.75rem',
-            maxWidth: '480px',
+            maxWidth: '640px',
             margin: '0 auto',
             flexWrap: 'wrap',
             justifyContent: 'center',
           }}
         >
+          <label htmlFor="kanban-full-name" className="sr-only">Full name</label>
+          <input
+            id="kanban-full-name"
+            type="text"
+            value={fullName}
+            onChange={(event) => {
+              setFullName(event.target.value)
+            }}
+            placeholder="Full name (optional)"
+            disabled={status === 'loading'}
+            style={{
+              flex: '1 1 220px',
+              minWidth: 0,
+              padding: '0.85rem 1.25rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#f8fafc',
+              fontSize: '0.95rem',
+              outline: 'none',
+            }}
+          />
           <label htmlFor="kanban-email" className="sr-only">Email address</label>
           <input
             id="kanban-email"
@@ -380,6 +418,76 @@ function HeroSection({
               outline: 'none',
             }}
           />
+          <label htmlFor="kanban-password" className="sr-only">Create password</label>
+          <input
+            id="kanban-password"
+            type="password"
+            required
+            minLength={8}
+            value={waitlistPassword}
+            onChange={(event) => {
+              setWaitlistPassword(event.target.value)
+            }}
+            placeholder="Create password (8+ chars)"
+            disabled={status === 'loading'}
+            style={{
+              flex: '1 1 220px',
+              minWidth: 0,
+              padding: '0.85rem 1.25rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#f8fafc',
+              fontSize: '0.95rem',
+              outline: 'none',
+            }}
+          />
+          <label htmlFor="kanban-institution" className="sr-only">Institution</label>
+          <input
+            id="kanban-institution"
+            type="text"
+            value={institution}
+            onChange={(event) => {
+              setInstitution(event.target.value)
+            }}
+            placeholder="Institution (optional)"
+            disabled={status === 'loading'}
+            style={{
+              flex: '1 1 220px',
+              minWidth: 0,
+              padding: '0.85rem 1.25rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#f8fafc',
+              fontSize: '0.95rem',
+              outline: 'none',
+            }}
+          />
+          <label htmlFor="kanban-role" className="sr-only">Role</label>
+          <select
+            id="kanban-role"
+            value={role}
+            onChange={(event) => {
+              setRole(event.target.value)
+            }}
+            disabled={status === 'loading'}
+            style={{
+              flex: '1 1 220px',
+              minWidth: 0,
+              padding: '0.85rem 1.25rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: '#1f2937',
+              color: '#f8fafc',
+              fontSize: '0.95rem',
+              outline: 'none',
+            }}
+          >
+            <option value="student">Student</option>
+            <option value="educator">Educator</option>
+            <option value="researcher">Researcher</option>
+          </select>
           <button
             type="submit"
             disabled={status === 'loading'}
@@ -398,6 +506,9 @@ function HeroSection({
           >
             {status === 'loading' ? 'Joining…' : 'Notify Me'}
           </button>
+          <p style={{ width: '100%', textAlign: 'center', color: '#64748b', fontSize: '0.8rem', margin: 0 }}>
+            This also creates your Espeezy login for cross-app access.
+          </p>
           {status === 'error' && (
             <p role="alert" style={{ width: '100%', textAlign: 'center', color: '#ef4444', fontSize: '0.85rem' }}>
               Something went wrong. Try again or email us at hello@espeezy.com
@@ -621,10 +732,18 @@ export function LandingPageView(props: LandingPageViewProps) {
       />
       <HeroSection
         email={props.email}
+        fullName={props.fullName}
+        institution={props.institution}
         onNotify={props.onNotify}
         registeredCount={props.registeredCount}
+        role={props.role}
         setEmail={props.setEmail}
+        setFullName={props.setFullName}
+        setInstitution={props.setInstitution}
+        setRole={props.setRole}
+        setWaitlistPassword={props.setWaitlistPassword}
         status={props.status}
+        waitlistPassword={props.waitlistPassword}
       />
       <BoardPreviewSection />
       <FeaturesSection />

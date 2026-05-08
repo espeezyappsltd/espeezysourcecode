@@ -11,6 +11,10 @@ export type LoginStatus = 'idle' | 'loading' | 'error'
 export function useLandingPage() {
   const user = useSupabaseUser()
   const [email, setEmail] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [waitlistPassword, setWaitlistPassword] = useState('')
+  const [institution, setInstitution] = useState('')
+  const [role, setRole] = useState('student')
   const [status, setStatus] = useState<WaitlistStatus>('idle')
   const [registeredCount, setRegisteredCount] = useState<number | null>(null)
   const [loginEmail, setLoginEmail] = useState('')
@@ -98,7 +102,7 @@ export function useLandingPage() {
   async function handleNotify(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!email.trim()) {
+    if (!email.trim() || waitlistPassword.trim().length < 8) {
       return
     }
 
@@ -107,11 +111,19 @@ export function useLandingPage() {
     try {
       const result = await submitPreregister({
         email: email.trim(),
+        password: waitlistPassword.trim(),
+        fullName: fullName.trim() || undefined,
+        institution: institution.trim() || undefined,
+        role: role.trim() || undefined,
         source: 'kanban-waitlist',
       })
 
       if (typeof result.count === 'number') {
         setRegisteredCount(result.count)
+      }
+
+      if (result.ok) {
+        setWaitlistPassword('')
       }
 
       setStatus(result.ok ? 'done' : 'error')
@@ -123,17 +135,25 @@ export function useLandingPage() {
   return {
     authError,
     email,
+    fullName,
     handleLogin,
     handleLogout,
     handleNotify,
+    institution,
     loginEmail,
     loginPassword,
     loginStatus,
     registeredCount,
+    role,
     setEmail,
+    setFullName,
+    setInstitution,
     setLoginEmail,
     setLoginPassword,
+    setRole,
+    setWaitlistPassword,
     status,
     user,
+    waitlistPassword,
   }
 }
