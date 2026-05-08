@@ -155,7 +155,7 @@ function getTierDonationOptions() {
       ...DONATION_TIER_CONTENT[1],
       href: DONATION_LINK_10,
     },
-  ]
+  ] as const
 }
 
 export default function FundPage() {
@@ -487,7 +487,7 @@ export default function FundPage() {
               Quick Stripe links for larger support tiers.
             </h2>
             <p style={{ margin: 0, color: '#64748b', fontSize: '0.92rem', lineHeight: 1.65 }}>
-              Support via dedicated Stripe payment links for GBP 5 and GBP 10 donations. If needed, these links can still be overridden via NEXT_PUBLIC_STRIPE_DONATION_LINK_5 and NEXT_PUBLIC_STRIPE_DONATION_LINK_10.
+              Support via dedicated Stripe payment links for GBP 5 and GBP 10 donations. Configure NEXT_PUBLIC_STRIPE_DONATION_LINK_5 and NEXT_PUBLIC_STRIPE_DONATION_LINK_10 as the primary values; built-in defaults are used only when these variables are missing.
             </p>
           </div>
 
