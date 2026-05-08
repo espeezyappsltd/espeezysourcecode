@@ -21,20 +21,35 @@ export function useLandingPage() {
   useEffect(() => {
     let active = true
 
-    void fetchPreregisterCount()
-      .then((count) => {
+    const refresh = async () => {
+      try {
+        const count = await fetchPreregisterCount()
         if (active) {
-          setRegisteredCount(count)
+          setRegisteredCount(typeof count === 'number' ? count : null)
         }
-      })
-      .catch(() => {
+      } catch {
         if (active) {
           setRegisteredCount(null)
         }
-      })
+      }
+    }
+
+    void refresh()
+
+    const interval = setInterval(() => {
+      void refresh()
+    }, 30_000)
+
+    const onFocus = () => {
+      void refresh()
+    }
+
+    window.addEventListener('focus', onFocus)
 
     return () => {
       active = false
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocus)
     }
   }, [])
 

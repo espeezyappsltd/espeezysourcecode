@@ -126,14 +126,21 @@ export default function GamesPage() {
     if (!email) return
     setStatus('loading')
     try {
-      const res = await fetch('https://espeezy.com/api/preregister', {
+      const res = await fetch('/api/preregister', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'games-waitlist' }),
       })
-      setStatus(res.ok ? 'done' : 'error')
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setStatus('done')
+      } else {
+        setStatus('error')
+        setAuthError(typeof data.error === 'string' ? data.error : 'Could not join waitlist right now.')
+      }
     } catch {
       setStatus('error')
+      setAuthError('Network error while joining waitlist. Please try again in a moment.')
     }
   }
 
@@ -321,22 +328,22 @@ export default function GamesPage() {
                 }}
               >
                 {loginStatus === 'loading' ? 'Logging in…' : 'Log In'}
-                <button
-                  type="button"
-                  onClick={handleCreateAccount}
-                  style={{
-                    padding: '0.55rem 0.9rem',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.22)',
-                    background: 'transparent',
-                    color: '#f8fafc',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Create Account
-                </button>
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateAccount}
+                style={{
+                  padding: '0.55rem 0.9rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.22)',
+                  background: 'transparent',
+                  color: '#f8fafc',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Create Account
               </button>
               {authError && (
                 <p role="alert" style={{ margin: 0, width: '100%', color: '#fca5a5', fontSize: '0.8rem' }}>

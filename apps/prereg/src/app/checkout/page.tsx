@@ -86,6 +86,7 @@ function CheckoutFlow() {
   const isProPlan = planKey === 'pro'
   const isLifetimePlan = planKey === 'lifetime'
   const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
+  const [metricsUpdatedAt, setMetricsUpdatedAt] = useState<string>('')
 
   useEffect(() => {
     if (!isLifetimePlan) return
@@ -94,10 +95,11 @@ function CheckoutFlow() {
 
     const refreshLifetimeSeats = async () => {
       try {
-        const res = await fetch('/api/lifetime-seats', { cache: 'no-store' })
+        const res = await fetch('/api/live-metrics', { cache: 'no-store' })
         const data = await res.json()
-        if (!cancelled && typeof data.count === 'number') {
-          setLifetimeSeatsUsed(data.count)
+        if (!cancelled && typeof data.lifetime_seats_used === 'number') {
+          setLifetimeSeatsUsed(data.lifetime_seats_used)
+          setMetricsUpdatedAt(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))
         }
       } catch {
         if (!cancelled) {
@@ -233,6 +235,12 @@ function CheckoutFlow() {
                   {isLifetimeSoldOut ? 'Sold Out' : 'Live'}
                 </span>
               </motion.div>
+            )}
+
+            {isLifetimePlan && metricsUpdatedAt && (
+              <p style={{ margin: '0 0 1rem', textAlign: 'center', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
+                Live Supabase count · updated {metricsUpdatedAt}
+              </p>
             )}
 
             {/* Card */}

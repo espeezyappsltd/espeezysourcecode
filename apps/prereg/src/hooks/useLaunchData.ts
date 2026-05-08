@@ -57,25 +57,41 @@ export function useLaunchData() {
   const [registeredCount, setRegisteredCount] = useState(0)
   const [configLoaded, setConfigLoaded] = useState(false)
 
-  const refreshCount = useCallback(async () => {
-    try {
-      const res = await fetch('/api/preregister')
-      const { count } = await res.json()
-      if (typeof count === 'number') setRegisteredCount(count)
-    } catch {
-      // silently ignore
+  const setCountAndPersist = useCallback((count: number) => {
+    setRegisteredCount(count)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('espeezy_last_registered_count', String(count))
     }
   }, [])
 
+  const refreshCount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/live-metrics', { cache: 'no-store' })
+      const data = await res.json()
+      if (typeof data.registered_count === 'number') {
+        setCountAndPersist(data.registered_count)
+      }
+    } catch {
+      // Keep previous value if live refresh fails.
+    }
+  }, [setCountAndPersist])
+
   useEffect(() => {
     const load = async () => {
+      if (typeof window !== 'undefined') {
+        const cached = Number(window.localStorage.getItem('espeezy_last_registered_count') ?? '0')
+        if (Number.isFinite(cached) && cached > 0) {
+          setRegisteredCount(cached)
+        }
+      }
+
       try {
         const [cfgRes, countRes] = await Promise.all([
           fetch('/api/launch-config'),
-          fetch('/api/preregister'),
+          fetch('/api/live-metrics', { cache: 'no-store' }),
         ])
         const { config: cfg } = await cfgRes.json()
-        const { count } = await countRes.json()
+        const metrics = await countRes.json()
         if (cfg) {
           setConfig(prev => ({
             ...prev,
@@ -84,7 +100,9 @@ export function useLaunchData() {
             preregister_goal: '5000',
           }))
         }
-        if (typeof count === 'number') setRegisteredCount(count)
+        if (typeof metrics.registered_count === 'number') {
+          setCountAndPersist(metrics.registered_count)
+        }
       } catch {
         // Use defaults on failure
       }

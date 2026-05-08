@@ -585,7 +585,7 @@ function CtaSection() {
         Join the Espeezy early-access list and be first to try Kanban when it launches.
       </p>
       <a
-        href="https://espeezy.com/#reregister"
+        href="https://espeezy.com/#register"
         style={{
           display: 'inline-block',
           padding: '0.9rem 2.25rem',

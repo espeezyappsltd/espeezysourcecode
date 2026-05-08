@@ -153,18 +153,20 @@ const TESTIMONIALS = [
 
 async function fetchDonationTotal(): Promise<{ total_cents: number; count: number }> {
   try {
-    const res = await fetch('/api/donations/total', { cache: 'no-store' })
+    const res = await fetch('/api/live-metrics', { cache: 'no-store' })
     const d = await res.json()
-    if (typeof d.total_cents === 'number') return d
+    if (typeof d.donation_total_cents === 'number') {
+      return { total_cents: d.donation_total_cents, count: typeof d.donation_count === 'number' ? d.donation_count : 0 }
+    }
   } catch {}
   return { total_cents: 0, count: 0 }
 }
 
 async function fetchLifetimeSeats(): Promise<number | null> {
   try {
-    const res = await fetch('/api/lifetime-seats', { cache: 'no-store' })
+    const res = await fetch('/api/live-metrics', { cache: 'no-store' })
     const data = await res.json()
-    if (typeof data.count === 'number') return data.count
+    if (typeof data.lifetime_seats_used === 'number') return data.lifetime_seats_used
   } catch {}
   return null
 }
@@ -191,16 +193,43 @@ export default function FundPage() {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
   const [donationTotal, setDonationTotal] = useState({ total_cents: 0, count: 0 })
   const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
+  const [metricsUpdatedAt, setMetricsUpdatedAt] = useState<string>('')
 
   const refreshTotals = useCallback(() => {
-    fetchDonationTotal().then(setDonationTotal)
+    fetchDonationTotal().then((totals) => {
+      setDonationTotal(totals)
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('espeezy_last_donation_total_cents', String(totals.total_cents))
+        window.localStorage.setItem('espeezy_last_donation_count', String(totals.count))
+      }
+    })
   }, [])
 
   const refreshLifetimeSeats = useCallback(() => {
-    fetchLifetimeSeats().then(setLifetimeSeatsUsed)
+    fetchLifetimeSeats().then((count) => {
+      setLifetimeSeatsUsed(count)
+      if (typeof window !== 'undefined' && typeof count === 'number') {
+        window.localStorage.setItem('espeezy_last_lifetime_seats_used', String(count))
+      }
+    })
   }, [])
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cachedTotal = Number(window.localStorage.getItem('espeezy_last_donation_total_cents') ?? '0')
+      const cachedCount = Number(window.localStorage.getItem('espeezy_last_donation_count') ?? '0')
+      const cachedSeats = Number(window.localStorage.getItem('espeezy_last_lifetime_seats_used') ?? '-1')
+      if (Number.isFinite(cachedTotal) || Number.isFinite(cachedCount)) {
+        setDonationTotal({
+          total_cents: Number.isFinite(cachedTotal) ? cachedTotal : 0,
+          count: Number.isFinite(cachedCount) ? cachedCount : 0,
+        })
+      }
+      if (Number.isFinite(cachedSeats) && cachedSeats >= 0) {
+        setLifetimeSeatsUsed(cachedSeats)
+      }
+    }
+
     refreshTotals()
     refreshLifetimeSeats()
     const interval = setInterval(refreshTotals, 30_000)
@@ -217,6 +246,10 @@ export default function FundPage() {
       window.removeEventListener('focus', onFocus)
     }
   }, [refreshTotals, refreshLifetimeSeats])
+
+  useEffect(() => {
+    setMetricsUpdatedAt(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))
+  }, [donationTotal.total_cents, donationTotal.count, lifetimeSeatsUsed])
 
   const getFinalAmount = () => {
     if (selectedPreset) return selectedPreset * 100
@@ -334,6 +367,9 @@ export default function FundPage() {
             </div>
           ))}
         </div>
+        <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+          Live metrics from Supabase. Last synced at {metricsUpdatedAt || '...'}.
+        </p>
       </section>
 
       <section style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(5rem, 8vw, 7rem)', position: 'relative', zIndex: 1 }}>

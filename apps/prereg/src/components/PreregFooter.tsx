@@ -98,6 +98,28 @@ export default function PreregFooter() {
             Payments via Stripe. Real-time sync across all your devices.
           </p>
 
+          <div
+            style={{
+              border: '1px solid rgba(148,163,184,0.2)',
+              background: 'rgba(15,23,42,0.5)',
+              borderRadius: '10px',
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              maxWidth: '260px',
+            }}
+          >
+            <p style={{ margin: 0, fontSize: '0.72rem', color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              Important Info
+            </p>
+            <p style={{ margin: '0.45rem 0 0', fontSize: '0.76rem', lineHeight: 1.5, color: '#94a3b8' }}>
+              Support: support@espeezy.com
+              <br />
+              Payments are processed by Stripe.
+              <br />
+              Core student tier stays free.
+            </p>
+          </div>
+
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <span style={{
               fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.6rem',
