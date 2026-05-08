@@ -50,7 +50,7 @@ const PLANS = {
     name: 'Premium Lifetime Access',
     price: 'GBP 49.00',
     period: 'one-time',
-    badge: 'Limited: 100 seats',
+    badge: 'First 100 Only — Limited Forever',
     hasTrial: false,
     features: [
       'Everything in Premium, forever',
@@ -60,7 +60,7 @@ const PLANS = {
       'Permanent legacy pricing protection',
       'Early supporter identity inside the product',
     ],
-    description: 'A limited founder-style offer for early supporters who want permanent access without recurring billing.',
+    description: 'Reserved exclusively for the first 100 early supporters. One payment, permanent Premium access — no recurring billing, ever.',
   },
 } as const
 
@@ -138,8 +138,8 @@ function CheckoutFlow() {
                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: '14px', marginBottom: '1rem' }}>
                 <Gift size={16} color={BRAND} style={{ flexShrink: 0 }} />
                 <div>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>14-day free trial, no charge today</span>
-                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.5)', fontWeight: 500, marginTop: '1px' }}>Start with Pro first. Cancel anytime before the trial ends and pay nothing.</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>14-day free trial · No credit card required</span>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(15,23,42,0.5)', fontWeight: 500, marginTop: '1px' }}>Start free. Cancel anytime before the trial ends and pay absolutely nothing.</span>
                 </div>
               </motion.div>
             )}

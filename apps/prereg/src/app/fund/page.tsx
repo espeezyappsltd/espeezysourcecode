@@ -134,10 +134,10 @@ const STRIPE_SUPPORT_PRODUCTS = [
   {
     name: 'Premium Lifetime Access',
     price: 'GBP 49.00 one-time',
-    tag: 'Founder Offer',
+    tag: 'First 100 Only \u2014 Limited',
     href: PLAN_PAYMENT_LINKS.lifetime,
     cta: 'Claim Lifetime',
-    description: 'A limited early-supporter product for permanent Premium access without recurring billing.',
+    description: 'Reserved for the first 100 early supporters only. One payment, permanent Premium access \u2014 no recurring billing, ever.',
     features: ['Everything in Premium', 'Founder badge', 'Legacy pricing protection'],
   },
 ] as const
