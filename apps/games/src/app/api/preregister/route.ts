@@ -27,6 +27,14 @@ function generateReferralCode(): string {
   return randomBytes(4).toString('hex').toUpperCase().slice(0, 8)
 }
 
+function isAlreadyRegisteredError(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object') return false
+  const data = payload as Record<string, unknown>
+  const code = typeof data.code === 'string' ? data.code.toLowerCase() : ''
+  const message = typeof data.message === 'string' ? data.message.toLowerCase() : ''
+  return code === 'user_already_exists' || message.includes('already') || message.includes('registered')
+}
+
 function getMainApi(req: Request): string | null {
   const currentOrigin = new URL(req.url).origin
   if (API_ORIGIN === currentOrigin) return null
@@ -90,7 +98,6 @@ async function ensureSupabaseAuthUser(email: string, source: string) {
   const res = await fetch(`${cfg.url}/auth/v1/admin/users`, {
     method: 'POST',
     headers: {
-      apikey: cfg.key,
       Authorization: `Bearer ${cfg.key}`,
       'Content-Type': 'application/json',
     },
@@ -105,8 +112,7 @@ async function ensureSupabaseAuthUser(email: string, source: string) {
   if (res.ok) return true
 
   const payload = await res.json().catch(() => null)
-  const errText = JSON.stringify(payload ?? '')
-  if (res.status === 422 && (errText.includes('already') || errText.includes('registered'))) {
+  if (res.status === 422 && isAlreadyRegisteredError(payload)) {
     return true
   }
 

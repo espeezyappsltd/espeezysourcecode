@@ -16,6 +16,14 @@ function getSupabaseConfig() {
   return { url, key }
 }
 
+function isAlreadyRegisteredError(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object') return false
+  const data = payload as Record<string, unknown>
+  const code = typeof data.code === 'string' ? data.code.toLowerCase() : ''
+  const message = typeof data.message === 'string' ? data.message.toLowerCase() : ''
+  return code === 'user_already_exists' || message.includes('already') || message.includes('registered')
+}
+
 export async function POST(req: Request) {
   const cfg = getSupabaseConfig()
   if (!cfg) {
@@ -35,7 +43,6 @@ export async function POST(req: Request) {
   const res = await fetch(`${cfg.url}/auth/v1/admin/users`, {
     method: 'POST',
     headers: {
-      apikey: cfg.key,
       Authorization: `Bearer ${cfg.key}`,
       'Content-Type': 'application/json',
     },
@@ -55,8 +62,7 @@ export async function POST(req: Request) {
     })
   }
 
-  const errorText = JSON.stringify(payload ?? '')
-  if (res.status === 422 && (errorText.includes('already') || errorText.includes('registered'))) {
+  if (res.status === 422 && isAlreadyRegisteredError(payload)) {
     return NextResponse.json({ error: 'An account already exists for this email.' }, { status: 409 })
   }
 
