@@ -67,7 +67,12 @@ export default function PreRegisterPage() {
         setSubmitted(true)
         setMyReferralCode(data.referral_code || null)
         setMyReferralCount(data.referral_count || 0)
-        if (typeof data.count === 'number') setRegisteredCount(data.count)
+        if (typeof data.count === 'number') {
+          setRegisteredCount(data.count)
+        } else {
+          // Fallback UI bump so the counter updates immediately after a successful registration.
+          setRegisteredCount(prev => prev + 1)
+        }
       }
     } catch {
       setSubmitError('Network error. Please check your connection and try again.')

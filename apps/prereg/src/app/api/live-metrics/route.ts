@@ -162,10 +162,10 @@ async function fetchFromSupabase(): Promise<LiveMetrics | null> {
 
   const donations = donationsRpc ?? donationsTable ?? { total_cents: 0, count: 0 }
   const authCount = authUserCount ?? 0
-  const effectiveRegistered = Math.max(preregCount, authCount)
 
   return {
-    registered_count: effectiveRegistered,
+    // Registered count displayed on UI should come directly from pre_registrations.
+    registered_count: preregCount,
     preregistration_count: preregCount,
     auth_user_count: authCount,
     donation_total_cents: donations.total_cents,

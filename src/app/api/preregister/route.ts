@@ -466,6 +466,7 @@ export async function POST(req: Request) {
 
 		const existing = await findExistingRegistrationByEmail(cleanEmail)
 		if (existing) {
+			const currentCount = await getRegistrationCount()
 			if (authProvisionResult && authProvisionResult.errorMessage) {
 				return jsonWithCors(req, {
 					error: authProvisionResult.errorMessage,
@@ -495,6 +496,7 @@ export async function POST(req: Request) {
 					: 'You are already registered. Check your inbox to set your Espeezy password.',
 				referral_code: existing.referral_code ?? null,
 				referral_count: existing.referral_count ?? 0,
+				count: currentCount ?? 0,
 				login_ready: true,
 			})
 		}
@@ -523,11 +525,13 @@ export async function POST(req: Request) {
 
 			if (insStatus === 409 || JSON.stringify(insData).includes('23505')) {
 				const duplicate = await findExistingRegistrationByEmail(cleanEmail)
+				const currentCount = await getRegistrationCount()
 				return jsonWithCors(req, {
 					success: true,
 					message: 'You are already registered!',
 					referral_code: duplicate?.referral_code ?? null,
 					referral_count: duplicate?.referral_count ?? 0,
+					count: currentCount ?? 0,
 				})
 			}
 			// Retry with minimal payload if columns are missing (table schema may not have optional fields)

@@ -56,7 +56,9 @@ export function useLaunchData() {
     try {
       const res = await fetch('/api/live-metrics', { cache: 'no-store' })
       const data = await res.json()
-      if (typeof data.registered_count === 'number') {
+      if (typeof data.preregistration_count === 'number') {
+        setCountAndPersist(data.preregistration_count)
+      } else if (typeof data.registered_count === 'number') {
         setCountAndPersist(data.registered_count)
       }
       if (typeof data.auth_user_count === 'number') {
@@ -91,7 +93,9 @@ export function useLaunchData() {
             preregister_goal: '5000',
           }))
         }
-        if (typeof metrics.registered_count === 'number') {
+        if (typeof metrics.preregistration_count === 'number') {
+          setCountAndPersist(metrics.preregistration_count)
+        } else if (typeof metrics.registered_count === 'number') {
           setCountAndPersist(metrics.registered_count)
         }
         if (typeof metrics.auth_user_count === 'number') {

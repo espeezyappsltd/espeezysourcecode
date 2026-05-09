@@ -29,6 +29,54 @@ const donationSchema = z.object({
   isAnonymous: z.boolean().optional(),
 })
 
+function getSupabaseConfig() {
+  const url = (process.env.PROJECT_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').trim()
+  const key = (process.env.SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
+  if (!url || !key) return null
+  return { url, key }
+}
+
+async function insertDonationInitiated(params: {
+  stripeSessionId: string
+  amountCents: number
+  donorEmail?: string
+  donorName?: string
+  message?: string
+  featureTag?: string
+  isAnonymous: boolean
+}) {
+  const cfg = getSupabaseConfig()
+  if (!cfg) return
+
+  const payload = {
+    stripe_session_id: params.stripeSessionId,
+    amount_cents: params.amountCents,
+    currency: 'gbp',
+    donor_email: params.isAnonymous ? null : (params.donorEmail || null),
+    donor_name: params.isAnonymous ? null : (params.donorName || null),
+    message: params.message || null,
+    feature_tag: params.featureTag || 'general',
+    is_anonymous: params.isAnonymous,
+    status: 'pending',
+    metadata: {
+      source: 'checkout_session_created',
+    },
+  }
+
+  await fetch(`${cfg.url}/rest/v1/donations`, {
+    method: 'POST',
+    headers: {
+      apikey: cfg.key,
+      Authorization: `Bearer ${cfg.key}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify(payload),
+  }).catch(() => {
+    // Donation checkout should continue even if tracking insert fails.
+  })
+}
+
 export async function POST(req: Request) {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json(
@@ -102,6 +150,16 @@ export async function POST(req: Request) {
     if (!session.url) {
       throw new Error('No Stripe session URL returned.')
     }
+
+    await insertDonationInitiated({
+      stripeSessionId: session.id,
+      amountCents,
+      donorEmail,
+      donorName,
+      message,
+      featureTag,
+      isAnonymous,
+    })
 
     return NextResponse.json({ url: session.url })
   } catch (error: unknown) {
