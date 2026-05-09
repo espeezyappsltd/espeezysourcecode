@@ -144,6 +144,31 @@ export async function sendPreregistrationConfirmationEmail(opts: {
   })
 }
 
+export async function sendPreregistrationPasswordSetupEmail(opts: {
+  to: string
+  actionLink: string
+}): Promise<void> {
+  await sendEmail({
+    to: opts.to,
+    subject: 'Set your Espeezy password',
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
+        <div style="background:linear-gradient(135deg,#10b981,#059669);padding:32px;border-radius:16px 16px 0 0;text-align:center">
+          <h1 style="color:white;margin:0;font-size:28px;letter-spacing:-0.03em">Your account is ready</h1>
+        </div>
+        <div style="background:#fff;padding:32px;border:1px solid #eee;border-top:none;border-radius:0 0 16px 16px">
+          <p style="font-size:18px;color:#111;margin-top:0">Finish setting up your Espeezy login.</p>
+          <p style="color:#444;line-height:1.6">Click the secure button below to set your password. This helps you sign in across Espeezy apps with the same account.</p>
+          <a href="${opts.actionLink}" style="display:inline-block;background:#10b981;color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700">Set password</a>
+          <p style="margin-top:18px;font-size:13px;color:#888">If the button does not open, copy and paste this link:</p>
+          <code style="display:block;margin-top:8px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#0f172a;word-break:break-all">${opts.actionLink}</code>
+        </div>
+      </div>
+    `,
+    text: `Set your Espeezy password: ${opts.actionLink}`,
+  })
+}
+
 /** Notification when a student certificate is generated */
 export async function sendCertificateEmail(opts: {
   to: string

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'crypto'
 import { z } from 'zod'
-import { sendPreregistrationConfirmationEmail } from '@/services/email'
+import { sendPreregistrationConfirmationEmail, sendPreregistrationPasswordSetupEmail } from '@/services/email'
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
 
 export const dynamic = 'force-dynamic'
@@ -139,6 +139,19 @@ async function authAdminRequest(
 function looksLikeExistingAuthUserError(data: unknown) {
 	const text = JSON.stringify(data).toLowerCase()
 	return text.includes('already') || text.includes('exists') || text.includes('registered') || text.includes('duplicate')
+}
+
+async function generateSupabaseRecoveryLink(email: string): Promise<string | null> {
+	const redirectTo = `${(process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com').replace(/\/$/, '')}/auth/reset-password`
+	const { ok, data } = await authAdminRequest('generate_link', 'POST', {
+		type: 'recovery',
+		email,
+		redirect_to: redirectTo,
+	})
+
+	if (!ok || !data || typeof data !== 'object') return null
+	const actionLink = (data as { action_link?: unknown }).action_link
+	return typeof actionLink === 'string' && actionLink.length > 0 ? actionLink : null
 }
 
 async function provisionSupabaseAccount(opts: {
@@ -391,11 +404,24 @@ export async function POST(req: Request) {
 				}, { status: 503 })
 			}
 
+			if (!cleanPassword) {
+				void (async () => {
+					const actionLink = await generateSupabaseRecoveryLink(cleanEmail)
+					if (!actionLink) return
+					await sendPreregistrationPasswordSetupEmail({
+						to: cleanEmail,
+						actionLink,
+					})
+				})().catch(err => {
+					console.error('[preregister] Existing user password setup email failed:', err)
+				})
+			}
+
 			return jsonWithCors(req, {
 				success: true,
 				message: cleanPassword
 					? 'You are already registered and your Espeezy login is ready.'
-					: 'You are already registered and your Supabase account is ready.',
+					: 'You are already registered. Check your inbox to set your Espeezy password.',
 				referral_code: existing.referral_code ?? null,
 				referral_count: existing.referral_count ?? 0,
 				login_ready: true,
@@ -485,12 +511,25 @@ export async function POST(req: Request) {
 			console.error('[preregister] Confirmation email failed:', err)
 		})
 
+		if (!cleanPassword) {
+			void (async () => {
+				const actionLink = await generateSupabaseRecoveryLink(cleanEmail)
+				if (!actionLink) return
+				await sendPreregistrationPasswordSetupEmail({
+					to: cleanEmail,
+					actionLink,
+				})
+			})().catch(err => {
+				console.error('[preregister] Password setup email failed:', err)
+			})
+		}
+
 		const count = await getRegistrationCount()
 		return jsonWithCors(req, {
 			success: true,
 			message: cleanPassword
 				? 'You are on the list and your login now works across Espeezy, Games, and Kanban.'
-				: 'You are on the list and your Supabase account has been created.',
+				: 'You are on the list. Check your inbox to set your Espeezy password.',
 			referral_code: newCode,
 			referral_count: 0,
 			count: count ?? 0,
