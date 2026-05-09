@@ -290,7 +290,7 @@ export default function PreRegisterPage() {
             Make fairness<br /><span style={{ color: 'var(--brand)' }}>the default.</span>
           </h2>
           <p style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-            {config.brand_name} shows exactly who did what in group work, so you can grade fairly based on real data—not guesswork.
+            {config.brand_name} shows exactly who did what in group work, so you can grade fairly based on real data.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
