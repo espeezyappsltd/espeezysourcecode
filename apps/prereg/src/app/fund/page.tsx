@@ -161,15 +161,40 @@ const TESTIMONIALS = [
   { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
 
-async function fetchDonationTotal(): Promise<{ total_cents: number; count: number }> {
+type DonationMetrics = {
+  total_cents: number
+  donation_count: number
+  supporters_count: number
+  click_count: number
+  click_user_count: number
+  conversion_rate_pct: number
+}
+
+async function fetchDonationMetrics(): Promise<DonationMetrics> {
   try {
     const res = await fetch('/api/live-metrics', { cache: 'no-store' })
     const d = await res.json()
     if (typeof d.donation_total_cents === 'number') {
-      return { total_cents: d.donation_total_cents, count: typeof d.donation_count === 'number' ? d.donation_count : 0 }
+      return {
+        total_cents: d.donation_total_cents,
+        donation_count: typeof d.donation_count === 'number' ? d.donation_count : 0,
+        supporters_count: typeof d.donation_supporters_count === 'number'
+          ? d.donation_supporters_count
+          : (typeof d.donation_count === 'number' ? d.donation_count : 0),
+        click_count: typeof d.donation_click_count === 'number' ? d.donation_click_count : 0,
+        click_user_count: typeof d.donation_click_user_count === 'number' ? d.donation_click_user_count : 0,
+        conversion_rate_pct: typeof d.donation_conversion_rate_pct === 'number' ? d.donation_conversion_rate_pct : 0,
+      }
     }
   } catch {}
-  return { total_cents: 0, count: 0 }
+  return {
+    total_cents: 0,
+    donation_count: 0,
+    supporters_count: 0,
+    click_count: 0,
+    click_user_count: 0,
+    conversion_rate_pct: 0,
+  }
 }
 
 async function fetchLifetimeSeats(): Promise<number | null> {
@@ -209,16 +234,59 @@ export default function FundPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
-  const [donationTotal, setDonationTotal] = useState({ total_cents: 0, count: 0 })
+  const [donationMetrics, setDonationMetrics] = useState<DonationMetrics>({
+    total_cents: 0,
+    donation_count: 0,
+    supporters_count: 0,
+    click_count: 0,
+    click_user_count: 0,
+    conversion_rate_pct: 0,
+  })
   const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
   const [metricsUpdatedAt, setMetricsUpdatedAt] = useState<string>('')
 
+  const getOrCreateActorKey = useCallback(() => {
+    if (typeof window === 'undefined') return ''
+    const existing = window.localStorage.getItem('espeezy_donate_actor_key')
+    if (existing) return existing
+    const next = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    window.localStorage.setItem('espeezy_donate_actor_key', next)
+    return next
+  }, [])
+
+  const trackDonateClick = useCallback((params: { amountCents: number; context: string; featureTag?: string }) => {
+    const actorKey = getOrCreateActorKey()
+    const payload = JSON.stringify({
+      amountCents: params.amountCents,
+      source: 'fund_page',
+      featureTag: params.featureTag || featureTag || undefined,
+      context: params.context,
+      actorKey,
+    })
+
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      const blob = new Blob([payload], { type: 'application/json' })
+      navigator.sendBeacon('/api/donations/click', blob)
+      return
+    }
+
+    void fetch('/api/donations/click', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload,
+      keepalive: true,
+    }).catch(() => {
+      // Analytics failures should never block checkout.
+    })
+  }, [featureTag, getOrCreateActorKey])
+
   const refreshTotals = useCallback(() => {
-    fetchDonationTotal().then((totals) => {
-      setDonationTotal(totals)
+    fetchDonationMetrics().then((totals) => {
+      setDonationMetrics(totals)
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem('espeezy_last_donation_total_cents', String(totals.total_cents))
-        window.localStorage.setItem('espeezy_last_donation_count', String(totals.count))
+        window.localStorage.setItem('espeezy_last_donation_metrics', JSON.stringify(totals))
       }
     })
   }, [])
@@ -234,14 +302,22 @@ export default function FundPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const cachedTotal = Number(window.localStorage.getItem('espeezy_last_donation_total_cents') ?? '0')
-      const cachedCount = Number(window.localStorage.getItem('espeezy_last_donation_count') ?? '0')
+      const cachedMetricsRaw = window.localStorage.getItem('espeezy_last_donation_metrics')
       const cachedSeats = Number(window.localStorage.getItem('espeezy_last_lifetime_seats_used') ?? '-1')
-      if (Number.isFinite(cachedTotal) || Number.isFinite(cachedCount)) {
-        setDonationTotal({
-          total_cents: Number.isFinite(cachedTotal) ? cachedTotal : 0,
-          count: Number.isFinite(cachedCount) ? cachedCount : 0,
-        })
+      if (cachedMetricsRaw) {
+        try {
+          const parsed = JSON.parse(cachedMetricsRaw) as Partial<DonationMetrics>
+          setDonationMetrics({
+            total_cents: typeof parsed.total_cents === 'number' ? parsed.total_cents : 0,
+            donation_count: typeof parsed.donation_count === 'number' ? parsed.donation_count : 0,
+            supporters_count: typeof parsed.supporters_count === 'number' ? parsed.supporters_count : (typeof parsed.donation_count === 'number' ? parsed.donation_count : 0),
+            click_count: typeof parsed.click_count === 'number' ? parsed.click_count : 0,
+            click_user_count: typeof parsed.click_user_count === 'number' ? parsed.click_user_count : 0,
+            conversion_rate_pct: typeof parsed.conversion_rate_pct === 'number' ? parsed.conversion_rate_pct : 0,
+          })
+        } catch {
+          // Ignore invalid cached metrics and rely on live fetch.
+        }
       }
       if (Number.isFinite(cachedSeats) && cachedSeats >= 0) {
         setLifetimeSeatsUsed(cachedSeats)
@@ -250,7 +326,7 @@ export default function FundPage() {
 
     refreshTotals()
     refreshLifetimeSeats()
-    const interval = setInterval(refreshTotals, 30_000)
+    const interval = setInterval(refreshTotals, 15_000)
     const seatsInterval = setInterval(refreshLifetimeSeats, 30_000)
     // Re-fetch when user returns to tab (e.g. after Stripe redirect back)
     const onFocus = () => {
@@ -267,7 +343,7 @@ export default function FundPage() {
 
   useEffect(() => {
     setMetricsUpdatedAt(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))
-  }, [donationTotal.total_cents, donationTotal.count, lifetimeSeatsUsed])
+  }, [donationMetrics.total_cents, donationMetrics.donation_count, donationMetrics.supporters_count, donationMetrics.click_user_count, donationMetrics.conversion_rate_pct, lifetimeSeatsUsed])
 
   const getFinalAmount = () => {
     if (selectedPreset) return selectedPreset * 100
@@ -281,6 +357,8 @@ export default function FundPage() {
     setSubmitError('')
     const amountCents = getFinalAmount()
     if (amountCents < 100) { setSubmitError('Minimum donation is £1.00'); return }
+
+    trackDonateClick({ amountCents, context: 'donate_form_submit', featureTag: featureTag || undefined })
 
     // For preset tiers, use direct Stripe payment links first (no API dependency).
     if (selectedPreset && selectedPreset >= 5 && selectedPreset <= 100) {
@@ -324,7 +402,8 @@ export default function FundPage() {
   }
 
   const displayAmount = getFinalAmount() / 100
-  const totalRaised = (donationTotal.total_cents / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 })
+  const totalRaised = (donationMetrics.total_cents / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 })
+  const conversionDisplay = `${Math.max(0, donationMetrics.conversion_rate_pct).toFixed(1)}%`
   const lifetimeSoldOut = lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= LIFETIME_LIMIT
   const lifetimeSeatsLeft = lifetimeSeatsUsed !== null ? Math.max(0, LIFETIME_LIMIT - lifetimeSeatsUsed) : null
 
@@ -386,8 +465,8 @@ export default function FundPage() {
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
           {[
             { value: totalRaised, label: 'Raised so far' },
-            { value: donationTotal.count.toLocaleString(), label: 'Supporters' },
-            { value: '100%', label: 'Goes to development' },
+            { value: donationMetrics.supporters_count.toLocaleString(), label: 'Supporters' },
+            { value: conversionDisplay, label: 'Donate conversion' },
           ].map((s, i) => (
             <div key={i} style={{ padding: '0.875rem 1.75rem', background: 'white', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '14px', textAlign: 'center', boxShadow: '0 1px 4px rgba(15,23,42,0.06)' }}>
               <div style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.04em', color: i === 2 ? '#10b981' : '#0f172a' }}>{s.value}</div>
@@ -397,6 +476,9 @@ export default function FundPage() {
         </div>
         <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
           Live metrics from Supabase. Last synced at {metricsUpdatedAt || '...'}.
+        </p>
+        <p style={{ margin: '0.4rem 0 0', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>
+          {donationMetrics.click_user_count.toLocaleString()} users clicked donate · {donationMetrics.donation_count.toLocaleString()} completed donations
         </p>
       </section>
 
@@ -629,6 +711,7 @@ export default function FundPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      trackDonateClick({ amountCents: tier.amount * 100, context: 'donation_tier_card_click' })
                       const paymentLink = getDonationFallbackLink(tier.amount, donorEmail)
                       if (paymentLink) {
                         window.location.href = paymentLink

@@ -69,7 +69,7 @@ function useConfetti(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
 function DonationSuccessContent() {
   const searchParams = useSearchParams()
   const [amount, setAmount] = useState<string | null>(null)
-  const [metrics, setMetrics] = useState({ donation_total_cents: 0, donation_count: 0 })
+  const [metrics, setMetrics] = useState({ donation_total_cents: 0, donation_supporters_count: 0 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useConfetti(canvasRef)
 
@@ -88,7 +88,9 @@ function DonationSuccessContent() {
         if (!active) return
         setMetrics({
           donation_total_cents: typeof data.donation_total_cents === 'number' ? data.donation_total_cents : 0,
-          donation_count: typeof data.donation_count === 'number' ? data.donation_count : 0,
+          donation_supporters_count: typeof data.donation_supporters_count === 'number'
+            ? data.donation_supporters_count
+            : (typeof data.donation_count === 'number' ? data.donation_count : 0),
         })
       } catch {
         // Leave existing totals in place when metrics are temporarily unavailable.
@@ -157,7 +159,7 @@ function DonationSuccessContent() {
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '4px' }}>Raised so far</div>
           </div>
           <div style={{ padding: '0.9rem 1rem', borderRadius: '16px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.16)' }}>
-            <div style={{ fontSize: '1.15rem', fontWeight: 950, color: '#059669' }}>{metrics.donation_count.toLocaleString()}</div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 950, color: '#059669' }}>{metrics.donation_supporters_count.toLocaleString()}</div>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '4px' }}>Supporters</div>
           </div>
         </div>
