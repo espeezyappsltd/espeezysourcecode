@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Espeezy Kanban: Coming Soon',
-  description: 'Visual task management built for students and teams. Track coursework, manage group projects, and hit every deadline.',
+  title: 'Espeezy Kanban Workspace',
+  description: 'Espeezy-branded visual task management for students and teams.',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   creator: 'Espeezy',
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Espeezy Kanban: Coming Soon',
-    description: 'The smartest academic kanban board is almost here.',
+    title: 'Espeezy Kanban Workspace',
+    description: 'Espeezy-branded visual task management for academic teams.',
     url: 'https://kanban.espeezy.com',
     siteName: 'Espeezy Kanban',
     type: 'website',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#10b981',
+  themeColor: '#0a0a0a',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,

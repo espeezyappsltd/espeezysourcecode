@@ -27,8 +27,8 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
 export const COL_CONFIG: Record<Column, ColumnConfig> = {
   todo: {
     title: 'To Do',
-    accent: '#6366f1',
-    dimAccent: 'rgba(99,102,241,0.18)',
+    accent: '#059669',
+    dimAccent: 'rgba(5,150,105,0.18)',
     emptyIcon: '📋',
     icon: <Clock size={14} />,
   },

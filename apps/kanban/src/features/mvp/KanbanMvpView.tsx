@@ -47,13 +47,13 @@ function HeaderSection({
   return (
     <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg,#6366f1,#10b981)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg,#059669,#10b981)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Zap size={18} color="white" />
         </div>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>Espeezy Kanban</h1>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>MVP · Public Room</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(16,185,129,0.2)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>MVP · Public Room</span>
           </div>
           <p style={{ margin: 0, color: '#64748b', fontSize: '0.78rem' }}>Realtime collaboration · {totalCards} card{totalCards !== 1 ? 's' : ''} · {donePercent}% complete</p>
         </div>
@@ -171,7 +171,7 @@ function ToolbarSection({
             gap: '0.35rem',
             border: 'none',
             borderRadius: '9px',
-            background: newTask.trim() ? 'linear-gradient(135deg,#6366f1,#10b981)' : 'rgba(148,163,184,0.1)',
+            background: newTask.trim() ? 'linear-gradient(135deg,#059669,#10b981)' : 'rgba(148,163,184,0.1)',
             color: newTask.trim() ? '#fff' : '#475569',
             fontWeight: 700,
             padding: '0.6rem 1rem',
@@ -323,10 +323,10 @@ function InsightsSection({
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0.85rem' }}>
       <section style={{ background: 'rgba(15,23,42,0.75)', border: '1px solid rgba(148,163,184,0.12)', borderRadius: '12px', padding: '0.9rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
-          <Activity size={15} color="#6366f1" />
+          <Activity size={15} color="#10b981" />
           <h2 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc' }}>Contribution Analytics</h2>
           <Tooltip tip="Actions per user since session start. Download CSV for full export.">
-            <span style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '5px', background: 'rgba(99,102,241,0.12)', color: '#818cf8', cursor: 'default', border: '1px solid rgba(99,102,241,0.2)' }}>?</span>
+            <span style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '5px', background: 'rgba(16,185,129,0.12)', color: '#6ee7b7', cursor: 'default', border: '1px solid rgba(16,185,129,0.2)' }}>?</span>
           </Tooltip>
         </div>
         {analytics.length === 0 ? (
@@ -347,7 +347,7 @@ function InsightsSection({
                       <span style={{ fontSize: '0.7rem', color: '#10b981', cursor: 'default' }}>+{item.created}</span>
                     </Tooltip>
                     <Tooltip tip={`${item.moved} card${item.moved !== 1 ? 's' : ''} moved`}>
-                      <span style={{ fontSize: '0.7rem', color: '#6366f1', cursor: 'default' }}>↔ {item.moved}</span>
+                      <span style={{ fontSize: '0.7rem', color: '#10b981', cursor: 'default' }}>↔ {item.moved}</span>
                     </Tooltip>
                     <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{item.total} total</span>
                   </div>
@@ -370,7 +370,7 @@ function InsightsSection({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', maxHeight: '260px', overflowY: 'auto' }}>
           {events.slice(0, 12).map((event, index) => {
             const icon = event.action === 'card_created' ? '✦' : event.action === 'card_moved' ? '→' : '⊕'
-            const iconColor = event.action === 'card_created' ? '#10b981' : event.action === 'card_moved' ? '#6366f1' : '#f59e0b'
+            const iconColor = event.action === 'card_created' ? '#10b981' : event.action === 'card_moved' ? '#059669' : '#f59e0b'
             const label = event.action === 'card_created'
               ? 'created a card'
               : event.action === 'card_moved'
@@ -414,7 +414,7 @@ export function KanbanMvpView(props: KanbanMvpViewProps) {
         />
 
         <div style={{ height: '4px', background: 'rgba(148,163,184,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${props.donePercent}%`, background: 'linear-gradient(90deg,#6366f1,#10b981)', borderRadius: '2px', transition: 'width 0.4s ease' }} />
+          <div style={{ height: '100%', width: `${props.donePercent}%`, background: 'linear-gradient(90deg,#059669,#10b981)', borderRadius: '2px', transition: 'width 0.4s ease' }} />
         </div>
 
         {props.joinError && (

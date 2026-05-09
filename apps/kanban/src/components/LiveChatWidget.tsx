@@ -168,7 +168,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
               maxLength={1000}
               style={{ flex: 1, borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#111827', color: '#f9fafb', padding: '0.45rem 0.55rem', fontSize: '0.8rem' }}
             />
-            <button type='submit' disabled={loading || username.trim().length < 3} style={{ borderRadius: '8px', border: 'none', background: '#6366f1', color: 'white', padding: '0.45rem 0.7rem', fontSize: '0.8rem', cursor: 'pointer' }}>
+            <button type='submit' disabled={loading || username.trim().length < 3} style={{ borderRadius: '8px', border: 'none', background: '#10b981', color: 'white', padding: '0.45rem 0.7rem', fontSize: '0.8rem', cursor: 'pointer' }}>
               Send
             </button>
           </form>
@@ -178,7 +178,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
       <button
         type='button'
         onClick={() => setOpen((v) => !v)}
-        style={{ position: 'fixed', right: '1rem', bottom: '1rem', zIndex: 1200, border: 'none', borderRadius: '999px', width: '52px', height: '52px', background: '#6366f1', color: 'white', fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 20px rgba(99,102,241,0.4)' }}
+        style={{ position: 'fixed', right: '1rem', bottom: '1rem', zIndex: 1200, border: 'none', borderRadius: '999px', width: '52px', height: '52px', background: '#10b981', color: 'white', fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 20px rgba(16,185,129,0.4)' }}
         aria-label='Toggle live chat'
       >
         Chat
