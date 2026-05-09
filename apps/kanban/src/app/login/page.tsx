@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase-client'
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') || '/'
+  const next = searchParams.get('next') || '/dashboard'
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
