@@ -7,8 +7,21 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-     "" : "" ,
-     "" : "" ,
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "docker compose --env-file .env.local -f docker-compose.local.yml up --build",
+    "dev:detached": "docker compose --env-file .env.local -f docker-compose.local.yml up -d --build",
+    "dev:down": "docker compose --env-file .env.local -f docker-compose.local.yml down",
+    "dev:logs": "docker compose --env-file .env.local -f docker-compose.local.yml logs -f",
+    "prod": "docker compose --env-file .env.production -f docker-compose.production.yml up -d",
+    "prod:down": "docker compose --env-file .env.production -f docker-compose.production.yml down",
+    "prod:logs": "docker compose --env-file .env.production -f docker-compose.production.yml logs -f",
+    "db:migrate:local": "docker compose --env-file .env.local -f docker-compose.local.yml run --rm planka npm run db:migrate",
+    "db:migrate:prod": "docker compose --env-file .env.production -f docker-compose.production.yml run --rm planka npm run db:migrate",
+    "db:create-admin:local": "docker compose --env-file .env.local -f docker-compose.local.yml run --rm planka npm run db:create-admin-user",
+    "db:create-admin:prod": "docker compose --env-file .env.production -f docker-compose.production.yml run --rm planka npm run db:create-admin-user",
+    "start": "npm run prod",
+    "stop": "npm run prod:down",
+    "logs": "npm run prod:logs",
+    "build": "docker build -t planka:latest .",
+    "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

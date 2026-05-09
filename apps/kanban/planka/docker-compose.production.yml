@@ -1,32 +1,13 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: espeezy_planka_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-planka}
-      POSTGRES_USER: ${POSTGRES_USER:-planka}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - planka_db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-planka} -d ${POSTGRES_DB:-planka}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
   planka:
     image: ghcr.io/plankanban/planka:latest
     container_name: espeezy_planka
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
       - "${PLANKA_PORT:-3333}:1337"
     environment:
       BASE_URL: ${BASE_URL}
-      DATABASE_URL: postgres://${POSTGRES_USER:-planka}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-planka}
+      DATABASE_URL: ${SUPABASE_DB_URL}
       SECRET_KEY: ${SECRET_KEY}
       TRUST_PROXY: "true"
       DEFAULT_ADMIN_NAME: ${DEFAULT_ADMIN_NAME:-Espeezy Admin}
@@ -36,14 +17,13 @@ services:
       DEFAULT_PROJECT_NAME: ${DEFAULT_PROJECT_NAME:-Espeezy Workspace}
       DEFAULT_BOARD_NAME: ${DEFAULT_BOARD_NAME:-Kanban Board}
       OUTGOING_BLOCKED_IPS: ${OUTGOING_BLOCKED_IPS:-127.0.0.1,0.0.0.0}
-      OUTGOING_BLOCKED_HOSTS: ${OUTGOING_BLOCKED_HOSTS:-localhost,postgres}
+      OUTGOING_BLOCKED_HOSTS: ${OUTGOING_BLOCKED_HOSTS:-localhost}
     volumes:
       - planka_user_avatars:/app/public/user-avatars
       - planka_project_background_images:/app/public/project-background-images
       - planka_attachments:/app/private/attachments
 
 volumes:
-  planka_db_data:
   planka_user_avatars:
   planka_project_background_images:
   planka_attachments:
