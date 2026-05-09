@@ -16,7 +16,7 @@ import LiveChatWidget from '@/components/LiveChatWidget'
 
 const COMING_FEATURES = [
   { icon: <Cpu size={20} />, title: 'Your Personal AI Coach', desc: 'Imagine having a smart tutor that knows your course content, adapts to how you learn best, and helps you crush your assignments.', tag: 'Smart Learning' },
-  { icon: <BarChart2 size={20} />, title: 'No More Freeloaders', desc: 'Crystal-clear analytics show exactly who did what in group projects. Say goodbye to carrying the team without credit.', tag: 'Fairness' },
+  { icon: <BarChart2 size={20} />, title: 'No More Freeloaders', desc: 'Crystal-clear analytics show exactly who did what in group projects. Say goodbye to carrying the team without credit.', tag: 'Visibility' },
   { icon: <Zap size={20} />, title: 'Supercharged Collaboration', desc: 'Everything you need in one fast, beautiful workspace. Plan, track, and execute group tasks seamlessly without the usual stress.', tag: 'Productivity' },
   { icon: <Heart size={20} />, title: 'Built-in Wellbeing Support', desc: 'We keep an eye on your workload to prevent burnout. Get gentle nudges when it\'s time to take a break and recharge.', tag: 'Mental Health' },
   { icon: <BookOpen size={20} />, title: 'Syncs with Your School', desc: 'Connects right into Canvas, Blackboard, or Moodle so you don\'t have to copy-paste your work everywhere.', tag: 'Integrations' },
@@ -137,7 +137,7 @@ export default function PreRegisterPage() {
 
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
           style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, maxWidth: '820px', margin: '0 auto 1.25rem' }}>
-          Make fairness<br /><span style={{ color: 'var(--brand)' }}>the default.</span>
+          Make your contribution<br /><span style={{ color: 'var(--brand)' }}>impossible to miss.</span>
         </motion.h2>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
