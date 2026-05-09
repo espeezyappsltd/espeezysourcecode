@@ -1,0 +1,14 @@
+{
+  "name": "planka",
+  "version": "1.0.0",
+  "description": "This folder ports the official Planka production Docker setup into this repository for the Kanban surface.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+     "" : "" ,
+     "" : "" ,
+    "test": "echo \"Error: no test specified\" && exit 1",
+  }
+}

@@ -56,11 +56,57 @@ function isValidReferralCode(code: unknown): code is string {
 function generateReferralCode(): string {
 	return randomBytes(4).toString('hex').toUpperCase().slice(0, 8)
 }
+
+function extractSupabaseRefFromUrl(url: string): string | null {
+	try {
+		const host = new URL(url).hostname
+		if (!host.endsWith('.supabase.co')) return null
+		return host.split('.')[0] ?? null
+	} catch {
+		return null
+	}
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+	const parts = token.split('.')
+	if (parts.length !== 3) return null
+	try {
+		const payload = parts[1]
+		if (!payload) return null
+		const decoded = Buffer.from(payload, 'base64url').toString('utf8')
+		const parsed = JSON.parse(decoded)
+		return parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : null
+	} catch {
+		return null
+	}
+}
+
+function buildSupabaseConfigIssue(url: string, key: string): string | null {
+	if (key.startsWith('sb_publishable_') || key.startsWith('sb_anon_')) {
+		return 'SUPABASE_SERVICE_ROLE_KEY is not a service-role key. Found a publishable/anon key instead.'
+	}
+
+	const payload = decodeJwtPayload(key)
+	const role = typeof payload?.role === 'string' ? payload.role : null
+	if (role === 'anon') {
+		return 'SUPABASE_SERVICE_ROLE_KEY decoded to role=anon. Use the service-role key for server routes.'
+	}
+
+	const urlRef = extractSupabaseRefFromUrl(url)
+	const keyRef = typeof payload?.ref === 'string' ? payload.ref : null
+	if (urlRef && keyRef && urlRef !== keyRef) {
+		return `Supabase project mismatch: URL points to ${urlRef}, key points to ${keyRef}.`
+	}
+
+	return null
+}
+
 function getSupabaseConfig() {
 	const url = process.env.PROJECT_URL?.trim() ?? process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
 	const key = process.env.SECRET_KEY?.trim() ?? process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 	if (!url || !key) return null
-	return { url, key }
+	const issue = buildSupabaseConfigIssue(url, key)
+	return { url, key, issue }
 }
 async function supaRest(
 	path: string,
@@ -69,6 +115,7 @@ async function supaRest(
 ): Promise<{ ok: boolean; data: unknown; status: number }> {
 	const cfg = getSupabaseConfig()
 	if (!cfg) return { ok: false, data: null, status: 0 }
+	if (cfg.issue) return { ok: false, data: { error: cfg.issue }, status: 0 }
 	const res = await fetch(`${cfg.url}/rest/v1/${path}`, {
 		method,
 		headers: {
@@ -87,6 +134,7 @@ async function supaRest(
 async function getRegistrationCount() {
 	const cfg = getSupabaseConfig()
 	if (!cfg) return null
+	if (cfg.issue) return null
 
 	const res = await fetch(`${cfg.url}/rest/v1/pre_registrations?select=*&limit=0`, {
 		method: 'GET',
@@ -119,6 +167,7 @@ async function authAdminRequest(
 ): Promise<{ ok: boolean; data: unknown; status: number }> {
 	const cfg = getSupabaseConfig()
 	if (!cfg) return { ok: false, data: null, status: 0 }
+	if (cfg.issue) return { ok: false, data: { error: cfg.issue }, status: 0 }
 
 	const res = await fetch(`${cfg.url}/auth/v1/admin/${path}`, {
 		method,
@@ -197,7 +246,7 @@ async function provisionFirebaseAccount(opts: {
 	if (!adminAuth) {
 		// Firebase Admin not configured in this environment — skip gracefully.
 		// Registration proceeds via Supabase alone.
-		return { ok: true, created: false }
+		return { ok: true, created: false, message: undefined }
 	}
 
 	let uid: string | null = null
@@ -263,7 +312,11 @@ async function provisionUnifiedLogin(opts: {
 		provisionSupabaseAccount(opts),
 		opts.provisionFirebase
 			? provisionFirebaseAccount(opts)
-			: Promise.resolve({ ok: true, created: false } as const),
+			: Promise.resolve<{ ok: boolean; created: boolean; message?: string }>({
+				ok: true,
+				created: false,
+				message: undefined,
+			}),
 	])
 
 	if (!supabaseResult.ok || !firebaseResult.ok) {
@@ -339,11 +392,20 @@ export async function OPTIONS(req: Request) {
 }
 
 export async function GET(req: Request) {
-	if (!getSupabaseConfig()) {
+	const supabaseConfig = getSupabaseConfig()
+	if (!supabaseConfig) {
 		return jsonWithCors(req, {
 			count: 0,
 			warning: 'Supabase is not configured.',
 		})
+	}
+
+	if (supabaseConfig.issue) {
+		return jsonWithCors(req, {
+			count: 0,
+			error: 'Supabase config error.',
+			hint: supabaseConfig.issue,
+		}, { status: 500 })
 	}
 
 	try {
@@ -382,6 +444,13 @@ export async function POST(req: Request) {
 
 	if (!supabaseConfig) {
 		return jsonWithCors(req, { error: 'Supabase is not configured.' }, { status: 503 })
+	}
+
+	if (supabaseConfig.issue) {
+		return jsonWithCors(req, {
+			error: 'Supabase credentials are misconfigured.',
+			hint: supabaseConfig.issue,
+		}, { status: 500 })
 	}
 
 	try {
@@ -444,6 +513,14 @@ export async function POST(req: Request) {
 			referral_count: 0,
 		})
 		if (!insOk) {
+			if (insStatus === 401 || insStatus === 403) {
+				return jsonWithCors(req, {
+					error: 'Supabase rejected credentials for preregistration insert.',
+					hint: 'Verify SUPABASE_SERVICE_ROLE_KEY belongs to the same project as NEXT_PUBLIC_SUPABASE_URL/PROJECT_URL.',
+					...(process.env.NODE_ENV !== 'production' ? { upstream_status: insStatus, upstream_error: insData } : {}),
+				}, { status: 500 })
+			}
+
 			if (insStatus === 409 || JSON.stringify(insData).includes('23505')) {
 				const duplicate = await findExistingRegistrationByEmail(cleanEmail)
 				return jsonWithCors(req, {

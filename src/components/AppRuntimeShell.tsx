@@ -1,12 +1,17 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import ClientShell from './ClientShell'
 import { NotificationProvider } from './NotificationProvider'
 import PWARegistry from './PWARegistry'
-import SessionGuard from './SessionGuard'
 import ToasterModeManager from './ToasterModeManager'
-import { RealtimeProvider } from '@/lib/realtime-provider'
+
+const SessionGuard = dynamic(() => import('./SessionGuard'), { ssr: false })
+const RealtimeProvider = dynamic(
+  () => import('@/lib/realtime-provider').then((module) => module.RealtimeProvider),
+  { ssr: false },
+)
 
 const PREREG_PATHS = new Set(['/', '/preregister'])
 

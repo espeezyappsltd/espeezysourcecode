@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getAuth, type Auth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import { getDatabase } from 'firebase/database'
@@ -25,7 +25,9 @@ export const firestoreClientEnabled = firestoreFlag === 'true' || (firestoreFlag
 // Prevent re-initialisation during Next.js hot-reload
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
 
-export const auth = getAuth(app)
+const authInstance: Auth | null = typeof window === 'undefined' ? null : getAuth(app)
+
+export const auth = authInstance as Auth
 export const db = firestoreDatabaseId && firestoreDatabaseId !== '(default)'
   ? getFirestore(app, firestoreDatabaseId)
   : getFirestore(app)
