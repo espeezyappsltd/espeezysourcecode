@@ -69,6 +69,7 @@ function useConfetti(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
 function DonationSuccessContent() {
   const searchParams = useSearchParams()
   const [amount, setAmount] = useState<string | null>(null)
+  const [metrics, setMetrics] = useState({ donation_total_cents: 0, donation_count: 0 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useConfetti(canvasRef)
 
@@ -76,6 +77,40 @@ function DonationSuccessContent() {
     const a = searchParams.get('amount')
     if (a) setAmount(a)
   }, [searchParams])
+
+  useEffect(() => {
+    let active = true
+
+    const refreshMetrics = async () => {
+      try {
+        const res = await fetch('/api/live-metrics', { cache: 'no-store' })
+        const data = await res.json()
+        if (!active) return
+        setMetrics({
+          donation_total_cents: typeof data.donation_total_cents === 'number' ? data.donation_total_cents : 0,
+          donation_count: typeof data.donation_count === 'number' ? data.donation_count : 0,
+        })
+      } catch {
+        // Leave existing totals in place when metrics are temporarily unavailable.
+      }
+    }
+
+    refreshMetrics()
+    const timer = window.setInterval(refreshMetrics, 30_000)
+    window.addEventListener('focus', refreshMetrics)
+
+    return () => {
+      active = false
+      clearInterval(timer)
+      window.removeEventListener('focus', refreshMetrics)
+    }
+  }, [])
+
+  const totalRaised = (metrics.donation_total_cents / 100).toLocaleString('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    maximumFractionDigits: 0,
+  })
 
   return (
     <main style={{ minHeight: '100vh', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
@@ -114,6 +149,17 @@ function DonationSuccessContent() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.5rem', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: '16px', color: '#059669', fontSize: '0.9rem', fontWeight: 700 }}>
           <CheckCircle2 size={20} />
           Payment processed securely via Stripe
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.75rem', width: '100%', maxWidth: '420px' }}>
+          <div style={{ padding: '0.9rem 1rem', borderRadius: '16px', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.08)' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 950, color: '#0f172a' }}>{totalRaised}</div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '4px' }}>Raised so far</div>
+          </div>
+          <div style={{ padding: '0.9rem 1rem', borderRadius: '16px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.16)' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 950, color: '#059669' }}>{metrics.donation_count.toLocaleString()}</div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '4px' }}>Supporters</div>
+          </div>
         </div>
 
         {/* CTAs */}

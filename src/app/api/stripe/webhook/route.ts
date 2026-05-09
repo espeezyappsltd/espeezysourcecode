@@ -144,7 +144,7 @@ async function handleDonationWebhook(session: Stripe.Checkout.Session) {
         stripe_session_id: session.id,
         stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
         amount_cents: session.amount_total ?? 0,
-        currency: session.currency ?? 'usd',
+        currency: session.currency ?? 'gbp',
         donor_email: meta.is_anonymous === 'true' ? null : (meta.donor_email || session.customer_email || null),
         donor_name: meta.is_anonymous === 'true' ? null : (meta.donor_name || null),
         message: meta.message || null,
