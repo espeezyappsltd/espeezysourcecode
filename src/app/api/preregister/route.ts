@@ -242,10 +242,13 @@ async function provisionUnifiedLogin(opts: {
 	role: string | null
 	institution: string | null
 	source: string
+	provisionFirebase: boolean
 }): Promise<ProvisionResult> {
 	const [supabaseResult, firebaseResult] = await Promise.all([
 		provisionSupabaseAccount(opts),
-		provisionFirebaseAccount(opts),
+		opts.provisionFirebase
+			? provisionFirebaseAccount(opts)
+			: Promise.resolve({ ok: true, created: false } as const),
 	])
 
 	if (!supabaseResult.ok || !firebaseResult.ok) {
@@ -367,17 +370,15 @@ export async function POST(req: Request) {
 	}
 
 	try {
-		let authProvisionResult: ProvisionResult | null = null
-		if (cleanPassword) {
-			authProvisionResult = await provisionUnifiedLogin({
-				email: cleanEmail,
-				password: cleanPassword,
-				fullName: cleanFullName,
-				institution: cleanInstitution,
-				role: cleanRole,
-				source: cleanSource,
-			})
-		}
+		const authProvisionResult = await provisionUnifiedLogin({
+			email: cleanEmail,
+			password: cleanPassword ?? randomBytes(24).toString('base64url'),
+			fullName: cleanFullName,
+			institution: cleanInstitution,
+			role: cleanRole,
+			source: cleanSource,
+			provisionFirebase: Boolean(cleanPassword),
+		})
 
 		const existing = await findExistingRegistrationByEmail(cleanEmail)
 		if (existing) {
@@ -394,10 +395,10 @@ export async function POST(req: Request) {
 				success: true,
 				message: cleanPassword
 					? 'You are already registered and your Espeezy login is ready.'
-					: 'You are already registered! We will be in touch.',
+					: 'You are already registered and your Supabase account is ready.',
 				referral_code: existing.referral_code ?? null,
 				referral_count: existing.referral_count ?? 0,
-				login_ready: Boolean(cleanPassword),
+				login_ready: true,
 			})
 		}
 
@@ -489,11 +490,11 @@ export async function POST(req: Request) {
 			success: true,
 			message: cleanPassword
 				? 'You are on the list and your login now works across Espeezy, Games, and Kanban.'
-				: 'You are on the list! We will notify you at launch.',
+				: 'You are on the list and your Supabase account has been created.',
 			referral_code: newCode,
 			referral_count: 0,
 			count: count ?? 0,
-			login_ready: Boolean(cleanPassword),
+			login_ready: true,
 		})
 	} catch (err) {
 		console.error('[preregister] Supabase error:', err)
