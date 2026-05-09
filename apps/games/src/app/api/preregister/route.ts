@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'crypto'
 import { z } from 'zod'
+import { generateServicePassword, isSupabaseUserExistsError } from '@/lib/supabase-auth'
 
 export const dynamic = 'force-dynamic'
 const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
@@ -25,14 +26,6 @@ function isValidReferralCode(code: unknown): code is string {
 
 function generateReferralCode(): string {
   return randomBytes(4).toString('hex').toUpperCase().slice(0, 8)
-}
-
-function isAlreadyRegisteredError(payload: unknown): boolean {
-  if (!payload || typeof payload !== 'object') return false
-  const data = payload as Record<string, unknown>
-  const code = typeof data.code === 'string' ? data.code.toLowerCase() : ''
-  const message = typeof data.message === 'string' ? data.message.toLowerCase() : ''
-  return code === 'user_already_exists' || message.includes('already') || message.includes('registered')
 }
 
 function getMainApi(req: Request): string | null {
@@ -94,7 +87,7 @@ async function ensureSupabaseAuthUser(email: string, source: string) {
   const cfg = getSupabaseConfig()
   if (!cfg) return false
 
-  const randomPassword = `${randomBytes(16).toString('hex')}Aa1!`
+  const randomPassword = generateServicePassword()
   const res = await fetch(`${cfg.url}/auth/v1/admin/users`, {
     method: 'POST',
     headers: {
@@ -112,7 +105,7 @@ async function ensureSupabaseAuthUser(email: string, source: string) {
   if (res.ok) return true
 
   const payload = await res.json().catch(() => null)
-  if (res.status === 422 && isAlreadyRegisteredError(payload)) {
+  if (res.status === 422 && isSupabaseUserExistsError(payload)) {
     return true
   }
 

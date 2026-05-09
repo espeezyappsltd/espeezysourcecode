@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { isSupabaseUserExistsError } from '@/lib/supabase-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,14 +15,6 @@ function getSupabaseConfig() {
   const key = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SECRET_KEY ?? '').trim()
   if (!url || !key) return null
   return { url, key }
-}
-
-function isAlreadyRegisteredError(payload: unknown): boolean {
-  if (!payload || typeof payload !== 'object') return false
-  const data = payload as Record<string, unknown>
-  const code = typeof data.code === 'string' ? data.code.toLowerCase() : ''
-  const message = typeof data.message === 'string' ? data.message.toLowerCase() : ''
-  return code === 'user_already_exists' || message.includes('already') || message.includes('registered')
 }
 
 export async function POST(req: Request) {
@@ -62,7 +55,7 @@ export async function POST(req: Request) {
     })
   }
 
-  if (res.status === 422 && isAlreadyRegisteredError(payload)) {
+  if (res.status === 422 && isSupabaseUserExistsError(payload)) {
     return NextResponse.json({ error: 'An account already exists for this email.' }, { status: 409 })
   }
 

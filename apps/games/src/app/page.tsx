@@ -116,7 +116,9 @@ export default function GamesPage() {
       return
     }
 
-    const data = await res.json().catch(() => ({}))
+    const data = await res.json().catch(() => ({
+      error: `Signup failed with status ${res.status}.`,
+    }))
     if (!res.ok) {
       setLoginStatus('error')
       setAuthError(typeof data.error === 'string' ? data.error : 'Could not create account right now.')
