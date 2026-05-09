@@ -613,7 +613,7 @@ function BoardPreviewSection() {
         ))}
       </div>
       <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#475569', marginTop: '0.75rem' }}>
-        Interactive preview — coming Q3 2026
+        Interactive preview - coming Q3 2026
       </p>
     </section>
   )

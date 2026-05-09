@@ -12,6 +12,7 @@ export default function DashboardPage() {
   const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
+    // Get initial session
     const getSession = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
@@ -20,13 +21,31 @@ export default function DashboardPage() {
         router.replace('/login')
       }
     }
+
     getSession()
+
+    // Listen for auth state changes (session updates, sign outs, etc)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session?.user) {
+        setUser(null)
+        router.replace('/login')
+      } else if (session?.user) {
+        setUser(session.user)
+      }
+    })
+
+    return () => {
+      subscription?.unsubscribe()
+    }
   }, [router])
 
   async function handleLogout() {
     setSigningOut(true)
-    await supabase.auth.signOut()
-    router.replace('/login')
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.error('Logout error:', error)
+    }
+    // Router push handled by auth state listener
   }
 
   if (loading) {

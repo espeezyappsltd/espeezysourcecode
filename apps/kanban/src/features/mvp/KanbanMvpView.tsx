@@ -87,7 +87,7 @@ function HeaderSection({
           {presenceCount > 5 && <span style={{ fontSize: '0.72rem', color: '#64748b', marginLeft: '4px' }}>+{presenceCount - 5}</span>}
         </div>
 
-        <Tooltip tip={socketStatus === 'open' ? 'Realtime connected via WebSocket' : 'WebSocket disconnected — attempting reconnect'}>
+        <Tooltip tip={socketStatus === 'open' ? 'Realtime connected via WebSocket' : 'WebSocket disconnected - attempting reconnect'}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.7rem', borderRadius: '8px', background: socketStatus === 'open' ? 'rgba(16,185,129,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${socketStatus === 'open' ? 'rgba(16,185,129,0.3)' : 'rgba(249,115,22,0.3)'}`, cursor: 'default' }}>
             {socketStatus === 'open' ? <Wifi size={13} color="#10b981" /> : <WifiOff size={13} color="#f97316" />}
             <span style={{ fontSize: '0.72rem', fontWeight: 600, color: socketStatus === 'open' ? '#10b981' : '#f97316' }}>
@@ -330,7 +330,7 @@ function InsightsSection({
           </Tooltip>
         </div>
         {analytics.length === 0 ? (
-          <p style={{ margin: 0, color: '#334155', fontSize: '0.82rem', textAlign: 'center', padding: '1rem 0' }}>No activity yet — create or move a card to start tracking.</p>
+          <p style={{ margin: 0, color: '#334155', fontSize: '0.82rem', textAlign: 'center', padding: '1rem 0' }}>No activity yet - create or move a card to start tracking.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {analytics.map((item) => (
