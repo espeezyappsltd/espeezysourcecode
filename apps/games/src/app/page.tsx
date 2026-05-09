@@ -100,17 +100,26 @@ export default function GamesPage() {
     setLoginStatus('loading')
     setAuthError('')
 
-    const { error } = await supabase.auth.signUp({
-      email: loginEmail.trim(),
-      password: loginPassword,
-      options: {
-        emailRedirectTo: 'https://games.espeezy.com',
-      },
-    })
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: loginEmail.trim(),
+        password: loginPassword,
+        source: 'games-account-create',
+      }),
+    }).catch(() => null)
 
-    if (error) {
+    if (!res) {
       setLoginStatus('error')
-      setAuthError(error.message || 'Could not create account right now.')
+      setAuthError('Network error while creating account. Please try again.')
+      return
+    }
+
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setLoginStatus('error')
+      setAuthError(typeof data.error === 'string' ? data.error : 'Could not create account right now.')
       return
     }
 
