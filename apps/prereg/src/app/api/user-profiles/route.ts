@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   const input = parsed.data
   const username = input.username ? normalizeUsername(input.username) : undefined
 
-  if (input.username && username.length < 3) {
+  if (input.username && (!username || username.length < 3)) {
     return NextResponse.json({ error: 'Username must be at least 3 valid characters.' }, { status: 422 })
   }
 
