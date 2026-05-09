@@ -26,47 +26,49 @@ function LoginContent() {
     setError('')
     setSuccess('')
 
-    if (mode === 'signup') {
-      if (!legalAccepted) {
-        setError('Please accept the terms and privacy policy to create your account.')
-        setLoading(false)
+    try {
+      if (mode === 'signup') {
+        if (!legalAccepted) {
+          setError('Please accept the terms and privacy policy to create your account.')
+          return
+        }
+
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`,
+          },
+        })
+
+        if (signUpError) {
+          setError(signUpError.message)
+          return
+        }
+
+        if (data.session) {
+          router.replace(next)
+          return
+        }
+
+        setSuccess('Account created. Check your email to confirm your account, then sign in.')
+        setMode('signin')
+        setPassword('')
         return
       }
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
-      })
-
-      if (signUpError) {
-        setError(signUpError.message)
-        setLoading(false)
+      const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      if (authError) {
+        setError(authError.message)
         return
       }
 
-      if (data.session) {
-        router.replace(next)
-        return
-      }
-
-      setSuccess('Account created. Check your email to confirm your account, then sign in.')
-      setMode('signin')
-      setPassword('')
+      router.replace(next)
+    } catch {
+      setError('Unable to complete sign in right now. Please try again.')
+    } finally {
       setLoading(false)
-      return
     }
-
-    const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-    if (authError) {
-      setError(authError.message)
-      setLoading(false)
-      return
-    }
-
-    router.replace(next)
   }
 
   async function handleReset(e: React.MouseEvent) {
@@ -131,7 +133,7 @@ function LoginContent() {
             {mode === 'signup' ? 'Create your account' : 'Sign in to continue'}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem', margin: '0.5rem 0 0' }}>
-            Kanban is free — any Espeezy account works.
+            Kanban is free - any Espeezy account works.
           </p>
         </div>
 
