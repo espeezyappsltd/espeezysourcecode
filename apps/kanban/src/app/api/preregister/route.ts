@@ -9,6 +9,7 @@ const preregSchema = z.object({
   email: z.string().email().max(254),
   source: z.string().trim().max(50).optional(),
   referrer_code: z.string().trim().max(8).nullish(),
+  tier: z.enum(['free', 'pro', 'premium']).optional().default('free'),
 })
 
 function getSupabaseConfig() {
@@ -148,6 +149,7 @@ export async function POST(req: Request) {
   const cleanEmail = parsed.data.email.trim().toLowerCase()
   const cleanSource = (parsed.data.source ?? 'organic').slice(0, 50)
   const cleanReferrerCode = isValidReferralCode(parsed.data.referrer_code) ? parsed.data.referrer_code : null
+  const cleanTier = parsed.data.tier ?? 'free'
   const ipRaw = (req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim()
   const ipHash = createHash('sha256').update(ipRaw + (process.env.IP_HASH_SALT ?? 'fallback')).digest('hex').slice(0, 16)
   const ua = (req.headers.get('user-agent') ?? '').slice(0, 500)
@@ -171,6 +173,7 @@ export async function POST(req: Request) {
       referral_code: newCode,
       referrer_code: cleanReferrerCode,
       referral_count: 0,
+      tier: cleanTier,
     })
 
     if (!insOk) {
@@ -193,6 +196,7 @@ export async function POST(req: Request) {
             source: cleanSource,
             referral_code: newCode,
             referrer_code: cleanReferrerCode,
+            tier: cleanTier,
             referral_count: 0,
           })
           if (!retryOk) {

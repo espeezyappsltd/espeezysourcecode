@@ -47,6 +47,7 @@ const preregSchema = z.object({
 	institution: z.string().trim().max(120).optional(),
 	role: z.string().trim().max(50).optional(),
 	referrer_code: z.string().trim().max(8).nullish(),
+	tier: z.enum(['free', 'pro', 'premium']).optional().default('free'),
 })
 
 function isValidReferralCode(code: unknown): code is string {
@@ -437,6 +438,7 @@ export async function POST(req: Request) {
 	const cleanFullName = parsed.data.fullName ?? null
 	const cleanInstitution = parsed.data.institution ?? null
 	const cleanRole = parsed.data.role ?? null
+	const cleanTier = parsed.data.tier ?? 'free'
 	const ipRaw = (req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim()
 	const ipHash = createHash('sha256').update(ipRaw + (process.env.IP_HASH_SALT ?? 'fallback')).digest('hex').slice(0, 16)
 	const ua = (req.headers.get('user-agent') ?? '').slice(0, 500)
@@ -513,6 +515,7 @@ export async function POST(req: Request) {
 			referral_code: newCode,
 			referrer_code: cleanReferrerCode,
 			referral_count: 0,
+			tier: cleanTier,
 		})
 		if (!insOk) {
 			if (insStatus === 401 || insStatus === 403) {
@@ -542,9 +545,13 @@ export async function POST(req: Request) {
 					const { ok: retryOk, data: retryData, status: retryStatus } = await supaRest('pre_registrations', 'POST', {
 						email: cleanEmail,
 						source: cleanSource,
+						full_name: cleanFullName,
+						institution: cleanInstitution,
+						role: cleanRole,
 						referral_code: newCode,
 						referrer_code: cleanReferrerCode,
 						referral_count: 0,
+						tier: cleanTier,
 					})
 					if (!retryOk) {
 						console.error('[preregister] Supabase minimal insert failed:', retryStatus, retryData)
