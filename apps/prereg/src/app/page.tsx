@@ -287,10 +287,10 @@ export default function PreRegisterPage() {
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, maxWidth: '820px', margin: '0 auto 1.25rem' }}>
-            Group work is broken.<br /><span style={{ color: 'var(--brand)' }}>We are fixing it.</span>
+            Make fairness<br /><span style={{ color: 'var(--brand)' }}>the default.</span>
           </h2>
           <p style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-            Every year millions of students receive the same grade despite wildly different contributions. {config.brand_name} ends this cycle with data, transparency, and fairness at its core.
+            {config.brand_name} shows exactly who did what in group work, so you can grade fairly based on real data—not guesswork.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
