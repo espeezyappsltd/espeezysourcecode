@@ -45,7 +45,7 @@ export const BOARD_PREVIEW = [
   },
   {
     column: 'In Progress',
-    color: '#6366f1',
+    color: '#059669',
     cards: ['Data analysis', 'Methodology draft'],
   },
   {

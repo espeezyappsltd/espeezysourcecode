@@ -3,7 +3,7 @@ export function initials(email: string) {
 }
 
 export function avatarColor(email: string) {
-  const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316']
+  const colors = ['#10b981', '#059669', '#34d399', '#f59e0b', '#ef4444', '#f97316', '#0ea5a4']
   let hash = 0
 
   for (let index = 0; index < email.length; index += 1) {

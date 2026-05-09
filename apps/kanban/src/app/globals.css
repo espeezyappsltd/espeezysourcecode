@@ -3,7 +3,7 @@
 
 :root {
   --accent: #10b981;
-  --hero-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%);
+  --hero-gradient: linear-gradient(135deg, #059669 0%, #10b981 55%, #34d399 100%);
 }
 
 @keyframes fadeIn {
