@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 
 type ChatMessage = {
   id: string
@@ -17,53 +18,36 @@ type ChatEvent = {
   created_at: string
 }
 
-const CHAT_USER_KEY = 'espeezy_chat_user'
-
-function getOrCreateClientUser() {
-  const existing = typeof window !== 'undefined' ? window.localStorage.getItem(CHAT_USER_KEY) : null
-  if (existing) {
-    try {
-      const parsed = JSON.parse(existing) as { userId: string; username: string; created: string }
-      if (parsed.userId && parsed.username) return parsed
-    } catch {
-      // no-op
-    }
-  }
-
-  const generated = {
-    userId: `guest_${Math.random().toString(36).slice(2, 10)}`,
-    username: `student_${Math.random().toString(36).slice(2, 8)}`,
-    created: new Date().toISOString(),
-  }
-
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem(CHAT_USER_KEY, JSON.stringify(generated))
-  }
-
-  return generated
+function deriveUsername(user: User): string {
+  const email = user.email ?? ''
+  return email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_').slice(0, 24) || `user_${user.id.slice(0, 6)}`
 }
 
-export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'games' | 'kanban' }) {
+export default function LiveChatWidget({
+  appScope,
+  user,
+}: {
+  appScope: 'prereg' | 'games' | 'kanban'
+  user: User
+}) {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newUserEvent, setNewUserEvent] = useState<ChatEvent | null>(null)
   const [lastSeenEventId, setLastSeenEventId] = useState('')
   const [text, setText] = useState('')
-  const [username, setUsername] = useState('')
-  const [userId, setUserId] = useState('')
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    const user = getOrCreateClientUser()
-    setUsername(user.username)
-    setUserId(user.userId)
+  const username = deriveUsername(user)
+  const userId = user.id
 
+  useEffect(() => {
     fetch('/api/chat/presence', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ app_scope: appScope, event_type: 'new_user', user_id: user.userId, username: user.username }),
+      body: JSON.stringify({ app_scope: appScope, event_type: 'new_user', user_id: userId, username }),
     }).catch(() => undefined)
-  }, [appScope])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appScope, userId])
 
   async function loadMessages() {
     const res = await fetch(`/api/chat/messages?app_scope=${encodeURIComponent(appScope)}&limit=30`, { cache: 'no-store' })
@@ -85,30 +69,26 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
       fetch('/api/chat/presence', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ app_scope: appScope, event_type: 'active', user_id: userId || 'guest', username: username || 'guest' }),
+        body: JSON.stringify({ app_scope: appScope, event_type: 'active', user_id: userId, username }),
       }).catch(() => undefined)
     }, 5000)
 
     return () => clearInterval(poll)
-  }, [appScope, lastSeenEventId, userId, username])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appScope, lastSeenEventId, userId])
 
   const orderedMessages = useMemo(() => messages.slice(-20), [messages])
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
-    if (!text.trim() || !username.trim()) return
+    if (!text.trim()) return
 
     setLoading(true)
     try {
       const res = await fetch('/api/chat/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          app_scope: appScope,
-          user_id: userId,
-          username,
-          message: text.trim(),
-        }),
+        body: JSON.stringify({ app_scope: appScope, user_id: userId, username, message: text.trim() }),
       })
 
       if (res.ok) {
@@ -132,22 +112,11 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
         <div style={{ position: 'fixed', right: '1rem', bottom: '4.5rem', width: '320px', maxHeight: '420px', zIndex: 1200, background: '#0f172a', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong style={{ fontSize: '0.85rem' }}>Live Chat ({appScope})</strong>
-            <button type='button' onClick={() => setOpen(false)} style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer' }}>x</button>
+            <button type='button' onClick={() => setOpen(false)} style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer' }}>×</button>
           </div>
 
-          <div style={{ padding: '0.5rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <input
-              value={username}
-              onChange={(e) => {
-                const clean = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 24)
-                setUsername(clean)
-                if (clean.length >= 3) {
-                  window.localStorage.setItem(CHAT_USER_KEY, JSON.stringify({ userId, username: clean, created: new Date().toISOString() }))
-                }
-              }}
-              placeholder='username'
-              style={{ width: '100%', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#111827', color: '#f9fafb', padding: '0.45rem 0.55rem', fontSize: '0.8rem' }}
-            />
+          <div style={{ padding: '0.5rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
+            Chatting as <strong style={{ color: '#6366f1' }}>{username}</strong>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -168,7 +137,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
               maxLength={1000}
               style={{ flex: 1, borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#111827', color: '#f9fafb', padding: '0.45rem 0.55rem', fontSize: '0.8rem' }}
             />
-            <button type='submit' disabled={loading || username.trim().length < 3} style={{ borderRadius: '8px', border: 'none', background: '#6366f1', color: 'white', padding: '0.45rem 0.7rem', fontSize: '0.8rem', cursor: 'pointer' }}>
+            <button type='submit' disabled={loading || !text.trim()} style={{ borderRadius: '8px', border: 'none', background: '#6366f1', color: 'white', padding: '0.45rem 0.7rem', fontSize: '0.8rem', cursor: 'pointer' }}>
               Send
             </button>
           </form>

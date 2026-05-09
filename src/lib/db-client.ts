@@ -515,5 +515,27 @@ const client = {
 }
 
 export const db = client as any
-export const createBrowserSupabaseClient = () => client as any
-export const createClient = () => client as any
+
+// If real Supabase env vars are present, return a real Supabase client for auth.
+// Otherwise fall back to the Firebase shim so existing code keeps working.
+let _supabaseBrowserClient: any = null
+export const createBrowserSupabaseClient = () => {
+  if (
+    typeof window !== 'undefined' &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    if (!_supabaseBrowserClient) {
+      // Dynamic import to avoid bundling @supabase/ssr in environments that don't need it
+      const { createBrowserClient } = require('@supabase/ssr')
+      _supabaseBrowserClient = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      )
+    }
+    return _supabaseBrowserClient
+  }
+  return client as any
+}
+
+export const createClient = createBrowserSupabaseClient

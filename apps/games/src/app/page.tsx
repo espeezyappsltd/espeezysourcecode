@@ -613,7 +613,7 @@ export default function GamesPage() {
         </a>
       </section>
 
-      <LiveChatWidget appScope='games' />
+      {user && <LiveChatWidget appScope='games' user={user} />}
       <PreregFooter />
     </main>
   )

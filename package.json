@@ -25,6 +25,8 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^6.2.0",
     "@stripe/stripe-js": "^9.2.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
     "country-flag-icons": "^1.6.16",

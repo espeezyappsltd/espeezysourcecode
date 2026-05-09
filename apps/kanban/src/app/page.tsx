@@ -10,7 +10,7 @@ export default function KanbanPage() {
   return (
     <>
       <LandingPageView {...landingPage} onLogin={landingPage.handleLogin} onLogout={landingPage.handleLogout} onNotify={landingPage.handleNotify} />
-      <LiveChatWidget appScope='kanban' />
+      {landingPage.user && <LiveChatWidget appScope='kanban' user={landingPage.user} />}
     </>
   )
 }

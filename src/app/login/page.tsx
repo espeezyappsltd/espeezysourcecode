@@ -1,20 +1,19 @@
 "use client"
 
-import { useMemo, useState, useEffect } from 'react'
-import { auth as firebaseAuth } from '@/lib/firebase'
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  sendPasswordResetEmail,
-  onAuthStateChanged
-} from 'firebase/auth'
+import { useState, useEffect } from 'react'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
 import { BookOpen, User, Lock, ExternalLink, Activity } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
+import type { Session } from '@supabase/supabase-js'
 import { Phone, Hash as HashIcon } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message
+  return 'An unexpected error occurred.'
+}
 
 function LoginContent() {
   const SIGNUP_ENABLED = false
@@ -39,14 +38,22 @@ function LoginContent() {
 
   // Client-side guard: Bounce authenticated users back to dashboard
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
-      if (user) {
+    const db = createBrowserSupabaseClient()
+    db.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+      if (session) {
         router.replace('/dashboard')
       } else {
         setCheckingAuth(false)
       }
     })
-    return () => unsubscribe()
+
+    // Listen for auth state changes (e.g. after OAuth redirect)
+    const { data: { subscription } } = db.auth.onAuthStateChange((_event: string, session: Session | null) => {
+      if (session) {
+        router.replace('/dashboard')
+      }
+    })
+    return () => subscription?.unsubscribe()
   }, [router])
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -54,16 +61,20 @@ function LoginContent() {
     setLoading(true)
     setAuthError(null)
 
+    const db = createBrowserSupabaseClient()
     try {
       if (isSignUp) {
         if (!legalAccepted) throw new Error('Please accept the legal policies.')
-        await createUserWithEmailAndPassword(firebaseAuth, email, password)
+        const { error } = await db.auth.signUp({ email, password })
+        if (error) throw error
+        setResetMessage('Check your email to confirm your account before signing in.')
       } else {
-        await signInWithEmailAndPassword(firebaseAuth, email, password)
+        const { error } = await db.auth.signInWithPassword({ email, password })
+        if (error) throw error
+        router.push('/dashboard')
       }
-      router.push('/dashboard')
-    } catch (err: any) {
-      setAuthError(err.message)
+    } catch (err: unknown) {
+      setAuthError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -76,30 +87,19 @@ function LoginContent() {
     }
     setIsResetting(true)
     setAuthError(null)
+    const db = createBrowserSupabaseClient()
     try {
-      await sendPasswordResetEmail(firebaseAuth, email)
+      const { error } = await db.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+      if (error) throw error
       setResetMessage("Secure recovery link sent to " + email)
-    } catch (err: any) {
-      setAuthError(err.message)
+    } catch (err: unknown) {
+      setAuthError(getErrorMessage(err))
     } finally {
       setIsResetting(false)
     }
   }
-
-  // Real-time password strength evaluation
-  const passwordStrength = useMemo(() => {
-    if (!password) return null;
-    let score = 0;
-    if (password.length > 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score <= 1) return { label: 'Weak', color: '#ef4444' };
-    if (score === 2) return { label: 'Fair', color: '#f59e0b' };
-    if (score === 3) return { label: 'Strong', color: '#10b981' };
-    return { label: 'Secure', color: '#06b6d4' };
-  }, [password]);
 
   const handleGithubLogin = async (e: React.MouseEvent) => {
     e.preventDefault();

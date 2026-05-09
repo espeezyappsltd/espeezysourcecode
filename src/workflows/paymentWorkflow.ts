@@ -1,4 +1,5 @@
 import { getAdminDb, getAdminAuth } from '../lib/firebase-admin'
+import type { Firestore } from 'firebase-admin/firestore'
 
 class FatalError extends Error {
   constructor(message: string) {
@@ -63,7 +64,7 @@ export async function paymentWorkflow(payload: PaymentWorkflowPayload) {
   throw new FatalError('Unsupported payment event type.')
 }
 
-async function resolveUserId(db: any, payload: PaymentWorkflowPayload) {
+async function resolveUserId(db: Firestore, payload: PaymentWorkflowPayload) {
   'use step'
 
   if (payload.userId) {
@@ -96,7 +97,7 @@ async function resolveUserId(db: any, payload: PaymentWorkflowPayload) {
   return null
 }
 
-async function handleCheckoutCompleted(db: any, userId: string, payload: PaymentWorkflowPayload) {
+async function handleCheckoutCompleted(db: Firestore, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
 
   const planLabel = payload.productLabel || (payload.plan === 'premium' ? 'Institutional Partner Authorization' : 'Pro Scholar Clearance')
@@ -150,7 +151,7 @@ async function handleCheckoutCompleted(db: any, userId: string, payload: Payment
   })
 }
 
-async function handleInvoiceSucceeded(db: any, userId: string, payload: PaymentWorkflowPayload) {
+async function handleInvoiceSucceeded(db: Firestore, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
   if (!payload.stripeSubscriptionId) return
 
@@ -181,7 +182,7 @@ async function handleInvoiceSucceeded(db: any, userId: string, payload: PaymentW
   })
 }
 
-async function handleInvoiceFailed(db: any, userId: string, payload: PaymentWorkflowPayload) {
+async function handleInvoiceFailed(db: Firestore, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
   if (!payload.stripeSubscriptionId) return
 
@@ -196,7 +197,7 @@ async function handleInvoiceFailed(db: any, userId: string, payload: PaymentWork
   await db.collection('profiles').doc(userId).update({ subscription_status: 'past_due' })
 }
 
-async function handleMarketplacePurchase(db: any, buyerId: string, payload: PaymentWorkflowPayload) {
+async function handleMarketplacePurchase(db: Firestore, buyerId: string, payload: PaymentWorkflowPayload) {
   'use step'
   const listingId = payload.metadata?.listing_id as string
   const sellerId = payload.metadata?.seller_id as string

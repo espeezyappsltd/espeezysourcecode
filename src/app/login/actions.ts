@@ -72,7 +72,8 @@ export async function signup(formData: FormData) {
 
     revalidatePath('/', 'layout')
     redirect('/dashboard')
-  } catch (err: any) {
-    redirect(`/login?error=${encodeURIComponent(err.message)}`)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Signup failed'
+    redirect(`/login?error=${encodeURIComponent(message)}`)
   }
 }

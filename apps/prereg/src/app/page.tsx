@@ -28,6 +28,7 @@ const NAV_LINKS = [
   { href: '/#features', label: 'Features' },
   { href: 'https://games.espeezy.com', label: 'Games', external: true },
   { href: 'https://kanban.espeezy.com', label: 'Kanban', external: true },
+  { href: '/login', label: 'Account' },
   { href: '/fund', label: 'Support Us' },
   { href: '/docs', label: 'Docs' },
   { href: '/checkout', label: 'Pricing' },
