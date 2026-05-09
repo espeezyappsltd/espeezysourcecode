@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
+const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://www.espeezy.com').replace(/\/$/, '')
 
 async function proxy(req: Request, id: string, method: string) {
   try {
@@ -18,6 +18,10 @@ async function proxy(req: Request, id: string, method: string) {
       },
       body,
     })
+
+    if (res.status === 404) {
+      return NextResponse.json({ error: 'Chat message route unavailable.' }, { status: 404 })
+    }
 
     const text = await res.text()
     return new NextResponse(text, { status: res.status, headers: { 'Content-Type': 'application/json' } })

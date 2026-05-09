@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
+const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://www.espeezy.com').replace(/\/$/, '')
 
 async function proxy(req: Request, path: string, method: string) {
   try {
@@ -19,10 +19,21 @@ async function proxy(req: Request, path: string, method: string) {
       body,
     })
 
+    // If upstream chat routes are not deployed yet, provide a safe no-op response.
+    if (res.status === 404) {
+      if (method === 'GET') {
+        return NextResponse.json({ messages: [], new_user_event: null }, { status: 200 })
+      }
+      return NextResponse.json({ ok: true, queued: false }, { status: 202 })
+    }
+
     const text = await res.text()
     return new NextResponse(text, { status: res.status, headers: { 'Content-Type': 'application/json' } })
   } catch {
-    return NextResponse.json({ error: 'Chat service unavailable.' }, { status: 503 })
+    if (method === 'GET') {
+      return NextResponse.json({ messages: [], new_user_event: null }, { status: 200 })
+    }
+    return NextResponse.json({ ok: true, queued: false }, { status: 202 })
   }
 }
 
