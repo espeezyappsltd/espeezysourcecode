@@ -195,7 +195,9 @@ async function provisionFirebaseAccount(opts: {
 }): Promise<{ ok: boolean; created: boolean; message?: string }> {
 	const adminAuth = getAdminAuth()
 	if (!adminAuth) {
-		return { ok: false, created: false, message: 'Firebase auth is not configured.' }
+		// Firebase Admin not configured in this environment — skip gracefully.
+		// Registration proceeds via Supabase alone.
+		return { ok: true, created: false }
 	}
 
 	let uid: string | null = null
