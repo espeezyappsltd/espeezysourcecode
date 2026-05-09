@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'crypto'
 import { z } from 'zod'
+import { generateServicePassword, isSupabaseUserExistsError } from '@/lib/supabase-auth'
 
 export const dynamic = 'force-dynamic'
 const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
@@ -82,6 +83,36 @@ async function supaRest(
   return { ok: res.ok, data, status: res.status }
 }
 
+async function ensureSupabaseAuthUser(email: string, source: string) {
+  const cfg = getSupabaseConfig()
+  if (!cfg) return false
+
+  const randomPassword = generateServicePassword()
+  const res = await fetch(`${cfg.url}/auth/v1/admin/users`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${cfg.key}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      password: randomPassword,
+      email_confirm: false,
+      user_metadata: { source: source.slice(0, 50) },
+    }),
+  })
+
+  if (res.ok) return true
+
+  const payload = await res.json().catch(() => null)
+  if (res.status === 422 && isSupabaseUserExistsError(payload)) {
+    return true
+  }
+
+  console.error('[preregister] Supabase auth user create failed:', res.status, payload)
+  return false
+}
+
 async function getRegistrationCount() {
   const cfg = getSupabaseConfig()
   if (!cfg) return null
@@ -154,6 +185,10 @@ export async function POST(req: Request) {
   try {
     const existing = await findExistingRegistrationByEmail(cleanEmail)
     if (existing) {
+      const ensured = await ensureSupabaseAuthUser(cleanEmail, `${cleanSource}-existing`)
+      if (!ensured) {
+        return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
+      }
       return NextResponse.json({
         success: true,
         message: 'You are already registered! We will be in touch.',
@@ -176,6 +211,10 @@ export async function POST(req: Request) {
     if (!insOk) {
       if (insStatus === 409 || JSON.stringify(insData).includes('23505')) {
         const duplicate = await findExistingRegistrationByEmail(cleanEmail)
+        const ensured = await ensureSupabaseAuthUser(cleanEmail, `${cleanSource}-duplicate`)
+        if (!ensured) {
+          return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
+        }
         return NextResponse.json({
           success: true,
           message: 'You are already registered!',
@@ -197,6 +236,10 @@ export async function POST(req: Request) {
           })
           if (!retryOk) {
             console.error('[preregister] Supabase minimal insert failed:', retryData)
+            return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
+          }
+          const ensured = await ensureSupabaseAuthUser(cleanEmail, `${cleanSource}-minimal`)
+          if (!ensured) {
             return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
           }
           const count2 = await getRegistrationCount()
@@ -225,6 +268,11 @@ export async function POST(req: Request) {
           referral_count: ((ref.referral_count as number) ?? 0) + 1,
         }).catch(() => {})
       }
+    }
+
+    const ensured = await ensureSupabaseAuthUser(cleanEmail, cleanSource)
+    if (!ensured) {
+      return NextResponse.json({ error: 'Unable to register right now.' }, { status: 503 })
     }
 
     const count = await getRegistrationCount()
