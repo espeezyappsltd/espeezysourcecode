@@ -363,7 +363,7 @@ export default function PreRegisterPage() {
         </motion.div>
       </section>
 
-      <LiveChatWidget appScope='prereg' />
+      {submitted && <LiveChatWidget appScope='prereg' />}
       </main>
       </div>
     </>
