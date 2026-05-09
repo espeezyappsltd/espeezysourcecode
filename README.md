@@ -172,8 +172,9 @@ Package-specific docs live here:
 If you are onboarding or returning after time away, start with this sequence:
 
 1. Read this file.
-2. Read the package README for the area you are editing.
-3. Run only the package-level build or typecheck that matches your change.
-4. Only run the full root build/test suite when your change actually touches the root app or shared backend behavior.
+2. Read `CODEBASE_NAVIGATION.md` for a file-level jump map.
+3. Read the package README for the area you are editing.
+4. Run only the package-level build or typecheck that matches your change.
+5. Only run the full root build/test suite when your change actually touches the root app or shared backend behavior.
 
 That is the fastest path to avoiding cross-package confusion in this repository.

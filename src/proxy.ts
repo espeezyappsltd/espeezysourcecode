@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 // ─── NEXT.JS MIDDLEWARE (OFFICIAL) ───────────────────────────────────────────
 // This replaces the custom server.js logic for Vercel portability.
 // It handles security headers, distributed rate limiting, and request filtering.
@@ -201,6 +202,33 @@ export default async function proxy(request: NextRequest) {
   // ── 6. Supabase session refresh (fail-open for public availability) ──────
   // If Supabase/session refresh fails, keep public pages online so marketing
   // and business-verification crawlers can still access the site.
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      let supabaseResponse = NextResponse.next({ request })
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+              supabaseResponse = NextResponse.next({ request })
+              cookiesToSet.forEach(({ name, value, options }) => {
+                supabaseResponse.cookies.set(name, value, options)
+              })
+            },
+          },
+        }
+      )
+      await supabase.auth.getUser()
+    } catch {
+      // no-op: keep site available if auth backend is unavailable
+    }
+  }
+
   const response = NextResponse.next({ request })
 
   // ── 7. Security + performance headers ────────────────────────────────────
