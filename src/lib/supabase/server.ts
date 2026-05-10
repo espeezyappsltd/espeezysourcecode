@@ -20,7 +20,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Called from a Server Component — cookies cannot be set.
+            // Called from a Server Component  -  cookies cannot be set.
             // Middleware keeps session fresh, so this is fine.
           }
         },
@@ -29,7 +29,7 @@ export async function createClient() {
   )
 }
 
-/** Service-role admin client — NEVER use in client components */
+/** Service-role admin client  -  NEVER use in client components */
 export function createAdminSupabaseClient() {
   return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

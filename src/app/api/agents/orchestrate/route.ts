@@ -27,13 +27,13 @@ function decomposeCommand(command: string): TaskSpec[] {
   if (isAPI) {
     tasks.push({
       title: 'Build API layer',
-      description: `Implement the backend changes required for: "${command}". Follow existing patterns — createAdminClient() for writes, createReadClient() for reads. Add Zod validation on all inputs.`,
+      description: `Implement the backend changes required for: "${command}". Follow existing patterns  -  createAdminClient() for writes, createReadClient() for reads. Add Zod validation on all inputs.`,
       agentName: 'Gamma',
       priority: 'high',
     });
   }
 
-  // Frontend builder (Alpha) — depends on API if both needed
+  // Frontend builder (Alpha)  -  depends on API if both needed
   if (isUI) {
     tasks.push({
       title: 'Build UI components',
@@ -44,11 +44,11 @@ function decomposeCommand(command: string): TaskSpec[] {
     });
   }
 
-  // Frontend validator (Beta) — depends on UI
+  // Frontend validator (Beta)  -  depends on UI
   if (isUI) {
     const uiIdx = tasks.findIndex(t => t.agentName === 'Alpha');
     tasks.push({
-      title: 'Validate UI — E2E tests & Lighthouse',
+      title: 'Validate UI  -  E2E tests & Lighthouse',
       description: `Write Playwright E2E tests for the UI delivered for: "${command}". Run Lighthouse (performance ≥ 90, accessibility ≥ 95). Report pass/fail counts and scores.`,
       agentName: 'Beta',
       priority: 'high',
@@ -56,11 +56,11 @@ function decomposeCommand(command: string): TaskSpec[] {
     });
   }
 
-  // Backend validator (Delta) — depends on API
+  // Backend validator (Delta)  -  depends on API
   if (isAPI) {
     const apiIdx = tasks.findIndex(t => t.agentName === 'Gamma');
     tasks.push({
-      title: 'Security audit — OWASP & RLS validation',
+      title: 'Security audit  -  OWASP & RLS validation',
       description: `Audit the API routes built for: "${command}". Check OWASP Top 10, verify RLS policies, run security-adversarial test suite. Report clean or list vulnerabilities.`,
       agentName: 'Delta',
       priority: 'critical',
@@ -68,7 +68,7 @@ function decomposeCommand(command: string): TaskSpec[] {
     });
   }
 
-  // DevOps builder (Epsilon) — always runs last to verify build
+  // DevOps builder (Epsilon)  -  always runs last to verify build
   const builderIndexes = tasks
     .map((t, i) => (t.agentName === 'Alpha' || t.agentName === 'Gamma' ? i : -1))
     .filter(i => i >= 0);
@@ -81,10 +81,10 @@ function decomposeCommand(command: string): TaskSpec[] {
     dependsOnIndexes: builderIndexes,
   });
 
-  // DevOps validator (Zeta) — depends on Epsilon
+  // DevOps validator (Zeta)  -  depends on Epsilon
   const epsilonIdx = tasks.findIndex(t => t.agentName === 'Epsilon');
   tasks.push({
-    title: 'Final validation — secrets, bundle size, uptime',
+    title: 'Final validation  -  secrets, bundle size, uptime',
     description: `After build passes for: "${command}", scan for hardcoded secrets, check bundle size regression, verify /api/health responds < 500ms. Confirm all clear or flag issues.`,
     agentName: 'Zeta',
     priority: 'high',

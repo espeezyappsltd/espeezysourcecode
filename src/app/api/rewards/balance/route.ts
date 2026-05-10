@@ -3,7 +3,7 @@ import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-// GET /api/rewards/balance — current points + recent ledger
+// GET /api/rewards/balance  -  current points + recent ledger
 export async function GET(req: NextRequest) {
   const db = await createServerSupabaseClient()
   const { data: { user } } = await db.auth.getUser()

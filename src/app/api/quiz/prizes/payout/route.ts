@@ -27,7 +27,7 @@ async function isAdminUser(): Promise<boolean> {
   return profile?.role === 'admin'
 }
 
-// POST /api/quiz/prizes/payout — settle unpaid quiz cash prizes
+// POST /api/quiz/prizes/payout  -  settle unpaid quiz cash prizes
 // Auth: admin session OR X-Agent-Key header for internal workers
 export async function POST(req: NextRequest) {
   let stripe: Stripe

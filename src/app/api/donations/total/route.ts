@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,13 +8,24 @@ export async function GET() {
     const db = await createAdminClient()
     const { data, error } = await db.rpc('get_donation_total')
     if (error) throw error
-    return NextResponse.json(data ?? { total_cents: 0, count: 0 }, {
+    const payload = Array.isArray(data) ? data[0] : data
+    const normalized = (payload && typeof payload === 'object')
+      ? {
+          total_cents: Number((payload as { total_cents?: unknown }).total_cents ?? 0) || 0,
+          count: Number((payload as { count?: unknown }).count ?? 0) || 0,
+        }
+      : { total_cents: 0, count: 0 }
+
+    return NextResponse.json(normalized, {
       headers: {
-        // Cache at the CDN edge for 60 s; browsers revalidate every 30 s
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+        'Cache-Control': 'no-store',
       },
     })
   } catch {
-    return NextResponse.json({ total_cents: 0, count: 0 })
+    return NextResponse.json({ total_cents: 0, count: 0 }, {
+      headers: {
+        'Cache-Control': 'no-store',
+      },
+    })
   }
 }

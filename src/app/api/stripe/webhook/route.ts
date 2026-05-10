@@ -129,7 +129,7 @@ async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
     const email = session.customer_email
 
     if (userId) {
-      // Authenticated user — update existing profile
+      // Authenticated user  -  update existing profile
       await adminDb.collection('profiles').doc(userId).update({
         plan: plan,
         stripe_customer_id: session.customer?.toString(),
@@ -137,7 +137,7 @@ async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
         updated_at: new Date().toISOString()
       })
     } else if (isPublicSignup && email) {
-      // Public signup — create new profile with email-based ID
+      // Public signup  -  create new profile with email-based ID
       // Use Firestore's automatic ID generation for new users
       const profileRef = await adminDb.collection('profiles').add({
         email: email,

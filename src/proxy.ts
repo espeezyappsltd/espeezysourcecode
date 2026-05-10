@@ -7,7 +7,7 @@ import { createServerClient } from '@supabase/ssr'
 // ─── DISTRIBUTED RATE LIMITING ────────────────────────────────────────────────
 // Uses Upstash Redis sliding-window when UPSTASH_REDIS_REST_URL is configured
 // (production / all Vercel regions). Falls back to in-process buckets for local dev.
-// Upstash Redis is globally replicated — rate limits are consistent across all
+// Upstash Redis is globally replicated  -  rate limits are consistent across all
 // Vercel edge regions simultaneously.
 
 interface RateBucket { count: number; resetAt: number }
@@ -241,7 +241,7 @@ export default async function proxy(request: NextRequest) {
   response.headers.set('X-DNS-Prefetch-Control', 'off')
   response.headers.delete('X-Powered-By')
 
-  // Cache public pages at the edge (CDN) — revalidated every 60s, stale up to 5min
+  // Cache public pages at the edge (CDN)  -  revalidated every 60s, stale up to 5min
   if (!pathname.startsWith('/api') && !pathname.startsWith('/dashboard') &&
       !pathname.startsWith('/admin') && request.method === 'GET') {
     response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')

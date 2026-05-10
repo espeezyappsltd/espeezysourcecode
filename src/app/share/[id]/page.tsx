@@ -26,8 +26,8 @@ export default function SyncPage() {
             <span style={{ color: '#10b981' }}>collaborative state.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '800px', margin: '0 auto 4rem' }}>
-            Espeezy&apos;s sync engine utilizes a peer-to-peer relay protocol to ensure that every team action—from a chat message 
-            to a presence update—is propagated across your whole team in milliseconds.
+            Espeezy&apos;s sync engine utilizes a peer-to-peer relay protocol to ensure that every team action - from a chat message 
+            to a presence update - is propagated across your whole team in milliseconds.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <Link href="/preregister" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem 2.5rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 900 }}>Get Started</Link>

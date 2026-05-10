@@ -1,5 +1,5 @@
 /**
- * Donation service — thin wrapper around /api/stripe/donate.
+ * Donation service  -  thin wrapper around /api/stripe/donate.
  * Returns the Stripe Checkout URL to redirect to, or throws on error.
  */
 export async function createDonationCheckout({

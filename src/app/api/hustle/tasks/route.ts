@@ -3,7 +3,7 @@ import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
 
 export const dynamic = 'force-dynamic'
 
-// GET /api/hustle/tasks — list tasks (with filters)
+// GET /api/hustle/tasks  -  list tasks (with filters)
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get('Authorization')
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/hustle/tasks — create a task
+// POST /api/hustle/tasks  -  create a task
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('Authorization')

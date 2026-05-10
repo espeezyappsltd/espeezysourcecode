@@ -197,7 +197,7 @@ export default function PreregFooter() {
                   onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
                 >
                   {label}
-                  <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>â†—</span>
+                  <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>â† - </span>
                 </a>
               </li>
             ))}

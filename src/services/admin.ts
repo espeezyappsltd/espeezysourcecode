@@ -1,5 +1,5 @@
 /**
- * Admin service layer — all admin data operations go through here.
+ * Admin service layer  -  all admin data operations go through here.
  * Components and pages must NOT call fetch('/api/admin/...') directly.
  */
 

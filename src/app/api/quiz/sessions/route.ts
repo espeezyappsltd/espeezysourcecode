@@ -10,7 +10,7 @@ const StartSchema = z.object({
   question_count: z.number().int().min(5).max(20).optional().default(10),
 })
 
-// POST /api/quiz/sessions — start a new quiz session, returns first question
+// POST /api/quiz/sessions  -  start a new quiz session, returns first question
 export async function POST(req: NextRequest) {
   const db = await createServerSupabaseClient()
   const { data: { user } } = await db.auth.getUser()

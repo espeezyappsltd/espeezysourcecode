@@ -5,12 +5,12 @@
  *
  * The right-side column of the "Operational Terminal" section.
  * Contains two stacked cards:
- *   1. LIVE_TERMINAL_LOGS — a scrolling list of system log entries
- *   2. UI Orchestrator    — a call-to-action card that opens the theme studio
+ *   1. LIVE_TERMINAL_LOGS  -  a scrolling list of system log entries
+ *   2. UI Orchestrator     -  a call-to-action card that opens the theme studio
  *
  * Props:
- *   logs           — array of log entries from the heartbeat interval
- *   onLaunchStudio — navigates to /dashboard/settings?tab=themes
+ *   logs            -  array of log entries from the heartbeat interval
+ *   onLaunchStudio  -  navigates to /dashboard/settings?tab=themes
  */
 
 import { Activity, Globe } from 'lucide-react'
@@ -87,7 +87,7 @@ function LiveTerminal({ logs }: { logs: SystemLog[] }) {
         ))}
       </div>
 
-      {/* Pulse keyframe — scoped to this component */}
+      {/* Pulse keyframe  -  scoped to this component */}
       <style jsx>{`
         @keyframes logPulse {
           0%   { opacity: 1; }

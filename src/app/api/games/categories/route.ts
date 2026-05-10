@@ -3,7 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 
 export const dynamic = 'force-dynamic'
 
-// GET /api/games/categories — public categories for standalone games
+// GET /api/games/categories  -  public categories for standalone games
 export async function GET() {
   try {
     const adminDb = getAdminDb()

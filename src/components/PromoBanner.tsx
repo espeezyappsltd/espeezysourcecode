@@ -70,7 +70,7 @@ export default function PromoBanner() {
         color: 'white',
         textShadow: '0 2px 10px rgba(0,0,0,0.3)'
       }}>
-        {bannerText} — CODE: <span style={{
+        {bannerText}  -  CODE: <span style={{
           background: 'rgba(255,255,255,1)',
           padding: '4px 12px',
           borderRadius: '8px',

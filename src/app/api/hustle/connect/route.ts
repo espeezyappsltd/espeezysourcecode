@@ -12,7 +12,7 @@ function getStripeClient(): Stripe {
   return new Stripe(stripeKey, { apiVersion: '2025-08-27.basil' })
 }
 
-// POST /api/hustle/connect — create Stripe Connect onboarding link
+// POST /api/hustle/connect  -  create Stripe Connect onboarding link
 export async function POST() {
   let stripe: Stripe
   try {
@@ -73,7 +73,7 @@ export async function POST() {
   return NextResponse.json({ url: accountLink.url })
 }
 
-// GET /api/hustle/connect — check Connect account status
+// GET /api/hustle/connect  -  check Connect account status
 export async function GET() {
   let stripe: Stripe
   try {

@@ -41,7 +41,7 @@ const FUND_FEATURES = [
     need: '$18,500',
     tag: 'Trust & Verification',
     why: 'Issuing W3C-compliant Verifiable Credentials requires integration with credential registries, legal review for academic recognition, and smart contract deployment and auditing costs.',
-    deliverable: 'Tamper-proof PDF and digital certificates students can share on LinkedIn and attach to job applications — backed by a public blockchain record.',
+    deliverable: 'Tamper-proof PDF and digital certificates students can share on LinkedIn and attach to job applications  -  backed by a public blockchain record.',
   },
   {
     icon: <BarChart2 size={22} />,
@@ -56,7 +56,7 @@ const FUND_FEATURES = [
     title: 'Native iOS & Android Applications',
     need: '$35,000',
     tag: 'Mobile',
-    why: 'Apple Developer Program ($99/yr), Google Play ($25 once), but more critically — native app development, code signing, TestFlight cycles, and App Store review processes require dedicated engineering sprints and device testing budgets.',
+    why: 'Apple Developer Program ($99/yr), Google Play ($25 once), but more critically  -  native app development, code signing, TestFlight cycles, and App Store review processes require dedicated engineering sprints and device testing budgets.',
     deliverable: 'Full Espeezy experience on mobile with push notifications, offline mode, camera document capture, and real-time sync.',
   },
   {
@@ -127,7 +127,7 @@ const STRIPE_DONATION_TIERS = [
 
 // ─── Donor testimonials (placeholder) ────────────────────────────────────────
 const TESTIMONIALS = [
-  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for — a tool that actually sees my students as individuals, not just a group grade.' },
+  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for  -  a tool that actually sees my students as individuals, not just a group grade.' },
   { name: 'Kenji T., Computer Science, Tokyo', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
   { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
@@ -147,10 +147,67 @@ export default function FundPage() {
   const [donationTotal, setDonationTotal] = useState({ total_cents: 0, count: 0 })
 
   useEffect(() => {
-    fetch('/api/donations/total')
-      .then(r => r.json())
-      .then(d => { if (d.total_cents !== undefined) setDonationTotal(d) })
-      .catch(() => {})
+    const refreshDonationTotal = () => {
+      fetch('/api/donations/total', { cache: 'no-store' })
+        .then(r => r.json())
+        .then(d => {
+          const payload = Array.isArray(d) ? d[0] : d
+          if (payload && typeof payload.total_cents === 'number') {
+            setDonationTotal({
+              total_cents: payload.total_cents,
+              count: typeof payload.count === 'number' ? payload.count : 0,
+            })
+          }
+        })
+        .catch(() => {})
+    }
+
+    refreshDonationTotal()
+    const checkoutReturnBurstTimers: number[] = []
+    const params = new URLSearchParams(window.location.search)
+    const checkoutCompletedAtRaw = window.sessionStorage.getItem('espeezy_donation_completed_at')
+    const checkoutCompletedAt = Number(checkoutCompletedAtRaw ?? '0')
+    const hasRecentCheckoutMarker = Number.isFinite(checkoutCompletedAt)
+      && checkoutCompletedAt > 0
+      && (Date.now() - checkoutCompletedAt) < 10 * 60 * 1000
+    const returnedFromCheckout = params.has('session_id')
+      || params.has('payment_intent')
+      || params.get('donated') === '1'
+      || hasRecentCheckoutMarker
+    if (returnedFromCheckout) {
+      // Stripe webhook writes can lag a few seconds, so retry quickly once after return.
+      for (const delayMs of [1500, 4000, 8000, 15000]) {
+        checkoutReturnBurstTimers.push(window.setTimeout(refreshDonationTotal, delayMs))
+      }
+
+      if (hasRecentCheckoutMarker) {
+        window.sessionStorage.removeItem('espeezy_donation_completed_at')
+      }
+
+      if (params.get('donated') === '1') {
+        params.delete('donated')
+        const nextSearch = params.toString()
+        const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
+        window.history.replaceState(null, '', nextUrl)
+      }
+    }
+
+    const interval = window.setInterval(refreshDonationTotal, 15_000)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refreshDonationTotal()
+    }
+    const onOnline = () => refreshDonationTotal()
+    window.addEventListener('focus', refreshDonationTotal)
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('online', onOnline)
+
+    return () => {
+      window.clearInterval(interval)
+      for (const timer of checkoutReturnBurstTimers) window.clearTimeout(timer)
+      window.removeEventListener('focus', refreshDonationTotal)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('online', onOnline)
+    }
   }, [])
 
   const getFinalAmount = () => {
@@ -237,7 +294,7 @@ export default function FundPage() {
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
           style={{ color: 'rgba(255,255,255,0.5)', maxWidth: '620px', margin: '0 auto 3rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65 }}>
-          Espeezy is free for every student — always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
+          Espeezy is free for every student  -  always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
         </motion.p>
 
         {/* Stats */}

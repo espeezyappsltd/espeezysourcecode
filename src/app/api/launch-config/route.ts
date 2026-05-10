@@ -25,7 +25,7 @@ export async function GET() {
 
     return NextResponse.json({ config }, {
       headers: {
-        // App config is rarely updated — cache at CDN for 5 min, stale for 1 min
+        // App config is rarely updated  -  cache at CDN for 5 min, stale for 1 min
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
       },
     })

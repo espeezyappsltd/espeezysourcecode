@@ -141,7 +141,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
         <div style={{ position: 'fixed', right: '1rem', bottom: '4.5rem', width: '320px', maxHeight: '420px', zIndex: 1200, background: '#0f172a', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong style={{ fontSize: '0.85rem' }}>Live Chat ({appScope})</strong>
-            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1, padding: '0.25rem 0.5rem' }}>Ã—</button>
+            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1, padding: '0.25rem 0.5rem' }}>Ã - </button>
           </div>
 
           <div style={{ padding: '0.5rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>

@@ -100,7 +100,7 @@ function HustlePage() {
           Side <span style={{ color: '#10B981' }}>Hustle</span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', margin: '0.4rem 0 0' }}>
-          Post tasks, earn real money — platform keeps 10%
+          Post tasks, earn real money  -  platform keeps 10%
         </p>
       </div>
 
@@ -120,7 +120,7 @@ function HustlePage() {
             <div>
               <p style={{ margin: 0, fontWeight: 800, fontSize: '0.88rem', color: '#F3F4F6' }}>Connect your bank to start earning</p>
               <p style={{ margin: '0.15rem 0 0', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
-                {connectStatus?.status === 'pending' ? 'Onboarding in progress — complete your Stripe setup' : 'Secure payouts via Stripe — no card stored on our end'}
+                {connectStatus?.status === 'pending' ? 'Onboarding in progress  -  complete your Stripe setup' : 'Secure payouts via Stripe  -  no card stored on our end'}
               </p>
             </div>
           </div>

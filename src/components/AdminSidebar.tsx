@@ -7,8 +7,8 @@
  * Links to all major admin sections. Collapsible on small screens.
  *
  * Props:
- *   adminEmail — shown in the footer identity card
- *   adminName  — displayed above the email
+ *   adminEmail  -  shown in the footer identity card
+ *   adminName   -  displayed above the email
  */
 
 import Link from 'next/link'

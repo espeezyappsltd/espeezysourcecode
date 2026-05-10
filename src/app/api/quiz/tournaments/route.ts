@@ -3,7 +3,7 @@ import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-// GET /api/quiz/tournaments — list active + upcoming tournaments
+// GET /api/quiz/tournaments  -  list active + upcoming tournaments
 export async function GET(_req: NextRequest) {
   const db = await createServerSupabaseClient()
   const { data: { user } } = await db.auth.getUser()

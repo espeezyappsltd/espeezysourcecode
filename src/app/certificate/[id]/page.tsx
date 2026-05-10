@@ -18,7 +18,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com'
 export async function generateMetadata({ params }: Props) {
   const { id } = await params
   return {
-    title: 'Certificate Verification — Espeezy',
+    title: 'Certificate Verification  -  Espeezy',
     description: `Verify the authenticity of Espeezy certificate ${id}`,
   }
 }

@@ -10,11 +10,11 @@
  *   - deploy button that calls the launch-config API
  *
  * Props:
- *   launchConfig    — the current launch config values
- *   onConfigChange  — updates a single key in the config
- *   preregCount     — current number of pre-registrations
- *   onSave          — triggers the PUT to /api/admin/launch-config
- *   saving          — true while the save is in flight
+ *   launchConfig     -  the current launch config values
+ *   onConfigChange   -  updates a single key in the config
+ *   preregCount      -  current number of pre-registrations
+ *   onSave           -  triggers the PUT to /api/admin/launch-config
+ *   saving           -  true while the save is in flight
  */
 
 import { Globe } from 'lucide-react'
@@ -259,7 +259,7 @@ export default function AdminLaunchCenter({
           rel="noreferrer"
           style={externalLinkStyle}
         >
-          VIEW PAGE ↗
+          VIEW PAGE � - 
         </a>
 
         {/* External link: fund page */}
@@ -268,7 +268,7 @@ export default function AdminLaunchCenter({
           rel="noreferrer"
           style={externalLinkStyle}
         >
-          FUND PAGE ↗
+          FUND PAGE � - 
         </a>
       </div>
     </div>

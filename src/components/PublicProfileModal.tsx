@@ -254,7 +254,7 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', marginBottom: '0.25rem', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>
                 <Calendar size={14} /> Academic Year
               </div>
-              <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>{member.enrollment_year} — {member.completion_year}</div>
+              <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>{member.enrollment_year}  -  {member.completion_year}</div>
             </div>
             <div style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', marginBottom: '0.25rem', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>

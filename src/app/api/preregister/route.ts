@@ -245,7 +245,7 @@ async function provisionFirebaseAccount(opts: {
 }): Promise<{ ok: boolean; created: boolean; message?: string }> {
 	const adminAuth = getAdminAuth()
 	if (!adminAuth) {
-		// Firebase Admin not configured in this environment — skip gracefully.
+		// Firebase Admin not configured in this environment  -  skip gracefully.
 		// Registration proceeds via Supabase alone.
 		return { ok: true, created: false, message: undefined }
 	}
@@ -557,7 +557,7 @@ export async function POST(req: Request) {
 						console.error('[preregister] Supabase minimal insert failed:', retryStatus, retryData)
 						return jsonWithCors(req, { error: 'Unable to register right now.' }, { status: 503 })
 					}
-					// Minimal insert succeeded — fall through
+					// Minimal insert succeeded  -  fall through
 					const count2 = await getRegistrationCount()
 					return jsonWithCors(req, {
 						success: true,

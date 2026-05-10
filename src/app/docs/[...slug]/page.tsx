@@ -57,7 +57,7 @@ const docsContent: Record<string, { title: string, icon: React.ReactNode, conten
     title: 'Smart Search',
     icon: <Search size={40} />,
     content: 'Instant discovery across the entire collaborative state.',
-    eli12: "A 'Find Everything' box. Type one word and—POOF!—it finds the person, the task, or the team you were looking for."
+    eli12: "A 'Find Everything' box. Type one word and - POOF! - it finds the person, the task, or the team you were looking for."
   },
   'infra/payments': {
     title: 'Stripe Integration',

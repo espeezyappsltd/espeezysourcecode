@@ -1,6 +1,6 @@
 /**
  * Shared admin authentication helpers.
- * All admin API routes must use these guards — never inline duplicates.
+ * All admin API routes must use these guards  -  never inline duplicates.
  */
 import { NextResponse } from 'next/server'
 import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
@@ -64,7 +64,7 @@ export async function requireModerator(): Promise<AdminContext | NextResponse> {
 }
 
 /**
- * Type guard — narrows AdminContext | NextResponse to AdminContext.
+ * Type guard  -  narrows AdminContext | NextResponse to AdminContext.
  * Use: if (isAuthError(ctx)) return ctx
  */
 export function isAuthError(ctx: AdminContext | NextResponse): ctx is NextResponse {
@@ -73,7 +73,7 @@ export function isAuthError(ctx: AdminContext | NextResponse): ctx is NextRespon
 
 /**
  * Writes an entry to the audit_logs table.
- * Never throws — silently swallows DB errors so the primary action isn't blocked.
+ * Never throws  -  silently swallows DB errors so the primary action isn't blocked.
  */
 export async function writeAuditLog(
   svc: AdminContext['svc'],

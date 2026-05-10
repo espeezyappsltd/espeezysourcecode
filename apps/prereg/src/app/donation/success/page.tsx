@@ -79,6 +79,11 @@ function DonationSuccessContent() {
   }, [searchParams])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.sessionStorage.setItem('espeezy_donation_completed_at', String(Date.now()))
+  }, [searchParams])
+
+  useEffect(() => {
     let active = true
 
     const refreshMetrics = async () => {

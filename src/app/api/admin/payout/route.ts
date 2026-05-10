@@ -14,7 +14,7 @@ function getStripeClient(): Stripe {
   return new Stripe(stripeKey, { apiVersion: STRIPE_API_VERSION })
 }
 
-// POST /api/admin/payout — admin sends money to a user
+// POST /api/admin/payout  -  admin sends money to a user
 export async function POST(req: NextRequest) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

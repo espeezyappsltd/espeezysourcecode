@@ -95,14 +95,14 @@ export default function LandingDonate() {
             </span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '580px', margin: '0 auto', fontSize: 'clamp(0.9rem, 2vw, 1.05rem)', lineHeight: 1.65 }}>
-            Espeezy is free for every student — and keeping it that way demands servers, APIs, and engineers who don&apos;t sleep. Even $5 keeps a feature running for a month. <strong style={{ color: 'rgba(255,255,255,0.7)' }}>Your $5 matters more than you think.</strong>
+            Espeezy is free for every student  -  and keeping it that way demands servers, APIs, and engineers who don&apos;t sleep. Even $5 keeps a feature running for a month. <strong style={{ color: 'rgba(255,255,255,0.7)' }}>Your $5 matters more than you think.</strong>
           </p>
         </motion.div>
 
         {/* Two-column layout */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'center' }}>
 
-          {/* Left — social proof + stats */}
+          {/* Left  -  social proof + stats */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -138,9 +138,9 @@ export default function LandingDonate() {
                 {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="var(--brand)" color="var(--brand)" />)}
               </div>
               <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, fontStyle: 'italic', margin: '0 0 0.75rem' }}>
-                &quot;Espeezy replaced three separate tools for my team. The transparency alone is worth every penny — finally, group work that&apos;s actually fair.&quot;
+                &quot;Espeezy replaced three separate tools for my team. The transparency alone is worth every penny  -  finally, group work that&apos;s actually fair.&quot;
               </p>
-              <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>— Kenji T., Computer Science, Tokyo</p>
+              <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}> -  Kenji T., Computer Science, Tokyo</p>
             </motion.div>
 
             <motion.div
@@ -155,7 +155,7 @@ export default function LandingDonate() {
             </motion.div>
           </motion.div>
 
-          {/* Right — donation form */}
+          {/* Right  -  donation form */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -258,7 +258,7 @@ export default function LandingDonate() {
                   {submitting
                     ? 'Redirecting to Stripe…'
                     : displayAmount >= 1
-                      ? <><Heart size={14} fill="white" />  Donate ${displayAmount.toFixed(2)} — it means everything</>
+                      ? <><Heart size={14} fill="white" />  Donate ${displayAmount.toFixed(2)}  -  it means everything</>
                       : 'Choose an amount above'}
                 </motion.button>
 

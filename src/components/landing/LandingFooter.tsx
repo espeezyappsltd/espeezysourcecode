@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 // ─── Site map data ────────────────────────────────────────────────────────────
-// 30+ surfaces across the platform — listed quietly for those who notice
+// 30+ surfaces across the platform  -  listed quietly for those who notice
 const SITEMAP = [
   {
     label: 'Platform',
@@ -83,7 +83,7 @@ export default function LandingFooter() {
         </p>
       </div>
 
-      {/* ── Discreet sitemap — 30+ pages quietly listed ───────────────────── */}
+      {/* ── Discreet sitemap  -  30+ pages quietly listed ───────────────────── */}
       <div style={{ maxWidth: '900px', margin: '0 auto 4rem', opacity: 0.18, pointerEvents: 'auto' }}
            title="30+ pages · blink and you'll miss it">
         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.35rem', alignItems: 'center', marginBottom: '1.25rem' }}>

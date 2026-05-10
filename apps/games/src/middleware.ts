@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
   const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv()
 
   if (!supabaseUrl || !supabaseKey) {
-    // Missing config — redirect to login with error
+    // Missing config - redirect to login with error
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('error', 'Configuration error')
@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Games is a Pro feature — check the user's tier in profiles table
+  // Games is a Pro feature - check the user's tier in profiles table
   // If the user has no pro/premium tier, redirect to upgrade page
   let tier = 'free'
   try {

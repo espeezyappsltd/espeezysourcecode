@@ -20,14 +20,14 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Fire-and-forget email notification — don't block the response
+  // Fire-and-forget email notification  -  don't block the response
   notifySupportTicket({
     ticketId: ticket.id,
     userId: user.id,
     userEmail: user.email ?? 'unknown',
     summary: summary?.slice(0, 2000) ?? '',
   }).catch(() => {
-    // Non-fatal — ticket is still created even if email fails
+    // Non-fatal  -  ticket is still created even if email fails
   })
 
   return NextResponse.json({ ticket_id: ticket.id }, { status: 201 })

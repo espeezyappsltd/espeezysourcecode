@@ -364,7 +364,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         </div>
       </div>
 
-      {/* Progress Bar — overall */}
+      {/* Progress Bar  -  overall */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>Project Pulse</span>
@@ -382,7 +382,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         gap: 'var(--gap-sm)' 
       }}>
 
-        {/* Team Leaderboard — fixed table */}
+        {/* Team Leaderboard  -  fixed table */}
         <section style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 900, margin: 0 }}>Team Leaderboard</h2>

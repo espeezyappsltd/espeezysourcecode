@@ -10,7 +10,7 @@ export default function LandingMission() {
                <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Helping Students Succeed</div>
                <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '2rem', letterSpacing: '-0.03em', lineHeight: 1.1, color: '#f3f4f6' }}>Get the credit you deserve for team projects.</h2>
                <p style={{ fontSize: '1.125rem', color: '#9ca3af', lineHeight: 1.7, marginBottom: '3rem' }}>
-                  Standard tools often miss how hard you actually work in a group. Espeezy was built to make sure everyone—from the ones doing the research to the ones putting it all together—gets recognised for their role.
+                  Standard tools often miss how hard you actually work in a group. Espeezy was built to make sure everyone - from the ones doing the research to the ones putting it all together - gets recognised for their role.
                </p>
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div style={{ background: '#111111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222222' }}>

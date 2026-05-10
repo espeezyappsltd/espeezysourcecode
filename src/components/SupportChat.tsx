@@ -90,7 +90,7 @@ export default function SupportChat() {
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.08)' }}>
             <div>
               <p style={{ margin: 0, fontWeight: 900, fontSize: '0.88rem', color: '#F3F4F6' }}>espeezy.com Support</p>
-              <p style={{ margin: 0, fontSize: '0.7rem', color: '#10B981' }}>â— AI-powered Â· usually instant</p>
+              <p style={{ margin: 0, fontSize: '0.7rem', color: '#10B981' }}>â -  AI-powered Â· usually instant</p>
             </div>
             <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>
               <ChevronDown size={16} />

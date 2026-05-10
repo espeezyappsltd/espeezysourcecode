@@ -137,7 +137,7 @@ export default function PreRegisterPage() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Early Access — Now Open</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Early Access  -  Now Open</span>
           </div>
         </motion.div>
 
@@ -252,11 +252,11 @@ export default function PreRegisterPage() {
 
                     <button type="submit" disabled={submitting} aria-busy={submitting}
                       style={{ width: '100%', padding: '0.95rem', borderRadius: '10px', background: submitting ? 'rgba(16,185,129,0.5)' : 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '0.95rem', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}>
-                      {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist — It&apos;s Free</>}
+                      {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist  -  It&apos;s Free</>}
                     </button>
 
                     <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
-                      By registering you agree to our Privacy Policy. No spam — ever. Unsubscribe any time.
+                      By registering you agree to our Privacy Policy. No spam  -  ever. Unsubscribe any time.
                     </p>
                   </div>
                 </motion.form>
@@ -311,14 +311,14 @@ export default function PreRegisterPage() {
             <span style={{ color: 'var(--brand)' }}>We are fixing it.</span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-            Every year millions of students receive the same grade despite wildly different contributions. Educators lack visibility. High performers burn out. Free riders pass. {config.brand_name} ends this cycle — with data, transparency, and fairness at its core.
+            Every year millions of students receive the same grade despite wildly different contributions. Educators lack visibility. High performers burn out. Free riders pass. {config.brand_name} ends this cycle  -  with data, transparency, and fairness at its core.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
               { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not fairly recognised in group assessments.' },
               { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
-              { icon: <TrendingUp size={22} />, stat: '3×', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
+              { icon: <TrendingUp size={22} />, stat: '3� - ', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
               { icon: <Globe size={22} />, stat: '195', label: 'countries where fair access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
@@ -392,7 +392,7 @@ export default function PreRegisterPage() {
             <span style={{ color: 'var(--brand)' }}>founding generation.</span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            5 million pre-registrations. One mission. Free, fair, and powerful education infrastructure — for every student on the planet.
+            5 million pre-registrations. One mission. Free, fair, and powerful education infrastructure  -  for every student on the planet.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -412,7 +412,7 @@ export default function PreRegisterPage() {
           <div style={{ marginBottom: '2.5rem', maxWidth: '600px' }}>
             <h3 style={{ color: 'white', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.75rem' }}>About the Project</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-              Hey there! We&apos;re building Espeezy to make student collaboration fairer and completely stress-free. It&apos;s an open, fast, and secure platform powered by modern technologies like Next.js and Firebase. By signing up now with your email, you help us understand how many students need this, which speeds up our development. We promise no spam—just early access!
+              Hey there! We&apos;re building Espeezy to make student collaboration fairer and completely stress-free. It&apos;s an open, fast, and secure platform powered by modern technologies like Next.js and Firebase. By signing up now with your email, you help us understand how many students need this, which speeds up our development. We promise no spam - just early access!
             </p>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '2rem' }}>

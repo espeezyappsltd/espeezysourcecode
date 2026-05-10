@@ -18,7 +18,7 @@ async function requireAdmin() {
   return { user, error: null }
 }
 
-// GET /api/admin/server-errors — returns the 100 most-recent logged errors
+// GET /api/admin/server-errors  -  returns the 100 most-recent logged errors
 export async function GET() {
   const { error } = await requireAdmin()
   if (error) return error

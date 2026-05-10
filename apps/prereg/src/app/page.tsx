@@ -297,7 +297,7 @@ export default function PreRegisterPage() {
             {[
               { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not fairly recognised in group assessments.' },
               { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
-              { icon: <TrendingUp size={22} />, stat: '3Ã—', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
+              { icon: <TrendingUp size={22} />, stat: '3Ã - ', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
               { icon: <Globe size={22} />, stat: '195', label: 'countries where fair access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}

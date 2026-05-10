@@ -14,6 +14,11 @@ function DonationSuccessContent() {
     if (a) setAmount(a)
   }, [searchParams])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.sessionStorage.setItem('espeezy_donation_completed_at', String(Date.now()))
+  }, [searchParams])
+
   return (
     <main style={{
       minHeight: '100vh',

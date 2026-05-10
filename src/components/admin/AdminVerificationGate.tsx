@@ -7,10 +7,10 @@
  * server-side role check in layout.tsx.
  *
  * Props:
- *   verificationCode  — controlled input value
- *   onCodeChange      — setter from parent hook
- *   onSubmit          — form submit handler from parent hook
- *   verifying         — true while the async check is running
+ *   verificationCode   -  controlled input value
+ *   onCodeChange       -  setter from parent hook
+ *   onSubmit           -  form submit handler from parent hook
+ *   verifying          -  true while the async check is running
  */
 
 import { Key } from 'lucide-react'

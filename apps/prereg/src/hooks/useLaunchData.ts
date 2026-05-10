@@ -29,7 +29,7 @@ export function useCountdown(targetDate: string): TimeLeft {
   return timeLeft
 }
 
-// Fixed launch date — update manually when the date changes
+// Fixed launch date - update manually when the date changes
 const DEFAULT_LAUNCH_DATE = '2026-06-01T00:00:00.000Z'
 
 const DEFAULTS: LaunchConfig = {

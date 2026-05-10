@@ -1,5 +1,5 @@
 /**
- * Email service — Namecheap Pro Email via SMTP
+ * Email service  -  Namecheap Pro Email via SMTP
  *
  * Required env vars (set in Vercel + .env.local):
  *   SMTP_HOST       = mail.privateemail.com
@@ -19,7 +19,7 @@ function createTransport() {
   const pass = process.env.SMTP_PASS
 
   if (!host || !user || !pass) {
-    throw new Error('SMTP credentials not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS')
+    throw new Error('SMTP credentials not configured  -  set SMTP_HOST, SMTP_USER, SMTP_PASS')
   }
 
   return nodemailer.createTransport({
@@ -179,7 +179,7 @@ export async function sendCertificateEmail(opts: {
 }): Promise<void> {
   await sendEmail({
     to: opts.to,
-    subject: `Your Espeezy Certificate of Completion — ${opts.programName}`,
+    subject: `Your Espeezy Certificate of Completion  -  ${opts.programName}`,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
         <div style="background:linear-gradient(135deg,#10b981,#059669);padding:40px;border-radius:16px 16px 0 0;text-align:center">

@@ -7,8 +7,8 @@
  * Shows the title, live service status dots, and the global refresh button.
  *
  * Props:
- *   onRefresh     — triggers a full data re-fetch
- *   isRefreshing  — true while data is loading (spins the icon)
+ *   onRefresh      -  triggers a full data re-fetch
+ *   isRefreshing   -  true while data is loading (spins the icon)
  */
 
 import { ShieldCheck, RefreshCw } from 'lucide-react'
