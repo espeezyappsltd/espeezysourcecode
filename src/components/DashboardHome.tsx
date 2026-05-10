@@ -2,20 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { db } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  getDoc,
-  doc, 
-  onSnapshot, 
-  orderBy, 
-  limit,
-  getCountFromServer,
-  QueryConstraint
-} from 'firebase/firestore'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
 import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle } from 'lucide-react'
@@ -23,6 +9,13 @@ import { Group, Profile } from '@/types/database'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from './NotificationProvider'
 import { getPlanName, hasFeature } from '@/utils/feature-gate'
+import {
+  fetchGroupById,
+  fetchGroupMembers,
+  fetchGroupTasks,
+  fetchPendingJoinRequests,
+  fetchPersonalPendingTaskCount,
+} from '@/services/dashboard'
 
 interface JoinRequest {
   id: string
@@ -107,12 +100,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
   const fetchGroupDetails = useCallback(async () => {
     try {
-      const snap = await getDoc(doc(db, 'groups', groupId))
-      if (snap.exists()) {
-        const data = { id: snap.id, ...snap.data() } as Group
-        setGroup(data)
-        localStorage.setItem(`gf_cache_group_${groupId}`, JSON.stringify(data))
-      }
+      const data = await fetchGroupById(groupId)
+      setGroup(data)
+      localStorage.setItem(`gf_cache_group_${groupId}`, JSON.stringify(data))
     } catch (err: any) {
       console.error('Fetch group details error:', err.message)
     }
@@ -121,12 +111,8 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const fetchMembers = useCallback(async () => {
     if (!groupId) return
     try {
-      const q = query(
-        collection(db, 'profiles'),
-        where('group_id', '==', groupId)
-      )
-      const snap = await getDocs(q)
-      setMembers(snap.docs.map(d => ({ id: d.id, ...d.data() } as unknown as Profile)))
+      const data = await fetchGroupMembers(groupId)
+      setMembers(data)
     } catch (err: any) {
       console.error('Error fetching group members:', err.message)
     }
@@ -135,22 +121,8 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const fetchPendingRequests = useCallback(async () => {
     if (!groupId || profile?.role !== 'admin') return
     try {
-      const q = query(
-        collection(db, 'group_join_requests'),
-        where('group_id', '==', groupId),
-        where('status', '==', 'pending')
-      )
-      const snap = await getDocs(q)
-      const data = await Promise.all(snap.docs.map(async d => {
-        const req = d.data()
-        const pSnap = await getDoc(doc(db, 'profiles', req.user_id))
-        return {
-          id: d.id,
-          ...req,
-          profiles: pSnap.exists() ? { id: pSnap.id, ...pSnap.data() as any } : null
-        } as JoinRequest
-      }))
-      setPendingRequests(data)
+      const data = await fetchPendingJoinRequests(groupId)
+      setPendingRequests(data.map((request) => ({ ...request, profiles: request.profiles ?? undefined })))
     } catch (err: any) {
       console.error('Fetch pending requests error:', err.message)
     }
@@ -180,13 +152,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const fetchPersonalTaskCount = useCallback(async () => {
     if (!profile?.id || !groupId) return
     try {
-      const q = query(
-        collection(db, 'tasks'),
-        where('group_id', '==', groupId),
-        where('assignees', 'array-contains', profile.id)
-      )
-      const snap = await getDocs(q)
-      const pendingCount = snap.docs.filter(d => d.data().status !== 'Done').length
+      const pendingCount = await fetchPersonalPendingTaskCount(groupId, profile.id)
       setPersonalTaskCount(pendingCount)
     } catch (err: any) {
       console.warn('Silent failure on personal task count:', err.message)
@@ -196,12 +162,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const fetchProjectProgress = useCallback(async () => {
     if (!groupId) return
     try {
-      const q = query(
-        collection(db, 'tasks'),
-        where('group_id', '==', groupId)
-      )
-      const snap = await getDocs(q)
-      const tasks = snap.docs.map(d => d.data())
+      const tasks = await fetchGroupTasks(groupId)
 
       if (tasks.length === 0) {
         setProjectProgress(0)
@@ -255,24 +216,12 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
     void initializeDashboardData()
 
-    // Firestore listeners
-    const tasksUnsub = onSnapshot(query(collection(db, 'tasks'), where('group_id', '==', groupId)), () => {
-      void fetchPersonalTaskCount()
-      void fetchProjectProgress()
-    })
-
-    const profilesUnsub = onSnapshot(query(collection(db, 'profiles'), where('group_id', '==', groupId)), () => {
-      void fetchMembers()
-    })
-
-    const requestsUnsub = onSnapshot(query(collection(db, 'group_join_requests'), where('group_id', '==', groupId)), () => {
-      void fetchPendingRequests()
-    })
+    const pollId = window.setInterval(() => {
+      void initializeDashboardData()
+    }, 20000)
 
     return () => {
-      tasksUnsub()
-      profilesUnsub()
-      requestsUnsub()
+      window.clearInterval(pollId)
     }
   }, [profile?.id, groupId, fetchPersonalTaskCount, fetchProjectProgress, fetchMembers, fetchPendingRequests])
 

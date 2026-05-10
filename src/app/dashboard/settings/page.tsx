@@ -2,18 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { db, auth, storage } from '@/lib/firebase'
-import { 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  collection, 
-  query, 
-  where, 
-  getDocs,
-  orderBy,
-  addDoc
-} from 'firebase/firestore'
+import { storage } from '@/lib/firebase'
 import { 
   ref, 
   uploadBytes, 
@@ -42,6 +31,18 @@ import { buildStripePaymentLink } from '@/lib/stripe-payment-links'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 import { deleteAccount, createStripePortalSession } from '@/services/account'
+import { createBrowserSupabaseClient } from '@/lib/db-client'
+import {
+  createUserFeedback,
+  fetchGroupById,
+  fetchGroupMembers,
+  fetchGroupsOrderedByName,
+  fetchMessagesForUser,
+  fetchProfileById,
+  getAuthUser,
+  updateGroupById,
+  updateProfileById,
+} from '@/services/dashboard'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabName>('identity')
@@ -111,20 +112,12 @@ export default function SettingsPage() {
   }, [isToasterMode])
 
   const fetchGroups = useCallback(async () => {
-    const q = query(collection(db, 'groups'), orderBy('name'))
-    const snap = await getDocs(q)
-    const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Group))
+    const data = await fetchGroupsOrderedByName()
     setAvailableGroups(data)
   }, [])
 
   const fetchJoinRequests = useCallback(async (userId: string) => {
-    const q = query(
-      collection(db, 'messages'),
-      where('user_id', '==', userId)
-    )
-    const snap = await getDocs(q)
-    const requests = snap.docs
-      .map(d => d.data())
+    const requests = (await fetchMessagesForUser(userId))
       .filter((m: any) => m.content?.includes('[JOIN REQUEST]'))
       .map((m: any) => m.group_id)
 
@@ -132,25 +125,19 @@ export default function SettingsPage() {
   }, [])
 
   const fetchTeam = useCallback(async (groupId: string) => {
-    const q = query(collection(db, 'profiles'), where('group_id', '==', groupId))
-    const snap = await getDocs(q)
-    const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as unknown as Profile))
-    setTeamMembers(data)
+    const data = await fetchGroupMembers(groupId)
+    setTeamMembers(data as unknown as Profile[])
   }, [])
 
   const fetchUserData = useCallback(async () => {
-    const user = auth.currentUser
+    const user = await getAuthUser()
     if (user) {
-      // 1. Meta-Information (Linked Identities)
-      const providers = user.providerData || []
-      setIsGithubLinked(providers.some(p => p.providerId === 'github.com'))
-      setIsGoogleLinked(providers.some(p => p.providerId === 'google.com'))
+      const providers: string[] = (user as any).app_metadata?.providers || []
+      setIsGithubLinked(providers.includes('github'))
+      setIsGoogleLinked(providers.includes('google'))
 
-      // 2. Profile and Dependent Data
-      const profileSnap = await getDoc(doc(db, 'profiles', user.uid))
-      
-      if (profileSnap.exists()) {
-        const data = profileSnap.data()
+      try {
+        const data: any = await fetchProfileById(user.id)
         setFullName(data.full_name || '')
         setCourseName(data.course_name || '')
         setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
@@ -168,19 +155,20 @@ export default function SettingsPage() {
         // Fetch group if exists
         let groupData = null
         if (data.group_id) {
-          const groupSnap = await getDoc(doc(db, 'groups', data.group_id))
-          groupData = groupSnap.exists() ? groupSnap.data() : null
+          groupData = await fetchGroupById(data.group_id)
           setIsEncrypted(groupData?.is_encrypted || false)
         }
 
         // Parallelize Secondary Context Fetches
         const contextFetches = []
-        contextFetches.push(fetchJoinRequests(user.uid))
+        contextFetches.push(fetchJoinRequests(user.id))
         if (data.group_id) contextFetches.push(fetchTeam(data.group_id))
         
         await Promise.all(contextFetches)
         
-        setProfile({ id: profileSnap.id, ...data, groups: groupData } as unknown as Profile)
+        setProfile({ id: data.id || user.id, ...data, groups: groupData } as unknown as Profile)
+      } catch (err) {
+        console.error('Fetch user data error:', err)
       }
     }
     setLoading(false)
@@ -215,7 +203,7 @@ export default function SettingsPage() {
     if (!profile) return
 
     try {
-      await updateDoc(doc(db, 'profiles', profile.id), {
+      await updateProfileById(profile.id, {
         full_name: fullName,
         course_name: courseName,
         enrollment_year: enrollmentYear ? Number(enrollmentYear) : null,
@@ -279,7 +267,7 @@ export default function SettingsPage() {
     setProtectAvatar(val)
     if (!profile) return
     try {
-      await updateDoc(doc(db, 'profiles', profile.id), { protect_avatar: val })
+      await updateProfileById(profile.id, { protect_avatar: val })
       addToast('Protection Updated', val ? 'Manual avatar locked.' : 'Provider sync enabled.', 'success')
     } catch (err: any) {
       addToast('Protocol Error', 'Failed to update protection status.', 'error')
@@ -304,7 +292,7 @@ export default function SettingsPage() {
 
       if (type === 'avatar') {
         const updateData: any = { avatar_url: publicUrl, manual_avatar_url: publicUrl }
-        await updateDoc(doc(db, 'profiles', profile.id), updateData)
+        await updateProfileById(profile.id, updateData)
         setAvatarUrl(publicUrl)
       } else {
         await setCustomBg(publicUrl)
@@ -325,7 +313,7 @@ export default function SettingsPage() {
     const nextValue = !isEncrypted
 
     try {
-      await updateDoc(doc(db, 'groups', profile.group_id), { is_encrypted: nextValue })
+      await updateGroupById(profile.group_id, { is_encrypted: nextValue })
       
       // Verifiable Logging
       if (profile.id && profile.group_id) {
@@ -372,7 +360,7 @@ export default function SettingsPage() {
     setError(null)
 
     try {
-      await updateDoc(doc(db, 'profiles', profile.id), { group_id: newGroupId, role: 'collaborator' })
+      await updateProfileById(profile.id, { group_id: newGroupId, role: 'collaborator' })
       await fetchUserData()
       refreshProfile()
       addToast('Team Switched', 'You have been successfully re-assigned to the new project group.', 'success')
@@ -388,7 +376,7 @@ export default function SettingsPage() {
     try {
       const result = await deleteAccount()
       if (!result.ok) throw new Error(result.error || 'Account termination failed')
-      await auth.signOut()
+      await createBrowserSupabaseClient().auth.signOut()
       window.location.href = '/login'
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Account termination failed'))
@@ -537,12 +525,8 @@ export default function SettingsPage() {
                   onClick={async () => {
                     setSubmittingFeedback(true)
                     try {
-                      await addDoc(collection(db, 'user_feedback'), {
-                        user_id: profile?.id,
-                        message: feedbackMessage,
-                        category: feedbackCategory,
-                        created_at: new Date().toISOString()
-                      })
+                      if (!profile?.id) throw new Error('Missing profile context')
+                      await createUserFeedback(profile.id, feedbackMessage, feedbackCategory)
                       
                       setFeedbackSuccess(true)
                       addToast('Feedback Received', 'Thank you for your input!', 'success')
@@ -1409,7 +1393,7 @@ export default function SettingsPage() {
                       if (!profile || !pendingAchievements) return
                       setSaving(true)
                       try {
-                        await updateDoc(doc(db, 'profiles', profile.id), { achievements: pendingAchievements })
+                        await updateProfileById(profile.id, { achievements: pendingAchievements })
                         logActivity(profile.id, profile.group_id || 'system', 'setting_updated', "Overhauled technical arsenal")
                         addToast('Arsenal Verified', 'Your updated toolkit has been saved to your academic record.', 'success')
                         setPendingAchievements(null)
