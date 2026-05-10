@@ -1,30 +1,24 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-let _instance: SupabaseClient | null = null
+let supabaseClient: SupabaseClient | null = null
 
-function resolveSupabaseEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.PROJECT_URL || 'https://placeholder.supabase.co'
-  const key =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_ANON_KEY ||
-    'placeholder'
+function getSupabaseClient(): SupabaseClient {
+  if (!supabaseClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  return { url, key }
-}
+    if (!url || !anonKey) {
+      throw new Error('Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required.')
+    }
 
-function getInstance(): SupabaseClient {
-  if (!_instance) {
-    const { url, key } = resolveSupabaseEnv()
-    _instance = createClient(url, key)
+    supabaseClient = createClient(url, anonKey)
   }
-  return _instance
+
+  return supabaseClient
 }
 
 export const supabase = new Proxy({} as SupabaseClient, {
-  get(_: SupabaseClient, prop: string | symbol) {
-    const client = getInstance()
-    const value = (client as unknown as Record<string | symbol, unknown>)[prop]
-    return typeof value === 'function' ? (value as Function).bind(client) : value
+  get(_target, prop, receiver) {
+    return Reflect.get(getSupabaseClient(), prop, receiver)
   },
 })
