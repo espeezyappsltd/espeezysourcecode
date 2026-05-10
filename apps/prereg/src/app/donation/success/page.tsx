@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Heart, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react'
+import { fetchLiveMetrics } from '@/services/launch'
 
 // ── Lightweight canvas confetti ──────────────────────────────────────────────
 const COLOURS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#a855f7']
@@ -88,8 +89,8 @@ function DonationSuccessContent() {
 
     const refreshMetrics = async () => {
       try {
-        const res = await fetch('/api/live-metrics', { cache: 'no-store' })
-        const data = await res.json()
+        const data = await fetchLiveMetrics()
+        if (!data) return
         if (!active) return
         setMetrics({
           donation_total_cents: typeof data.donation_total_cents === 'number' ? data.donation_total_cents : 0,

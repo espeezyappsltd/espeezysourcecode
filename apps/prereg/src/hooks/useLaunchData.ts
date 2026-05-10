@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { LaunchConfig, TimeLeft } from '@shared-types/launch'
+import { fetchLaunchConfig, fetchLiveMetrics } from '@/services/launch'
 
 const ZERO_TIME: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 }
 
@@ -54,8 +55,8 @@ export function useLaunchData() {
 
   const refreshCount = useCallback(async () => {
     try {
-      const res = await fetch('/api/live-metrics', { cache: 'no-store' })
-      const data = await res.json()
+      const data = await fetchLiveMetrics()
+      if (!data) return
       if (typeof data.preregistration_count === 'number') {
         setCountAndPersist(data.preregistration_count)
       } else if (typeof data.registered_count === 'number') {
@@ -79,12 +80,11 @@ export function useLaunchData() {
       }
 
       try {
-        const [cfgRes, countRes] = await Promise.all([
-          fetch('/api/launch-config'),
-          fetch('/api/live-metrics', { cache: 'no-store' }),
+        const [cfgPayload, metrics] = await Promise.all([
+          fetchLaunchConfig(),
+          fetchLiveMetrics(),
         ])
-        const { config: cfg } = await cfgRes.json()
-        const metrics = await countRes.json()
+        const cfg = cfgPayload?.config
         if (cfg) {
           setConfig(prev => ({
             ...prev,
@@ -92,6 +92,10 @@ export function useLaunchData() {
             launch_date: cfg.launch_date ?? DEFAULT_LAUNCH_DATE,
             preregister_goal: '5000',
           }))
+        }
+        if (!metrics) {
+          setConfigLoaded(true)
+          return
         }
         if (typeof metrics.preregistration_count === 'number') {
           setCountAndPersist(metrics.preregistration_count)

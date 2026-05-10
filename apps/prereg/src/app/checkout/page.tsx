@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
+import { fetchLiveMetrics } from '@/services/launch'
 
 const PLANS = {
   pro: {
@@ -97,8 +98,8 @@ function CheckoutFlow() {
 
     const refreshLifetimeSeats = async () => {
       try {
-        const res = await fetch('/api/live-metrics', { cache: 'no-store' })
-        const data = await res.json()
+        const data = await fetchLiveMetrics()
+        if (!data) return
         if (!cancelled && typeof data.lifetime_seats_used === 'number') {
           setLifetimeSeatsUsed(data.lifetime_seats_used)
           setMetricsUpdatedAt(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))

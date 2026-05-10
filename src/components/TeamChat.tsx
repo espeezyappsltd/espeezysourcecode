@@ -28,6 +28,7 @@ import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
 import { ChatMessage, ChatPayload } from '@/types/ui'
 import { Profile } from '@/types/auth'
+import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 type TeamChatProps = {
   groupId: string
@@ -218,18 +219,13 @@ function TeamLobby({
                 overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: 'white', fontWeight: 900
               }}>
-                {member.avatar_url ? (
-                  <Image
-                    src={member.avatar_url}
-                    alt={`${member.full_name ?? 'Member'} avatar`}
-                    width={42}
-                    height={42}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    unoptimized
-                  />
-                ) : (
-                  member.full_name?.charAt(0)
-                )}
+                <RemoteAvatar
+                  src={member.avatar_url}
+                  alt={`${member.full_name ?? 'Member'} avatar`}
+                  size={42}
+                  fallback={member.full_name?.charAt(0) ?? '?'}
+                  style={{ borderRadius: '14px' }}
+                />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{member.id === userId ? 'You' : member.full_name}</div>

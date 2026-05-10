@@ -41,6 +41,7 @@ import { Group, Achievement } from '@/types/database'
 import { buildStripePaymentLink } from '@/lib/stripe-payment-links'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
+import { deleteAccount, createStripePortalSession } from '@/services/account'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabName>('identity')
@@ -385,9 +386,8 @@ export default function SettingsPage() {
     if (deleteConfirmation !== 'DELETE') return
     setIsDeleting(true)
     try {
-      const res = await fetch('/api/account', { method: 'DELETE' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Account termination failed')
+      const result = await deleteAccount()
+      if (!result.ok) throw new Error(result.error || 'Account termination failed')
       await auth.signOut()
       window.location.href = '/login'
     } catch (err: unknown) {
@@ -401,9 +401,8 @@ export default function SettingsPage() {
     setLoadingPortal(true)
     setError(null)
     try {
-      const response = await fetch('/api/stripe/portal', { method: 'POST' })
-      const result = await response.json()
-      if (!response.ok) throw new Error(result.error || 'Portal creation failed')
+      const result = await createStripePortalSession()
+      if (!result.ok || !result.url) throw new Error(result.error || 'Portal creation failed')
       window.location.href = result.url
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Unable to open billing portal'))
