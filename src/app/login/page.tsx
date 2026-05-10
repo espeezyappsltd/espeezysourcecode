@@ -90,7 +90,7 @@ function LoginContent() {
     const db = createBrowserSupabaseClient()
     try {
       const { error } = await db.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
       })
       if (error) throw error
       setResetMessage("Secure recovery link sent to " + email)
