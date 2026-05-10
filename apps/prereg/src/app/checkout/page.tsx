@@ -50,7 +50,7 @@ const PLANS = {
     name: 'Premium Lifetime Access',
     price: 'GBP 149.00',
     period: 'one-time',
-    badge: 'First 100 Only — Limited Forever',
+    badge: 'First 100 Only - Limited Forever',
     hasTrial: false,
     features: [
       'Everything in Premium, forever',
@@ -60,7 +60,7 @@ const PLANS = {
       'Permanent legacy pricing protection',
       'Early supporter identity inside the product',
     ],
-    description: 'Reserved exclusively for the first 100 early supporters. One payment, permanent Premium access — no recurring billing, ever.',
+    description: 'Reserved exclusively for the first 100 early supporters. One payment, permanent Premium access - no recurring billing, ever.',
   },
 } as const
 

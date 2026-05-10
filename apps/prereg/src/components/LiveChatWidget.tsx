@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type ChatMessage = {
   id: string
@@ -44,26 +44,24 @@ function getOrCreateClientUser() {
 }
 
 export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'games' | 'kanban' }) {
+  const initialUser = getOrCreateClientUser()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newUserEvent, setNewUserEvent] = useState<ChatEvent | null>(null)
-  const [lastSeenEventId, setLastSeenEventId] = useState('')
   const [text, setText] = useState('')
-  const [username, setUsername] = useState('')
-  const [userId, setUserId] = useState('')
+  const [username, setUsername] = useState(initialUser.username)
+  const [userId] = useState(initialUser.userId)
   const [loading, setLoading] = useState(false)
+  const lastSeenEventIdRef = useRef('')
+  const clearEventTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    const user = getOrCreateClientUser()
-    setUsername(user.username)
-    setUserId(user.userId)
-
     fetch('/api/chat/presence', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ app_scope: appScope, event_type: 'new_user', user_id: user.userId, username: user.username }),
+      body: JSON.stringify({ app_scope: appScope, event_type: 'new_user', user_id: userId, username }),
     }).catch(() => undefined)
-  }, [appScope])
+  }, [appScope, userId, username])
 
   async function loadMessages() {
     const res = await fetch(`/api/chat/messages?app_scope=${encodeURIComponent(appScope)}&limit=30`, { cache: 'no-store' })
@@ -71,10 +69,13 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
     if (Array.isArray(data.messages)) {
       setMessages(data.messages)
     }
-    if (data.new_user_event && data.new_user_event.id && data.new_user_event.id !== lastSeenEventId) {
-      setLastSeenEventId(data.new_user_event.id)
+    if (data.new_user_event && data.new_user_event.id && data.new_user_event.id !== lastSeenEventIdRef.current) {
+      lastSeenEventIdRef.current = data.new_user_event.id
       setNewUserEvent(data.new_user_event)
-      setTimeout(() => setNewUserEvent(null), 5000)
+      if (clearEventTimeoutRef.current) {
+        clearTimeout(clearEventTimeoutRef.current)
+      }
+      clearEventTimeoutRef.current = setTimeout(() => setNewUserEvent(null), 5000)
     }
   }
 
@@ -90,7 +91,15 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
     }, 5000)
 
     return () => clearInterval(poll)
-  }, [appScope, lastSeenEventId, userId, username])
+  }, [appScope, userId, username])
+
+  useEffect(() => {
+    return () => {
+      if (clearEventTimeoutRef.current) {
+        clearTimeout(clearEventTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const orderedMessages = useMemo(() => messages.slice(-20), [messages])
 
@@ -132,7 +141,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
         <div style={{ position: 'fixed', right: '1rem', bottom: '4.5rem', width: '320px', maxHeight: '420px', zIndex: 1200, background: '#0f172a', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong style={{ fontSize: '0.85rem' }}>Live Chat ({appScope})</strong>
-            <button type='button' onClick={() => setOpen(false)} style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer' }}>x</button>
+            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1, padding: '0.25rem 0.5rem' }}>×</button>
           </div>
 
           <div style={{ padding: '0.5rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>

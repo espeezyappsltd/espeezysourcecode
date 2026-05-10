@@ -259,7 +259,7 @@ function LoginContent() {
             color: '#a5b4fc',
             fontSize: '0.875rem',
             marginBottom: '1.25rem',
-          }}>Recovery link sent — check your inbox.</div>
+          }}>Recovery link sent - check your inbox.</div>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
