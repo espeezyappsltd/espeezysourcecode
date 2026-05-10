@@ -1,16 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useTransition } from 'react'
-import { database, auth } from '@/lib/firebase'
-import { 
-  ref, 
-  onValue, 
-  set, 
-  onDisconnect, 
-  serverTimestamp, 
-  remove,
-  update
-} from 'firebase/database'
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useTransition, useMemo } from 'react'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { PresenceContextType } from '@/types/ui'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
@@ -29,6 +20,7 @@ type PresenceProviderProps = {
 }
 
 export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [, startTransition] = useTransition()
@@ -40,73 +32,141 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const groupId = profile?.group_id
 
   const lastNotified = useRef<Map<string, number>>(new Map())
+  const previousOnlineRef = useRef<Set<string>>(new Set())
 
   const setTypingStatus = useCallback(async (isTyping: boolean) => {
     if (!userId) return
     try {
-      const presenceRef = ref(database, `presence/global/${userId}`)
-      await update(presenceRef, { is_typing: isTyping, last_seen: serverTimestamp() })
+      const { error } = await db
+        .from('presence')
+        .upsert({
+          user_id: userId,
+          group_id: groupId ?? null,
+          is_online: true,
+          is_typing: isTyping,
+          last_seen: new Date().toISOString(),
+          activity_status: 'active',
+          device_info: { source: 'presence-provider' },
+        }, { onConflict: 'user_id' })
+
+      if (error) throw error
     } catch (err: any) {
       console.error('Typing status error:', err.message)
     }
-  }, [userId])
+  }, [db, groupId, userId])
 
   useEffect(() => {
     if (!userId) return
 
-    const presenceRef = ref(database, `presence/global/${userId}`)
-    const allPresenceRef = ref(database, 'presence/global')
+    let active = true
 
-    // 1. Setup local presence with automatic cleanup
-    const setupPresence = async () => {
-      await set(presenceRef, {
-        user_id: userId,
-        full_name: userName || 'Anonymous',
-        group_id: groupId || 'none',
-        online_at: new Date().toISOString(),
-        is_typing: false,
-        last_seen: serverTimestamp()
-      })
-      onDisconnect(presenceRef).remove()
-    }
+    const applyPresenceState = (rows: Array<{ user_id: string; is_typing: boolean; group_id: string | null }>) => {
+      const nextOnline = new Set<string>()
+      const nextTyping = new Set<string>()
 
-    setupPresence()
-
-    // 2. Listen to all presence
-    const unsubscribe = onValue(allPresenceRef, (snap) => {
-      const data = snap.val() || {}
-      const onlineIds = new Set<string>()
-      const typingIds = new Set<string>()
-
-      Object.keys(data).forEach(key => {
-        const item = data[key]
-        onlineIds.add(key)
-        if (item.is_typing) {
-          typingIds.add(key)
+      rows.forEach((row) => {
+        nextOnline.add(row.user_id)
+        if (row.is_typing) {
+          nextTyping.add(row.user_id)
         }
 
-        // Check for join notifications (scoped to group)
-        if (key !== userId && item.group_id === groupId && groupId && groupId !== 'none') {
+        if (
+          row.user_id !== userId &&
+          row.group_id &&
+          groupId &&
+          row.group_id === groupId &&
+          !previousOnlineRef.current.has(row.user_id)
+        ) {
           const now = Date.now()
-          const lastTime = lastNotified.current.get(key) || 0
+          const lastTime = lastNotified.current.get(row.user_id) || 0
           if (now - lastTime > 60000) {
-            addToast('Teammate Online', `${item.full_name || 'A teammate'} is online now`, 'success')
-            lastNotified.current.set(key, now)
+            addToast('Teammate Online', 'A teammate is online now', 'success')
+            lastNotified.current.set(row.user_id, now)
           }
         }
       })
 
+      previousOnlineRef.current = nextOnline
+
       startTransition(() => {
-        setOnlineUsers(onlineIds)
-        setTypingUsers(typingIds)
+        setOnlineUsers(nextOnline)
+        setTypingUsers(nextTyping)
       })
-    })
+    }
+
+    const fetchPresence = async () => {
+      const staleCutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      const { data, error } = await db
+        .from('presence')
+        .select('user_id, is_typing, group_id')
+        .eq('is_online', true)
+        .gte('last_seen', staleCutoff)
+
+      if (!active) return
+      if (error) {
+        console.error('Presence fetch error:', error.message)
+        return
+      }
+
+      applyPresenceState((data ?? []) as Array<{ user_id: string; is_typing: boolean; group_id: string | null }>)
+    }
+
+    const setupPresence = async () => {
+      const { error } = await db
+        .from('presence')
+        .upsert({
+          user_id: userId,
+          group_id: groupId ?? null,
+          is_online: true,
+          is_typing: false,
+          last_seen: new Date().toISOString(),
+          activity_status: 'active',
+          device_info: { source: 'presence-provider', user_name: userName ?? 'Anonymous' },
+        }, { onConflict: 'user_id' })
+
+      if (error) {
+        console.error('Presence setup error:', error.message)
+        return
+      }
+
+      await fetchPresence()
+    }
+
+    setupPresence()
+
+    const heartbeat = setInterval(() => {
+      db
+        .from('presence')
+        .update({
+          is_online: true,
+          last_seen: new Date().toISOString(),
+          activity_status: 'active',
+        })
+        .eq('user_id', userId)
+    }, 30000)
+
+    const channel = db
+      .channel('presence-feed')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'presence' }, () => {
+        fetchPresence()
+      })
+      .subscribe()
 
     return () => {
-      unsubscribe()
-      remove(presenceRef)
+      active = false
+      clearInterval(heartbeat)
+      db
+        .from('presence')
+        .update({
+          is_online: false,
+          is_typing: false,
+          activity_status: 'offline',
+          last_seen: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+      db.removeChannel(channel)
     }
-  }, [userId, userName, groupId, addToast])
+  }, [addToast, db, groupId, startTransition, userId, userName])
 
   return (
     <PresenceContext.Provider value={{ onlineUsers, typingUsers, setTypingStatus }}>

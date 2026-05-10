@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { TaskModalProps } from '@/types/ui'
 import { Profile } from '@/types/auth'
@@ -8,6 +8,7 @@ import { TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { logActivity } from '@/utils/logging'
 import { taskSchema } from '@/utils/validation'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
@@ -21,21 +22,6 @@ const CATEGORIES: TaskCategory[] = [
   'DevOps', 
   'Ethics & Legal'
 ]
-import { db, auth, storage } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  onSnapshot, 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc, 
-  addDoc,
-  setDoc,
-  orderBy
-} from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 export default function TaskModal({ 
   task, 
@@ -46,6 +32,7 @@ export default function TaskModal({
   initialDueDate,
   onlineUserIds
 }: TaskModalProps) {
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
   const router = useRouter()
 
   const onlineUsers = onlineUserIds || new Set<string>()
@@ -63,7 +50,7 @@ export default function TaskModal({
         ? initialDueDate 
         : ''
   )
-  const [currentUser, setCurrentUser] = useState<any | null>(null)
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null)
   const [members, setMembers] = useState<Profile[]>([])
   
   const [loading, setLoading] = useState(false)
@@ -79,33 +66,89 @@ export default function TaskModal({
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
-    setCurrentUser(auth.currentUser)
-    
-    // Fetch members real-time
-    const q = query(collection(db, 'profiles'), where('group_id', '==', groupId))
-    const unsub = onSnapshot(q, (snap) => {
-      setMembers(snap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)))
+    let active = true
+
+    db.auth.getUser().then(({ data }) => {
+      if (!active) return
+      setCurrentUser(data.user ? { id: data.user.id } : null)
     })
 
-    return () => unsub()
-  }, [groupId])
+    const { data: authSub } = db.auth.onAuthStateChange((_event, session) => {
+      if (!active) return
+      setCurrentUser(session?.user ? { id: session.user.id } : null)
+    })
+
+    const loadMembers = async () => {
+      const { data, error } = await db
+        .from('profiles')
+        .select('*')
+        .eq('group_id', groupId)
+
+      if (!active) return
+      if (error) {
+        console.error('Members load error:', error.message)
+        return
+      }
+
+      setMembers((data ?? []) as Profile[])
+    }
+
+    loadMembers()
+
+    const channel = db
+      .channel(`task-modal-members:${groupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },
+        () => loadMembers()
+      )
+      .subscribe()
+
+    return () => {
+      active = false
+      authSub.subscription.unsubscribe()
+      db.removeChannel(channel)
+    }
+  }, [db, groupId])
 
   useEffect(() => {
     if (!isEditMode || !task) return
 
-    const q = query(
-      collection(db, 'artifacts'), 
-      where('task_id', '==', task.id),
-      orderBy('created_at', 'desc')
-    )
-    
-    const unsub = onSnapshot(q, (snap) => {
-      setArtifacts(snap.docs.map(d => ({ id: d.id, ...d.data() } as Artifact)))
-      setEvidenceLoading(false)
-    })
+    let active = true
+    const loadArtifacts = async () => {
+      const { data, error } = await db
+        .from('artifacts')
+        .select('*')
+        .eq('task_id', task.id)
+        .order('created_at', { ascending: false })
 
-    return () => unsub()
-  }, [task?.id, isEditMode])
+      if (!active) return
+      if (error) {
+        console.error('Artifacts load error:', error.message)
+        setEvidenceLoading(false)
+        return
+      }
+
+      setArtifacts((data ?? []) as Artifact[])
+      setEvidenceLoading(false)
+    }
+
+    loadArtifacts()
+
+    const channel = db
+      .channel(`task-artifacts:${task.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'artifacts', filter: `task_id=eq.${task.id}` },
+        () => loadArtifacts()
+      )
+      .subscribe()
+
+    return () => {
+      active = false
+      db.removeChannel(channel)
+    }
+  }, [db, isEditMode, task])
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -214,13 +257,19 @@ export default function TaskModal({
 
     setLoading(true)
     try {
-      await deleteDoc(doc(db, 'tasks', task.id))
+      const { error: deleteError } = await db
+        .from('tasks')
+        .delete()
+        .eq('id', task.id)
+
+      if (deleteError) throw deleteError
+
       await onRefresh()
       await onTaskSaved?.()
 
       if (currentUser) {
         logActivity(
-          currentUser.uid,
+          currentUser.id,
           groupId,
           'task_deleted',
           `Deleted task: ${task.title}`
@@ -245,7 +294,13 @@ export default function TaskModal({
     if (isEditMode && task) {
        setLoading(true)
        try {
-         await updateDoc(doc(db, 'tasks', task.id), { assignees: newAssignees })
+         const { error } = await db
+           .from('tasks')
+           .update({ assignees: newAssignees })
+           .eq('id', task.id)
+
+         if (error) throw error
+
          onRefresh()
        } catch (err: any) {
          setError(`Failed to update assignment: ${err.message}`)
@@ -267,16 +322,20 @@ export default function TaskModal({
     }
 
     try {
-      await addDoc(collection(db, 'artifacts'), {
+      const { error } = await db
+        .from('artifacts')
+        .insert({
         task_id: task.id,
         file_url: newUrl,
-        uploaded_by: currentUser.uid,
+        uploaded_by: currentUser.id,
         endorsements_count: 0,
         created_at: new Date().toISOString()
       })
 
+      if (error) throw error
+
       logActivity(
-        currentUser.uid,
+        currentUser.id,
         groupId,
         'artifact_uploaded',
         `Attached a link to task`,
@@ -297,19 +356,30 @@ export default function TaskModal({
        setUploading(true)
        setError(null)
        
-       const fileName = `evidence-${task.id}-${Date.now()}-${file.name}`
-       const fileRef = ref(storage, `Espeezy_assets/${fileName}`)
-       
-       await uploadBytes(fileRef, file)
-       const publicUrl = await getDownloadURL(fileRef)
-       
-       await addDoc(collection(db, 'artifacts'), {
+       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+       const filePath = `task-evidence/${task.id}/evidence-${Date.now()}-${safeName}`
+
+       const { error: uploadError } = await db.storage
+         .from('espeezy-assets')
+         .upload(filePath, file, { upsert: false })
+
+       if (uploadError) throw uploadError
+
+       const { data } = db.storage
+         .from('espeezy-assets')
+         .getPublicUrl(filePath)
+
+       const { error: insertError } = await db
+         .from('artifacts')
+         .insert({
          task_id: task.id,
-         file_url: publicUrl,
-         uploaded_by: currentUser.uid,
+         file_url: data.publicUrl,
+         uploaded_by: currentUser.id,
          endorsements_count: 0,
          created_at: new Date().toISOString()
        })
+
+       if (insertError) throw insertError
      } catch (err: any) {
        setError(`File upload failed: ${err.message}`)
      } finally {
@@ -319,10 +389,16 @@ export default function TaskModal({
 
   const handleDeleteArtifact = async (artifactId: string) => {
     try {
-      await deleteDoc(doc(db, 'artifacts', artifactId))
+      const { error } = await db
+        .from('artifacts')
+        .delete()
+        .eq('id', artifactId)
+
+      if (error) throw error
+
       if (currentUser) {
         logActivity(
-          currentUser.uid,
+          currentUser.id,
           groupId,
           'artifact_uploaded',
           `Removed an attachment from task`,
@@ -336,7 +412,12 @@ export default function TaskModal({
 
   const handleEndorse = async (artifactId: string, currentCount: number) => {
     try {
-      await updateDoc(doc(db, 'artifacts', artifactId), { endorsements_count: currentCount + 1 })
+      const { error } = await db
+        .from('artifacts')
+        .update({ endorsements_count: currentCount + 1 })
+        .eq('id', artifactId)
+
+      if (error) throw error
     } catch (err: any) {
       setError(`Failed to endorse: ${err.message}`)
     }

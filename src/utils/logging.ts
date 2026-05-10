@@ -1,15 +1,47 @@
-import { db } from '@/lib/firebase'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+const inferAppScope = () => {
+  if (typeof window === 'undefined') return 'system'
+  const path = window.location.pathname
+  if (path.startsWith('/dashboard')) return 'core'
+  if (path.startsWith('/games')) return 'games'
+  if (path.startsWith('/kanban')) return 'kanban'
+  if (path.startsWith('/prereg')) return 'prereg'
+  return 'system'
+}
 
 export const logEvent = async (eventData: Record<string, unknown>) => {
   try {
-    const logsRef = collection(db, 'system_logs')
-    await addDoc(logsRef, {
-      ...eventData,
-      createdAt: serverTimestamp(),
+    const db = createBrowserSupabaseClient()
+    const userIdRaw = typeof eventData.user_id === 'string' ? eventData.user_id : null
+    const userId = userIdRaw && UUID_RE.test(userIdRaw) ? userIdRaw : null
+    const details =
+      eventData.details && typeof eventData.details === 'object'
+        ? eventData.details
+        : {
+            message: eventData.details ?? null,
+            metadata: eventData.metadata ?? null,
+            group_id: eventData.group_id ?? null,
+          }
+
+    const { error } = await db.from('activity_logs').insert({
+      user_id: userId,
+      app_scope: inferAppScope(),
+      action: String(eventData.action ?? 'UNKNOWN_ACTION'),
+      resource_type: typeof eventData.resource_type === 'string' ? eventData.resource_type : 'system',
+      resource_id: typeof eventData.resource_id === 'string' ? eventData.resource_id : null,
+      details,
+      status: typeof eventData.status === 'string' ? eventData.status : 'success',
     })
+
+    if (error) {
+      throw error
+    }
   } catch (error) {
-    console.error('Critical failure writing to Firestore:', error)
+    console.error('Critical failure writing to Supabase activity_logs:', error)
   }
 }
 

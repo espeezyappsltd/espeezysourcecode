@@ -1,21 +1,8 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
-import { db, auth, firestoreClientEnabled } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  onSnapshot, 
-  getDocs, 
-  updateDoc, 
-  doc, 
-  writeBatch,
-  DocumentData
-} from 'firebase/firestore'
-import { X, Info, UserPlus, CheckCircle2, AlertCircle, Timer } from 'lucide-react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
+import { X, Info, CheckCircle2, AlertCircle, Timer } from 'lucide-react'
 import { Notification, NotificationContextType, Toast } from '@/types/ui'
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
@@ -27,8 +14,11 @@ export const useNotifications = () => {
 }
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
+  const [userId, setUserId] = useState<string | null>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
+  const baselineLoadedRef = useRef(false)
 
   const addToast = (title: string, message: string, type: string = 'info') => {
     const id = Math.random().toString(36).substr(2, 9)
@@ -39,34 +29,33 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }
 
   const fetchNotifications = useCallback(async () => {
-    if (!firestoreClientEnabled) return
-    const user = auth.currentUser
-    if (!user) return
+    if (!userId) return
 
     try {
-      const q = query(
-        collection(db, 'notifications'),
-        where('user_id', '==', user.uid),
-        orderBy('created_at', 'desc'),
-        limit(20)
-      )
-      const snap = await getDocs(q)
-      setNotifications(snap.docs.map(d => ({ id: d.id, ...d.data() } as unknown as Notification)))
+      const { data, error } = await db
+        .from('notifications')
+        .select('id, type, title, message, link, read, created_at, metadata')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      if (error) throw error
+
+      setNotifications((data ?? []) as Notification[])
+      baselineLoadedRef.current = true
     } catch (err: any) {
       console.error('Error fetching notifications:', err.message)
     }
-  }, [])
+  }, [db, userId])
 
   useEffect(() => {
-    if (!firestoreClientEnabled) return
     if (typeof window !== 'undefined' && 'Notification' in window) {
       if (window.Notification.permission === 'default') {
         window.Notification.requestPermission();
       }
     }
 
-    let unsubscribe: (() => void) | null = null;
-    let active = true;
+    let active = true
 
     const showBrowserAlert = (title: string, message: string) => {
       if (typeof window === 'undefined') return;
@@ -81,61 +70,97 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       notification.onclick = () => window.focus();
     };
 
-    const setupSubscription = () => {
-      const user = auth.currentUser
-      if (!user) return
-
-      const q = query(
-        collection(db, 'notifications'),
-        where('user_id', '==', user.uid),
-        orderBy('created_at', 'desc'),
-        limit(20)
-      )
-
-      unsubscribe = onSnapshot(q, (snap) => {
-        if (!active) return
-
-        const incoming = snap.docChanges()
-          .filter(change => change.type === 'added')
-          .map(change => ({ id: change.doc.id, ...change.doc.data() } as Notification))
-
-        // Trigger alerts for truly new ones if we already had a baseline
-        if (notifications.length > 0) {
-          incoming.forEach(notif => {
-            addToast(notif.title, notif.message, notif.type)
-            showBrowserAlert(notif.title, notif.message)
-          })
-        }
-
-        setNotifications(snap.docs.map(d => ({ id: d.id, ...d.data() } as unknown as Notification)))
-      })
-    }
-
-    const unsubAuth = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setupSubscription()
-      } else {
-        if (unsubscribe) unsubscribe()
+    db.auth.getUser().then(({ data }) => {
+      if (!active) return
+      const id = data.user?.id ?? null
+      setUserId(id)
+      if (!id) {
+        baselineLoadedRef.current = false
         setNotifications([])
       }
     })
 
+    const { data: authSubscription } = db.auth.onAuthStateChange((_event, session) => {
+      if (!active) return
+      const id = session?.user?.id ?? null
+      setUserId(id)
+      if (!id) {
+        baselineLoadedRef.current = false
+        setNotifications([])
+      }
+    })
+
+    const channel = db
+      .channel('notifications-feed')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications' },
+        (payload) => {
+          if (!active || !userId) return
+
+          if (payload.eventType === 'INSERT') {
+            const inserted = payload.new as Notification & { user_id?: string }
+            if (inserted.user_id !== userId) return
+
+            setNotifications((prev) => {
+              const exists = prev.some((n) => n.id === inserted.id)
+              if (!exists && baselineLoadedRef.current) {
+                addToast(inserted.title, inserted.message, inserted.type)
+                showBrowserAlert(inserted.title, inserted.message)
+              }
+              if (exists) return prev
+              return [inserted, ...prev].slice(0, 20)
+            })
+            return
+          }
+
+          if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as Notification & { user_id?: string }
+            if (updated.user_id !== userId) return
+            setNotifications((prev) => prev.map((n) => (n.id === updated.id ? updated : n)))
+            return
+          }
+
+          if (payload.eventType === 'DELETE') {
+            const removed = payload.old as { id?: string; user_id?: string }
+            if (removed.user_id !== userId) return
+            setNotifications((prev) => prev.filter((n) => n.id !== removed.id))
+          }
+        }
+      )
+      .subscribe()
+
     return () => {
       active = false
-      unsubAuth()
-      if (unsubscribe) unsubscribe()
+      authSubscription.subscription.unsubscribe()
+      db.removeChannel(channel)
     }
-  }, [])
+  }, [db, userId])
+
+  useEffect(() => {
+    if (userId) {
+      fetchNotifications()
+    } else {
+      baselineLoadedRef.current = false
+      setNotifications([])
+    }
+  }, [fetchNotifications, userId])
 
   const markAsRead = async (id: string) => {
-    if (!firestoreClientEnabled) return
+    if (!userId) return
     const original = notifications.find(n => n.id === id)
     if (!original || original.read) return
 
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
 
     try {
-      await updateDoc(doc(db, 'notifications', id), { read: true })
+      const { error } = await db
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id)
+        .eq('user_id', userId)
+
+      if (error) throw error
     } catch (err: any) {
       console.error('Persistence error (markAsRead):', err.message)
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n))
@@ -144,21 +169,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }
 
   const markAllAsRead = async () => {
-    if (!firestoreClientEnabled) return
-    const user = auth.currentUser
-    if (!user) return
+    if (!userId) return
 
     const original = [...notifications]
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
 
     try {
-      const q = query(collection(db, 'notifications'), where('user_id', '==', user.uid), where('read', '==', false))
-      const snap = await getDocs(q)
-      if (!snap.empty) {
-        const batch = writeBatch(db)
-        snap.docs.forEach(d => batch.update(d.ref, { read: true }))
-        await batch.commit()
-      }
+      const { error } = await db
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', userId)
+        .eq('read', false)
+
+      if (error) throw error
     } catch (err: any) {
       console.error('Persistence error (markAllAsRead):', err.message)
       setNotifications(original)
