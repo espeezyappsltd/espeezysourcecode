@@ -259,7 +259,7 @@ export default function AdminLaunchCenter({
           rel="noreferrer"
           style={externalLinkStyle}
         >
-          VIEW PAGE � - 
+          VIEW PAGE ->
         </a>
 
         {/* External link: fund page */}
@@ -268,7 +268,7 @@ export default function AdminLaunchCenter({
           rel="noreferrer"
           style={externalLinkStyle}
         >
-          FUND PAGE � - 
+          FUND PAGE ->
         </a>
       </div>
     </div>

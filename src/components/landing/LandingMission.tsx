@@ -1,6 +1,7 @@
 'use client'
 
 import { CheckCircle, Zap } from 'lucide-react'
+import Image from 'next/image'
 
 export default function LandingMission() {
    return (
@@ -28,7 +29,7 @@ export default function LandingMission() {
             <div style={{ background: 'linear-gradient(135deg, #111111 0%, #0a0a0a 100%)', padding: '3rem', borderRadius: '16px', border: '1px solid #222222', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '2.5rem' }}>
                   <div style={{ width: '42px', height: '42px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                     <img src="/brand-logo-black-gold.png" style={{ width: '24px', height: '24px' }} alt="Espeezy" />
+                     <Image src="/brand-logo-black-gold.png" width={24} height={24} style={{ width: '24px', height: '24px' }} alt="Espeezy" />
                   </div>
                   <div>
                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981' }}>EVERYTHING ONLINE</div>

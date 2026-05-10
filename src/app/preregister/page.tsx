@@ -13,6 +13,7 @@ import {
 import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
+import { submitPreregistration } from '@/services/preregister'
 
 // ─── Coming Features ─────────────────────────────────────────────────────────
 const COMING_FEATURES = [
@@ -67,17 +68,12 @@ export default function PreRegisterPage() {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/preregister', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email, 
-          source: 'preregister_page',
-          ...(referrerCode != null ? { referrer_code: referrerCode } : {}),
-        }),
+      const { ok, data } = await submitPreregistration({
+        email,
+        source: 'preregister_page',
+        ...(referrerCode != null ? { referrer_code: referrerCode } : {}),
       })
-      const data = await res.json()
-      if (!res.ok) {
+      if (!ok) {
         setSubmitError(data.error ?? 'Registration failed. Please try again.')
       } else {
         setSubmitted(true)
@@ -288,9 +284,9 @@ export default function PreRegisterPage() {
             ].map((img, i) => (
               <motion.div key={i} initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }}
                 style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}>
-                <img src={img.src} alt={img.title} loading="lazy" decoding="async" style={{ width: '100%', height: 'auto', display: 'block', transition: 'transform 0.4s ease' }} 
-                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                <div style={{ position: 'relative', aspectRatio: '16 / 10' }}>
+                  <Image src={img.src} alt={img.title} fill sizes="(max-width: 900px) 100vw, 50vw" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s ease' }} />
+                </div>
                 <div style={{ padding: '1.5rem', background: 'linear-gradient(to top, #0a0a0a 0%, transparent 100%)', position: 'absolute', bottom: 0, left: 0, right: 0 }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 0.25rem' }}>{img.title}</h3>
                   <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', margin: 0 }}>{img.desc}</p>
@@ -319,7 +315,7 @@ export default function PreRegisterPage() {
             {[
               { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not fairly recognised in group assessments.' },
               { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
-              { icon: <TrendingUp size={22} />, stat: '3� - ', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
+              { icon: <TrendingUp size={22} />, stat: '3x', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
               { icon: <Globe size={22} />, stat: '195', label: 'countries where fair access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}

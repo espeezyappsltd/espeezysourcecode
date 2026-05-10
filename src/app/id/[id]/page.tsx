@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useCheckoutAwarePolling } from '@/hooks/useCheckoutAwarePolling'
+import { createDonationCheckout, fetchDonationTotal } from '@/services/donations'
 import {
   Sparkles, ArrowRight, Heart, CheckCircle, Cpu, Globe, BookOpen,
   Shield, Zap, Award, BarChart2, Smartphone, ShieldCheck, Lock,
@@ -102,69 +104,17 @@ export default function FundPage() {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
   const [donationTotal, setDonationTotal] = useState({ total_cents: 0, count: 0 })
 
-  useEffect(() => {
-    const refreshDonationTotal = () => {
-      fetch('/api/donations/total', { cache: 'no-store' })
-        .then(r => r.json())
-        .then(d => {
-          const payload = Array.isArray(d) ? d[0] : d
-          if (payload && typeof payload.total_cents === 'number') {
-            setDonationTotal({
-              total_cents: payload.total_cents,
-              count: typeof payload.count === 'number' ? payload.count : 0,
-            })
-          }
-        })
-        .catch(() => {})
-    }
-
-    refreshDonationTotal()
-    const checkoutReturnBurstTimers: number[] = []
-    const params = new URLSearchParams(window.location.search)
-    const checkoutCompletedAtRaw = window.sessionStorage.getItem('espeezy_donation_completed_at')
-    const checkoutCompletedAt = Number(checkoutCompletedAtRaw ?? '0')
-    const hasRecentCheckoutMarker = Number.isFinite(checkoutCompletedAt)
-      && checkoutCompletedAt > 0
-      && (Date.now() - checkoutCompletedAt) < 10 * 60 * 1000
-    const returnedFromCheckout = params.has('session_id')
-      || params.has('payment_intent')
-      || params.get('donated') === '1'
-      || hasRecentCheckoutMarker
-    if (returnedFromCheckout) {
-      // Stripe webhook writes can lag a few seconds, so retry quickly once after return.
-      for (const delayMs of [1500, 4000, 8000, 15000]) {
-        checkoutReturnBurstTimers.push(window.setTimeout(refreshDonationTotal, delayMs))
-      }
-
-      if (hasRecentCheckoutMarker) {
-        window.sessionStorage.removeItem('espeezy_donation_completed_at')
-      }
-
-      if (params.get('donated') === '1') {
-        params.delete('donated')
-        const nextSearch = params.toString()
-        const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
-        window.history.replaceState(null, '', nextUrl)
-      }
-    }
-
-    const interval = window.setInterval(refreshDonationTotal, 15_000)
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') refreshDonationTotal()
-    }
-    const onOnline = () => refreshDonationTotal()
-    window.addEventListener('focus', refreshDonationTotal)
-    document.addEventListener('visibilitychange', onVisible)
-    window.addEventListener('online', onOnline)
-
-    return () => {
-      window.clearInterval(interval)
-      for (const timer of checkoutReturnBurstTimers) window.clearTimeout(timer)
-      window.removeEventListener('focus', refreshDonationTotal)
-      document.removeEventListener('visibilitychange', onVisible)
-      window.removeEventListener('online', onOnline)
-    }
+  const refreshDonationTotal = useCallback(() => {
+    fetchDonationTotal()
+      .then(total => {
+        if (total) {
+          setDonationTotal(total)
+        }
+      })
+      .catch(() => {})
   }, [])
+
+  useCheckoutAwarePolling(refreshDonationTotal)
 
   const getFinalAmount = () => {
     if (selectedPreset) return selectedPreset * 100
@@ -183,19 +133,10 @@ export default function FundPage() {
     }
     setSubmitting(true)
     try {
-      const res = await fetch('/api/stripe/donate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amountCents, donorName, donorEmail, message, featureTag: featureTag || 'general', isAnonymous }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.url) {
-        setSubmitError(data.error ?? 'Failed to start checkout. Please try again.')
-      } else {
-        window.location.href = data.url
-      }
+      const url = await createDonationCheckout({ amountCents, donorName, donorEmail, message, featureTag: featureTag || 'general', isAnonymous })
+      window.location.href = url
     } catch (_) {
-      setSubmitError('Network error. Please check your connection.')
+      setSubmitError('Failed to start checkout. Please try again.')
     }
     setSubmitting(false)
   }
