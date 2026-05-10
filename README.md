@@ -10,7 +10,7 @@ This repository contains the main Espeezy platform, three standalone marketing/p
 | `apps/prereg` | Early-access / preregistration site | `npm --prefix apps/prereg run dev` | `3001` |
 | `apps/games` | Games landing app with Supabase auth | `npm --prefix apps/games run dev` | `3002` |
 | `apps/kanban` | Kanban landing app with Supabase auth | `npm --prefix apps/kanban run dev` | `3003` |
-| `apps/core` | Local-first core runtime (4th app target) | `npm --prefix apps/core run dev` | `3010` |
+| `apps/core` | Local-first core runtime (4th app target) | `npm --prefix apps/core run dev` | `3000` |
 | `apps/shared` | Shared app-level components used by sub-apps | n/a | n/a |
 | `functions` | Firebase Cloud Functions package | `npm --prefix functions run serve` | emulator-managed |
 | `mobile-app` | Expo / React Native client | `npm --prefix mobile-app run start` | Expo-managed |

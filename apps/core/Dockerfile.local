@@ -9,7 +9,7 @@ RUN npm install --prefer-offline
 
 COPY . .
 
-EXPOSE 3010
+EXPOSE 3000
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=development

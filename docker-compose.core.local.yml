@@ -8,7 +8,7 @@ services:
     container_name: espeezy_core_app
     restart: unless-stopped
     ports:
-      - "3010:3010"
+      - "3000:3000"
     volumes:
       - ./apps/core:/app:cached
       - core_node_modules:/app/node_modules
@@ -21,7 +21,7 @@ services:
     networks:
       - core-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3010"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 5

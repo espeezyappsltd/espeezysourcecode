@@ -50,7 +50,7 @@ export default function CoreHomePage() {
         >
           <div>Container profile: local core runtime</div>
           <div>App path: apps/core</div>
-          <div>Port: 3010 (mapped to host 3010)</div>
+          <div>Port: 3000 (mapped to host 3000)</div>
         </div>
       </section>
     </main>
