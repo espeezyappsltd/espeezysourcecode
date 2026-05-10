@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { fetchChatMessages, postChatPresence, sendChatMessage } from '@/services/chat'
 
 type ChatMessage = {
   id: string
@@ -56,16 +57,11 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
   const clearEventTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    fetch('/api/chat/presence', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ app_scope: appScope, event_type: 'new_user', user_id: userId, username }),
-    }).catch(() => undefined)
+    postChatPresence({ app_scope: appScope, event_type: 'new_user', user_id: userId, username }).catch(() => undefined)
   }, [appScope, userId, username])
 
   async function loadMessages() {
-    const res = await fetch(`/api/chat/messages?app_scope=${encodeURIComponent(appScope)}&limit=30`, { cache: 'no-store' })
-    const data = await res.json().catch(() => ({ messages: [] }))
+    const data = await fetchChatMessages(appScope, 30)
     if (Array.isArray(data.messages)) {
       setMessages(data.messages)
     }
@@ -83,11 +79,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
     void loadMessages()
     const poll = setInterval(() => {
       void loadMessages()
-      fetch('/api/chat/presence', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ app_scope: appScope, event_type: 'active', user_id: userId || 'guest', username: username || 'guest' }),
-      }).catch(() => undefined)
+      postChatPresence({ app_scope: appScope, event_type: 'active', user_id: userId || 'guest', username: username || 'guest' }).catch(() => undefined)
     }, 5000)
 
     return () => clearInterval(poll)
@@ -109,15 +101,11 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
 
     setLoading(true)
     try {
-      const res = await fetch('/api/chat/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          app_scope: appScope,
-          user_id: userId,
-          username,
-          message: text.trim(),
-        }),
+      const res = await sendChatMessage({
+        app_scope: appScope,
+        user_id: userId,
+        username,
+        message: text.trim(),
       })
 
       if (res.ok) {
@@ -141,7 +129,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
         <div style={{ position: 'fixed', right: '1rem', bottom: '4.5rem', width: '320px', maxHeight: '420px', zIndex: 1200, background: '#0f172a', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong style={{ fontSize: '0.85rem' }}>Live Chat ({appScope})</strong>
-            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1, padding: '0.25rem 0.5rem' }}>Ã - </button>
+            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1, padding: '0.25rem 0.5rem' }}>X</button>
           </div>
 
           <div style={{ padding: '0.5rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
