@@ -40,6 +40,12 @@ x-next-boot: &next-boot
       npm install --prefer-offline;
       echo \"$$LOCK_HASH\" > /app/node_modules/.pkg-hash;
     fi;
+    if [ -f /app/.env.local ]; then
+      echo '[boot] loading .env.local...';
+      set -a;
+      . /app/.env.local;
+      set +a;
+    fi;
     npm run dev"
 
 x-next-env: &next-env
@@ -136,8 +142,7 @@ services:
       <<: *next-env
       NODE_OPTIONS: "--max-old-space-size=1024"
     env_file:
-      - path: ./apps/games/.env.local
-        required: false
+      - ./apps/games/.env.local
     dns: ["8.8.8.8", "8.8.4.4"]
     networks:
       - espeezy-net
