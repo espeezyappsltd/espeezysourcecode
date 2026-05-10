@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import type { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase-client'
 import PreregFooter from '@/components/PreregFooter'
 import LiveChatWidget from '@/components/LiveChatWidget'
+import { useGamesLanding } from '@/hooks/useGamesLanding'
 
 const FEATURES = [
   {
@@ -46,118 +44,26 @@ const FEATURES = [
 ]
 
 export default function GamesPage() {
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-  const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'error' | 'signup-done'>('idle')
-  const [authError, setAuthError] = useState('')
-  const [user, setUser] = useState<User | null>(null)
-
-  useEffect(() => {
-    let active = true
-
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active) setUser(data.user)
-    })
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        setAuthError('')
-        setLoginStatus('idle')
-      }
-    })
-
-    return () => {
-      active = false
-      sub.subscription.unsubscribe()
-    }
-  }, [])
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    if (!loginEmail.trim() || !loginPassword) return
-    setLoginStatus('loading')
-    setAuthError('')
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: loginEmail.trim(),
-        password: loginPassword,
-      })
-      if (error) throw error
-      setLoginStatus('idle')
-      setLoginPassword('')
-    } catch {
-      setLoginStatus('error')
-      setAuthError('Login failed. Use the email/password from your Espeezy account.')
-    }
-  }
-
-  async function handleCreateAccount() {
-    if (!loginEmail.trim() || !loginPassword) return
-    setLoginStatus('loading')
-    setAuthError('')
-
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: loginEmail.trim(),
-        password: loginPassword,
-        source: 'games-account-create',
-      }),
-    }).catch(() => null)
-
-    if (!res) {
-      setLoginStatus('error')
-      setAuthError('Network error while creating account. Please try again.')
-      return
-    }
-
-    const data = await res.json().catch(() => ({
-      error: `Signup failed with status ${res.status}.`,
-    }))
-    if (!res.ok) {
-      setLoginStatus('error')
-      setAuthError(typeof data.error === 'string' ? data.error : 'Could not create account right now.')
-      return
-    }
-
-    setLoginStatus('signup-done')
-    setAuthError('Account created. Check your inbox for verification, then sign in.')
-  }
-
-  async function handleLogout() {
-    await supabase.auth.signOut().catch(() => undefined)
-  }
-
-  async function handleNotify(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email) return
-    setStatus('loading')
-    try {
-      const res = await fetch('/api/preregister', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'games-waitlist' }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        setStatus('done')
-      } else {
-        setStatus('error')
-        setAuthError(typeof data.error === 'string' ? data.error : 'Could not join waitlist right now.')
-      }
-    } catch {
-      setStatus('error')
-      setAuthError('Network error while joining waitlist. Please try again in a moment.')
-    }
-  }
+  const {
+    authError,
+    email,
+    handleCreateAccount,
+    handleLogin,
+    handleLogout,
+    handleNotify,
+    loginEmail,
+    loginPassword,
+    loginStatus,
+    registeredCount,
+    setEmail,
+    setLoginEmail,
+    setLoginPassword,
+    status,
+    user,
+  } = useGamesLanding()
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0f172a', color: '#f8fafc' }}>
+    <main style={{ minHeight: '100vh', background: '#ffffff', color: '#0f172a' }}>
       {/* Skip link */}
       <a
         href="#main-content"
@@ -167,7 +73,7 @@ export default function GamesPage() {
           left: '0.5rem',
           zIndex: 99999,
           padding: '0.5rem 1rem',
-          background: '#6366f1',
+          background: '#10b981',
           color: 'white',
           fontWeight: 700,
           borderRadius: '0 0 8px 8px',
@@ -186,9 +92,9 @@ export default function GamesPage() {
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          background: 'rgba(15,23,42,0.92)',
+          background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid rgba(15, 23, 42, 0.08)',
           padding: '0 clamp(1rem, 4vw, 2.5rem)',
           display: 'flex',
           alignItems: 'center',
@@ -197,11 +103,11 @@ export default function GamesPage() {
         }}
       >
         <a
-          href="https://espeezy.com/preregister"
+          href="https://espeezy.com"
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
           aria-label="Back to Espeezy"
         >
-          <span style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#fff' }}>
+          <span style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a' }}>
             espeezy
           </span>
           <span
@@ -210,7 +116,7 @@ export default function GamesPage() {
               fontWeight: 700,
               padding: '2px 6px',
               borderRadius: '4px',
-              background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
+              background: 'linear-gradient(135deg, #059669, #10b981)',
               color: '#fff',
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
@@ -220,26 +126,26 @@ export default function GamesPage() {
           </span>
         </a>
         <a
-          href="https://espeezy.com/preregister"
+          href="https://espeezy.com"
           style={{
             fontSize: '0.85rem',
-            color: '#94a3b8',
+            color: '#64748b',
             textDecoration: 'none',
             padding: '0.4rem 1rem',
-            border: '1px solid rgba(255,255,255,0.12)',
+            border: '1px solid rgba(15, 23, 42, 0.12)',
             borderRadius: '8px',
             transition: 'all 0.15s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#fff'
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
+            e.currentTarget.style.color = '#0f172a'
+            e.currentTarget.style.borderColor = 'rgba(15, 23, 42, 0.3)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#94a3b8'
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+            e.currentTarget.style.color = '#64748b'
+            e.currentTarget.style.borderColor = 'rgba(15, 23, 42, 0.12)'
           }}
         >
-          ← Early Access
+          ← Back to Espeezy
         </a>
       </nav>
 
@@ -253,21 +159,21 @@ export default function GamesPage() {
       >
         <div
           style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(16, 185, 129, 0.04)',
+            border: '1px solid rgba(16, 185, 129, 0.15)',
             borderRadius: '12px',
             padding: '0.9rem 1rem',
           }}
         >
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.9rem' }}>
-                Logged in as <strong style={{ color: '#fff' }}>{user.email}</strong>
+              <p style={{ margin: 0, color: '#475569', fontSize: '0.9rem' }}>
+                Logged in as <strong style={{ color: '#0f172a' }}>{user.email}</strong>
               </p>
               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                 <a
                   href="https://espeezy.com/login"
-                  style={{ color: '#fcd34d', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
+                  style={{ color: '#059669', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
                 >
                   Open Main App
                 </a>
@@ -277,9 +183,9 @@ export default function GamesPage() {
                   style={{
                     padding: '0.45rem 0.8rem',
                     borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    border: '1px solid rgba(15, 23, 42, 0.2)',
                     background: 'transparent',
-                    color: '#fff',
+                    color: '#0f172a',
                     fontSize: '0.8rem',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -291,7 +197,7 @@ export default function GamesPage() {
             </div>
           ) : (
             <form onSubmit={handleLogin} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.25rem' }}>
+              <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.25rem' }}>
                 Log in with your Espeezy account
               </span>
               <input
@@ -305,9 +211,9 @@ export default function GamesPage() {
                   minWidth: 0,
                   padding: '0.6rem 0.7rem',
                   borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.14)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#fff',
+                  border: '1px solid rgba(15, 23, 42, 0.14)',
+                  background: 'rgba(16, 185, 129, 0.06)',
+                  color: '#0f172a',
                 }}
               />
               <input
@@ -321,9 +227,9 @@ export default function GamesPage() {
                   minWidth: 0,
                   padding: '0.6rem 0.7rem',
                   borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.14)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#fff',
+                  border: '1px solid rgba(15, 23, 42, 0.14)',
+                  background: 'rgba(16, 185, 129, 0.06)',
+                  color: '#0f172a',
                 }}
               />
               <button
@@ -333,7 +239,7 @@ export default function GamesPage() {
                   padding: '0.6rem 0.9rem',
                   borderRadius: '8px',
                   border: 'none',
-                  background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
+                  background: 'linear-gradient(135deg, #059669, #10b981)',
                   color: '#fff',
                   fontWeight: 700,
                   cursor: loginStatus === 'loading' ? 'wait' : 'pointer',
@@ -347,9 +253,9 @@ export default function GamesPage() {
                 style={{
                   padding: '0.55rem 0.9rem',
                   borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.22)',
+                  border: '1px solid rgba(15, 23, 42, 0.22)',
                   background: 'transparent',
-                  color: '#f8fafc',
+                  color: '#0f172a',
                   fontWeight: 700,
                   fontSize: '0.8rem',
                   cursor: 'pointer',
@@ -358,7 +264,7 @@ export default function GamesPage() {
                 Create Account
               </button>
               {authError && (
-                <p role="alert" style={{ margin: 0, width: '100%', color: '#fca5a5', fontSize: '0.8rem' }}>
+                <p role="alert" style={{ margin: 0, width: '100%', color: '#dc2626', fontSize: '0.8rem' }}>
                   {authError}
                 </p>
               )}
@@ -373,7 +279,7 @@ export default function GamesPage() {
         style={{
           padding: 'clamp(5rem, 12vw, 9rem) clamp(1rem, 5vw, 2.5rem) clamp(4rem, 8vw, 6rem)',
           textAlign: 'center',
-          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.18) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
         }}
       >
         <p
@@ -383,11 +289,11 @@ export default function GamesPage() {
             fontWeight: 700,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color: '#f59e0b',
-            background: 'rgba(245,158,11,0.1)',
+            color: '#10b981',
+            background: 'rgba(16, 185, 129, 0.1)',
             padding: '0.3rem 0.9rem',
             borderRadius: '20px',
-            border: '1px solid rgba(245,158,11,0.25)',
+            border: '1px solid rgba(16, 185, 129, 0.25)',
             marginBottom: '1.5rem',
           }}
         >
@@ -401,7 +307,7 @@ export default function GamesPage() {
             lineHeight: 1.1,
             letterSpacing: '-0.04em',
             marginBottom: '1.5rem',
-            background: 'linear-gradient(135deg, #fff 0%, #c7d2fe 40%, #f59e0b 100%)',
+            background: 'linear-gradient(135deg, #0f172a 0%, #059669 50%, #10b981 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -413,7 +319,7 @@ export default function GamesPage() {
         <p
           style={{
             fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            color: '#94a3b8',
+            color: '#475569',
             maxWidth: '600px',
             margin: '0 auto 3rem',
             lineHeight: 1.7,
@@ -432,8 +338,8 @@ export default function GamesPage() {
               alignItems: 'center',
               gap: '0.6rem',
               padding: '1rem 2rem',
-              background: 'rgba(16,185,129,0.12)',
-              border: '1px solid rgba(16,185,129,0.3)',
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
               borderRadius: '12px',
               color: '#10b981',
               fontWeight: 600,
@@ -468,9 +374,9 @@ export default function GamesPage() {
                 minWidth: 0,
                 padding: '0.85rem 1.25rem',
                 borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.06)',
-                color: '#f8fafc',
+                border: '1px solid rgba(15, 23, 42, 0.12)',
+                background: 'rgba(16, 185, 129, 0.06)',
+                color: '#0f172a',
                 fontSize: '0.95rem',
                 outline: 'none',
               }}
@@ -482,7 +388,7 @@ export default function GamesPage() {
                 padding: '0.85rem 1.75rem',
                 borderRadius: '10px',
                 border: 'none',
-                background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
+                background: 'linear-gradient(135deg, #059669, #10b981)',
                 color: '#fff',
                 fontWeight: 700,
                 fontSize: '0.95rem',
@@ -494,7 +400,7 @@ export default function GamesPage() {
               {status === 'loading' ? 'Joining…' : 'Notify Me'}
             </button>
             {status === 'error' && (
-              <p role="alert" style={{ width: '100%', textAlign: 'center', color: '#ef4444', fontSize: '0.85rem' }}>
+              <p role="alert" style={{ width: '100%', textAlign: 'center', color: '#dc2626', fontSize: '0.85rem' }}>
                 Something went wrong. Try again or email us at hello@espeezy.com
               </p>
             )}
@@ -517,7 +423,7 @@ export default function GamesPage() {
             { value: 'Q3 2026', label: 'Target launch' },
           ].map(({ value, label }) => (
             <div key={label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', fontWeight: 900, color: '#f59e0b' }}>{value}</div>
+              <div style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', fontWeight: 900, color: '#10b981' }}>{value}</div>
               <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>{label}</div>
             </div>
           ))}
@@ -540,7 +446,7 @@ export default function GamesPage() {
             fontWeight: 800,
             textAlign: 'center',
             marginBottom: '3rem',
-            color: '#fff',
+            color: '#0f172a',
           }}
         >
           What to expect
@@ -557,26 +463,26 @@ export default function GamesPage() {
             <article
               key={title}
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(16, 185, 129, 0.04)',
+                border: '1px solid rgba(16, 185, 129, 0.15)',
                 borderRadius: '16px',
                 padding: '1.75rem',
                 transition: 'border-color 0.2s, background 0.2s',
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget
-                el.style.borderColor = 'rgba(99,102,241,0.4)'
-                el.style.background = 'rgba(99,102,241,0.06)'
+                el.style.borderColor = 'rgba(16, 185, 129, 0.4)'
+                el.style.background = 'rgba(16, 185, 129, 0.12)'
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget
-                el.style.borderColor = 'rgba(255,255,255,0.08)'
-                el.style.background = 'rgba(255,255,255,0.04)'
+                el.style.borderColor = 'rgba(16, 185, 129, 0.15)'
+                el.style.background = 'rgba(16, 185, 129, 0.04)'
               }}
             >
               <div style={{ fontSize: '2rem', marginBottom: '1rem' }} aria-hidden="true">{icon}</div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#fff' }}>{title}</h3>
-              <p style={{ fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.6 }}>{description}</p>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#0f172a' }}>{title}</h3>
+              <p style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6 }}>{description}</p>
             </article>
           ))}
         </div>
@@ -587,22 +493,22 @@ export default function GamesPage() {
         style={{
           padding: 'clamp(3rem, 6vw, 5rem) clamp(1rem, 5vw, 2.5rem)',
           textAlign: 'center',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          borderTop: '1px solid rgba(15, 23, 42, 0.08)',
         }}
       >
-        <h2 style={{ fontSize: 'clamp(1.3rem, 3.5vw, 1.75rem)', fontWeight: 800, marginBottom: '1rem', color: '#fff' }}>
+        <h2 style={{ fontSize: 'clamp(1.3rem, 3.5vw, 1.75rem)', fontWeight: 800, marginBottom: '1rem', color: '#0f172a' }}>
           Ready to transform how you learn?
         </h2>
         <p style={{ color: '#64748b', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
           Join thousands of students already on the Espeezy early-access list and be first to play when Games launches.
         </p>
         <a
-          href="https://espeezy.com/preregister"
+          href="https://espeezy.com"
           style={{
             display: 'inline-block',
             padding: '0.9rem 2.25rem',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg,#6366f1,#06b6d4)',
+            background: 'linear-gradient(135deg, #059669, #10b981)',
             color: '#fff',
             fontWeight: 700,
             fontSize: '1rem',
