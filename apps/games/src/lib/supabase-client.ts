@@ -1,14 +1,16 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { resolveSupabaseEnv } from './supabase-env'
 
 let supabaseClient: SupabaseClient | null = null
 
 function getSupabaseClient(): SupabaseClient {
   if (!supabaseClient) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const { url, anonKey } = resolveSupabaseEnv()
 
     if (!url || !anonKey) {
-      throw new Error('Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required.')
+      throw new Error(
+        'Missing Supabase env vars: set NEXT_PUBLIC_SUPABASE_URL (or PROJECT_URL) and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY).'
+      )
     }
 
     supabaseClient = createClient(url, anonKey)

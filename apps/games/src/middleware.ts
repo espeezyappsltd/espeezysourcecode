@@ -1,11 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-
-function resolveSupabaseEnv() {
-  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').trim()
-  const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').trim()
-  return { url, anonKey }
-}
+import { resolveSupabaseEnv } from '@/lib/supabase-env'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
