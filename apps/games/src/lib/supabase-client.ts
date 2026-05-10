@@ -2,10 +2,20 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 let _instance: SupabaseClient | null = null
 
+function resolveSupabaseEnv() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.PROJECT_URL || 'https://placeholder.supabase.co'
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_ANON_KEY ||
+    'placeholder'
+
+  return { url, key }
+}
+
 function getInstance(): SupabaseClient {
   if (!_instance) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
+    const { url, key } = resolveSupabaseEnv()
     _instance = createClient(url, key)
   }
   return _instance

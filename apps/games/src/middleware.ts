@@ -1,6 +1,17 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+function resolveSupabaseEnv() {
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.PROJECT_URL ?? '').trim()
+  const anonKey = (
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_ANON_KEY ??
+    ''
+  ).trim()
+  return { url, anonKey }
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -17,8 +28,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Validate Supabase config before creating client
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv()
 
   if (!supabaseUrl || !supabaseKey) {
     // Missing config — redirect to login with error
