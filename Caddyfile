@@ -16,8 +16,9 @@
 #       → Firestore real-time push → user browser
 # ──────────────────────────────────────────────────────────────────────────────
 
-# ── Shared proxy snippet ──────────────────────────────────────────────────────
-(espeezy_proxy) {
+# ── Shared proxy snippet factory ─────────────────────────────────────────────
+# Usage: import app_proxy <container_name> <port>
+(app_proxy) {
     encode zstd gzip
 
     header {
@@ -28,14 +29,13 @@
         -Server
     }
 
-    # WebSocket passthrough (Next.js HMR + Firebase real-time)
     @websockets {
         header Connection *Upgrade*
         header Upgrade websocket
     }
-    reverse_proxy @websockets app:3000
+    reverse_proxy @websockets {args[0]}:{args[1]}
 
-    reverse_proxy app:3000 {
+    reverse_proxy {args[0]}:{args[1]} {
         header_up Host {host}
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
@@ -53,9 +53,39 @@
     }
 }
 
-# ── Apex domain: espeezy.com (+ www redirect) ─────────────────────────────────
+# Backwards-compat alias for existing references
+(espeezy_proxy) {
+    import app_proxy app 3000
+}
+
+# ── Apex domain: espeezy.com → main app ──────────────────────────────────────
 {$CADDY_DOMAIN}, www.{$CADDY_DOMAIN} {
     @www host www.{$CADDY_DOMAIN}
     redir @www https://{$CADDY_DOMAIN}{uri} 308
-    import espeezy_proxy
+    import app_proxy app 3000
+}
+
+# ── prereg.espeezy.com → pre-registration app ────────────────────────────────
+prereg.{$CADDY_DOMAIN} {
+    import app_proxy prereg 3001
+}
+
+# ── games.espeezy.com → games app ────────────────────────────────────────────
+games.{$CADDY_DOMAIN} {
+    import app_proxy games 3002
+}
+
+# ── kanban.espeezy.com → Kanban Next.js app ──────────────────────────────────
+kanban.{$CADDY_DOMAIN} {
+    import app_proxy kanban 3003
+}
+
+# ── core.espeezy.com → core app ──────────────────────────────────────────────
+core.{$CADDY_DOMAIN} {
+    import app_proxy core 3000
+}
+
+# ── planka.espeezy.com → Planka board ────────────────────────────────────────
+planka.{$CADDY_DOMAIN} {
+    import app_proxy planka 1337
 }

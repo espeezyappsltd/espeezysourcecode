@@ -1,10 +1,206 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
+
+type AuthMode = 'signin' | 'signup'
+
+const styles = {
+  page: {
+    minHeight: '100vh',
+    background: '#0f172a',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1rem',
+    fontFamily: 'system-ui, sans-serif',
+  } as CSSProperties,
+  cardBase: {
+    width: '100%',
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '24px',
+    padding: '2.5rem',
+    boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
+  } as CSSProperties,
+  logoWrap: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.75rem',
+  } as CSSProperties,
+  logoText: {
+    fontSize: '1.4rem',
+    fontWeight: 900,
+    color: '#fff',
+    letterSpacing: '-0.03em',
+  } as CSSProperties,
+  badge: {
+    fontSize: '0.6rem',
+    fontWeight: 800,
+    padding: '2px 7px',
+    borderRadius: '4px',
+    background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
+    color: '#fff',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+  } as CSSProperties,
+  heading: {
+    color: '#fff',
+    fontSize: '1.5rem',
+    fontWeight: 800,
+    margin: 0,
+    letterSpacing: '-0.03em',
+  } as CSSProperties,
+  subHeading: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: '0.875rem',
+    margin: '0.5rem 0 0',
+  } as CSSProperties,
+  switchWrap: {
+    display: 'flex',
+    gap: '0.4rem',
+    marginBottom: '1rem',
+    padding: '4px',
+    borderRadius: '10px',
+    border: '1px solid rgba(255,255,255,0.08)',
+    background: 'rgba(255,255,255,0.02)',
+  } as CSSProperties,
+  switchButton: {
+    flex: 1,
+    padding: '0.6rem',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: 700,
+    color: '#fff',
+  } as CSSProperties,
+  fieldLabel: {
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    color: 'rgba(255,255,255,0.4)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+  } as CSSProperties,
+  input: {
+    width: '100%',
+    padding: '0.75rem 1rem',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '10px',
+    color: '#fff',
+    fontSize: '0.95rem',
+    outline: 'none',
+    boxSizing: 'border-box',
+  } as CSSProperties,
+  primaryButton: {
+    marginTop: '0.5rem',
+    padding: '0.85rem',
+    borderRadius: '12px',
+    border: 'none',
+    color: '#fff',
+    fontWeight: 800,
+    fontSize: '1rem',
+    letterSpacing: '-0.01em',
+  } as CSSProperties,
+  quietText: {
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: '0.8rem',
+  } as CSSProperties,
+}
+
+function AuthShell({ maxWidth, centered, children }: { maxWidth: string; centered?: boolean; children: ReactNode }) {
+  return (
+    <div style={styles.page}>
+      <div style={{ ...styles.cardBase, maxWidth, ...(centered ? { textAlign: 'center' } : {}) }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function BrandHeader({ badgeLabel, title, subtitle, iconSize = '2.5rem' }: {
+  badgeLabel: string
+  title: string
+  subtitle?: ReactNode
+  iconSize?: string
+}) {
+  return (
+    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+      <div style={{ fontSize: iconSize, marginBottom: '0.75rem' }}>🎮</div>
+      <div style={styles.logoWrap}>
+        <span style={styles.logoText}>espeezy</span>
+        <span style={styles.badge}>{badgeLabel}</span>
+      </div>
+      <h1 style={styles.heading}>{title}</h1>
+      {subtitle ? <p style={styles.subHeading}>{subtitle}</p> : null}
+    </div>
+  )
+}
+
+function Notice({ children, tone }: { children: ReactNode; tone: 'error' | 'info' }) {
+  const palette = tone === 'error'
+    ? { bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)', text: '#fca5a5' }
+    : { bg: 'rgba(99,102,241,0.1)', border: 'rgba(99,102,241,0.2)', text: '#a5b4fc' }
+
+  return (
+    <div
+      style={{
+        padding: '0.75rem 1rem',
+        borderRadius: '10px',
+        background: palette.bg,
+        border: `1px solid ${palette.border}`,
+        color: palette.text,
+        fontSize: '0.875rem',
+        marginBottom: '1.25rem',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function ModeToggle({ mode, onChange }: { mode: AuthMode; onChange: (mode: AuthMode) => void }) {
+  return (
+    <div style={styles.switchWrap}>
+      <button
+        type="button"
+        onClick={() => onChange('signin')}
+        style={{ ...styles.switchButton, background: mode === 'signin' ? 'rgba(99,102,241,0.2)' : 'transparent' }}
+      >
+        Sign In
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('signup')}
+        style={{ ...styles.switchButton, background: mode === 'signup' ? 'rgba(99,102,241,0.2)' : 'transparent' }}
+      >
+        Create Account
+      </button>
+    </div>
+  )
+}
+
+function AuthField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <label
+        style={{
+          ...styles.fieldLabel,
+          display: 'block',
+          marginBottom: '0.4rem',
+        }}
+      >
+        {label}
+      </label>
+      {children}
+    </div>
+  )
+}
 
 function LoginContent() {
   const router = useRouter()
@@ -12,7 +208,7 @@ function LoginContent() {
   const next = searchParams.get('next') || '/'
   const needsUpgrade = searchParams.get('upgrade') === '1'
 
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<AuthMode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [legalAccepted, setLegalAccepted] = useState(false)
@@ -21,6 +217,17 @@ function LoginContent() {
   const [loading, setLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
   const [resetting, setResetting] = useState(false)
+
+  function switchMode(nextMode: AuthMode) {
+    setMode(nextMode)
+    setError('')
+    setSuccess('')
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    router.replace('/login')
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -93,42 +300,8 @@ function LoginContent() {
 
   if (needsUpgrade) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#0f172a',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-        fontFamily: 'system-ui, sans-serif',
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '460px',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '24px',
-          padding: '2.5rem',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎮</div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em' }}>espeezy</span>
-            <span style={{
-              fontSize: '0.6rem',
-              fontWeight: 800,
-              padding: '2px 7px',
-              borderRadius: '4px',
-              background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-            }}>pro</span>
-          </div>
-          <h1 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.75rem', letterSpacing: '-0.03em' }}>
-            Games is a Pro feature
-          </h1>
+      <AuthShell maxWidth="460px" centered>
+        <BrandHeader badgeLabel="pro" title="Games is a Pro feature" iconSize="3rem" />
           <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>
             You&apos;re logged in, but Espeezy Games requires a <strong style={{ color: '#f59e0b' }}>Pro</strong> or <strong style={{ color: '#6366f1' }}>Premium</strong> account. Upgrade to unlock game-based learning, ranked leagues, and co-op challenges.
           </p>
@@ -151,148 +324,44 @@ function LoginContent() {
           </a>
           <button
             type="button"
-            onClick={() => supabase.auth.signOut().then(() => router.replace('/login'))}
+            onClick={handleSignOut}
             style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', cursor: 'pointer' }}
           >
             Sign out
           </button>
-        </div>
-      </div>
+      </AuthShell>
     )
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0f172a',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem',
-      fontFamily: 'system-ui, sans-serif',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '420px',
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '24px',
-        padding: '2.5rem',
-        boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
-      }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎮</div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em' }}>espeezy</span>
-            <span style={{
-              fontSize: '0.6rem',
-              fontWeight: 800,
-              padding: '2px 7px',
-              borderRadius: '4px',
-              background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-            }}>games</span>
-          </div>
-          <h1 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>
-            {mode === 'signup' ? 'Create your account' : 'Sign in to play'}
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem', margin: '0.5rem 0 0' }}>
-            Requires a <strong style={{ color: '#f59e0b' }}>Pro</strong> Espeezy account.
-          </p>
-        </div>
+    <AuthShell maxWidth="420px">
+      <BrandHeader
+        badgeLabel="games"
+        title={mode === 'signup' ? 'Create your account' : 'Sign in to play'}
+        subtitle={<>Requires a <strong style={{ color: '#f59e0b' }}>Pro</strong> Espeezy account.</>}
+      />
 
-        <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1rem', padding: '4px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('signin')
-              setError('')
-              setSuccess('')
-            }}
-            style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 700, background: mode === 'signin' ? 'rgba(99,102,241,0.2)' : 'transparent', color: '#fff' }}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('signup')
-              setError('')
-              setSuccess('')
-            }}
-            style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 700, background: mode === 'signup' ? 'rgba(99,102,241,0.2)' : 'transparent', color: '#fff' }}
-          >
-            Create Account
-          </button>
-        </div>
+      <ModeToggle mode={mode} onChange={switchMode} />
 
-        {error && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '10px',
-            background: 'rgba(239,68,68,0.1)',
-            border: '1px solid rgba(239,68,68,0.2)',
-            color: '#fca5a5',
-            fontSize: '0.875rem',
-            marginBottom: '1.25rem',
-          }}>{error}</div>
-        )}
-        {success && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '10px',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            color: '#a5b4fc',
-            fontSize: '0.875rem',
-            marginBottom: '1.25rem',
-          }}>{success}</div>
-        )}
-        {resetSent && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '10px',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            color: '#a5b4fc',
-            fontSize: '0.875rem',
-            marginBottom: '1.25rem',
-          }}>Recovery link sent - check your inbox.</div>
-        )}
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {success ? <Notice tone="info">{success}</Notice> : null}
+      {resetSent ? <Notice tone="info">Recovery link sent - check your inbox.</Notice> : null}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
-              Email
-            </label>
+          <AuthField label="Email">
             <input
               type="email"
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="you@university.edu"
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '10px',
-                color: '#fff',
-                fontSize: '0.95rem',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={styles.input}
             />
-          </div>
+          </AuthField>
 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                Password
-              </label>
+              <label style={styles.fieldLabel}>Password</label>
               {mode === 'signin' && (
                 <button
                   type="button"
@@ -310,17 +379,7 @@ function LoginContent() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '10px',
-                color: '#fff',
-                fontSize: '0.95rem',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={styles.input}
             />
           </div>
 
@@ -342,30 +401,21 @@ function LoginContent() {
             type="submit"
             disabled={loading}
             style={{
-              marginTop: '0.5rem',
-              padding: '0.85rem',
-              borderRadius: '12px',
-              border: 'none',
+              ...styles.primaryButton,
               background: loading ? 'rgba(99,102,241,0.4)' : 'linear-gradient(135deg,#6366f1,#f59e0b)',
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: '1rem',
               cursor: loading ? 'wait' : 'pointer',
-              letterSpacing: '-0.01em',
             }}
           >
             {loading ? (mode === 'signup' ? 'Creating account…' : 'Signing in…') : (mode === 'signup' ? 'Create Account' : 'Sign In & Play')}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem' }}>
+        <p style={{ ...styles.quietText, marginTop: '1.5rem' }}>
           {mode === 'signup' ? 'Already have an account? ' : 'Need a new account? '}
           <button
             type="button"
             onClick={() => {
-              setMode(mode === 'signup' ? 'signin' : 'signup')
-              setError('')
-              setSuccess('')
+              switchMode(mode === 'signup' ? 'signin' : 'signup')
             }}
             style={{ background: 'none', border: 'none', color: '#a5b4fc', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem', padding: 0 }}
           >
@@ -373,14 +423,13 @@ function LoginContent() {
           </button>
         </p>
 
-        <p style={{ textAlign: 'center', marginTop: '0.5rem', color: 'rgba(255,255,255,0.35)', fontSize: '0.78rem' }}>
+        <p style={{ ...styles.quietText, marginTop: '0.5rem', fontSize: '0.78rem' }}>
           Need Pro to play?{' '}
           <a href="https://espeezy.com/checkout" style={{ color: '#f59e0b', fontWeight: 700 }}>
             Upgrade now →
           </a>
         </p>
-      </div>
-    </div>
+    </AuthShell>
   )
 }
 
