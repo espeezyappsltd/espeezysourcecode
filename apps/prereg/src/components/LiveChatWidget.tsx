@@ -44,6 +44,12 @@ function getOrCreateClientUser() {
   return generated
 }
 
+function isChatEvent(value: unknown): value is ChatEvent {
+  if (!value || typeof value !== 'object') return false
+  const event = value as Record<string, unknown>
+  return typeof event.id === 'string' && typeof event.event_type === 'string' && typeof event.created_at === 'string'
+}
+
 export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'games' | 'kanban' }) {
   const initialUser = getOrCreateClientUser()
   const [open, setOpen] = useState(false)
@@ -65,7 +71,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
     if (Array.isArray(data.messages)) {
       setMessages(data.messages)
     }
-    if (data.new_user_event && data.new_user_event.id && data.new_user_event.id !== lastSeenEventIdRef.current) {
+    if (isChatEvent(data.new_user_event) && data.new_user_event.id !== lastSeenEventIdRef.current) {
       lastSeenEventIdRef.current = data.new_user_event.id
       setNewUserEvent(data.new_user_event)
       if (clearEventTimeoutRef.current) {

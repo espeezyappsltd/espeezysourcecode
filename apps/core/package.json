@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start -p 3000",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build"

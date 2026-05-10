@@ -89,7 +89,7 @@ export function useLaunchData() {
           setConfig(prev => ({
             ...prev,
             ...cfg,
-            launch_date: cfg.launch_date ?? DEFAULT_LAUNCH_DATE,
+            launch_date: typeof cfg.launch_date === 'string' ? cfg.launch_date : DEFAULT_LAUNCH_DATE,
             preregister_goal: '5000',
           }))
         }

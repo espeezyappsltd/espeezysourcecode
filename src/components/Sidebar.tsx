@@ -15,7 +15,6 @@ import {
   Lock,
   LogOut,
   Moon,
-  Music,
   Rss,
   Settings,
   ShieldCheck,
@@ -41,7 +40,7 @@ import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
 const THEME_SEQUENCE = ['Google Light', 'Deep Oceanic', 'Cyberpunk'] as const
-const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats', 'Jukebox'])
+const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats'])
 const subscribeToClient = () => () => {}
 
 type SidebarNavItem = {
@@ -56,7 +55,6 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Hustle', path: '/dashboard/hustle', icon: DollarSign },
   { name: 'Teammates', path: '/dashboard/network', icon: Users },
   { name: 'Resources', path: '/dashboard/marketplace', icon: TrendingUp },
-  { name: 'Jukebox', path: '/dashboard/music', icon: Music },
   { name: 'Break Room', path: '/dashboard/chillout', icon: Sparkles },
   { name: 'Project Stats', path: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Plans', path: '/dashboard/upgrade', icon: Activity },
