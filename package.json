@@ -1,7 +1,8 @@
 {
-  "name": "espeezy",
+  "name": "espeezycodebaseserver",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -10,7 +11,7 @@
     "dev:core": "npm --prefix apps/core run dev",
     "build": "next build --webpack",
     "build:core": "npm --prefix apps/core run build",
-    "start": "node server.js",
+    "start": "node customserver.js",
     "start:core": "npm --prefix apps/core run start",
     "docker:core:up": "docker compose -f docker-compose.core.local.yml up -d",
     "docker:core:down": "docker compose -f docker-compose.core.local.yml down",
