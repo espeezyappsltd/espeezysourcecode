@@ -3,17 +3,12 @@
 import type { User } from '@supabase/supabase-js'
 import PreregFooter from '@/components/PreregFooter'
 import { BOARD_PREVIEW, FEATURES } from './content'
-import type { LoginStatus, WaitlistStatus } from './useLandingPage'
+import type { WaitlistStatus } from './useLandingPage'
 
 type LandingPageViewProps = {
-  authError: string
   email: string
   fullName: string
   institution: string
-  loginEmail: string
-  loginPassword: string
-  loginStatus: LoginStatus
-  onLogin: (event: React.FormEvent<HTMLFormElement>) => void
   onLogout: () => Promise<void>
   onNotify: (event: React.FormEvent<HTMLFormElement>) => void
   registeredCount: number | null
@@ -21,8 +16,6 @@ type LandingPageViewProps = {
   setEmail: (value: string) => void
   setFullName: (value: string) => void
   setInstitution: (value: string) => void
-  setLoginEmail: (value: string) => void
-  setLoginPassword: (value: string) => void
   setRole: (value: string) => void
   setWaitlistPassword: (value: string) => void
   status: WaitlistStatus
@@ -126,19 +119,9 @@ function LandingNav() {
 }
 
 function AccountAccessSection({
-  authError,
-  loginEmail,
-  loginPassword,
-  loginStatus,
-  onLogin,
   onLogout,
-  setLoginEmail,
-  setLoginPassword,
   user,
-}: Pick<
-  LandingPageViewProps,
-  'authError' | 'loginEmail' | 'loginPassword' | 'loginStatus' | 'onLogin' | 'onLogout' | 'setLoginEmail' | 'setLoginPassword' | 'user'
->) {
+}: Pick<LandingPageViewProps, 'onLogout' | 'user'>) {
   return (
     <section
       aria-label="Account access"
@@ -187,63 +170,12 @@ function AccountAccessSection({
             </div>
           </div>
         ) : (
-          <form onSubmit={onLogin} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.25rem' }}>
-              Log in with your Espeezy account
-            </span>
-            <input
-              type="email"
-              value={loginEmail}
-              onChange={(event) => {
-                setLoginEmail(event.target.value)
-              }}
-              required
-              placeholder="Email"
-              style={{
-                flex: '1 1 180px',
-                minWidth: 0,
-                padding: '0.6rem 0.7rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,0.14)',
-                background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
-              }}
-            />
-            <input
-              type="password"
-              value={loginPassword}
-              onChange={(event) => {
-                setLoginPassword(event.target.value)
-              }}
-              required
-              placeholder="Password"
-              style={{
-                flex: '1 1 160px',
-                minWidth: 0,
-                padding: '0.6rem 0.7rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,0.14)',
-                background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
-              }}
-            />
-            <button
-              type="submit"
-              disabled={loginStatus === 'loading'}
-              style={{
-                padding: '0.6rem 0.9rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: 'linear-gradient(135deg,#059669,#10b981)',
-                color: '#fff',
-                fontWeight: 700,
-                cursor: loginStatus === 'loading' ? 'wait' : 'pointer',
-              }}
-            >
-              {loginStatus === 'loading' ? 'Logging in…' : 'Log In'}
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem' }}>
+              Sign in once to open your Kanban workspace and keep your cross-app session.
+            </p>
             <a
-              href="https://espeezy.com/#register"
+              href="https://espeezy.com/login"
               style={{
                 padding: '0.55rem 0.9rem',
                 borderRadius: '8px',
@@ -252,19 +184,13 @@ function AccountAccessSection({
                 color: '#f8fafc',
                 fontWeight: 700,
                 fontSize: '0.8rem',
-                cursor: 'pointer',
                 textDecoration: 'none',
                 display: 'inline-block',
               }}
             >
-              Create Account
+              Sign In
             </a>
-            {authError && (
-              <p role="alert" style={{ margin: 0, width: '100%', color: '#fca5a5', fontSize: '0.8rem' }}>
-                {authError}
-              </p>
-            )}
-          </form>
+          </div>
         )}
       </div>
     </section>
@@ -696,7 +622,7 @@ function CtaSection() {
         Join the Espeezy early-access list and be first to try Kanban when it launches.
       </p>
       <a
-        href="https://espeezy.com/#register"
+        href="https://espeezy.com/preregister"
         style={{
           display: 'inline-block',
           padding: '0.9rem 2.25rem',
@@ -720,14 +646,7 @@ export function LandingPageView(props: LandingPageViewProps) {
       <SkipLink />
       <LandingNav />
       <AccountAccessSection
-        authError={props.authError}
-        loginEmail={props.loginEmail}
-        loginPassword={props.loginPassword}
-        loginStatus={props.loginStatus}
-        onLogin={props.onLogin}
         onLogout={props.onLogout}
-        setLoginEmail={props.setLoginEmail}
-        setLoginPassword={props.setLoginPassword}
         user={props.user}
       />
       <HeroSection

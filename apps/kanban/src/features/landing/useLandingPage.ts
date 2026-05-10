@@ -6,7 +6,6 @@ import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { fetchPreregisterCount, submitPreregister } from '@/services/preregister'
 
 export type WaitlistStatus = 'idle' | 'loading' | 'done' | 'error'
-export type LoginStatus = 'idle' | 'loading' | 'error'
 
 export function useLandingPage() {
   const user = useSupabaseUser()
@@ -17,10 +16,6 @@ export function useLandingPage() {
   const [role, setRole] = useState('student')
   const [status, setStatus] = useState<WaitlistStatus>('idle')
   const [registeredCount, setRegisteredCount] = useState<number | null>(null)
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>('idle')
-  const [authError, setAuthError] = useState('')
 
   useEffect(() => {
     let active = true
@@ -56,44 +51,6 @@ export function useLandingPage() {
       window.removeEventListener('focus', onFocus)
     }
   }, [])
-
-  useEffect(() => {
-    if (!user) {
-      return
-    }
-
-    setAuthError('')
-    setLoginStatus('idle')
-    setLoginPassword('')
-  }, [user])
-
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!loginEmail.trim() || !loginPassword) {
-      return
-    }
-
-    setLoginStatus('loading')
-    setAuthError('')
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: loginEmail.trim(),
-        password: loginPassword,
-      })
-
-      if (error) {
-        throw error
-      }
-
-      setLoginStatus('idle')
-      setLoginPassword('')
-    } catch {
-      setLoginStatus('error')
-      setAuthError('Login failed. Use the email/password from your Espeezy account.')
-    }
-  }
 
   async function handleLogout() {
     await supabase.auth.signOut().catch(() => undefined)
@@ -133,23 +90,16 @@ export function useLandingPage() {
   }
 
   return {
-    authError,
     email,
     fullName,
-    handleLogin,
     handleLogout,
     handleNotify,
     institution,
-    loginEmail,
-    loginPassword,
-    loginStatus,
     registeredCount,
     role,
     setEmail,
     setFullName,
     setInstitution,
-    setLoginEmail,
-    setLoginPassword,
     setRole,
     setWaitlistPassword,
     status,

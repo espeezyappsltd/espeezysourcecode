@@ -1,7 +1,5 @@
 'use client'
 
-import Link from 'next/link'
-
 export default function PreregFooter() {
   const linkStyle: React.CSSProperties = {
     color: '#94a3b8',
@@ -34,9 +32,10 @@ export default function PreregFooter() {
           Espeezy Games. Learn through play.
         </p>
         <nav aria-label="Footer links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <Link href="/" style={linkStyle}>Home</Link>
-          <Link href="/fund" style={linkStyle}>Support Us</Link>
-          <Link href="/privacy" style={linkStyle}>Privacy</Link>
+          <a href="https://espeezy.com" style={linkStyle}>Home</a>
+          <a href="https://espeezy.com/preregister" style={linkStyle}>Early Access</a>
+          <a href="https://espeezy.com/fund" style={linkStyle}>Support Us</a>
+          <a href="https://espeezy.com/privacy" style={linkStyle}>Privacy</a>
           <a href="https://kanban.espeezy.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>Kanban</a>
         </nav>
       </div>

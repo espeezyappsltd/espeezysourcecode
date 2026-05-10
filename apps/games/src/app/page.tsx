@@ -45,19 +45,10 @@ const FEATURES = [
 
 export default function GamesPage() {
   const {
-    authError,
     email,
-    handleCreateAccount,
-    handleLogin,
     handleLogout,
     handleNotify,
-    loginEmail,
-    loginPassword,
-    loginStatus,
-    registeredCount,
     setEmail,
-    setLoginEmail,
-    setLoginPassword,
     status,
     user,
   } = useGamesLanding()
@@ -196,60 +187,12 @@ export default function GamesPage() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleLogin} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.25rem' }}>
-                Log in with your Espeezy account
-              </span>
-              <input
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                required
-                placeholder="Email"
-                style={{
-                  flex: '1 1 180px',
-                  minWidth: 0,
-                  padding: '0.6rem 0.7rem',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(15, 23, 42, 0.14)',
-                  background: 'rgba(16, 185, 129, 0.06)',
-                  color: '#0f172a',
-                }}
-              />
-              <input
-                type="password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-                placeholder="Password"
-                style={{
-                  flex: '1 1 160px',
-                  minWidth: 0,
-                  padding: '0.6rem 0.7rem',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(15, 23, 42, 0.14)',
-                  background: 'rgba(16, 185, 129, 0.06)',
-                  color: '#0f172a',
-                }}
-              />
-              <button
-                type="submit"
-                disabled={loginStatus === 'loading'}
-                style={{
-                  padding: '0.6rem 0.9rem',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #059669, #10b981)',
-                  color: '#fff',
-                  fontWeight: 700,
-                  cursor: loginStatus === 'loading' ? 'wait' : 'pointer',
-                }}
-              >
-                {loginStatus === 'loading' ? 'Logging in…' : 'Log In'}
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateAccount}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
+                Sign in once to sync your Games profile with your Espeezy account.
+              </p>
+              <a
+                href="https://espeezy.com/login"
                 style={{
                   padding: '0.55rem 0.9rem',
                   borderRadius: '8px',
@@ -258,17 +201,13 @@ export default function GamesPage() {
                   color: '#0f172a',
                   fontWeight: 700,
                   fontSize: '0.8rem',
-                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'inline-block',
                 }}
               >
-                Create Account
-              </button>
-              {authError && (
-                <p role="alert" style={{ margin: 0, width: '100%', color: '#dc2626', fontSize: '0.8rem' }}>
-                  {authError}
-                </p>
-              )}
-            </form>
+                Sign In
+              </a>
+            </div>
           )}
         </div>
       </section>
@@ -503,7 +442,7 @@ export default function GamesPage() {
           Join thousands of students already on the Espeezy early-access list and be first to play when Games launches.
         </p>
         <a
-          href="https://espeezy.com"
+          href="https://espeezy.com/preregister"
           style={{
             display: 'inline-block',
             padding: '0.9rem 2.25rem',
