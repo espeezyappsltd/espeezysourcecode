@@ -10,6 +10,7 @@ This repository contains the main Espeezy platform, three standalone marketing/p
 | `apps/prereg` | Early-access / preregistration site | `npm --prefix apps/prereg run dev` | `3001` |
 | `apps/games` | Games landing app with Supabase auth | `npm --prefix apps/games run dev` | `3002` |
 | `apps/kanban` | Kanban landing app with Supabase auth | `npm --prefix apps/kanban run dev` | `3003` |
+| `apps/core` | Local-first core runtime (4th app target) | `npm --prefix apps/core run dev` | `3010` |
 | `apps/shared` | Shared app-level components used by sub-apps | n/a | n/a |
 | `functions` | Firebase Cloud Functions package | `npm --prefix functions run serve` | emulator-managed |
 | `mobile-app` | Expo / React Native client | `npm --prefix mobile-app run start` | Expo-managed |
@@ -62,6 +63,7 @@ Install dependencies for any standalone packages you plan to run locally:
 npm --prefix apps/prereg install
 npm --prefix apps/games install
 npm --prefix apps/kanban install
+npm --prefix apps/core install
 npm --prefix functions install
 npm --prefix mobile-app install
 ```
@@ -94,7 +96,26 @@ npm --prefix apps/games run dev
 
 # kanban app
 npm --prefix apps/kanban run dev
+
+# core app (new local VM-focused main runtime)
+npm --prefix apps/core run dev
 ```
+
+### Local VM Docker Runtime (Core App)
+
+Use the dedicated local compose file to run only the new core app and its minimal core services:
+
+```bash
+npm run docker:core:up
+```
+
+Shutdown:
+
+```bash
+npm run docker:core:down
+```
+
+The compose definition lives at `docker-compose.core.local.yml` and is designed for local/small-VM execution, not cloud deployment.
 
 ## Common Commands
 

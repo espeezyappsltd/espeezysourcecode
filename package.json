@@ -7,8 +7,13 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:core": "npm --prefix apps/core run dev",
     "build": "next build --webpack",
+    "build:core": "npm --prefix apps/core run build",
     "start": "node server.js",
+    "start:core": "npm --prefix apps/core run start",
+    "docker:core:up": "docker compose -f docker-compose.core.local.yml up -d",
+    "docker:core:down": "docker compose -f docker-compose.core.local.yml down",
     "lint": "eslint",
     "test": "playwright test",
     "test:critical": "playwright test tests/critical.spec.ts",
@@ -20,7 +25,8 @@
     "predeploy:prereg": "npm --prefix apps/prereg run predeploy:check",
     "predeploy:games": "npm --prefix apps/games run predeploy:check",
     "predeploy:kanban": "npm --prefix apps/kanban run predeploy:check",
-    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban"
+    "predeploy:core": "npm --prefix apps/core run predeploy:check",
+    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban ; npm run predeploy:core"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.2.0",
