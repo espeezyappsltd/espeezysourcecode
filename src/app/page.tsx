@@ -20,6 +20,7 @@ import { submitPreregistration } from '@/services/preregister'
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '#features', label: 'Features' },
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/preregister', label: 'Register' },
 ]
 
