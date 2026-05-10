@@ -117,19 +117,40 @@ async function upsertDonationToSupabase(session: Stripe.Checkout.Session) {
 }
 
 async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
-  const userId = session.metadata?.user_id
   const plan = session.metadata?.plan
-  if (!userId || !plan) return
+  if (!plan) return
 
   try {
     const adminDb = getAdminDb()
     if (!adminDb) return
-    await adminDb.collection('profiles').doc(userId).update({
-      plan: plan,
-      stripe_customer_id: session.customer?.toString(),
-      stripe_subscription_id: session.subscription?.toString(),
-      updated_at: new Date().toISOString()
-    })
+
+    const userId = session.metadata?.user_id
+    const isPublicSignup = session.metadata?.is_public_signup === 'true'
+    const email = session.customer_email
+
+    if (userId) {
+      // Authenticated user — update existing profile
+      await adminDb.collection('profiles').doc(userId).update({
+        plan: plan,
+        stripe_customer_id: session.customer?.toString(),
+        stripe_subscription_id: session.subscription?.toString(),
+        updated_at: new Date().toISOString()
+      })
+    } else if (isPublicSignup && email) {
+      // Public signup — create new profile with email-based ID
+      // Use Firestore's automatic ID generation for new users
+      const profileRef = await adminDb.collection('profiles').add({
+        email: email,
+        plan: plan,
+        stripe_customer_id: session.customer?.toString(),
+        stripe_subscription_id: session.subscription?.toString(),
+        stripe_session_id: session.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      
+      console.log(`[webhook] Created new profile for public signup: ${profileRef.id} (${email})`)
+    }
   } catch (err) {
     console.error('[webhook] subscription update error:', err)
   }

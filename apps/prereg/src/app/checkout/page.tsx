@@ -83,6 +83,8 @@ function CheckoutFlow() {
   const plan = PLANS[planKey] ?? PLANS.pro
   const [step, setStep] = useState<'review' | 'processing'>('review')
   const [hovered, setHovered] = useState(false)
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
   const isProPlan = planKey === 'pro'
   const isLifetimePlan = planKey === 'lifetime'
   const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
@@ -128,17 +130,62 @@ function CheckoutFlow() {
     ? Math.max(0, LIFETIME_LIMIT - lifetimeSeatsUsed)
     : null
 
-  const handlePay = () => {
+  const validateEmail = (value: string): boolean => {
+    if (!value) {
+      setEmailError('Email is required')
+      return false
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(value)) {
+      setEmailError('Please enter a valid email address')
+      return false
+    }
+    setEmailError('')
+    return true
+  }
+
+  const handlePay = async () => {
     if (isLifetimeSoldOut) return
 
+    // Validate email
+    if (!validateEmail(email)) return
+
     setStep('processing')
-    // NOTE: Each Stripe Payment Link must be configured in the Stripe dashboard to
-    // redirect to: https://{your-prereg-domain}/checkout/success?plan={pro|premium|lifetime}
-    // after a successful payment. The ?plan= param drives the per-tier success page.
-    window.location.href = buildStripePaymentLink(planKey, {
-      client_reference_id: userId || undefined,
-      prefilled_promo_code: coupon || undefined,
-    })
+    
+    try {
+      // Determine the API origin - in client components, we use the current origin
+      // then let the server route proxy to the main app if needed
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+      const response = await fetch(`${currentOrigin}/api/stripe/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: planKey,
+          email: email.trim().toLowerCase(),
+          prefilled_promo_code: coupon || undefined,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Checkout error:', error)
+        setStep('review')
+        setEmailError('Unable to start checkout. Please try again.')
+        return
+      }
+
+      const data = await response.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setStep('review')
+        setEmailError('Unable to start checkout. Please try again.')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      setStep('review')
+      setEmailError('Network error. Please check your connection and try again.')
+    }
   }
 
   return (
@@ -282,6 +329,44 @@ function CheckoutFlow() {
 
               {/* CTA */}
               <div style={{ padding: '0 2rem 2rem' }}>
+                {/* Email input */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
+                    Email address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      if (emailError) setEmailError('')
+                    }}
+                    onBlur={() => {
+                      if (email) validateEmail(email)
+                    }}
+                    placeholder="you@example.com"
+                    style={{
+                      width: '100%',
+                      padding: '0.85rem 1rem',
+                      border: emailError ? '1px solid #dc2626' : '1px solid rgba(15,23,42,0.1)',
+                      borderRadius: '10px',
+                      fontSize: '0.9rem',
+                      fontFamily: 'inherit',
+                      boxSizing: 'border-box',
+                      background: emailError ? 'rgba(220, 38, 38, 0.03)' : '#f8fafc',
+                      transition: 'border-color 0.2s',
+                    }}
+                  />
+                  {emailError && (
+                    <p style={{ margin: '0.4rem 0 0', fontSize: '0.72rem', color: '#dc2626', fontWeight: 500 }}>
+                      {emailError}
+                    </p>
+                  )}
+                  <p style={{ margin: '0.4rem 0 0', fontSize: '0.72rem', color: 'rgba(15,23,42,0.4)', fontWeight: 500 }}>
+                    We'll use this to create your Espeezy account
+                  </p>
+                </div>
+
                 <motion.button
                   onClick={handlePay}
                   disabled={isLifetimeSoldOut}

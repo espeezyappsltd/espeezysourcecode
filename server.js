@@ -1,9 +1,15 @@
+
 // Custom Next.js server
+
+
 // Intercepts TRACE/TRACK before Next.js processes them (Next.js throws TypeError for these methods)
+
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
+
 const { createServer } = require('http')
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const next = require('next')
 
