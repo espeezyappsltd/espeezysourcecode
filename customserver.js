@@ -6,12 +6,8 @@
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-
-const { createServer } = require('http')
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const next = require('next')
+import { createServer } from 'http'
+import next from 'next'
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = process.env.HOSTNAME || '0.0.0.0'
