@@ -10,6 +10,7 @@ import {
 import Link from 'next/link'
 import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 import { fetchLiveMetrics } from '@/services/launch'
+import { createStripeCheckout } from '@/services/checkout'
 
 const PLANS = {
   pro: {
@@ -154,34 +155,20 @@ function CheckoutFlow() {
     setStep('processing')
     
     try {
-      // Determine the API origin - in client components, we use the current origin
-      // then let the server route proxy to the main app if needed
-      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
-      const response = await fetch(`${currentOrigin}/api/stripe/checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan: planKey,
-          email: email.trim().toLowerCase(),
-          prefilled_promo_code: coupon || undefined,
-        }),
+      const result = await createStripeCheckout({
+        plan: planKey,
+        email: email.trim().toLowerCase(),
+        prefilled_promo_code: coupon || undefined,
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        console.error('Checkout error:', error)
+      if (!result.ok || !result.url) {
+        console.error('Checkout error:', result.error)
         setStep('review')
-        setEmailError('Unable to start checkout. Please try again.')
+        setEmailError(result.error ?? 'Unable to start checkout. Please try again.')
         return
       }
 
-      const data = await response.json()
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        setStep('review')
-        setEmailError('Unable to start checkout. Please try again.')
-      }
+      window.location.href = result.url
     } catch (error) {
       console.error('Checkout error:', error)
       setStep('review')
