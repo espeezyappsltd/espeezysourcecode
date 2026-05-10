@@ -1,15 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { db } from '@/lib/firebase'
-import { 
-  collection, 
-  getDocs, 
-  query, 
-  orderBy, 
-  where,
-  documentId
-} from 'firebase/firestore'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Listing, MarketplaceCategory } from '@/types/marketplace'
@@ -22,6 +14,7 @@ export function useMarketplace() {
   const [isPosting, setIsPosting] = useState(false)
   const [showWalkthrough, setShowWalkthrough] = useState(false)
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
   
   const { withLoading } = useSmartLoading()
   const { addToast } = useNotifications()
@@ -30,37 +23,54 @@ export function useMarketplace() {
     setLoading(true)
     
     try {
-      const listingsSnap = await getDocs(query(
-        collection(db, 'marketplace_listings'),
-        orderBy('created_at', 'desc')
-      ))
+      // Fetch marketplace_listings from Supabase
+      const { data: listingsData, error: listingsError } = await db
+        .from('marketplace_listings')
+        .select('*')
+        .order('created_at', { ascending: false })
       
-      const listingsData = listingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any))
-      const ownerIds = Array.from(new Set(listingsData.map(l => l.owner_id).filter(Boolean)))
-      
-      if (ownerIds.length > 0) {
-        // Firestore 'in' queries are limited to 10-30 items depending on version, 
-        // but for now we'll assume it fits or handle chunks if needed.
-        const profilesSnap = await getDocs(query(
-          collection(db, 'profiles'),
-          where(documentId(), 'in', ownerIds.slice(0, 30))
-        ))
+      if (listingsError) {
+        console.error('Fetch error:', listingsError.message)
+        setListings([])
+        return
+      }
 
-        const profileMap = profilesSnap.docs.reduce((acc, p) => {
-          acc[p.id] = p.data()
-          return acc
-        }, {} as Record<string, any>)
-
-        const merged = listingsData.map(l => ({
-          ...l,
-          profiles: profileMap[l.owner_id]
-        }))
-
-        setListings(merged)
-        localStorage.setItem('gf_marketplace_cache', JSON.stringify(merged))
-      } else {
+      if (!listingsData || listingsData.length === 0) {
         setListings([])
         localStorage.setItem('gf_marketplace_cache', JSON.stringify([]))
+        return
+      }
+
+      // Extract unique owner IDs
+      const ownerIds = Array.from(new Set((listingsData as any[]).map(l => l.owner_id).filter(Boolean)))
+
+      if (ownerIds.length > 0) {
+        // Fetch profiles for owner enrichment
+        const { data: profilesData, error: profilesError } = await db
+          .from('profiles')
+          .select('*')
+          .in('id', ownerIds)
+        
+        if (profilesError) {
+          console.error('Profile fetch error:', profilesError)
+          setListings(listingsData as any[])
+        } else {
+          const profileMap = (profilesData || []).reduce((acc: Record<string, any>, p: any) => {
+            acc[p.id] = p
+            return acc
+          }, {})
+
+          const merged = (listingsData as any[]).map(l => ({
+            ...l,
+            profiles: profileMap[l.owner_id]
+          }))
+
+          setListings(merged)
+          localStorage.setItem('gf_marketplace_cache', JSON.stringify(merged))
+        }
+      } else {
+        setListings(listingsData as any[])
+        localStorage.setItem('gf_marketplace_cache', JSON.stringify(listingsData))
       }
     } catch (err: any) {
       console.error('Fetch error:', err.message)
@@ -68,7 +78,7 @@ export function useMarketplace() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [db])
 
   useEffect(() => {
     const hasSeen = localStorage.getItem('gf_marketplace_onboarding')

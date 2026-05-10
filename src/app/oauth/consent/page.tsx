@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
-import { onAuthStateChanged, User } from 'firebase/auth'
-import { auth as firebaseAuth } from '@/lib/firebase'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 import { ShieldCheck, AlertCircle, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
 
 // ─── Scope metadata ───────────────────────────────────────────────────────────
@@ -27,6 +27,7 @@ interface ClientInfo {
 function ConsentContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
 
   const clientId     = searchParams.get('client_id') ?? ''
   const redirectUri  = searchParams.get('redirect_uri') ?? ''
@@ -49,14 +50,14 @@ function ConsentContent() {
     if (!scopeParam) return setParamError('Missing scope parameter.')
   }, [clientId, redirectUri, responseType, scopeParam])
 
-  // Watch Firebase auth state
+  // Watch Supabase auth state
   useEffect(() => {
-    const unsub = onAuthStateChanged(firebaseAuth, (u) => {
-      setUser(u)
+    const { data: { subscription } } = db.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
       setAuthLoading(false)
     })
-    return unsub
-  }, [])
+    return () => subscription?.unsubscribe()
+  }, [db.auth])
 
   // Redirect unauthenticated users to login
   useEffect(() => {
@@ -86,12 +87,19 @@ function ConsentContent() {
     setProcessing(true)
 
     try {
-      const idToken = await user.getIdToken()
+      // Get current session to access token
+      const { data: { session }, error: sessionError } = await db.auth.getSession()
+      if (sessionError || !session?.access_token) {
+        setClientError('Failed to get authentication token. Please try again.')
+        setProcessing(false)
+        return
+      }
+
       const res = await fetch('/api/oauth/authorize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ client_id: clientId, redirect_uri: redirectUri, scope: scopeParam, state, approved }),
       })
@@ -106,7 +114,7 @@ function ConsentContent() {
       setClientError('Network error. Please check your connection.')
       setProcessing(false)
     }
-  }, [user, clientId, redirectUri, scopeParam, state])
+  }, [user, clientId, redirectUri, scopeParam, state, db.auth])
 
   // ── Error states ────────────────────────────────────────────────────────────
   if (paramError || clientError) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -8,15 +8,7 @@ import {
   MessageCircle, Send, Image as ImageIcon, X, ChevronDown, Loader2,
   Globe, Users, Lock, MoreHorizontal, Trash2, Pencil
 } from 'lucide-react'
-import { db } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy, 
-  limit 
-} from 'firebase/firestore'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { useProfile } from '../../context/ProfileContext'
 import {
   fetchFeedPosts,
@@ -70,6 +62,7 @@ interface Comment {
 export default function FeedPage() {
   const { profile } = useProfile()
   const router = useRouter()
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -115,26 +108,31 @@ export default function FeedPage() {
     return () => observerRef.current?.disconnect()
   }, [cursor, hasMore, loadingMore, loadPosts])
 
-  // Realtime subscription
+  // Realtime subscription: listen for new public posts and reload feed
   useEffect(() => {
-    const q = query(
-      collection(db, 'posts'),
-      where('visibility', '==', 'public'),
-      orderBy('created_at', 'desc'),
-      limit(1)
-    )
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const data = change.doc.data()
-          if (data.author_id !== profile?.id) {
+    const channel = db
+      .channel('feed_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'posts',
+          filter: `visibility=eq.public`
+        },
+        (payload: any) => {
+          // Only reload if the new post is not from the current user
+          if (payload.new && payload.new.author_id !== profile?.id) {
             loadPosts()
           }
         }
-      })
-    })
-    return () => unsubscribe()
-  }, [profile?.id, loadPosts])
+      )
+      .subscribe()
+
+    return () => {
+      db.removeChannel(channel)
+    }
+  }, [profile?.id, loadPosts, db])
 
   async function submitPost() {
     if (!composerText.trim() || posting) return
