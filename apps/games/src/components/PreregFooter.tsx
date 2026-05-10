@@ -37,7 +37,7 @@ export default function PreregFooter() {
           <Link href="/" style={linkStyle}>Home</Link>
           <Link href="/fund" style={linkStyle}>Support Us</Link>
           <Link href="/privacy" style={linkStyle}>Privacy</Link>
-          <a href="https://kanban.espeezy.com" style={linkStyle}>Kanban</a>
+          <a href="https://kanban.espeezy.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>Kanban</a>
         </nav>
       </div>
     </footer>

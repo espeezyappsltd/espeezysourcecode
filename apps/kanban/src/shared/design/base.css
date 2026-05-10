@@ -41,7 +41,7 @@ select {
 }
 
 :focus-visible {
-  outline: 2px solid #10b981;
+  outline: 2px solid var(--brand);
   outline-offset: 3px;
   border-radius: 4px;
 }
@@ -69,4 +69,50 @@ select {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.page-shell {
+  width: min(var(--content-max), 100%);
+  margin: 0 auto;
+  padding: var(--space-5) clamp(1rem, 3vw, 2rem);
+}
+
+.flow-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.flow-tight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.panel-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+}
+
+.eyebrow {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.title-display {
+  font-size: var(--text-xl);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 900;
+}
+
+.body-copy {
+  font-size: var(--text-md);
+  color: var(--text-sub);
+  line-height: 1.65;
 }
