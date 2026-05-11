@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics Dashboard</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .event { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        form { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Analytics Dashboard</h1>
+    <form id="addEventForm">
+        <input type="text" id="type" placeholder="Event Type (e.g. click, login)" required>
+        <input type="text" id="metadata" placeholder="Metadata (JSON string)" required>
+        <button type="submit">Log Event</button>
+    </form>
+    <div id="eventsList"></div>
+
+    <script>
+        const form = document.getElementById('addEventForm');
+        const list = document.getElementById('eventsList');
+
+        async function fetchEvents() {
+            const res = await fetch('/api/events');
+            const events = await res.json();
+            list.innerHTML = events.map(event => `
+                <div class="event">
+                    <strong>${event.type}</strong> - ${event.timestamp}
+                    <pre>${JSON.stringify(event.metadata, null, 2)}</pre>
+                    <button onclick="deleteEvent('${event.id}')">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('type').value;
+            const metadataStr = document.getElementById('metadata').value;
+            let metadata;
+            try {
+                metadata = JSON.parse(metadataStr);
+            } catch (err) {
+                metadata = metadataStr;
+            }
+            await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, metadata })
+            });
+            form.reset();
+            fetchEvents();
+        };
+
+        async function deleteEvent(id) {
+            await fetch(\`/api/events/\${id}\`, { method: 'DELETE' });
+            fetchEvents();
+        }
+
+        fetchEvents();
+    </script>
+</body>
+</html>

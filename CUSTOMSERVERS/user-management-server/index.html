@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Management</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .user { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        form { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>User Management</h1>
+    <form id="addUserForm">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <button type="submit">Add User</button>
+    </form>
+    <div id="usersList"></div>
+
+    <script>
+        const form = document.getElementById('addUserForm');
+        const list = document.getElementById('usersList');
+
+        async function fetchUsers() {
+            const res = await fetch('/api/users');
+            const users = await res.json();
+            list.innerHTML = users.map(user => `
+                <div class="user">
+                    <strong>${user.username}</strong> (${user.email})
+                    <button onclick="deleteUser('${user.id}')">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email })
+            });
+            form.reset();
+            fetchUsers();
+        };
+
+        async function deleteUser(id) {
+            await fetch(\`/api/users/\${id}\`, { method: 'DELETE' });
+            fetchUsers();
+        }
+
+        fetchUsers();
+    </script>
+</body>
+</html>

@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('next', pathname)
-    loginUrl.searchParams.set('error', 'Missing local Supabase config. Create apps/games/.env.local first.')
+    // Removed dev-only error param to allow users to attempt login or see a better UI
     return NextResponse.redirect(loginUrl)
   }
 

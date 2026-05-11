@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
+import { resolveSupabaseEnv } from '@/lib/supabase-env'
 
 type AuthMode = 'signin' | 'signup'
+// ... rest of styles ...
 
 const styles = {
   page: {
@@ -207,6 +209,9 @@ export default function LoginClient() {
   const next = searchParams.get('next') || '/'
   const needsUpgrade = searchParams.get('upgrade') === '1'
 
+  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv()
+  const configMissing = !supabaseUrl || !supabaseKey
+
   const [mode, setMode] = useState<AuthMode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -321,6 +326,25 @@ export default function LoginClient() {
         >
           Upgrade to Pro →
         </a>
+
+        <a
+          href="https://espeezy.com/dashboard"
+          style={{
+            display: 'block',
+            padding: '0.85rem',
+            borderRadius: '12px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            textDecoration: 'none',
+            marginBottom: '1.5rem',
+          }}
+        >
+          Go to Dashboard
+        </a>
+
         <button
           type="button"
           onClick={handleSignOut}
@@ -343,6 +367,11 @@ export default function LoginClient() {
       <ModeToggle mode={mode} onChange={switchMode} />
 
       {error ? <Notice tone="error">{error}</Notice> : null}
+      {configMissing ? (
+        <Notice tone="error">
+          Authentication is temporarily unavailable. Please try again later or contact support if the issue persists.
+        </Notice>
+      ) : null}
       {success ? <Notice tone="info">{success}</Notice> : null}
       {resetSent ? <Notice tone="info">Recovery link sent - check your inbox.</Notice> : null}
 
@@ -426,6 +455,10 @@ export default function LoginClient() {
         Need Pro to play?{' '}
         <a href="https://espeezy.com/checkout" style={{ color: '#f59e0b', fontWeight: 700 }}>
           Upgrade now →
+        </a>
+        {' or '}
+        <a href="https://espeezy.com/dashboard" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          Go to Dashboard
         </a>
       </p>
     </AuthShell>

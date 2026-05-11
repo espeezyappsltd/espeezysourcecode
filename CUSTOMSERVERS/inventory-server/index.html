@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Management</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .item { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        form { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Inventory Management</h1>
+    <form id="addItemForm">
+        <input type="text" id="name" placeholder="Item Name" required>
+        <input type="number" id="quantity" placeholder="Quantity" required>
+        <button type="submit">Add Item</button>
+    </form>
+    <div id="itemsList"></div>
+
+    <script>
+        const form = document.getElementById('addItemForm');
+        const list = document.getElementById('itemsList');
+
+        async function fetchItems() {
+            const res = await fetch('/api/items');
+            const items = await res.json();
+            list.innerHTML = items.map(item => `
+                <div class="item">
+                    <strong>${item.name}</strong> - Quantity: ${item.quantity}
+                    <button onclick="deleteItem('${item.id}')">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const quantity = document.getElementById('quantity').value;
+            await fetch('/api/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, quantity })
+            });
+            form.reset();
+            fetchItems();
+        };
+
+        async function deleteItem(id) {
+            await fetch(\`/api/items/\${id}\`, { method: 'DELETE' });
+            fetchItems();
+        }
+
+        fetchItems();
+    </script>
+</body>
+</html>
