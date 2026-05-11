@@ -1,14 +1,17 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { resolveSupabaseAnonKey, resolveSupabaseServiceRoleKey, resolveSupabaseUrl } from './env'
 
 /** Server component / Route Handler client (reads session from cookies) */
 export async function createClient() {
   const cookieStore = await cookies()
+  const supabaseUrl = resolveSupabaseUrl()
+  const supabaseAnonKey = resolveSupabaseAnonKey()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -31,9 +34,12 @@ export async function createClient() {
 
 /** Service-role admin client  -  NEVER use in client components */
 export function createAdminSupabaseClient() {
+  const supabaseUrl = resolveSupabaseUrl()
+  const serviceRoleKey = resolveSupabaseServiceRoleKey()
+
   return createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseUrl,
+    serviceRoleKey,
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 }

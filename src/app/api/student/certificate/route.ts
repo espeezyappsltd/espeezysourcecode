@@ -12,7 +12,7 @@
  * Returns all certificates for the authenticated user.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { sendCertificateEmail } from '@/services/email'
 import { createHash } from 'crypto'
 
