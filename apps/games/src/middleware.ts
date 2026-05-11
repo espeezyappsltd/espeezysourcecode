@@ -12,10 +12,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.includes('.')
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // Robustly resolve environment variables
+  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv()
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseUrl || !supabaseKey) {
     if (isPublicRoute) {
       return NextResponse.next({ request })
     }
@@ -30,24 +30,8 @@ export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   // Allow public routes through
-  if (
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/_next') ||
-    pathname.includes('.')
-  ) {
+  if (isPublicRoute) {
     return supabaseResponse
-  }
-
-  // Validate Supabase config before creating client
-  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv()
-
-  if (!supabaseUrl || !supabaseKey) {
-    // Missing config - redirect to login with error
-    const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/login'
-    loginUrl.searchParams.set('error', 'Configuration error')
-    return NextResponse.redirect(loginUrl)
   }
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {

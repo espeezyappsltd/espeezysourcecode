@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 
-export default function SsoBridgePage() {
+function SsoBridgeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState('')
@@ -68,5 +68,13 @@ export default function SsoBridgePage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function SsoBridgePage() {
+  return (
+    <Suspense>
+      <SsoBridgeContent />
+    </Suspense>
   )
 }
