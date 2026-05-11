@@ -8,19 +8,16 @@ export const dynamic = 'force-dynamic'
 // CDN edge-cached for 10s so monitors don't hammer the DB.
 export async function GET() {
   const region = process.env.VERCEL_REGION ?? 'local'
-  // ── Live Firestore check ──────────────────────────────────────────────────
+  // ── Live Supabase check ───────────────────────────────────────────────────
   const t0 = Date.now()
   let dbHealthy = false
   try {
-    const { getAdminDb } = await import('@/lib/firebase-admin')
+    const { getAdminDb } = await import('@/lib/supabase/admin')
     const db = getAdminDb()
-    if (db) {
-      // Smallest possible read to verify connectivity
-      await db.collection('profiles').limit(1).get()
-      dbHealthy = true
-    }
+    const { error } = await db.from('profiles').select('id').limit(1)
+    dbHealthy = !error
   } catch (err) {
-    console.error('Health Check: Firestore Error:', err)
+    console.error('Health Check: Supabase Error:', err)
     dbHealthy = false
   }
   const dbLatencyMs = Date.now() - t0
