@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 
 type ChatMessage = {
@@ -33,9 +33,10 @@ export default function LiveChatWidget({
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newUserEvent, setNewUserEvent] = useState<ChatEvent | null>(null)
-  const [lastSeenEventId, setLastSeenEventId] = useState('')
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
+  const lastSeenEventIdRef = useRef('')
+  const clearEventTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const username = deriveUsername(user)
   const userId = user.id
@@ -55,15 +56,20 @@ export default function LiveChatWidget({
     if (Array.isArray(data.messages)) {
       setMessages(data.messages)
     }
-    if (data.new_user_event && data.new_user_event.id && data.new_user_event.id !== lastSeenEventId) {
-      setLastSeenEventId(data.new_user_event.id)
+    if (data.new_user_event && data.new_user_event.id && data.new_user_event.id !== lastSeenEventIdRef.current) {
+      lastSeenEventIdRef.current = data.new_user_event.id
       setNewUserEvent(data.new_user_event)
-      setTimeout(() => setNewUserEvent(null), 5000)
+      if (clearEventTimeoutRef.current) {
+        clearTimeout(clearEventTimeoutRef.current)
+      }
+      clearEventTimeoutRef.current = setTimeout(() => setNewUserEvent(null), 5000)
     }
   }
 
   useEffect(() => {
-    void loadMessages()
+    const initialLoad = setTimeout(() => {
+      void loadMessages()
+    }, 0)
     const poll = setInterval(() => {
       void loadMessages()
       fetch('/api/chat/presence', {
@@ -73,9 +79,20 @@ export default function LiveChatWidget({
       }).catch(() => undefined)
     }, 5000)
 
-    return () => clearInterval(poll)
+    return () => {
+      clearTimeout(initialLoad)
+      clearInterval(poll)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appScope, lastSeenEventId, userId])
+  }, [appScope, userId])
+
+  useEffect(() => {
+    return () => {
+      if (clearEventTimeoutRef.current) {
+        clearTimeout(clearEventTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const orderedMessages = useMemo(() => messages.slice(-20), [messages])
 
@@ -112,7 +129,7 @@ export default function LiveChatWidget({
         <div style={{ position: 'fixed', right: '1rem', bottom: '4.5rem', width: '320px', maxHeight: '420px', zIndex: 1200, background: '#0f172a', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong style={{ fontSize: '0.85rem' }}>Live Chat ({appScope})</strong>
-            <button type='button' onClick={() => setOpen(false)} style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer' }}>×</button>
+            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1, padding: '0.25rem 0.5rem' }}>×</button>
           </div>
 
           <div style={{ padding: '0.5rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>

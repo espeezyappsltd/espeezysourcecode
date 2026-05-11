@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // Validate redirect path — must be a relative path on same origin (open redirect prevention)
+  // Validate redirect path  -  must be a relative path on same origin (open redirect prevention)
   const isSafeRedirect = next.startsWith('/') && !next.startsWith('//') && !next.includes(':')
   const safePath = isSafeRedirect ? next : '/dashboard'
 

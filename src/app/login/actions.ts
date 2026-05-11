@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { headers, cookies } from 'next/headers'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
+import { headers } from 'next/headers'
+import { getAdminAuth, getAdminDb } from '@/lib/supabase/admin'
 import { validateEmailRateLimit } from '@/utils/email-rate-limit'
 
 export async function login(formData: FormData) {
@@ -52,23 +52,31 @@ export async function signup(formData: FormData) {
   try {
     const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) redirect(`/login?error=${encodeURIComponent('Service Unavailable')}`)
     
-    // 1. Create user in Firebase Auth
-    const userRecord = await adminAuth.createUser({
+    const { data: createdUser, error: createUserError } = await adminAuth.admin.createUser({
       email,
       password,
+      email_confirm: true,
     })
+    
+    if (createUserError || !createdUser.user) {
+      throw createUserError ?? new Error('Signup failed')
+    }
 
-    // 2. Create profile in Firestore
-    await adminDb.collection('profiles').doc(userRecord.uid).set({
-      id: userRecord.uid,
-      email,
-      school_id,
-      legal_accepted: true,
-      total_score: 0,
-      created_at: new Date().toISOString()
-    })
+    const { error: profileError } = await adminDb
+      .from('profiles')
+      .insert({
+        id: createdUser.user.id,
+        email,
+        school_id,
+        legal_accepted: true,
+        total_score: 0,
+      })
+
+    if (profileError) {
+      await adminAuth.admin.deleteUser(createdUser.user.id)
+      throw profileError
+    }
 
     revalidatePath('/', 'layout')
     redirect('/dashboard')

@@ -2,18 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { db, auth } from '@/lib/firebase'
-import { 
-  doc, 
-  getDoc, 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  addDoc, 
-  setDoc,
-  serverTimestamp 
-} from 'firebase/firestore'
 import { 
   X, UserCircle, ShieldCheck, Mail, Target, Award, Hash, 
   GraduationCap, Calendar, UserPlus, Check, MessageSquare, 
@@ -22,6 +10,14 @@ import {
 import Link from 'next/link'
 import { Profile } from '@/types/database'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import {
+  createNotification,
+  fetchConnectionRecords,
+  fetchGroupById,
+  fetchProfileById,
+  getAuthUser,
+  upsertPendingConnectionRequest,
+} from '@/services/dashboard'
 
 export default function StudentProfilePage() {
   const params = useParams()
@@ -54,35 +50,26 @@ export default function StudentProfilePage() {
 
   const fetchProfileData = async () => {
     setLoading(true)
-    const currentUser = auth.currentUser
+    const currentUser = await getAuthUser()
     setMe(currentUser)
 
     try {
-      const profileSnap = await getDoc(doc(db, 'profiles', studentId))
-      if (profileSnap.exists()) {
-        const profileData = profileSnap.data()
+      const profileData = await fetchProfileById(studentId)
+      if (profileData) {
         
         // Fetch group details if group_id exists
         let groupData = null
         if (profileData.group_id) {
-          const groupSnap = await getDoc(doc(db, 'groups', profileData.group_id))
-          groupData = groupSnap.exists() ? groupSnap.data() : null
+          groupData = await fetchGroupById(profileData.group_id)
         }
 
-        setMember({ id: profileSnap.id, ...profileData, groups: groupData })
+        setMember({ ...profileData, groups: groupData })
 
         if (currentUser) {
-          // Check connections
-          const q = query(
-            collection(db, 'user_connections'),
-            where('user_id', 'in', [currentUser.uid, studentId]),
-            where('target_id', 'in', [currentUser.uid, studentId])
-          )
-          const connSnap = await getDocs(q)
-          const conns = connSnap.docs.map(d => d.data())
+          const conns = await fetchConnectionRecords(currentUser.id, studentId)
           
           const connection = conns.find((c: any) => c.status === 'connected' || c.status === 'accepted')
-          const pendingSentByMe = conns.find((c: any) => c.user_id === currentUser.uid && c.status === 'pending')
+          const pendingSentByMe = conns.find((c: any) => c.user_id === currentUser.id && c.status === 'pending')
 
           if (connection) {
             setConnectionStatus('connected')
@@ -105,21 +92,14 @@ export default function StudentProfilePage() {
 
     await withLoading(async () => {
       try {
-        const connId = [me.uid, member.id].sort().join('_')
-        await setDoc(doc(db, 'user_connections', connId), { 
-          user_id: me.uid, 
-          target_id: member.id, 
-          status: 'pending',
-          created_at: serverTimestamp()
-        })
+        await upsertPendingConnectionRequest(me.id, member.id)
 
-        await addDoc(collection(db, 'notifications'), {
+        await createNotification({
           user_id: member.id,
           type: 'connection_request',
           title: 'New Connection Request',
-          message: `${me.displayName || me.email} wants to connect with you.`,
-          metadata: { sender_id: me.uid },
-          created_at: serverTimestamp()
+          message: `${me.email || 'A peer'} wants to connect with you.`,
+          metadata: { sender_id: me.id },
         })
 
         setConnectionStatus('pending')

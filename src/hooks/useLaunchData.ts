@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { LaunchConfig, TimeLeft } from '@shared-types/launch'
+import { fetchPreregisterCount } from '@/services/preregister'
 
 export function useCountdown(targetDate: string): TimeLeft {
   const calc = useCallback(() => {
@@ -40,8 +41,7 @@ export function useLaunchData() {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
       try {
-        const res = await fetch('/api/preregister', { signal: controller.signal, cache: 'no-store' })
-        return res.ok ? await res.json() : null
+        return await fetchPreregisterCount(controller.signal)
       } catch {
         return null
       } finally {
@@ -51,8 +51,7 @@ export function useLaunchData() {
 
     const load = async () => {
       try {
-        const countPayload = await withTimeout()
-        const count = countPayload?.count
+        const count = await withTimeout()
         if (typeof count === 'number') setRegisteredCount(count)
       } catch (_) {
         // Fallback to defaults

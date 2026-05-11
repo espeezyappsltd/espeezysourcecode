@@ -1,9 +1,8 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
-import { auth, db } from '@/lib/firebase'
-import { onAuthStateChanged, User } from 'firebase/auth'
-import { doc, getDoc, onSnapshot } from 'firebase/firestore'
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react'
+import type { User } from '@supabase/supabase-js'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { PersistentCache } from '@/utils/cache'
 import { Profile } from '@/types/auth'
 
@@ -25,6 +24,7 @@ export function ProfileProvider({
   userId?: string
   initialProfile?: Profile | null
 }) {
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const [profile, setProfile] = useState<Profile | null>(() => {
     if (initialProfile) return initialProfile
     return initialUserId ? PersistentCache.get<Profile>(`profile_${initialUserId}`) : null
@@ -33,58 +33,125 @@ export function ProfileProvider({
   const [user, setUser] = useState<User | null>(null)
 
   const refreshProfile = useCallback(async () => {
-    const currentUserId = user?.uid || initialUserId
+    const currentUserId = user?.id || initialUserId
     if (!currentUserId) return
 
-    const docRef = doc(db, 'profiles', currentUserId)
-    const docSnap = await getDoc(docRef)
-    
-    if (docSnap.exists()) {
-      const data = docSnap.data() as Profile
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUserId)
+      .single()
+
+    if (error) {
+      console.error('Profile refresh error:', error.message)
+      return
+    }
+
+    if (data) {
       setProfile(data)
       PersistentCache.set(`profile_${currentUserId}`, data, 3600000) // 1 Hour TTL
+    } else {
+      setProfile(null)
     }
-  }, [user, initialUserId])
+  }, [initialUserId, supabase, user])
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser)
-      if (!firebaseUser) {
+    let mounted = true
+
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!mounted) return
+      if (error) {
+        console.error('Auth getUser error:', error.message)
+      }
+      setUser(data.user ?? null)
+      if (!data.user) {
         setProfile(null)
         setLoading(false)
       }
     })
 
-    return () => unsubscribeAuth()
-  }, [])
+    const { data: authSubscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      const sessionUser = session?.user ?? null
+      setUser(sessionUser)
+      if (!sessionUser) {
+        setProfile(null)
+        setLoading(false)
+      }
+    })
+
+    return () => {
+      mounted = false
+      authSubscription.subscription.unsubscribe()
+    }
+  }, [supabase])
 
   useEffect(() => {
-    const currentUserId = user?.uid || initialUserId
+    const currentUserId = user?.id || initialUserId
     if (!currentUserId) {
       setLoading(false)
       return
     }
 
     setLoading(true)
-    
-    // Subscribe to REALTIME changes for the current user profile in Firestore
-    const docRef = doc(db, 'profiles', currentUserId)
-    const unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as Profile
-        setProfile(data)
-        PersistentCache.set(`profile_${currentUserId}`, data, 3600000)
+
+    let active = true
+
+    const loadProfile = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUserId)
+        .single()
+
+      if (!active) return
+
+      if (error) {
+        console.error('Profile load error:', error.message)
+        setLoading(false)
+        return
+      }
+
+      if (data) {
+        const typed = data as Profile
+        setProfile(typed)
+        PersistentCache.set(`profile_${currentUserId}`, typed, 3600000)
       } else {
         setProfile(null)
       }
       setLoading(false)
-    }, (error) => {
-      console.error("Profile snapshot error:", error)
-      setLoading(false)
-    })
+    }
 
-    return () => unsubscribeSnapshot()
-  }, [user, initialUserId])
+    loadProfile()
+
+    const channel = supabase
+      .channel(`profile:${currentUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${currentUserId}`,
+        },
+        (payload) => {
+          const next = (payload.new ?? null) as Profile | null
+          setProfile(next)
+          if (next) {
+            PersistentCache.set(`profile_${currentUserId}`, next, 3600000)
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('Profile realtime channel error')
+        }
+      })
+
+    return () => {
+      active = false
+      supabase.removeChannel(channel)
+    }
+  }, [initialUserId, supabase, user])
 
   return (
     <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile }}>

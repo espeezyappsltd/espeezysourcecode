@@ -1,4 +1,4 @@
-// Live Stripe Payment Link fallbacks — override per environment via NEXT_PUBLIC_STRIPE_LINK_* env vars
+// Live Stripe Payment Link fallbacks - override per environment via NEXT_PUBLIC_STRIPE_LINK_* env vars
 const LIVE_LINKS = {
   pro:      'https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04',
   premium:  'https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06',

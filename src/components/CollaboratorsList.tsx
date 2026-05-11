@@ -17,6 +17,7 @@ import {
 import { Profile } from '@/types/database'
 import { Users, UserPlus, Check, ExternalLink, Shield, Sparkles } from 'lucide-react'
 import { getFlagComponent } from '@/utils/geo'
+import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 interface CollaboratorsListProps {
   currentGroupId: string | null;
@@ -181,11 +182,13 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
         }}
       >
         <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.7rem' }}>
-          {collab.avatar_url ? (
-            <img src={collab.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            collab.full_name?.[0] || '?'
-          )}
+          <RemoteAvatar
+            src={collab.avatar_url}
+            alt={`${collab.full_name || 'User'} avatar`}
+            size={32}
+            fallback={collab.full_name?.[0] || '?'}
+            style={{ borderRadius: '8px' }}
+          />
         </div>
         
         <div style={{ flex: 1, minWidth: 0 }}>

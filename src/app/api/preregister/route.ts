@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'crypto'
 import { z } from 'zod'
 import { sendPreregistrationConfirmationEmail, sendPreregistrationPasswordSetupEmail } from '@/services/email'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -156,8 +155,7 @@ async function getRegistrationCount() {
 }
 
 type ProvisionResult = {
-	supabaseReady: boolean
-	firebaseReady: boolean
+	loginReady: boolean
 	errorMessage: string | null
 }
 
@@ -236,70 +234,6 @@ async function provisionSupabaseAccount(opts: {
 	return { ok: false, created: false, message: typeof data === 'string' ? data : 'Unable to create Supabase login.' }
 }
 
-async function provisionFirebaseAccount(opts: {
-	email: string
-	password: string
-	fullName: string | null
-	role: string | null
-	institution: string | null
-}): Promise<{ ok: boolean; created: boolean; message?: string }> {
-	const adminAuth = getAdminAuth()
-	if (!adminAuth) {
-		// Firebase Admin not configured in this environment — skip gracefully.
-		// Registration proceeds via Supabase alone.
-		return { ok: true, created: false, message: undefined }
-	}
-
-	let uid: string | null = null
-	let created = false
-
-	try {
-		const userRecord = await adminAuth.createUser({
-			email: opts.email,
-			password: opts.password,
-			emailVerified: true,
-			displayName: opts.fullName ?? undefined,
-		})
-		uid = userRecord.uid
-		created = true
-	} catch (error) {
-		const err = error as { code?: string; message?: string }
-		if (err.code !== 'auth/email-already-exists') {
-			return { ok: false, created: false, message: err.message ?? 'Unable to create Firebase login.' }
-		}
-
-		try {
-			const existing = await adminAuth.getUserByEmail(opts.email)
-			uid = existing.uid
-		} catch (lookupError) {
-			const errLookup = lookupError as { message?: string }
-			return { ok: false, created: false, message: errLookup.message ?? 'Unable to load Firebase login.' }
-		}
-	}
-
-	if (!uid) return { ok: false, created, message: 'Firebase user id was not available.' }
-
-	const adminDb = getAdminDb()
-	if (!adminDb) return { ok: true, created }
-
-	const profileRef = adminDb.collection('profiles').doc(uid)
-	const existingProfile = await profileRef.get()
-	if (!existingProfile.exists) {
-		await profileRef.set({
-			id: uid,
-			email: opts.email,
-			full_name: opts.fullName,
-			institution: opts.institution,
-			role: opts.role,
-			legal_accepted: true,
-			total_score: 0,
-			created_at: new Date().toISOString(),
-		})
-	}
-
-	return { ok: true, created }
-}
-
 async function provisionUnifiedLogin(opts: {
 	email: string
 	password: string
@@ -307,30 +241,18 @@ async function provisionUnifiedLogin(opts: {
 	role: string | null
 	institution: string | null
 	source: string
-	provisionFirebase: boolean
 }): Promise<ProvisionResult> {
-	const [supabaseResult, firebaseResult] = await Promise.all([
-		provisionSupabaseAccount(opts),
-		opts.provisionFirebase
-			? provisionFirebaseAccount(opts)
-			: Promise.resolve<{ ok: boolean; created: boolean; message?: string }>({
-				ok: true,
-				created: false,
-				message: undefined,
-			}),
-	])
+	const supabaseResult = await provisionSupabaseAccount(opts)
 
-	if (!supabaseResult.ok || !firebaseResult.ok) {
+	if (!supabaseResult.ok) {
 		return {
-			supabaseReady: supabaseResult.ok,
-			firebaseReady: firebaseResult.ok,
-			errorMessage: supabaseResult.message ?? firebaseResult.message ?? 'Unable to prepare your login on every Espeezy app.',
+			loginReady: false,
+			errorMessage: supabaseResult.message ?? 'Unable to prepare your Espeezy login.',
 		}
 	}
 
 	return {
-		supabaseReady: true,
-		firebaseReady: true,
+		loginReady: true,
 		errorMessage: null,
 	}
 }
@@ -463,7 +385,6 @@ export async function POST(req: Request) {
 			institution: cleanInstitution,
 			role: cleanRole,
 			source: cleanSource,
-			provisionFirebase: Boolean(cleanPassword),
 		})
 
 		const existing = await findExistingRegistrationByEmail(cleanEmail)
@@ -473,8 +394,7 @@ export async function POST(req: Request) {
 				return jsonWithCors(req, {
 					error: authProvisionResult.errorMessage,
 					registration_saved: true,
-					supabase_ready: authProvisionResult.supabaseReady,
-					firebase_ready: authProvisionResult.firebaseReady,
+					login_ready: authProvisionResult.loginReady,
 				}, { status: 503 })
 			}
 
@@ -557,7 +477,7 @@ export async function POST(req: Request) {
 						console.error('[preregister] Supabase minimal insert failed:', retryStatus, retryData)
 						return jsonWithCors(req, { error: 'Unable to register right now.' }, { status: 503 })
 					}
-					// Minimal insert succeeded — fall through
+					// Minimal insert succeeded  -  fall through
 					const count2 = await getRegistrationCount()
 					return jsonWithCors(req, {
 						success: true,
@@ -576,8 +496,7 @@ export async function POST(req: Request) {
 			return jsonWithCors(req, {
 				error: authProvisionResult.errorMessage,
 				registration_saved: true,
-				supabase_ready: authProvisionResult.supabaseReady,
-				firebase_ready: authProvisionResult.firebaseReady,
+				login_ready: authProvisionResult.loginReady,
 			}, { status: 503 })
 		}
 

@@ -1,5 +1,4 @@
-import { getAdminDb, getAdminAuth } from '../lib/firebase-admin'
-import type { Firestore } from 'firebase-admin/firestore'
+import { getAdminDb } from '../lib/supabase/admin'
 
 class FatalError extends Error {
   constructor(message: string) {
@@ -32,8 +31,6 @@ export async function paymentWorkflow(payload: PaymentWorkflowPayload) {
   }
 
   const db = getAdminDb();
-  const auth = getAdminAuth();
-  if (!db || !auth) throw new Error('Firebase Services Unavailable');
 
   const userId = await resolveUserId(db, payload)
 
@@ -64,40 +61,41 @@ export async function paymentWorkflow(payload: PaymentWorkflowPayload) {
   throw new FatalError('Unsupported payment event type.')
 }
 
-async function resolveUserId(db: Firestore, payload: PaymentWorkflowPayload) {
+type AdminDb = ReturnType<typeof getAdminDb>
+
+async function resolveUserId(db: AdminDb, payload: PaymentWorkflowPayload) {
   'use step'
 
   if (payload.userId) {
     return payload.userId
   }
 
-  const paymentsRef = db.collection('payments')
   let userId = null
 
   if (payload.stripeSubscriptionId) {
-    const q = await paymentsRef.where('stripe_subscription_id', '==', payload.stripeSubscriptionId).limit(1).get()
-    if (!q.empty) userId = q.docs[0].data().user_id
+    const { data } = await db.from('payments').select('user_id').eq('stripe_subscription_id', payload.stripeSubscriptionId).limit(1).maybeSingle()
+    if (data?.user_id) userId = data.user_id
   }
   if (!userId && payload.sessionId) {
-    const q = await paymentsRef.where('stripe_session_id', '==', payload.sessionId).limit(1).get()
-    if (!q.empty) userId = q.docs[0].data().user_id
+    const { data } = await db.from('payments').select('user_id').eq('stripe_session_id', payload.sessionId).limit(1).maybeSingle()
+    if (data?.user_id) userId = data.user_id
   }
   if (!userId && payload.stripeCustomerId) {
-    const q = await paymentsRef.where('stripe_customer_id', '==', payload.stripeCustomerId).limit(1).get()
-    if (!q.empty) userId = q.docs[0].data().user_id
+    const { data } = await db.from('payments').select('user_id').eq('stripe_customer_id', payload.stripeCustomerId).limit(1).maybeSingle()
+    if (data?.user_id) userId = data.user_id
   }
 
   if (userId) return userId
 
   if (payload.stripeCustomerId) {
-    const profileQ = await db.collection('profiles').where('stripe_customer_id', '==', payload.stripeCustomerId).limit(1).get()
-    if (!profileQ.empty) return profileQ.docs[0].id
+    const { data } = await db.from('profiles').select('id').eq('stripe_customer_id', payload.stripeCustomerId).limit(1).maybeSingle()
+    if (data?.id) return data.id
   }
 
   return null
 }
 
-async function handleCheckoutCompleted(db: Firestore, userId: string, payload: PaymentWorkflowPayload) {
+async function handleCheckoutCompleted(db: AdminDb, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
 
   const planLabel = payload.productLabel || (payload.plan === 'premium' ? 'Institutional Partner Authorization' : 'Pro Scholar Clearance')
@@ -107,7 +105,8 @@ async function handleCheckoutCompleted(db: Firestore, userId: string, payload: P
   const invoiceNumber = `GF-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`
 
   const paymentId = payload.sessionId || `PAY-${Date.now()}`
-  await db.collection('payments').doc(paymentId).set({
+    await db.from('payments').upsert({
+      id: paymentId,
       user_id: userId,
       stripe_customer_id: payload.stripeCustomerId,
       stripe_subscription_id: payload.stripeSubscriptionId,
@@ -124,15 +123,15 @@ async function handleCheckoutCompleted(db: Firestore, userId: string, payload: P
         raw_status: payload.status,
         stripe_event: payload.eventType
       }
-  }, { merge: true })
+  }, { onConflict: 'id' })
 
-  await db.collection('profiles').doc(userId).update({
+  await db.from('profiles').update({
     subscription_plan: normalizedPlan,
     subscription_status: 'active',
     subscription_started_at: new Date().toISOString()
-  })
+  }).eq('id', userId)
 
-  await db.collection('activity_log').add({
+  await db.from('activity_log').insert({
     user_id: userId,
     group_id: null,
     action_type: 'payment_completed',
@@ -141,7 +140,7 @@ async function handleCheckoutCompleted(db: Firestore, userId: string, payload: P
     created_at: new Date().toISOString()
   })
 
-  await db.collection('notifications').add({
+  await db.from('notifications').insert({
     user_id: userId,
     type: 'payment_completed',
     title: 'Protocol Authorization Secured',
@@ -151,12 +150,13 @@ async function handleCheckoutCompleted(db: Firestore, userId: string, payload: P
   })
 }
 
-async function handleInvoiceSucceeded(db: Firestore, userId: string, payload: PaymentWorkflowPayload) {
+async function handleInvoiceSucceeded(db: AdminDb, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
   if (!payload.stripeSubscriptionId) return
 
   const invoiceId = payload.invoiceId || `INV-${Date.now()}`
-  await db.collection('payments').doc(invoiceId).set({
+  await db.from('payments').upsert({
+      id: invoiceId,
       user_id: userId,
       stripe_customer_id: payload.stripeCustomerId,
       stripe_subscription_id: payload.stripeSubscriptionId,
@@ -169,11 +169,11 @@ async function handleInvoiceSucceeded(db: Firestore, userId: string, payload: Pa
       stripe_invoice_id: payload.invoiceId,
       updated_at: new Date().toISOString(),
       metadata: { stripe_event: payload.eventType }
-  }, { merge: true })
+  }, { onConflict: 'id' })
 
-  await db.collection('profiles').doc(userId).update({ subscription_status: 'active' })
+  await db.from('profiles').update({ subscription_status: 'active' }).eq('id', userId)
 
-  await db.collection('activity_log').add({
+  await db.from('activity_log').insert({
     user_id: userId,
     action_type: 'payment_completed',
     description: `Subscription payment succeeded`,
@@ -182,31 +182,32 @@ async function handleInvoiceSucceeded(db: Firestore, userId: string, payload: Pa
   })
 }
 
-async function handleInvoiceFailed(db: Firestore, userId: string, payload: PaymentWorkflowPayload) {
+async function handleInvoiceFailed(db: AdminDb, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
   if (!payload.stripeSubscriptionId) return
 
   const invoiceId = payload.invoiceId || `INV-${Date.now()}`
-  await db.collection('payments').doc(invoiceId).set({
+  await db.from('payments').upsert({
+      id: invoiceId,
       user_id: userId,
       status: 'failed',
       stripe_invoice_id: payload.invoiceId,
       updated_at: new Date().toISOString()
-  }, { merge: true })
+  }, { onConflict: 'id' })
 
-  await db.collection('profiles').doc(userId).update({ subscription_status: 'past_due' })
+  await db.from('profiles').update({ subscription_status: 'past_due' }).eq('id', userId)
 }
 
-async function handleMarketplacePurchase(db: Firestore, buyerId: string, payload: PaymentWorkflowPayload) {
+async function handleMarketplacePurchase(db: AdminDb, buyerId: string, payload: PaymentWorkflowPayload) {
   'use step'
   const listingId = payload.metadata?.listing_id as string
   const sellerId = payload.metadata?.seller_id as string
   const productName = (payload.metadata?.product_name as string) || 'Marketplace Item'
 
-  await db.collection('marketplace_listings').doc(listingId).update({ status: 'SOLD' })
+  await db.from('marketplace_listings').update({ status: 'SOLD' }).eq('id', listingId)
 
   const internalRef = `GF-MP-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`
-  await db.collection('payments').add({
+  await db.from('payments').insert({
     user_id: buyerId,
     amount_total: payload.amountTotal,
     currency: payload.currency,
@@ -219,24 +220,20 @@ async function handleMarketplacePurchase(db: Firestore, buyerId: string, payload
     metadata: { ...payload.metadata, item_name: productName, seller_id: sellerId }
   })
 
-  // Notifications
-  const batch = db.batch()
-  const sellerNotify = db.collection('notifications').doc()
-  const buyerNotify = db.collection('notifications').doc()
-
-  batch.set(sellerNotify, {
-    user_id: sellerId,
-    type: 'payment_completed',
-    title: 'Item Sold',
-    message: `Payment received for "${productName}".`,
-    created_at: new Date().toISOString()
-  })
-  batch.set(buyerNotify, {
-    user_id: buyerId,
-    type: 'payment_completed',
-    title: 'Transaction Authorized',
-    message: `Your payment for "${productName}" is confirmed.`,
-    created_at: new Date().toISOString()
-  })
-  await batch.commit()
+  await db.from('notifications').insert([
+    {
+      user_id: sellerId,
+      type: 'payment_completed',
+      title: 'Item Sold',
+      message: `Payment received for "${productName}".`,
+      created_at: new Date().toISOString(),
+    },
+    {
+      user_id: buyerId,
+      type: 'payment_completed',
+      title: 'Transaction Authorized',
+      message: `Your payment for "${productName}" is confirmed.`,
+      created_at: new Date().toISOString(),
+    },
+  ])
 }

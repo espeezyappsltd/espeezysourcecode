@@ -1,16 +1,6 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { db, auth } from '@/lib/firebase'
-import { 
-  doc, 
-  getDoc, 
-  getDocs, 
-  collection, 
-  query, 
-  where, 
-  orderBy 
-} from 'firebase/firestore'
 import { 
   BarChart3, Users, FileCheck, AlertCircle, Download, Printer,
   ChevronRight, TrendingUp, ShieldCheck, Zap, Clock, UserCircle, CheckCircle2, Circle, Timer, Search
@@ -26,6 +16,15 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
   RadialBarChart, RadialBar
 } from 'recharts'
+import {
+  fetchActivityLogByGroup,
+  fetchArtifactsByGroup,
+  fetchGroupById,
+  fetchGroupMembersByScore,
+  fetchGroupTasks,
+  fetchProfileById,
+  getAuthUser,
+} from '@/services/dashboard'
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Implementation': '#38bdf8',
@@ -67,40 +66,33 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const fetchData = async () => {
     setLoading(true)
     
-    const authUser = auth.currentUser
+    const authUser = await getAuthUser()
     if (!authUser) {
       setLoading(false)
       return
     }
 
     try {
-      const [profileSnap, groupSnap, tasksSnap, membersSnap, artifactsSnap] = await Promise.all([
-        getDoc(doc(db, 'profiles', authUser.uid)),
-        getDoc(doc(db, 'groups', groupId)),
-        getDocs(query(collection(db, 'tasks'), where('group_id', '==', groupId))),
-        getDocs(query(collection(db, 'profiles'), where('group_id', '==', groupId), orderBy('total_score', 'desc'))),
-        getDocs(query(collection(db, 'artifacts'), where('group_id', '==', groupId)))
+      const [userProfile, groupData, groupTasks, groupMembers, groupArtifacts] = await Promise.all([
+        fetchProfileById(authUser.id),
+        fetchGroupById(groupId),
+        fetchGroupTasks(groupId),
+        fetchGroupMembersByScore(groupId),
+        fetchArtifactsByGroup(groupId),
       ])
 
-      if (profileSnap.exists()) {
-        const userProfile = profileSnap.data() as Profile
-        setCurrentUser(userProfile)
-        const memberCheck = userProfile?.group_id === groupId
-        setIsMember(memberCheck)
-      }
+      setCurrentUser(userProfile as unknown as Profile)
+      const memberCheck = userProfile?.group_id === groupId
+      setIsMember(memberCheck)
 
-      if (groupSnap.exists()) {
-        setGroup({ id: groupSnap.id, ...groupSnap.data() } as Group)
-      }
-      
-      const memberCheck = (profileSnap.data() as Profile)?.group_id === groupId
+      setGroup(groupData as Group)
       
       if (memberCheck) {
-        setTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() } as Task)))
-        setMembers(membersSnap.docs.map(d => ({ id: d.id, ...d.data() } as ProfileDB)))
-        setArtifacts(artifactsSnap.docs.map(d => ({ id: d.id, ...d.data() })))
+        setTasks(groupTasks as Task[])
+        setMembers(groupMembers as ProfileDB[])
+        setArtifacts(groupArtifacts as Record<string, any>[])
       } else {
-        setMembers(membersSnap.docs.map(d => ({ id: d.id, ...d.data() } as ProfileDB)))
+        setMembers(groupMembers as ProfileDB[])
       }
     } catch (err: unknown) {
       console.error('Analytics Fetch Error:', err)
@@ -164,17 +156,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const exportToCSV = async () => {
     setLoading(true)
     try {
-      const logsSnap = await getDocs(query(
-        collection(db, 'activity_log'), 
-        where('group_id', '==', groupId), 
-        orderBy('created_at', 'desc')
-      ))
+      const logs = await fetchActivityLogByGroup(groupId)
       const headers = ['Type', 'User', 'Description', 'Timestamp']
-      const rows = logsSnap.docs.map(doc => {
-        const l = doc.data()
-        return [l.action_type, l.user_name || 'System', l.description, l.created_at]
+      const rows = logs.map((l: any) => {
+        return [l.action_type || l.action, l.user_name || 'System', l.description || l.message, l.created_at]
       })
-      const csvContent = [headers, ...rows].map(e => e.map(c => `"${c}"`).join(',')).join('\n')
+      const csvContent = [headers, ...rows].map(e => e.map((c: string) => `"${c}"`).join(',')).join('\n')
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -364,7 +351,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         </div>
       </div>
 
-      {/* Progress Bar — overall */}
+      {/* Progress Bar  -  overall */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>Project Pulse</span>
@@ -382,7 +369,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         gap: 'var(--gap-sm)' 
       }}>
 
-        {/* Team Leaderboard — fixed table */}
+        {/* Team Leaderboard  -  fixed table */}
         <section style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 900, margin: 0 }}>Team Leaderboard</h2>

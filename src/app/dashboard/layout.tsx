@@ -1,4 +1,4 @@
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import BottomNav from '@/components/BottomNav'
@@ -10,8 +10,6 @@ import OnboardingWrapper from '@/components/OnboardingWrapper'
 import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
 import { ProfileProvider } from '@/context/ProfileContext'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
-import { SpotifyProvider } from '@/context/SpotifyContext'
-import SpotifyMiniPlayer from '@/components/SpotifyMiniPlayer'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import SupportChat from '@/components/SupportChat'
 
@@ -47,21 +45,18 @@ export default async function DashboardLayout({
           <OnboardingWrapper profile={profile as { full_name?: string; avatar_url?: string } | null} user={user}>
             <div className="dashboard-layout">
               <PresenceProvider user={user}>
-                <SpotifyProvider>
-                  <NotificationProvider>
-                    <Sidebar user={user} />
-                    
-                    <main className="main-content">
-                      <ConnectionAlertTray />
-                      {children}
-                    </main>
+                <NotificationProvider>
+                  <Sidebar user={user} />
 
-                    <SpotifyMiniPlayer />
-                    <GlobalAnnouncement />
-                    <SupportChat />
-                    <BottomNav />
-                  </NotificationProvider>
-                </SpotifyProvider>
+                  <main className="main-content">
+                    <ConnectionAlertTray />
+                    {children}
+                  </main>
+
+                  <GlobalAnnouncement />
+                  <SupportChat />
+                  <BottomNav />
+                </NotificationProvider>
               </PresenceProvider>
             </div>
           </OnboardingWrapper>

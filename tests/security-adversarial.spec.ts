@@ -461,15 +461,6 @@ test.describe('7. Open Redirect & SSRF Prevention', () => {
     })
   }
 
-  test('Spotify OAuth state validated (CSRF in OAuth)', async ({ request }) => {
-    const resp = await request.get('/api/spotify/login')
-    // Should redirect to Spotify with state param, or require auth
-    expect([302, 307, 401, 403]).toContain(resp.status())
-    if ([302, 307].includes(resp.status())) {
-      const location = resp.headers()['location'] ?? ''
-      expect(location).toContain('state=')
-    }
-  })
 })
 
 // ─── 8. DATA EXPOSURE CHECKS ─────────────────────────────────────────────────

@@ -2,21 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
-import { db, auth, storage } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy, 
-  limit, 
-  addDoc, 
-  updateDoc, 
-  doc, 
-  getDocs,
-  serverTimestamp 
-} from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, Clock,
   Trash2, Shield, LayoutGrid,
@@ -28,6 +14,7 @@ import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
 import { ChatMessage, ChatPayload } from '@/types/ui'
 import { Profile } from '@/types/auth'
+import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 type TeamChatProps = {
   groupId: string
@@ -218,18 +205,13 @@ function TeamLobby({
                 overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: 'white', fontWeight: 900
               }}>
-                {member.avatar_url ? (
-                  <Image
-                    src={member.avatar_url}
-                    alt={`${member.full_name ?? 'Member'} avatar`}
-                    width={42}
-                    height={42}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    unoptimized
-                  />
-                ) : (
-                  member.full_name?.charAt(0)
-                )}
+                <RemoteAvatar
+                  src={member.avatar_url}
+                  alt={`${member.full_name ?? 'Member'} avatar`}
+                  size={42}
+                  fallback={member.full_name?.charAt(0) ?? '?'}
+                  style={{ borderRadius: '14px' }}
+                />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{member.id === userId ? 'You' : member.full_name}</div>
@@ -444,6 +426,7 @@ function ChatInputBar({
 }
 
 export default function TeamChat({ groupId, user }: TeamChatProps) {
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -475,49 +458,98 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
   // Real-time Subscription
   useEffect(() => {
-    const q = query(
-      collection(db, 'messages'),
-      where('group_id', '==', groupId),
-      orderBy('created_at', 'asc'),
-      limit(50)
-    )
+    let active = true
 
-    const unsub = onSnapshot(q, (snap) => {
-      const incomingMessages = snap.docs.map(d => ({ id: d.id, ...d.data() } as ChatMessage))
-      
-      // Handle notifications for new messages
-      snap.docChanges().forEach(change => {
-        if (change.type === 'added') {
-          const incoming = change.doc.data() as ChatMessage
-          if (incoming.user_id !== user.id && (!isOpen || document.hidden)) {
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('New Team Message', {
-                body: incoming.content || 'Sent an attachment',
-                icon: '/brand-logo-black-gold.png'
-              })
-            }
-          }
-        }
-      })
+    const loadMessages = async () => {
+      const { data, error } = await db
+        .from('messages')
+        .select('id, group_id, user_id, content, payload, is_deleted, created_at, profiles:profiles!messages_user_id_fkey(full_name, avatar_url, role)')
+        .eq('group_id', groupId)
+        .order('created_at', { ascending: true })
+        .limit(50)
 
-      setMessages(incomingMessages)
+      if (!active) return
+      if (error) {
+        console.error('Messages load error:', error.message)
+        setLoading(false)
+        return
+      }
+
+      const normalized = (data ?? []).map((row: any) => ({
+        ...row,
+        profiles: Array.isArray(row.profiles) ? row.profiles[0] : row.profiles,
+      }))
+      setMessages(normalized as ChatMessage[])
       setLoading(false)
       setTimeout(() => scrollToBottom('smooth'), 100)
-    })
+    }
 
-    return () => unsub()
-  }, [groupId, isOpen, user.id])
+    loadMessages()
+
+    const channel = db
+      .channel(`team-messages:${groupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'messages', filter: `group_id=eq.${groupId}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const incoming = payload.new as ChatMessage
+            if (incoming.user_id !== user.id && (!isOpen || document.hidden)) {
+              if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('New Team Message', {
+                  body: incoming.content || 'Sent an attachment',
+                  icon: '/brand-logo-black-gold.png'
+                })
+              }
+            }
+          }
+
+          loadMessages()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      active = false
+      db.removeChannel(channel)
+    }
+  }, [db, groupId, isOpen, user.id])
 
   useEffect(() => {
     if (!isOpen) return
 
-    const q = query(collection(db, 'profiles'), where('group_id', '==', groupId))
-    const unsub = onSnapshot(q, (snap) => {
-      setGroupMembers(snap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)))
-    })
+    let active = true
+    const loadMembers = async () => {
+      const { data, error } = await db
+        .from('profiles')
+        .select('*')
+        .eq('group_id', groupId)
 
-    return () => unsub()
-  }, [isOpen, groupId])
+      if (!active) return
+      if (error) {
+        console.error('Group members load error:', error.message)
+        return
+      }
+
+      setGroupMembers((data ?? []) as Profile[])
+    }
+
+    loadMembers()
+
+    const channel = db
+      .channel(`team-members:${groupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },
+        () => loadMembers()
+      )
+      .subscribe()
+
+    return () => {
+      active = false
+      db.removeChannel(channel)
+    }
+  }, [db, isOpen, groupId])
 
   const handleTyping = (text: string) => {
     setNewMessage(text)
@@ -540,15 +572,20 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
     scrollToBottom('smooth')
 
     try {
-      const docRef = await addDoc(collection(db, 'messages'), {
-        group_id: groupId,
-        user_id: user.id,
-        content,
-        payload,
-        is_deleted: false,
-        created_at: new Date().toISOString(),
-        server_timestamp: serverTimestamp()
-      })
+      const { data, error } = await db
+        .from('messages')
+        .insert({
+          group_id: groupId,
+          user_id: user.id,
+          content,
+          payload: payload ?? null,
+          is_deleted: false,
+          created_at: new Date().toISOString(),
+        })
+        .select('id')
+        .single()
+
+      if (error) throw error
 
       // Verifiable Logging
       logActivity(
@@ -556,7 +593,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         groupId, 
         'message_sent', 
         `Sent a ${payload?.type || 'text'} message`,
-        { message_id: docRef.id }
+        { message_id: data.id }
       )
     } catch (err: any) {
       console.error('Send message error:', err.message)
@@ -567,10 +604,15 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
      if (!confirm('Are you sure you want to delete this message for everyone?')) return
      
      try {
-       await updateDoc(doc(db, 'messages', msgId), {
-         is_deleted: true,
-         content: 'This message was deleted'
-       })
+       const { error } = await db
+         .from('messages')
+         .update({
+           is_deleted: true,
+           content: 'This message was deleted'
+         })
+         .eq('id', msgId)
+
+       if (error) throw error
        
        logActivity(
          user.id, 
@@ -590,11 +632,20 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
      
      setUploading(true)
      try {
-       const fileName = `${groupId}/chat-${Date.now()}-${file.name}`
-       const fileRef = ref(storage, `Espeezy_assets/${fileName}`)
-       
-       await uploadBytes(fileRef, file)
-       const publicUrl = await getDownloadURL(fileRef)
+       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+       const filePath = `${groupId}/chat-${Date.now()}-${safeName}`
+
+       const { error: uploadError } = await db.storage
+         .from('espeezy-assets')
+         .upload(filePath, file, { upsert: false })
+
+       if (uploadError) throw uploadError
+
+       const { data } = db.storage
+         .from('espeezy-assets')
+         .getPublicUrl(filePath)
+
+       const publicUrl = data.publicUrl
 
        await handleSendMessage(
           null,

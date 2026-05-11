@@ -1,20 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { db, auth } from '@/lib/firebase'
-import { 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  setDoc, 
-  deleteDoc, 
-  addDoc, 
-  collection 
-} from 'firebase/firestore'
 import { useNotifications } from '@/components/NotificationProvider'
 import type { Notification } from '@/types/ui'
 import { Bell, UserPlus, Check, X, Shield, Clock, Inbox, Mail, MessageSquare } from 'lucide-react'
 import { DateTime } from '@/utils/dateTime'
+import {
+  createNotification,
+  deleteConnectionRecord,
+  fetchNotificationSettings,
+  getAuthUser,
+  setConnectionAccepted,
+  updateNotificationSetting,
+} from '@/services/dashboard'
 
 type InboxNotification = Notification & { metadata?: { sender_id?: string } }
 
@@ -32,28 +30,21 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     async function fetchSettings() {
-      const user = auth.currentUser
+      const user = await getAuthUser()
       if (!user) return
-      const snap = await getDoc(doc(db, 'profiles', user.uid))
-      if (snap.exists()) {
-        const data = snap.data()
-        setSettings({
-          email_notifications: data.email_notifications ?? true,
-          push_notifications: data.push_notifications ?? true,
-          marketing_emails: data.marketing_emails ?? false
-        })
-      }
+      const data = await fetchNotificationSettings(user.id)
+      setSettings(data)
     }
-    fetchSettings()
+    void fetchSettings()
   }, [])
 
   const updateSetting = async (key: keyof typeof settings, value: boolean) => {
     const newSettings = { ...settings, [key]: value }
     setSettings(newSettings)
-    const user = auth.currentUser
+    const user = await getAuthUser()
     if (!user) return
     try {
-      await updateDoc(doc(db, 'profiles', user.uid), { [key]: value })
+      await updateNotificationSetting(user.id, key, value)
       addToast('Success', 'Preferences updated', 'success')
     } catch (err: any) {
       console.error('Update settings error:', err.message)
@@ -65,30 +56,22 @@ export default function NotificationsPage() {
     const { sender_id } = notification.metadata || {}
     if (!sender_id) return
 
-    const user = auth.currentUser
+    const user = await getAuthUser()
     if (!user) return
 
     try {
-      // 1. Update Connection to 'connected'
-      const connId = [user.uid, sender_id].sort().join('_')
-      await setDoc(doc(db, 'user_connections', connId), {
-        user_id: user.uid,
-        target_id: sender_id,
-        status: 'connected',
-        created_at: new Date().toISOString()
-      })
+      await setConnectionAccepted(user.id, sender_id)
 
       // 2. Mark notification as read
       await markAsRead(notification.id)
       
       // 3. Send reciprocal notification to sender
-      await addDoc(collection(db, 'notifications'), {
+      await createNotification({
         user_id: sender_id,
         type: 'connection_accepted',
         title: 'Connection Accepted',
         message: 'Your connection request was accepted. You can now chat real-time.',
-        metadata: { acceptor_id: user.uid },
-        created_at: new Date().toISOString()
+        metadata: { acceptor_id: user.id },
       })
 
       addToast('Success', 'Connection established!', 'success')
@@ -101,10 +84,9 @@ export default function NotificationsPage() {
   const handleDeclineConnection = async (notification: InboxNotification) => {
     const senderId = notification.metadata?.sender_id
     if (senderId) {
-      const user = auth.currentUser
+      const user = await getAuthUser()
       if (user) {
-        const connId = [user.uid, senderId].sort().join('_')
-        await deleteDoc(doc(db, 'user_connections', connId))
+        await deleteConnectionRecord(user.id, senderId)
       }
     }
     await markAsRead(notification.id)

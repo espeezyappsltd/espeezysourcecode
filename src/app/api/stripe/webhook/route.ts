@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
 // import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
-import { getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { sendP2PTransactionEmail } from '@/services/email'
 import { getStripeClient, getStripeWebhookSecret } from '@/utils/stripe'
 
@@ -117,19 +117,53 @@ async function upsertDonationToSupabase(session: Stripe.Checkout.Session) {
 }
 
 async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
-  const userId = session.metadata?.user_id
   const plan = session.metadata?.plan
-  if (!userId || !plan) return
+  if (!plan) return
 
   try {
     const adminDb = getAdminDb()
     if (!adminDb) return
-    await adminDb.collection('profiles').doc(userId).update({
-      plan: plan,
-      stripe_customer_id: session.customer?.toString(),
-      stripe_subscription_id: session.subscription?.toString(),
-      updated_at: new Date().toISOString()
-    })
+
+    const userId = session.metadata?.user_id
+    const isPublicSignup = session.metadata?.is_public_signup === 'true'
+    const email = session.customer_email
+
+    if (userId) {
+      await adminDb.from('profiles').update({
+        plan: plan,
+        stripe_customer_id: session.customer?.toString(),
+        stripe_subscription_id: session.subscription?.toString(),
+        updated_at: new Date().toISOString()
+      }).eq('id', userId)
+    } else if (isPublicSignup && email) {
+      const { data: existingProfile } = await adminDb
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .limit(1)
+        .maybeSingle()
+
+      if (existingProfile) {
+        await adminDb.from('profiles').update({
+          plan,
+          stripe_customer_id: session.customer?.toString(),
+          stripe_subscription_id: session.subscription?.toString(),
+          stripe_session_id: session.id,
+          updated_at: new Date().toISOString(),
+        }).eq('id', existingProfile.id)
+      } else {
+        const { data: profile } = await adminDb.from('profiles').insert({
+        email: email,
+        plan: plan,
+        stripe_customer_id: session.customer?.toString(),
+        stripe_subscription_id: session.subscription?.toString(),
+        stripe_session_id: session.id,
+        updated_at: new Date().toISOString(),
+        }).select('id').single()
+
+        console.log(`[webhook] Created new profile for public signup: ${profile?.id ?? 'unknown'} (${email})`)
+      }
+    }
   } catch (err) {
     console.error('[webhook] subscription update error:', err)
   }
@@ -140,7 +174,7 @@ async function handleDonationWebhook(session: Stripe.Checkout.Session) {
     const adminDb = getAdminDb()
     const meta = session.metadata ?? {}
     if (adminDb) {
-      await adminDb.collection('donations').doc(session.id).set({
+      await adminDb.from('donations').upsert({
         stripe_session_id: session.id,
         stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
         amount_cents: session.amount_total ?? 0,
@@ -153,7 +187,7 @@ async function handleDonationWebhook(session: Stripe.Checkout.Session) {
         status: session.payment_status === 'paid' ? 'completed' : 'pending',
         completed_at: session.payment_status === 'paid' ? new Date().toISOString() : null,
         metadata: meta,
-      })
+      }, { onConflict: 'stripe_session_id' })
     }
 
     await upsertDonationToSupabase(session)
@@ -171,36 +205,39 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
   try {
     const adminDb = getAdminDb()
     if (!adminDb) return
-    const transferRef = adminDb.collection('p2p_transfers').doc(transferId)
-    const transferSnap = await transferRef.get()
-    if (!transferSnap.exists) return
-    const transfer = transferSnap.data()!
+    const { data: transfer, error: transferError } = await adminDb
+      .from('p2p_transfers')
+      .select('*')
+      .eq('id', transferId)
+      .single()
+    if (transferError || !transfer) return
 
     if (paid) {
-      await transferRef.update({
+      await adminDb.from('p2p_transfers').update({
         status: 'completed',
         completed_at: new Date().toISOString(),
         stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
-      })
+      }).eq('id', transferId)
 
-      const senderSnap = await adminDb.collection('profiles').doc(transfer.sender_id).get()
-      const recipientSnap = await adminDb.collection('profiles').doc(transfer.recipient_id).get()
+      const { data: profiles } = await adminDb
+        .from('profiles')
+        .select('*')
+        .in('id', [transfer.sender_id, transfer.recipient_id])
 
-      if (senderSnap.exists && recipientSnap.exists) {
-        const sender = senderSnap.data()!
-        const recipient = recipientSnap.data()!
+      const sender = (profiles ?? []).find((profile: any) => profile.id === transfer.sender_id)
+      const recipient = (profiles ?? []).find((profile: any) => profile.id === transfer.recipient_id)
+
+      if (sender && recipient) {
         const impactScore = 15
 
-        // Update scores
-        await adminDb.collection('profiles').doc(transfer.sender_id).update({
+        await adminDb.from('profiles').update({
           total_score: (sender.total_score || 0) + impactScore
-        })
-        await adminDb.collection('profiles').doc(transfer.recipient_id).update({
+        }).eq('id', transfer.sender_id)
+        await adminDb.from('profiles').update({
           total_score: (recipient.total_score || 0) + impactScore
-        })
+        }).eq('id', transfer.recipient_id)
 
-        // Notifications
-        await adminDb.collection('notifications').add({
+        await adminDb.from('notifications').insert({
           user_id: transfer.sender_id,
           type: 'payment_sent',
           title: `Payment sent to @${recipient.username || 'scholar'}`,
@@ -208,7 +245,7 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
           link: '/dashboard/wallet',
           created_at: new Date().toISOString()
         })
-        await adminDb.collection('notifications').add({
+        await adminDb.from('notifications').insert({
           user_id: transfer.recipient_id,
           type: 'payment_received',
           title: `Payment received from @${sender.username || 'scholar'}`,
@@ -216,9 +253,26 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
           link: '/dashboard/wallet',
           created_at: new Date().toISOString()
         })
+
+        const recipientEmails = [recipient.email, recipient.espeezy_email].filter((value): value is string => Boolean(value))
+        if (recipientEmails.length > 0) {
+          void sendP2PTransactionEmail({
+            to: recipientEmails,
+            role: 'recipient',
+            transferId: transfer.id,
+            counterpartyName: sender.full_name || sender.username || 'scholar',
+            counterpartyUsername: sender.username || 'scholar',
+            amountCents: transfer.amount_cents,
+            feeCents: transfer.fee_cents || 0,
+            netCents: transfer.net_cents || transfer.amount_cents,
+            note: transfer.note ?? null,
+          }).catch((error) => {
+            console.error('[webhook] P2P email error:', error)
+          })
+        }
       }
     } else {
-      await transferRef.update({ status: 'failed', failed_at: new Date().toISOString() })
+      await adminDb.from('p2p_transfers').update({ status: 'failed', failed_at: new Date().toISOString() }).eq('id', transferId)
     }
   } catch (err) {
     console.error('[webhook] P2P transfer error:', err)

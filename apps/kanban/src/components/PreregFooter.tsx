@@ -32,10 +32,11 @@ export default function PreregFooter() {
           Espeezy Kanban. Fair collaboration for every team.
         </p>
         <nav aria-label="Footer links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <a href="/" style={linkStyle}>Home</a>
-          <a href="/fund" style={linkStyle}>Support Us</a>
-          <a href="/privacy" style={linkStyle}>Privacy</a>
-          <a href="https://games.espeezy.com" style={linkStyle}>Games</a>
+          <a href="https://espeezy.com" style={linkStyle}>Home</a>
+          <a href="https://espeezy.com/preregister" style={linkStyle}>Early Access</a>
+          <a href="https://espeezy.com/fund" style={linkStyle}>Support Us</a>
+          <a href="https://espeezy.com/privacy" style={linkStyle}>Privacy</a>
+          <a href="https://games.espeezy.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>Games</a>
         </nav>
       </div>
     </footer>

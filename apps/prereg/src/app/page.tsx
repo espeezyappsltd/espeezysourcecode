@@ -15,6 +15,7 @@ import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import { supabase } from '@/lib/supabase-client'
+import { submitPreregistration } from '@/services/preregister'
 
 const COMING_FEATURES = [
   { icon: <Cpu size={20} />, title: 'Your Personal AI Coach', desc: 'Imagine having a smart tutor that knows your course content, adapts to how you learn best, and helps you crush your assignments.', tag: 'Smart Learning' },
@@ -139,13 +140,12 @@ export default function PreRegisterPage() {
     if (!email.trim()) { setSubmitError('Please enter a valid email address.'); return }
     setSubmitting(true)
     try {
-      const res = await fetch('/api/preregister', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'preregister_page', ...(referrerCode != null ? { referrer_code: referrerCode } : {}) }),
+      const { ok, data } = await submitPreregistration({
+        email,
+        source: 'preregister_page',
+        ...(referrerCode != null ? { referrer_code: referrerCode } : {}),
       })
-      const data = await res.json()
-      if (!res.ok) {
+      if (!ok) {
         setSubmitError(data.error ?? 'Registration failed. Please try again.')
       } else {
         setSubmitted(true)
@@ -404,7 +404,7 @@ export default function PreRegisterPage() {
             {[
               { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not fairly recognised in group assessments.' },
               { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
-              { icon: <TrendingUp size={22} />, stat: '3×', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
+              { icon: <TrendingUp size={22} />, stat: '3� - ', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
               { icon: <Globe size={22} />, stat: '195', label: 'countries where fair access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}

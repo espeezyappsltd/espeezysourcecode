@@ -1,7 +1,8 @@
 {
-  "name": "espeezy",
+  "name": "espeezycodebaseserver",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -10,12 +11,17 @@
     "dev:prereg": "npm --prefix apps/prereg run dev",
     "dev:games": "npm --prefix apps/games run dev",
     "dev:kanban": "npm --prefix apps/kanban run dev",
-    "dev:all:apps": "npm run dev:prereg ; npm run dev:games ; npm run dev:kanban",
+    "dev:core": "npm --prefix apps/core run dev",
+    "dev:all:apps": "npm run dev:prereg ; npm run dev:games ; npm run dev:kanban ; npm run dev:core",
     "build": "next build --webpack",
     "build:prereg": "npm --prefix apps/prereg run build",
     "build:games": "npm --prefix apps/games run build",
     "build:kanban": "npm --prefix apps/kanban run build",
-    "start": "node server.js",
+    "build:core": "npm --prefix apps/core run build",
+    "start": "node customserver.js",
+    "start:core": "npm --prefix apps/core run start",
+    "docker:core:up": "docker compose -f docker-compose.core.local.yml up -d",
+    "docker:core:down": "docker compose -f docker-compose.core.local.yml down",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "typecheck:prereg": "npm --prefix apps/prereg run typecheck",
@@ -31,7 +37,8 @@
     "predeploy:prereg": "npm --prefix apps/prereg run predeploy:check",
     "predeploy:games": "npm --prefix apps/games run predeploy:check",
     "predeploy:kanban": "npm --prefix apps/kanban run predeploy:check",
-    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban"
+    "predeploy:core": "npm --prefix apps/core run predeploy:check",
+    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban ; npm run predeploy:core"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.2.0",
@@ -74,6 +81,7 @@
     "globals": "^17.5.0",
     "playwright": "^1.59.1",
     "sharp": "^0.34.5",
+    "supabase": "^2.98.2",
     "typescript": "^5",
     "typescript-eslint": "^8.59.0"
   },

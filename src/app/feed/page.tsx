@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -8,16 +8,16 @@ import {
   MessageCircle, Send, Image as ImageIcon, X, ChevronDown, Loader2,
   Globe, Users, Lock, MoreHorizontal, Trash2, Pencil
 } from 'lucide-react'
-import { db } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy, 
-  limit 
-} from 'firebase/firestore'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { useProfile } from '../../context/ProfileContext'
+import {
+  fetchFeedPosts,
+  createFeedPost,
+  reactToFeedPost,
+  fetchFeedComments,
+  createFeedComment,
+} from '@/services/feed'
+import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 type Reaction = 'like' | 'love' | 'fire' | 'clap' | 'insightful' | 'celebrate'
 
@@ -62,6 +62,7 @@ interface Comment {
 export default function FeedPage() {
   const { profile } = useProfile()
   const router = useRouter()
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -81,10 +82,9 @@ export default function FeedPage() {
   const loadPosts = useCallback(async (cur?: string) => {
     if (cur) setLoadingMore(true); else setLoading(true)
     try {
-      const url = `/api/feed?filter=public${cur ? `&cursor=${encodeURIComponent(cur)}` : ''}`
-      const res = await fetch(url)
-      if (!res.ok) return
-      const { posts: newPosts, nextCursor } = await res.json()
+      const payload = await fetchFeedPosts(cur)
+      if (!payload) return
+      const { posts: newPosts, nextCursor } = payload
       setPosts(prev => cur ? [...prev, ...newPosts] : newPosts)
       setCursor(nextCursor)
       setHasMore(!!nextCursor)
@@ -108,37 +108,38 @@ export default function FeedPage() {
     return () => observerRef.current?.disconnect()
   }, [cursor, hasMore, loadingMore, loadPosts])
 
-  // Realtime subscription
+  // Realtime subscription: listen for new public posts and reload feed
   useEffect(() => {
-    const q = query(
-      collection(db, 'posts'),
-      where('visibility', '==', 'public'),
-      orderBy('created_at', 'desc'),
-      limit(1)
-    )
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const data = change.doc.data()
-          if (data.author_id !== profile?.id) {
+    const channel = db
+      .channel('feed_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'posts',
+          filter: `visibility=eq.public`
+        },
+        (payload: any) => {
+          // Only reload if the new post is not from the current user
+          if (payload.new && payload.new.author_id !== profile?.id) {
             loadPosts()
           }
         }
-      })
-    })
-    return () => unsubscribe()
-  }, [profile?.id, loadPosts])
+      )
+      .subscribe()
+
+    return () => {
+      db.removeChannel(channel)
+    }
+  }, [profile?.id, loadPosts, db])
 
   async function submitPost() {
     if (!composerText.trim() || posting) return
     setPosting(true)
     try {
-      const res = await fetch('/api/feed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: composerText.trim(), visibility: composerVisibility }),
-      })
-      if (res.ok) {
+      const { ok } = await createFeedPost({ content: composerText.trim(), visibility: composerVisibility })
+      if (ok) {
         setComposerText('')
         loadPosts()
       }
@@ -149,12 +150,8 @@ export default function FeedPage() {
 
   async function toggleReaction(postId: string, reaction: Reaction) {
     setShowReactionPicker(null)
-    const res = await fetch(`/api/feed/${postId}/react`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reaction }),
-    })
-    if (res.ok) {
+    const { ok } = await reactToFeedPost(postId, reaction)
+    if (ok) {
       // Optimistic update
       setPosts(prev => prev.map(p => {
         if (p.id !== postId) return p
@@ -181,9 +178,9 @@ export default function FeedPage() {
     }
     setLoadingComments(prev => ({ ...prev, [postId]: true }))
     try {
-      const res = await fetch(`/api/feed/${postId}/comments`)
-      if (res.ok) {
-        const { comments } = await res.json()
+      const payload = await fetchFeedComments(postId)
+      if (payload) {
+        const { comments } = payload
         setExpandedComments(prev => ({ ...prev, [postId]: comments }))
       }
     } finally {
@@ -196,13 +193,9 @@ export default function FeedPage() {
     if (!text || submittingComment[postId]) return
     setSubmittingComment(prev => ({ ...prev, [postId]: true }))
     try {
-      const res = await fetch(`/api/feed/${postId}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text }),
-      })
-      if (res.ok) {
-        const { comment } = await res.json()
+      const payload = await createFeedComment(postId, text)
+      if (payload) {
+        const { comment } = payload
         setExpandedComments(prev => ({ ...prev, [postId]: [...(prev[postId] ?? []), comment] }))
         setCommentText(prev => ({ ...prev, [postId]: '' }))
         setPosts(prev => prev.map(p => p.id === postId
@@ -485,13 +478,13 @@ function PostCard({
 
 function Avatar({ profile, size = 36 }: { profile?: PostAuthor | null; size?: number }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', background: '#222', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.4 }}>
-      {profile?.avatar_url ? (
-        <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      ) : (
-        <span style={{ color: '#10B981', fontWeight: 800 }}>{profile?.full_name?.[0]?.toUpperCase() ?? '?'}</span>
-      )}
-    </div>
+    <RemoteAvatar
+      src={profile?.avatar_url}
+      alt={`${profile?.full_name ?? 'User'} avatar`}
+      size={size}
+      fallback={<span style={{ color: '#10B981', fontWeight: 800 }}>{profile?.full_name?.[0]?.toUpperCase() ?? '?'}</span>}
+      style={{ background: '#222', flexShrink: 0, fontSize: size * 0.4 }}
+    />
   )
 }
 

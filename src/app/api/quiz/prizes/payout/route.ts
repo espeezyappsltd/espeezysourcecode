@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { z } from 'zod'
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { sendP2PTransactionEmail } from '@/services/email'
 
 export const dynamic = 'force-dynamic'
@@ -27,7 +27,7 @@ async function isAdminUser(): Promise<boolean> {
   return profile?.role === 'admin'
 }
 
-// POST /api/quiz/prizes/payout — settle unpaid quiz cash prizes
+// POST /api/quiz/prizes/payout  -  settle unpaid quiz cash prizes
 // Auth: admin session OR X-Agent-Key header for internal workers
 export async function POST(req: NextRequest) {
   let stripe: Stripe

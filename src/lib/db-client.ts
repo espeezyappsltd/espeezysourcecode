@@ -381,6 +381,20 @@ const client = {
         return { data: { session: null }, error }
       }
     },
+    onAuthStateChange: (callback: (event: string, session: { user: User } | null) => void) => {
+      const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+        const event = user ? 'SIGNED_IN' : 'SIGNED_OUT'
+        callback(event, user ? { user: user as User } : null)
+      })
+
+      return {
+        data: {
+          subscription: {
+            unsubscribe,
+          },
+        },
+      }
+    },
     signInWithOAuth: async (options: { provider: string }) => {
       try {
         const provider = buildOAuthProvider(options.provider)

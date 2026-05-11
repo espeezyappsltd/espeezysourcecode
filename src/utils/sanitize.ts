@@ -36,7 +36,7 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, '&#x27;')
 }
 
-/** Strip all HTML tags — use for plain-text fields */
+/** Strip all HTML tags  -  use for plain-text fields */
 export function stripHtml(value: string): string {
   return value.replace(/<[^>]*>/g, '')
 }
@@ -48,7 +48,7 @@ export function stripDangerousProtocols(value: string): string {
 
 /**
  * Full sanitize pipeline for user-generated text content.
- * Use for post content, descriptions, comments — anything stored and re-rendered.
+ * Use for post content, descriptions, comments  -  anything stored and re-rendered.
  */
 export function sanitizeText(value: unknown, maxLength = MAX_STRING_LENGTH): string {
   if (typeof value !== 'string') return ''
@@ -80,14 +80,14 @@ export function isValidEmail(email: unknown): email is string {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())
 }
 
-/** UUID v4 validation — prevents IDOR via non-UUID params */
+/** UUID v4 validation  -  prevents IDOR via non-UUID params */
 export function isValidUUID(value: unknown): value is string {
   if (typeof value !== 'string') return false
   if (value.length !== MAX_UUID_LENGTH) return false
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
 }
 
-/** Safe positive integer — prevents negative amounts, overflows, string injection */
+/** Safe positive integer  -  prevents negative amounts, overflows, string injection */
 export function isPositiveInteger(value: unknown, max = 10_000_000_00): boolean {
   if (typeof value !== 'number') return false
   if (!Number.isFinite(value)) return false
@@ -120,7 +120,7 @@ export function sanitizeQueryParam(value: unknown, maxLength = 100): string {
  */
 export function checkBodySize(req: Request, maxBytes = 50_000): boolean {
   const contentLength = parseInt(req.headers.get('content-length') ?? '0', 10)
-  if (isNaN(contentLength)) return true // unknown — allow, let parse fail naturally
+  if (isNaN(contentLength)) return true // unknown  -  allow, let parse fail naturally
   return contentLength <= maxBytes
 }
 

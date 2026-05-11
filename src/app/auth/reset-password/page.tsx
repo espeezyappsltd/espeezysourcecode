@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { createClient as createSupabaseClient } from '@/lib/supabase/client'
+import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useRouter } from 'next/navigation'
 import { ShieldCheck, Lock, Activity } from 'lucide-react'
 import TransientError from '@/components/TransientError'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const supabase = useMemo(() => createSupabaseClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -43,8 +43,8 @@ export default function ResetPasswordPage() {
       setError('Passwords do not match.')
       return
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
       return
     }
 
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
             <Lock color="white" size={30} />
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em', margin: 0 }}>Secure Account Recovery</h1>
-          <p style={{ color: 'var(--text-sub)', marginTop: '0.6rem', fontWeight: 600 }}>Update your terminal credentials to regain access.</p>
+          <p style={{ color: 'var(--text-sub)', marginTop: '0.6rem', fontWeight: 600 }}>Update your password to regain access.</p>
         </div>
 
         {error && <TransientError message={error} />}
@@ -90,8 +90,8 @@ export default function ResetPasswordPage() {
             <div style={{ color: 'var(--success)', marginBottom: '1.5rem' }}>
               <ShieldCheck size={48} style={{ margin: '0 auto' }} />
             </div>
-            <h3 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>Protocol Updated</h3>
-            <p style={{ color: 'var(--text-sub)', fontWeight: 600 }}>Identity credentials have been successfully reset. Redirecting to terminal...</p>
+            <h3 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>Password Updated</h3>
+            <p style={{ color: 'var(--text-sub)', fontWeight: 600 }}>Your password has been successfully reset. Redirecting to login...</p>
           </div>
         ) : (
           <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -105,6 +105,7 @@ export default function ResetPasswordPage() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 style={{ borderRadius: '14px' }}
+                disabled={loading}
               />
             </div>
             <div className="form-group">
@@ -117,6 +118,7 @@ export default function ResetPasswordPage() {
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 style={{ borderRadius: '14px' }}
+                disabled={loading}
               />
             </div>
             <button className="btn btn-primary" type="submit" disabled={loading || !sessionReady} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem' }}>
@@ -124,13 +126,6 @@ export default function ResetPasswordPage() {
             </button>
           </form>
         )}
-
-        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            <Activity size={14} color="var(--brand)" /> 
-            System Recovery Mode Active
-          </div>
-        </div>
       </div>
     </div>
   )

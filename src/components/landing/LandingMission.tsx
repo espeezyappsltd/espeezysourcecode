@@ -1,6 +1,7 @@
 'use client'
 
 import { CheckCircle, Zap } from 'lucide-react'
+import Image from 'next/image'
 
 export default function LandingMission() {
    return (
@@ -10,7 +11,7 @@ export default function LandingMission() {
                <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Helping Students Succeed</div>
                <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '2rem', letterSpacing: '-0.03em', lineHeight: 1.1, color: '#f3f4f6' }}>Get the credit you deserve for team projects.</h2>
                <p style={{ fontSize: '1.125rem', color: '#9ca3af', lineHeight: 1.7, marginBottom: '3rem' }}>
-                  Standard tools often miss how hard you actually work in a group. Espeezy was built to make sure everyone—from the ones doing the research to the ones putting it all together—gets recognised for their role.
+                  Standard tools often miss how hard you actually work in a group. Espeezy was built to make sure everyone - from the ones doing the research to the ones putting it all together - gets recognised for their role.
                </p>
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div style={{ background: '#111111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222222' }}>
@@ -28,7 +29,7 @@ export default function LandingMission() {
             <div style={{ background: 'linear-gradient(135deg, #111111 0%, #0a0a0a 100%)', padding: '3rem', borderRadius: '16px', border: '1px solid #222222', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '2.5rem' }}>
                   <div style={{ width: '42px', height: '42px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                     <img src="/brand-logo-black-gold.png" style={{ width: '24px', height: '24px' }} alt="Espeezy" />
+                     <Image src="/brand-logo-black-gold.png" width={24} height={24} style={{ width: '24px', height: '24px' }} alt="Espeezy" />
                   </div>
                   <div>
                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981' }}>EVERYTHING ONLINE</div>

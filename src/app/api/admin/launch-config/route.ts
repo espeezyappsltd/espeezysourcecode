@@ -1,28 +1,28 @@
 import { NextResponse } from 'next/server'
-import { getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const db = getAdminDb()
-  if (!db) {
-    return NextResponse.json({ error: 'Database not initialized' }, { status: 500 })
-  }
 
   const keys = ['launch_date', 'launch_message', 'preregister_goal', 'preregister_open', 'brand_name']
   const config: Record<string, any> = {}
 
   try {
-    const snapshots = await Promise.all(
-      keys.map(key => db.collection('app_config').doc(key).get())
-    )
+    const { data, error } = await db
+      .from('app_config')
+      .select('key, value')
+      .in('key', keys)
 
-    snapshots.forEach((doc, index) => {
-      if (doc.exists) {
-        config[keys[index]] = doc.data()?.value
-      }
-    })
+    if (error) {
+      throw error
+    }
+
+    for (const row of data ?? []) {
+      config[row.key] = row.value
+    }
 
     return NextResponse.json({ config })
   } catch (error) {
@@ -43,9 +43,6 @@ export async function PUT(req: Request) {
   }
 
   const db = getAdminDb()
-  if (!db) {
-    return NextResponse.json({ error: 'Database not initialized' }, { status: 500 })
-  }
 
   const updates: Array<{ key: string; value: string }> = await req.json()
   if (!Array.isArray(updates)) {
@@ -56,20 +53,23 @@ export async function PUT(req: Request) {
   const filtered = updates.filter(u => ALLOWED_KEYS.includes(u.key) && typeof u.value === 'string')
 
   try {
-    const batch = db.batch()
     const now = new Date().toISOString()
 
-    filtered.forEach(u => {
-      const ref = db.collection('app_config').doc(u.key)
-      batch.set(ref, {
-        key: u.key,
-        value: u.value,
-        updated_at: now,
-        updated_by: user.uid,
-      }, { merge: true })
-    })
+    const payload = filtered.map((u) => ({
+      key: u.key,
+      value: u.value,
+      updated_at: now,
+      updated_by: user.uid,
+    }))
 
-    await batch.commit()
+    const { error } = await db
+      .from('app_config')
+      .upsert(payload, { onConflict: 'key' })
+
+    if (error) {
+      throw error
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[admin-config] batch update error:', error)

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
+import { getRequestUser } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 
 
@@ -12,17 +12,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Get session token from headers
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return new NextResponse(JSON.stringify({ error: 'Authentication required.' }), { status: 401 })
     }
-    const token = authHeader.split('Bearer ')[1]
-    const adminAuth = getAdminAuth()
-    const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) return NextResponse.json({ error: 'Service Unavailable' }, { status: 503 })
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
 
     const { question, correctAnswer, userResponse } = await req.json()
     

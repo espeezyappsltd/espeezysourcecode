@@ -65,7 +65,7 @@ export default function CertificateViewer({ cert, displayName, avatarUrl, downlo
             : <AlertTriangle size={20} color="#ef4444" />}
           <div>
             <p style={{ margin: 0, fontWeight: 800, fontSize: '0.9rem', color: isValid ? '#10b981' : '#ef4444' }}>
-              {isValid ? 'Certificate Verified — Authentic' : 'Certificate Revoked'}
+              {isValid ? 'Certificate Verified  -  Authentic' : 'Certificate Revoked'}
             </p>
             <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>
               {isValid

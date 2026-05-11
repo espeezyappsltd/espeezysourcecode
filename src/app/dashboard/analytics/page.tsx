@@ -1,4 +1,4 @@
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { redirect } from 'next/navigation'
 
 export default async function AnalyticsRedirect() {

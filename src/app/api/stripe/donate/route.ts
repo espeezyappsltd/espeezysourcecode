@@ -117,8 +117,8 @@ export async function POST(req: Request) {
                 unit_amount: amountCents,
                 product_data: {
                   name: featureTag
-                    ? `Espeezy — ${featureTag}`
-                    : 'Espeezy — Mission Support Donation',
+                    ? `Espeezy  -  ${featureTag}`
+                    : 'Espeezy  -  Mission Support Donation',
                   description:
                     'Your contribution funds free, equitable education tools for students worldwide.',
                   images: [`${origin}/assets/og-image.png`],

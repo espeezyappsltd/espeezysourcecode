@@ -1,5 +1,5 @@
 /**
- * logServerError — write an unhandled server error to public.server_error_log
+ * logServerError  -  write an unhandled server error to public.server_error_log
  * using the service-role client so RLS is bypassed.
  *
  * Only import this module from server-side code (API routes, Server Actions).
@@ -7,7 +7,7 @@
  * surface on the admin dashboard.
  */
 
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient } from '@/lib/db'
 
 export interface ErrorLogPayload {
   route?: string

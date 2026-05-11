@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
-import { auth } from '@/lib/firebase' // For client-side auth state if needed, but this is an API route
+import { getAdminAuth, getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 
 
@@ -9,34 +8,36 @@ const checkBotId = async () => ({ isBot: false })
 
 export async function GET(req: Request) {
   try {
-    // Get session token from cookies/headers (assuming Firebase session cookie or Bearer token)
-    // For now, we'll implement a simple check.
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return new NextResponse('Unauthorized Pipeline', { status: 401 })
     }
-    const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) return new NextResponse('Service Unavailable', { status: 503 })
+    const uid = user.id
 
-    const token = authHeader.split('Bearer ')[1]
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
-
-    // Fetch all data concurrently from Firestore
-    const [profileSnap, tasksSnap, artifactsSnap] = await Promise.all([
-      adminDb.collection('profiles').doc(uid).get(),
-      adminDb.collection('tasks').where('assignees', 'array-contains', uid).get(),
-      adminDb.collection('artifacts').where('uploaded_by', '==', uid).get(),
+    const [profileResult, tasksResult, artifactsResult] = await Promise.all([
+      adminDb.from('profiles').select('*').eq('id', uid).single(),
+      adminDb.from('tasks').select('*').contains('assignees', [uid]),
+      adminDb.from('artifacts').select('*').eq('uploaded_by', uid),
     ])
 
-    if (!profileSnap.exists) {
+    if (profileResult.error) {
+      return new NextResponse(`Server Fault: ${profileResult.error.message}`, { status: 500 })
+    }
+    if (!profileResult.data) {
       return new NextResponse('Profile Not Found', { status: 404 })
     }
 
-    const profileData = profileSnap.data()
-    const tasksData = tasksSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }))
-    const artifactsData = artifactsSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }))
+    if (tasksResult.error || artifactsResult.error) {
+      return new NextResponse(
+        `Server Fault: ${tasksResult.error?.message ?? artifactsResult.error?.message}`,
+        { status: 500 }
+      )
+    }
+
+    const profileData = profileResult.data
+    const tasksData = tasksResult.data ?? []
+    const artifactsData = artifactsResult.data ?? []
 
     // Assemble "Takeout" Package
     const exportData = {
@@ -63,22 +64,23 @@ export async function GET(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return new NextResponse('Unauthorized Pipeline', { status: 401 })
     }
-    const token = authHeader.split('Bearer ')[1]
     const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) return new NextResponse('Service Unavailable', { status: 503 })
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
+    const uid = user.id
 
-    // 1. Delete user from Firebase Auth
-    await adminAuth.deleteUser(uid)
+    const { error: deleteAuthError } = await adminAuth.admin.deleteUser(uid)
+    if (deleteAuthError) {
+      return new NextResponse(`Server Fault: ${deleteAuthError.message}`, { status: 500 })
+    }
     
-    // 2. Delete profile from Firestore (assuming a profile document exists)
-    await adminDb.collection('profiles').doc(uid).delete()
+    const { error: deleteProfileError } = await adminDb.from('profiles').delete().eq('id', uid)
+    if (deleteProfileError) {
+      return new NextResponse(`Server Fault: ${deleteProfileError.message}`, { status: 500 })
+    }
 
     return new NextResponse('Account successfully terminated.', { status: 200 })
 

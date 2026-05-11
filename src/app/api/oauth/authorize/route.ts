@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 import { z } from 'zod'
 import crypto from 'crypto'
 
@@ -18,18 +18,12 @@ const bodySchema = z.object({
 
 export async function POST(req: Request) {
   // 1. Authenticate the user
-  const authHeader = req.headers.get('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
+  const user = await getRequestUser(req)
+  if (!user) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
-  const token = authHeader.split('Bearer ')[1]
-  const adminAuth = getAdminAuth()
   const adminDb = getAdminDb()
-  if (!adminAuth || !adminDb) return NextResponse.json({ error: 'server_error' }, { status: 503 })
-
-  const decodedToken = await adminAuth.verifyIdToken(token).catch(() => null)
-  if (!decodedToken) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  const uid = decodedToken.uid
+  const uid = user.id
 
   // 2. Validate request body
   const body = await req.json().catch(() => null)
@@ -40,11 +34,14 @@ export async function POST(req: Request) {
   const { client_id, redirect_uri, scope, state, approved } = parsed.data
 
   // 3. Re-validate client and redirect_uri server-side
-  const clientSnap = await adminDb.collection('oauth_clients').doc(client_id).get().catch(() => null)
-  if (!clientSnap || !clientSnap.exists) {
+  const { data: client, error: clientError } = await adminDb
+    .from('oauth_clients')
+    .select('id, client_id, allowed_redirect_uris, allowed_scopes')
+    .or(`id.eq.${client_id},client_id.eq.${client_id}`)
+    .single()
+  if (clientError || !client) {
     return NextResponse.json({ error: 'invalid_client' }, { status: 400 })
   }
-  const client = clientSnap.data()!
   if (!(client.allowed_redirect_uris as string[] ?? []).includes(redirect_uri)) {
     return NextResponse.json({ error: 'invalid_redirect_uri' }, { status: 400 })
   }
@@ -68,7 +65,7 @@ export async function POST(req: Request) {
   const code = crypto.randomBytes(32).toString('hex')
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
-  await adminDb.collection('oauth_auth_codes').doc(code).set({
+  const { error: insertError } = await adminDb.from('oauth_auth_codes').insert({
     code,
     client_id,
     uid,
@@ -76,8 +73,10 @@ export async function POST(req: Request) {
     redirect_uri,
     expires_at: expiresAt,
     used: false,
-    created_at: new Date().toISOString(),
   })
+  if (insertError) {
+    return NextResponse.json({ error: 'server_error', details: insertError.message }, { status: 500 })
+  }
 
   redirectUrl.searchParams.set('code', code)
   if (state) redirectUrl.searchParams.set('state', state)

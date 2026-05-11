@@ -1,4 +1,4 @@
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createServerSupabaseClient } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { ProfileProvider } from '@/context/ProfileContext'
 import { ThemeProvider } from '@/context/ThemeContext'

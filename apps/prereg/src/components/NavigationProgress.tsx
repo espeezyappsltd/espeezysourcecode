@@ -15,7 +15,7 @@ export default function NavigationProgress() {
     if (pathname === prevPath.current) return
     prevPath.current = pathname
 
-    // Path changed — stop any running animation and flash complete
+    // Path changed - stop any running animation and flash complete
     if (timerRef.current) clearTimeout(timerRef.current)
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
     setWidth(100)

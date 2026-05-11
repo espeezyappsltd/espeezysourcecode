@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useCheckoutAwarePolling } from '@/hooks/useCheckoutAwarePolling'
+import { createDonationCheckout, fetchDonationTotal } from '@/services/donations'
 import {
   Sparkles, ArrowRight, Heart, CheckCircle, Cpu, Globe, BookOpen,
   Shield, Zap, Award, BarChart2, Smartphone, ShieldCheck, Lock,
@@ -41,7 +44,7 @@ const FUND_FEATURES = [
     need: '$18,500',
     tag: 'Trust & Verification',
     why: 'Issuing W3C-compliant Verifiable Credentials requires integration with credential registries, legal review for academic recognition, and smart contract deployment and auditing costs.',
-    deliverable: 'Tamper-proof PDF and digital certificates students can share on LinkedIn and attach to job applications — backed by a public blockchain record.',
+    deliverable: 'Tamper-proof PDF and digital certificates students can share on LinkedIn and attach to job applications  -  backed by a public blockchain record.',
   },
   {
     icon: <BarChart2 size={22} />,
@@ -56,7 +59,7 @@ const FUND_FEATURES = [
     title: 'Native iOS & Android Applications',
     need: '$35,000',
     tag: 'Mobile',
-    why: 'Apple Developer Program ($99/yr), Google Play ($25 once), but more critically — native app development, code signing, TestFlight cycles, and App Store review processes require dedicated engineering sprints and device testing budgets.',
+    why: 'Apple Developer Program ($99/yr), Google Play ($25 once), but more critically  -  native app development, code signing, TestFlight cycles, and App Store review processes require dedicated engineering sprints and device testing budgets.',
     deliverable: 'Full Espeezy experience on mobile with push notifications, offline mode, camera document capture, and real-time sync.',
   },
   {
@@ -82,7 +85,7 @@ const PRESETS = [5, 10, 25, 50, 100, 250]
 
 // ─── Donor testimonials (placeholder) ────────────────────────────────────────
 const TESTIMONIALS = [
-  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for — a tool that actually sees my students as individuals, not just a group grade.' },
+  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for  -  a tool that actually sees my students as individuals, not just a group grade.' },
   { name: 'Kenji T., Computer Science, Tokyo', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
   { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
@@ -101,12 +104,17 @@ export default function FundPage() {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
   const [donationTotal, setDonationTotal] = useState({ total_cents: 0, count: 0 })
 
-  useEffect(() => {
-    fetch('/api/donations/total')
-      .then(r => r.json())
-      .then(d => { if (d.total_cents !== undefined) setDonationTotal(d) })
+  const refreshDonationTotal = useCallback(() => {
+    fetchDonationTotal()
+      .then(total => {
+        if (total) {
+          setDonationTotal(total)
+        }
+      })
       .catch(() => {})
   }, [])
+
+  useCheckoutAwarePolling(refreshDonationTotal)
 
   const getFinalAmount = () => {
     if (selectedPreset) return selectedPreset * 100
@@ -125,19 +133,10 @@ export default function FundPage() {
     }
     setSubmitting(true)
     try {
-      const res = await fetch('/api/stripe/donate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amountCents, donorName, donorEmail, message, featureTag: featureTag || 'general', isAnonymous }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.url) {
-        setSubmitError(data.error ?? 'Failed to start checkout. Please try again.')
-      } else {
-        window.location.href = data.url
-      }
+      const url = await createDonationCheckout({ amountCents, donorName, donorEmail, message, featureTag: featureTag || 'general', isAnonymous })
+      window.location.href = url
     } catch (_) {
-      setSubmitError('Network error. Please check your connection.')
+      setSubmitError('Failed to start checkout. Please try again.')
     }
     setSubmitting(false)
   }
@@ -155,7 +154,7 @@ export default function FundPage() {
       <nav style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(10,10,10,0.85)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
           <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/brand_logo2.svg" style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Espeezy" />
+            <Image src="/brand_logo2.svg" width={22} height={22} style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Espeezy" priority />
           </div>
           <span style={{ fontWeight: 950, fontSize: '1rem', color: 'white', letterSpacing: '-0.03em' }}>Espeezy</span>
         </Link>
@@ -182,7 +181,7 @@ export default function FundPage() {
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
           style={{ color: 'rgba(255,255,255,0.5)', maxWidth: '620px', margin: '0 auto 3rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65 }}>
-          Espeezy is free for every student — always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
+          Espeezy is free for every student  -  always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
         </motion.p>
 
         {/* Stats */}

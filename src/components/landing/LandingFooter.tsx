@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 // ─── Site map data ────────────────────────────────────────────────────────────
-// 30+ surfaces across the platform — listed quietly for those who notice
+// 30+ surfaces across the platform  -  listed quietly for those who notice
 const SITEMAP = [
   {
     label: 'Platform',
@@ -75,7 +76,7 @@ export default function LandingFooter() {
       {/* ── Brand block ───────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '1.5rem', fontWeight: 700, justifyContent: 'center', marginBottom: '2rem', color: '#f3f4f6' }}>
-          <img src="/brand_logo2.svg" style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'contain' }} alt="Espeezy" /> Espeezy
+          <Image src="/brand_logo2.svg" width={38} height={38} style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'contain' }} alt="Espeezy" /> Espeezy
         </div>
         <p style={{ color: '#f3f4f6', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>Built by Sospeter • Project Lead</p>
         <p style={{ color: '#6b7280', fontSize: '0.875rem', maxWidth: '500px', margin: '0 auto', lineHeight: 1.6 }}>
@@ -83,7 +84,7 @@ export default function LandingFooter() {
         </p>
       </div>
 
-      {/* ── Discreet sitemap — 30+ pages quietly listed ───────────────────── */}
+      {/* ── Discreet sitemap  -  30+ pages quietly listed ───────────────────── */}
       <div style={{ maxWidth: '900px', margin: '0 auto 4rem', opacity: 0.18, pointerEvents: 'auto' }}
            title="30+ pages · blink and you'll miss it">
         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.35rem', alignItems: 'center', marginBottom: '1.25rem' }}>

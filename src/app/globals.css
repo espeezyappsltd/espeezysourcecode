@@ -113,7 +113,7 @@ body {
   overscroll-behavior-x: auto !important;
 }
 
-/* Global scrollbar kill — only .main-content keeps a scrollbar */
+/* Global scrollbar kill - only .main-content keeps a scrollbar */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -282,7 +282,7 @@ input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible
   box-shadow: 0 0 0 4px rgba(var(--brand-rgb), 0.2);
 }
 
-/* — TOASTER MODE — 
+/* - TOASTER MODE - 
    Extreme optimization for low-power devices 
 */
 .toaster-mode * {
@@ -460,7 +460,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn:active { transform: scale(0.98); }
 
-/* — PRIMARY: Institutional Brand — flat but pops */
+/* - PRIMARY: Institutional Brand - flat but pops */
 .btn-primary {
   background-color: var(--brand);
   color: #000;
@@ -473,7 +473,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(-1px);
 }
 
-/* — SECONDARY: Subtle Support — clean borders */
+/* - SECONDARY: Subtle Support - clean borders */
 .btn-secondary {
   background-color: rgba(255,255,255,0.05);
   color: var(--text-main);
@@ -485,7 +485,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(-1px);
 }
 
-/* — DANGER: Red Alert — clean and alarming */
+/* - DANGER: Red Alert - clean and alarming */
 .btn-danger {
   background-color: rgba(239, 68, 68, 0.1);
   color: #ef4444;
@@ -498,7 +498,7 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-/* — SUCCESS: Positive Action — trusted green */
+/* - SUCCESS: Positive Action - trusted green */
 .btn-success {
   background-color: rgba(16, 185, 129, 0.1);
   color: #10b981;
@@ -510,7 +510,7 @@ h1, h2, h3, h4, h5, h6 {
   border-color: #10b981;
 }
 
-/* — GHOST: Minimal / Subtle — invisible at rest */
+/* - GHOST: Minimal / Subtle - invisible at rest */
 .btn-ghost {
   background-color: transparent;
   color: var(--text-sub);
@@ -520,7 +520,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-main);
 }
 
-/* — SIZE MODIFIERS — */
+/* - SIZE MODIFIERS - */
 .btn-sm {
   padding: 0.4rem 0.8rem;
   font-size: 0.75rem;

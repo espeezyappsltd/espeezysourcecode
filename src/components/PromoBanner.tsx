@@ -1,41 +1,80 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { X, Zap } from 'lucide-react'
-import { db, firestoreClientEnabled } from '@/lib/firebase'
-import { doc, onSnapshot, DocumentData } from 'firebase/firestore'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
+
+interface PlatformConfig {
+  id: string
+  config_key: string
+  config_value: Record<string, unknown>
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
 
 export default function PromoBanner() {
   const [isClient] = useState(() => typeof window !== 'undefined')
-  const [config, setConfig] = useState<DocumentData | null>(null)
+  const [config, setConfig] = useState<PlatformConfig | null>(null)
   const [isVisible, setIsVisible] = useState(() => {
     if (typeof localStorage === 'undefined') return true
     return !localStorage.getItem('gf_promo_dismissed_v2')
   })
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
 
   useEffect(() => {
-    if (!firestoreClientEnabled) return
-    if (!isClient) return;
+    if (!isClient) return
 
-    const unsub = onSnapshot(doc(db, 'platform_config', 'main_banner'), (snap) => {
-      if (snap.exists()) {
-        setConfig(snap.data())
-      }
-    })
+    // Initial fetch
+    db.from('platform_config')
+      .select('*')
+      .eq('config_key', 'main_banner')
+      .single()
+      .then(({ data, error }: { data: PlatformConfig | null; error: any }) => {
+        if (error) {
+          console.warn('Failed to load promo banner config:', error)
+          return
+        }
+        if (data) {
+          setConfig(data as PlatformConfig)
+        }
+      })
 
-    return () => unsub()
-  }, [isClient])
+    // Real-time subscription
+    const channel = db
+      .channel('platform_config_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'platform_config',
+          filter: `config_key=eq.main_banner`
+        },
+        (payload: any) => {
+          if (payload.new && typeof payload.new === 'object') {
+            setConfig(payload.new as PlatformConfig)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      db.removeChannel(channel)
+    }
+  }, [isClient, db])
 
   const handleDismiss = () => {
     setIsVisible(false)
     localStorage.setItem('gf_promo_dismissed_v2', 'true')
   }
 
-  const configValue = typeof config?.value === 'object' && config.value !== null ? config.value as Record<string, string> : {}
+  // Extract config values from Supabase JSON column
+  const configValue = typeof config?.config_value === 'object' && config?.config_value !== null ? config.config_value as Record<string, string> : {}
   if (!isClient || !isVisible || !config?.is_active) return null
 
-  const bannerText = configValue.text || '30% OFF ALL CLEARANCE TIERS'
-  const promoCode = configValue.code || 'ELITE30'
+  const bannerText = (configValue.text as string) || '30% OFF ALL CLEARANCE TIERS'
+  const promoCode = (configValue.code as string) || 'ELITE30'
 
   return (
     <div className="promo-banner-container" style={{
@@ -70,7 +109,7 @@ export default function PromoBanner() {
         color: 'white',
         textShadow: '0 2px 10px rgba(0,0,0,0.3)'
       }}>
-        {bannerText} — CODE: <span style={{
+        {bannerText}  -  CODE: <span style={{
           background: 'rgba(255,255,255,1)',
           padding: '4px 12px',
           borderRadius: '8px',

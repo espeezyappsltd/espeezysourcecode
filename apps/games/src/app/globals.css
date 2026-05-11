@@ -2,8 +2,8 @@
 @import '../shared/design/base.css';
 
 :root {
-  --accent: #f59e0b;
-  --hero-gradient: linear-gradient(135deg, #6366f1 0%, #f59e0b 50%, #ef4444 100%);
+  --accent: #10b981;
+  --hero-gradient: linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%);
 }
 
 @keyframes fadeIn {

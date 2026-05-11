@@ -4,15 +4,15 @@
  * AdminMarketingPanel
  *
  * The three-column "live marketing controls" grid:
- *   1. Landing Banner  — edit and deploy the site marquee message
- *   2. Announcement    — push / terminate a global notification
- *   3. Active Promos   — toggle the current promotional offer
+ *   1. Landing Banner   -  edit and deploy the site marquee message
+ *   2. Announcement     -  push / terminate a global notification
+ *   3. Active Promos    -  toggle the current promotional offer
  *
  * Props:
- *   config          — the full platform_config map (keyed by config key name)
- *   onConfigChange  — replaces the whole config map in parent state
- *   onUpdateConfig  — persists a single key to the database
- *   saving          — disables buttons while a write is in flight
+ *   config           -  the full platform_config map (keyed by config key name)
+ *   onConfigChange   -  replaces the whole config map in parent state
+ *   onUpdateConfig   -  persists a single key to the database
+ *   saving           -  disables buttons while a write is in flight
  */
 
 import { Globe, AlertCircle, CreditCard } from 'lucide-react'
@@ -95,7 +95,7 @@ export default function AdminMarketingPanel({
         />
 
         <div style={{ display: 'flex', gap: '1rem' }}>
-          {/* Deploy — saves the current text and activates the banner */}
+          {/* Deploy  -  saves the current text and activates the banner */}
           <ActionButton
             onClick={() => onUpdateConfig('main_banner', { value: mainBanner?.value ?? '', is_active: true })}
             disabled={saving}
@@ -104,7 +104,7 @@ export default function AdminMarketingPanel({
             DEPLOY
           </ActionButton>
 
-          {/* Toggle — flips is_active without touching the text */}
+          {/* Toggle  -  flips is_active without touching the text */}
           <ActionButton
             onClick={() => onUpdateConfig('main_banner', { is_active: !mainBanner?.is_active })}
             disabled={saving}

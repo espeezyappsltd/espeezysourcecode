@@ -90,7 +90,7 @@ export default function SupportChat() {
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.08)' }}>
             <div>
               <p style={{ margin: 0, fontWeight: 900, fontSize: '0.88rem', color: '#F3F4F6' }}>espeezy.com Support</p>
-              <p style={{ margin: 0, fontSize: '0.7rem', color: '#10B981' }}>● AI-powered · usually instant</p>
+              <p style={{ margin: 0, fontSize: '0.7rem', color: '#10B981' }}>24/7 AI-powered | usually instant</p>
             </div>
             <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>
               <ChevronDown size={16} />
@@ -136,7 +136,7 @@ export default function SupportChat() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }}}
-              placeholder="Type your question…"
+              placeholder="Type your question..."
               disabled={loading}
               maxLength={500}
               style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.5rem 0.75rem', color: '#F3F4F6', fontSize: '0.82rem', fontFamily: 'inherit', outline: 'none' }}

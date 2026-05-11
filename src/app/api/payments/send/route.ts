@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { z } from 'zod'
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +26,7 @@ const SendSchema = z.object({
   note: z.string().max(280).optional(),
 })
 
-// POST /api/payments/send — initiate a P2P payment checkout
+// POST /api/payments/send  -  initiate a P2P payment checkout
 export async function POST(req: NextRequest) {
   let stripe: Stripe
   try {
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create transfer record' }, { status: 500 })
   }
 
-  // Create Stripe Checkout Session — sender pays amount_cents, net_cents goes to recipient
+  // Create Stripe Checkout Session  -  sender pays amount_cents, net_cents goes to recipient
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',

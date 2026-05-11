@@ -1,0 +1,323 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# espeezy — Unified Local Dev Stack
+#
+# Services:
+#   app      → Main Next.js app              localhost:3000
+#   prereg   → Pre-registration app          localhost:3001
+#   games    → Games app                     localhost:3002
+#   kanban   → Kanban Next.js app            localhost:3003
+#   core     → Core app                      localhost:3004
+#   redis    → Redis (used by core)          internal only
+#   planka   → Planka board (Kanban SaaS)    localhost:3333
+#   caddy    → Reverse proxy + auto-HTTPS    ports 80/443  [profile: proxy]
+#
+# Usage:
+#   # Start all apps (direct port access):
+#   docker compose -f docker-compose.local.yml up -d
+#
+#   # Start with Caddy reverse proxy (requires CADDY_DOMAIN in .env.local):
+#   docker compose -f docker-compose.local.yml --profile proxy up -d
+#
+#   # View logs for one service:
+#   docker compose -f docker-compose.local.yml logs -f app
+#
+#   # Rebuild after dependency changes:
+#   docker compose -f docker-compose.local.yml build --no-cache app
+#
+#   # Tear down:
+#   docker compose -f docker-compose.local.yml down
+#
+# Boot order: each app installs deps if lock hash has drifted, then starts dev.
+# ──────────────────────────────────────────────────────────────────────────────
+name: espeezy-local
+
+x-next-boot: &next-boot
+  sh -c "
+    LOCK_HASH=\"$$(sha256sum /app/package-lock.json | awk '{print $$1}')\";
+    INSTALLED=\"$$(cat /app/node_modules/.pkg-hash 2>/dev/null || true)\";
+    if [ ! -d /app/node_modules ] || [ \"$$LOCK_HASH\" != \"$$INSTALLED\" ]; then
+      echo '[boot] installing deps...';
+      npm install --prefer-offline;
+      echo \"$$LOCK_HASH\" > /app/node_modules/.pkg-hash;
+    fi;
+    if [ -f /app/.env.local ]; then
+      echo '[boot] loading .env.local...';
+      set -a;
+      . /app/.env.local;
+      set +a;
+    fi;
+    npm run dev"
+
+x-next-env: &next-env
+  WATCHPACK_POLLING: "true"
+  CHOKIDAR_USEPOLLING: "true"
+  POLL_INTERVAL: "1000"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+x-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+services:
+
+  # ── Main app ────────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: espeezy_app
+    restart: unless-stopped
+    command: *next-boot
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app:cached
+      - app_node_modules:/app/node_modules
+      - app_next_cache:/app/.next
+    environment:
+      <<: *next-env
+      NODE_OPTIONS: "--max-old-space-size=2048"
+    env_file:
+      - path: .env.local
+        required: false
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 90s
+    logging: *logging
+
+  # ── Pre-registration app ────────────────────────────────────────────────────
+  prereg:
+    build:
+      context: ./apps/prereg
+      dockerfile: Dockerfile
+    container_name: espeezy_prereg
+    restart: unless-stopped
+    command: *next-boot
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./apps/prereg:/app:cached
+      - prereg_node_modules:/app/node_modules
+      - prereg_next_cache:/app/.next
+    environment:
+      <<: *next-env
+      NODE_OPTIONS: "--max-old-space-size=1024"
+    env_file:
+      - path: ./apps/prereg/.env.local
+        required: false
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+
+  # ── Games app ───────────────────────────────────────────────────────────────
+  games:
+    build:
+      context: ./apps/games
+      dockerfile: Dockerfile
+    container_name: espeezy_games
+    restart: unless-stopped
+    command: *next-boot
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./apps/games:/app:cached
+      - games_node_modules:/app/node_modules
+      - games_next_cache:/app/.next
+    environment:
+      <<: *next-env
+      NODE_OPTIONS: "--max-old-space-size=1024"
+    env_file:
+      - ./apps/games/.env.local
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+
+  # ── Kanban Next.js app ──────────────────────────────────────────────────────
+  kanban:
+    build:
+      context: ./apps/kanban
+      dockerfile: Dockerfile
+    container_name: espeezy_kanban
+    restart: unless-stopped
+    command: *next-boot
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./apps/kanban:/app:cached
+      - kanban_node_modules:/app/node_modules
+      - kanban_next_cache:/app/.next
+    environment:
+      <<: *next-env
+      NODE_OPTIONS: "--max-old-space-size=1024"
+    env_file:
+      - path: ./apps/kanban/.env.local
+        required: false
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3003"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+
+  # ── Core app ────────────────────────────────────────────────────────────────
+  core:
+    build:
+      context: ./apps/core
+      dockerfile: Dockerfile.local
+    container_name: espeezy_core
+    restart: unless-stopped
+    ports:
+      - "3004:3000"
+    volumes:
+      - ./apps/core:/app:cached
+      - core_node_modules:/app/node_modules
+      - core_next_cache:/app/.next
+    environment:
+      <<: *next-env
+      NODE_OPTIONS: "--max-old-space-size=1536"
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+
+  # ── Redis (used by core) ────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: espeezy_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - espeezy-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # ── Planka board ────────────────────────────────────────────────────────────
+  planka:
+    image: ghcr.io/plankanban/planka:latest
+    container_name: espeezy_planka
+    restart: unless-stopped
+    ports:
+      - "3333:1337"
+    environment:
+      BASE_URL: "${BASE_URL:-http://localhost:3333}"
+      DATABASE_URL: "${SUPABASE_DB_URL}"
+      SECRET_KEY: "${SECRET_KEY}"
+      TRUST_PROXY: "true"
+      DEFAULT_ADMIN_NAME: "${DEFAULT_ADMIN_NAME:-Espeezy Admin}"
+      DEFAULT_ADMIN_USERNAME: "${DEFAULT_ADMIN_USERNAME:-admin}"
+      DEFAULT_ADMIN_EMAIL: "${DEFAULT_ADMIN_EMAIL}"
+      DEFAULT_ADMIN_PASSWORD: "${DEFAULT_ADMIN_PASSWORD}"
+      DEFAULT_PROJECT_NAME: "${DEFAULT_PROJECT_NAME:-Espeezy Workspace}"
+      DEFAULT_BOARD_NAME: "${DEFAULT_BOARD_NAME:-Kanban Board}"
+      OUTGOING_BLOCKED_IPS: "${OUTGOING_BLOCKED_IPS:-127.0.0.1,0.0.0.0}"
+      OUTGOING_BLOCKED_HOSTS: "${OUTGOING_BLOCKED_HOSTS:-localhost}"
+    env_file:
+      - path: .env.local
+        required: false
+    volumes:
+      - planka_avatars:/app/public/user-avatars
+      - planka_backgrounds:/app/public/project-background-images
+      - planka_attachments:/app/private/attachments
+    networks:
+      - espeezy-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Caddy reverse proxy ─────────────────────────────────────────────────────
+  # Opt in with:  docker compose -f docker-compose.local.yml --profile proxy up -d
+  caddy:
+    image: caddy:2-alpine
+    container_name: espeezy_caddy
+    restart: unless-stopped
+    profiles:
+      - proxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3 QUIC
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      CADDY_DOMAIN: "${CADDY_DOMAIN:-localhost}"
+    env_file:
+      - path: .env.local
+        required: false
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    depends_on:
+      app:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  espeezy-net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1460
+
+volumes:
+  app_node_modules:
+  app_next_cache:
+  prereg_node_modules:
+  prereg_next_cache:
+  games_node_modules:
+  games_next_cache:
+  kanban_node_modules:
+  kanban_next_cache:
+  core_node_modules:
+  core_next_cache:
+  redis_data:
+  planka_avatars:
+  planka_backgrounds:
+  planka_attachments:
+  caddy_data:
+  caddy_config:

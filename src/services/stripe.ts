@@ -1,4 +1,4 @@
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient } from '@/lib/db'
 import { getAppUrl, getStripeClient } from '../utils/stripe'
 
 const APP_URL = getAppUrl()
@@ -70,7 +70,7 @@ export async function createCheckoutSession({
     : undefined
 
   const session = await stripe.checkout.sessions.create({
-    // Dynamic payment methods — Stripe auto-selects based on customer locale/wallet
+    // Dynamic payment methods  -  Stripe auto-selects based on customer locale/wallet
     mode: isSubscription ? 'subscription' : 'payment',
     customer: customerId,
     customer_email: customerId ? undefined : email,

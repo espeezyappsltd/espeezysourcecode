@@ -3,15 +3,15 @@
 /**
  * AdminAnalyticsGrid
  *
- * The "Business Intelligence Grid" — two side-by-side charts:
+ * The "Business Intelligence Grid"  -  two side-by-side charts:
  *   Left  (3/4 width): AreaChart showing projected MRR over 4 months
  *   Right (1/4 width): Animated conversion funnel (Framer Motion bars)
  *
  * Props:
- *   stats — AdminStats from useAdminDashboard hook
+ *   stats  -  AdminStats from useAdminDashboard hook
  *
  * Chart libraries: recharts + framer-motion
- * No internal state needed — all data is derived from props.
+ * No internal state needed  -  all data is derived from props.
  */
 
 import { motion, useReducedMotion } from 'framer-motion'

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, MessageSquare, Send, CheckCircle, ArrowLeft } from 'lucide-react'
+import { submitContactForm } from '@/services/contact'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', category: 'General', message: '' })
@@ -16,16 +17,11 @@ export default function ContactPage() {
     setIsSubmitting(true)
     setError('')
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      if (res.ok) {
+      const result = await submitContactForm(formData)
+      if (result.ok) {
         setIsSubmitted(true)
       } else {
-        const data = await res.json()
-        setError(data.error || 'Something went wrong. Please try again.')
+        setError(result.error || 'Something went wrong. Please try again.')
       }
     } catch (_) {
       setError('Network error. Please try again.')

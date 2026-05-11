@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -24,17 +24,18 @@ export async function GET(req: Request) {
 
   const { client_id, redirect_uri } = parsed.data
   const db = getAdminDb()
-  if (!db) return NextResponse.json({ error: 'server_error' }, { status: 503 })
-
-  const snap = await db.collection('oauth_clients').doc(client_id).get().catch(() => null)
-  if (!snap || !snap.exists) {
+  const { data: client, error } = await db
+    .from('oauth_clients')
+    .select('id, client_id, client_name, logo_url, allowed_redirect_uris, allowed_scopes')
+    .or(`id.eq.${client_id},client_id.eq.${client_id}`)
+    .single()
+  if (error || !client) {
     return NextResponse.json(
       { error: 'invalid_client', error_description: 'Unknown client_id' },
       { status: 400 },
     )
   }
 
-  const client = snap.data()!
   const allowedUris: string[] = client.allowed_redirect_uris ?? []
   if (!allowedUris.includes(redirect_uri)) {
     return NextResponse.json(
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     client_id,
     client_name: client.client_name as string,
-    logo_url: (client.logo_url as string) ?? null,
+    logo_url: (client.logo_url as string | null) ?? null,
     allowed_scopes: (client.allowed_scopes as string[]) ?? [],
   })
 }

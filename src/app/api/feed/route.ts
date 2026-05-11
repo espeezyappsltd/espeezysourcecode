@@ -1,64 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
-import crypto from 'crypto'
+import { z } from 'zod'
+import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 
 
 const PAGE_SIZE = 20
+const createPostSchema = z.object({
+  content: z.string().trim().min(1).max(2000),
+  media_urls: z.array(z.string()).optional(),
+  post_type: z.string().optional(),
+  visibility: z.enum(['public', 'connections']).optional(),
+  group_id: z.string().uuid().nullable().optional(),
+})
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) {
-      return NextResponse.json({ error: 'Service Unavailable (Build)' }, { status: 503 })
-    }
-
-    const token = authHeader.split('Bearer ')[1]
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
 
     const { searchParams } = new URL(req.url)
     const cursor = searchParams.get('cursor')
     const filter = searchParams.get('filter') ?? 'public'
 
-    let query: any = adminDb.collection('posts')
-      .where('is_deleted', '==', false)
-      .orderBy('created_at', 'desc')
+    let query = adminDb
+      .from('posts')
+      .select('id, author_id, content, media_urls, post_type, visibility, created_at, edited_at, group_id')
+      .eq('is_deleted', false)
+      .eq('visibility', filter === 'connections' ? 'connections' : 'public')
+      .order('created_at', { ascending: false })
       .limit(PAGE_SIZE)
 
     if (cursor) {
-      query = query.startAfter(cursor)
+      query = query.lt('created_at', cursor)
     }
 
-    if (filter === 'connections') {
-      query = query.where('visibility', '==', 'connections')
+    const { data: postRows, error: postsError } = await query
+    if (postsError) {
+      return NextResponse.json({ error: postsError.message }, { status: 500 })
     }
 
-    const postsSnap = await query.get()
-    const posts = await Promise.all(postsSnap.docs.map(async (doc: any) => {
-      const data = doc.data()
-      // Manual join for author
-      const authorSnap = await adminDb.collection('profiles').doc(data.author_id).get()
-      const author = authorSnap.exists ? authorSnap.data() : null
-      
+    const authorIds = Array.from(new Set((postRows ?? []).map((post) => post.author_id).filter(Boolean)))
+    const { data: authorRows } = authorIds.length
+      ? await adminDb
+          .from('profiles')
+          .select('id, full_name, username, avatar_url, role')
+          .in('id', authorIds)
+      : { data: [] as Array<{ id: string; full_name: string | null; username: string | null; avatar_url: string | null; role: string | null }> }
+
+    const authorsById = new Map((authorRows ?? []).map((author) => [author.id, author]))
+    const posts = (postRows ?? []).map((post) => {
+      const author = authorsById.get(post.author_id)
+
       return {
-        id: doc.id,
-        ...data,
-        created_at: data.created_at,
+        ...post,
         author: author ? {
-          id: authorSnap.id,
+          id: author.id,
           full_name: author.full_name,
-          username: author.username,
-          avatar_url: author.avatar_url,
-          role: author.role
-        } : null
+          ...(author.username ? { username: author.username } : {}),
+          ...(author.avatar_url ? { avatar_url: author.avatar_url } : {}),
+          ...(author.role ? { role: author.role } : {}),
+        } : null,
+        reactions: [],
+        comments: [],
       }
-    }))
+    })
 
     return NextResponse.json({
       posts,
@@ -72,54 +80,60 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const token = authHeader.split('Bearer ')[1]
-    const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) return NextResponse.json({ error: 'Service Unavailable' }, { status: 503 })
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
+    const uid = user.id
 
     // Check account is active
-    const profileSnap = await adminDb.collection('profiles').doc(uid).get()
-    const profile = profileSnap.data()
+    const { data: profile, error: profileError } = await adminDb
+      .from('profiles')
+      .select('account_status')
+      .eq('id', uid)
+      .single()
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 500 })
+    }
     if (profile?.account_status !== 'active' && profile?.account_status !== undefined) {
       return NextResponse.json({ error: 'Your account has been suspended. Contact support.' }, { status: 403 })
     }
 
-    const body = await req.json()
-    const { content, media_urls, post_type, visibility, group_id } = body
+    const parsedBody = createPostSchema.safeParse(await req.json())
+    if (!parsedBody.success) {
+      return NextResponse.json({ error: parsedBody.error.flatten() }, { status: 422 })
+    }
+    const { content, media_urls, post_type, visibility, group_id } = parsedBody.data
 
-    if (!content?.trim() || content.length > 2000) {
-      return NextResponse.json({ error: 'Content required (max 2000 chars)' }, { status: 400 })
+    const { data: post, error: postError } = await adminDb
+      .from('posts')
+      .insert({
+        author_id: uid,
+        content,
+        media_urls: media_urls ?? [],
+        post_type: post_type ?? 'general',
+        visibility: visibility ?? 'public',
+        group_id: group_id ?? null,
+        is_deleted: false,
+      })
+      .select('id, author_id, content, media_urls, post_type, visibility, created_at, edited_at, group_id')
+      .single()
+    if (postError || !post) {
+      return NextResponse.json({ error: postError?.message ?? 'Failed to create post' }, { status: 500 })
     }
 
-    const postRef = await adminDb.collection('posts').add({
-      author_id: uid,
-      content: content.trim(),
-      media_urls: media_urls ?? [],
-      post_type: post_type ?? 'general',
-      visibility: visibility ?? 'public',
-      group_id: group_id ?? null,
-      is_deleted: false,
-      created_at: new Date().toISOString()
-    })
-
-    // Log activity (simplified)
-    await adminDb.collection('activity_log').add({
+    await adminDb.from('activity_logs').insert({
       user_id: uid,
-      action_type: 'post.create',
-      resource: 'posts',
-      resource_id: postRef.id,
-      metadata: { visibility, post_type },
-      created_at: new Date().toISOString()
+      app_scope: 'feed',
+      action: 'post.create',
+      resource_type: 'posts',
+      resource_id: post.id,
+      details: { visibility: visibility ?? 'public', post_type: post_type ?? 'general' },
+      status: 'success',
     })
 
-    const postSnap = await postRef.get()
-    return NextResponse.json({ post: { id: postSnap.id, ...postSnap.data() } }, { status: 201 })
+    return NextResponse.json({ post }, { status: 201 })
   } catch (err: any) {
     console.error('Post creation error:', err.message)
     return NextResponse.json({ error: err.message }, { status: 500 })

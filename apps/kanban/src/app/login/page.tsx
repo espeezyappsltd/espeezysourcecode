@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
 
 function LoginContent() {
@@ -81,7 +82,7 @@ function LoginContent() {
     setResetting(true)
     setError('')
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
     })
     setResetting(false)
     if (resetError) {
@@ -268,7 +269,7 @@ function LoginContent() {
                 style={{ marginTop: '0.1rem' }}
               />
               <span>
-                I agree to the <a href="/terms" style={{ color: '#10b981' }}>Terms</a> and <a href="/privacy" style={{ color: '#10b981' }}>Privacy Policy</a>.
+                I agree to the <Link href="/terms" style={{ color: '#10b981' }}>Terms</Link> and <Link href="/privacy" style={{ color: '#10b981' }}>Privacy Policy</Link>.
               </span>
             </label>
           )}

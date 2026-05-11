@@ -1,20 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { db } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  limit, 
-  getDocs, 
-  doc, 
-  updateDoc 
-} from 'firebase/firestore'
 import Image from 'next/image'
 import { User, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, Fingerprint, Edit2, Check, X, Zap, Handshake, CheckCircle2, Globe, Target } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { getFlagComponent } from '@/utils/geo'
+import { fetchArtifactsByUser, fetchCommitsByUser, updateProfileById } from '@/services/dashboard'
 
 export default function ProfilePage() {
    const { profile, loading, refreshProfile } = useProfile()
@@ -28,21 +19,14 @@ export default function ProfilePage() {
        if (!profile?.id) return
        
        try {
-         const artifactsSnap = await getDocs(query(
-           collection(db, 'artifacts'),
-           where('user_id', '==', profile.id),
-           limit(3)
-         ))
-         
-         const commitsSnap = await getDocs(query(
-           collection(db, 'commits'),
-           where('user_id', '==', profile.id),
-           limit(3)
-         ))
+             const [artifacts, commits] = await Promise.all([
+                fetchArtifactsByUser(profile.id, 3),
+                fetchCommitsByUser(profile.id, 3),
+             ])
 
          const combined = [
-           ...artifactsSnap.docs.map((d: any) => ({ type: 'artifact', id: d.id, ...d.data() })),
-           ...commitsSnap.docs.map((d: any) => ({ type: 'commit', id: d.id, ...d.data() }))
+                ...artifacts.map((d: any) => ({ type: 'artifact', ...d })),
+                ...commits.map((d: any) => ({ type: 'commit', ...d }))
          ]
          setAchievements(combined)
        } catch (err: any) {
@@ -74,7 +58,7 @@ export default function ProfilePage() {
       setIsSaving(true)
       
       try {
-        await updateDoc(doc(db, 'profiles', profile.id), { biography: bioText })
+            await updateProfileById(profile.id, { biography: bioText })
         await refreshProfile()
         setIsEditingBio(false)
       } catch (err: any) {

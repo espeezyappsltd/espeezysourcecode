@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Users } from 'lucide-react'
+import { fetchPreregisterCount } from '@/services/preregister'
 
 export default function UserCount() {
   const [count, setCount] = useState<number | null>(null)
@@ -9,10 +10,9 @@ export default function UserCount() {
 
   const fetchCount = async () => {
     try {
-      const res = await fetch('/api/preregister')
-      const data = await res.json()
-      if (data.count !== undefined) {
-        setCount(data.count)
+      const nextCount = await fetchPreregisterCount()
+      if (typeof nextCount === 'number') {
+        setCount(nextCount)
         setIsLive(true)
         setTimeout(() => setIsLive(false), 2000)
       }

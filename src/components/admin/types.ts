@@ -2,7 +2,7 @@
  * Shared TypeScript types for the Admin Dashboard feature.
  *
  * Keep this file as the single source of truth for admin-related shapes.
- * Import from here in every admin component — never redefine inline.
+ * Import from here in every admin component  -  never redefine inline.
  */
 
 // ── Platform Config ────────────────────────────────────────────────────────────
@@ -64,7 +64,7 @@ export interface LaunchConfig {
   launch_date: string
   launch_message: string
   preregister_goal: string
-  /** String "true" | "false" — stored as text in the DB. */
+  /** String "true" | "false"  -  stored as text in the DB. */
   preregister_open: string
   brand_name: string
   platform_version: string

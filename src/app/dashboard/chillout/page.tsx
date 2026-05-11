@@ -2,18 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { db } from '@/lib/firebase'
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  collection, 
-  query, 
-  where, 
-  getDocs,
-  documentId,
-  addDoc
-} from 'firebase/firestore'
 import { 
   Sparkles, 
   Gamepad2, 
@@ -33,6 +21,13 @@ import { useProfile } from '@/context/ProfileContext'
 import { usePresence } from '@/components/PresenceProvider'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import {
+  createGameSession,
+  createNotification,
+  fetchProfilesByIds,
+  fetchUserGameStats,
+  upsertUserGameStats,
+} from '@/services/dashboard'
 
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -94,27 +89,19 @@ export default function ChillOutHub() {
       if (!profile?.id) return
 
       try {
-        // Fetch User Stats
-        const statsRef = doc(db, 'user_game_stats', profile.id)
-        const statsSnap = await getDoc(statsRef)
-        
-        if (!statsSnap.exists()) {
+        const stats = await fetchUserGameStats(profile.id)
+
+        if (!stats) {
           const newStats = { user_id: profile.id, total_xp: 0, level: 1 }
-          await setDoc(statsRef, newStats)
+          await upsertUserGameStats(profile.id, newStats)
           setUserStats(newStats)
         } else {
-          setUserStats(statsSnap.data())
+          setUserStats(stats)
         }
 
-        // Fetch Online Profiles
         if (onlineUsers.size > 0) {
           const ids = Array.from(onlineUsers)
-          const profilesSnap = await getDocs(query(
-            collection(db, 'profiles'),
-            where(documentId(), 'in', ids.slice(0, 10)) // Firestore limit
-          ))
-          
-          const profilesData = profilesSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+          const profilesData = await fetchProfilesByIds(ids.slice(0, 10))
           setOnlineProfiles(profilesData.filter((p: any) => p.id !== profile?.id))
         }
       } catch (err: any) {
@@ -172,8 +159,7 @@ export default function ChillOutHub() {
     const roomId = `skirmish_${Date.now()}`
     
     await withLoading(async () => {
-      // 1. Create Game Session in Firestore
-      await addDoc(collection(db, 'game_sessions'), {
+      await createGameSession({
         room_id: roomId,
         creator_id: profile?.id,
         topic_id: selectedTopic?.id,
@@ -182,15 +168,13 @@ export default function ChillOutHub() {
         created_at: new Date().toISOString()
       })
 
-      // 2. Send Notifications
       for (const playerId of selectedPlayers) {
-        await addDoc(collection(db, 'notifications'), {
+        await createNotification({
           user_id: playerId,
           type: 'skirmish_invite',
           title: 'SKIRMISH DETECTED',
           message: `${profile?.full_name || 'A Peer'} challenged you to ${difficulty} ${selectedTopic?.name}.`,
           metadata: { room_id: roomId, topic_id: selectedTopic?.id, mode: gameMode, questions },
-          created_at: new Date().toISOString()
         })
       }
       

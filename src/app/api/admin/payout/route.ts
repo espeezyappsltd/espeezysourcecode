@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 
 export const dynamic = 'force-dynamic'
@@ -14,7 +14,7 @@ function getStripeClient(): Stripe {
   return new Stripe(stripeKey, { apiVersion: STRIPE_API_VERSION })
 }
 
-// POST /api/admin/payout — admin sends money to a user
+// POST /api/admin/payout  -  admin sends money to a user
 export async function POST(req: NextRequest) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -25,9 +25,6 @@ export async function POST(req: NextRequest) {
   }
 
   const db = getAdminDb()
-  if (!db) {
-    return NextResponse.json({ error: 'Database not initialized' }, { status: 500 })
-  }
 
   const body = await req.json().catch(() => null)
   const { recipient_id, amount_cents, note } = body ?? {}
@@ -50,10 +47,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'amount_cents must be a positive integer >= 100 (min $1)' }, { status: 400 })
   }
 
-  const recipientDoc = await db.collection('profiles').doc(recipient_id).get()
-  const recipient = recipientDoc.data()
+  const { data: recipient, error: recipientError } = await db
+    .from('profiles')
+    .select('stripe_account_id, stripe_account_status')
+    .eq('id', recipient_id)
+    .single()
 
-  if (!recipientDoc.exists || !recipient) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  if (recipientError || !recipient) return NextResponse.json({ error: 'User not found' }, { status: 404 })
   if (!recipient.stripe_account_id || recipient.stripe_account_status !== 'active') {
     return NextResponse.json({ error: 'Recipient has no active bank account connected.' }, { status: 400 })
   }
@@ -84,17 +84,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 502 })
   }
 
-  await db.collection('admin_payouts').add({
+  await db.from('admin_payouts').insert({
     admin_id: user.uid,
     recipient_id,
     amount_cents: Math.round(amount_cents),
     stripe_transfer_id: transfer.id,
     note: note ?? null,
-    created_at: new Date().toISOString()
   })
 
   try {
-    await db.collection('activity_log').add({
+    await db.from('activity_log').insert({
       user_id: user.uid,
       action: 'admin_payout',
       resource_type: 'admin_payout',

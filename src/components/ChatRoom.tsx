@@ -4,17 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { usePresence, useSyncedList } from '@/lib/realtime-provider'
 import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare } from 'lucide-react'
 
-import { db } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  getDocs, 
-  addDoc,
-  serverTimestamp 
-} from 'firebase/firestore'
+import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
 type ChatHistoryMessage = {
@@ -32,6 +22,7 @@ interface ChatRoomProps {
 }
 
 export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
+  const db = createBrowserSupabaseClient()
   const { list: liveMessages, pushItem: sendLiveMessage } = useSyncedList<{
     senderId: string;
     senderName: string;
@@ -51,17 +42,18 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
   const fetchHistory = async () => {
     setLoadingHistory(true);
     try {
-      const q = query(
-        collection(db, 'chat_messages'),
-        where('room_id', '==', roomId),
-        orderBy('created_at', 'asc'),
-        limit(50)
-      )
-      const snap = await getDocs(q)
-      setHistory(snap.docs.map((d: any) => {
-        const m = d.data()
+      const { data, error } = await db
+        .from('chat_messages')
+        .select('id, sender_id, content, created_at, metadata')
+        .eq('room_id', roomId)
+        .order('created_at', { ascending: true })
+        .limit(50)
+
+      if (error) throw error
+
+      setHistory((data ?? []).map((m: any) => {
         return {
-          id: d.id,
+          id: m.id,
           senderId: m.sender_id,
           senderName: m.metadata?.sender_name || 'Student',
           text: m.content,
@@ -107,14 +99,14 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
 
       try {
         await Promise.all([
-          addDoc(collection(db, 'chat_messages'), {
+          db.from('chat_messages').insert({
             room_id: roomId,
             sender_id: currentUser.id,
             content: messageContent,
             metadata: { sender_name: currentUser.name },
             created_at: new Date().toISOString()
           }),
-          recipientId ? addDoc(collection(db, 'notifications'), {
+          recipientId ? db.from('notifications').insert({
             user_id: recipientId,
             type: 'new_message',
             title: currentUser.name,

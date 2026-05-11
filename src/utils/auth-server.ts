@@ -1,36 +1,34 @@
-import { cookies } from 'next/headers'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
+import { createClient as createServerSupabaseClient } from '@/lib/supabase/server'
+import { getAdminDb } from '@/lib/supabase/admin'
 
 export async function getAuthUser() {
-  const adminAuth = getAdminAuth()
-  if (!adminAuth) return null
-  const sessionCookie = (await cookies()).get('__session')?.value
-  if (!sessionCookie) return null
-  try {
-    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true)
-    return decodedClaims
-  } catch (e) {
-    return null
+  const db = await createServerSupabaseClient()
+  const { data: { user } } = await db.auth.getUser()
+    .catch(() => ({ data: { user: null } }))
+
+  if (!user) return null
+
+  return {
+    uid: user.id,
+    email: user.email,
+    aud: user.aud,
+    role: user.role,
   }
 }
 
 export async function getUid() {
-  const adminAuth = getAdminAuth()
-  if (!adminAuth) return null
-  const sessionCookie = (await cookies()).get('__session')?.value
-  if (!sessionCookie) return null
-  try {
-    const decoded = await adminAuth.verifySessionCookie(sessionCookie)
-    return decoded.uid
-  } catch {
-    return null
-  }
+  const user = await getAuthUser()
+  return user?.uid ?? null
 }
 
 export async function getUserProfile(uid: string) {
   const adminDb = getAdminDb()
-  if (!adminDb) return null
-  const doc = await adminDb.collection('profiles').doc(uid).get()
-  if (!doc.exists) return null
-  return { id: doc.id, ...doc.data() }
+  const { data, error } = await adminDb
+    .from('profiles')
+    .select('*')
+    .eq('id', uid)
+    .single()
+
+  if (error || !data) return null
+  return data
 }

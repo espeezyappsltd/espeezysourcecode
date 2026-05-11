@@ -1,0 +1,47 @@
+name: espeezy-core-local
+
+services:
+  core-app:
+    build:
+      context: ./apps/core
+      dockerfile: Dockerfile.local
+    container_name: espeezy_core_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/core:/app:cached
+      - core_node_modules:/app/node_modules
+      - core_next_cache:/app/.next
+    environment:
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      POLL_INTERVAL: "1000"
+      NODE_OPTIONS: "--max-old-space-size=1536"
+    networks:
+      - core-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  redis-core:
+    image: redis:7-alpine
+    container_name: espeezy_core_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - core_redis_data:/data
+    networks:
+      - core-net
+
+networks:
+  core-net:
+    driver: bridge
+
+volumes:
+  core_node_modules:
+  core_next_cache:
+  core_redis_data:

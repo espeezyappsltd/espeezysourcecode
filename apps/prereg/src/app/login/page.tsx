@@ -100,15 +100,9 @@ function LoginContent() {
     setError('')
     setSuccess('')
 
-    let resetError: { message: string } | null = null
-    try {
-      const result = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/login`,
-      })
-      resetError = result.error as { message: string } | null
-    } catch {
-      resetError = { message: missingConfigMessage }
-    }
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+    })
 
     setResetting(false)
     if (resetError) {

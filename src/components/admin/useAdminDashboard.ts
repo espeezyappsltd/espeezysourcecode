@@ -4,7 +4,7 @@
  * useAdminDashboard
  *
  * Custom hook that owns ALL state and data-fetching for the Admin Dashboard.
- * No UI code lives here — just data, effects, and callbacks.
+ * No UI code lives here  -  just data, effects, and callbacks.
  *
  * Why a hook?
  *   - Keeps page.tsx and every sub-component free of business logic.
@@ -215,7 +215,7 @@ export function useAdminDashboard() {
         if (cfg) setLaunchConfig((prev) => ({ ...prev, ...cfg }))
         setPreregCount(count ?? 0)
       } catch {
-        // Non-critical — silently ignore; the form just shows empty defaults
+        // Non-critical  -  silently ignore; the form just shows empty defaults
       }
     }
 
@@ -302,7 +302,7 @@ export function useAdminDashboard() {
 
   /**
    * Verifies the admin clearance code.
-   * The code is intentionally simple — the real gate is the server-side
+   * The code is intentionally simple  -  the real gate is the server-side
    * role check in the layout and every API route.
    */
   const handleVerify = useCallback(

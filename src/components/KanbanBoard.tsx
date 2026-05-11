@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { db, createBrowserSupabaseClient } from '@/lib/db-client'
-import { FileUp, GitCommit, AlertCircle, Search, X, RefreshCw, CloudOff } from 'lucide-react'
+import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { AlertCircle, Search, X, RefreshCw, CloudOff } from 'lucide-react'
 import { useConnectivity } from '@/context/ConnectivityContext'
 import { Task, TaskStatus } from '@/types/database'
 import { Profile } from '@/types/auth'
@@ -14,20 +14,12 @@ import confetti from 'canvas-confetti'
 import { distributeTaskScore } from '@/app/dashboard/actions'
 import TeamChat from './TeamChat'
 import { logActivity } from '@/utils/logging'
-import MemberProfileModal from './MemberProfileModal'
-import { usePresence, useSyncedList, useSyncedObject } from '@/lib/realtime-provider'
-import { ref, update, set, remove, push } from 'firebase/database'
-import { database } from '@/lib/firebase'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
 // Minimum drag duration (ms) before a drop is accepted.
 // Prevents accidental fast flicks and ensures intentional placement.
 const MIN_DRAG_MS = 150
-
-// How long the lock-snap animation class stays active (ms).
-// Slightly longer than the CSS animation (0.45s / 450ms) to ensure full playback.
-const LOCK_SNAP_DURATION_MS = 500
 
 export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   if (!groupId) return <div>Invalid Group</div>;
@@ -41,13 +33,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   const router = useRouter();
   const db = createBrowserSupabaseClient();
-  const { isOnline, isSlow } = useConnectivity()
-  
-  const { list: liveTasksRaw, pushItem: pushLiveTask, removeItem: removeLiveTask } = useSyncedList<Task>(`rooms/${groupId}/tasks`);
-  const storageTasks = useMemo(() => liveTasksRaw.map(item => item.data), [liveTasksRaw]);
-  
-  const { others, me, updateMyState } = usePresence(groupId);
-  const othersDragging = useMemo(() => others.filter(other => (other as any).draggingTaskId), [others]);
+  const { isOnline } = useConnectivity()
+
+  const [storageTasks, setStorageTasks] = useState<Task[]>([])
 
   const [boardSearch, setBoardSearch] = useState('');
   const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
@@ -56,43 +44,23 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [boardError, setBoardError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Drag UX state
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
-  const [droppingTaskId, setDroppingTaskId] = useState<string | null>(null)
   const [activeDragColumn, setActiveDragColumn] = useState<TaskStatus | null>(null)
   const dragStartTimeRef = useRef<number>(0)
 
-  // Reconcile Liveblocks Storage with Supabase Data
-  const reconcileTasks = useCallback(async (dbTasks: Task[]) => {
-    // 1. Add missing tasks and update existing ones
-    for (const dbTask of dbTasks) {
-      if (pendingUpdates.has(dbTask.id)) continue;
-
-      const liveTaskItem = liveTasksRaw.find(item => item.data.id === dbTask.id);
-      if (!liveTaskItem) {
-        const listRef = ref(database, `rooms/${groupId}/tasks`);
-        const newItemRef = push(listRef);
-        await set(newItemRef, dbTask);
-      } else {
-        if (JSON.stringify(liveTaskItem.data) !== JSON.stringify(dbTask)) {
-          const itemRef = ref(database, `rooms/${groupId}/tasks/${liveTaskItem.id}`);
-          await set(itemRef, dbTask);
-        }
-      }
-    }
-
-    // 2. Remove deleted tasks
-    const dbTaskIds = new Set(dbTasks.map(t => t.id));
-    for (const liveItem of liveTasksRaw) {
-      if (!dbTaskIds.has(liveItem.data.id)) {
-        const itemRef = ref(database, `rooms/${groupId}/tasks/${liveItem.id}`);
-        await remove(itemRef);
-      }
-    }
-  }, [liveTasksRaw, pendingUpdates, groupId]);
+  // Keep local optimistic state, but always reconcile from Supabase source of truth.
+  const reconcileTasks = useCallback((dbTasks: Task[]) => {
+    setStorageTasks((prev) => {
+      const previousById = new Map(prev.map((task) => [task.id, task]))
+      return dbTasks.map((task) => {
+        if (!pendingUpdates.has(task.id)) return task
+        return previousById.get(task.id) ?? task
+      })
+    })
+  }, [pendingUpdates])
 
   // 0. BLAZING SPEED CACHE: Load from LocalStorage for instant perception
   useEffect(() => {
@@ -105,7 +73,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         console.error("Cache Hydration Failed", e);
       }
     }
-  }, [groupId]); // Run once on mount
+  }, [groupId, reconcileTasks, storageTasks?.length]);
 
   // Persistence Sync
   useEffect(() => {
@@ -121,7 +89,6 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   }, [])
 
   const fetchTasksFromDB = useCallback(async () => {
-    if (storageTasks == null) return;
     const { data } = await db
       .from('tasks')
       .select('*')
@@ -131,7 +98,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     if (data) {
       reconcileTasks(data as Task[]);
     }
-  }, [db, groupId, reconcileTasks, storageTasks])
+  }, [db, groupId, reconcileTasks])
 
   const fetchGroupMembers = useCallback(async () => {
     const { data } = await db
@@ -202,19 +169,17 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     }
   }, [newTaskSignal])
 
-  // Collaborative Handlers (RTDB)
+  // Drag handlers
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId)
     e.dataTransfer.effectAllowed = 'move'
     dragStartTimeRef.current = Date.now()
     setDraggingCardId(taskId)
-    updateMyState({ draggingTaskId: taskId });
   }
 
   const handleDragEnd = () => {
     setDraggingCardId(null)
     setActiveDragColumn(null)
-    updateMyState({ draggingTaskId: null });
   }
 
   const handleDragOver = (e: React.DragEvent, col: TaskStatus) => {
@@ -230,25 +195,11 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     }
   }
 
-  const moveTask = useCallback(async (taskId: string, newStatus: TaskStatus) => {
-    const liveTaskItem = liveTasksRaw.find(item => item.data.id === taskId);
-    if (liveTaskItem) {
-      const itemRef = ref(database, `rooms/${groupId}/tasks/${liveTaskItem.id}`);
-      await update(itemRef, { status: newStatus });
-    }
-  }, [liveTasksRaw, groupId]);
-
-  const addTask = useCallback(async (newTask: Task) => {
-    await pushLiveTask(newTask);
-  }, [pushLiveTask]);
-
-  const updateTask = useCallback(async (updatedTask: Task) => {
-    const liveTaskItem = liveTasksRaw.find(item => item.data.id === updatedTask.id);
-    if (liveTaskItem) {
-      const itemRef = ref(database, `rooms/${groupId}/tasks/${liveTaskItem.id}`);
-      await set(itemRef, updatedTask);
-    }
-  }, [liveTasksRaw, groupId]);
+  const moveTask = useCallback((taskId: string, newStatus: TaskStatus) => {
+    setStorageTasks((prev) => prev.map((task) => (
+      task.id === taskId ? { ...task, status: newStatus } : task
+    )))
+  }, [])
 
   const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
     e.preventDefault()
@@ -405,11 +356,6 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       sessionStorage.removeItem(sessionKey)
     }
   }, [globalProbability, storageTasks?.length, hasCelebrated, groupId])
-  if (storageTasks == null) {
-    return <div>Loading board...</div>;
-  }
-
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
       {boardError && (
@@ -431,12 +377,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Project Progress</h3>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
               <div style={{ display: 'flex', WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent)' }}>
-                {others.map((other, idx) => {
-                  const presence = other as any
-                  const user = groupMembers.find(m => m.id === presence.userId) || { full_name: presence.name || 'Someone', avatar_url: presence.avatar || '' }
+                {groupMembers.slice(0, 6).map((user, idx) => {
                   return (
                     <div
-                      key={presence.userId}
+                      key={user.id}
                       style={{
                         width: '24px',
                         height: '24px',
@@ -460,10 +404,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                   )
                 })}
               </div>
-              {others.length > 0 && (
+              {groupMembers.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.8rem', background: 'var(--bg-main)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {others.length} Team {others.length === 1 ? 'Node' : 'Nodes'} Active
+                    {groupMembers.length} Team {groupMembers.length === 1 ? 'Member' : 'Members'}
                   </span>
                 </div>
               )}
@@ -539,43 +483,24 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                onDrop={(e) => handleDrop(e, col)}
              >
                   {tasksByStatus[col].map((task: Task) => {
-                    const draggingOther = othersDragging.find(o => (o as any).draggingTaskId === task.id)
                     const isDraggingThis = draggingCardId === task.id
 
                     return (
                       <div
                         key={task.id}
-                        className={`kanban-card ${draggingOther ? 'remote' : ''} ${isDraggingThis ? 'dragging' : ''}`}
+                        className={`kanban-card ${isDraggingThis ? 'dragging' : ''}`}
                         draggable
                         onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent<HTMLDivElement>, task.id)}
                         onDragEnd={handleDragEnd}
                         onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
                         style={{
                           position: 'relative',
-                          border: draggingOther ? '2px solid var(--brand)' : '1px solid var(--border)',
+                          border: '1px solid var(--border)',
                           padding: '0.5rem',
                           cursor: isDraggingThis ? 'grabbing' : 'grab',
                           opacity: isDraggingThis ? 0.4 : 1,
                         }}
                       >
-                     {draggingOther && (
-                       <div style={{
-                         position: 'absolute',
-                         top: '-10px',
-                         right: '10px',
-                         backgroundColor: 'var(--brand)',
-                         color: 'white',
-                         fontSize: '0.65rem',
-                         padding: '2px 8px',
-                         borderRadius: '10px',
-                         fontWeight: 700,
-                         boxShadow: '0 2px 10px rgba(var(--brand-rgb), 0.3)',
-                         zIndex: 2,
-                         animation: 'pulse 2s infinite'
-                       }}>
-                         {(draggingOther as any).name || 'A teammate'} is moving this
-                       </div>
-                     )}
                      <div className="kanban-card-title" style={{ fontSize: '0.85rem', marginBottom: '0.4rem' }}>{task.title}</div>
 
                     {/* COMPACT PROGRESS BAR */}
@@ -721,16 +646,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             setIsModalOpen(false)
             setSelectedTask(null)
           }}
-          onlineUserIds={new Set([...others.map((o: any) => o.userId), profile?.id].filter(Boolean) as string[])}
-        />
-      )}
-
-      {selectedMember && (
-        <MemberProfileModal
-          member={selectedMember}
-          groupMembers={groupMembers}
-          tasks={filteredTasks}
-          onClose={() => setSelectedMember(null)}
+          onlineUserIds={new Set([profile?.id].filter(Boolean) as string[])}
         />
       )}
 

@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { resolveSupabaseEnv } from '@/lib/supabase-env'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -28,33 +29,45 @@ export async function middleware(request: NextRequest) {
 
   let supabaseResponse = NextResponse.next({ request })
 
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
+  // Allow public routes through
+  if (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next') ||
+    pathname.includes('.')
+  ) {
+    return supabaseResponse
+  }
+
+  // Validate Supabase config before creating client
+  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv()
+
+  if (!supabaseUrl || !supabaseKey) {
+    // Missing config - redirect to login with error
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    loginUrl.searchParams.set('error', 'Configuration error')
+    return NextResponse.redirect(loginUrl)
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll()
       },
-    }
-  )
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        supabaseResponse = NextResponse.next({ request })
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        )
+      },
+    },
+  })
 
   const {
     data: { user },
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
-
-  // Allow login page and API routes through
-  if (isPublicRoute) {
-    return supabaseResponse
-  }
 
   // Redirect unauthenticated users to /login
   if (!user) {
@@ -64,7 +77,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Games is a Pro feature — check the user's tier in profiles table
+  // Games is a Pro feature - check the user's tier in profiles table
   // If the user has no pro/premium tier, redirect to upgrade page
   let tier = 'free'
   try {

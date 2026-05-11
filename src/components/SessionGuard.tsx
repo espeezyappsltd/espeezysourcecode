@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { auth } from '@/lib/firebase'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Clock, LogOut, CheckCircle2 } from 'lucide-react'
@@ -15,6 +14,7 @@ export default function SessionGuard() {
   const [showWarning, setShowWarning] = useState(false)
   const [countdown, setCountdown] = useState(COUNTDOWN_DURATION)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const db = useMemo(() => createBrowserSupabaseClient(), [])
   
   const router = useRouter()
   const pathname = usePathname()
@@ -24,23 +24,23 @@ export default function SessionGuard() {
 
   // 1. Monitor Authentication State
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user)
-      if (!user) {
+    const { data: { subscription } } = db.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user)
+      if (!session?.user) {
         setShowWarning(false)
         router.refresh()
       }
     })
 
-    return () => unsub()
-  }, [router])
+    return () => subscription?.unsubscribe()
+  }, [router, db.auth])
 
   const handleLogout = useCallback(async () => {
-    await signOut(auth)
+    await db.auth.signOut()
     setShowWarning(false)
     router.push('/login')
     router.refresh()
-  }, [router])
+  }, [router, db.auth])
 
   const resetTimers = useCallback(() => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current)

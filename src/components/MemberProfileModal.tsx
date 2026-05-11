@@ -2,6 +2,7 @@
 
 import { X, UserCircle, ShieldCheck, Target } from 'lucide-react'
 import { MemberProfileModalProps } from '@/types/ui'
+import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 export default function MemberProfileModal({ member, groupMembers, tasks, onClose }: MemberProfileModalProps) {
   // Calculate verified CURRENT PROJECT EFFORT contribution %
@@ -57,11 +58,12 @@ export default function MemberProfileModal({ member, groupMembers, tasks, onClos
              alignItems: 'center',
              justifyContent: 'center'
            }}>
-              {member.avatar_url ? (
-                <img src={member.avatar_url} alt={member.full_name || 'Member avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <UserCircle size={60} color="var(--text-sub)" />
-              )}
+              <RemoteAvatar
+                src={member.avatar_url}
+                alt={member.full_name || 'Member avatar'}
+                size={90}
+                fallback={<UserCircle size={60} color="var(--text-sub)" />}
+              />
            </div>
 
            <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '0.25rem', letterSpacing: '-0.02em' }}>{member.full_name || 'Anonymous'}</h2>

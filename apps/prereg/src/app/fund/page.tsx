@@ -10,6 +10,8 @@ import {
   ChevronDown, ChevronUp, Users, ArrowRight,
 } from 'lucide-react'
 import { PLAN_PAYMENT_LINKS } from '@/lib/stripe-payment-links'
+import { fetchLiveMetrics } from '@/services/launch'
+import { createDonationCheckout, trackDonationClick } from '@/services/donations'
 
 const FUND_FEATURES = [
   {
@@ -172,8 +174,17 @@ type DonationMetrics = {
 
 async function fetchDonationMetrics(): Promise<DonationMetrics> {
   try {
-    const res = await fetch('/api/live-metrics', { cache: 'no-store' })
-    const d = await res.json()
+    const d = await fetchLiveMetrics()
+    if (!d) {
+      return {
+        total_cents: 0,
+        donation_count: 0,
+        supporters_count: 0,
+        click_count: 0,
+        click_user_count: 0,
+        conversion_rate_pct: 0,
+      }
+    }
     if (typeof d.donation_total_cents === 'number') {
       return {
         total_cents: d.donation_total_cents,
@@ -199,8 +210,8 @@ async function fetchDonationMetrics(): Promise<DonationMetrics> {
 
 async function fetchLifetimeSeats(): Promise<number | null> {
   try {
-    const res = await fetch('/api/live-metrics', { cache: 'no-store' })
-    const data = await res.json()
+    const data = await fetchLiveMetrics()
+    if (!data) return null
     if (typeof data.lifetime_seats_used === 'number') return data.lifetime_seats_used
   } catch {}
   return null
@@ -258,28 +269,15 @@ export default function FundPage() {
 
   const trackDonateClick = useCallback((params: { amountCents: number; context: string; featureTag?: string }) => {
     const actorKey = getOrCreateActorKey()
-    const payload = JSON.stringify({
+    const payload = {
       amountCents: params.amountCents,
       source: 'fund_page',
       featureTag: params.featureTag || featureTag || undefined,
       context: params.context,
       actorKey,
-    })
-
-    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-      const blob = new Blob([payload], { type: 'application/json' })
-      navigator.sendBeacon('/api/donations/click', blob)
-      return
     }
 
-    void fetch('/api/donations/click', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: payload,
-      keepalive: true,
-    }).catch(() => {
-      // Analytics failures should never block checkout.
-    })
+    trackDonationClick(payload)
   }, [featureTag, getOrCreateActorKey])
 
   const refreshTotals = useCallback(() => {
@@ -373,14 +371,9 @@ export default function FundPage() {
 
     // Try the Stripe Checkout Sessions API first
     try {
-      const res = await fetch('/api/stripe/donate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amountCents, donorName, donorEmail, message, featureTag: featureTag || 'general', isAnonymous }),
-      })
-      const data = await res.json()
-      if (res.ok && data.url) {
-        window.location.href = data.url
+      const result = await createDonationCheckout({ amountCents, donorName, donorEmail, message, featureTag: featureTag || 'general', isAnonymous })
+      if (result.ok && result.url) {
+        window.location.href = result.url
         return
       }
       // If API is unavailable (Stripe not configured) fall back to Payment Link
@@ -389,7 +382,7 @@ export default function FundPage() {
         window.location.href = paymentLink
         return
       }
-      setSubmitError(data.error ?? 'Failed to start checkout. Please try again.')
+      setSubmitError(result.error ?? 'Failed to start checkout. Please try again.')
     } catch {
       const paymentLink = getDonationFallbackLink(selectedPreset ?? undefined, donorEmail)
       if (paymentLink) {

@@ -9,7 +9,7 @@ import confetti from 'canvas-confetti'
 
 const PERKS = [
   { icon: <Star size={15} />, label: 'Verified Scholar badge added to your profile' },
-  { icon: <Zap size={15} />, label: 'AI Study Coach activated — start your first session' },
+  { icon: <Zap size={15} />, label: 'AI Study Coach activated  -  start your first session' },
   { icon: <Users size={15} />, label: 'Unlimited group workspaces unlocked' },
 ]
 

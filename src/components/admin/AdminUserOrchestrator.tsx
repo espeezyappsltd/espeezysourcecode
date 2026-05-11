@@ -3,17 +3,17 @@
 /**
  * AdminUserOrchestrator
  *
- * The "Identity Orchestrator" panel — a list of recent users with
+ * The "Identity Orchestrator" panel  -  a list of recent users with
  * per-row action buttons to upgrade, ban, or unlock a user.
  *
  * Props:
- *   users        — array of recent user profiles
- *   loading      — true while data is still being fetched
- *   onUserAction — called when an action button is clicked
+ *   users         -  array of recent user profiles
+ *   loading       -  true while data is still being fetched
+ *   onUserAction  -  called when an action button is clicked
  *
  * Internal sub-components:
- *   UserRow     — renders a single user card
- *   ActionButton — a small square icon button with hover states
+ *   UserRow      -  renders a single user card
+ *   ActionButton  -  a small square icon button with hover states
  */
 
 import { ArrowRight, UserCheck, UserMinus, Search } from 'lucide-react'
@@ -54,7 +54,7 @@ export default function AdminUserOrchestrator({
           Identity Orchestrator
         </h2>
 
-        {/* Search input — visual only; filtering is out of scope for this component */}
+        {/* Search input  -  visual only; filtering is out of scope for this component */}
         <div style={{ position: 'relative' }}>
           <Search
             size={18}

@@ -1,9 +1,9 @@
 /**
  * Shared admin authentication helpers.
- * All admin API routes must use these guards — never inline duplicates.
+ * All admin API routes must use these guards  -  never inline duplicates.
  */
 import { NextResponse } from 'next/server'
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 
 export type AdminContext = {
   user: { id: string; email?: string }
@@ -64,7 +64,7 @@ export async function requireModerator(): Promise<AdminContext | NextResponse> {
 }
 
 /**
- * Type guard — narrows AdminContext | NextResponse to AdminContext.
+ * Type guard  -  narrows AdminContext | NextResponse to AdminContext.
  * Use: if (isAuthError(ctx)) return ctx
  */
 export function isAuthError(ctx: AdminContext | NextResponse): ctx is NextResponse {
@@ -73,7 +73,7 @@ export function isAuthError(ctx: AdminContext | NextResponse): ctx is NextRespon
 
 /**
  * Writes an entry to the audit_logs table.
- * Never throws — silently swallows DB errors so the primary action isn't blocked.
+ * Never throws  -  silently swallows DB errors so the primary action isn't blocked.
  */
 export async function writeAuditLog(
   svc: AdminContext['svc'],
@@ -90,19 +90,22 @@ export async function writeAuditLog(
     user_agent?: string
   }
 ): Promise<void> {
-  await svc
-    .from('audit_logs')
-    .insert({
-      actor_id:      params.actor_id,
-      actor_email:   params.actor_email ?? null,
-      action:        params.action,
-      resource_type: params.resource_type,
-      resource_id:   params.resource_id ?? null,
-      old_value:     params.old_value ?? null,
-      new_value:     params.new_value ?? null,
-      severity:      params.severity ?? 'info',
-      ip_address:    params.ip_address ?? null,
-      user_agent:    params.user_agent ?? null,
-    })
-    .catch(() => null) // fire-and-forget; audit failure never blocks the action
+  try {
+    await svc
+      .from('audit_logs')
+      .insert({
+        actor_id:      params.actor_id,
+        actor_email:   params.actor_email ?? null,
+        action:        params.action,
+        resource_type: params.resource_type,
+        resource_id:   params.resource_id ?? null,
+        old_value:     params.old_value ?? null,
+        new_value:     params.new_value ?? null,
+        severity:      params.severity ?? 'info',
+        ip_address:    params.ip_address ?? null,
+        user_agent:    params.user_agent ?? null,
+      })
+  } catch {
+    // Audit failures are non-blocking.
+  }
 }
