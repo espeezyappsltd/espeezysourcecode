@@ -8,71 +8,89 @@ function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/'
+  const initialError = searchParams.get('error') || ''
+  const hasSupabaseConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  const missingConfigMessage = 'Missing local Supabase config. Create apps/prereg/.env.local first.'
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [legalAccepted, setLegalAccepted] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(initialError)
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [resetting, setResetting] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!hasSupabaseConfig) {
+      setError(missingConfigMessage)
+      return
+    }
+
     setLoading(true)
     setError('')
     setSuccess('')
 
-    if (mode === 'signup') {
-      if (!legalAccepted) {
-        setError('Please accept the terms and privacy policy to create your account.')
+    try {
+      if (mode === 'signup') {
+        if (!legalAccepted) {
+          setError('Please accept the terms and privacy policy to create your account.')
+          setLoading(false)
+          return
+        }
+
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`,
+          },
+        })
+
+        if (signUpError) {
+          setError(signUpError.message)
+          setLoading(false)
+          return
+        }
+
+        if (data.session) {
+          router.replace(next)
+          return
+        }
+
+        setSuccess('Account created. Check your email to confirm your account, then sign in.')
+        setMode('signin')
+        setPassword('')
         setLoading(false)
         return
       }
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
       })
 
-      if (signUpError) {
-        setError(signUpError.message)
+      if (authError) {
+        setError(authError.message)
         setLoading(false)
         return
       }
 
-      if (data.session) {
-        router.replace(next)
-        return
-      }
-
-      setSuccess('Account created. Check your email to confirm your account, then sign in.')
-      setMode('signin')
-      setPassword('')
+      router.replace(next)
+    } catch {
+      setError(missingConfigMessage)
       setLoading(false)
-      return
     }
-
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
-
-    if (authError) {
-      setError(authError.message)
-      setLoading(false)
-      return
-    }
-
-    router.replace(next)
   }
 
   async function handleReset(e: React.MouseEvent) {
     e.preventDefault()
+    if (!hasSupabaseConfig) {
+      setError(missingConfigMessage)
+      return
+    }
+
     if (!email.trim()) {
       setError('Enter your email first, then click Reset Password.')
       return
@@ -82,9 +100,15 @@ function LoginContent() {
     setError('')
     setSuccess('')
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/login`,
-    })
+    let resetError: { message: string } | null = null
+    try {
+      const result = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/login`,
+      })
+      resetError = result.error as { message: string } | null
+    } catch {
+      resetError = { message: missingConfigMessage }
+    }
 
     setResetting(false)
     if (resetError) {
@@ -268,17 +292,17 @@ function LoginContent() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !hasSupabaseConfig}
             style={{
               marginTop: '0.3rem',
               padding: '0.9rem',
               borderRadius: '10px',
               border: 'none',
-              background: loading ? 'rgba(99,102,241,0.45)' : 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+              background: loading || !hasSupabaseConfig ? 'rgba(99,102,241,0.45)' : 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
               color: '#fff',
               fontWeight: 800,
               fontSize: '0.95rem',
-              cursor: loading ? 'wait' : 'pointer',
+              cursor: loading || !hasSupabaseConfig ? 'not-allowed' : 'pointer',
             }}
           >
             {loading
@@ -294,11 +318,11 @@ function LoginContent() {
             <button
               type="button"
               onClick={handleReset}
-              disabled={resetting}
+              disabled={resetting || !hasSupabaseConfig}
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#4f46e5',
+                color: hasSupabaseConfig ? '#4f46e5' : '#94a3b8',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 cursor: 'pointer',

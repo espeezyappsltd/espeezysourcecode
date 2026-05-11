@@ -10,12 +10,13 @@ function LoginContent() {
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/'
   const needsUpgrade = searchParams.get('upgrade') === '1'
+  const initialError = searchParams.get('error') || ''
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [legalAccepted, setLegalAccepted] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(initialError)
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)

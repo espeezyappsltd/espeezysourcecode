@@ -80,6 +80,15 @@ At minimum, expect to configure:
 
 The games and kanban apps already ship local examples for their browser-side values.
 
+For root app Supabase local auth testing, ensure `.env.local` includes:
+
+```bash
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
 ### 3. Run the package you care about
 
 ```bash
@@ -105,6 +114,20 @@ npm run dev
 npm run build
 npm run lint
 npm test
+```
+
+### Standalone app navigation (from root)
+
+```bash
+npm run dev:prereg
+npm run dev:games
+npm run dev:kanban
+npm run typecheck:prereg
+npm run typecheck:games
+npm run typecheck:kanban
+npm run build:prereg
+npm run build:games
+npm run build:kanban
 ```
 
 ### Sub-app predeploy checks
@@ -159,6 +182,11 @@ The script is designed to:
 
 Package-specific docs live here:
 
+- `NON_ENGINEER_ACCESS_GUIDE.md`
+- `DATA_ACCESS_CATALOG.md`
+- `SECURITY.md`
+- `CODEBASE_NAVIGATION.md`
+- `apps/README.md`
 - `apps/prereg/README.md`
 - `apps/games/README.md`
 - `apps/kanban/README.md`
@@ -172,9 +200,11 @@ Package-specific docs live here:
 If you are onboarding or returning after time away, start with this sequence:
 
 1. Read this file.
-2. Read `CODEBASE_NAVIGATION.md` for a file-level jump map.
-3. Read the package README for the area you are editing.
-4. Run only the package-level build or typecheck that matches your change.
-5. Only run the full root build/test suite when your change actually touches the root app or shared backend behavior.
+2. Read `NON_ENGINEER_ACCESS_GUIDE.md` for business-friendly access guidance.
+3. Read `DATA_ACCESS_CATALOG.md` for data domains, access paths, and controls.
+4. Read `CODEBASE_NAVIGATION.md` for a file-level jump map.
+5. Read the package README for the area you are editing.
+6. Run only the package-level build or typecheck that matches your change.
+7. Only run the full root build/test suite when your change actually touches the root app or shared backend behavior.
 
 That is the fastest path to avoiding cross-package confusion in this repository.

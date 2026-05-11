@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
 import { BookOpen, User, Lock, ExternalLink, Activity } from 'lucide-react'
-import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import type { Session } from '@supabase/supabase-js'
 import { Phone, Hash as HashIcon } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -19,6 +19,7 @@ function LoginContent() {
   const SIGNUP_ENABLED = false
   const router = useRouter()
   const searchParams = useSearchParams()
+  const supabase = useMemo(() => createSupabaseClient(), [])
   const error = searchParams.get('error')
   const [resetMessage, setResetMessage] = useState<string | null>(null)
   const [authTab, setAuthTab] = useState<'email' | 'phone'>(searchParams.get('method') === 'phone' ? 'phone' : 'email')
@@ -38,8 +39,7 @@ function LoginContent() {
 
   // Client-side guard: Bounce authenticated users back to dashboard
   useEffect(() => {
-    const db = createBrowserSupabaseClient()
-    db.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (session) {
         router.replace('/dashboard')
       } else {
@@ -48,28 +48,27 @@ function LoginContent() {
     })
 
     // Listen for auth state changes (e.g. after OAuth redirect)
-    const { data: { subscription } } = db.auth.onAuthStateChange((_event: string, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       if (session) {
         router.replace('/dashboard')
       }
     })
     return () => subscription?.unsubscribe()
-  }, [router])
+  }, [router, supabase])
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setAuthError(null)
 
-    const db = createBrowserSupabaseClient()
     try {
       if (isSignUp) {
         if (!legalAccepted) throw new Error('Please accept the legal policies.')
-        const { error } = await db.auth.signUp({ email, password })
+        const { error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
         setResetMessage('Check your email to confirm your account before signing in.')
       } else {
-        const { error } = await db.auth.signInWithPassword({ email, password })
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         router.push('/dashboard')
       }
@@ -87,9 +86,8 @@ function LoginContent() {
     }
     setIsResetting(true)
     setAuthError(null)
-    const db = createBrowserSupabaseClient()
     try {
-      const { error } = await db.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })
       if (error) throw error
@@ -103,14 +101,12 @@ function LoginContent() {
 
   const handleGithubLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
-    const db = createBrowserSupabaseClient();
-    await db.auth.signInWithOAuth({ provider: 'github' });
+    await supabase.auth.signInWithOAuth({ provider: 'github' });
   };
 
   const handleGoogleLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
-    const db = createBrowserSupabaseClient();
-    await db.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({ provider: 'google' });
   };
 
   const handleRequestOtp = async (e: React.MouseEvent) => {
@@ -121,8 +117,7 @@ function LoginContent() {
     }
     setSendingOtp(true)
     setAuthError(null)
-    const db = createBrowserSupabaseClient()
-    const { error } = await db.auth.signInWithOtp({ phone })
+    const { error } = await supabase.auth.signInWithOtp({ phone })
     if (error) setAuthError(error.message)
     else setOtpSent(true)
     setSendingOtp(false)
@@ -132,8 +127,7 @@ function LoginContent() {
     e.preventDefault()
     setSendingOtp(true)
     setAuthError(null)
-    const db = createBrowserSupabaseClient()
-    const { error } = await db.auth.verifyOtp({ phone, token: otp, type: 'sms' })
+    const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
     if (error) setAuthError(error.message)
     else router.replace('/dashboard')
     setSendingOtp(false)

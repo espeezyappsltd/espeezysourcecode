@@ -2,11 +2,35 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  const isPublicRoute =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/sso') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next') ||
+    pathname.includes('.')
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (isPublicRoute) {
+      return NextResponse.next({ request })
+    }
+
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    loginUrl.searchParams.set('next', pathname)
+    loginUrl.searchParams.set('error', 'Missing local Supabase config. Create apps/games/.env.local first.')
+    return NextResponse.redirect(loginUrl)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -27,15 +51,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
-  const { pathname } = request.nextUrl
-
   // Allow login page and API routes through
-  if (
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/_next') ||
-    pathname.includes('.')
-  ) {
+  if (isPublicRoute) {
     return supabaseResponse
   }
 

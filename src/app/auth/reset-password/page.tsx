@@ -1,19 +1,41 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { auth } from '@/lib/firebase'
-import { updatePassword } from 'firebase/auth'
+import { useState, useEffect, useMemo } from 'react'
+import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { ShieldCheck, Lock, Activity, ArrowRight } from 'lucide-react'
+import { ShieldCheck, Lock, Activity } from 'lucide-react'
 import TransientError from '@/components/TransientError'
 
 export default function ResetPasswordPage() {
+  const router = useRouter()
+  const supabase = useMemo(() => createSupabaseClient(), [])
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [sessionReady, setSessionReady] = useState(false)
+
+  useEffect(() => {
+    let mounted = true
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return
+      if (!session) {
+        setError('Recovery session not found. Please request a new password reset link.')
+        return
+      }
+      setSessionReady(true)
+    })
+
+    return () => {
+      mounted = false
+    }
+  }, [supabase])
+
+  const getErrorMessage = (err: unknown) => {
+    if (err instanceof Error) return err.message
+    return 'An unexpected error occurred.'
+  }
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,21 +52,14 @@ export default function ResetPasswordPage() {
     setError(null)
 
     try {
-      const user = auth.currentUser
-      if (!user) {
-        setError('No active session found. Please request a new reset link.')
-        return
+      const { error: updateError } = await supabase.auth.updateUser({ password })
+      if (updateError) {
+        throw updateError
       }
-
-      await updatePassword(user, password)
       setSuccess(true)
       setTimeout(() => router.push('/login'), 3000)
-    } catch (err: any) {
-      if (err.code === 'auth/requires-recent-login') {
-        setError('Security Protocol: Please sign out and sign back in to reset your password.')
-      } else {
-        setError(err.message || 'An unexpected error occurred.')
-      }
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -104,7 +119,7 @@ export default function ResetPasswordPage() {
                 style={{ borderRadius: '14px' }}
               />
             </div>
-            <button className="btn btn-primary" type="submit" disabled={loading} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem' }}>
+            <button className="btn btn-primary" type="submit" disabled={loading || !sessionReady} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem' }}>
               {loading ? 'Updating Credentials...' : 'Update Password'}
             </button>
           </form>

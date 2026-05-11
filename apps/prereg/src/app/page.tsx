@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
+import type { Session, User } from '@supabase/supabase-js'
 import {
   ArrowRight, CheckCircle, Users, Globe,
   BookOpen, Cpu, Zap, BarChart2, Mail,
@@ -13,6 +14,7 @@ import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import LiveChatWidget from '@/components/LiveChatWidget'
+import { supabase } from '@/lib/supabase-client'
 
 const COMING_FEATURES = [
   { icon: <Cpu size={20} />, title: 'Your Personal AI Coach', desc: 'Imagine having a smart tutor that knows your course content, adapts to how you learn best, and helps you crush your assignments.', tag: 'Smart Learning' },
@@ -26,9 +28,6 @@ const COMING_FEATURES = [
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
-  { href: 'https://games.espeezy.com', label: 'Games', external: true },
-  { href: 'https://kanban.espeezy.com', label: 'Kanban', external: true },
-  { href: '/login', label: 'Account' },
   { href: '/fund', label: 'Support Us' },
   { href: '/docs', label: 'Docs' },
   { href: '/checkout', label: 'Pricing' },
@@ -36,6 +35,9 @@ const NAV_LINKS = [
 
 export default function PreRegisterPage() {
   const { config, registeredCount, authUserCount, configLoaded, timeLeft, setRegisteredCount } = useLaunchData()
+  const [authUser, setAuthUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [userTier, setUserTier] = useState<'free' | 'pro' | 'premium' | 'unknown'>('unknown')
 
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -47,6 +49,87 @@ export default function PreRegisterPage() {
   })
   const [myReferralCode, setMyReferralCode] = useState<string | null>(null)
   const [myReferralCount, setMyReferralCount] = useState(0)
+
+  const kanbanBaseUrl = process.env.NEXT_PUBLIC_KANBAN_APP_URL ?? 'https://kanban.espeezy.com'
+  const gamesBaseUrl = process.env.NEXT_PUBLIC_GAMES_APP_URL ?? 'https://games.espeezy.com'
+
+  const buildSsoUrl = (appBaseUrl: string, nextPath: string) => {
+    if (!session?.access_token || !session.refresh_token) {
+      return `${appBaseUrl}/login?next=${encodeURIComponent(nextPath)}`
+    }
+
+    const hash = new URLSearchParams({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    })
+
+    return `${appBaseUrl}/sso?next=${encodeURIComponent(nextPath)}#${hash.toString()}`
+  }
+
+  const kanbanSsoUrl = buildSsoUrl(kanbanBaseUrl, '/dashboard')
+  const gamesSsoUrl = buildSsoUrl(gamesBaseUrl, '/')
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!mounted) return
+
+      setSession(session)
+      setAuthUser(session?.user ?? null)
+
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('tier')
+          .eq('id', session.user.id)
+          .maybeSingle()
+        const tier = (profile as { tier?: string } | null)?.tier
+        if (tier === 'pro' || tier === 'premium' || tier === 'free') {
+          setUserTier(tier)
+        } else {
+          setUserTier('free')
+        }
+      } else {
+        setUserTier('unknown')
+      }
+    }
+
+    void loadUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return
+      setSession(session)
+      setAuthUser(session?.user ?? null)
+
+      if (!session?.user) {
+        setUserTier('unknown')
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tier')
+        .eq('id', session.user.id)
+        .maybeSingle()
+      const tier = (profile as { tier?: string } | null)?.tier
+      if (tier === 'pro' || tier === 'premium' || tier === 'free') {
+        setUserTier(tier)
+      } else {
+        setUserTier('free')
+      }
+    })
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+  }
 
   const goal = parseInt(config.preregister_goal ?? '5000', 10)
 
@@ -105,20 +188,20 @@ export default function PreRegisterPage() {
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="hide-mobile">
           {NAV_LINKS.map(link =>
-            link.external ? (
-              <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer"
-                style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#0f172a')}
-                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(15,23,42,0.55)')}>
-                {link.label}
-              </a>
-            ) : (
-              <Link key={link.href} href={link.href} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#0f172a')}
-                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(15,23,42,0.55)')}>  
-                {link.label}
-              </Link>
-            )
+            <Link key={link.href} href={link.href} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#0f172a')}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(15,23,42,0.55)')}>  
+              {link.label}
+            </Link>
+          )}
+          {authUser ? (
+            <>
+              <a href={kanbanSsoUrl} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, color: 'rgba(15,23,42,0.7)', textDecoration: 'none' }}>Kanban</a>
+              <a href={gamesSsoUrl} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, color: 'rgba(15,23,42,0.7)', textDecoration: 'none' }}>Games</a>
+              <button type="button" onClick={() => void handleSignOut()} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', border: '1px solid rgba(15,23,42,0.12)', background: 'white', fontSize: '0.8rem', fontWeight: 700, color: '#334155', cursor: 'pointer' }}>Sign out</button>
+            </>
+          ) : (
+            <Link href="/login" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, color: 'rgba(15,23,42,0.7)', textDecoration: 'none' }}>Account</Link>
           )}
         </div>
         <a href="#register" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none', whiteSpace: 'nowrap' }}>
@@ -148,6 +231,30 @@ export default function PreRegisterPage() {
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
         <UserRegistrationCounter registeredCount={registeredCount} goal={goal} authUserCount={authUserCount} />
+
+        {authUser && (
+          <div style={{ margin: '2rem auto 0', maxWidth: '680px', background: 'white', border: '1px solid rgba(15,23,42,0.1)', borderRadius: '14px', padding: '1rem', textAlign: 'left', boxShadow: '0 8px 30px rgba(15,23,42,0.08)' }}>
+            <p style={{ margin: 0, color: '#0f172a', fontWeight: 700, fontSize: '0.92rem' }}>
+              Signed in as {authUser.email}
+            </p>
+            <p style={{ margin: '0.35rem 0 0.8rem', color: '#64748b', fontSize: '0.82rem' }}>
+              Plan: {userTier === 'unknown' ? 'Loading...' : userTier.toUpperCase()}
+            </p>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <a href={kanbanSsoUrl} style={{ padding: '0.55rem 0.9rem', borderRadius: '10px', background: '#10b981', color: 'white', textDecoration: 'none', fontWeight: 700, fontSize: '0.82rem' }}>
+                Open Kanban
+              </a>
+              <a href={gamesSsoUrl} style={{ padding: '0.55rem 0.9rem', borderRadius: '10px', background: '#6366f1', color: 'white', textDecoration: 'none', fontWeight: 700, fontSize: '0.82rem' }}>
+                Open Games
+              </a>
+              {userTier === 'free' && (
+                <a href="https://espeezy.com/checkout" style={{ padding: '0.55rem 0.9rem', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.25)', color: '#4338ca', textDecoration: 'none', fontWeight: 700, fontSize: '0.82rem', background: 'rgba(99,102,241,0.08)' }}>
+                  You need Pro for Games - Upgrade
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Registration Form */}
