@@ -1,24 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
 // GET /api/hustle/tasks  -  list tasks (with filters)
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) {
-      return NextResponse.json({ error: 'Service Unavailable (Build)' }, { status: 503 })
-    }
-
-    const token = authHeader.split('Bearer ')[1]
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
+    const uid = user.id
 
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status') ?? 'open'
@@ -27,36 +20,45 @@ export async function GET(req: NextRequest) {
     const cursor = searchParams.get('cursor')
     const PAGE_SIZE = 20
 
-    let query: any = adminDb.collection('hustle_tasks')
-      .orderBy('created_at', 'desc')
+    let query = adminDb
+      .from('hustle_tasks')
+      .select('*')
+      .order('created_at', { ascending: false })
       .limit(PAGE_SIZE + 1)
 
     if (mine) {
-      query = query.where('poster_id', '==', uid)
+      query = query.eq('poster_id', uid)
     } else {
-      query = query.where('status', '==', status)
+      query = query.eq('status', status)
     }
 
-    if (category) query = query.where('category', '==', category)
-    if (cursor) query = query.startAfter(cursor)
+    if (category) query = query.eq('category', category)
+    if (cursor) query = query.lt('created_at', cursor)
 
-    const snap = await query.get()
-    const tasks = await Promise.all(snap.docs.map(async (doc: any) => {
-      const data = doc.data()
-      // Manual join for poster/assignee
-      const [posterSnap, assigneeSnap] = await Promise.all([
-        adminDb.collection('profiles').doc(data.poster_id).get(),
-        data.assignee_id ? adminDb.collection('profiles').doc(data.assignee_id).get() : Promise.resolve(null)
-      ])
-      
+    const { data: rows, error: tasksError } = await query
+
+    if (tasksError) {
+      throw tasksError
+    }
+
+    const profileIds = Array.from(new Set((rows ?? []).flatMap((row: any) => [row.poster_id, row.assignee_id]).filter(Boolean)))
+    const { data: profiles, error: profilesError } = profileIds.length > 0
+      ? await adminDb.from('profiles').select('*').in('id', profileIds)
+      : { data: [], error: null }
+
+    if (profilesError) {
+      throw profilesError
+    }
+
+    const profileMap = new Map((profiles ?? []).map((profile: any) => [profile.id, profile]))
+    const tasks = (rows ?? []).map((data: any) => {
       return {
-        id: doc.id,
         ...data,
         created_at: data.created_at,
-        poster: posterSnap.exists ? { id: posterSnap.id, ...posterSnap.data() } : null,
-        assignee: assigneeSnap?.exists ? { id: assigneeSnap.id, ...assigneeSnap.data() } : null
+        poster: profileMap.get(data.poster_id) ?? null,
+        assignee: profileMap.get(data.assignee_id) ?? null
       }
-    }))
+    })
 
     const hasMore = tasks.length > PAGE_SIZE
     const finalTasks = hasMore ? tasks.slice(0, PAGE_SIZE) : tasks
@@ -72,19 +74,24 @@ export async function GET(req: NextRequest) {
 // POST /api/hustle/tasks  -  create a task
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const token = authHeader.split('Bearer ')[1]
-    const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) return NextResponse.json({ error: 'Service Unavailable' }, { status: 503 })
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
+    const uid = user.id
 
-    const profileSnap = await adminDb.collection('profiles').doc(uid).get()
-    if (profileSnap.data()?.account_status !== 'active' && profileSnap.data()?.account_status !== undefined) {
+    const { data: profile, error: profileError } = await adminDb
+      .from('profiles')
+      .select('account_status')
+      .eq('id', uid)
+      .single()
+
+    if (profileError) {
+      throw profileError
+    }
+
+    if (profile?.account_status !== 'active' && profile?.account_status !== undefined) {
       return NextResponse.json({ error: 'Account suspended' }, { status: 403 })
     }
 
@@ -102,21 +109,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 })
     }
 
-    const taskRef = await adminDb.collection('hustle_tasks').add({
-      poster_id: uid,
-      title: title.trim(),
-      description: description.trim(),
-      category,
-      payout_cents: Math.round(payout_cents),
-      deadline: deadline ? new Date(deadline).toISOString() : null,
-      connection_only: !!connection_only,
-      status: 'open',
-      created_at: new Date().toISOString()
-    })
+    const { data: task, error: insertError } = await adminDb
+      .from('hustle_tasks')
+      .insert({
+        poster_id: uid,
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        payout_cents: Math.round(payout_cents),
+        deadline: deadline ? new Date(deadline).toISOString() : null,
+        connection_only: !!connection_only,
+        status: 'open',
+      })
+      .select('*')
+      .single()
 
-    const taskSnap = await taskRef.get()
+    if (insertError || !task) {
+      throw insertError ?? new Error('Task creation failed')
+    }
 
-    return NextResponse.json({ task: { id: taskSnap.id, ...taskSnap.data() } }, { status: 201 })
+    return NextResponse.json({ task }, { status: 201 })
   } catch (err: any) {
     console.error('Task creation error:', err.message)
     return NextResponse.json({ error: err.message }, { status: 500 })

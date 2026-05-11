@@ -22,8 +22,8 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
     .eq('status', 'completed')
 
   const gamesPlayed = gameSessions?.length ?? 0
-  const totalScore = (gameSessions ?? []).reduce((acc: number, s: typeof gameSessions[0]) => acc + (s.score ?? 0), 0)
-  const totalPrizeCents = (gameSessions ?? []).reduce((acc: number, s: typeof gameSessions[0]) => acc + (s.prize_cents_won ?? 0), 0)
+  const totalScore = (gameSessions ?? []).reduce((acc: number, s) => acc + (s.score ?? 0), 0)
+  const totalPrizeCents = (gameSessions ?? []).reduce((acc: number, s) => acc + (s.prize_cents_won ?? 0), 0)
 
   return (
     <div style={{ maxWidth: '680px', margin: '0 auto', padding: '3rem 1rem' }}>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin'
+import { getRequestUser } from '@/lib/supabase/admin'
 import { getStripeClient } from '@/utils/stripe'
 
 export const dynamic = 'force-dynamic'
@@ -43,22 +43,19 @@ export async function POST(req: Request) {
       return handlePublicCheckout(stripe, body)
     }
 
-    return handleAuthenticatedCheckout(stripe, authHeader, body)
+    return handleAuthenticatedCheckout(stripe, req, body)
   } catch (error: any) {
     console.error('Stripe Checkout Error:', error.message)
     return NextResponse.json({ error: error.message || 'Stripe session creation failed.' }, { status: 500 })
   }
 }
 
-async function handleAuthenticatedCheckout(stripe: any, authHeader: string, body: any) {
-  const adminAuth = getAdminAuth()
-  const adminDb = getAdminDb()
-  if (!adminAuth || !adminDb) return NextResponse.json({ error: 'Service Unavailable' }, { status: 503 })
+async function handleAuthenticatedCheckout(stripe: any, req: Request, body: any) {
+  const user = await getRequestUser(req)
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const token = authHeader.split('Bearer ')[1]
-  const decodedToken = await adminAuth.verifyIdToken(token)
-  const uid = decodedToken.uid
-  const email = decodedToken.email
+  const uid = user.id
+  const email = user.email
 
   const parsedBody = checkoutSchema.safeParse(body)
   if (!parsedBody.success) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 
 export const dynamic = 'force-dynamic'
@@ -24,16 +24,19 @@ export async function GET() {
   if (error) return error
 
   const db = getAdminDb()
-  if (!db) return NextResponse.json({ error: 'Database not initialized' }, { status: 500 })
 
   try {
-    const snapshot = await db.collection('server_error_log')
-      .orderBy('created_at', 'desc')
+    const { data, error: dbErr } = await db
+      .from('server_error_log')
+      .select('*')
+      .order('created_at', { ascending: false })
       .limit(100)
-      .get()
 
-    const errors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    return NextResponse.json({ errors })
+    if (dbErr) {
+      throw dbErr
+    }
+
+    return NextResponse.json({ errors: data ?? [] })
   } catch (dbErr: any) {
     return NextResponse.json({ error: dbErr.message }, { status: 500 })
   }

@@ -1,18 +1,18 @@
 'use server'
 
-import { getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function distributeTaskScore(taskId: string, assignees: string[]) {
   try {
     const adminDb = getAdminDb()
-    if (!adminDb) throw new Error('Service Unavailable')
-    const taskRef = adminDb.collection('tasks').doc(taskId)
-    const taskSnap = await taskRef.get()
+    const { data: taskData, error: taskError } = await adminDb
+      .from('tasks')
+      .select('score_awarded')
+      .eq('id', taskId)
+      .single()
 
-    if (!taskSnap.exists) throw new Error('Task node validation failed')
-    
-    const taskData = taskSnap.data()!
+    if (taskError || !taskData) throw new Error('Task node validation failed')
     if (taskData.score_awarded) {
       return { success: false, reason: 'Already awarded' }
     }
@@ -20,17 +20,22 @@ export async function distributeTaskScore(taskId: string, assignees: string[]) {
     // Safely traverse all assignees and globally inject +15 Validity Score internally
     if (assignees && assignees.length > 0) {
       for (const userId of assignees) {
-        const profileRef = adminDb.collection('profiles').doc(userId)
-        const profileSnap = await profileRef.get()
-        if (profileSnap.exists) {
-           const currentScore = profileSnap.data()?.total_score || 0
-           await profileRef.update({ total_score: currentScore + 15 })
+        const { data: profile } = await adminDb
+          .from('profiles')
+          .select('total_score')
+          .eq('id', userId)
+          .single()
+        if (profile) {
+          await adminDb
+            .from('profiles')
+            .update({ total_score: (profile.total_score || 0) + 15 })
+            .eq('id', userId)
         }
       }
     }
 
     // Close the physical lock permanently
-    await taskRef.update({ score_awarded: true })
+    await adminDb.from('tasks').update({ score_awarded: true }).eq('id', taskId)
 
     revalidatePath('/dashboard', 'layout')
     return { success: true }
@@ -43,11 +48,11 @@ export async function distributeTaskScore(taskId: string, assignees: string[]) {
 export async function updateUserGameStats(userId: string, xpEarned: number, won: boolean) {
   try {
     const adminDb = getAdminDb()
-    if (!adminDb) throw new Error('Service Unavailable')
-    const statsRef = adminDb.collection('user_game_stats').doc(userId)
-    const statsSnap = await statsRef.get()
-
-    const currentStats = statsSnap.exists ? statsSnap.data()! : { total_xp: 0, wins: 0, games_played: 0 }
+    const { data: currentStats } = await adminDb
+      .from('user_game_stats')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
 
     const newData = {
       user_id: userId,
@@ -57,7 +62,13 @@ export async function updateUserGameStats(userId: string, xpEarned: number, won:
       updated_at: new Date().toISOString()
     }
 
-    await statsRef.set(newData, { merge: true })
+    const { error } = await adminDb
+      .from('user_game_stats')
+      .upsert(newData, { onConflict: 'user_id' })
+
+    if (error) {
+      throw error
+    }
 
     revalidatePath('/dashboard/chillout', 'page')
     return { success: true, stats: newData }

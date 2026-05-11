@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin'
+import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,18 +9,12 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const user = await getRequestUser(req)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const token = authHeader.split('Bearer ')[1]
-    const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
-    if (!adminAuth || !adminDb) return NextResponse.json({ error: 'Service Unavailable' }, { status: 503 })
-
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const uid = decodedToken.uid
+    const uid = user.id
 
     const { searchParams } = new URL(req.url)
     const page = Math.max(0, parseInt(searchParams.get('page') ?? '0', 10))
@@ -28,49 +22,64 @@ export async function GET(req: NextRequest) {
     const direction = searchParams.get('direction') ?? 'all' // 'sent' | 'received' | 'all'
 
     // 1. Fetch P2P Transfers
-    let p2pQuery: any = adminDb.collection('p2p_transfers')
+    let p2pQuery = adminDb
+      .from('p2p_transfers')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit * 2)
     
     if (direction === 'sent') {
-      p2pQuery = p2pQuery.where('sender_id', '==', uid)
+      p2pQuery = p2pQuery.eq('sender_id', uid)
     } else if (direction === 'received') {
-      p2pQuery = p2pQuery.where('recipient_id', '==', uid)
+      p2pQuery = p2pQuery.eq('recipient_id', uid)
     } else {
-      // Use OR filter for P2P
-      const admin = require('firebase-admin')
-      p2pQuery = p2pQuery.where(admin.firestore.Filter.or(
-        admin.firestore.Filter.where('sender_id', '==', uid),
-        admin.firestore.Filter.where('recipient_id', '==', uid)
-      ))
+      p2pQuery = p2pQuery.or(`sender_id.eq.${uid},recipient_id.eq.${uid}`)
     }
 
-    const p2pSnap = await p2pQuery.orderBy('created_at', 'desc').limit(limit * 2).get()
-    const p2pTransfers = await Promise.all(p2pSnap.docs.map(async (doc: any) => {
-      const data = doc.data()
-      // Manual join for profiles
-      const [senderSnap, recipientSnap] = await Promise.all([
-        adminDb.collection('profiles').doc(data.sender_id).get(),
-        adminDb.collection('profiles').doc(data.recipient_id).get()
-      ])
+    const { data: p2pRows, error: p2pError } = await p2pQuery
+
+    if (p2pError) {
+      throw p2pError
+    }
+
+    const profileIds = Array.from(new Set((p2pRows ?? []).flatMap((row: any) => [row.sender_id, row.recipient_id]).filter(Boolean)))
+    const { data: profileRows, error: profileError } = profileIds.length > 0
+      ? await adminDb.from('profiles').select('*').in('id', profileIds)
+      : { data: [], error: null }
+
+    if (profileError) {
+      throw profileError
+    }
+
+    const profileMap = new Map((profileRows ?? []).map((profile: any) => [profile.id, profile]))
+    const p2pTransfers = (p2pRows ?? []).map((row: any) => {
+      const data = row
 
       return {
-        id: doc.id,
         ...data,
         type: 'p2p',
-        sender: senderSnap.exists ? { id: senderSnap.id, ...senderSnap.data() } : null,
-        recipient: recipientSnap.exists ? { id: recipientSnap.id, ...recipientSnap.data() } : null
+        sender: profileMap.get(data.sender_id) ?? null,
+        recipient: profileMap.get(data.recipient_id) ?? null
       }
-    }))
+    })
 
     // 2. Fetch Direct Payments (Upgrades)
-    let paymentsQuery = adminDb.collection('payments').where('user_id', '==', uid)
-    const paymentsSnap = await paymentsQuery.orderBy('updated_at', 'desc').limit(limit).get()
-    const payments = paymentsSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
+    const { data: paymentRows, error: paymentError } = await adminDb
+      .from('payments')
+      .select('*')
+      .eq('user_id', uid)
+      .order('updated_at', { ascending: false })
+      .limit(limit)
+
+    if (paymentError) {
+      throw paymentError
+    }
+
+    const payments = (paymentRows ?? []).map((payment: any) => ({
+      ...payment,
       type: 'upgrade',
-      // Map Firestore fields to the expected frontend shape if needed
-      amount_cents: doc.data().amount_total, 
-      created_at: doc.data().updated_at
+      amount_cents: payment.amount_total,
+      created_at: payment.updated_at
     }))
 
     // 3. Combine and Sort

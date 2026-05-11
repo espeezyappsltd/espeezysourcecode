@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 import { sendEmail } from '@/services/email'
 import { z } from 'zod'
@@ -30,16 +30,19 @@ export async function GET() {
   if (error) return error
 
   const db = getAdminDb()
-  if (!db) return NextResponse.json({ error: 'Database not initialized' }, { status: 500 })
 
   try {
-    const snapshot = await db.collection('marketing_campaigns')
-      .orderBy('created_at', 'desc')
+    const { data, error: dbErr } = await db
+      .from('marketing_campaigns')
+      .select('*')
+      .order('created_at', { ascending: false })
       .limit(50)
-      .get()
 
-    const campaigns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    return NextResponse.json({ campaigns })
+    if (dbErr) {
+      throw dbErr
+    }
+
+    return NextResponse.json({ campaigns: data ?? [] })
   } catch (dbErr: any) {
     return NextResponse.json({ error: dbErr.message }, { status: 500 })
   }
@@ -79,17 +82,28 @@ export async function POST(req: Request) {
   const text_body = rawTextBody ?? html_body.replace(/<[^>]*>/g, ' ').replace(/\s{2,}/g, ' ').trim()
   
   const db = getAdminDb()
-  if (!db) return NextResponse.json({ error: 'Database not initialized' }, { status: 500 })
 
   let campaignId: string
   try {
-    const campaignRef = await db.collection('marketing_campaigns').add({
-      title, subject, preview, html_body, text_body,
-      status: 'sending',
-      created_by: user!.uid,
-      created_at: new Date().toISOString()
-    })
-    campaignId = campaignRef.id
+    const { data: campaign, error: insertErr } = await db
+      .from('marketing_campaigns')
+      .insert({
+        title,
+        subject,
+        preview,
+        html_body,
+        text_body,
+        status: 'sending',
+        created_by: user!.uid,
+      })
+      .select('id')
+      .single()
+
+    if (insertErr || !campaign) {
+      throw insertErr ?? new Error('Insert failed')
+    }
+
+    campaignId = campaign.id
   } catch (insertErr: any) {
     return NextResponse.json({ error: insertErr.message ?? 'Insert failed' }, { status: 500 })
   }
@@ -97,15 +111,20 @@ export async function POST(req: Request) {
   // 2. Fetch all opted-in users
   let list: Recipient[] = []
   try {
-    const snapshot = await db.collection('profiles')
-      .where('marketing_emails', '==', true)
-      .get()
-    
-    list = snapshot.docs
-      .map(doc => ({ id: doc.id, email: doc.data().email, full_name: doc.data().full_name }))
+    const { data: recipients, error: recipientsErr } = await db
+      .from('profiles')
+      .select('id, email, full_name')
+      .eq('marketing_emails', true)
+
+    if (recipientsErr) {
+      throw recipientsErr
+    }
+
+    list = (recipients ?? [])
+      .map((recipient) => ({ id: recipient.id, email: recipient.email, full_name: recipient.full_name }))
       .filter(r => !!r.email)
   } catch (recipientsErr: any) {
-    await db.collection('marketing_campaigns').doc(campaignId).update({ status: 'failed' })
+    await db.from('marketing_campaigns').update({ status: 'failed' }).eq('id', campaignId)
     return NextResponse.json({ error: recipientsErr.message ?? 'Failed to fetch recipients' }, { status: 500 })
   }
 
@@ -152,20 +171,18 @@ export async function POST(req: Request) {
 
     for (let i = 0; i < notifRows.length; i += 500) {
       const chunk = notifRows.slice(i, i + 500)
-      const batch = db.batch()
-      chunk.forEach(row => {
-        const ref = db.collection('notifications').doc()
-        batch.set(ref, row)
-      })
       
       try {
-        await batch.commit()
+        const { error: notifErr } = await db.from('notifications').insert(chunk)
+        if (notifErr) {
+          throw notifErr
+        }
       } catch (notifErr: any) {
-        await db.collection('marketing_campaigns').doc(campaignId).update({
+        await db.from('marketing_campaigns').update({
           status: 'sent',
           sent_count: sentCount,
           sent_at: new Date().toISOString()
-        })
+        }).eq('id', campaignId)
         return NextResponse.json({
           error: 'Emails sent but notifications failed',
           details: notifErr.message,
@@ -180,11 +197,18 @@ export async function POST(req: Request) {
   // 5. Mark campaign sent
   const finalStatus = errors.length === list.length && list.length > 0 ? 'failed' : 'sent'
   try {
-    await db.collection('marketing_campaigns').doc(campaignId).update({
+    const { error: finalUpdateErr } = await db
+      .from('marketing_campaigns')
+      .update({
       status: finalStatus,
       sent_count: sentCount,
       sent_at: new Date().toISOString()
-    })
+      })
+      .eq('id', campaignId)
+
+    if (finalUpdateErr) {
+      throw finalUpdateErr
+    }
   } catch (finalUpdateErr: any) {
     return NextResponse.json({
       error: 'Failed to update campaign status',

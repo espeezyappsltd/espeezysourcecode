@@ -1,4 +1,4 @@
-import { getAdminDb } from '../lib/firebase-admin'
+import { getAdminDb } from '../lib/supabase/admin'
 import type { TaskCategory, TaskStatus } from '../types/database'
 import { taskSchema } from '../utils/validation'
 
@@ -57,10 +57,18 @@ async function insertTask(task: TaskPayload) {
   'use step'
 
   const db = getAdminDb()
-  if (!db) throw new Error('Firebase unavailable')
-  
-  const ref = await db.collection('tasks').add({ ...task })
-  return { id: ref.id }
+
+  const { data, error } = await db
+    .from('tasks')
+    .insert({ ...task })
+    .select('id')
+    .single()
+
+  if (error || !data) {
+    throw error ?? new Error('Task insert failed')
+  }
+
+  return { id: data.id }
 }
 
 async function updateTask(task: TaskPayload) {
@@ -69,16 +77,18 @@ async function updateTask(task: TaskPayload) {
   if (!task.id) throw new Error('Task ID missing')
 
   const db = getAdminDb()
-  if (!db) throw new Error('Firebase unavailable')
-  
-  await db.collection('tasks').doc(task.id).update({
+  const { error } = await db.from('tasks').update({
     title: task.title,
     description: task.description,
     status: task.status,
     category: task.category,
     assignees: task.assignees,
     due_date: task.due_date,
-  })
+  }).eq('id', task.id)
+
+  if (error) {
+    throw error
+  }
 }
 
 async function logActivity(
@@ -91,15 +101,17 @@ async function logActivity(
   'use step'
 
   const db = getAdminDb()
-  if (!db) throw new Error('Firebase unavailable')
-  
-  await db.collection('activity_log').add({ 
+  const { error } = await db.from('activity_log').insert({ 
     user_id: userId, 
     group_id: groupId, 
     action_type: actionType, 
     description, 
     metadata 
   })
+
+  if (error) {
+    throw error
+  }
 }
 
 async function notifyAssignees(assignees: string[], title: string, taskId: string, actingUserId: string) {
@@ -112,19 +124,17 @@ async function notifyAssignees(assignees: string[], title: string, taskId: strin
   }
 
   const db = getAdminDb()
-  if (!db) throw new Error('Firebase unavailable')
-
-  const batch = db.batch()
-  filtered.forEach((userId) => {
-    const ref = db.collection('notifications').doc()
-    batch.set(ref, {
+  const { error } = await db.from('notifications').insert(
+    filtered.map((userId) => ({
       user_id: userId,
       type: 'task_created',
       title: 'New task assigned',
       message: `You were assigned to ${title}`,
       link: `/dashboard?taskId=${taskId}`
-    })
-  })
+    }))
+  )
 
-  await batch.commit()
+  if (error) {
+    throw error
+  }
 }

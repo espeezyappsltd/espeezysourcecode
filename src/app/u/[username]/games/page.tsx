@@ -23,8 +23,8 @@ export default async function UserGamesPage({ params }: { params: Promise<{ user
     .order('completed_at', { ascending: false })
     .limit(50)
 
-  const totalScore = (sessions ?? []).reduce((a: number, s: typeof sessions[0]) => a + (s.score ?? 0), 0)
-  const totalPrize = (sessions ?? []).reduce((a: number, s: typeof sessions[0]) => a + (s.prize_cents_won ?? 0), 0)
+  const totalScore = (sessions ?? []).reduce((a: number, s) => a + (s.score ?? 0), 0)
+  const totalPrize = (sessions ?? []).reduce((a: number, s) => a + (s.prize_cents_won ?? 0), 0)
 
   return (
     <main style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1rem 4rem' }}>
