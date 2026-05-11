@@ -9,6 +9,8 @@
  */
 
 import { createAdminSupabaseClient } from './server'
+import { createClient as createServerSupabaseClient } from './server'
+import type { User } from '@supabase/supabase-js'
 
 /**
  * Get admin Supabase client for database operations (service-role access)
@@ -44,4 +46,22 @@ export function getAdminStorage() {
  */
 export function getAdminDatabase() {
   return createAdminSupabaseClient()
+}
+
+export async function getRequestUser(req?: Request): Promise<User | null> {
+  const authHeader = req?.headers.get('authorization') ?? req?.headers.get('Authorization')
+  const token = authHeader?.replace(/^Bearer\s+/i, '')
+
+  if (token) {
+    const admin = getAdminDb()
+    const { data: { user } } = await admin.auth.getUser(token)
+      .catch(() => ({ data: { user: null } }))
+    if (user) return user
+  }
+
+  const db = await createServerSupabaseClient()
+  const { data: { user } } = await db.auth.getUser()
+    .catch(() => ({ data: { user: null } }))
+
+  return user
 }
