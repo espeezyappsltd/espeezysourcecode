@@ -2,19 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { Profile } from '@/types/database'
-import { db, auth } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  setDoc, 
-  doc, 
-  addDoc, 
-  limit, 
-  orderBy, 
-  or 
-} from 'firebase/firestore'
+// TODO: Replace with Supabase client
+// import { db, auth } from '@/lib/firebase'
+// import { collection, query, where, getDocs, setDoc, doc, addDoc, limit, orderBy, or } from 'firebase/firestore'
 import { Profile } from '@/types/database'
 import { Users, UserPlus, Check, ExternalLink, Shield, Sparkles } from 'lucide-react'
 import { getFlagComponent } from '@/utils/geo'
@@ -33,92 +23,19 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
   const [loading, setLoading] = useState(true)
 
   const fetchCollaborators = useCallback(async () => {
-    const user = auth.currentUser
-    const groupId = currentGroupId
-    
-    if (!user || !groupId) return
-
-    try {
-      const q = query(
-        collection(db, 'profiles'),
-        where('group_id', '==', groupId)
-      )
-      const snap = await getDocs(q)
-      const data = snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as unknown as Profile))
-        .filter(p => p.id !== user.uid)
-      
-      setCollaborators(data)
-    } catch (err) {
-      console.error('Fetch collaborators error:', err instanceof Error ? err.message : err)
-    }
+    // TODO: Replace with Supabase logic
+    setCollaborators([])
   }, [currentGroupId])
 
   const fetchSuggested = useCallback(async () => {
-    const user = auth.currentUser
-    if (!user) return
-
-    try {
-      const q = query(
-        collection(db, 'profiles'),
-        limit(20) // Get a batch and filter client-side for complex "not in group"
-      )
-      const snap = await getDocs(q)
-      const data = snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as unknown as Profile))
-        .filter(p => p.id !== user.uid && p.group_id !== currentGroupId)
-        .slice(0, 6)
-
-      setSuggested(data)
-    } catch (err) {
-      console.error('Fetch suggested error:', err instanceof Error ? err.message : err)
-    }
+    // TODO: Replace with Supabase logic
+    setSuggested([])
   }, [currentGroupId])
 
   const fetchConnections = useCallback(async () => {
-    const user = auth.currentUser
-    if (!user) return
-
-    try {
-      // 1. Fetch connected IDs (split 'or' into two queries for broader compatibility)
-      const q1 = query(
-        collection(db, 'user_connections'),
-        where('user_id', '==', user.uid),
-        where('status', '==', 'connected')
-      )
-      const q2 = query(
-        collection(db, 'user_connections'),
-        where('target_id', '==', user.uid),
-        where('status', '==', 'connected')
-      )
-      const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)])
-      
-      const ids: string[] = [
-        ...snap1.docs.map(d => d.data().target_id),
-        ...snap2.docs.map(d => d.data().user_id)
-      ]
-      const uniqueIds = Array.from(new Set(ids))
-      setConnections(new Set(uniqueIds))
-
-      // 2. Fetch full profiles
-      if (uniqueIds.length > 0) {
-        const profiles: Profile[] = []
-        // Firestore 'in' query has a limit of 10-30 IDs usually, 
-        // for simplicity we'll fetch them individually or in chunks if needed.
-        // For a small list, individual gets are okay.
-        for (const id of uniqueIds.slice(0, 10)) {
-          const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', id)))
-          if (!pSnap.empty) {
-            profiles.push({ id: pSnap.docs[0].id, ...pSnap.docs[0].data() } as unknown as Profile)
-          }
-        }
-        setPersonalNetwork(profiles)
-      } else {
-        setPersonalNetwork([])
-      }
-    } catch (err) {
-      console.error('Fetch connections error:', err instanceof Error ? err.message : err)
-    }
+    // TODO: Replace with Supabase logic
+    setConnections(new Set())
+    setPersonalNetwork([])
   }, [])
 
   useEffect(() => {
@@ -137,32 +54,9 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
   }, [currentGroupId, fetchCollaborators, fetchConnections, fetchSuggested])
 
   const handleConnect = async (targetId: string) => {
-    const user = auth.currentUser
-    if (!user) return
-
-    try {
-      const connId = [user.uid, targetId].sort().join('_')
-      await setDoc(doc(db, 'user_connections', connId), {
-        user_id: user.uid,
-        target_id: targetId,
-        status: 'connected',
-        created_at: new Date().toISOString()
-      })
-
-      setConnections(prev => new Set([...Array.from(prev), targetId]))
-      void fetchConnections()
-      
-      await addDoc(collection(db, 'notifications'), {
-        user_id: targetId,
-        type: 'connection_request',
-        title: 'Network Expansion',
-        message: `${user.displayName || 'A scholar'} has established a synchronization link with you.`,
-        metadata: { sender_id: user.uid },
-        created_at: new Date().toISOString()
-      })
-    } catch (err) {
-      console.error('Connect error:', err instanceof Error ? err.message : err)
-    }
+    // TODO: Replace with Supabase logic
+    setConnections(prev => new Set([...Array.from(prev), targetId]))
+    void fetchConnections()
   }
 
   const renderUserCard = (collab: Profile) => {

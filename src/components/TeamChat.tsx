@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
 import { ChatMessage, ChatPayload } from '@/types/ui'
-import { Profile } from '@/types/auth'
+// import { Profile } from '@/types/auth' // TODO: Remove if not needed, replace with Supabase type
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 type TeamChatProps = {

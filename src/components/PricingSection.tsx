@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { Shield, Sparkles, CheckCircle2, ArrowRight, Loader2, Key, Zap, Crown, Rocket } from 'lucide-react'
-import { db, auth } from '@/lib/firebase'
-import { collection, query, where, getCountFromServer } from 'firebase/firestore'
-import { onAuthStateChanged, User } from 'firebase/auth'
+// TODO: Replace with Supabase client
+// import { db, auth } from '@/lib/firebase'
+// import { collection, query, where, getCountFromServer } from 'firebase/firestore'
+// import { onAuthStateChanged, User } from 'firebase/auth'
+import type { User } from '@/types/auth' // Placeholder, replace with Supabase user type
 import TransientError from '@/components/TransientError'
 import { buildStripePaymentLink, type PlanKey } from '@/lib/stripe-payment-links'
 
@@ -22,27 +24,15 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
   const [validatingCoupon, setValidatingCoupon] = useState(false)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
 
+  // TODO: Replace with Supabase auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user)
-    })
-    return () => unsubscribe()
+    // setCurrentUser(supabaseUser)
+    setCurrentUser(null) // Placeholder
   }, [])
 
   useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const lifetimeQuery = query(collection(db, 'profiles'), where('subscription_plan', '==', 'lifetime'))
-        const lifetimeSnapshot = await getCountFromServer(lifetimeQuery)
-
-        setLifetimeSeatsUsed(lifetimeSnapshot.data().count || 0)
-      } catch (err) {
-        console.error('Error fetching counts:', err)
-        // Fallback to mock if it fails during migration
-        setLifetimeSeatsUsed(12)
-      }
-    }
-    fetchCounts()
+    // TODO: Replace with Supabase query for lifetime seats
+    setLifetimeSeatsUsed(12) // Placeholder
   }, [])
 
   const handleApplyCoupon = () => {

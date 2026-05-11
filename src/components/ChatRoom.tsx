@@ -92,7 +92,7 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
     setText("");
     updateMyState({ status: 'online' });
 
-    // 2. Permanent Archival via Firebase + Notification Trigger
+    // 2. Permanent Archival via Supabase + Notification Trigger (migrated from Firebase)
     await withLoading(async () => {
       // Find recipient Id from roomId (slug: id1_id2)
       const recipientId = roomId.split('_').find(id => id !== currentUser.id);

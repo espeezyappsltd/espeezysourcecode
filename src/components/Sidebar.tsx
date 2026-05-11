@@ -272,7 +272,8 @@ export default function Sidebar({ user }: SidebarProps) {
               .eq('id', user.id)
           }
 
-          await db.auth.signOut()
+          // TODO: Replace with Supabase signOut
+          await db.auth.signOut?.() // If using Supabase client, adjust as needed
           window.location.href = '/login'
         }, 'Signing you out...')
       },
