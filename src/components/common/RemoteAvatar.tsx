@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import Image from 'next/image'
 
 type RemoteAvatarProps = {
   src?: string | null
@@ -40,7 +41,7 @@ export default function RemoteAvatar({ src, alt, size, fallback, style, imgStyle
       }}
     >
       {showImage ? (
-        <img
+        <Image
           src={normalized}
           alt={alt}
           loading="lazy"

@@ -51,7 +51,7 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
 
       if (error) throw error
 
-      setHistory((data ?? []).map((m: any) => {
+      setHistory((data ?? []).map((m: { id: string; sender_id: string; content: string; created_at: string; metadata?: { sender_name?: string } }) => {
         return {
           id: m.id,
           senderId: m.sender_id,
@@ -61,8 +61,8 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
           isHistory: true
         }
       }))
-    } catch (err: any) {
-      console.error('Fetch chat history error:', err.message)
+    } catch (err) {
+      console.error('Fetch chat history error:', err instanceof Error ? err.message : err)
     }
     setLoadingHistory(false);
   };
@@ -115,8 +115,8 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
             created_at: new Date().toISOString()
           }) : Promise.resolve()
         ]);
-      } catch (err: any) {
-        console.error("Message backup failed:", err.message);
+      } catch (err) {
+        console.error("Message backup failed:", err instanceof Error ? err.message : err);
       }
     }, 'Synchronizing Archive...')
   };

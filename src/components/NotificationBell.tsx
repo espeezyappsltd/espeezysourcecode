@@ -207,8 +207,8 @@ export default function NotificationBell() {
                                      link: `/dashboard/network/profile/${myId}`,
                                      created_at: new Date().toISOString()
                                    });
-                                 } catch (err: any) {
-                                   console.error('Accept connection error:', err.message)
+                                 } catch (err) {
+                                   console.error('Accept connection error:', err instanceof Error ? err.message : err)
                                  }
                                }}
                              >
@@ -228,8 +228,8 @@ export default function NotificationBell() {
                                  try {
                                    await deleteDoc(doc(db, 'user_connections', connId));
                                    markAsRead(notif.id);
-                                 } catch (err: any) {
-                                   console.error('Decline connection error:', err.message)
+                                 } catch (err) {
+                                   console.error('Decline connection error:', err instanceof Error ? err.message : err)
                                  }
                                }}
                              >

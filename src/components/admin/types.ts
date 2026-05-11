@@ -33,6 +33,9 @@ export interface AdminStats {
   pro: number
   premium: number
   revenue: number
+  ltv?: number
+  cac?: number
+  nrr?: number
 }
 
 // ── Users ──────────────────────────────────────────────────────────────────────

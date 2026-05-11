@@ -147,26 +147,37 @@ export function useAdminDashboard() {
       // Convert the config rows array into a key-indexed map
       const configMap = configSnap.docs.reduce<PlatformConfig>(
         (acc, doc) => {
-          const item = doc.data() as any
+          const item = doc.data() as Record<string, unknown>
           return { ...acc, [item.key]: item }
         },
         {},
       )
 
+      // --- Metrics Calculation (simple demo logic, replace with real formulas as needed) ---
+      const revenue = proUsers * 4.99 + premiumUsers * 14.99 + lifetimeUsers * 99
+      // LTV: (ARPU * Gross Margin %) / Churn Rate (demo: ARPU = revenue/totalUsers, margin=0.8, churn=0.03)
+      const arpu = totalUsers > 0 ? revenue / totalUsers : 0
+      const grossMargin = 0.8
+      const churnRate = 0.03
+      const ltv = churnRate > 0 ? Math.round((arpu * grossMargin) / churnRate) : 0
+      // CAC: demo value (replace with real acquisition cost tracking)
+      const cac = 25
+      // NRR: demo value (replace with real retention calculation)
+      const nrr = 0.92
+
       setStats({
         users: totalUsers,
         pro: proUsers,
         premium: premiumUsers + lifetimeUsers,
-        // Estimated revenue calculation
-        revenue:
-          proUsers * 4.99 +
-          premiumUsers * 14.99 +
-          lifetimeUsers * 99,
+        revenue,
+        ltv,
+        cac,
+        nrr,
       })
       setRecentUsers(recentSnap.docs.map(d => ({ id: d.id, ...d.data() } as unknown as RecentUser)))
       setConfig(configMap)
-    } catch (err: any) {
-      console.error('Fetch admin data error:', err.message)
+    } catch (err) {
+      console.error('Fetch admin data error:', err instanceof Error ? err.message : err)
     } finally {
       setLoading(false)
     }
@@ -256,7 +267,7 @@ export function useAdminDashboard() {
         'success',
       )
 
-      const updateData: any =
+      const updateData: Record<string, unknown> =
         action === 'upgrade'
           ? { subscription_plan: 'premium' }
           : action === 'ban'
@@ -267,8 +278,8 @@ export function useAdminDashboard() {
         await updateDoc(doc(db, 'profiles', userId), updateData)
         addToast('Operation Success', 'Database synchronized.', 'success')
         fetchAdminData()
-      } catch (err: any) {
-        addToast('Command Failed', err.message, 'error')
+      } catch (err) {
+        addToast('Command Failed', err instanceof Error ? err.message : String(err), 'error')
       }
     },
     [addToast, fetchAdminData],
@@ -292,8 +303,8 @@ export function useAdminDashboard() {
           addToast('State Persisted', `${key} re-routed successfully.`, 'success')
           fetchAdminData()
         }
-      } catch (err: any) {
-        addToast('Sync Error', err.message, 'error')
+      } catch (err) {
+        addToast('Sync Error', err instanceof Error ? err.message : String(err), 'error')
       }
       setSavingConfig(false)
     },

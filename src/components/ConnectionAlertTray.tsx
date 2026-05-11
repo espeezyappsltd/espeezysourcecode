@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { Profile } from '@/types/database'
 import { db, auth } from '@/lib/firebase'
 import { 
   collection, 
@@ -18,8 +19,14 @@ import { UserPlus, X, Check, ExternalLink, RefreshCw } from 'lucide-react'
 import { useNotifications } from './NotificationProvider'
 import Link from 'next/link'
 
-export default function ConnectionAlertTray() {
-  const [requests, setRequests] = useState<any[]>([])
+  type ConnectionRequest = {
+    id: string
+    user_id: string
+    target_id: string
+    status: string
+    profiles: Profile | null
+  }
+  const [requests, setRequests] = useState<ConnectionRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const { addToast } = useNotifications()
@@ -48,8 +55,8 @@ export default function ConnectionAlertTray() {
       }))
       
       setRequests(data)
-    } catch (err: any) {
-      console.error('Error fetching connection requests:', err.message)
+    } catch (err) {
+      console.error('Error fetching connection requests:', err instanceof Error ? err.message : err)
     } finally {
       setLoading(false)
     }
@@ -120,8 +127,8 @@ export default function ConnectionAlertTray() {
       }
 
       await fetchRequests()
-    } catch (err: any) {
-      addToast('Sync Error', err.message, 'error')
+    } catch (err) {
+      addToast('Sync Error', err instanceof Error ? err.message : String(err), 'error')
     } finally {
       setProcessingId(null)
     }

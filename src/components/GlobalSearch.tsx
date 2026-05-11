@@ -1,8 +1,9 @@
+import Image from 'next/image'
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Search, User, CheckSquare, Users, X, ArrowRight, Loader2 } from 'lucide-react'
-import { db, createBrowserSupabaseClient } from '@/lib/db-client'
+import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useRouter } from 'next/navigation'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { getFlagComponent } from '@/utils/geo'
@@ -239,7 +240,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
                    <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--bg-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {r.type === 'profile' && (
                         r.image_url ? (
-                          <img src={r.image_url} style={{ width: '100%', height: '100%', borderRadius: '12px', objectFit: 'cover' }} />
+                          <Image src={r.image_url} alt={r.title || 'result'} width={40} height={40} style={{ width: '100%', height: '100%', borderRadius: '12px', objectFit: 'cover' }} />
                         ) : (
                           <User size={20} color="var(--brand)" />
                         )

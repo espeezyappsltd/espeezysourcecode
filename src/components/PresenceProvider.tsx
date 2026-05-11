@@ -50,8 +50,10 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         }, { onConflict: 'user_id' })
 
       if (error) throw error
-    } catch (err: any) {
-      console.error('Typing status error:', err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error('Typing status error:', err.message)
+      }
     }
   }, [db, groupId, userId])
 

@@ -30,7 +30,7 @@ export default function PromoBanner() {
       .select('*')
       .eq('config_key', 'main_banner')
       .single()
-      .then(({ data, error }: { data: PlatformConfig | null; error: any }) => {
+      .then(({ data, error }: { data: PlatformConfig | null; error: unknown }) => {
         if (error) {
           console.warn('Failed to load promo banner config:', error)
           return
@@ -51,7 +51,7 @@ export default function PromoBanner() {
           table: 'platform_config',
           filter: `config_key=eq.main_banner`
         },
-        (payload: any) => {
+        (payload: unknown) => {
           if (payload.new && typeof payload.new === 'object') {
             setConfig(payload.new as PlatformConfig)
           }

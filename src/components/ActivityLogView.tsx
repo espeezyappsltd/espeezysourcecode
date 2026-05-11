@@ -1,3 +1,4 @@
+import Image from 'next/image'
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -125,11 +126,13 @@ export default function ActivityLogView({
     return () => {
       db.removeChannel(channel)
     }
-  }, [fetchLogs, groupId, userId, db])
-
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                          <Image
+                            src={activity.profiles.avatar_url}
+                            alt={`${activity.profiles.full_name ?? 'System'} avatar`}
+                            width={16}
+                            height={16}
+                            style={{ borderRadius: '50%' }}
+                          />
         {[1, 2].map(g => (
           <div key={g}>
             <div className="skeleton skeleton-text" style={{ width: '100px', marginBottom: '1.5rem' }} />

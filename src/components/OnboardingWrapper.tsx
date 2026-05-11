@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import OnboardingModal from './OnboardingModal'
 import { OnboardingWrapperProps } from '@/types/ui'
 import { useProfile } from '@/context/ProfileContext'

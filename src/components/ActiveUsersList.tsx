@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { db, createBrowserSupabaseClient } from '@/lib/db-client'
+import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { usePresence } from './PresenceProvider'
 import { User, Shield } from 'lucide-react'
+import Image from 'next/image'
 import { ActiveUser } from '@/types/auth'
 import { getFlagComponent } from '@/utils/geo'
 
@@ -110,10 +111,12 @@ export default function ActiveUsersList({
                   }}
                 >
                   {member.avatar_url ? (
-                    <img
+                        <Image
                       src={member.avatar_url}
                       alt={member.full_name ? `${member.full_name}'s avatar` : 'User avatar'}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          width={32}
+                          height={32}
+                          style={{ borderRadius: '50%', objectFit: 'cover' }}
                     />
                   ) : (
                     <User size={24} color="var(--text-sub)" />

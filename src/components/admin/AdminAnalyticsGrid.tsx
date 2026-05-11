@@ -35,16 +35,53 @@ export default function AdminAnalyticsGrid({ stats }: Props) {
   const funnelData = buildFunnelData(stats)
 
   return (
+    <div>
+      {/* Metrics Row */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '2.5rem',
+          marginBottom: '2.5rem',
+          flexWrap: 'wrap',
+        }}
+      >
+        <MetricCard label="LTV" value={typeof stats.ltv === 'number' ? `£${stats.ltv}` : '—'} desc="Lifetime Value" color="#6366f1" />
+        <MetricCard label="CAC" value={typeof stats.cac === 'number' ? `£${stats.cac}` : '—'} desc="Customer Acquisition Cost" color="#f59e42" />
+        <MetricCard label="NRR" value={typeof stats.nrr === 'number' ? `${Math.round((stats.nrr ?? 0) * 100)}%` : '—'} desc="Net Revenue Retention" color="#10b981" />
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '3fr 1fr',
+          gap: '1.5rem',
+          marginBottom: '3rem',
+        }}
+      >
+        <MrrChart chartData={chartData} />
+        <ConversionFunnel funnelData={funnelData} />
+      </div>
+    </div>
+  )
+}
+
+function MetricCard({ label, value, desc, color }: { label: string; value: string; desc: string; color: string }) {
+  return (
     <div
       style={{
-        display: 'grid',
-        gridTemplateColumns: '3fr 1fr',
-        gap: '1.5rem',
-        marginBottom: '3rem',
+        background: '#0a0a0a',
+        border: `2px solid ${color}`,
+        borderRadius: '20px',
+        padding: '1.5rem 2.5rem',
+        minWidth: '160px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        boxShadow: '0 2px 12px 0 rgba(0,0,0,0.08)',
       }}
     >
-      <MrrChart chartData={chartData} />
-      <ConversionFunnel funnelData={funnelData} />
+      <span style={{ fontSize: '0.8rem', fontWeight: 700, color, marginBottom: '0.5rem', letterSpacing: '1px' }}>{label}</span>
+      <span style={{ fontSize: '2.2rem', fontWeight: 950, color: 'white', marginBottom: '0.25rem' }}>{value}</span>
+      <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 500 }}>{desc}</span>
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
+import Image from 'next/image'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, Clock,
@@ -475,7 +476,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         return
       }
 
-      const normalized = (data ?? []).map((row: any) => ({
+      const normalized = (data ?? []).map((row: Record<string, unknown>) => ({
         ...row,
         profiles: Array.isArray(row.profiles) ? row.profiles[0] : row.profiles,
       }))
@@ -595,7 +596,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         `Sent a ${payload?.type || 'text'} message`,
         { message_id: data.id }
       )
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Send message error:', err.message)
     }
   }
@@ -621,7 +622,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
          'Deleted a message',
          { message_id: msgId }
        )
-     } catch (err: any) {
+    } catch (err: unknown) {
        console.error('Delete message error:', err.message)
      }
   }
@@ -656,7 +657,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
             name: file.name
           }
        )
-     } catch (err: any) {
+    } catch (err: unknown) {
        console.error('File upload error:', err.message)
      } finally {
        setUploading(false)

@@ -43,7 +43,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       setNotifications((data ?? []) as Notification[])
       baselineLoadedRef.current = true
-    } catch (err: any) {
+      } catch (err) {
       console.error('Error fetching notifications:', err.message)
     }
   }, [db, userId])
@@ -162,6 +162,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       if (error) throw error
     } catch (err: any) {
+      } catch (err) {
       console.error('Persistence error (markAsRead):', err.message)
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n))
       addToast('Check connection', 'We couldn\'t update that just now.', 'error')
@@ -183,6 +184,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       if (error) throw error
     } catch (err: any) {
+      } catch (err) {
       console.error('Persistence error (markAllAsRead):', err.message)
       setNotifications(original)
       addToast('Check connection', 'We couldn\'t clear your notifications.', 'error')

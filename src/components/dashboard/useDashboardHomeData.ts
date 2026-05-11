@@ -69,8 +69,8 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
       const data = await fetchGroupById(groupId)
       setGroup(data)
       localStorage.setItem(`gf_cache_group_${groupId}`, JSON.stringify(data))
-    } catch (err: any) {
-      console.error('Fetch group details error:', err.message)
+    } catch (err) {
+      console.error('Fetch group details error:', err instanceof Error ? err.message : err)
     }
   }, [groupId])
 
@@ -79,8 +79,8 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     try {
       const data = await fetchGroupMembers(groupId)
       setMembers(data)
-    } catch (err: any) {
-      console.error('Error fetching group members:', err.message)
+    } catch (err) {
+      console.error('Error fetching group members:', err instanceof Error ? err.message : err)
     }
   }, [groupId])
 
@@ -89,8 +89,8 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     try {
       const data = await fetchPendingJoinRequests(groupId)
       setPendingRequests(data.map((request) => ({ ...request, profiles: request.profiles ?? undefined })))
-    } catch (err: any) {
-      console.error('Fetch pending requests error:', err.message)
+    } catch (err) {
+      console.error('Fetch pending requests error:', err instanceof Error ? err.message : err)
     }
   }, [groupId, profile?.role])
 
@@ -124,8 +124,8 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     try {
       const pendingCount = await fetchPersonalPendingTaskCount(groupId, profile.id)
       setPersonalTaskCount(pendingCount)
-    } catch (err: any) {
-      console.warn('Silent failure on personal task count:', err.message)
+    } catch (err) {
+      console.warn('Silent failure on personal task count:', err instanceof Error ? err.message : err)
     }
   }, [profile?.id, groupId])
 
@@ -141,10 +141,11 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
         return
       }
 
-      const pending = tasks.filter((t: any) => t.status !== 'Done').length
+      type Task = { status: string }
+      const pending = tasks.filter((t: Task) => t.status !== 'Done').length
       setTotalBacklog(pending)
 
-      const completed = tasks.filter((t: any) => t.status === 'Done').length
+      const completed = tasks.filter((t: Task) => t.status === 'Done').length
       const progress = Math.round((completed / tasks.length) * 100)
       setProjectProgress(progress)
 
@@ -161,8 +162,8 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
         progress,
         label,
       }))
-    } catch (err: any) {
-      console.error('Fetch project progress error:', err.message)
+    } catch (err) {
+      console.error('Fetch project progress error:', err instanceof Error ? err.message : err)
     }
   }, [groupId, personalTaskCount])
 

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import React, { useState, useEffect } from 'react'
 import type { Profile } from '@/types/auth'
 import ChatRoom from './ChatRoom'
@@ -69,7 +70,12 @@ import {
 
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
   const [me, setMe] = useState<{ id: string; email?: string; full_name?: string } | null>(null)
-  const [achievements, setAchievements] = useState<any[]>([])
+  type Achievement = {
+    type: 'artifact' | 'commit'
+    id: string
+    [key: string]: unknown
+  }
+  const [achievements, setAchievements] = useState<Achievement[]>([])
   const [isConnected, setIsConnected] = useState(initialConnected)
   const [loading, setLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
@@ -97,8 +103,8 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
           ...comSnap.docs.map(d => ({ type: 'commit', ...d.data(), id: d.id }))
         ]
         setAchievements(combined)
-      } catch (err: any) {
-        console.error('Achievements error:', err.message)
+      } catch (err) {
+        console.error('Achievements error:', err instanceof Error ? err.message : err)
       }
     }
 
@@ -133,8 +139,8 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
 
       setIsConnected(true)
       if (onConnect) onConnect()
-    } catch (err: any) {
-      console.error('Connection request error:', err.message)
+    } catch (err) {
+      console.error('Connection request error:', err instanceof Error ? err.message : err)
     }
     setLoading(false)
   }
@@ -182,7 +188,7 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
               justifyContent: 'center'
             }}>
               {member.avatar_url ? (
-                <img src={member.avatar_url} alt={member.full_name || 'avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image src={member.avatar_url} alt={member.full_name || 'avatar'} width={32} height={32} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <UserCircle size={70} color="var(--text-sub)" />
               )}

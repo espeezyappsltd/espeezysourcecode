@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import type { Profile } from '@/types/database'
 import { db, auth } from '@/lib/firebase'
 import { 
   collection, 
@@ -48,8 +49,8 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
         .filter(p => p.id !== user.uid)
       
       setCollaborators(data)
-    } catch (err: any) {
-      console.error('Fetch collaborators error:', err.message)
+    } catch (err) {
+      console.error('Fetch collaborators error:', err instanceof Error ? err.message : err)
     }
   }, [currentGroupId])
 
@@ -69,8 +70,8 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
         .slice(0, 6)
 
       setSuggested(data)
-    } catch (err: any) {
-      console.error('Fetch suggested error:', err.message)
+    } catch (err) {
+      console.error('Fetch suggested error:', err instanceof Error ? err.message : err)
     }
   }, [currentGroupId])
 
@@ -115,8 +116,8 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
       } else {
         setPersonalNetwork([])
       }
-    } catch (err: any) {
-      console.error('Fetch connections error:', err.message)
+    } catch (err) {
+      console.error('Fetch connections error:', err instanceof Error ? err.message : err)
     }
   }, [])
 
@@ -159,8 +160,8 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
         metadata: { sender_id: user.uid },
         created_at: new Date().toISOString()
       })
-    } catch (err: any) {
-      console.error('Connect error:', err.message)
+    } catch (err) {
+      console.error('Connect error:', err instanceof Error ? err.message : err)
     }
   }
 

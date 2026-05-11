@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
@@ -181,7 +182,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                     >
                       <div style={{ position: 'relative' }}>
                         <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, color: 'var(--brand)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-                          {m.avatar_url ? <img src={m.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.full_name?.[0]}
+                          {m.avatar_url ? <Image src={m.avatar_url} alt={m.full_name || 'avatar'} width={32} height={32} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.full_name?.[0]}
                         </div>
                         <div style={{ position: 'absolute', bottom: -1, right: -1, width: '10px', height: '10px', borderRadius: '50%', background: isOnline ? 'var(--success)' : '#94a3b8', border: '2px solid var(--surface)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} />
                       </div>
@@ -217,7 +218,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {r.profiles?.avatar_url ? <img src={r.profiles.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={18} color="var(--text-sub)" />}
+                            {r.profiles?.avatar_url ? <Image src={r.profiles.avatar_url} alt={r.profiles.full_name || 'avatar'} width={18} height={18} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={18} color="var(--text-sub)" />}
                           </div>
                           <div style={{ fontWeight: 850, fontSize: '0.85rem', color: 'var(--text-main)' }}>{r.profiles?.full_name}</div>
                         </div>

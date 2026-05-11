@@ -1,3 +1,4 @@
+import Image from 'next/image'
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -598,13 +599,12 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                                 className="avatar-bubble"
                               >
                                 {user?.avatar_url ? (
-                                  <img
+                                  <Image
                                     src={user.avatar_url}
-                                    title={user.full_name || 'View Profile'}
-                                    style={{
-                                      width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover',
-                                      border: '1px solid var(--surface)', boxShadow: 'var(--shadow-sm)'
-                                    }}
+                                    alt={user.full_name || 'View Profile'}
+                                    width={20}
+                                    height={20}
+                                    style={{ borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--surface)', boxShadow: 'var(--shadow-sm)' }}
                                   />
                                 ) : (
                                   <div

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
@@ -276,8 +277,8 @@ export default function TaskModal({
         )
       }
       onClose()
-    } catch (err: any) {
-      setError(`Failed to delete: ${err.message}`)
+    } catch (err) {
+      setError(`Failed to delete: ${err instanceof Error ? err.message : err}`)
     } finally {
       setLoading(false)
     }
@@ -302,8 +303,8 @@ export default function TaskModal({
          if (error) throw error
 
          onRefresh()
-       } catch (err: any) {
-         setError(`Failed to update assignment: ${err.message}`)
+       } catch (err) {
+         setError(`Failed to update assignment: ${err instanceof Error ? err.message : err}`)
          setAssignees(task.assignees || [])
        }
        setLoading(false)
@@ -342,8 +343,8 @@ export default function TaskModal({
         { task_id: task.id }
       )
       setNewUrl('')
-    } catch (err: any) {
-      setError(`Failed to attach evidence: ${err.message}`)
+    } catch (err) {
+      setError(`Failed to attach evidence: ${err instanceof Error ? err.message : err}`)
     } finally {
       setUploading(false)
     }
@@ -380,8 +381,8 @@ export default function TaskModal({
        })
 
        if (insertError) throw insertError
-     } catch (err: any) {
-       setError(`File upload failed: ${err.message}`)
+     } catch (err) {
+       setError(`File upload failed: ${err instanceof Error ? err.message : err}`)
      } finally {
        setUploading(false)
      }
@@ -405,8 +406,8 @@ export default function TaskModal({
           { task_id: task?.id || 'deleted' }
         )
       }
-    } catch (err: any) {
-      setError(`Failed to delete artifact: ${err.message}`)
+    } catch (err) {
+      setError(`Failed to delete artifact: ${err instanceof Error ? err.message : err}`)
     }
   }
 
@@ -418,8 +419,8 @@ export default function TaskModal({
         .eq('id', artifactId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(`Failed to endorse: ${err.message}`)
+    } catch (err) {
+      setError(`Failed to endorse: ${err instanceof Error ? err.message : err}`)
     }
   }
 
@@ -470,7 +471,7 @@ export default function TaskModal({
                          title={m?.full_name || 'Assigned User'}
                        >
                          {m?.avatar_url ? (
-                           <img src={m.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                           <Image src={m.avatar_url} alt={m.full_name || 'avatar'} width={32} height={32} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                          ) : (
                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
                              {(m?.full_name || '?')[0]}
@@ -635,7 +636,7 @@ export default function TaskModal({
                       >
                         <div style={{ position: 'relative', flexShrink: 0 }}>
                           {member.avatar_url ? (
-                            <img 
+                            <Image 
                               src={member.avatar_url} 
                               style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} 
                               alt={member.full_name || 'Member'}
