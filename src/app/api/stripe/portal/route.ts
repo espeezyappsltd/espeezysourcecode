@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { getAppUrl, getStripeClient, getStripePortalConfigurationId } from '@/utils/stripe'
 
 export const dynamic = 'force-dynamic'

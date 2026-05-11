@@ -7,7 +7,7 @@
  * surface on the admin dashboard.
  */
 
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient } from '@/lib/db'
 
 export interface ErrorLogPayload {
   route?: string

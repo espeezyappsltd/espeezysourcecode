@@ -5,7 +5,7 @@
  * Body: { institution: string; enrollment_proof?: string; academic_year?: string }
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 

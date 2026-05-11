@@ -3,7 +3,7 @@
  * All admin API routes must use these guards  -  never inline duplicates.
  */
 import { NextResponse } from 'next/server'
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 
 export type AdminContext = {
   user: { id: string; email?: string }

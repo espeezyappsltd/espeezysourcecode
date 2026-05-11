@@ -1,4 +1,4 @@
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient } from '@/lib/db'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'

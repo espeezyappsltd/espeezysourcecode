@@ -1,4 +1,4 @@
-import { db, createAdminClient, createServerSupabaseClient } from '@/lib/db'
+import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import Sidebar from '../../components/Sidebar'
 import BottomNav from '../../components/BottomNav'
