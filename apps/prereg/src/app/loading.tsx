@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function Loading() {
   return (
     <div
@@ -33,7 +35,7 @@ export default function Loading() {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <img src="/brand_logo2.svg" style={{ width: '16px', height: '16px', objectFit: 'contain' }} alt="" />
+          <Image src="/brand_logo2.svg" width={16} height={16} style={{ objectFit: 'contain' }} alt="" priority />
         </div>
         <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'rgba(15,23,42,0.5)', letterSpacing: '-0.02em' }}>
           Espeezy

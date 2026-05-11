@@ -18,20 +18,20 @@ import { supabase } from '@/lib/supabase-client'
 import { submitPreregistration } from '@/services/preregister'
 
 const COMING_FEATURES = [
-  { icon: <Cpu size={20} />, title: 'Your Personal AI Coach', desc: 'Imagine having a smart tutor that knows your course content, adapts to how you learn best, and helps you crush your assignments.', tag: 'Smart Learning' },
-  { icon: <BarChart2 size={20} />, title: 'No More Freeloaders', desc: 'Crystal-clear analytics show exactly who did what in group projects. Say goodbye to carrying the team without credit.', tag: 'Visibility' },
-  { icon: <Zap size={20} />, title: 'Supercharged Collaboration', desc: 'Everything you need in one fast, beautiful workspace. Plan, track, and execute group tasks seamlessly without the usual stress.', tag: 'Productivity' },
-  { icon: <Heart size={20} />, title: 'Built-in Wellbeing Support', desc: 'We keep an eye on your workload to prevent burnout. Get gentle nudges when it\'s time to take a break and recharge.', tag: 'Mental Health' },
-  { icon: <BookOpen size={20} />, title: 'Syncs with Your School', desc: 'Connects right into Canvas, Blackboard, or Moodle so you don\'t have to copy-paste your work everywhere.', tag: 'Integrations' },
-  { icon: <Globe size={20} />, title: 'Global Student Network', desc: 'Join forces with students around the world. Share awesome resources, find study buddies, and collaborate globally.', tag: 'Community' },
+  { icon: <Cpu size={20} />, title: 'Personal AI Tutor', desc: 'Our AI analyzes your specific course materials to generate custom study plans, instant tutoring sessions, and automated task prioritization tailored to your learning style.', tag: 'Smart Learning' },
+  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'Real-time tracking logs every task update and document edit, generating verifiable accountability reports that ensure every student\'s work is recognized and fairly credited.', tag: 'Visibility' },
+  { icon: <Zap size={20} />, title: 'Unified Project Hub', desc: 'A high-performance workspace that integrates Kanban boards, shared documents, and group chat, eliminating the need to jump between multiple apps to manage your academic life.', tag: 'Productivity' },
+  { icon: <Heart size={20} />, title: 'Predictive Wellbeing', desc: 'Smart workload monitoring analyzes your upcoming deadlines and project velocity, delivering proactive schedule adjustments and break reminders to prevent student burnout.', tag: 'Mental Health' },
+  { icon: <BookOpen size={20} />, title: 'Deep LMS Sync', desc: 'Bi-directional connectors for Canvas, Blackboard, and Moodle automatically sync your assignments, deadlines, and grades into your centralized Espeezy dashboard.', tag: 'Integrations' },
+  { icon: <Globe size={20} />, title: 'Global Peer Network', desc: 'A verified student-only platform that connects you with peers studying the same courses worldwide, facilitating secure resource sharing and cross-institutional study groups.', tag: 'Community' },
 ]
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
-  { href: '/fund', label: 'Support Us' },
+  { href: '/fund', label: 'Fund' },
   { href: '/docs', label: 'Docs' },
-  { href: '/checkout', label: 'Pricing' },
+  { href: '/pricing', label: 'Pricing' },
 ]
 
 export default function PreRegisterPage() {
@@ -182,7 +182,7 @@ export default function PreRegisterPage() {
       <nav aria-label="Primary navigation" style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(15,23,42,0.07)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(255,255,255,0.9)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
           <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Image src="/brand_logo2.svg" width={22} height={22} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" />
+            <Image src="/brand_logo2.svg" width={22} height={22} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" priority />
           </div>
           <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a', letterSpacing: '-0.03em' }}>{config.brand_name}</span>
         </Link>
@@ -316,11 +316,11 @@ export default function PreRegisterPage() {
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Free Forever Plan · Early Access</span>
                   </div>
                   <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 1.9rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '1rem 0 0.5rem', lineHeight: 1.1 }}>
-                    Secure your spot.<br />
-                    <span style={{ color: 'var(--brand)' }}>No credit card required.</span>
+                    Stop group work free-riding.<br />
+                    <span style={{ color: 'var(--brand)' }}>See exactly who did what.</span>
                   </h2>
                   <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                    Register your interest today and get priority access, exclusive early features, and founding member recognition.
+                    Join the waitlist for the only platform that tracks individual contributions in real-time, allowing for fair grading based on verifiable data.
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <label htmlFor="prereg-email" className="sr-only">Email address (required)</label>
@@ -392,19 +392,19 @@ export default function PreRegisterPage() {
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 'clamp(2.8rem, 8vw, 6rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, maxWidth: '960px', margin: '0 auto 1.5rem' }}>
-            The platform that gives every student a{' '}
+            The platform that makes group work{' '}
             <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              fair voice.
+              fair for everyone.
             </span>
           </h2>
           <p style={{ color: '#64748b', maxWidth: '680px', margin: '0 auto 3rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
-            {config.launch_message}
+            No more guessing who did what. Espeezy provides the real-time data needed to ensure every contribution is recognized and graded accurately.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
               { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not fairly recognised in group assessments.' },
               { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
-              { icon: <TrendingUp size={22} />, stat: '3� - ', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
+              { icon: <TrendingUp size={22} />, stat: '3x', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
               { icon: <Globe size={22} />, stat: '195', label: 'countries where fair access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
@@ -463,7 +463,7 @@ export default function PreRegisterPage() {
             Be part of the<br /><span style={{ color: 'var(--brand)' }}>founding generation.</span>
           </h2>
           <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            5 million pre-registrations. One mission. Free, fair, and powerful education infrastructure for every student on the planet.
+            One mission: Eliminate group work free-riding. Join millions of students securing a future where grading is fair, transparent, and based on real work.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

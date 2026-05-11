@@ -7,7 +7,7 @@ import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import {
   Sparkles, Heart, Cpu, Globe, BookOpen,
   BarChart2, Smartphone, ShieldCheck, Lock,
-  ChevronDown, ChevronUp, Users, ArrowRight,
+  ChevronDown, ChevronUp, ArrowRight,
 } from 'lucide-react'
 import { PLAN_PAYMENT_LINKS } from '@/lib/stripe-payment-links'
 import { fetchLiveMetrics } from '@/services/launch'
@@ -66,45 +66,6 @@ const FUND_FEATURES = [
 
 const PRESETS = [5, 10, 25, 50, 100, 250]
 
-const STRIPE_DONATION_TIERS = [
-  {
-    amount: 5,
-    name: 'Supporter Donation',
-    tag: 'Low Friction',
-    description: 'A fast, low-friction way to keep Espeezy online and moving.',
-  },
-  {
-    amount: 10,
-    name: 'Momentum Donation',
-    tag: 'Roadmap Boost',
-    description: 'A simple step up that helps fund infrastructure and short development pushes.',
-  },
-  {
-    amount: 15,
-    name: 'Builder Donation',
-    tag: 'Feature Sprint',
-    description: 'A low-friction way to directly fund a meaningful slice of product work.',
-  },
-  {
-    amount: 25,
-    name: 'Sprint Donation',
-    tag: 'Roadmap Boost',
-    description: 'Push a roadmap item forward faster with a stronger one-off contribution.',
-  },
-  {
-    amount: 50,
-    name: 'Sponsor Donation',
-    tag: 'Higher Intent',
-    description: 'Back a larger chunk of engineering, infrastructure, or AI feature delivery.',
-  },
-  {
-    amount: 100,
-    name: 'Patron Donation',
-    tag: 'Mission Support',
-    description: 'A strong supporter tier for people who want to materially move the roadmap forward.',
-  },
-] as const
-
 // Amount-specific Stripe links for direct checkout (preferred for preset buttons)
 const DONATION_PAYMENT_LINKS: Record<number, string> = {
   5: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_5 ?? 'https://donate.stripe.com/00w8wPbhO16wfdufa07wA08').trim(),
@@ -115,107 +76,11 @@ const DONATION_PAYMENT_LINKS: Record<number, string> = {
   100: (process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK_100 ?? 'https://donate.stripe.com/dRm6oH3Pm9D23uM1ja7wA0d').trim(),
 }
 
-const STRIPE_SUPPORT_PRODUCTS = [
-  {
-    name: 'Espeezy Standard',
-    price: 'Free',
-    tag: 'Entry Tier',
-    href: '/',
-    cta: 'Join Early Access',
-    description: 'Core collaboration, transparent contribution tracking, and the free student entry point.',
-    features: ['Basic kanban workspace', 'Core contribution tracking', 'Free forever for students'],
-  },
-  {
-    name: 'Espeezy Pro',
-    price: 'GBP 4.99 / month',
-    tag: 'Best Place To Start',
-    href: PLAN_PAYMENT_LINKS.pro,
-    cta: 'Choose Pro',
-    description: 'The main paid plan for students who want better execution, deeper analytics, and a measurable academic edge.',
-    features: ['Unlimited workspaces', 'AI Study Coach credits', 'Personal performance insights'],
-  },
-  {
-    name: 'Espeezy Premium',
-    price: 'GBP 14.99 / month',
-    tag: 'Advanced Workflows',
-    href: PLAN_PAYMENT_LINKS.premium,
-    cta: 'Choose Premium',
-    description: 'For team leads and heavier collaboration workflows that need deeper analytics and intervention tools.',
-    features: ['Everything in Pro', 'Advanced AI access', 'Academic integrity reports'],
-  },
-  {
-    name: 'Premium Lifetime Access',
-    price: 'GBP 149.00 one-time',
-    tag: 'First 100 Only \u2014 Limited',
-    href: PLAN_PAYMENT_LINKS.lifetime,
-    cta: 'Claim Lifetime',
-    description: 'Reserved for the first 100 early supporters only. One payment, permanent Premium access \u2014 no recurring billing, ever.',
-    features: ['Everything in Premium', 'Founder badge', 'Legacy pricing protection'],
-  },
-] as const
-
-const DEFAULT_FEATURED_SUPPORT_LINK = PLAN_PAYMENT_LINKS.pro
-const LIFETIME_LIMIT = 100
-
 const TESTIMONIALS = [
   { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
   { name: 'Kenji T., Computer Science, Tokyo', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
   { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
-
-type DonationMetrics = {
-  total_cents: number
-  donation_count: number
-  supporters_count: number
-  click_count: number
-  click_user_count: number
-  conversion_rate_pct: number
-}
-
-async function fetchDonationMetrics(): Promise<DonationMetrics> {
-  try {
-    const d = await fetchLiveMetrics()
-    if (!d) {
-      return {
-        total_cents: 0,
-        donation_count: 0,
-        supporters_count: 0,
-        click_count: 0,
-        click_user_count: 0,
-        conversion_rate_pct: 0,
-      }
-    }
-    if (typeof d.donation_total_cents === 'number') {
-      return {
-        total_cents: d.donation_total_cents,
-        donation_count: typeof d.donation_count === 'number' ? d.donation_count : 0,
-        supporters_count: typeof d.donation_supporters_count === 'number'
-          ? d.donation_supporters_count
-          : (typeof d.donation_count === 'number' ? d.donation_count : 0),
-        click_count: typeof d.donation_click_count === 'number' ? d.donation_click_count : 0,
-        click_user_count: typeof d.donation_click_user_count === 'number' ? d.donation_click_user_count : 0,
-        conversion_rate_pct: typeof d.donation_conversion_rate_pct === 'number' ? d.donation_conversion_rate_pct : 0,
-      }
-    }
-  } catch {}
-  return {
-    total_cents: 0,
-    donation_count: 0,
-    supporters_count: 0,
-    click_count: 0,
-    click_user_count: 0,
-    conversion_rate_pct: 0,
-  }
-}
-
-async function fetchLifetimeSeats(): Promise<number | null> {
-  try {
-    const data = await fetchLiveMetrics()
-    if (!data) return null
-    if (typeof data.lifetime_seats_used === 'number') return data.lifetime_seats_used
-  } catch {}
-  return null
-}
 
 function getDonationFallbackLink(amount?: number, email?: string) {
   const base = (amount ? DONATION_PAYMENT_LINKS[amount] : null)
@@ -229,12 +94,7 @@ function getDonationFallbackLink(amount?: number, email?: string) {
   return `${base}${separator}prefilled_email=${encodeURIComponent(email.trim())}`
 }
 
-function getFeaturedSupportLink() {
-  return process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK?.trim() || DEFAULT_FEATURED_SUPPORT_LINK
-}
-
 export default function FundPage() {
-  const donationTierOptions = STRIPE_DONATION_TIERS
   const [customAmount, setCustomAmount] = useState('')
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
   const [donorName, setDonorName] = useState('')
@@ -245,16 +105,6 @@ export default function FundPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
-  const [donationMetrics, setDonationMetrics] = useState<DonationMetrics>({
-    total_cents: 0,
-    donation_count: 0,
-    supporters_count: 0,
-    click_count: 0,
-    click_user_count: 0,
-    conversion_rate_pct: 0,
-  })
-  const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
-  const [metricsUpdatedAt, setMetricsUpdatedAt] = useState<string>('')
 
   const getOrCreateActorKey = useCallback(() => {
     if (typeof window === 'undefined') return ''
@@ -279,69 +129,6 @@ export default function FundPage() {
 
     trackDonationClick(payload)
   }, [featureTag, getOrCreateActorKey])
-
-  const refreshTotals = useCallback(() => {
-    fetchDonationMetrics().then((totals) => {
-      setDonationMetrics(totals)
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('espeezy_last_donation_metrics', JSON.stringify(totals))
-      }
-    })
-  }, [])
-
-  const refreshLifetimeSeats = useCallback(() => {
-    fetchLifetimeSeats().then((count) => {
-      setLifetimeSeatsUsed(count)
-      if (typeof window !== 'undefined' && typeof count === 'number') {
-        window.localStorage.setItem('espeezy_last_lifetime_seats_used', String(count))
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const cachedMetricsRaw = window.localStorage.getItem('espeezy_last_donation_metrics')
-      const cachedSeats = Number(window.localStorage.getItem('espeezy_last_lifetime_seats_used') ?? '-1')
-      if (cachedMetricsRaw) {
-        try {
-          const parsed = JSON.parse(cachedMetricsRaw) as Partial<DonationMetrics>
-          setDonationMetrics({
-            total_cents: typeof parsed.total_cents === 'number' ? parsed.total_cents : 0,
-            donation_count: typeof parsed.donation_count === 'number' ? parsed.donation_count : 0,
-            supporters_count: typeof parsed.supporters_count === 'number' ? parsed.supporters_count : (typeof parsed.donation_count === 'number' ? parsed.donation_count : 0),
-            click_count: typeof parsed.click_count === 'number' ? parsed.click_count : 0,
-            click_user_count: typeof parsed.click_user_count === 'number' ? parsed.click_user_count : 0,
-            conversion_rate_pct: typeof parsed.conversion_rate_pct === 'number' ? parsed.conversion_rate_pct : 0,
-          })
-        } catch {
-          // Ignore invalid cached metrics and rely on live fetch.
-        }
-      }
-      if (Number.isFinite(cachedSeats) && cachedSeats >= 0) {
-        setLifetimeSeatsUsed(cachedSeats)
-      }
-    }
-
-    refreshTotals()
-    refreshLifetimeSeats()
-    const interval = setInterval(refreshTotals, 15_000)
-    const seatsInterval = setInterval(refreshLifetimeSeats, 30_000)
-    // Re-fetch when user returns to tab (e.g. after Stripe redirect back)
-    const onFocus = () => {
-      refreshTotals()
-      refreshLifetimeSeats()
-    }
-    window.addEventListener('focus', onFocus)
-    return () => {
-      clearInterval(interval)
-      clearInterval(seatsInterval)
-      window.removeEventListener('focus', onFocus)
-    }
-  }, [refreshTotals, refreshLifetimeSeats])
-
-  useEffect(() => {
-    setMetricsUpdatedAt(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))
-  }, [donationMetrics.total_cents, donationMetrics.donation_count, donationMetrics.supporters_count, donationMetrics.click_user_count, donationMetrics.conversion_rate_pct, lifetimeSeatsUsed])
 
   const getFinalAmount = () => {
     if (selectedPreset) return selectedPreset * 100
@@ -395,21 +182,6 @@ export default function FundPage() {
   }
 
   const displayAmount = getFinalAmount() / 100
-  const totalRaised = (donationMetrics.total_cents / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 })
-  const conversionDisplay = `${Math.max(0, donationMetrics.conversion_rate_pct).toFixed(1)}%`
-  const lifetimeSoldOut = lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= LIFETIME_LIMIT
-  const lifetimeSeatsLeft = lifetimeSeatsUsed !== null ? Math.max(0, LIFETIME_LIMIT - lifetimeSeatsUsed) : null
-
-  const useDonationTier = (amount: number) => {
-    if (PRESETS.includes(amount)) {
-      setSelectedPreset(amount)
-      setCustomAmount('')
-    } else {
-      setSelectedPreset(null)
-      setCustomAmount(String(amount))
-    }
-    document.getElementById('donate-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   return (
     <MotionConfig reducedMotion="user">
@@ -425,13 +197,13 @@ export default function FundPage() {
       <nav aria-label="Primary navigation" style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(15,23,42,0.07)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(255,255,255,0.9)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
           <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Image src="/brand_logo2.svg" width={22} height={22} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" />
+            <Image src="/brand_logo2.svg" width={22} height={22} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" priority />
           </div>
           <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a', letterSpacing: '-0.03em' }}>Espeezy</span>
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pre-Register</Link>
-          <Link href="/docs" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Docs</Link>
+          <Link href="/pricing" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pricing</Link>
           <a href="#donate-form" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none' }}>Donate</a>
         </div>
       </nav>
@@ -451,80 +223,14 @@ export default function FundPage() {
           </span>
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
-          style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto 3rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65, fontWeight: 500 }}>
-          Espeezy is free for every student, always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
+          style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto 1rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65, fontWeight: 500 }}>
+          Espeezy shows exactly who did what in group work, so you can grade fairly based on real data. Help us build the infrastructure needed to eliminate free-riding in education forever.
         </motion.p>
-
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          {[
-            { value: totalRaised, label: 'Raised so far' },
-            { value: donationMetrics.supporters_count.toLocaleString(), label: 'Supporters' },
-            { value: conversionDisplay, label: 'Donate conversion' },
-          ].map((s, i) => (
-            <div key={i} style={{ padding: '0.875rem 1.75rem', background: 'white', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '14px', textAlign: 'center', boxShadow: '0 1px 4px rgba(15,23,42,0.06)' }}>
-              <div style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.04em', color: i === 2 ? '#10b981' : '#0f172a' }}>{s.value}</div>
-              <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '3px' }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-        <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
-          Live metrics from Supabase. Last synced at {metricsUpdatedAt || '...'}.
-        </p>
-        <p style={{ margin: '0.4rem 0 0', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>
-          {donationMetrics.click_user_count.toLocaleString()} users clicked donate · {donationMetrics.donation_count.toLocaleString()} completed donations
-        </p>
       </section>
 
       <section style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(5rem, 8vw, 7rem)', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', alignItems: 'start' }}>
-          <div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem', color: '#0f172a' }}>What your support builds</h2>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>These are real costs. Click any feature to see exactly what the money is for.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {FUND_FEATURES.map((f, i) => (
-                <div key={i}
-                  style={{ border: `1px solid ${expandedFeature === i ? 'rgba(99,102,241,0.3)' : 'rgba(15,23,42,0.08)'}`, borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', background: expandedFeature === i ? 'rgba(99,102,241,0.03)' : 'white', boxShadow: expandedFeature === i ? '0 0 0 1px rgba(99,102,241,0.15)' : '0 1px 3px rgba(15,23,42,0.04)' }}
-                  onClick={() => setExpandedFeature(expandedFeature === i ? null : i)}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-                      <div style={{ color: 'var(--brand)', opacity: 0.8, flexShrink: 0 }}>{f.icon}</div>
-                      <div>
-                        <div style={{ fontWeight: 750, fontSize: '0.9rem', color: '#0f172a' }}>{f.title}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px' }}>{f.tag}</div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669' }}>{f.need}</span>
-                      {expandedFeature === i ? <ChevronUp size={14} color="#94a3b8" /> : <ChevronDown size={14} color="#94a3b8" />}
-                    </div>
-                  </div>
-                  <AnimatePresence>
-                    {expandedFeature === i && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}>
-                        <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid rgba(15,23,42,0.07)' }}>
-                          <div style={{ marginTop: '1rem' }}>
-                            <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.6, marginBottom: '0.875rem' }}>
-                              <strong style={{ color: '#475569', display: 'block', marginBottom: '0.25rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Why it costs money</strong>
-                              {f.why}
-                            </p>
-                            <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
-                              <strong style={{ color: '#059669', display: 'block', marginBottom: '0.25rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>What it delivers</strong>
-                              {f.deliverable}
-                            </p>
-                          </div>
-                          <button onClick={e => { e.stopPropagation(); setFeatureTag(f.title); document.getElementById('donate-form')?.scrollIntoView({ behavior: 'smooth' }) }}
-                            style={{ marginTop: '1rem', padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', color: 'var(--brand)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-                            Support this feature <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </div>
-
+          
           <div id="donate-form" style={{ position: 'sticky', top: '84px' }}>
             <div style={{ background: 'white', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '20px', padding: 'clamp(1.75rem, 4vw, 2.5rem)', boxShadow: '0 4px 24px rgba(15,23,42,0.08)' }}>
               <div style={{ marginBottom: '0.5rem', display: 'inline-flex', padding: '4px 12px', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '100px' }}>
@@ -537,12 +243,6 @@ export default function FundPage() {
               <p style={{ color: '#64748b', fontSize: '0.83rem', lineHeight: 1.55, marginBottom: '1.75rem' }}>
                 100% of donations go directly to engineering and infrastructure. No admin overhead.
               </p>
-
-              <div style={{ padding: '0.875rem 1rem', borderRadius: '12px', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.16)', marginBottom: '1.25rem' }}>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: '#475569', lineHeight: 1.6 }}>
-                  Custom donations use a Stripe Checkout session and return to the Espeezy donation confirmation page. If you want a product-backed checkout instead, use the live support products below.
-                </p>
-              </div>
 
               <form onSubmit={handleDonate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
@@ -599,129 +299,59 @@ export default function FundPage() {
                   <Lock size={12} color="#cbd5e1" />
                   <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>Secured by Stripe · 256-bit SSL encryption</span>
                 </div>
-
-                {!getDonationFallbackLink() && (
-                  <p style={{ margin: 0, textAlign: 'center', fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.5 }}>
-                    If the custom donation service is temporarily unavailable, use one of the Stripe-backed support products below.
-                  </p>
-                )}
               </form>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(4rem, 7vw, 5rem)', position: 'relative', zIndex: 1 }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ maxWidth: '720px', marginBottom: '2rem' }}>
-            <div style={{ marginBottom: '0.5rem', display: 'inline-flex', padding: '4px 12px', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '100px' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Live Support Products</span>
-            </div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '0.875rem 0 0.5rem', color: '#0f172a' }}>
-              Support Espeezy through the current product ladder.
-            </h2>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '0.92rem', lineHeight: 1.65 }}>
-              These options map to the Stripe catalog that exists today. Pro is the main paid starting point, Premium is the advanced upgrade, Lifetime stays scarce, and Standard keeps the student entry path free.
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-            {STRIPE_SUPPORT_PRODUCTS.map((product) => (
-              (() => {
-                const isLifetime = product.name === 'Premium Lifetime Access'
-                const soldOut = isLifetime && lifetimeSoldOut
-                const lifetimeBadge = isLifetime && lifetimeSeatsLeft !== null
-                  ? (soldOut ? `Sold out (${LIFETIME_LIMIT}/${LIFETIME_LIMIT})` : `${lifetimeSeatsLeft} spots left`)
-                  : null
-
-                return (
-              <div key={product.name} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem', background: '#ffffff', border: `1px solid ${product.name === 'Espeezy Pro' ? 'rgba(99,102,241,0.25)' : 'rgba(15,23,42,0.08)'}`, borderRadius: '16px', boxShadow: product.name === 'Espeezy Pro' ? '0 8px 30px rgba(99,102,241,0.08)' : '0 1px 4px rgba(15,23,42,0.05)' }}>
-                <div>
-                  <div style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '999px', background: product.name === 'Espeezy Pro' ? 'rgba(99,102,241,0.08)' : 'rgba(15,23,42,0.05)', color: product.name === 'Espeezy Pro' ? 'var(--brand)' : '#64748b', fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>{product.tag}</div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a' }}>{product.name}</h3>
-                  <div style={{ marginTop: '0.25rem', fontSize: '0.92rem', fontWeight: 800, color: product.name === 'Espeezy Pro' ? 'var(--brand)' : '#059669' }}>{product.price}</div>
-                  {lifetimeBadge && (
-                    <div style={{ marginTop: '0.35rem', fontSize: '0.74rem', fontWeight: 700, color: soldOut ? '#dc2626' : '#059669' }}>
-                      {lifetimeBadge}
+          <div>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem', color: '#0f172a' }}>What your support builds</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>These are real costs. Click any feature to see exactly what the money is for.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {FUND_FEATURES.map((f, i) => (
+                <div key={i}
+                  style={{ border: `1px solid ${expandedFeature === i ? 'rgba(99,102,241,0.3)' : 'rgba(15,23,42,0.08)'}`, borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', background: expandedFeature === i ? 'rgba(99,102,241,0.03)' : 'white', boxShadow: expandedFeature === i ? '0 0 0 1px rgba(99,102,241,0.15)' : '0 1px 3px rgba(15,23,42,0.04)' }}
+                  onClick={() => setExpandedFeature(expandedFeature === i ? null : i)}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                      <div style={{ color: 'var(--brand)', opacity: 0.8, flexShrink: 0 }}>{f.icon}</div>
+                      <div>
+                        <div style={{ fontWeight: 750, fontSize: '0.9rem', color: '#0f172a' }}>{f.title}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px' }}>{f.tag}</div>
+                      </div>
                     </div>
-                  )}
-                </div>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '0.84rem', lineHeight: 1.6 }}>{product.description}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                  {product.features.map((feature) => (
-                    <div key={feature} style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <span style={{ color: '#10b981', fontWeight: 900 }}>•</span>
-                      <span>{feature}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669' }}>{f.need}</span>
+                      {expandedFeature === i ? <ChevronUp size={14} color="#94a3b8" /> : <ChevronDown size={14} color="#94a3b8" />}
                     </div>
-                  ))}
-                </div>
-                {soldOut ? (
-                  <div style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: '#e2e8f0', border: '1px solid #cbd5e1', color: '#64748b', fontSize: '0.82rem', fontWeight: 800 }}>
-                    Offer Expired
                   </div>
-                ) : (
-                  <Link href={product.href} style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: product.name === 'Espeezy Pro' ? 'var(--brand)' : '#f8fafc', border: product.name === 'Espeezy Pro' ? 'none' : '1px solid rgba(15,23,42,0.1)', color: product.name === 'Espeezy Pro' ? '#ffffff' : '#0f172a', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 800 }}>
-                    {product.cta} <ArrowRight size={14} />
-                  </Link>
-                )}
-              </div>
-                )
-              })()
-            ))}
-          </div>
-
-          <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
-            <a href={getFeaturedSupportLink()} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.9rem 1.1rem', borderRadius: '10px', border: '1px solid rgba(15,23,42,0.1)', color: '#475569', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 700, background: '#ffffff' }}>
-              Open the featured Stripe payment page <ArrowRight size={14} />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(4rem, 7vw, 5rem)', position: 'relative', zIndex: 1 }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ maxWidth: '720px', marginBottom: '2rem' }}>
-              <div style={{ marginBottom: '0.5rem', display: 'inline-flex', padding: '4px 12px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '100px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Donation Tiers</span>
-              </div>
-              <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '0.875rem 0 0.5rem', color: '#0f172a' }}>
-                Live Stripe support links for the supporter ladder.
-              </h2>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.92rem', lineHeight: 1.65 }}>
-                These are wired directly to the current GBP 5, 10, 15, 25, 50, and 100 Stripe payment links so supporters can jump straight into checkout from the fund page.
-              </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-              {donationTierOptions.map((tier) => (
-                <div key={tier.amount} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', padding: '1.25rem', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '16px', boxShadow: '0 1px 4px rgba(15,23,42,0.05)' }}>
-                  <div>
-                    <div style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '999px', background: 'rgba(16,185,129,0.08)', color: '#059669', fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>{tier.tag}</div>
-                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a' }}>{tier.name}</h3>
-                    <div style={{ marginTop: '0.25rem', fontSize: '0.95rem', fontWeight: 800, color: '#059669' }}>£{tier.amount}</div>
-                  </div>
-                  <p style={{ margin: 0, color: '#64748b', fontSize: '0.84rem', lineHeight: 1.6 }}>{tier.description}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackDonateClick({ amountCents: tier.amount * 100, context: 'donation_tier_card_click' })
-                      const paymentLink = getDonationFallbackLink(tier.amount, donorEmail)
-                      if (paymentLink) {
-                        window.location.href = paymentLink
-                        return
-                      }
-                      useDonationTier(tier.amount)
-                    }}
-                    aria-label={`Donate £${tier.amount} via ${tier.name}`}
-                    style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', padding: '0.8rem 1rem', borderRadius: '10px', background: 'var(--brand)', color: '#ffffff', border: 'none', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}
-                  >
-                    Donate £{tier.amount} <ArrowRight size={14} />
-                  </button>
+                  <AnimatePresence>
+                    {expandedFeature === i && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}>
+                        <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid rgba(15,23,42,0.07)' }}>
+                          <div style={{ marginTop: '1rem' }}>
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.6, marginBottom: '0.875rem' }}>
+                              <strong style={{ color: '#475569', display: 'block', marginBottom: '0.25rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Why it costs money</strong>
+                              {f.why}
+                            </p>
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+                              <strong style={{ color: '#059669', display: 'block', marginBottom: '0.25rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>What it delivers</strong>
+                              {f.deliverable}
+                            </p>
+                          </div>
+                          <button onClick={e => { e.stopPropagation(); setFeatureTag(f.title); document.getElementById('donate-form')?.scrollIntoView({ behavior: 'smooth' }) }}
+                            style={{ marginTop: '1rem', padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', color: 'var(--brand)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+                            Support this feature <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
       <section style={{ padding: 'clamp(4rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem)', borderTop: '1px solid rgba(15,23,42,0.07)', position: 'relative', zIndex: 1, background: '#f8fafc' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
@@ -769,7 +399,7 @@ export default function FundPage() {
             <span style={{ fontWeight: 900, fontSize: '0.9rem', color: '#475569' }}>Espeezy</span>
           </Link>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
-            {[['/', 'Home'], ['/docs', 'Docs'], ['/terms', 'Terms'], ['/privacy', 'Privacy']].map(([href, label]) => (
+            {[['/', 'Home'], ['/pricing', 'Pricing'], ['/terms', 'Terms'], ['/privacy', 'Privacy']].map(([href, label]) => (
               <Link key={href} href={href} style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'none', fontWeight: 600 }}>{label}</Link>
             ))}
           </div>

@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/db'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { ProfileProvider } from '@/context/ProfileContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { NotificationProvider } from '@/components/NotificationProvider'
@@ -14,12 +15,23 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const headersList = await headers()
+  const host = headersList.get('host') || ''
+  const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https')
+  
+  // If we are on the admin subdomain, redirects should go to the correct apps
+  const isSubdomain = host.startsWith('teamdynamics.')
+  const mainDomain = isSubdomain ? host.replace('teamdynamics.', '') : host
+  
+  const teamdynamicsUrl = `${protocol}://${host.includes('localhost') ? host : `teamdynamics.${mainDomain}`}`
+  const kanbanUrl = `${protocol}://${host.includes('localhost') ? host.replace('3000', '3003') : `kanban.${mainDomain}`}`
+
   const db = await createServerSupabaseClient()
   const { data: { user } } = await db.auth.getUser()
     .catch(() => ({ data: { user: null } }))
 
   if (!user) {
-    redirect('/login?redirect=/admin')
+    redirect(`${teamdynamicsUrl}/login?redirect=${encodeURIComponent(`${protocol}://${host}/admin`)}`)
   }
 
   const { data: profile } = await db
@@ -30,7 +42,7 @@ export default async function AdminLayout({
 
   // Ensure only admins can access this subtree
   if (!profile || profile.role !== 'admin') {
-    redirect('/dashboard')
+    redirect(`${kanbanUrl}/dashboard`)
   }
 
   const initialTheme = {

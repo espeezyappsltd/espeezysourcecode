@@ -83,6 +83,7 @@ export default function PreregFooter() {
                 style={{ objectFit: 'contain' }}
                 alt=""
                 aria-hidden="true"
+                loading="lazy"
               />
             </div>
             <span style={{ fontWeight: 900, fontSize: '1rem', color: '#f1f5f9', letterSpacing: '-0.01em' }}>Espeezy</span>

@@ -26,7 +26,7 @@ export default function UserRegistrationCounter({ registeredCount, goal, authUse
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
       style={{ maxWidth: '520px', margin: '0 auto 4rem', width: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', marginBottom: '0.5rem' }}>
         <span style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 600 }}>
           <AnimatedNumber value={registeredCount} /> registered
         </span>
@@ -47,9 +47,6 @@ export default function UserRegistrationCounter({ registeredCount, goal, authUse
           transition={{ duration: 1.2, ease: 'easeOut', delay: 0.6 }}
           style={{ height: '100%', background: 'linear-gradient(90deg, var(--brand), #34d399)', borderRadius: '100px' }}
         />
-      </div>
-      <div style={{ textAlign: 'right', marginTop: '0.4rem' }}>
-        <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>{remainingCount.toLocaleString()} remaining / {goal.toLocaleString()}</span>
       </div>
       {authUserCount > 0 && (
         <div style={{ textAlign: 'right', marginTop: '0.2rem' }}>
