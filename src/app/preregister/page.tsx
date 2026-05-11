@@ -51,7 +51,7 @@ export default function PreRegisterPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const ref = params.get('ref')
-      if (ref) setReferrerCode(ref)
+      setReferrerCode(ref)
     }
   }, [])
 
