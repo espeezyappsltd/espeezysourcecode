@@ -17,26 +17,48 @@ export default function KanbanMvpPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!user) return
 
-    const fetchProfile = async () => {
-      const { data, error } = await supabase
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchOrCreateProfile = async () => {
+      let { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error)
+      if (error && error.code === 'PGRST116') {
+        // No profile exists, create one
+        const { data: created, error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: user.id,
+              email: user.email,
+              full_name: user.user_metadata?.full_name || null,
+              avatar_url: user.user_metadata?.avatar_url || null,
+              total_score: 0,
+              created_at: new Date().toISOString(),
+            },
+          ])
+          .select()
+          .single();
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+        } else {
+          setProfile(created as Profile);
+        }
+      } else if (error) {
+        console.error('Error fetching profile:', error);
       } else {
-        setProfile(data as Profile)
+        setProfile(data as Profile);
       }
-      setLoading(false)
-    }
+      setLoading(false);
+    };
 
-    fetchProfile()
-  }, [user])
+    fetchOrCreateProfile();
+  }, [user]);
 
   if (loading || !user || !profile) {
     return (
