@@ -58,17 +58,24 @@
     import app_proxy app 3000
 }
 
-# ── Apex domain: espeezy.com → Redirect to teamdynamics ──────────────────────
+# ── Apex domain: espeezy.com → main app ──────────────────────────────────────
 {$CADDY_DOMAIN}, www.{$CADDY_DOMAIN} {
-    redir https://teamdynamics.{$CADDY_DOMAIN}{uri} 308
-}
-
-# ── teamdynamics.espeezy.com → Main App (root) ──────────────────────────────
-teamdynamics.{$CADDY_DOMAIN} {
+    @www host www.{$CADDY_DOMAIN}
+    redir @www https://{$CADDY_DOMAIN}{uri} 308
     import app_proxy app 3000
 }
 
-# ── kanban.espeezy.com → Kanban Dashboard ───────────────────────────────────
+# ── prereg.espeezy.com → pre-registration app ────────────────────────────────
+prereg.{$CADDY_DOMAIN} {
+    import app_proxy prereg 3001
+}
+
+# ── games.espeezy.com → games app ────────────────────────────────────────────
+games.{$CADDY_DOMAIN} {
+    import app_proxy games 3002
+}
+
+# ── kanban.espeezy.com → Kanban Next.js app ──────────────────────────────────
 kanban.{$CADDY_DOMAIN} {
     import app_proxy kanban 3003
 }

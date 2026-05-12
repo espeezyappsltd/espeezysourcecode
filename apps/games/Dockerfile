@@ -11,9 +11,6 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --prefer-offline
 
-# Copy .env.local if it exists (for build-time env vars)
-COPY .env.local* ./
-
 EXPOSE 3002
 
 ENV NEXT_TELEMETRY_DISABLED=1
