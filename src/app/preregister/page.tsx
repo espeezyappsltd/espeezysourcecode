@@ -147,9 +147,19 @@ export default function PreRegisterPage() {
         </motion.h1>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
-          style={{ color: 'rgba(255,255,255,0.55)', maxWidth: '680px', margin: '0 auto 3rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
+          style={{ color: 'rgba(255,255,255,0.55)', maxWidth: '680px', margin: '0 auto 2rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
           {config.launch_message}
         </motion.p>
+        <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: 12, padding: '1.25rem 1.5rem', margin: '0 auto 2.5rem', maxWidth: 540, color: '#6ee7b7', fontWeight: 600, fontSize: '1.05rem' }}>
+          <span style={{ color: '#10b981', fontWeight: 800 }}>New: Role-Based Access Control (RBAC)</span><br />
+          <ul style={{ margin: '0.5em 0 0 1.2em', padding: 0, color: '#6ee7b7', fontSize: '0.98em' }}>
+            <li>Log in with a personal email for <strong>Free Tier</strong> access.</li>
+            <li>Upgrade to <strong>Premium</strong> by verifying your school or institutional email.</li>
+            <li>Roles: <strong>Personal</strong> (free), <strong>Student</strong> (premium), <strong>Educator</strong>, <strong>Admin</strong>.</li>
+            <li>Premium features unlock automatically when your email is verified as belonging to a recognized institution.</li>
+          </ul>
+          <span style={{ color: '#10b981', fontWeight: 700 }}>You control your workspace, your data, and your team.</span>
+        </div>
 
         {/* Countdown */}
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
