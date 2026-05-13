@@ -224,7 +224,7 @@ export default function FundPage() {
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
           style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto 1rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65, fontWeight: 500 }}>
-          Espeezy shows exactly who did what in group work, so you can grade fairly based on real data. Help us build the infrastructure needed to eliminate free-riding in education forever.
+          Espeezy shows exactly who did what in group work, so you can grade based on real data. Help us build the infrastructure needed to eliminate free-riding in education forever.
         </motion.p>
       </section>
 

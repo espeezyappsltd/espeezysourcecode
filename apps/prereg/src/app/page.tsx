@@ -226,7 +226,7 @@ export default function PreRegisterPage() {
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
           style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-          {config.brand_name} shows exactly who did what in group work, so you can grade fairly based on real data.
+          {config.brand_name} shows exactly who did what in group work, so you can grade based on real data.
         </motion.p>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
