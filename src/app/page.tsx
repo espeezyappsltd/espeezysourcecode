@@ -1,3 +1,4 @@
+import KanbanBoard from '@/components/KanbanBoard';
 'use client'
 
 import { useState } from 'react'

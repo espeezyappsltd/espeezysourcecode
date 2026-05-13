@@ -1,8 +1,9 @@
 
+'use client'
 
-import KanbanBoard from "../../../../src/components/KanbanBoard";
+import KanbanBoard from "@/components/KanbanBoard";
 import { useEffect, useState } from "react";
-import { supabase } from "../../../../src/lib/supabase-client";
+import { supabase } from "@/lib/supabase-client";
 import type { Profile } from "../../../../src/features/kanban/types";
 
 
