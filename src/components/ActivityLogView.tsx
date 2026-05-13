@@ -126,32 +126,8 @@ export default function ActivityLogView({
     return () => {
       db.removeChannel(channel)
     }
-                          <Image
-                            src={activity.profiles.avatar_url}
-                            alt={`${activity.profiles.full_name ?? 'System'} avatar`}
-                            width={16}
-                            height={16}
-                            style={{ borderRadius: '50%' }}
-                          />
-        {[1, 2].map(g => (
-          <div key={g}>
-            <div className="skeleton skeleton-text" style={{ width: '100px', marginBottom: '1.5rem' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border)' }}>
-              {[1, 2, 3].map(i => (
-                <div key={i} style={{ display: 'flex', gap: '1rem' }}>
-                  <div className="skeleton" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
-                  <div style={{ flex: 1 }}>
-                    <div className="skeleton skeleton-title" style={{ width: '70%' }} />
-                    <div className="skeleton skeleton-text" style={{ width: '30%' }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
+  }, [userId, groupId, limit, db])
+
   if (activities.length === 0) return (
     <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-sub)', background: 'var(--bg-main)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
       <History size={32} style={{ marginBottom: '1rem', opacity: 0.5 }} />

@@ -174,7 +174,7 @@ class ClientQueryBuilder {
   async get() {
     try {
       let q: any = query(collection(firebaseDb, this.table))
-      let clientSideLike: QueryFilter[] = []
+      const clientSideLike: QueryFilter[] = []
 
       for (const f of this.filters) {
         if (f.op === 'ilike') {

@@ -35,7 +35,7 @@ export default function KanbanMvpPage() {
     if (!user) return;
 
     const fetchOrCreateProfile = async () => {
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
