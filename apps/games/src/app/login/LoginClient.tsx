@@ -328,7 +328,7 @@ export default function LoginClient() {
         </a>
 
         <a
-          href="https://espeezy.com/dashboard"
+          href="https://kanban.espeezy.com "
           style={{
             display: 'block',
             padding: '0.85rem',

@@ -6,37 +6,37 @@ import { useGamesLanding } from '@/hooks/useGamesLanding'
 
 const FEATURES = [
   {
-    icon: '⚔️',
+    icon: '',
     title: 'Skirmish Mode',
     description:
       'Challenge peers to real-time knowledge duels. Answer questions faster and more accurately to claim victory and climb the global leaderboard.',
   },
   {
-    icon: '🏆',
+    icon: '',
     title: 'Ranked Leagues',
     description:
       'Seasonal ranked competition across subjects. Earn badges, unlock cosmetics, and prove mastery from Bronze all the way to Grandmaster.',
   },
   {
-    icon: '🤝',
+    icon: '',
     title: 'Co-op Challenges',
     description:
       'Team up with classmates to tackle collaborative boss battles. Shared goals, shared glory. Group learning that actually sticks.',
   },
   {
-    icon: '📊',
+    icon: '',
     title: 'XP & Progress Tracking',
     description:
       'Every match earns XP tied to your academic profile. Watch your subject mastery grow with detailed post-game breakdowns.',
   },
   {
-    icon: '🎯',
+    icon: '',
     title: 'Adaptive Difficulty',
     description:
       'Our AI adjusts question difficulty in real time based on your performance, keeping every game challenging but fair.',
   },
   {
-    icon: '🌍',
+    icon: '',
     title: 'Global Tournaments',
     description:
       'Monthly inter-school tournaments open to all students. Represent your institution and compete on the world stage.',
@@ -285,7 +285,7 @@ export default function GamesPage() {
               fontSize: '1rem',
             }}
           >
-            <span aria-hidden="true">🙂</span> You are in the list 🙂
+            You are in the list
           </div>
         ) : (
           <form
@@ -419,7 +419,7 @@ export default function GamesPage() {
                 el.style.background = 'rgba(16, 185, 129, 0.04)'
               }}
             >
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }} aria-hidden="true">{icon}</div>
+              {/* Removed icon */}
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#0f172a' }}>{title}</h3>
               <p style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6 }}>{description}</p>
             </article>

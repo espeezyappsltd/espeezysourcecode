@@ -2,21 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-
-type ChatMessage = {
-  id: string
-  username: string
-  message: string
-  created_at: string
-  status: string
-}
-
-type ChatEvent = {
-  id: string
-  event_type: string
-  username?: string
-  created_at: string
-}
+import type { ChatMessage, ChatEvent } from '@/types/chat'
 
 function deriveUsername(user: User): string {
   const email = user.email ?? ''
