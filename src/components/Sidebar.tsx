@@ -481,6 +481,38 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
         </div>
 
+        {/* Persistent Help Button */}
+        <div style={{ padding: isOpen ? '0 1rem 0.5rem' : '0 0.75rem 0.5rem', display: 'flex', justifyContent: isOpen ? 'flex-start' : 'center', alignItems: 'center', gap: '0.5rem' }}>
+          <button
+            aria-label="Help & Onboarding"
+            title="Help & Onboarding"
+            style={{
+              width: isOpen ?  '100%' : '38px',
+              height: '38px',
+              borderRadius: '10px',
+              background: 'rgba(59,130,246,0.08)',
+              border: '1px solid rgba(59,130,246,0.18)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: isOpen ? 'flex-start' : 'center',
+              color: '#2563eb',
+              fontWeight: 900,
+              fontSize: '0.95rem',
+              gap: '0.7rem',
+              cursor: 'pointer',
+              padding: isOpen ? '0.625rem 1rem' : 0,
+              outline: 'none',
+              boxShadow: 'var(--shadow-xs)'
+            }}
+            onClick={() => window.dispatchEvent(new CustomEvent('open-help-tray'))}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="20" height="20" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            </span>
+            {isOpen && <span>Help & Onboarding</span>}
+          </button>
+        </div>
+
         {isOpen && (
           <div style={{ padding: '0 1rem 0.5rem' }}>
             <Link href="/fund" className="support-link" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.625rem 1rem', borderRadius: '12px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', textDecoration: 'none', transition: 'all 0.2s' }}>

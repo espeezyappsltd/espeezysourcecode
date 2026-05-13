@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import PreregFooter from '@/components/PreregFooter'
+import dynamic from 'next/dynamic'
+const HelpTray = dynamic(() => import('@/components/HelpTray'), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'Espeezy Kanban Workspace',
@@ -45,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         {children}
+        <HelpTray />
         <PreregFooter />
       </body>
     </html>

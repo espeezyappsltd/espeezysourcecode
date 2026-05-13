@@ -23,6 +23,15 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
   const isOnline = useConnectivity();
 
   // Fetch tasks and members
+
+  // Contextual Help Button
+  const openKanbanHelp = () => {
+    window.dispatchEvent(new CustomEvent('open-help-tray'));
+    setTimeout(() => {
+      const el = document.querySelector('a[href="/docs/features/kanban"]');
+      if (el) (el as HTMLElement).focus();
+    }, 350);
+  };
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -116,7 +125,35 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
 
   // Main Kanban UI (simplified, modularize as needed)
   return (
-    <div role="region" aria-label="Kanban Board" style={{ display: 'flex', gap: 24, padding: 24, overflowX: 'auto' }}>
+    <div style={{ position: 'relative' }}>
+      {/* Contextual Help Button */}
+      <button
+        aria-label="How to use Kanban Board"
+        title="How to use Kanban Board"
+        onClick={openKanbanHelp}
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          zIndex: 20,
+          background: 'rgba(59,130,246,0.09)',
+          border: '1px solid rgba(59,130,246,0.18)',
+          borderRadius: 12,
+          padding: '0.5rem 0.8rem',
+          color: '#2563eb',
+          fontWeight: 900,
+          fontSize: '1rem',
+          boxShadow: 'var(--shadow-xs)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          cursor: 'pointer'
+        }}
+      >
+        <svg width="18" height="18" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <span style={{ fontWeight: 700, fontSize: '0.97rem' }}>How to use Kanban</span>
+      </button>
+      <div role="region" aria-label="Kanban Board" style={{ display: 'flex', gap: 24, padding: 24, overflowX: 'auto' }}>
       {COLUMNS.map(col => (
         <div key={col} role="list" aria-label={col} style={{ minWidth: 280, flex: 1, background: '#18181b', borderRadius: 12, padding: 16 }}>
           <h3 style={{ color: '#10b981', fontWeight: 700, fontSize: 18, marginBottom: 12 }}>{col}</h3>
@@ -144,6 +181,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
           onlineUserIds={new Set(groupMembers.map(m => m.id))}
         />
       )}
+      </div>
     </div>
   );
 }
