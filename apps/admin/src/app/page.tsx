@@ -3,7 +3,7 @@
 
 
 import { useEffect, useState } from "react";
-import { supabase } from "kanban/supabase/supabase-client";
+import { supabase } from "./kanban/supabase/supabase-client";
 import type { Profile } from "../../../../src/features/kanban/types";
 
 
