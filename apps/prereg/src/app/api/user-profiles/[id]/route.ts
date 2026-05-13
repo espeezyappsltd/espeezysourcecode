@@ -14,7 +14,10 @@ const patchSchema = z.object({
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!getSupabaseConfig()) {
-    return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
+    return NextResponse.json({
+      error: 'Supabase is not configured.',
+      message: 'Profile service is unavailable. Please try again later or contact support.'
+    }, { status: 503 })
   }
 
   const { id } = await params
@@ -24,12 +27,19 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   )
 
   if (!ok) {
-    return NextResponse.json({ error: 'Unable to fetch profile.', details: data }, { status })
+    return NextResponse.json({
+      error: 'Unable to fetch profile.',
+      message: 'Could not load profile. Please refresh or contact support.',
+      details: data
+    }, { status })
   }
 
   const profile = Array.isArray(data) ? data[0] ?? null : null
   if (!profile) {
-    return NextResponse.json({ error: 'Profile not found.' }, { status: 404 })
+    return NextResponse.json({
+      error: 'Profile not found.',
+      message: 'No profile found for this user. Please check the ID or contact support.'
+    }, { status: 404 })
   }
 
   return NextResponse.json({ profile })
@@ -37,17 +47,26 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!isAdminRequest(req)) {
-    return NextResponse.json({ error: 'Forbidden.' }, { status: 403 })
+    return NextResponse.json({
+      error: 'Forbidden.',
+      message: 'You do not have permission to update this profile.'
+    }, { status: 403 })
   }
 
   if (!getSupabaseConfig()) {
-    return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
+    return NextResponse.json({
+      error: 'Supabase is not configured.',
+      message: 'Profile service is unavailable. Please try again later or contact support.'
+    }, { status: 503 })
   }
 
   const body = await req.json().catch(() => null)
   const parsed = patchSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid profile update payload.' }, { status: 422 })
+    return NextResponse.json({
+      error: 'Invalid profile update payload.',
+      message: 'Please check your input and try again.'
+    }, { status: 422 })
   }
 
   const { id } = await params
@@ -65,7 +84,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   )
 
   if (!ok) {
-    return NextResponse.json({ error: 'Unable to update profile.', details: data }, { status })
+    return NextResponse.json({
+      error: 'Unable to update profile.',
+      message: 'Could not update profile. Please try again or contact support.',
+      details: data
+    }, { status })
   }
 
   const profile = Array.isArray(data) ? data[0] ?? null : null
@@ -74,11 +97,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!isAdminRequest(req)) {
-    return NextResponse.json({ error: 'Forbidden.' }, { status: 403 })
+    return NextResponse.json({
+      error: 'Forbidden.',
+      message: 'You do not have permission to delete this profile.'
+    }, { status: 403 })
   }
 
   if (!getSupabaseConfig()) {
-    return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
+    return NextResponse.json({
+      error: 'Supabase is not configured.',
+      message: 'Profile service is unavailable. Please try again later or contact support.'
+    }, { status: 503 })
   }
 
   const { id } = await params
@@ -90,7 +119,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   )
 
   if (!ok) {
-    return NextResponse.json({ error: 'Unable to delete profile.', details: data }, { status })
+    return NextResponse.json({
+      error: 'Unable to delete profile.',
+      message: 'Could not delete profile. Please try again or contact support.',
+      details: data
+    }, { status })
   }
 
   return NextResponse.json({ success: true })
