@@ -1,11 +1,23 @@
 'use client'
 
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import KanbanBoard from '@/features/kanban/KanbanBoard'
 import type { Profile } from '@/features/kanban/types'
+
+// Utility to fetch group UUID by slug
+async function getGroupIdBySlug(slug: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('groups')
+    .select('id')
+    .eq('name', slug)
+    .single();
+  if (error || !data) return null;
+  return data.id;
+}
 
 export default function KanbanMvpPage() {
   const router = useRouter()
@@ -15,6 +27,7 @@ export default function KanbanMvpPage() {
   })
   
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [groupId, setGroupId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
 
@@ -28,8 +41,15 @@ export default function KanbanMvpPage() {
         .eq('id', user.id)
         .single();
 
+      let group_id = data?.group_id;
+
+      // If no group_id, look up the default group by slug
+      if (!group_id) {
+        group_id = await getGroupIdBySlug('default-mvp-group');
+      }
+
+      // If no profile exists, create one with group_id
       if (error && error.code === 'PGRST116') {
-        // No profile exists, create one
         const { data: created, error: insertError } = await supabase
           .from('profiles')
           .insert([
@@ -40,6 +60,7 @@ export default function KanbanMvpPage() {
               avatar_url: user.user_metadata?.avatar_url || null,
               total_score: 0,
               created_at: new Date().toISOString(),
+              group_id: group_id,
             },
           ])
           .select()
@@ -48,11 +69,13 @@ export default function KanbanMvpPage() {
           console.error('Error creating profile:', insertError);
         } else {
           setProfile(created as Profile);
+          setGroupId(created.group_id);
         }
       } else if (error) {
         console.error('Error fetching profile:', error);
       } else {
         setProfile(data as Profile);
+        setGroupId(group_id);
       }
       setLoading(false);
     };
@@ -60,7 +83,7 @@ export default function KanbanMvpPage() {
     fetchOrCreateProfile();
   }, [user]);
 
-  if (loading || !user || !profile) {
+  if (loading || !user || !profile || !groupId) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -79,7 +102,7 @@ export default function KanbanMvpPage() {
   return (
     <main style={{ minHeight: '100vh', background: '#0a0a0a', padding: '1rem' }}>
       <KanbanBoard 
-        groupId={profile.group_id || 'default-mvp-group'} 
+        groupId={groupId} 
         profile={profile} 
       />
     </main>
