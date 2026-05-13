@@ -1,0 +1,3 @@
+// MOVED FROM src/components/KanbanBoard.tsx
+
+// ...existing code from src/components/KanbanBoard.tsx...

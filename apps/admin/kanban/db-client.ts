@@ -1,0 +1,3 @@
+// MOVED FROM src/lib/db-client.ts
+
+// ...existing code from src/lib/db-client.ts...

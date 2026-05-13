@@ -1,22 +1,55 @@
+
+
+import KanbanBoard from "../../../../src/components/KanbanBoard";
+import { useEffect, useState } from "react";
+import { supabase } from "../../../../src/lib/supabase-client";
+import type { Profile } from "../../../../src/features/kanban/types";
+
+
 export default function AdminPage() {
-  return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Espeezy Admin Dashboard</h1>
-      <p>Welcome to the administrative control center.</p>
-      <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-        <div style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-          <h3>Users</h3>
-          <p>Manage user accounts and permissions.</p>
-        </div>
-        <div style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-          <h3>Settings</h3>
-          <p>Configure system-wide parameters.</p>
-        </div>
-        <div style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-          <h3>Analytics</h3>
-          <p>View platform usage and growth.</p>
-        </div>
+  // For demonstration, use a default group and profile for admin
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Replace with real admin logic as needed
+    const fetchAdminProfile = async () => {
+      // Try to get the first admin profile and group
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
+      if (data) {
+        setProfile(data as Profile);
+        setGroupId(data.group_id);
+      }
+      setLoading(false);
+    };
+    fetchAdminProfile();
+  }, []);
+
+  if (loading || !profile || !groupId) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#0a0a0a',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'rgba(255,255,255,0.5)',
+        fontFamily: 'system-ui, sans-serif'
+      }}>
+        Loading Kanban Board...
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <main style={{ minHeight: '100vh', background: '#0a0a0a', padding: '1rem' }}>
+      <KanbanBoard groupId={groupId} profile={profile} />
+    </main>
   );
 }
