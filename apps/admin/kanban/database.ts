@@ -1,3 +1,0 @@
-// MOVED FROM src/types/database.ts
-
-// ...existing code from src/types/database.ts...

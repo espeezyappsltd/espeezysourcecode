@@ -1,9 +1,9 @@
 
 'use client'
 
-import KanbanBoard from "@/components/KanbanBoard";
+
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "kanban/supabase/supabase-client";
 import type { Profile } from "../../../../src/features/kanban/types";
 
 
@@ -43,14 +43,14 @@ export default function AdminPage() {
         color: 'rgba(255,255,255,0.5)',
         fontFamily: 'system-ui, sans-serif'
       }}>
-        Loading Kanban Board...
+        Loading Espeezy Admin Board...
       </div>
     );
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0a0a0a', padding: '1rem' }}>
-      <KanbanBoard groupId={groupId} profile={profile} />
+    <main>     
+    	<>Espeezy Admin Page</>
     </main>
   );
 }
