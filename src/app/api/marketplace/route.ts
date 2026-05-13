@@ -27,7 +27,10 @@ export async function GET(req: Request) {
   if (category) q = q.eq('category', category)
   if (tag) q = q.contains('tags', [tag])
   const { data, error } = await q.limit(50)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({
+    error: 'Could not load assets.',
+    message: 'Something went wrong. Please refresh or contact support if this continues.'
+  }, { status: 500 })
   return NextResponse.json({ assets: data }, { status: 200 })
 }
 
@@ -36,13 +39,22 @@ export async function POST(req: Request) {
   await rateLimit(req)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return NextResponse.json({
+    error: 'Unauthorized',
+    message: 'Please log in to continue.'
+  }, { status: 401 })
   const body = await req.json()
   const parse = AssetSchema.safeParse(body)
-  if (!parse.success) return NextResponse.json({ error: parse.error }, { status: 422 })
+  if (!parse.success) return NextResponse.json({
+    error: 'Invalid input',
+    message: 'Please check your asset details and try again.'
+  }, { status: 422 })
   const asset = { ...parse.data, user_id: user.id }
   const admin = createAdminSupabaseClient()
   const { data, error } = await admin.from('marketplace_assets').insert([asset]).select('*').single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({
+    error: 'Could not create asset.',
+    message: 'Something went wrong. Please refresh or contact support.'
+  }, { status: 500 })
   return NextResponse.json({ asset: data }, { status: 201 })
 }

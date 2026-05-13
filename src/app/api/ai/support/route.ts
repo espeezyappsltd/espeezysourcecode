@@ -24,16 +24,25 @@ Keep responses concise and friendly. Use markdown formatting where helpful.`
 export async function POST(req: NextRequest) {
   const db = await createServerSupabaseClient()
   const { data: { user } } = await db.auth.getUser().catch(() => ({ data: { user: null } }))
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return NextResponse.json({
+    error: 'Unauthorized',
+    message: 'Please log in to continue.'
+  }, { status: 401 })
 
   const { messages, ticket_id } = await req.json()
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: 'messages array required' }, { status: 400 })
+    return NextResponse.json({
+      error: 'No messages provided',
+      message: 'Please enter your question or issue and try again.'
+    }, { status: 400 })
   }
 
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'AI support temporarily unavailable.' }, { status: 503 })
+    return NextResponse.json({
+      error: 'AI support temporarily unavailable.',
+      message: 'Our AI support is down. Please contact support@espeezy.com or try again later.'
+    }, { status: 503 })
   }
 
   // Rate limit: max 20 AI messages per hour per user
@@ -47,7 +56,10 @@ export async function POST(req: NextRequest) {
     .limit(1)
 
   if (typeof aiMsgCount === 'number' && aiMsgCount >= 20) {
-    return NextResponse.json({ error: 'AI rate limit reached. Please try again in an hour.' }, { status: 429 })
+    return NextResponse.json({
+      error: 'AI rate limit reached.',
+      message: 'You’ve reached the AI support limit. Please wait an hour or contact support@espeezy.com.'
+    }, { status: 429 })
   }
 
   // Build message array for OpenAI
@@ -74,7 +86,10 @@ export async function POST(req: NextRequest) {
   if (!response.ok) {
     const err = await response.text()
     console.error('OpenAI error:', err)
-    return NextResponse.json({ error: 'AI response failed. Please try again.' }, { status: 502 })
+    return NextResponse.json({
+      error: 'AI response failed.',
+      message: 'Something went wrong. Please refresh or contact support.'
+    }, { status: 502 })
   }
 
   const data = await response.json()

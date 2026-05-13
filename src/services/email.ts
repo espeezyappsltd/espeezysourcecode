@@ -19,7 +19,7 @@ function createTransport() {
   const pass = process.env.SMTP_PASS
 
   if (!host || !user || !pass) {
-    throw new Error('SMTP credentials not configured  -  set SMTP_HOST, SMTP_USER, SMTP_PASS')
+    throw new Error('Email service is not configured. Please contact support@espeezy.com or try again later.')
   }
 
   return nodemailer.createTransport({

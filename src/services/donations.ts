@@ -46,7 +46,7 @@ export async function createDonationCheckout({
   })
   const data = await res.json()
   if (!res.ok || !data.url) {
-    throw new Error(data.error ?? 'Could not initialize donation checkout.')
+    throw new Error(data.message || data.error || 'Could not start donation checkout. Please try again or contact support.')
   }
   return data.url as string
 }

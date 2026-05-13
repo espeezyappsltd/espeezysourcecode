@@ -100,14 +100,20 @@ export async function fetchUsers(params: {
   if (params.order)  sp.set('order',  params.order)
 
   const res = await fetch(`/api/admin/users?${sp.toString()}`, { cache: 'no-store' })
-  if (!res.ok) throw new Error('Failed to fetch users')
+  if (!res.ok) {
+    const { message } = await res.json().catch(() => ({}))
+    throw new Error(message || 'Could not load users. Please refresh or contact support.')
+  }
   const json = await res.json()
   return { users: json.users, data: json.users, total: json.total, page: json.page, pageSize: json.pageSize, totalPages: json.totalPages }
 }
 
 export async function fetchUser(id: string) {
   const res = await fetch(`/api/admin/users/${id}`, { cache: 'no-store' })
-  if (!res.ok) throw new Error('User not found')
+  if (!res.ok) {
+    const { message } = await res.json().catch(() => ({}))
+    throw new Error(message || 'User not found. Please check the ID or contact support.')
+  }
   return res.json() as Promise<{ user: AdminUser & Record<string, unknown>; activeBan: unknown }>
 }
 
@@ -125,7 +131,7 @@ export async function updateUser(id: string, updates: Partial<{
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as { error?: string }).error ?? 'Failed to update user')
+    throw new Error((err as { message?: string, error?: string }).message || (err as { error?: string }).error || 'Could not update user. Please check your input or contact support.')
   }
   return res.json()
 }
@@ -138,7 +144,7 @@ export async function banUser(id: string, reason: string, ban_type: 'temporary' 
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as { error?: string }).error ?? 'Failed to ban user')
+    throw new Error((err as { message?: string, error?: string }).message || (err as { error?: string }).error || 'Could not ban user. Please try again or contact support.')
   }
   return res.json()
 }
@@ -149,7 +155,10 @@ export async function unbanUser(id: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'unban' }),
   })
-  if (!res.ok) throw new Error('Failed to unban user')
+  if (!res.ok) {
+    const { message } = await res.json().catch(() => ({}))
+    throw new Error(message || 'Could not unban user. Please try again or contact support.')
+  }
   return res.json()
 }
 
@@ -157,7 +166,7 @@ export async function deleteUser(id: string) {
   const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as { error?: string }).error ?? 'Failed to delete user')
+    throw new Error((err as { message?: string, error?: string }).message || (err as { error?: string }).error || 'Could not delete user. Please try again or contact support.')
   }
   return res.json()
 }

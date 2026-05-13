@@ -22,7 +22,10 @@ export async function fetchMarketplaceAssets(params?: { category?: string; tag?:
   if (params?.category) url.searchParams.set('category', params.category)
   if (params?.tag) url.searchParams.set('tag', params.tag)
   const res = await fetch(url.toString(), { next: { revalidate: 60 } })
-  if (!res.ok) throw new Error('Failed to fetch assets')
+  if (!res.ok) {
+    const { message } = await res.json().catch(() => ({}))
+    throw new Error(message || 'Could not load assets. Please refresh or contact support.')
+  }
   const { assets } = await res.json()
   return assets as MarketplaceAsset[]
 }
@@ -33,7 +36,10 @@ export async function createMarketplaceAsset(asset: Omit<MarketplaceAsset, 'id' 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(asset),
   })
-  if (!res.ok) throw new Error('Failed to create asset')
+  if (!res.ok) {
+    const { message } = await res.json().catch(() => ({}))
+    throw new Error(message || 'Could not create asset. Please check your input or contact support.')
+  }
   const { asset: created } = await res.json()
   return created as MarketplaceAsset
 }
