@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createServerSupabaseClient, createAdminClient } from '@/src/lib/supabase/server'
-import { rateLimit } from '@/src/proxy'
+import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server'
+import { rateLimit } from '@/proxy'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +19,7 @@ const AssetSchema = z.object({
 // GET: List all assets (optionally by category/tag)
 export async function GET(req: Request) {
   await rateLimit(req)
-  const supabase = await createServerSupabaseClient()
+  const supabase = await createClient()
   const { searchParams } = new URL(req.url)
   const category = searchParams.get('category')
   const tag = searchParams.get('tag')
@@ -34,14 +34,15 @@ export async function GET(req: Request) {
 // POST: Create new asset
 export async function POST(req: Request) {
   await rateLimit(req)
-  const supabase = await createServerSupabaseClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json()
   const parse = AssetSchema.safeParse(body)
   if (!parse.success) return NextResponse.json({ error: parse.error }, { status: 422 })
   const asset = { ...parse.data, user_id: user.id }
-  const { data, error } = await supabase.from('marketplace_assets').insert([asset]).select('*').single()
+  const admin = createAdminSupabaseClient()
+  const { data, error } = await admin.from('marketplace_assets').insert([asset]).select('*').single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ asset: data }, { status: 201 })
 }

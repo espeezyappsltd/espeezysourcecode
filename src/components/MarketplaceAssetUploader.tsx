@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AssetSchema, createMarketplaceAsset } from '@/src/services/marketplace'
+import { AssetSchema, createMarketplaceAsset } from '@/services/marketplace'
 import { z } from 'zod'
 
 const CATEGORIES = [

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { fetchMarketplaceAssets, MarketplaceAsset } from '@/src/services/marketplace'
+import { fetchMarketplaceAssets, MarketplaceAsset } from '@/services/marketplace'
 
 const CATEGORY_COLORS: Record<string, string> = {
   Graphics: '#10b981',
