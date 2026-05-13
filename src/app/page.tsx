@@ -1,7 +1,10 @@
-import KanbanBoard from '@/components/KanbanBoard';
 'use client'
+import KanbanBoard from '../components/KanbanBoard';
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Profile } from '../types/auth';
+import { createClient } from '../lib/supabase/client';
+const supabase = createClient();
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -15,6 +18,7 @@ import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import { submitPreregistration } from '@/services/preregister'
+
 
 
 // ─── Nav Items ────────────────────────────────────────────────────────────────
@@ -39,6 +43,37 @@ const COMING_FEATURES = [
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Home() {
   const { config, registeredCount, configLoaded, timeLeft, setRegisteredCount } = useLaunchData()
+
+  // Use Supabase user profile and groupId
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [newTaskSignal, setNewTaskSignal] = useState(0);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoadingProfile(true);
+      // Get user from supabase auth
+      const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+      if (!user) {
+        setProfile(null);
+        setGroupId(null);
+        setLoadingProfile(false);
+        return;
+      }
+      // Fetch profile from DB
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      setProfile(profileData || null);
+      // Optionally fetch groupId from profile or another table
+      setGroupId(profileData?.group_id || null);
+      setLoadingProfile(false);
+    };
+    fetchProfile();
+  }, []);
 
   // Form state
   const [email, setEmail] = useState('')
@@ -81,43 +116,42 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white', overflowX: 'hidden', fontFamily: 'inherit' }}>
-
-      {/* ── Grid overlay ─────────────────────────────────────────────────── */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(16,185,129,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.025) 1px, transparent 1px)', backgroundSize: '64px 64px', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', top: '-20%', right: '-10%', width: '70vw', height: '70vw', background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 65%)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }} />
-
-      {/* ── Navigation ───────────────────────────────────────────────────── */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(10,10,10,0.85)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
-          <div style={{ width: '32px', height: '32px', background: '#10b981', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
-            <Image src="/brand_logo2.svg" width={22} height={22} style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Logo" priority />
-          </div>
-          <span style={{ fontWeight: 950, fontSize: '1rem', color: 'white', letterSpacing: '-0.03em' }}>{config.brand_name}</span>
-        </Link>
-
-        {/* Desktop nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="hide-mobile">
-          {NAV_LINKS.map(link => (
-            <Link key={link.href} href={link.href} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'white')}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <Link href="/preregister" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            Join Early Access
+    <>
+      {!loadingProfile && groupId && profile && (
+        <KanbanBoard groupId={groupId} profile={profile} newTaskSignal={newTaskSignal} />
+      )}
+      <div style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white', overflowX: 'hidden', fontFamily: 'inherit' }}>
+        {/* ── Grid overlay ─────────────────────────────────────────────────── */}
+        <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(16,185,129,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.025) 1px, transparent 1px)', backgroundSize: '64px 64px', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'fixed', top: '-20%', right: '-10%', width: '70vw', height: '70vw', background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 65%)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'fixed', bottom: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }} />
+        {/* ── Navigation ───────────────────────────────────────────────────── */}
+        <nav style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(10,10,10,0.85)' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
+            <div style={{ width: '32px', height: '32px', background: '#10b981', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
+              <Image src="/brand_logo2.svg" width={22} height={22} style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Logo" priority />
+            </div>
+            <span style={{ fontWeight: 950, fontSize: '1rem', color: 'white', letterSpacing: '-0.03em' }}>{config.brand_name}</span>
           </Link>
-        </div>
-      </nav>
-
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section id="hero" style={{ padding: 'clamp(4rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          {/* Desktop nav */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="hide-mobile">
+            {NAV_LINKS.map(link => (
+              <Link key={link.href} href={link.href} style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.55)', textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'white')}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <Link href="/preregister" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              Join Early Access
+            </Link>
+          </div>
+        </nav>
+        {/* ── HERO ─────────────────────────────────────────────────────────── */}
+        <section id="hero" style={{ padding: 'clamp(4rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1 }}>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
@@ -370,11 +404,11 @@ export default function Home() {
           </p>
         </div>
       </footer>
-
       <style jsx>{`
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         @media (max-width: 640px) { .hide-mobile { display: none !important; } }
       `}</style>
-    </div>
-  )
+      </div>
+    </>
+  );
 }
