@@ -18,11 +18,10 @@ export function useCountdown(targetDate: string): TimeLeft {
     }
   }, [targetDate])
 
-  // Start with zeros so SSR and client initial render match, then hydrate on client
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(ZERO_TIME)
+  // Start with calculated value so SSR and client initial render match, no cascading render
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calc())
 
   useEffect(() => {
-    setTimeLeft(calc())
     const id = setInterval(() => setTimeLeft(calc()), 1000)
     return () => clearInterval(id)
   }, [calc])
@@ -120,7 +119,7 @@ export function useLaunchData() {
       clearInterval(pollId)
       window.removeEventListener('focus', refreshCount)
     }
-  }, [refreshCount])
+  }, [refreshCount, setCountAndPersist])
 
   const timeLeft = useCountdown(config.launch_date)
 

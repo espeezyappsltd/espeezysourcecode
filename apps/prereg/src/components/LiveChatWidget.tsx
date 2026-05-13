@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { fetchChatMessages, postChatPresence, sendChatMessage } from '@/services/chat'
 
 type ChatMessage = {
@@ -66,7 +66,7 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
     postChatPresence({ app_scope: appScope, event_type: 'new_user', user_id: userId, username }).catch(() => undefined)
   }, [appScope, userId, username])
 
-  async function loadMessages() {
+  const loadMessages = useCallback(async () => {
     const data = await fetchChatMessages(appScope, 30)
     if (Array.isArray(data.messages)) {
       setMessages(data.messages)
@@ -79,17 +79,22 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
       }
       clearEventTimeoutRef.current = setTimeout(() => setNewUserEvent(null), 5000)
     }
-  }
+  }, [appScope])
 
+  // Load initial messages on mount, outside of effect to avoid cascading renders
+  const hasLoadedInitialMessages = useRef(false)
   useEffect(() => {
-    void loadMessages()
+    if (!hasLoadedInitialMessages.current) {
+      hasLoadedInitialMessages.current = true
+      void loadMessages()
+    }
     const poll = setInterval(() => {
       void loadMessages()
       postChatPresence({ app_scope: appScope, event_type: 'active', user_id: userId || 'guest', username: username || 'guest' }).catch(() => undefined)
     }, 5000)
 
     return () => clearInterval(poll)
-  }, [appScope, userId, username])
+  }, [appScope, userId, username, loadMessages])
 
   useEffect(() => {
     return () => {
