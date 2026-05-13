@@ -4,6 +4,8 @@ import { Suspense } from 'react'
 const MarketplaceGallery = dynamic(() => import('@/src/components/MarketplaceGallery'), { ssr: false })
 const MarketplaceAssetUploader = dynamic(() => import('@/src/components/MarketplaceAssetUploader'), { ssr: false })
 
+export const dynamic = 'force-dynamic'
+
 export default function MarketplacePage() {
   return (
     <main style={{ background: '#0a0a0a', minHeight: '100vh', paddingBottom: 80 }}>
@@ -14,6 +16,5 @@ export default function MarketplacePage() {
         <MarketplaceAssetUploader />
       </section>
     </main>
-  export const dynamic = 'force-dynamic'
   )
 }
