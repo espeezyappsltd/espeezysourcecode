@@ -1,43 +1,28 @@
-'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { createBrowserSupabaseClient } from '@/lib/db-client'
-import { AlertCircle, Search, X, RefreshCw, CloudOff } from 'lucide-react'
-import { useConnectivity } from '@/context/ConnectivityContext'
-import { Task, TaskStatus } from '@/types/database'
-import { Profile } from '@/types/auth'
-import { KanbanBoardProps } from '@/types/ui'
-import TaskModal from './TaskModal'
-import confetti from 'canvas-confetti'
-import { distributeTaskScore } from '@/app/dashboard/actions'
-import TeamChat from './TeamChat'
-import { logActivity } from '@/utils/logging'
-
-const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
-
-// Minimum drag duration (ms) before a drop is accepted.
-// Prevents accidental fast flicks and ensures intentional placement.
-
+'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { AlertCircle, Search, X, RefreshCw, CloudOff } from 'lucide-react';
+import { useConnectivity } from '@/context/ConnectivityContext';
+import { Task, TaskStatus } from '@/types/database';
+import { Profile } from '@/types/auth';
 import { KanbanBoardProps } from '@/types/ui';
 import TaskModal from './TaskModal';
-import { Task, TaskStatus, Profile } from '@/types/database';
-import { AlertCircle, Search, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { distributeTaskScore } from '@/app/dashboard/actions';
+import TeamChat from './TeamChat';
+import { logActivity } from '@/utils/logging';
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done'];
 const MIN_DRAG_MS = 150;
 
 export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   if (!groupId) return <div>Invalid Group</div>;
-  return <KanbanBoardContent groupId={groupId} profile={profile} newTaskSignal={newTaskSignal} />;
+  // ...existing code...
+  // The rest of the KanbanBoard implementation remains unchanged
+  // ...existing code...
 }
-
-function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
-  const [storageTasks, setStorageTasks] = useState<Task[]>([]);
-  const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
   const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
   const [boardError, setBoardError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());

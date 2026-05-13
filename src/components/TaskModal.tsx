@@ -1,5 +1,5 @@
+﻿'use client'
 import Image from 'next/image'
-'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -530,7 +530,7 @@ export default function TaskModal({
                     opacity: aiLoading || !title.trim() ? 0.7 : 1
                   }}
                 >
-                  {aiLoading ? 'Generating…' : 'AI Assist'}
+                  {aiLoading ? 'Generatingâ€¦' : 'AI Assist'}
                 </button>
               </div>
               <textarea 
@@ -785,3 +785,4 @@ export default function TaskModal({
     </div>
   )
 }
+

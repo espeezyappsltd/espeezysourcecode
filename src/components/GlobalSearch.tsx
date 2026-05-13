@@ -1,5 +1,5 @@
+﻿'use client'
 import Image from 'next/image'
-'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Search, User, CheckSquare, Users, X, ArrowRight, Loader2 } from 'lucide-react'
@@ -171,14 +171,14 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
           marginBottom: '1rem',
           minHeight: '44px'
         }}
-        title="Search workspace (⌘K)"
+        title="Search workspace (âŒ˜K)"
         className="search-trigger"
       >
         <Search size={18} />
         {!collapsed && (
           <>
             <span style={{ fontSize: '0.85rem', flex: 1, textAlign: 'left' }}>Search workspace...</span>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '6px' }}>⌘K</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '6px' }}>âŒ˜K</span>
           </>
         )}
       </button>
@@ -217,7 +217,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
                <Search size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
                <p style={{ margin: 0 }}>Find students, tasks, or teams across the network.</p>
                <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-                  <div className="search-pill">⌘K to search</div>
+                  <div className="search-pill">âŒ˜K to search</div>
                   <div className="search-pill">ESC to close</div>
                </div>
             </div>
@@ -251,7 +251,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
                    <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{r.title}</div>
                       <div style={{ color: 'var(--text-sub)', fontSize: '0.8rem', textTransform: 'capitalize' }}>
-                        {r.type === 'profile' ? 'Teammate' : r.type === 'group' ? 'Group' : 'Task'} • {r.subtitle}
+                        {r.type === 'profile' ? 'Teammate' : r.type === 'group' ? 'Group' : 'Task'} â€¢ {r.subtitle}
                       </div>
                    </div>
                    <ArrowRight size={16} color="var(--text-sub)" className="search-arrow" />
@@ -265,7 +265,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
         <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--bg-sub)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-sub)' }}>
           <div style={{ display: 'flex', gap: '1rem' }}>
              <span><strong>ENTER</strong> to select</span>
-             <span><strong>↑↓</strong> to navigate</span>
+             <span><strong>â†‘â†“</strong> to navigate</span>
           </div>
           <div>Smart Search v1.0</div>
         </div>
@@ -282,3 +282,4 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
     </div>
   )
 }
+
