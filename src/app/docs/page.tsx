@@ -39,7 +39,15 @@ export default function DocsHome() {
               <div style={{ color: '#10b981', marginBottom: '1rem' }}><Sparkles size={24} /></div>
               <h3 className="docs-card-title">What is it?</h3>
               <p className="docs-card-subtext">
-                Think of Espeezy as a super-powered school project app. It&apos;s a place where you and your friends can work together on a technical project without ever losing your work.
+                Think of Espeezy as a collaborative project app. It&apos;s a place where you and your friends can work together on personal, school, work or technical projects without ever losing your work.<br /><br />
+                <strong>New: Role-Based Access Control (RBAC) for User Accounts</strong><br />
+                <ul style={{ margin: '0.5em 0 0 1.2em', padding: 0, color: '#6b7280', fontSize: '0.92em' }}>
+                  <li>Log in with a personal email for <strong>Free Tier</strong> access.</li>
+                  <li>Upgrade to <strong>Premium</strong> by verifying your school or institutional email.</li>
+                  <li>Access is managed by roles: <strong>Personal</strong> (free), <strong>Student</strong> (premium), <strong>Educator</strong>, and <strong>Admin</strong>.</li>
+                  <li>Premium features unlock automatically when your email is verified as belonging to a recognized institution.</li>
+                </ul>
+                <span style={{ color: '#10b981', fontWeight: 600 }}>You control your workspace, your data, and your team.</span>
               </p>
            </div>
            <div className="docs-card small">

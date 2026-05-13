@@ -1,97 +1,151 @@
 ﻿
 'use client';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { AlertCircle, Search, X, RefreshCw, CloudOff } from 'lucide-react';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useConnectivity } from '@/context/ConnectivityContext';
-import { Task, TaskStatus } from '@/types/database';
-import { Profile } from '@/types/auth';
+import { Task, TaskStatus, Profile } from '@/types/database';
 import { KanbanBoardProps } from '@/types/ui';
 import TaskModal from './TaskModal';
-import confetti from 'canvas-confetti';
-import { distributeTaskScore } from '@/app/dashboard/actions';
 import TeamChat from './TeamChat';
-import { logActivity } from '@/utils/logging';
+import { AlertCircle, RefreshCw, CloudOff } from 'lucide-react';
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done'];
-const MIN_DRAG_MS = 150;
 
 
-export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
-  const router = useRouter();
-  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
-  const [boardError, setBoardError] = useState<string | null>(null);
-  const [now, setNow] = useState(() => Date.now());
+
+export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [boardSearch, setBoardSearch] = useState('');
-  const [activeDragColumn, setActiveDragColumn] = useState<TaskStatus | null>(null);
-  const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
-  const dragStartTimeRef = useRef<number>(0);
-  const [tasks, setStorageTasks] = useState<Task[]>([]);
-  const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
   const isOnline = useConnectivity();
-  const currentUserProfile = profile;
 
-  // Fetch tasks from API
-  const fetchTasks = useCallback(() => {
-    fetch(`/api/kanban/tasks?group_id=${groupId}`)
-      .then(res => res.json())
-      .then(({ tasks, error }) => {
-        if (tasks) setStorageTasks(tasks);
-        if (error) setBoardError(error);
-      });
-  }, [groupId]);
-
-  // Fetch group members from API
-  const fetchGroupMembers = useCallback(() => {
-    fetch(`/api/kanban/profiles?group_id=${groupId}`)
-      .then(res => res.json())
-      .then(({ profiles, error }) => {
-        if (profiles) setGroupMembers(profiles);
-        if (error) setBoardError(error);
-      });
-  }, [groupId]);
-
-  useEffect(() => {
-    fetchTasks();
-    fetchGroupMembers();
-    const interval = setInterval(() => setNow(Date.now()), 60000);
-    return () => clearInterval(interval);
-  }, [fetchTasks, fetchGroupMembers]);
-
-  useEffect(() => {
-    if (typeof newTaskSignal === 'number' && newTaskSignal > 0) {
-      Promise.resolve().then(() => {
-        setSelectedTask(null);
-        setIsModalOpen(true);
-      });
+  // Fetch tasks and members
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [tasksRes, membersRes] = await Promise.all([
+        fetch(`/api/kanban/tasks?group_id=${groupId}`),
+        fetch(`/api/kanban/profiles?group_id=${groupId}`)
+      ]);
+      const { tasks, error: taskError } = await tasksRes.json();
+      const { profiles, error: memberError } = await membersRes.json();
+      if (taskError) throw new Error(taskError);
+      if (memberError) throw new Error(memberError);
+      setTasks(tasks || []);
+      setGroupMembers(profiles || []);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load board data.');
+    } finally {
+      setLoading(false);
     }
-  }, [newTaskSignal]);
+  }, [groupId]);
 
-  // CRUD via API
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  // CRUD
   const createTask = async (task: Partial<Task>) => {
-    setPendingUpdates(prev => new Set(prev).add('new'));
-    const res = await fetch('/api/kanban/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(task)
-    });
-    const { task: newTask, error } = await res.json();
-    setPendingUpdates(prev => { const s = new Set(prev); s.delete('new'); return s; });
-    if (error) setBoardError(error);
-    else setStorageTasks(tasks => [...tasks, newTask]);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/kanban/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task)
+      });
+      const { task: newTask, error } = await res.json();
+      if (error) throw new Error(error);
+      setTasks(prev => [...prev, newTask]);
+    } catch (e: any) {
+      setError(e.message || 'Failed to create task.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
-    setPendingUpdates(prev => new Set(prev).add(taskId));
-    // TODO: implement status update logic here
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/kanban/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const { task: updatedTask, error } = await res.json();
+      if (error) throw new Error(error);
+      setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
+    } catch (e: any) {
+      setError(e.message || 'Failed to update task.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ...rest of KanbanBoard rendering logic goes here (omitted for brevity, but should include the JSX for the board, cards, modals, etc.)
-  // For now, render a placeholder:
-  return <div>Kanban Board UI (fix JSX and logic as needed)</div>;
+  // Accessibility: ARIA roles, keyboard nav, error/empty/loading states
+  if (loading) {
+    return (
+      <div role="status" aria-busy="true" style={{ padding: '2rem', textAlign: 'center' }}>
+        <RefreshCw className="animate-spin" style={{ margin: '0 auto', color: '#10b981' }} />
+        <div>Loading board…</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div role="alert" style={{ color: '#ef4444', padding: '2rem', textAlign: 'center' }}>
+        <AlertCircle style={{ marginBottom: 8 }} />
+        {error}
+        <button onClick={fetchAll} style={{ marginLeft: 16, background: '#10b981', color: 'white', border: 'none', borderRadius: 8, padding: '0.5rem 1rem', cursor: 'pointer' }}>Retry</button>
+      </div>
+    );
+  }
+  if (!tasks.length) {
+    return (
+      <div role="region" aria-label="Kanban Board" style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
+        <CloudOff style={{ marginBottom: 8 }} />
+        No tasks yet. Get started by adding a new task.
+      </div>
+    );
+  }
+
+  // Main Kanban UI (simplified, modularize as needed)
+  return (
+    <div role="region" aria-label="Kanban Board" style={{ display: 'flex', gap: 24, padding: 24, overflowX: 'auto' }}>
+      {COLUMNS.map(col => (
+        <div key={col} role="list" aria-label={col} style={{ minWidth: 280, flex: 1, background: '#18181b', borderRadius: 12, padding: 16 }}>
+          <h3 style={{ color: '#10b981', fontWeight: 700, fontSize: 18, marginBottom: 12 }}>{col}</h3>
+          {tasks.filter(t => t.status === col).length === 0 ? (
+            <div style={{ color: '#888', fontSize: 14, padding: '1rem 0' }}>No tasks</div>
+          ) : (
+            tasks.filter(t => t.status === col).map(task => (
+              <div key={task.id} tabIndex={0} role="listitem" aria-label={task.title} style={{ background: '#232326', borderRadius: 8, marginBottom: 12, padding: 12, outline: 'none' }}>
+                <div style={{ fontWeight: 600 }}>{task.title}</div>
+                <div style={{ fontSize: 13, color: '#aaa' }}>{task.description}</div>
+                <button onClick={() => { setSelectedTask(task); setIsModalOpen(true); }} style={{ marginTop: 8, background: '#10b981', color: 'white', border: 'none', borderRadius: 6, padding: '0.3rem 0.7rem', fontSize: 13, cursor: 'pointer' }}>View</button>
+              </div>
+            ))
+          )}
+        </div>
+      ))}
+      {isModalOpen && selectedTask && (
+        <TaskModal
+          task={selectedTask}
+          groupId={groupId}
+          onClose={() => setIsModalOpen(false)}
+          onRefresh={fetchAll}
+          onTaskSaved={fetchAll}
+          initialDueDate={selectedTask.due_date || undefined}
+          onlineUserIds={new Set(groupMembers.map(m => m.id))}
+        />
+      )}
+    </div>
+  );
 }
 
 function KanbanBoardSkeleton() {
