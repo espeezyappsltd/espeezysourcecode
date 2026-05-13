@@ -31,7 +31,7 @@ export default function MarketplaceAssetUploader({ onUpload }: { onUpload?: () =
       price: form.price ? Number(form.price) : undefined,
     })
     if (!parsed.success) {
-      setError(parsed.error.errors[0]?.message || 'Invalid input')
+      setError(parsed.error.issues?.[0]?.message || 'Invalid input')
       setSubmitting(false)
       return
     }

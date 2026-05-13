@@ -24,7 +24,7 @@ export async function rateLimit(req: Request) {
   }
 }
 
-export default async function proxy(req: Request) {
+export default async function proxy() {
   // Empty default proxy function to satisfy Next.js requirements if used as a proxy
   return NextResponse.next()
 }

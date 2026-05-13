@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server'
-import { rateLimit } from '@/proxy'
+import { rateLimit } from '../../../proxy'
 
 export const dynamic = 'force-dynamic'
 

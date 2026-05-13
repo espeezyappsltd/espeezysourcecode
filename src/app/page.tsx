@@ -48,7 +48,6 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [groupId, setGroupId] = useState<string | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
-  const [newTaskSignal, setNewTaskSignal] = useState(0);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -118,7 +117,7 @@ export default function Home() {
   return (
     <>
       {!loadingProfile && groupId && profile && (
-        <KanbanBoard groupId={groupId} profile={profile} newTaskSignal={newTaskSignal} />
+        <KanbanBoard groupId={groupId} profile={profile} />
       )}
       <div style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white', overflowX: 'hidden', fontFamily: 'inherit' }}>
         {/* ── Grid overlay ─────────────────────────────────────────────────── */}
