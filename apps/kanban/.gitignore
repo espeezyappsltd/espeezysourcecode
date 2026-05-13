@@ -1,0 +1,64 @@
+.vercel
+.env
+.env.local
+.env.development
+.env.test
+
+
+
+# Ignore all log files and keep the logs directory
+logs/
+
+
+# Ignore all build output and keep the build directory
+build/
+
+
+# Ignore all node modules and keep the node_modules directory
+
+node_modules/
+
+# Ignore all coverage output and keep the coverage directory
+coverage/
+
+# Ignore all dist output and keep the dist directory
+dist/
+
+# Ignore all .env files
+*.env
+
+# Ignore all .log files
+*.log
+
+# Ignore all .DS_Store files (macOS)
+.DS_Store
+
+# Ignore all .vscode files
+.vscode/
+
+# Ignore all .idea files (JetBrains IDEs)
+.idea/
+
+# Ignore all .eslintcache files
+.eslintcache
+
+# Ignore all .prettiercache files
+
+.prettiercache
+
+# Ignore all .next files (Next.js)
+.next/
+
+# Ignore all .nuxt files (Nuxt.js)
+.nuxt/
+
+# Ignore all .expo files (Expo)
+.expo/
+
+# Ignore all .vercel files (Vercel)
+.vercel/
+# Ignore all .firebase files (Firebase)
+.firebase/
+
+# Ignore all .env files
+*.env
