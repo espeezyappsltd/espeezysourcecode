@@ -3,8 +3,8 @@
 
 
 import { useEffect, useState } from "react";
-import { supabase } from "./kanban/supabase/supabase-client";
-import type { Profile } from "../../../../src/features/kanban/types";
+import { supabase } from "../../kanban/supabase/supabase-client";
+import type { Profile } from "../../kanban/types";
 
 
 export default function AdminPage() {
