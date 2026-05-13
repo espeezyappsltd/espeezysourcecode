@@ -29,7 +29,7 @@ const COMING_FEATURES = [
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
-  { href: '/fund', label: 'Fund' },
+  { href: '/fund', label: 'Contribute' },
   { href: '/docs', label: 'Docs' },
   { href: '/pricing', label: 'Pricing' },
 ]
