@@ -1,5 +1,6 @@
-import Image from 'next/image'
+
 'use client'
+import Image from 'next/image'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { db, createBrowserSupabaseClient } from '@/lib/db-client'

@@ -17,12 +17,7 @@ import { logActivity } from '@/utils/logging';
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done'];
 const MIN_DRAG_MS = 150;
 
-export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
-  if (!groupId) return <div>Invalid Group</div>;
-  // ...existing code...
-  // The rest of the KanbanBoard implementation remains unchanged
-  // ...existing code...
-}
+// (Removed duplicate/placeholder KanbanBoard export)
   const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
   const [boardError, setBoardError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -83,44 +78,8 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 
   const updateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
     setPendingUpdates(prev => new Set(prev).add(taskId));
-  }
-                            alignItems: 'center',
-                            gap: '0.25rem',
-                            background: task.category === 'Implementation' ? 'rgba(var(--brand-rgb), 0.1)' :
-                              task.category === 'Architecture' ? 'rgba(139, 92, 246, 0.1)' :
-                                task.category === 'UX/UI Design' ? 'rgba(236, 72, 153, 0.1)' :
-                                  task.category === 'Quality Assurance' ? 'rgba(10, 185, 129, 0.1)' :
-                                    task.category === 'Research' ? 'rgba(245, 158, 11, 0.1)' :
-                                      task.category === 'Mentorship' ? 'rgba(99, 102, 241, 0.1)' :
-                                        task.category === 'Documentation' ? 'rgba(100, 116, 139, 0.1)' :
-                                          task.category === 'DevOps' ? 'rgba(6, 182, 212, 0.1)' :
-                                            'rgba(239, 68, 68, 0.1)',
-                            color: task.category === 'Implementation' ? 'var(--brand)' :
-                              task.category === 'Architecture' ? '#8b5cf6' :
-                                task.category === 'UX/UI Design' ? '#ec4899' :
-                                  task.category === 'Quality Assurance' ? '#10b981' :
-                                    task.category === 'Research' ? '#f59e0b' :
-                                      task.category === 'Mentorship' ? '#6366f1' :
-                                        task.category === 'Documentation' ? '#64748b' :
-                                          task.category === 'DevOps' ? '#06b6d4' :
-                                            'var(--error)',
-                            border: 'none',
-                            fontSize: '0.65rem',
-                            fontWeight: 800
-                          }}
-                        >
-                          {task.category || 'Legacy'}
-                        </span>
-                        
-                        {pendingUpdates.has(task.id) && (
-                          <span style={{ 
-                            fontSize: '0.6rem', color: 'var(--brand)', fontWeight: 900, textTransform: 'uppercase', 
-                            display: 'flex', alignItems: 'center', gap: '0.25rem', letterSpacing: '0.5px' 
-                          }}>
-                            <RefreshCw size={10} className="spin" />
-                            Vault Sync
-                          </span>
-                        )}
+    // TODO: implement status update logic here
+  };
                         
                         {!isOnline && (
                           <span style={{ 
@@ -137,8 +96,6 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
                           </span>
                         )}
                       </div>
-
-                      <div style={{ display: 'flex', gap: '0.2rem', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '40%' }}>
                         {(!task.assignees || task.assignees.length === 0) ? (
                           <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>Unassigned</span>
                         ) : (

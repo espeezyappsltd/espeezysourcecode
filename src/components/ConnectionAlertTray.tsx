@@ -1,50 +1,10 @@
+// Fixed version
+export { default } from './ConnectionAlertTray.fixed'
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Profile } from '@/types/database'
-import { db, auth } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  onSnapshot, 
-  addDoc, 
-  writeBatch 
-} from 'firebase/firestore'
-import { UserPlus, X, Check, ExternalLink, RefreshCw } from 'lucide-react'
-import { useNotifications } from './NotificationProvider'
 import Link from 'next/link'
 
-  type ConnectionRequest = {
-    id: string
-    user_id: string
-    target_id: string
-    status: string
-    profiles: Profile | null
-  }
-  const [requests, setRequests] = useState<ConnectionRequest[]>([])
-  const [loading, setLoading] = useState(true)
-  const [processingId, setProcessingId] = useState<string | null>(null)
-  const { addToast } = useNotifications()
-
-  const fetchRequests = async () => {
-    const user = auth.currentUser
-    if (!user) return
-
-    try {
-      const q = query(
-        collection(db, 'user_connections'),
-        where('target_id', '==', user.uid),
-        where('status', '==', 'pending')
-      )
-      const snap = await getDocs(q)
-      
-      const data = await Promise.all(snap.docs.map(async d => {
-        const conn = d.data()
         // Join with profile manually if needed, or assume it exists in the doc
         const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', conn.user_id)))
         return {
@@ -134,7 +94,9 @@ import Link from 'next/link'
     }
   }
 
-  if (loading || requests.length === 0) return null
+  if (loading || requests.length === 0) {
+    return null;
+  }
 
   return (
     <div className="connection-tray-container" style={{ margin: '0 0 var(--gap-md) 0', animation: 'slideInDown 0.4s cubic-bezier(0.23, 1, 0.32, 1)' }}>
@@ -177,68 +139,106 @@ import Link from 'next/link'
                  padding: '0.5rem', 
                  borderRadius: '8px', 
                  color: 'var(--text-sub)', 
-                 background: 'var(--bg-sub)',
-                 border: '1px solid var(--border)',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-                 transition: 'all 0.2s'
-               }}
-               title="View Profile"
-             >
-                <ExternalLink size={16} />
-             </Link>
-             
-             <button 
-               onClick={() => handleAction(req.id, req.user_id, 'decline')}
-               disabled={processingId === req.id}
-               style={{ 
-                 padding: '0.5rem 1rem', 
-                 borderRadius: '10px', 
-                 background: 'var(--bg-sub)', 
-                 color: 'var(--text-sub)',
-                 border: '1px solid var(--border)',
-                 fontSize: '0.75rem',
-                 fontWeight: 800,
-                 cursor: 'pointer'
-               }}
-             >
-               {processingId === req.id ? '...' : 'Ignore'}
-             </button>
+                await fetchRequests()
+              } catch (err) {
+                addToast('Sync Error', err instanceof Error ? err.message : String(err), 'error')
+              } finally {
+                setProcessingId(null)
+              }
+            }
 
-             <button 
-               onClick={() => handleAction(req.id, req.user_id, 'accept')}
-               disabled={processingId === req.id}
-               style={{ 
-                 padding: '0.5rem 1.25rem', 
-                 borderRadius: '10px', 
-                 background: 'var(--brand)', 
-                 color: 'white',
-                 border: 'none',
-                 fontSize: '0.75rem',
-                 fontWeight: 900,
-                 cursor: 'pointer',
-                 boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.2)',
-                 display: 'flex',
-                 alignItems: 'center',
-                 gap: '0.4rem'
-               }}
-             >
-               {processingId === req.id ? <RefreshCw size={14} className="spin" /> : <Check size={16} />}
-               Accept Request
-             </button>
-          </div>
-        </div>
-      ))}
+            if (loading || requests.length === 0) {
+              return null;
+            }
 
-    </div>
-    <style jsx>{`
-      @keyframes slideInDown {
-        from { transform: translateY(-20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-      .spin { animation: spin 1s linear infinite; }
-      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    `}</style>
-  )
-}
+            return (
+              <div className="connection-tray-container" style={{ margin: '0 0 var(--gap-md) 0', animation: 'slideInDown 0.4s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+                {requests.map((req) => (
+                  <div 
+                    key={req.id} 
+                    style={{ 
+                      background: 'rgba(var(--brand-rgb), 0.05)', 
+                      border: '1px solid var(--brand)', 
+                      borderRadius: '16px', 
+                      padding: '0.75rem 1.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                      flexWrap: 'wrap',
+                      boxShadow: '0 4px 15px rgba(var(--brand-rgb), 0.1)',
+                      marginBottom: requests.length > 1 ? '0.5rem' : 0
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                      <div style={{ padding: '8px', background: 'var(--brand)', color: 'white', borderRadius: '10px' }}>
+                        <UserPlus size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          Pending Connection Request
+                          <span className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)' }} />
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)' }}>
+                          <strong>{req.profiles?.full_name || 'A student'}</strong> wants to connect for collaboration.
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        disabled={processingId === req.id}
+                        style={{ 
+                          padding: '0.5rem 1.25rem', 
+                          borderRadius: '10px', 
+                          background: 'var(--brand)', 
+                          color: 'white',
+                          border: 'none',
+                          fontSize: '0.75rem',
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem'
+                        }}
+                        onClick={() => handleAction(req.id, req.user_id, 'accept')}
+                      >
+                        {processingId === req.id ? <RefreshCw size={14} className="spin" /> : <Check size={16} />}
+                        Accept Request
+                      </button>
+                      <button
+                        disabled={processingId === req.id}
+                        style={{ 
+                          padding: '0.5rem 1.25rem', 
+                          borderRadius: '10px', 
+                          background: 'var(--danger)', 
+                          color: 'white',
+                          border: 'none',
+                          fontSize: '0.75rem',
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 10px rgba(var(--danger-rgb), 0.2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem'
+                        }}
+                        onClick={() => handleAction(req.id, req.user_id, 'ignore')}
+                      >
+                        {processingId === req.id ? <RefreshCw size={14} className="spin" /> : <X size={16} />}
+                        Ignore
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+              <style jsx>{`
+                @keyframes slideInDown {
+                  from { transform: translateY(-20px); opacity: 0; }
+                  to { transform: translateY(0); opacity: 1; }
+                }
+                .spin { animation: spin 1s linear infinite; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              `}</style>
+            )
+          }
