@@ -28,7 +28,7 @@ export default async function TerminalLayout({
 
   // Secure terminal nodes require administrative clearance
   if (!profile || profile.role !== 'admin') {
-    redirect('/dashboard')
+    redirect('/')
   }
 
   const initialTheme = {

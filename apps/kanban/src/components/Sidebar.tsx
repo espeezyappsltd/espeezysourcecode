@@ -50,16 +50,16 @@ type SidebarNavItem = {
 }
 
 const NAV_LINKS: SidebarNavItem[] = [
-  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Feed', path: '/feed', icon: Rss },
-  { name: 'Hustle', path: '/dashboard/hustle', icon: DollarSign },
-  { name: 'Teammates', path: '/dashboard/network', icon: Users },
-  { name: 'Resources', path: '/dashboard/marketplace', icon: TrendingUp },
-  { name: 'Break Room', path: '/dashboard/chillout', icon: Sparkles },
-  { name: 'Project Stats', path: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Plans', path: '/dashboard/upgrade', icon: Activity },
-  { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
-  { name: 'Settings', path: '/dashboard/settings', icon: Settings },
+  { name: 'Hustle', path: '/hustle', icon: DollarSign },
+  { name: 'Teammates', path: '/network', icon: Users },
+  { name: 'Resources', path: '/marketplace', icon: TrendingUp },
+  { name: 'Break Room', path: '/chillout', icon: Sparkles },
+  { name: 'Project Stats', path: '/analytics', icon: BarChart3 },
+  { name: 'Plans', path: '/upgrade', icon: Activity },
+  { name: 'My Profile', path: '/profile', icon: UserCircle },
+  { name: 'Settings', path: '/settings', icon: Settings },
 ]
 
 function BrandWordmark() {
@@ -190,7 +190,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const isDark = currentPalette.name !== 'Google Light'
   const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
   const showUpgradeCard = profile?.subscription_plan === 'free' || !profile?.subscription_plan
-  const projectStatsPath = profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics'
+  const projectStatsPath = profile?.group_id ? `/analytics/${profile.group_id}` : '/analytics'
 
   const navLinks = useMemo(
     () =>
@@ -283,10 +283,10 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const isNavItemActive = (path: string, name: string) => {
     if (name === 'Project Stats') {
-      return pathname.startsWith('/dashboard/analytics')
+      return pathname.startsWith('/analytics')
     }
 
-    if (path === '/dashboard') {
+    if (path === '/') {
       return pathname === path
     }
 
@@ -359,7 +359,7 @@ export default function Sidebar({ user }: SidebarProps) {
             <NotificationBell />
           </div>
           <button
-            onClick={() => pushRoute('/dashboard/profile')}
+            onClick={() => pushRoute('/profile')}
             aria-label="Open profile"
             style={{ width: '32px', height: '32px', borderRadius: '10px', border: '2px solid var(--brand)', overflow: 'hidden', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
           >
@@ -389,7 +389,7 @@ export default function Sidebar({ user }: SidebarProps) {
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
               <button
-                onClick={() => pushRoute('/dashboard')}
+                onClick={() => pushRoute('/')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.04em', flexShrink: 0 }}
               >
                 <BrandWordmark />
@@ -448,7 +448,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
         {isOpen && showUpgradeCard && (
           <div style={{ padding: '0 1rem 1rem' }}>
-            <div className="glass-card-prestige" style={{ padding: '1.25rem', borderRadius: '20px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => pushRoute('/dashboard/upgrade')}>
+            <div className="glass-card-prestige" style={{ padding: '1.25rem', borderRadius: '20px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => pushRoute('/upgrade')}>
               <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={16} className="shimmer-gold" />
@@ -532,7 +532,7 @@ export default function Sidebar({ user }: SidebarProps) {
         )}
 
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: isOpen ? '0.5rem' : '0', backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent', borderRadius: '12px', border: isOpen ? '1px solid var(--border)' : 'none', justifyContent: isOpen ? 'flex-start' : 'center', cursor: 'pointer', transition: 'all 0.2s ease', minHeight: '40px' }} className="identity-pill" onClick={() => pushRoute('/dashboard/profile')}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: isOpen ? '0.5rem' : '0', backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent', borderRadius: '12px', border: isOpen ? '1px solid var(--border)' : 'none', justifyContent: isOpen ? 'flex-start' : 'center', cursor: 'pointer', transition: 'all 0.2s ease', minHeight: '40px' }} className="identity-pill" onClick={() => pushRoute('/profile')}>
             <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 950, flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 8px rgba(var(--brand-rgb), 0.15)' }}>
               <ProfileAvatar avatarUrl={profile?.avatar_url} fallback={profile?.full_name?.charAt(0) || 'U'} size={38} alt="User avatar" />
             </div>

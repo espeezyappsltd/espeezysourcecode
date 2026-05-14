@@ -1,3 +1,0 @@
-// MOVED FROM src/utils/logging.ts
-
-// ...existing code from src/utils/logging.ts...

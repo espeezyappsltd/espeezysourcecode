@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
-  const next = searchParams.get('next') ?? '/dashboard'
+  const next = searchParams.get('next') ?? '/'
   const errorParam = searchParams.get('error')
   const errorDesc = searchParams.get('error_description')
   const code = searchParams.get('code')
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
   // Validate redirect path  -  must be a relative path on same origin (open redirect prevention)
   const isSafeRedirect = next.startsWith('/') && !next.startsWith('//') && !next.includes(':')
-  const safePath = isSafeRedirect ? next : '/dashboard'
+  const safePath = isSafeRedirect ? next : '/'
 
   const redirectPath = isRecovery ? '/auth/reset-password' : safePath
   const redirectUrl = new URL(redirectPath, origin).toString()

@@ -95,7 +95,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
   }, [groupId, profile?.role])
 
   const handleAcceptRequest = async (id: string) => {
-    const { acceptJoinRequest } = await import('@/app/(dashboard)/join/actions')
+    const { acceptJoinRequest } = await import('@/app/join/actions')
     const res = await acceptJoinRequest(id)
     if (res.error) {
       addToast('Oops, something went wrong', "We couldn't add the member right now. Let's try again.", 'error')
@@ -108,7 +108,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
   }
 
   const handleDeclineRequest = async (id: string) => {
-    const { declineJoinRequest } = await import('@/app/(dashboard)/join/actions')
+    const { declineJoinRequest } = await import('@/app/join/actions')
     const res = await declineJoinRequest(id)
     if (res.error) {
       addToast('Slight issue', "We couldn't update the request. Please try again.", 'error')

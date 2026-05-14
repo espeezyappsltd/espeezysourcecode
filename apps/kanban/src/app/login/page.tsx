@@ -16,7 +16,7 @@ function getErrorMessage(err: unknown): string {
 }
 
 function LoginContent() {
-  const SIGNUP_ENABLED = false
+  const SIGNUP_ENABLED = true
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createSupabaseClient(), [])
@@ -41,7 +41,7 @@ function LoginContent() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (session) {
-        router.replace('/dashboard')
+        router.replace('/')
       } else {
         setCheckingAuth(false)
       }
@@ -50,7 +50,7 @@ function LoginContent() {
     // Listen for auth state changes (e.g. after OAuth redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       if (session) {
-        router.replace('/dashboard')
+        router.replace('/')
       }
     })
     return () => subscription?.unsubscribe()
@@ -70,7 +70,7 @@ function LoginContent() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        router.push('/dashboard')
+        router.push('/')
       }
     } catch (err: unknown) {
       setAuthError(getErrorMessage(err))
@@ -129,7 +129,7 @@ function LoginContent() {
     setAuthError(null)
     const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
     if (error) setAuthError(error.message)
-    else router.replace('/dashboard')
+    else router.replace('/')
     setSendingOtp(false)
   }
 

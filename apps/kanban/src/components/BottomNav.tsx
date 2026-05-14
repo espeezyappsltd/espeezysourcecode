@@ -24,11 +24,11 @@ export default function BottomNav() {
   const { withLoading } = useSmartLoading()
 
   const navLinks = [
-    { name: 'Board', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Board', path: '/', icon: LayoutDashboard },
     { name: 'Feed', path: '/feed', icon: Rss },
-    { name: 'Hustle', path: '/dashboard/hustle', icon: DollarSign },
-    { name: 'Network', path: '/dashboard/network', icon: Users },
-    { name: 'Inbox', path: '/dashboard/notifications', icon: Bell },
+    { name: 'Hustle', path: '/hustle', icon: DollarSign },
+    { name: 'Network', path: '/network', icon: Users },
+    { name: 'Inbox', path: '/notifications', icon: Bell },
   ]
 
   const handleNav = (path: string, name: string) => {
