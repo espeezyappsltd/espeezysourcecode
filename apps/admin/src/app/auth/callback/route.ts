@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   if (errorParam || errorDesc) {
     const msg = errorDesc || errorParam || 'OAuth authentication failed'
     console.error('[Auth Callback] Provider Error:', msg)
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(msg)}`)
+    return NextResponse.redirect(`${origin}/?error=${encodeURIComponent(msg)}`)
   }
 
   // Check if this is a password recovery flow
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
+      return NextResponse.redirect(`${origin}/?error=${encodeURIComponent(error.message)}`)
     }
   }
 

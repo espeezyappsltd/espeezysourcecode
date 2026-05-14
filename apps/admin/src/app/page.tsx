@@ -30,6 +30,11 @@ export default function AdminDashboard() {
   const supabase = createClient()
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const errParam = params.get('error')
+    if (errParam) {
+      setError(errParam)
+    }
     checkAccessAndFetch()
   }, [])
 

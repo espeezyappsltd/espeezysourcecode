@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
         throw updateError
       }
       setSuccess(true)
-      setTimeout(() => router.push('/login'), 3000)
+      setTimeout(() => router.push('/'), 1500)
     } catch (err: unknown) {
       setError(getErrorMessage(err))
     } finally {
