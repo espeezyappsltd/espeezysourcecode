@@ -23,24 +23,28 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const db = await createServerSupabaseClient()
-  const { data: { user } } = await db.auth.getUser()
+  const { data: { user: realUser } } = await db.auth.getUser()
 
-  // For routes like login/auth, we don't want the dashboard layout
-  // However, Next.js root layout applies to all.
-  // We can handle the dashboard-specific components conditionally or move them to a separate layout if needed.
-  // But the user said "host the main dashboard".
-
-  if (!user) {
-    // If we're not on the login page, redirect
-    // But since this is a server component layout, we need to be careful.
-    // Usually auth is handled in middleware.
+  // MOCK USER FOR TESTING
+  const user = realUser || {
+    id: '00000000-0000-0000-0000-000000000000',
+    email: 'test@example.com',
+    user_metadata: { full_name: 'Test User' },
+    app_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
   }
 
-  const profile = user ? (await db
+  const profile = user.id !== '00000000-0000-0000-0000-000000000000' ? (await db
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single()).data : null
+    .single()).data : {
+      id: user.id,
+      full_name: 'Test User',
+      subscription_plan: 'pro',
+      theme_config: { palette: 'Google Light' }
+    }
 
   const initialTheme = {
     palette: profile?.theme_config?.palette || 'Google Light',
@@ -52,30 +56,26 @@ export default async function RootLayout({
       <body style={{ margin: 0, padding: 0, background: '#000', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
         <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
           <GlobalLoadingProvider>
-            {user ? (
-              <ProfileProvider userId={user.id} initialProfile={profile as import('@/types/auth').Profile | null}>
-                <OnboardingWrapper profile={profile as { full_name?: string; avatar_url?: string } | null} user={user}>
-                  <div className="dashboard-layout">
-                    <PresenceProvider user={user}>
-                      <NotificationProvider>
-                        <Sidebar user={user} />
+            <ProfileProvider userId={user.id} initialProfile={profile as any}>
+              <OnboardingWrapper profile={profile as any} user={user as any}>
+                <div className="dashboard-layout">
+                  <PresenceProvider user={user as any}>
+                    <NotificationProvider>
+                      <Sidebar user={user as any} />
 
-                        <main className="main-content">
-                          <ConnectionAlertTray />
-                          {children}
-                        </main>
+                      <main className="main-content">
+                        <ConnectionAlertTray />
+                        {children}
+                      </main>
 
-                        <GlobalAnnouncement />
-                        <SupportChat />
-                        <BottomNav />
-                      </NotificationProvider>
-                    </PresenceProvider>
-                  </div>
-                </OnboardingWrapper>
-              </ProfileProvider>
-            ) : (
-              <main>{children}</main>
-            )}
+                      <GlobalAnnouncement />
+                      <SupportChat />
+                      <BottomNav />
+                    </NotificationProvider>
+                  </PresenceProvider>
+                </div>
+              </OnboardingWrapper>
+            </ProfileProvider>
           </GlobalLoadingProvider>
         </ThemeProvider>
       </body>

@@ -9,12 +9,11 @@ function pickFirstNonEmpty(values: Array<string | undefined>): string | null {
 
 export function resolveSupabaseUrl(): string {
   const url = pickFirstNonEmpty([
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://rqazxvcanqiurjlrtkpz.supabase.co",
-    process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL || "https://rqazxvcanqiurjlrtkpz.supabase.co",
-    process.env.PROJECT_URL || "https://rqazxvcanqiurjlrtkpz.supabase.co",
-    process.env.SUPABASE_URL || "https://rqazxvcanqiurjlrtkpz.supabase.co",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_H-y4099dnadUp2VPd2uRZg_G0vWdyJi"
-  ])
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL,
+    process.env.PROJECT_URL,
+    process.env.SUPABASE_URL,
+  ]) || "https://rqazxvcanqiurjlrtkpz.supabase.co"
 
   if (!url) {
     throw new Error(

@@ -1,12 +1,19 @@
-import { createClient as createBrowserClient } from '@supabase/supabase-js'
+import { createClient as createBrowserClient, type SupabaseClient } from '@supabase/supabase-js'
 import { resolveSupabaseAnonKey, resolveSupabaseUrl } from './env'
 
-export function createClient() {
+let supabaseInstance: SupabaseClient | null = null
+
+export function createClient(): SupabaseClient {
+  // Return cached instance if it exists
+  if (supabaseInstance) return supabaseInstance
+
   const supabaseUrl = resolveSupabaseUrl()
   const supabaseAnonKey = resolveSupabaseAnonKey()
 
-  return createBrowserClient(
+  supabaseInstance = createBrowserClient(
     supabaseUrl,
     supabaseAnonKey
   )
+
+  return supabaseInstance
 }
