@@ -1,14 +1,17 @@
 import type { NextConfig } from 'next'
 import path from 'node:path'
 
-const appRoot = path.join(process.cwd())
+const monorepoRoot = path.join(process.cwd(), '../../')
 
 const nextConfig: NextConfig = {
-  // Deployed to Vercel — server mode (no static export)
+  // Deployed to Vercel - server mode (no static export)
   images: {
     unoptimized: true,
   },
-  outputFileTracingRoot: appRoot,
+  outputFileTracingRoot: monorepoRoot,
+  turbopack: {
+    root: monorepoRoot,
+  },
   experimental: {
   },
 }

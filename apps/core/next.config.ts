@@ -1,15 +1,15 @@
 import type { NextConfig } from 'next'
 import path from 'node:path'
 
-const appRoot = path.join(/* turbopackIgnore: true */ process.cwd())
+const monorepoRoot = path.join(process.cwd(), '../../')
 
 const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  outputFileTracingRoot: appRoot,
+  outputFileTracingRoot: monorepoRoot,
   turbopack: {
-    root: appRoot,
+    root: monorepoRoot,
   },
 }
 
