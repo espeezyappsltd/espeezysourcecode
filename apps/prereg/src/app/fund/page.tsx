@@ -14,14 +14,16 @@ import { fetchLiveMetrics } from '@/services/launch'
 import { createDonationCheckout, trackDonationClick } from '@/services/donations'
 
 const FUND_FEATURES = [
+
   {
-    icon: <Cpu size={22} />,
-    title: 'AI Study Coach & Adaptive Learning Engine',
-    need: '$28,000',
-    tag: 'AI Infrastructure',
-    why: 'Running GPT-4o inference at scale for 100,000+ concurrent students requires dedicated GPU compute, fine-tuned model hosting, and significant API budget. We cannot use free tiers for production AI at this scale.',
-    deliverable: 'Personalised weekly study plans, real-time feedback on submissions, automatic workload balancing within groups.',
+    icon: <Globe size={22} />,
+    title: 'Free access to all platform features including kanban board and basic analytics features',
+    need: '$3,000',
+    tag: 'Localization',
+    why: 'Free-tier hosting cannot support the global infrastructure and translation management needed to offer Espeezy in multiple languages. Dedicated budget is required for localization engineers, translators, and multi-region hosting.', 
+    deliverable: 'English, Spanish, French, and more.',
   },
+
   {
     icon: <BookOpen size={22} />,
     title: 'LMS Integration Layer (Canvas, Blackboard, Nile)',
@@ -30,6 +32,23 @@ const FUND_FEATURES = [
     why: 'Official LTI 1.3 certification costs $3,500 per platform. Dedicated integration engineers, sandbox environments, and compliance audits for each LMS require real budget.',
     deliverable: 'One-click grade sync, single sign-on from your institution, automatic assignment import into Espeezy.',
   },
+  {
+    icon: <Smartphone size={22} />,
+    title: 'Mobile & Web Apps for Educators',
+    need: '$6,000',
+    tag: 'Mobile & Web',
+    why: 'Free-tier hosting cannot support high-traffic mobile apps and web services. Dedicated mobile and web app engineers and infrastructure are required.',
+    deliverable: 'One-click sign-in for educators, mobile app for students, and web service for educators and students.', 
+  },
+  {
+    icon: <Cpu size={22} />,
+    title: 'AI Study Coach & Adaptive Learning Engine',
+    need: '$28,000',
+    tag: 'AI Infrastructure',
+    why: 'Running GPT-4o inference at scale for 100,000+ concurrent students requires dedicated GPU compute, fine-tuned model hosting, and significant API budget. We cannot use free tiers for production AI at this scale.',
+    deliverable: 'Personalised weekly study plans, real-time feedback on submissions, automatic workload balancing within groups.',
+  },
+  
   {
     icon: <Globe size={22} />,
     title: 'Global CDN & Multi-Region Infrastructure',
@@ -53,15 +72,7 @@ const FUND_FEATURES = [
     tag: 'Analytics',
     why: 'Processing contribution heatmaps, velocity graphs, and anomaly detection in real-time for classrooms of 200+ students demands dedicated data pipeline infrastructure beyond what serverless free tiers allow.',
     deliverable: 'Educators see every student\'s daily contribution level, flag free-rider patterns automatically, and export grade-ready reports in one click.',
-  },
-  {
-    icon: <Smartphone size={22} />,
-    title: 'Native iOS & Android Applications',
-    need: '$35,000',
-    tag: 'Mobile',
-    why: 'Apple Developer Program ($99/yr), Google Play ($25 once), plus native app development, code signing, TestFlight cycles, and App Store review processes require dedicated engineering sprints.',
-    deliverable: 'Full Espeezy experience on mobile with push notifications, offline mode, camera document capture, and real-time sync.',
-  },
+  }
 ]
 
 const PRESETS = [5, 10, 25, 50, 100, 250]
@@ -77,9 +88,9 @@ const DONATION_PAYMENT_LINKS: Record<number, string> = {
 }
 
 const TESTIMONIALS = [
-  { name: 'Dr Amir Minal., University of Northampton', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
-  { name: 'Software Engineer. Mike T., Computer Science, University of Northampton', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
-  { name: 'Qualified Nurse. Joel K., University of Northampton', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
+  { name: 'Sr Lecturer, Dr. Amir Minal., University of Northampton', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
+  { name: 'Qualified Nurse. Joel K., University of Northampton', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
+  { name: 'Software Engineer. Mike T., Computer Science, University of Northampton', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
 
 function getDonationFallbackLink(amount?: number, email?: string) {
@@ -204,7 +215,7 @@ export default function FundPage() {
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pre-Register</Link>
           <Link href="/pricing" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pricing</Link>
-          <a href="#donate-form" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none' }}>Donate</a>
+          <a href="#donate-form" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none' }}>Fund</a>
         </div>
       </nav>
 
@@ -212,19 +223,19 @@ export default function FundPage() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
             <Heart size={14} color="#10b981" />
-            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Mission Support Fund</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Mission Support</span>
           </div>
         </motion.div>
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.8 }}
           style={{ fontSize: 'clamp(2.5rem, 7vw, 5rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, maxWidth: '800px', margin: '0 auto 1.5rem', color: '#0f172a' }}>
-          Help us build the future of{' '}
+          Build the future of{' '}
           <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             free education.
           </span>
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
           style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto 1rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65, fontWeight: 500 }}>
-          Espeezy shows exactly who did what in group work, so you can grade based on real data. Help us build the infrastructure needed to eliminate free-riding in education forever.
+          Espeezy shows exactly who did what in group work. Help speed up the develpment process to deliver features you find most useful. 100% goes to engineering and infrastructure.
         </motion.p>
       </section>
 
@@ -237,11 +248,11 @@ export default function FundPage() {
                 <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Secure Payment via Stripe</span>
               </div>
               <h2 style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.04em', margin: '0.875rem 0 0.5rem', lineHeight: 1.1, color: '#0f172a' }}>
-                Make a contribution.<br />
+                Make a move.<br />
                 <span style={{ color: '#10b981' }}>Any amount. Any time.</span>
               </h2>
               <p style={{ color: '#64748b', fontSize: '0.83rem', lineHeight: 1.55, marginBottom: '1.75rem' }}>
-                100% of donations go directly to engineering and infrastructure. No admin overhead.
+                100% directly to engineering and infrastructure. 
               </p>
 
               <form onSubmit={handleDonate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -304,7 +315,7 @@ export default function FundPage() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem', color: '#0f172a' }}>What your support builds</h2>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem', color: '#0f172a' }}>What cooking...</h2>
             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>These are real costs. Click any feature to see exactly what the money is for.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {FUND_FEATURES.map((f, i) => (
