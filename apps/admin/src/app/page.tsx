@@ -5,8 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Activity, Users, FolderKanban, MessageSquare, AlertCircle, RefreshCcw, Shield, Database, LayoutDashboard } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { formatDistanceToNow } from 'date-fns' // Nextjs standard, we'll just do manual if not installed
-import Link from 'next/link'
 
 // Mock chart data for visual density
 const MOCK_TREND = [
@@ -89,7 +87,7 @@ export default function AdminDashboard() {
           <Shield size={48} color="var(--brand)" style={{ margin: '0 auto 1.5rem' }} />
           <h2 style={{ margin: '0 0 0.5rem', fontWeight: 800 }}>Admin Login</h2>
           <p style={{ margin: '0 0 1.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>Authenticate to access the control center.</p>
-          
+
           {loginError && (
             <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '1rem', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
               {loginError}
@@ -104,10 +102,10 @@ export default function AdminDashboard() {
             setLoginError(null);
             const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
             if (signInError) {
-               setLoginError(signInError.message);
-               setLoading(false);
+              setLoginError(signInError.message);
+              setLoading(false);
             } else {
-               window.location.reload();
+              window.location.reload();
             }
           }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <input name="email" type="email" placeholder="Email" required style={{ padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', color: 'white', fontSize: '0.95rem' }} />
@@ -158,7 +156,7 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main style={{ flex: 1, padding: '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        
+
         {/* KPI Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
           <KpiCard icon={<Users size={20} />} label="Total Users" value={metrics?.total_users || 0} trend="+12% this week" />
@@ -168,7 +166,7 @@ export default function AdminDashboard() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-          
+
           {/* Chart Section */}
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '1.5rem', height: '400px', display: 'flex', flexDirection: 'column' }}>
             <h3 style={{ margin: '0 0 1.5rem', fontSize: '0.9rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -179,14 +177,14 @@ export default function AdminDashboard() {
                 <AreaChart data={MOCK_TREND} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--brand)" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var(--brand)" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="var(--brand)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--brand)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                   <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
                     itemStyle={{ color: 'white', fontSize: '0.8rem' }}
                   />
@@ -221,7 +219,7 @@ export default function AdminDashboard() {
               )}
             </div>
           </div>
-          
+
         </div>
       </main>
     </div>
