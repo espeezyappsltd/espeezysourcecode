@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { LaunchConfig, TimeLeft } from '../src/types/launch'
+import type { LaunchConfig, TimeLeft } from '../types/launch'
 import { fetchLaunchConfig, fetchLiveMetrics } from '../services/launch'
 
 const ZERO_TIME: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 }

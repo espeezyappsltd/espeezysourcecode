@@ -1,3 +1,0 @@
-// MOVED FROM src/context/ConnectivityContext.tsx
-
-// ...existing code from src/context/ConnectivityContext.tsx...

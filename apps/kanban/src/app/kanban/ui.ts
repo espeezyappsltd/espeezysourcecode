@@ -1,3 +1,0 @@
-// MOVED FROM src/types/ui.ts
-
-// ...existing code from src/types/ui.ts...

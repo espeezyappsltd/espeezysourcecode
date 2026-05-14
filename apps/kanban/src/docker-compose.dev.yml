@@ -1,0 +1,108 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# espeezy.com — Cloud Dev Stack
+#
+# Services:
+#   app    → Next.js dev server with hot reload (port 3000)
+#   caddy  → Reverse proxy + auto-HTTPS via Let's Encrypt (ports 80/443)
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#   docker compose -f docker-compose.dev.yml --profile edge up -d
+#   docker compose -f docker-compose.dev.yml logs -f app
+#   docker compose -f docker-compose.dev.yml restart app
+#
+# Environment:
+#   Copy .env.local to /opt/espeezy/.env.local before starting.
+#   Set CADDY_DOMAIN env var to your domain (e.g. dev.espeezy.com)
+#   or leave unset for plain HTTP on the VPS IP.
+# ──────────────────────────────────────────────────────────────────────────────
+name: Espeezy-App
+
+services:
+  # ── Next.js dev server ────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: Espeezy_App
+    restart: unless-stopped
+    command: >
+      sh -c "LOCK_HASH=\"$$(sha256sum /app/package-lock.json | awk '{print $$1}')\";
+      INSTALLED_HASH=\"$$(cat /app/node_modules/.package-lock.hash 2>/dev/null || true)\";
+      if [ ! -d /app/node_modules ] || [ \"$$LOCK_HASH\" != \"$$INSTALLED_HASH\" ]; then
+      echo '[boot] dependency drift detected; running npm ci...';
+      npm ci --prefer-offline --legacy-peer-deps;
+      echo \"$$LOCK_HASH\" > /app/node_modules/.package-lock.hash;
+      fi;
+      npm run dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      # Bind-mount the repo so agents editing files get instant hot reload
+      - .:/app:cached
+      # Preserve node_modules and .next from the build layer — don't overwrite
+      # with the (possibly empty) host directory
+      - node_modules:/app/node_modules
+      - next_cache:/app/.next
+    environment:
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      POLL_INTERVAL: "1000"
+      NODE_OPTIONS: "--max-old-space-size=2048"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    networks:
+      - espeezy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 90s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ── Caddy — auto-HTTPS reverse proxy ─────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: espeezy_caddy_cache
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3 QUIC
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      CADDY_DOMAIN: "${CADDY_DOMAIN:-localhost}"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    networks:
+      - espeezy-net
+    depends_on:
+      app:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  espeezy-net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1460
+
+volumes:
+  node_modules:
+  next_cache:
+  caddy_data:
+  caddy_config:
