@@ -22,6 +22,8 @@ const MOCK_TREND = [
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [needsLogin, setNeedsLogin] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
   const [metrics, setMetrics] = useState<any>(null)
   const [activityFeed, setActivityFeed] = useState<any[]>([])
   const router = useRouter()
@@ -35,10 +37,11 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       setError(null)
+      setNeedsLogin(false)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         // Not logged in
-        setError("Not authenticated. Please log in.")
+        setNeedsLogin(true)
         setLoading(false)
         return
       }
@@ -74,6 +77,45 @@ export default function AdminDashboard() {
     )
   }
 
+  if (needsLogin) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '2.5rem', borderRadius: '24px', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+          <Shield size={48} color="var(--brand)" style={{ margin: '0 auto 1.5rem' }} />
+          <h2 style={{ margin: '0 0 0.5rem', fontWeight: 800 }}>Admin Login</h2>
+          <p style={{ margin: '0 0 1.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>Authenticate to access the control center.</p>
+          
+          {loginError && (
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '1rem', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+              {loginError}
+            </div>
+          )}
+
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const email = (e.target as any).email.value;
+            const password = (e.target as any).password.value;
+            setLoading(true);
+            setLoginError(null);
+            const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+            if (signInError) {
+               setLoginError(signInError.message);
+               setLoading(false);
+            } else {
+               window.location.reload();
+            }
+          }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <input name="email" type="email" placeholder="Email" required style={{ padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', color: 'white', fontSize: '0.95rem' }} />
+            <input name="password" type="password" placeholder="Password" required style={{ padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', color: 'white', fontSize: '0.95rem' }} />
+            <button type="submit" style={{ padding: '0.85rem', background: 'var(--brand)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', marginTop: '0.5rem', fontSize: '0.95rem' }}>
+              Log In
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   if (error) {
     return (
       <div style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -81,9 +123,9 @@ export default function AdminDashboard() {
           <Shield size={48} color="#ef4444" style={{ margin: '0 auto 1rem' }} />
           <h2 style={{ margin: '0 0 0.5rem', fontWeight: 800, color: '#fca5a5' }}>Access Denied</h2>
           <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>{error}</p>
-          <Link href="/" onClick={() => window.location.reload()} style={{ display: 'inline-block', marginTop: '1.5rem', padding: '0.5rem 1rem', background: '#ef4444', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>
+          <button onClick={() => window.location.reload()} style={{ display: 'inline-block', marginTop: '1.5rem', padding: '0.5rem 1rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
             Return to Safety
-          </Link>
+          </button>
         </div>
       </div>
     )

