@@ -77,9 +77,9 @@ const DONATION_PAYMENT_LINKS: Record<number, string> = {
 }
 
 const TESTIMONIALS = [
-  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
-  { name: 'Kenji T., Computer Science, Tokyo', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
-  { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
+  { name: 'Dr Amir Minal., University of Northampton', text: 'Espeezy is what I have been waiting for: a tool that actually sees my students as individuals, not just a group grade.' },
+  { name: 'Software Engineer. Mike T., Computer Science, University of Northampton', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
+  { name: 'Qualified Nurse. Joel K., University of Northampton', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
 
 function getDonationFallbackLink(amount?: number, email?: string) {
