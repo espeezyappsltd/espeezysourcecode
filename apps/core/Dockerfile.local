@@ -1,0 +1,19 @@
+FROM node:24-alpine AS base
+
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm install --prefer-offline
+
+COPY . .
+
+EXPOSE 3000
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=development
+ENV WATCHPACK_POLLING=true
+ENV CHOKIDAR_USEPOLLING=true
+
+CMD ["npm", "run", "dev"]

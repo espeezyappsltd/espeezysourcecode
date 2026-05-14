@@ -1,0 +1,3 @@
+// MOVED FROM src/types/auth.ts
+
+// ...existing code from src/types/auth.ts...
