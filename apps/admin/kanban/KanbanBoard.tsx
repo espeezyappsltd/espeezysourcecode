@@ -219,16 +219,12 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 				))}
 			</div>
 			{isModalOpen && (
-				   <TaskModal
-					   task={selectedTask}
-					   onClose={() => setIsModalOpen(false)}
-					   // onTaskSaved removed: signature mismatch
-					   groupMembers={groupMembers}
-					   aria-modal="true"
-					   aria-labelledby="task-modal-title"
-					   role="dialog"
-					   tabIndex={-1}
-				   />
+				<TaskModal
+					task={selectedTask}
+					groupId={groupId}
+					onClose={() => setIsModalOpen(false)}
+					onRefresh={fetchTasks}
+				/>
 			)}
 		</div>
 	);
