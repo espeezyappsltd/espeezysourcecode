@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { fetchChatMessages, postChatPresence, sendChatMessage } from '@/services/chat'
+import { fetchChatMessages, postChatPresence, sendChatMessage } from '../services/chat'
 
 type ChatMessage = {
   id: string

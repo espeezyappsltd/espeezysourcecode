@@ -1,16 +1,6 @@
-export type TaskStatus = 'To Do' | 'In Progress' | 'In Review' | 'Done';
 
-export type Task = {
-  id: string;
-  group_id: string;
-  title: string;
-  description?: string;
-  status: TaskStatus;
-  assignees?: string[];
-  due_date?: string;
-  artifacts?: any;
-  category?: string;
-};
+// Use canonical types from src/types/database
+export type { Task, TaskStatus, TaskCategory, Artifact } from '../src/types/database';
 
 export type KanbanBoardProps = {
   groupId: string;

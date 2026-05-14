@@ -106,7 +106,11 @@ export default function LiveChatWidget({
   return (
     <>
       {newUserEvent && newUserEvent.username && (
-        <div style={{ position: 'fixed', right: '1rem', bottom: '5.5rem', zIndex: 1200, background: '#111827', color: '#f9fafb', border: '1px solid #374151', borderRadius: '10px', padding: '0.6rem 0.8rem', fontSize: '0.8rem', boxShadow: '0 6px 20px rgba(0,0,0,0.35)' }}>
+        <div 
+          style={{ position: 'fixed', right: '1rem', bottom: '5.5rem', zIndex: 1200, background: '#111827', color: '#f9fafb', border: '1px solid #374151', borderRadius: '10px', padding: '0.6rem 0.8rem', fontSize: '0.8rem', boxShadow: '0 6px 20px rgba(0,0,0,0.35)' }}
+          aria-live="polite"
+          role="status"
+        >
           {newUserEvent.username} joined live chat
         </div>
       )}
@@ -122,7 +126,11 @@ export default function LiveChatWidget({
             Chatting as <strong style={{ color: '#6366f1' }}>{username}</strong>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+          <div 
+            style={{ flex: 1, overflowY: 'auto', padding: '0.6rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}
+            aria-live="polite"
+            role="log"
+          >
             {orderedMessages.map((m) => (
               <div key={m.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '0.45rem 0.55rem' }}>
                 <div style={{ fontSize: '0.72rem', color: '#93c5fd', fontWeight: 700 }}>{m.username}</div>

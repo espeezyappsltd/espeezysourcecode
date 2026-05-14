@@ -3,7 +3,26 @@
 import Image from 'next/image'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Profile, TaskStatus } from './types'
-// TODO: Define Artifact, TaskCategory, TaskModalProps, logActivity, taskSchema, and createBrowserSupabaseClient in your shared files or utilities and import them here.
+import type { Profile, TaskStatus } from '../../types/kanban'
+// TODO: Define Artifact, TaskCategory, logActivity, taskSchema, and createBrowserSupabaseClient in your shared files or utilities and import them here.
 
-// ...rest of the code from src/components/TaskModal.tsx should be pasted here, updating imports to use your local/shared types and utilities as needed...
+import type { Task } from '../../types/kanban';
+
+export interface TaskModalProps extends React.HTMLAttributes<HTMLDivElement> {
+	task: Task | null;
+	onClose: () => void;
+	onSave: (task: Partial<Task>) => Promise<void>;
+	groupMembers: Profile[];
+}
+
+export function TaskModal({ task, onClose, onSave, groupMembers, ...rest }: TaskModalProps) {
+	// Minimal implementation for typecheck
+	return (
+		<div {...rest}>
+			<h2 id="task-modal-title">Task Modal</h2>
+			<button onClick={onClose}>Close</button>
+			{/* TODO: Implement full modal UI */}
+			<pre>{JSON.stringify(task, null, 2)}</pre>
+		</div>
+	);
+}

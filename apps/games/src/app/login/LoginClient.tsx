@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type CSSProperties, type ReactNode, useEffect } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
@@ -203,157 +203,240 @@ function AuthField({ label, children }: { label: string; children: ReactNode }) 
   )
 }
 
+function UpgradeRequired({ onSignOut }: { onSignOut: () => void }) {
+  return (
+    <AuthShell maxWidth="460px" centered>
+      <BrandHeader badgeLabel="pro" title="Games is a Pro feature" iconSize="3rem" />
+      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+        You&apos;re logged in, but Espeezy Games requires a <strong style={{ color: '#f59e0b' }}>Pro</strong> or <strong style={{ color: '#6366f1' }}>Premium</strong> account. Upgrade to unlock game-based learning, ranked leagues, and co-op challenges.
+      </p>
+      <a
+        href="https://espeezy.com/checkout"
+        style={{
+          display: 'block',
+          padding: '0.85rem',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
+          color: '#fff',
+          fontWeight: 800,
+          fontSize: '1rem',
+          textDecoration: 'none',
+          marginBottom: '1rem',
+          letterSpacing: '-0.01em',
+        }}
+      >
+        Upgrade to Pro →
+      </a>
+      <a
+        href="https://kanban.espeezy.com "
+        style={{
+          display: 'block',
+          padding: '0.85rem',
+          borderRadius: '12px',
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          color: '#fff',
+          fontWeight: 700,
+          fontSize: '0.9rem',
+          textDecoration: 'none',
+          marginBottom: '1.5rem',
+        }}
+      >
+        Go to Dashboard
+      </a>
+      <button
+        type="button"
+        onClick={onSignOut}
+        style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', cursor: 'pointer' }}
+      >
+        Sign out
+      </button>
+    </AuthShell>
+  );
+}
+
+function AuthForm({
+  mode,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  legalAccepted,
+  setLegalAccepted,
+  loading,
+  handleSubmit,
+  handleReset,
+  resetting,
+}: {
+  mode: AuthMode;
+  email: string;
+  setEmail: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+  legalAccepted: boolean;
+  setLegalAccepted: (v: boolean) => void;
+  loading: boolean;
+  handleSubmit: (e: React.FormEvent) => void;
+  handleReset: (e: React.MouseEvent) => void;
+  resetting: boolean;
+}) {
+  return (
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <AuthField label="Email">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="you@university.edu"
+          style={styles.input}
+        />
+      </AuthField>
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+          <label style={styles.fieldLabel}>Password</label>
+          {mode === 'signin' && (
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={resetting}
+              style={{ background: 'none', border: 'none', color: '#6366f1', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+            >
+              {resetting ? 'Sending…' : 'Forgot password?'}
+            </button>
+          )}
+        </div>
+        <input
+          type="password"
+          required
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          placeholder="••••••••"
+          style={styles.input}
+        />
+      </div>
+      {mode === 'signup' && (
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', lineHeight: 1.5 }}>
+          <input
+            type="checkbox"
+            checked={legalAccepted}
+            onChange={(e) => setLegalAccepted(e.target.checked)}
+            style={{ marginTop: '0.1rem' }}
+          />
+          <span>
+            I agree to the <Link href="/terms" style={{ color: '#a5b4fc' }}>Terms</Link> and <Link href="/privacy" style={{ color: '#a5b4fc' }}>Privacy Policy</Link>.
+          </span>
+        </label>
+      )}
+      <button
+        type="submit"
+        disabled={loading}
+        style={{
+          ...styles.primaryButton,
+          background: loading ? 'rgba(99,102,241,0.4)' : 'linear-gradient(135deg,#6366f1,#f59e0b)',
+          cursor: loading ? 'wait' : 'pointer',
+        }}
+      >
+        {loading ? (mode === 'signup' ? 'Creating account…' : 'Signing in…') : (mode === 'signup' ? 'Create Account' : 'Sign In & Play')}
+      </button>
+    </form>
+  );
+}
+
 export default function LoginClient() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const next = searchParams.get('next') || '/'
-  const needsUpgrade = searchParams.get('upgrade') === '1'
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') || '/';
+  const needsUpgrade = searchParams.get('upgrade') === '1';
 
-  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv()
-  const configMissing = !supabaseUrl || !supabaseKey
+  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv();
+  const configMissing = !supabaseUrl || !supabaseKey;
 
-  const [mode, setMode] = useState<AuthMode>('signin')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [legalAccepted, setLegalAccepted] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [resetSent, setResetSent] = useState(false)
-  const [resetting, setResetting] = useState(false)
+  const [mode, setMode] = useState<AuthMode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
-  function switchMode(nextMode: AuthMode) {
-    setMode(nextMode)
-    setError('')
-    setSuccess('')
-  }
+  const switchMode = (nextMode: AuthMode) => {
+    setMode(nextMode);
+    setError('');
+    setSuccess('');
+  };
 
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    router.replace('/login')
-  }
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.replace('/login');
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess('')
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
     if (mode === 'signup') {
       if (!legalAccepted) {
-        setError('Please accept the terms and privacy policy to create your account.')
-        setLoading(false)
-        return
+        setError('Please accept the terms and privacy policy to create your account.');
+        setLoading(false);
+        return;
       }
-
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/login`,
         },
-      })
-
+      });
       if (signUpError) {
-        setError(signUpError.message)
-        setLoading(false)
-        return
+        setError(signUpError.message);
+        setLoading(false);
+        return;
       }
-
       if (data.session) {
-        router.replace(next)
-        return
+        router.replace(next);
+        return;
       }
-
-      setSuccess('Account created. Check your email to confirm your account, then sign in.')
-      setMode('signin')
-      setPassword('')
-      setLoading(false)
-      return
+      setSuccess('Account created. Check your email to confirm your account, then sign in.');
+      setMode('signin');
+      setPassword('');
+      setLoading(false);
+      return;
     }
-
-    const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (authError) {
-      setError(authError.message)
-      setLoading(false)
-      return
+      setError(authError.message);
+      setLoading(false);
+      return;
     }
+    router.replace(next);
+  };
 
-    // Middleware will re-check tier and redirect to /login?upgrade=1 if still free
-    router.replace(next)
-  }
-
-  async function handleReset(e: React.MouseEvent) {
-    e.preventDefault()
+  const handleReset = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!email.trim()) {
-      setError('Enter your email first, then click Reset Password.')
-      return
+      setError('Enter your email first, then click Reset Password.');
+      return;
     }
-    setResetting(true)
-    setError('')
+    setResetting(true);
+    setError('');
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
-    })
-    setResetting(false)
+    });
+    setResetting(false);
     if (resetError) {
-      setError(resetError.message)
+      setError(resetError.message);
     } else {
-      setResetSent(true)
+      setResetSent(true);
     }
-  }
+  };
 
   if (needsUpgrade) {
-    return (
-      <AuthShell maxWidth="460px" centered>
-        <BrandHeader badgeLabel="pro" title="Games is a Pro feature" iconSize="3rem" />
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-          You&apos;re logged in, but Espeezy Games requires a <strong style={{ color: '#f59e0b' }}>Pro</strong> or <strong style={{ color: '#6366f1' }}>Premium</strong> account. Upgrade to unlock game-based learning, ranked leagues, and co-op challenges.
-        </p>
-        <a
-          href="https://espeezy.com/checkout"
-          style={{
-            display: 'block',
-            padding: '0.85rem',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg,#6366f1,#f59e0b)',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: '1rem',
-            textDecoration: 'none',
-            marginBottom: '1rem',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          Upgrade to Pro →
-        </a>
-
-        <a
-          href="https://kanban.espeezy.com "
-          style={{
-            display: 'block',
-            padding: '0.85rem',
-            borderRadius: '12px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            textDecoration: 'none',
-            marginBottom: '1.5rem',
-          }}
-        >
-          Go to Dashboard
-        </a>
-
-        <button
-          type="button"
-          onClick={handleSignOut}
-          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', cursor: 'pointer' }}
-        >
-          Sign out
-        </button>
-      </AuthShell>
-    )
+    return <UpgradeRequired onSignOut={handleSignOut} />;
   }
 
   return (
@@ -363,9 +446,7 @@ export default function LoginClient() {
         title={mode === 'signup' ? 'Create your account' : 'Sign in to play'}
         subtitle={<>Requires a <strong style={{ color: '#f59e0b' }}>Pro</strong> Espeezy account.</>}
       />
-
       <ModeToggle mode={mode} onChange={switchMode} />
-
       {error ? <Notice tone="error">{error}</Notice> : null}
       {configMissing ? (
         <Notice tone="error">
@@ -374,83 +455,29 @@ export default function LoginClient() {
       ) : null}
       {success ? <Notice tone="info">{success}</Notice> : null}
       {resetSent ? <Notice tone="info">Recovery link sent - check your inbox.</Notice> : null}
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <AuthField label="Email">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="you@university.edu"
-            style={styles.input}
-          />
-        </AuthField>
-
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-            <label style={styles.fieldLabel}>Password</label>
-            {mode === 'signin' && (
-              <button
-                type="button"
-                onClick={handleReset}
-                disabled={resetting}
-                style={{ background: 'none', border: 'none', color: '#6366f1', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
-              >
-                {resetting ? 'Sending…' : 'Forgot password?'}
-              </button>
-            )}
-          </div>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="••••••••"
-            style={styles.input}
-          />
-        </div>
-
-        {mode === 'signup' && (
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', lineHeight: 1.5 }}>
-            <input
-              type="checkbox"
-              checked={legalAccepted}
-              onChange={(e) => setLegalAccepted(e.target.checked)}
-              style={{ marginTop: '0.1rem' }}
-            />
-            <span>
-              I agree to the <Link href="/terms" style={{ color: '#a5b4fc' }}>Terms</Link> and <Link href="/privacy" style={{ color: '#a5b4fc' }}>Privacy Policy</Link>.
-            </span>
-          </label>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            ...styles.primaryButton,
-            background: loading ? 'rgba(99,102,241,0.4)' : 'linear-gradient(135deg,#6366f1,#f59e0b)',
-            cursor: loading ? 'wait' : 'pointer',
-          }}
-        >
-          {loading ? (mode === 'signup' ? 'Creating account…' : 'Signing in…') : (mode === 'signup' ? 'Create Account' : 'Sign In & Play')}
-        </button>
-      </form>
-
+      <AuthForm
+        mode={mode}
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        legalAccepted={legalAccepted}
+        setLegalAccepted={setLegalAccepted}
+        loading={loading}
+        handleSubmit={handleSubmit}
+        handleReset={handleReset}
+        resetting={resetting}
+      />
       <p style={{ ...styles.quietText, marginTop: '1.5rem' }}>
         {mode === 'signup' ? 'Already have an account? ' : 'Need a new account? '}
         <button
           type="button"
-          onClick={() => {
-            switchMode(mode === 'signup' ? 'signin' : 'signup')
-          }}
+          onClick={() => switchMode(mode === 'signup' ? 'signin' : 'signup')}
           style={{ background: 'none', border: 'none', color: '#a5b4fc', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem', padding: 0 }}
         >
           {mode === 'signup' ? 'Sign in' : 'Create one now'}
         </button>
       </p>
-
       <p style={{ ...styles.quietText, marginTop: '0.5rem', fontSize: '0.78rem' }}>
         Need Pro to play?{' '}
         <a href="https://espeezy.com/checkout" style={{ color: '#f59e0b', fontWeight: 700 }}>
@@ -462,5 +489,5 @@ export default function LoginClient() {
         </a>
       </p>
     </AuthShell>
-  )
+  );
 }

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import type { TimeLeft } from '@shared-types/launch'
+import type { TimeLeft } from '../src/types/launch'
 
 function CountBlock({ value, label }: { value: number; label: string }) {
   return (

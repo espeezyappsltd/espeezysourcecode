@@ -63,6 +63,11 @@ export async function middleware(request: NextRequest) {
 
   // Games is a Pro feature - check the user's tier in profiles table
   // If the user has no pro/premium tier, redirect to upgrade page
+  // Allowlist for dev/test accounts to bypass Pro check
+  const devBypassEmails = ['kedogosospeter36@gmail.com']
+  if (user.email && devBypassEmails.includes(user.email)) {
+    return supabaseResponse
+  }
   let tier = 'free'
   try {
     const { data: profile } = await supabase

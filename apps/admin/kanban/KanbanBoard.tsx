@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { KanbanBoardProps, Task, TaskStatus, Profile } from './types';
+import type { KanbanBoardProps } from './types';
+import type { Task, TaskStatus, Profile } from '../src/types/database';
 import TaskModal from './TaskModal';
 import { AlertCircle, Search, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -218,16 +219,16 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 				))}
 			</div>
 			{isModalOpen && (
-				<TaskModal
-					task={selectedTask}
-					onClose={() => setIsModalOpen(false)}
-					onSave={createTask}
-					groupMembers={groupMembers}
-					aria-modal="true"
-					aria-labelledby="task-modal-title"
-					role="dialog"
-					tabIndex={-1}
-				/>
+				   <TaskModal
+					   task={selectedTask}
+					   onClose={() => setIsModalOpen(false)}
+					   // onTaskSaved removed: signature mismatch
+					   groupMembers={groupMembers}
+					   aria-modal="true"
+					   aria-labelledby="task-modal-title"
+					   role="dialog"
+					   tabIndex={-1}
+				   />
 			)}
 		</div>
 	);

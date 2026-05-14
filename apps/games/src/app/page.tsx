@@ -1,49 +1,12 @@
-'use client'
+"use client"
 
-import PreregFooter from '@/components/PreregFooter'
 import LiveChatWidget from '@/components/LiveChatWidget'
+import CategoriesGamesSection from '@/components/CategoriesGamesSection'
 import { useGamesLanding } from '@/hooks/useGamesLanding'
+import { useCategoriesWithGames } from '@/hooks/useCategoriesWithGames'
+import features from '@/data/features.json'
 
-const FEATURES = [
-  {
-    icon: '',
-    title: 'Skirmish Mode',
-    description:
-      'Challenge peers to real-time knowledge duels. Answer questions faster and more accurately to claim victory and climb the global leaderboard.',
-  },
-  {
-    icon: '',
-    title: 'Ranked Leagues',
-    description:
-      'Seasonal ranked competition across subjects. Earn badges, unlock cosmetics, and prove mastery from Bronze all the way to Grandmaster.',
-  },
-  {
-    icon: '',
-    title: 'Co-op Challenges',
-    description:
-      'Team up with classmates to tackle collaborative boss battles. Shared goals, shared glory. Group learning that actually sticks.',
-  },
-  {
-    icon: '',
-    title: 'XP & Progress Tracking',
-    description:
-      'Every match earns XP tied to your academic profile. Watch your subject mastery grow with detailed post-game breakdowns.',
-  },
-  {
-    icon: '',
-    title: 'Adaptive Difficulty',
-    description:
-      'Our AI adjusts question difficulty in real time based on your performance, keeping every game challenging but fair.',
-  },
-  {
-    icon: '',
-    title: 'Global Tournaments',
-    description:
-      'Monthly inter-school tournaments open to all students. Represent your institution and compete on the world stage.',
-  },
-]
-
-export default function GamesPage() {
+export default function HomePage() {
   const {
     email,
     handleLogout,
@@ -52,6 +15,8 @@ export default function GamesPage() {
     status,
     user,
   } = useGamesLanding()
+
+  const { categories, loading, error } = useCategoriesWithGames();
 
   return (
     <main style={{ minHeight: '100vh', background: '#ffffff', color: '#0f172a' }}>
@@ -75,71 +40,6 @@ export default function GamesPage() {
       >
         Skip to content
       </a>
-
-      {/* Nav */}
-      <nav
-        aria-label="Main navigation"
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(15, 23, 42, 0.08)',
-          padding: '0 clamp(1rem, 4vw, 2.5rem)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '60px',
-        }}
-      >
-        <a
-          href="https://espeezy.com"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
-          aria-label="Back to Espeezy"
-        >
-          <span style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a' }}>
-            espeezy
-          </span>
-          <span
-            style={{
-              fontSize: '0.65rem',
-              fontWeight: 700,
-              padding: '2px 6px',
-              borderRadius: '4px',
-              background: 'linear-gradient(135deg, #059669, #10b981)',
-              color: '#fff',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-            }}
-          >
-            games
-          </span>
-        </a>
-        <a
-          href="https://espeezy.com"
-          style={{
-            fontSize: '0.85rem',
-            color: '#64748b',
-            textDecoration: 'none',
-            padding: '0.4rem 1rem',
-            border: '1px solid rgba(15, 23, 42, 0.12)',
-            borderRadius: '8px',
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#0f172a'
-            e.currentTarget.style.borderColor = 'rgba(15, 23, 42, 0.3)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#64748b'
-            e.currentTarget.style.borderColor = 'rgba(15, 23, 42, 0.12)'
-          }}
-        >
-          ← Back to Espeezy
-        </a>
-      </nav>
-
       <section
         aria-label="Account access"
         style={{
@@ -188,25 +88,52 @@ export default function GamesPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
-                Sign in once to sync your Games profile with your Espeezy account.
-              </p>
-              <a
-                href="https://espeezy.com/login"
-                style={{
-                  padding: '0.55rem 0.9rem',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(15, 23, 42, 0.22)',
-                  background: 'transparent',
-                  color: '#0f172a',
-                  fontWeight: 700,
-                  fontSize: '0.8rem',
-                  textDecoration: 'none',
-                  display: 'inline-block',
-                }}
-              >
-                Sign In
-              </a>
+              <form onSubmit={handleNotify} style={{ display: 'flex', gap: '0.7rem', alignItems: 'center', width: '100%' }}>
+                <label htmlFor="games-email" className="sr-only">Email address</label>
+                <input
+                  id="games-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email to get notified"
+                  style={{
+                    flex: 1,
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    padding: '0.5rem 1rem',
+                    fontSize: '1rem',
+                  }}
+                  required
+                  autoComplete="email"
+                  aria-describedby={status === 'error' ? 'notify-error' : undefined}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    background: '#059669',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.5rem 1.2rem',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                  }}
+                  disabled={status === 'loading'}
+                >
+                  Notify Me
+                </button>
+              </form>
+              {status === 'error' && (
+                <p id="notify-error" role="alert" aria-live="assertive" style={{ width: '100%', textAlign: 'center', color: '#dc2626', fontSize: '0.85rem' }}>
+                  Something went wrong. Please try again.
+                </p>
+              )}
+              {status === 'done' && (
+                <p role="status" aria-live="polite" style={{ width: '100%', textAlign: 'center', color: '#059669', fontSize: '0.85rem' }}>
+                  You’ll be notified when games launch!
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -340,7 +267,7 @@ export default function GamesPage() {
             </button>
             {status === 'error' && (
               <p role="alert" style={{ width: '100%', textAlign: 'center', color: '#dc2626', fontSize: '0.85rem' }}>
-                Something went wrong. Try again or email us at hello@espeezy.com
+                Something went wrong. Try again or email us at support@espeezy.com
               </p>
             )}
           </form>
@@ -369,63 +296,9 @@ export default function GamesPage() {
         </div>
       </section>
 
-      {/* Features grid */}
-      <section
-        aria-labelledby="features-heading"
-        style={{
-          padding: 'clamp(3rem, 6vw, 5rem) clamp(1rem, 5vw, 2.5rem)',
-          maxWidth: '1100px',
-          margin: '0 auto',
-        }}
-      >
-        <h2
-          id="features-heading"
-          style={{
-            fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
-            fontWeight: 800,
-            textAlign: 'center',
-            marginBottom: '3rem',
-            color: '#0f172a',
-          }}
-        >
-          What to expect
-        </h2>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '1.5rem',
-          }}
-        >
-          {FEATURES.map(({ icon, title, description }) => (
-            <article
-              key={title}
-              style={{
-                background: 'rgba(16, 185, 129, 0.04)',
-                border: '1px solid rgba(16, 185, 129, 0.15)',
-                borderRadius: '16px',
-                padding: '1.75rem',
-                transition: 'border-color 0.2s, background 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget
-                el.style.borderColor = 'rgba(16, 185, 129, 0.4)'
-                el.style.background = 'rgba(16, 185, 129, 0.12)'
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget
-                el.style.borderColor = 'rgba(16, 185, 129, 0.15)'
-                el.style.background = 'rgba(16, 185, 129, 0.04)'
-              }}
-            >
-              {/* Removed icon */}
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#0f172a' }}>{title}</h3>
-              <p style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6 }}>{description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      {/* Dynamic categories/games section */}
+      <CategoriesGamesSection categories={categories} loading={loading} error={error} />
 
       {/* CTA */}
       <section
@@ -442,7 +315,7 @@ export default function GamesPage() {
           Join thousands of students already on the Espeezy early-access list and be first to play when Games launches.
         </p>
         <a
-          href="https://espeezy.com/preregister"
+          href="https://espeezy.com"
           style={{
             display: 'inline-block',
             padding: '0.9rem 2.25rem',
@@ -456,10 +329,27 @@ export default function GamesPage() {
         >
           Get Early Access →
         </a>
+
+        {/* view features */}
+        <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '600px', margin: '3rem auto 0' }}>
+          {features.map((feature) => (
+            <div key={feature.title} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ width: '1.5rem', height: '1.5rem', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.9rem', flexShrink: 0 }}>
+                ✓
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, color: '#0f172a' }}>{feature.title}</div>
+                <div style={{ color: '#475569', fontSize: '0.9rem' }}>{feature.description}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+
+        
       </section>
 
       {user && <LiveChatWidget appScope='games' user={user} />}
-      <PreregFooter />
     </main>
   )
 }
