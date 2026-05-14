@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { KanbanBoardProps } from './types';
-import type { Task, TaskStatus, Profile } from '../src/types/database';
+import type { Task, TaskStatus, Profile } from '@/types';
 import TaskModal from './TaskModal';
 import { AlertCircle, Search, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
