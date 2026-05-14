@@ -1,4 +1,4 @@
-﻿
+
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -8,6 +8,7 @@ import { KanbanBoardProps } from '@/types/ui';
 import TaskModal from './TaskModal';
 import TeamChat from './TeamChat';
 import { AlertCircle, RefreshCw, CloudOff } from 'lucide-react';
+import { fetchGroupTasks, fetchGroupMembers, createTask as createTaskApi, updateTask as updateTaskApi } from '@/services/dashboard';
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done'];
 
@@ -36,14 +37,10 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     setLoading(true);
     setError(null);
     try {
-      const [tasksRes, membersRes] = await Promise.all([
-        fetch(`/api/kanban/tasks?group_id=${groupId}`),
-        fetch(`/api/kanban/profiles?group_id=${groupId}`)
+      const [tasks, profiles] = await Promise.all([
+        fetchGroupTasks(groupId),
+        fetchGroupMembers(groupId)
       ]);
-      const { tasks, error: taskError } = await tasksRes.json();
-      const { profiles, error: memberError } = await membersRes.json();
-      if (taskError) throw new Error(taskError);
-      if (memberError) throw new Error(memberError);
       setTasks(tasks || []);
       setGroupMembers(profiles || []);
     } catch (e: any) {
@@ -62,13 +59,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/kanban/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task)
-      });
-      const { task: newTask, error } = await res.json();
-      if (error) throw new Error(error);
+      const newTask = await createTaskApi(task);
       setTasks(prev => [...prev, newTask]);
     } catch (e: any) {
       setError(e.message || 'Failed to create task.');
@@ -81,13 +72,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/kanban/tasks/${taskId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-      const { task: updatedTask, error } = await res.json();
-      if (error) throw new Error(error);
+      const updatedTask = await updateTaskApi(taskId, { status: newStatus });
       setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
     } catch (e: any) {
       setError(e.message || 'Failed to update task.');

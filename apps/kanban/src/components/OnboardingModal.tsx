@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { 
@@ -24,13 +24,24 @@ const PRESET_AVATARS = [
 ]
 
 import { OnboardingModalProps } from '@/types/ui'
+import { useProfile } from '@/context/ProfileContext'
 
 export default function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
   const [step, setStep] = useState(1)
   const [fullName, setFullName] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState('')
   const [saving, setSaving] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { refreshProfile, setProfile } = useProfile()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const db = createBrowserSupabaseClient()
+
+  if (!mounted) return null
+
 
   const handleNext = async () => {
     if (step === 1 && !fullName) return
@@ -53,17 +64,36 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
   }
 
   const saveIdentity = async () => {
+    if (user.id === '00000000-0000-0000-0000-000000000000') {
+      setSaving(true)
+      // Local-only update for mock user
+      setProfile((prev: any) => ({
+        ...prev,
+        full_name: fullName,
+        avatar_url: selectedAvatar
+      }))
+      setTimeout(() => {
+        setSaving(false)
+        handleNext()
+      }, 500)
+      return
+    }
+
     setSaving(true)
     const { error } = await db
       .from('profiles')
-      .update({ 
+      .upsert({ 
+        id: user.id,
         full_name: fullName, 
-        avatar_url: selectedAvatar 
+        avatar_url: selectedAvatar,
+        updated_at: new Date().toISOString()
       })
-      .eq('id', user.id)
     
     setSaving(false)
-    if (!error) handleNext()
+    if (!error) {
+      await refreshProfile()
+      handleNext()
+    }
   }
 
   return (

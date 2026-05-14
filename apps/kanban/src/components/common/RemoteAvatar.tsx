@@ -44,11 +44,13 @@ export default function RemoteAvatar({ src, alt, size, fallback, style, imgStyle
         <Image
           src={normalized}
           alt={alt}
+          width={size}
+          height={size}
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', ...imgStyle }}
+          style={{ objectFit: 'cover', ...imgStyle }}
         />
       ) : (
         fallback

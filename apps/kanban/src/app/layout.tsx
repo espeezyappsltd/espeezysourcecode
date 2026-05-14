@@ -59,8 +59,8 @@ export default async function RootLayout({
             <ProfileProvider userId={user.id} initialProfile={profile as any}>
               <OnboardingWrapper profile={profile as any} user={user as any}>
                 <div className="dashboard-layout">
-                  <PresenceProvider user={user as any}>
-                    <NotificationProvider>
+                  <NotificationProvider>
+                    <PresenceProvider user={user as any}>
                       <Sidebar user={user as any} />
 
                       <main className="main-content">
@@ -71,8 +71,8 @@ export default async function RootLayout({
                       <GlobalAnnouncement />
                       <SupportChat />
                       <BottomNav />
-                    </NotificationProvider>
-                  </PresenceProvider>
+                    </PresenceProvider>
+                  </NotificationProvider>
                 </div>
               </OnboardingWrapper>
             </ProfileProvider>

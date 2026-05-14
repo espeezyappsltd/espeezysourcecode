@@ -6,6 +6,9 @@
   "engines": {
     "node": ">=22.0.0"
   },
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "dev:prereg": "npm --prefix apps/prereg run dev",

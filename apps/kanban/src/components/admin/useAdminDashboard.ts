@@ -15,20 +15,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { db } from '@/lib/firebase'
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  getDoc, 
-  doc, 
-  updateDoc, 
-  onSnapshot, 
-  orderBy, 
-  limit,
-  getCountFromServer
-} from 'firebase/firestore'
+import { db, collection, query, where, getDocs, getDoc, doc, updateDoc, onSnapshot, orderBy, limit, getCountFromServer, selectCols } from '@/lib/db-client'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
 import type {
@@ -136,7 +123,7 @@ export function useAdminDashboard() {
         getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'pro'))),
         getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'premium'))),
         getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'lifetime'))),
-        getDocs(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(8))),
+        getDocs(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(8), selectCols('id, full_name, avatar_url, role, created_at'))),
         getDocs(collection(db, 'platform_config'))
       ])
 
@@ -146,12 +133,12 @@ export function useAdminDashboard() {
       const lifetimeUsers = lifetimeUsersSnap.data().count
 
       // Convert the config rows array into a key-indexed map
-      const configMap = configSnap.docs.reduce<PlatformConfig>(
-        (acc, doc) => {
+      const configMap = configSnap.docs.reduce(
+        (acc: PlatformConfig, doc: any) => {
           const item = doc.data() as { key: string } & ConfigEntry
           return { ...acc, [item.key]: item }
         },
-        {},
+        {} as PlatformConfig,
       )
 
       // --- Metrics Calculation (simple demo logic, replace with real formulas as needed) ---
@@ -175,7 +162,7 @@ export function useAdminDashboard() {
         cac,
         nrr,
       })
-      setRecentUsers(recentSnap.docs.map(d => ({ id: d.id, ...d.data() } as unknown as RecentUser)))
+      setRecentUsers(recentSnap.docs.map((d: any) => ({ id: d.id, ...d.data() } as unknown as RecentUser)))
       setConfig(configMap)
     } catch (err) {
       console.error('Fetch admin data error:', err instanceof Error ? err.message : err)
@@ -197,8 +184,8 @@ export function useAdminDashboard() {
     })
 
     // New Profile listener
-    const profileUnsub = onSnapshot(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(1)), (snap) => {
-      snap.docChanges().forEach(change => {
+    const profileUnsub = onSnapshot(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(1)), (snap: any) => {
+      snap.docChanges().forEach((change: any) => {
         if (change.type === 'added') {
           addToast('Institutional Event', 'User registration detected. Refreshing terminal...', 'success')
           fetchAdminData()

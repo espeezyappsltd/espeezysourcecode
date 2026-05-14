@@ -50,7 +50,7 @@ export async function updateUserGameStats(userId: string, xpEarned: number, won:
     const adminDb = getAdminDb()
     const { data: currentStats } = await adminDb
       .from('user_game_stats')
-      .select('*')
+      .select('total_xp, wins, games_played')
       .eq('user_id', userId)
       .single()
 

@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { usePresence, useSyncedList, useSyncedObject } from '@/lib/realtime-provider'
-import { ref, update, set, remove, push, onValue } from 'firebase/database'
-import { database } from '@/lib/firebase'
 import { 
   Trophy, 
   Crown, 

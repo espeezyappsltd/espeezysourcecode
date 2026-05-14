@@ -34,7 +34,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     try {
       const { data, error } = await db
         .from('notifications')
-        .select('id, type, title, message, link, read, created_at, metadata')
+        .select('id, type, title, message, read, created_at, metadata')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(20)

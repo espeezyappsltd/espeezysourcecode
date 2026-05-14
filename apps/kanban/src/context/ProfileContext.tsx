@@ -36,11 +36,15 @@ export function ProfileProvider({
     const currentUserId = user?.id || initialUserId
     if (!currentUserId) return
 
+    if (currentUserId === '00000000-0000-0000-0000-000000000000') {
+      return // Skip DB fetch for mock user
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', currentUserId)
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Profile refresh error:', error.message)
@@ -97,11 +101,16 @@ export function ProfileProvider({
     let active = true
 
     const loadProfile = async () => {
+      if (currentUserId === '00000000-0000-0000-0000-000000000000') {
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', currentUserId)
-        .single()
+        .maybeSingle()
 
       if (!active) return
 

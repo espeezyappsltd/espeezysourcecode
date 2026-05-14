@@ -3,15 +3,7 @@
 import { useState, useRef, useEffect, type CSSProperties } from 'react'
 import { Bell, Check, Clock, ExternalLink, Inbox } from 'lucide-react'
 import { useNotifications } from './NotificationProvider'
-import { db, auth } from '@/lib/firebase'
-import { 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  addDoc, 
-  collection, 
-  setDoc 
-} from 'firebase/firestore'
+import { db, auth, doc, updateDoc, deleteDoc, addDoc, collection, setDoc } from '@/lib/db-client'
 import { Notification } from '@/types/ui'
 
 export default function NotificationBell() {

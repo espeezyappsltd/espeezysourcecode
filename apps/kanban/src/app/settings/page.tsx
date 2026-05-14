@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { storage } from '@/lib/firebase'
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL 
-} from 'firebase/storage'
+import { auth, storage, ref, uploadBytes, getDownloadURL } from '@/lib/db-client'
 import {
   Settings, Save, CheckCircle2, Shield, Trash2,
   Key, AlertTriangle, X, Palette as PaletteIcon,

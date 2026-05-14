@@ -27,8 +27,17 @@ export async function getAuthUser() {
 }
 
 export async function fetchProfileById(userId: string) {
+  if (userId === '00000000-0000-0000-0000-000000000000') {
+    return {
+      id: userId,
+      full_name: 'Test User',
+      subscription_plan: 'pro',
+      group_id: '00000000-0000-0000-0000-000000000000',
+      theme_config: { palette: 'Google Light' }
+    } as unknown as Profile
+  }
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('*').eq('id', userId).single()
+  const { data, error } = await db.from('profiles').select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen').eq('id', userId).maybeSingle()
   if (error) throw error
   return data as Profile
 }
@@ -40,8 +49,20 @@ export async function updateProfileById(userId: string, updates: Record<string, 
 }
 
 export async function fetchGroupById(groupId: string) {
+  if (groupId === '00000000-0000-0000-0000-000000000000') {
+    return {
+      id: groupId,
+      name: 'Mock Group',
+      module_code: 'MOCK101',
+      is_encrypted: false,
+      description: 'This is a mock group for development.',
+      rules: 'Be kind.',
+      capacity: 10,
+      created_at: new Date().toISOString()
+    } as unknown as Group
+  }
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('groups').select('*').eq('id', groupId).single()
+  const { data, error } = await db.from('groups').select('id, name, module_code, is_encrypted, description, rules, capacity, created_at').eq('id', groupId).maybeSingle()
   if (error) throw error
   return data as Group
 }
@@ -54,14 +75,14 @@ export async function updateGroupById(groupId: string, updates: Record<string, u
 
 export async function fetchGroupsOrderedByName() {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('groups').select('*').order('name', { ascending: true })
+  const { data, error } = await db.from('groups').select('id, name, module_code, is_encrypted, description, rules, capacity, created_at').order('name', { ascending: true })
   if (error) throw error
   return (data ?? []) as Group[]
 }
 
 export async function fetchGroupMembers(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('*').eq('group_id', groupId)
+  const { data, error } = await db.from('profiles').select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen').eq('group_id', groupId)
   if (error) throw error
   return (data ?? []) as Profile[]
 }
@@ -70,7 +91,7 @@ export async function fetchGroupMembersByScore(groupId: string) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('profiles')
-    .select('*')
+    .select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen')
     .eq('group_id', groupId)
     .order('total_score', { ascending: false })
   if (error) throw error
@@ -82,14 +103,14 @@ export async function fetchProfilesByIds(ids: string[]) {
   if (safeIds.length === 0) return [] as Profile[]
 
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('*').in('id', safeIds)
+  const { data, error } = await db.from('profiles').select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen').in('id', safeIds)
   if (error) throw error
   return (data ?? []) as Profile[]
 }
 
 export async function fetchGroupTasks(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('tasks').select('*').eq('group_id', groupId)
+  const { data, error } = await db.from('tasks').select('id, title, description, status, category, assignees, group_id, is_coding_task, due_date, created_at').eq('group_id', groupId)
   if (error) throw error
   return (data ?? []) as Task[]
 }
@@ -97,6 +118,20 @@ export async function fetchGroupTasks(groupId: string) {
 export async function fetchPersonalPendingTaskCount(groupId: string, userId: string) {
   const tasks = await fetchGroupTasks(groupId)
   return tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.includes(userId) && task.status !== 'Done').length
+}
+
+export async function createTask(task: Partial<Task>) {
+  const db = createBrowserSupabaseClient()
+  const { data, error } = await db.from('tasks').insert(task).select().single()
+  if (error) throw error
+  return data as Task
+}
+
+export async function updateTask(taskId: string, updates: Partial<Task>) {
+  const db = createBrowserSupabaseClient()
+  const { data, error } = await db.from('tasks').update(updates).eq('id', taskId).select().single()
+  if (error) throw error
+  return data as Task
 }
 
 export async function fetchPendingJoinRequests(groupId: string): Promise<JoinRequestWithProfile[]> {
@@ -138,7 +173,7 @@ export async function fetchPendingJoinRequests(groupId: string): Promise<JoinReq
 
 export async function fetchArtifactsByGroup(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('artifacts').select('*').eq('group_id', groupId)
+  const { data, error } = await db.from('artifacts').select('id, task_id, file_url, uploaded_by, endorsements_count, created_at').eq('group_id', groupId)
   if (error) throw error
   return data ?? []
 }
@@ -147,7 +182,7 @@ export async function fetchArtifactsByUser(userId: string, rowLimit = 3) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('artifacts')
-    .select('*')
+    .select('id, task_id, file_url, uploaded_by, endorsements_count, created_at')
     .eq('uploaded_by', userId)
     .order('created_at', { ascending: false })
     .limit(rowLimit)
@@ -159,7 +194,7 @@ export async function fetchCommitsByUser(userId: string, rowLimit = 3) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('commits')
-    .select('*')
+    .select('hash, message, lines_added, lines_deleted, author_email, task_id, impact_score, created_at')
     .eq('author_id', userId)
     .order('created_at', { ascending: false })
     .limit(rowLimit)
@@ -171,7 +206,7 @@ export async function fetchActivityLogByGroup(groupId: string) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('activity_log')
-    .select('*')
+    .select('id, user_id, group_id, action, details, created_at')
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -204,7 +239,7 @@ export async function createUserFeedback(userId: string, message: string, catego
 
 export async function fetchMessagesForUser(userId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('messages').select('*').eq('user_id', userId)
+  const { data, error } = await db.from('messages').select('id, user_id, content, created_at, group_id').eq('user_id', userId)
   if (error) throw error
   return data ?? []
 }
@@ -213,8 +248,8 @@ export async function fetchConnectionRecords(userA: string, userB: string) {
   const db = createBrowserSupabaseClient()
 
   const [first, second] = await Promise.all([
-    db.from('user_connections').select('*').eq('user_id', userA).eq('target_id', userB),
-    db.from('user_connections').select('*').eq('user_id', userB).eq('target_id', userA),
+    db.from('user_connections').select('id, user_id, target_id, status, created_at, updated_at').eq('user_id', userA).eq('target_id', userB),
+    db.from('user_connections').select('id, user_id, target_id, status, created_at, updated_at').eq('user_id', userB).eq('target_id', userA),
   ])
 
   if (first.error) throw first.error
@@ -283,7 +318,7 @@ export async function setConnectionAccepted(userA: string, userB: string) {
 
 export async function fetchUserGameStats(userId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('user_game_stats').select('*').eq('user_id', userId).single()
+  const { data, error } = await db.from('user_game_stats').select('user_id, total_games, wins, losses, current_streak, best_streak, total_points, updated_at').eq('user_id', userId).single()
   if (error) return null
   return data
 }

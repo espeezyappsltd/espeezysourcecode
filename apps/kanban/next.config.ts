@@ -9,9 +9,6 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   outputFileTracingRoot: monorepoRoot,
-  turbopack: {
-    root: monorepoRoot,
-  },
   experimental: {
   },
 }

@@ -55,18 +55,7 @@ function FlagDisplay({ countryCode }: { countryCode?: string }) {
   )
 }
 
-import { db, auth } from '@/lib/firebase'
-import { 
-  doc, 
-  getDoc, 
-  getDocs, 
-  query, 
-  collection, 
-  where, 
-  limit, 
-  setDoc, 
-  addDoc 
-} from 'firebase/firestore'
+import { db, auth, doc, getDoc, getDocs, query, collection, where, limit, setDoc, addDoc } from '@/lib/db-client'
 
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
   const [me, setMe] = useState<{ id: string; email?: string; full_name?: string } | null>(null)

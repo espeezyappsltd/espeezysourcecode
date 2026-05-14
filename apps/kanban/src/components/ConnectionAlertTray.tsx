@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react'
 
 import { useNotifications } from './NotificationProvider'
 import { UserPlus, X, Check, RefreshCw } from 'lucide-react'
-import { db, auth } from '@/lib/firebase'
-import { collection, query, where, getDocs, updateDoc, deleteDoc, doc, onSnapshot, addDoc, writeBatch } from 'firebase/firestore'
+import { db, auth, collection, query, where, getDocs, updateDoc, deleteDoc, doc, onSnapshot, addDoc, writeBatch, selectCols } from '@/lib/db-client'
 import type { Profile } from '@/types/database'
 
 type ConnectionRequest = {
@@ -33,16 +32,18 @@ export default function ConnectionAlertTray() {
         where('status', '==', 'pending')
       )
       const snap = await getDocs(q)
-      const data = await Promise.all(snap.docs.map(async d => {
-        const conn = d.data()
-        const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', conn.user_id)))
+      const data = await Promise.all(snap.docs.map(async (d: any) => {
+        const conn = d.data() as any
+        if (!conn.user_id) return null
+        
+        const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', conn.user_id), selectCols('id, full_name, avatar_url')))
         return {
           id: d.id,
           ...conn,
           profiles: pSnap.empty ? null : pSnap.docs[0].data()
         }
       }))
-      setRequests(data as ConnectionRequest[])
+      setRequests(data.filter(Boolean) as ConnectionRequest[])
     } catch (err) {
       console.error('Error fetching connection requests:', err instanceof Error ? err.message : err)
     } finally {
@@ -94,7 +95,7 @@ export default function ConnectionAlertTray() {
       const notifSnap = await getDocs(qNotif)
       if (!notifSnap.empty) {
         const batch = writeBatch(db)
-        notifSnap.docs.forEach(d => {
+        notifSnap.docs.forEach((d: any) => {
           const data = d.data()
           if (data.metadata?.sender_id === senderId) {
             batch.update(d.ref, { read: true })
