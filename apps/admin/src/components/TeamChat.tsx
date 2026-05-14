@@ -596,7 +596,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         { message_id: data.id }
       )
     } catch (err: unknown) {
-      console.error('Send message error:', err.message)
+      console.error('Send message error:', (err as Error).message)
     }
   }
 
@@ -622,7 +622,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
          { message_id: msgId }
        )
     } catch (err: unknown) {
-       console.error('Delete message error:', err.message)
+       console.error('Delete message error:', (err as Error).message)
      }
   }
 
@@ -657,7 +657,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
           }
        )
     } catch (err: unknown) {
-       console.error('File upload error:', err.message)
+       console.error('File upload error:', (err as Error).message)
      } finally {
        setUploading(false)
      }

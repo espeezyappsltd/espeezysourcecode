@@ -6,7 +6,7 @@ import { Shield, Sparkles, CheckCircle2, ArrowRight, Loader2, Key, Zap, Crown, R
 // import { db, auth } from '@/lib/firebase'
 // import { collection, query, where, getCountFromServer } from 'firebase/firestore'
 // import { onAuthStateChanged, User } from 'firebase/auth'
-import type { User } from '@/types/auth' // Placeholder, replace with Supabase user type
+import type { User } from '@supabase/supabase-js' 
 import TransientError from '@/components/TransientError'
 import { buildStripePaymentLink, type PlanKey } from '@/lib/stripe-payment-links'
 
@@ -65,7 +65,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
       }
 
       window.location.href = buildStripePaymentLink(plan, {
-        client_reference_id: currentUser.uid,
+        client_reference_id: currentUser.id,
         prefilled_promo_code: discountActive && coupon ? coupon : undefined,
       })
     } catch (err: unknown) {

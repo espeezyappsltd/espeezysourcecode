@@ -99,9 +99,9 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
         const [artSnap, comSnap] = await Promise.all([getDocs(artQ), getDocs(comQ)])
         
         const combined = [
-          ...artSnap.docs.map(d => ({ type: 'artifact', ...d.data(), id: d.id })),
-          ...comSnap.docs.map(d => ({ type: 'commit', ...d.data(), id: d.id }))
-        ]
+          ...artSnap.docs.map(d => ({ type: 'artifact' as const, ...d.data(), id: d.id })),
+          ...comSnap.docs.map(d => ({ type: 'commit' as const, ...d.data(), id: d.id }))
+        ] as Achievement[]
         setAchievements(combined)
       } catch (err) {
         console.error('Achievements error:', err instanceof Error ? err.message : err)
@@ -294,8 +294,8 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
                         {ach.type === 'artifact' ? <Target size={16} color="var(--brand)" /> : <Check size={16} color="var(--success)" />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ach.title || ach.content || 'Contribution'}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>{ach.type === 'artifact' ? 'Verifiable Artifact' : 'Synced Logic Update'} • {new Date(ach.created_at).toLocaleDateString()}</div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{(ach.title as string) || (ach.content as string) || 'Contribution'}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>{ach.type === 'artifact' ? 'Verifiable Artifact' : 'Synced Logic Update'} • {new Date(ach.created_at as string).toLocaleDateString()}</div>
                       </div>
                     </div>
                   ))}

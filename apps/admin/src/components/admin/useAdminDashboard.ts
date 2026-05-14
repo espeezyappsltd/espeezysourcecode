@@ -37,6 +37,7 @@ import type {
   SystemLog,
   LaunchConfig,
   PlatformConfig,
+  ConfigEntry,
 } from './types'
 
 // ── Default values defined outside the hook ────────────────────────────────────
@@ -148,9 +149,9 @@ export function useAdminDashboard() {
       const configMap = configSnap.docs.reduce<PlatformConfig>(
         (acc, doc) => {
           const item = doc.data() as Record<string, unknown>
-          return { ...acc, [item.key]: item }
+          return { ...acc, [item.key as string]: item as unknown as ConfigEntry }
         },
-        {},
+        {} as PlatformConfig,
       )
 
       // --- Metrics Calculation (simple demo logic, replace with real formulas as needed) ---
