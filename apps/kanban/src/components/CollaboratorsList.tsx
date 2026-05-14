@@ -5,7 +5,6 @@ import type { Profile } from '@/types/database'
 // TODO: Replace with Supabase client
 // import { db, auth } from '@/lib/firebase'
 // import { collection, query, where, getDocs, setDoc, doc, addDoc, limit, orderBy, or } from 'firebase/firestore'
-import { Profile } from '@/types/database'
 import { Users, UserPlus, Check, ExternalLink, Shield, Sparkles } from 'lucide-react'
 import { getFlagComponent } from '@/utils/geo'
 import RemoteAvatar from '@/components/common/RemoteAvatar'

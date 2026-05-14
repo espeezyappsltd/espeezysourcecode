@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { LaunchConfig, TimeLeft } from '@shared-types/launch'
-import { fetchPreregisterCount } from '@/services/preregister'
+import type { LaunchConfig, TimeLeft } from '../types/launch'
+import { fetchLaunchConfig, fetchLiveMetrics } from '../services/launch'
+
+const ZERO_TIME: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 }
 
 export function useCountdown(targetDate: string): TimeLeft {
   const calc = useCallback(() => {
     const diff = new Date(targetDate).getTime() - Date.now()
-    if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+    if (diff <= 0) return ZERO_TIME
     return {
       days: Math.floor(diff / 86_400_000),
       hours: Math.floor((diff % 86_400_000) / 3_600_000),
@@ -16,9 +18,11 @@ export function useCountdown(targetDate: string): TimeLeft {
     }
   }, [targetDate])
 
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calc)
+  // Start with zeros so SSR and client initial render match, then hydrate on client
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(ZERO_TIME)
 
   useEffect(() => {
+    setTimeLeft(calc())
     const id = setInterval(() => setTimeLeft(calc()), 1000)
     return () => clearInterval(id)
   }, [calc])
@@ -26,47 +30,99 @@ export function useCountdown(targetDate: string): TimeLeft {
   return timeLeft
 }
 
+// Fixed launch date - update manually when the date changes
+const DEFAULT_LAUNCH_DATE = '2026-06-01T00:00:00.000Z'
+
+const DEFAULTS: LaunchConfig = {
+  launch_date: DEFAULT_LAUNCH_DATE,
+  launch_message: 'Something big is coming. Join the first 5,000 students shaping the future of collaborative education.',
+  preregister_goal: '5000',
+  brand_name: 'Espeezy',
+}
+
 export function useLaunchData() {
-  const [config] = useState<LaunchConfig>({
-    launch_date: '2026-05-09T00:00:00.000Z',
-    launch_message: 'Something big is coming. Join 5 million students shaping the future of collaborative education.',
-    preregister_goal: '5000000',
-    brand_name: 'Espeezy',
-  })
+  const [config, setConfig] = useState<LaunchConfig>(DEFAULTS)
   const [registeredCount, setRegisteredCount] = useState(0)
-  const [configLoaded] = useState(true)
+  const [authUserCount, setAuthUserCount] = useState(0)
+  const [configLoaded, setConfigLoaded] = useState(false)
+
+  const setCountAndPersist = useCallback((count: number) => {
+    setRegisteredCount(count)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('espeezy_last_registered_count', String(count))
+    }
+  }, [])
+
+  const refreshCount = useCallback(async () => {
+    try {
+      const data = await fetchLiveMetrics()
+      if (!data) return
+      if (typeof data.preregistration_count === 'number') {
+        setCountAndPersist(data.preregistration_count)
+      } else if (typeof data.registered_count === 'number') {
+        setCountAndPersist(data.registered_count)
+      }
+      if (typeof data.auth_user_count === 'number') {
+        setAuthUserCount(data.auth_user_count)
+      }
+    } catch {
+      // Keep previous value if live refresh fails.
+    }
+  }, [setCountAndPersist])
 
   useEffect(() => {
-    const withTimeout = async (timeoutMs = 3500) => {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
-      try {
-        return await fetchPreregisterCount(controller.signal)
-      } catch {
-        return null
-      } finally {
-        clearTimeout(timeoutId)
-      }
-    }
-
     const load = async () => {
-      try {
-        const count = await withTimeout()
-        if (typeof count === 'number') setRegisteredCount(count)
-      } catch (_) {
-        // Fallback to defaults
+      if (typeof window !== 'undefined') {
+        const cached = Number(window.localStorage.getItem('espeezy_last_registered_count') ?? '0')
+        if (Number.isFinite(cached) && cached > 0) {
+          setRegisteredCount(cached)
+        }
       }
+
+      try {
+        const [cfgPayload, metrics] = await Promise.all([
+          fetchLaunchConfig(),
+          fetchLiveMetrics(),
+        ])
+        const cfg = cfgPayload?.config
+        if (cfg) {
+          setConfig(prev => ({
+            ...prev,
+            ...cfg,
+            launch_date: typeof cfg.launch_date === 'string' ? cfg.launch_date : DEFAULT_LAUNCH_DATE,
+            preregister_goal: '5000',
+          }))
+        }
+        if (!metrics) {
+          setConfigLoaded(true)
+          return
+        }
+        if (typeof metrics.preregistration_count === 'number') {
+          setCountAndPersist(metrics.preregistration_count)
+        } else if (typeof metrics.registered_count === 'number') {
+          setCountAndPersist(metrics.registered_count)
+        }
+        if (typeof metrics.auth_user_count === 'number') {
+          setAuthUserCount(metrics.auth_user_count)
+        }
+      } catch {
+        // Use defaults on failure
+      }
+      setConfigLoaded(true)
     }
     load()
-  }, [])
+
+    // Poll every 30s so count stays fresh
+    const pollId = setInterval(refreshCount, 30_000)
+    // Re-fetch when the tab regains focus (e.g. returning from Stripe)
+    window.addEventListener('focus', refreshCount)
+    return () => {
+      clearInterval(pollId)
+      window.removeEventListener('focus', refreshCount)
+    }
+  }, [refreshCount])
 
   const timeLeft = useCountdown(config.launch_date)
 
-  return {
-    config,
-    registeredCount,
-    configLoaded,
-    timeLeft,
-    setRegisteredCount,
-  }
+  return { config, registeredCount, authUserCount, configLoaded, timeLeft, setRegisteredCount, refreshCount }
 }

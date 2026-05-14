@@ -5,7 +5,7 @@ import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { usePresence } from './PresenceProvider'
 import { User, Shield } from 'lucide-react'
 import Image from 'next/image'
-// import { ActiveUser } from '@/types/auth' // TODO: Remove if not needed, replace with Supabase type
+import { ActiveUser } from '@/types/auth'
 import { getFlagComponent } from '@/utils/geo'
 
 export default function ActiveUsersList({

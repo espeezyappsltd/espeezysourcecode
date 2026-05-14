@@ -33,12 +33,12 @@ export default function ConnectionAlertTray() {
       )
       const snap = await getDocs(q)
       const data = await Promise.all(snap.docs.map(async d => {
-        const conn = d.data()
+        const conn = d.data() as Omit<ConnectionRequest, 'id' | 'profiles'>
         const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', conn.user_id)))
         return {
           id: d.id,
           ...conn,
-          profiles: pSnap.empty ? null : pSnap.docs[0].data()
+          profiles: (pSnap.empty ? null : pSnap.docs[0].data()) as Profile | null
         }
       }))
       setRequests(data)
@@ -114,6 +114,7 @@ export default function ConnectionAlertTray() {
   }
 
   return (
+    <>
     <div className="connection-tray-container" style={{ margin: '0 0 var(--gap-md) 0', animation: 'slideInDown 0.4s cubic-bezier(0.23, 1, 0.32, 1)' }}>
       {requests.map((req) => (
         <div 
@@ -201,5 +202,6 @@ export default function ConnectionAlertTray() {
       .spin { animation: spin 1s linear infinite; }
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     `}</style>
+    </>
   )
 }

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
-import Image from 'next/image'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, Clock,
@@ -14,7 +13,7 @@ import { useRouter } from 'next/navigation'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
 import { ChatMessage, ChatPayload } from '@/types/ui'
-// import { Profile } from '@/types/auth' // TODO: Remove if not needed, replace with Supabase type
+import { Profile } from '@/types/auth'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 
 type TeamChatProps = {
@@ -597,7 +596,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         { message_id: data.id }
       )
     } catch (err: unknown) {
-      console.error('Send message error:', err.message)
+      console.error('Send message error:', err instanceof Error ? err.message : 'Unknown error')
     }
   }
 
@@ -623,7 +622,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
          { message_id: msgId }
        )
     } catch (err: unknown) {
-       console.error('Delete message error:', err.message)
+       console.error('Delete message error:', err instanceof Error ? err.message : 'Unknown error')
      }
   }
 
@@ -658,7 +657,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
           }
        )
     } catch (err: unknown) {
-       console.error('File upload error:', err.message)
+       console.error('File upload error:', err instanceof Error ? err.message : 'Unknown error')
      } finally {
        setUploading(false)
      }

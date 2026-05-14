@@ -37,6 +37,7 @@ import type {
   SystemLog,
   LaunchConfig,
   PlatformConfig,
+  ConfigEntry,
 } from './types'
 
 // ── Default values defined outside the hook ────────────────────────────────────
@@ -147,7 +148,7 @@ export function useAdminDashboard() {
       // Convert the config rows array into a key-indexed map
       const configMap = configSnap.docs.reduce<PlatformConfig>(
         (acc, doc) => {
-          const item = doc.data() as Record<string, unknown>
+          const item = doc.data() as { key: string } & ConfigEntry
           return { ...acc, [item.key]: item }
         },
         {},
