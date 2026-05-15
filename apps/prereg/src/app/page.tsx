@@ -15,6 +15,7 @@ import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
+import { SCREENSHOT_ASSETS } from '@shared/assets'
 
 function HeroVisual({ registeredCount }: { registeredCount: number }) {
   return (
@@ -55,10 +56,18 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
             background: '#fff'
           }}
         >
-          <img src="/screenshots/dashboard.png" alt="Espeezy Dashboard" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Image 
+            src={SCREENSHOT_ASSETS.PROJECT_OVERVIEW} 
+            alt="Espeezy Dashboard" 
+            fill
+            sizes="(max-width: 1024px) 100vw, 800px"
+            quality={50}
+            priority
+            style={{ objectFit: 'cover' }} 
+          />
         </motion.div>
 
-        {/* Portrait Left (Mobile Experience) */}
+        {/* Portrait Left (Mobile View 1) */}
         <motion.div
           initial={{ opacity: 0, x: -60, rotateY: 15 }}
           animate={{ opacity: 1, x: -100, rotateY: 20 }}
@@ -70,10 +79,17 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
           }}
           className="show-desktop"
         >
-          <img src="/screenshots/mobile.png" alt="Mobile App" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Image 
+            src={SCREENSHOT_ASSETS.RESOURCE_CENTER} 
+            alt="Mobile Dashboard" 
+            fill
+            sizes="180px"
+            quality={40}
+            style={{ objectFit: 'cover' }} 
+          />
         </motion.div>
 
-        {/* Portrait Right (Project View) */}
+        {/* Portrait Right (Mobile View 2) */}
         <motion.div
           initial={{ opacity: 0, x: 60, rotateY: -15 }}
           animate={{ opacity: 1, x: 100, rotateY: -20 }}
@@ -85,7 +101,14 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
           }}
           className="show-desktop"
         >
-          <img src="/screenshots/Screen_Shot_2026-05-14_at_23.11.51.png" alt="Task Interface" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Image 
+            src={SCREENSHOT_ASSETS.ASSET_MARKETPLACE} 
+            alt="Mobile Marketplace" 
+            fill
+            sizes="180px"
+            quality={40}
+            style={{ objectFit: 'cover' }} 
+          />
         </motion.div>
 
       </div>

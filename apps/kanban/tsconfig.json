@@ -28,6 +28,9 @@
       ],
       "@shared-types/*": [
         "./src/types/*"
+      ],
+      "@shared/*": [
+        "../shared/*"
       ]
     }
   },

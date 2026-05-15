@@ -1,41 +1,48 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { SCREENSHOT_ASSETS } from '@shared/assets'
 
 const SCREENSHOTS = [
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.11.51.png', title: 'Task Interface', category: 'Productivity' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.12.07.png', title: 'Project Overview', category: 'Management' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.12.38.png', title: 'Contribution Metrics', category: 'Analytics' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.12.46.png', title: 'Team Management', category: 'Collaboration' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.19.00.png', title: 'Dashboard View', category: 'Overview' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.19.15.png', title: 'Collaboration Hub', category: 'Communication' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.19.22.png', title: 'Resource Center', category: 'Resources' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.19.30.png', title: 'Analytics Engine', category: 'Data' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.19.44.png', title: 'User Profile', category: 'Personal' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.19.55.png', title: 'Settings Panel', category: 'Configuration' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.20.09.png', title: 'Notification System', category: 'Alerts' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.20.23.png', title: 'Workflows', category: 'Automation' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.20.51.png', title: 'Deep Insights', category: 'Insights' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.21.02.png', title: 'Performance Tracking', category: 'Performance' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.21.20.png', title: 'Live Updates', category: 'Real-time' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.21.28.png', title: 'Group Chat', category: 'Social' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.21.37.png', title: 'Asset Marketplace', category: 'Economy' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.21.46.png', title: 'Admin Console', category: 'Control' },
-  { src: '/screenshots/Screen_Shot_2026-05-14_at_23.22.01.png', title: 'Global Network', category: 'Community' },
-  { src: '/screenshots/Screenshot_2026-05-14_at_23-23-54_.png', title: 'Side Hustle', category: 'Income' },
-  { src: '/screenshots/Screenshot_2026-05-14_at_23-24-10_.png', title: 'Earning Portal', category: 'Finance' },
-  { src: '/screenshots/Screenshot_2026-05-14_at_23-24-30_.png', title: 'Task Marketplace', category: 'Work' },
-  { src: '/screenshots/Screenshot_2026-05-14_at_23-24-47_.png', title: 'Internal Node', category: 'Network' },
-  { src: '/screenshots/Screenshot_2026-05-14_at_23-25-13_.png', title: 'System Status', category: 'Infrastructure' },
-  { src: '/screenshots/mobile.png', title: 'Mobile Experience', category: 'Mobile' },
-  { src: '/screenshots/dashboard.png', title: 'Main Dashboard', category: 'Dashboard' },
+  { src: SCREENSHOT_ASSETS.TASK_INTERFACE, title: 'Task Interface', category: 'Productivity' },
+  { src: SCREENSHOT_ASSETS.PROJECT_OVERVIEW, title: 'Project Overview', category: 'Management' },
+  { src: SCREENSHOT_ASSETS.CONTRIBUTION_METRICS, title: 'Contribution Metrics', category: 'Analytics' },
+  { src: SCREENSHOT_ASSETS.TEAM_MANAGEMENT, title: 'Team Management', category: 'Collaboration' },
+  { src: SCREENSHOT_ASSETS.DASHBOARD_VIEW, title: 'Dashboard View', category: 'Overview' },
+  { src: SCREENSHOT_ASSETS.COLLABORATION_HUB, title: 'Collaboration Hub', category: 'Communication' },
+  { src: SCREENSHOT_ASSETS.RESOURCE_CENTER, title: 'Resource Center', category: 'Resources' },
+  { src: SCREENSHOT_ASSETS.ANALYTICS_ENGINE, title: 'Analytics Engine', category: 'Data' },
+  { src: SCREENSHOT_ASSETS.USER_PROFILE, title: 'User Profile', category: 'Personal' },
+  { src: SCREENSHOT_ASSETS.SETTINGS_PANEL, title: 'Settings Panel', category: 'Configuration' },
+  { src: SCREENSHOT_ASSETS.NOTIFICATION_SYSTEM, title: 'Notification System', category: 'Alerts' },
+  { src: SCREENSHOT_ASSETS.WORKFLOWS, title: 'Workflows', category: 'Automation' },
+  { src: SCREENSHOT_ASSETS.DEEP_INSIGHTS, title: 'Deep Insights', category: 'Insights' },
+  { src: SCREENSHOT_ASSETS.PERFORMANCE_TRACKING, title: 'Performance Tracking', category: 'Performance' },
+  { src: SCREENSHOT_ASSETS.LIVE_UPDATES, title: 'Live Updates', category: 'Real-time' },
+  { src: SCREENSHOT_ASSETS.GROUP_CHAT, title: 'Group Chat', category: 'Social' },
+  { src: SCREENSHOT_ASSETS.ASSET_MARKETPLACE, title: 'Asset Marketplace', category: 'Economy' },
+  { src: SCREENSHOT_ASSETS.ADMIN_CONSOLE, title: 'Admin Console', category: 'Control' },
+  { src: SCREENSHOT_ASSETS.GLOBAL_NETWORK, title: 'Global Network', category: 'Community' },
+  { src: SCREENSHOT_ASSETS.SIDE_HUSTLE, title: 'Side Hustle', category: 'Income' },
+  { src: SCREENSHOT_ASSETS.EARNING_PORTAL, title: 'Earning Portal', category: 'Finance' },
+  { src: SCREENSHOT_ASSETS.TASK_MARKETPLACE, title: 'Task Marketplace', category: 'Work' },
+  { src: SCREENSHOT_ASSETS.INTERNAL_NODE, title: 'Internal Node', category: 'Network' },
+  { src: SCREENSHOT_ASSETS.SYSTEM_STATUS, title: 'System Status', category: 'Infrastructure' },
+  { src: SCREENSHOT_ASSETS.MOBILE_EXPERIENCE, title: 'Mobile Experience', category: 'Mobile' },
+  { src: SCREENSHOT_ASSETS.SETTINGS_MOBILE, title: 'Settings Mobile', category: 'Settings' },
 ]
 
 export default function ScreenshotGallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
   const [filter, setFilter] = useState('All')
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({})
+
+  const handleImageLoad = (src: string) => {
+    setLoadedImages(prev => ({ ...prev, [src]: true }))
+  }
 
   // Extract unique categories
   const categories = ['All', ...Array.from(new Set(SCREENSHOTS.map(s => s.category)))]
@@ -93,42 +100,49 @@ export default function ScreenshotGallery() {
             <motion.div
               key={img.src}
               layout
-              initial={{ opacity: 0, scale: 0.9, rotateX: -10 }}
-              animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-              exit={{ opacity: 0, scale: 0.9, rotateX: 10 }}
-              transition={{ 
-                duration: 0.5, 
-                delay: (i % 6) * 0.05,
-                type: 'spring',
-                stiffness: 100,
-                damping: 20
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ 
+                opacity: 1, 
+                y: 0,
+                transition: { 
+                  duration: 0.8,
+                  delay: (i % 4) * 0.1, // Staggered entry
+                  ease: [0.16, 1, 0.3, 1]
+                }
               }}
+              viewport={{ once: true, margin: "-50px" }}
               style={{ 
                 borderRadius: '24px',
                 overflow: 'hidden',
-                background: 'white',
+                background: '#f8fafc',
                 border: '1px solid rgba(15,23,42,0.06)',
                 boxShadow: '0 4px 30px rgba(15,23,42,0.03)',
                 cursor: 'pointer',
                 position: 'relative',
-                transformStyle: 'preserve-3d'
               }}
               onClick={() => setSelectedImage(SCREENSHOTS.findIndex(s => s.src === img.src))}
             >
-              <div style={{ position: 'relative', paddingBottom: '62.5%', overflow: 'hidden' }}>
-                <motion.img 
-                  src={img.src} 
-                  alt={img.title} 
-                  style={{ 
-                    position: 'absolute',
-                    width: '100%', 
-                    height: '100%', 
-                    objectFit: 'cover',
-                    display: 'block',
-                  }} 
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.6 }}
-                />
+              <div style={{ 
+              position: 'relative', 
+              paddingBottom: '62.5%', 
+              overflow: 'hidden',
+              background: '#f1f5f9' // Fallback color while loading
+            }}>
+              <Image 
+                src={img.src} 
+                alt={img.title} 
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                quality={75}
+                onLoad={() => handleImageLoad(img.src)}
+                style={{ 
+                  objectFit: 'cover',
+                  display: 'block',
+                  opacity: loadedImages[img.src] ? 1 : 0,
+                  transition: 'opacity 1s ease-in-out',
+                  transform: loadedImages[img.src] ? 'scale(1)' : 'scale(1.05)',
+                }} 
+              />
                 
                 {/* Subtle Floating Animation Overlay */}
                 <motion.div 
@@ -214,9 +228,17 @@ export default function ScreenshotGallery() {
               borderRadius: '12px', 
               overflow: 'hidden',
               border: '1px solid rgba(15,23,42,0.1)',
-              background: '#f1f5f9'
+              background: '#f1f5f9',
+              position: 'relative'
             }}>
-              <img src={img.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+              <Image 
+                src={img.src} 
+                alt="" 
+                fill 
+                sizes="80px" 
+                quality={20} // Tiny thumbnail quality
+                style={{ objectFit: 'cover', opacity: 0.6 }} 
+              />
             </div>
           ))}
         </div>
@@ -297,11 +319,15 @@ export default function ScreenshotGallery() {
                 overflow: 'hidden', 
                 boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                background: 'black'
+                background: 'black',
+                position: 'relative'
               }}>
-                <img
+                <Image
                   src={SCREENSHOTS[selectedImage].src}
                   alt={SCREENSHOTS[selectedImage].title}
+                  width={800} // Smaller width for faster lightbox
+                  height={533}
+                  quality={60} // Slightly better but still optimized
                   style={{
                     width: '100%',
                     height: 'auto',

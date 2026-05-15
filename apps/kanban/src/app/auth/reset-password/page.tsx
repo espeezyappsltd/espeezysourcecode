@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useRouter } from 'next/navigation'
 import { ShieldCheck, Lock, Activity } from 'lucide-react'
@@ -70,19 +71,50 @@ export default function ResetPasswordPage() {
   return (
     <div style={{
       minHeight: '100vh',
+      width: '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'var(--bg-main)',
-      padding: '1.5rem'
+      position: 'relative',
+      padding: '1.5rem',
+      overflow: 'hidden',
+      background: '#000'
     }}>
-      <div className="auth-card" style={{ maxWidth: '450px', width: '100%', animation: 'fadeIn 0.5s ease-out' }}>
+      {/* Background Image */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <Image
+          src="/auth_bg.png"
+          alt="Auth Background"
+          fill
+          priority
+          quality={80}
+          style={{ objectFit: 'cover', opacity: 0.4 }}
+        />
+        {/* Dark overlay for text legibility */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%)' }} />
+      </div>
+
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '480px',
+          background: 'rgba(10, 10, 10, 0.4)',
+          backdropFilter: 'blur(40px)',
+          borderRadius: '40px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          padding: '3.5rem',
+          position: 'relative',
+          zIndex: 1,
+          boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
+          animation: 'fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{ width: '60px', height: '60px', background: 'var(--brand)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 8px 16px rgba(var(--brand-rgb), 0.3)' }}>
+          <div style={{ width: '60px', height: '60px', background: 'var(--brand, #10b981)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 12px 24px rgba(16,185,129,0.25)' }}>
             <Lock color="white" size={30} />
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em', margin: 0 }}>Secure Account Recovery</h1>
-          <p style={{ color: 'var(--text-sub)', marginTop: '0.6rem', fontWeight: 600 }}>Update your password to regain access.</p>
+          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'white', letterSpacing: '-0.03em', margin: 0 }}>Secure Account Recovery</h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '0.6rem', fontWeight: 600 }}>Update your password to regain access.</p>
         </div>
 
         {error && <TransientError message={error} />}
@@ -106,7 +138,7 @@ export default function ResetPasswordPage() {
                 value={password} 
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
-                style={{ borderRadius: '14px' }}
+                style={{ borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white' }}
                 disabled={loading}
               />
             </div>
@@ -119,7 +151,7 @@ export default function ResetPasswordPage() {
                 value={confirmPassword} 
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                style={{ borderRadius: '14px' }}
+                style={{ borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white' }}
                 disabled={loading}
               />
             </div>

@@ -5,6 +5,7 @@ import PreregFooter from '@/components/PreregFooter'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://espeezy.com'),
   title: 'Espeezy: Early Access',
   description: 'Join 5 million students shaping the future of collaborative education.',
   manifest: '/manifest.json',
@@ -45,6 +46,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link 
+          rel="preload" 
+          href="/brand_logo2.svg" 
+          as="image" 
+          type="image/svg+xml" 
+        />
+      </head>
       <body>
         <NavigationProgress />
         {children}

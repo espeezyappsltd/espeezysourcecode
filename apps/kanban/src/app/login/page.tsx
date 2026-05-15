@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react'
+import Image from 'next/image'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
 import { BookOpen, User, Lock, ExternalLink, Activity } from 'lucide-react'
@@ -156,26 +157,37 @@ function LoginContent() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#0a0a0a',
       position: 'relative',
       padding: '1rem',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      background: '#000'
     }}>
-      {/* Background decoration */}
-      <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40%', height: '40%', background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '40%', height: '40%', background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+      {/* Background Image */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <Image
+          src="/auth_bg.png"
+          alt="Auth Background"
+          fill
+          priority
+          quality={80}
+          style={{ objectFit: 'cover', opacity: 0.4 }}
+        />
+        {/* Dark overlay for text legibility */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%)' }} />
+      </div>
 
       <div
         style={{
           width: '100%',
           maxWidth: '480px',
-          background: 'rgba(255, 255, 255, 0.02)',
-          backdropFilter: 'blur(30px)',
+          background: 'rgba(10, 10, 10, 0.4)',
+          backdropFilter: 'blur(40px)',
           borderRadius: '40px',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.1)',
           padding: '3.5rem',
           position: 'relative',
-          boxShadow: '0 40px 100px rgba(0,0,0,0.5)',
+          zIndex: 1,
+          boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
           animation: 'fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
