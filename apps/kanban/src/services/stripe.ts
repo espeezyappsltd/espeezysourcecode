@@ -2,8 +2,8 @@ import { createAdminClient } from '@/lib/db'
 import { getAppUrl, getStripeClient } from '../utils/stripe'
 
 const APP_URL = getAppUrl()
-const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || `${APP_URL}/dashboard/payment-success`
-const CANCEL_URL = process.env.STRIPE_CANCEL_URL || `${APP_URL}/dashboard/marketplace`
+const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || `${APP_URL}/payment-success`
+const CANCEL_URL = process.env.STRIPE_CANCEL_URL || `${APP_URL}/marketplace`
 
 /**
  * Retrieve an existing Stripe Customer for the user or create one.

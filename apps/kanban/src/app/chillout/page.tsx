@@ -270,10 +270,11 @@ export default function ChillOutHub() {
                   key={topic.id}
                   onClick={() => handleTopicSelect(topic)}
                   className="glass hover-card"
+                  aria-label={`Select topic: ${topic.name}. ${topic.description}`}
                   style={{ padding: '2rem', borderRadius: '24px', border: '1px solid var(--border)', textAlign: 'left', background: 'var(--surface)', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '1rem' }}
                 >
                   <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: `rgba(${topic.id === 'cyber_ethics' ? '239, 68, 68' : 'var(--brand-rgb)'}, 0.1)`, color: topic.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                     <topic.icon size={28} />
+                     <topic.icon size={28} aria-hidden="true" />
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>{topic.name}</h3>
@@ -298,34 +299,53 @@ export default function ChillOutHub() {
                   {/* Difficulty */}
                   <div>
                     <label style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', display: 'block', marginBottom: '1rem' }}>Challenge Level</label>
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                       {['Easy', 'Medium', 'Hard'].map(d => (
-                         <button key={d} onClick={() => setDifficulty(d as 'Easy' | 'Medium' | 'Hard')} style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: difficulty === d ? 'var(--brand)' : 'var(--border)', background: difficulty === d ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: difficulty === d ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}>{d}</button>
-                       ))}
-                    </div>
+                     <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        {['Easy', 'Medium', 'Hard'].map(d => (
+                          <button 
+                            key={d} 
+                            onClick={() => setDifficulty(d as 'Easy' | 'Medium' | 'Hard')} 
+                            aria-pressed={difficulty === d}
+                            style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: difficulty === d ? 'var(--brand)' : 'var(--border)', background: difficulty === d ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: difficulty === d ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}
+                          >
+                            {d}
+                          </button>
+                        ))}
+                     </div>
                   </div>
 
                   {/* Mode */}
                   <div>
                     <label style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', display: 'block', marginBottom: '1rem' }}>Grading Protocol</label>
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                       {['Speed Recall', 'AI Evaluated'].map(m => (
-                         <button key={m} onClick={() => setGameMode(m as 'Speed Recall' | 'AI Evaluated')} style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: gameMode === m ? 'var(--brand)' : 'var(--border)', background: gameMode === m ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: gameMode === m ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s', textAlign: 'left' }}>
-                            <div style={{ fontWeight: 950 }}>{m}</div>
-                            <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '2px' }}>{m === 'Speed Recall' ? 'Reveal & choices' : 'Text input + AI Grade'}</div>
-                         </button>
-                       ))}
-                    </div>
+                     <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        {['Speed Recall', 'AI Evaluated'].map(m => (
+                          <button 
+                            key={m} 
+                            onClick={() => setGameMode(m as 'Speed Recall' | 'AI Evaluated')} 
+                            aria-pressed={gameMode === m}
+                            style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: gameMode === m ? 'var(--brand)' : 'var(--border)', background: gameMode === m ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: gameMode === m ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s', textAlign: 'left' }}
+                          >
+                             <div style={{ fontWeight: 950 }}>{m}</div>
+                             <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '2px' }}>{m === 'Speed Recall' ? 'Reveal & choices' : 'Text input + AI Grade'}</div>
+                          </button>
+                        ))}
+                     </div>
                   </div>
 
                   {/* Rounds */}
                   <div>
                     <label style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', display: 'block', marginBottom: '1rem' }}>Skirmish Depth</label>
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                       {[3, 5, 10].map(r => (
-                         <button key={r} onClick={() => setRoundCount(r)} style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: roundCount === r ? 'var(--brand)' : 'var(--border)', background: roundCount === r ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: roundCount === r ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}>{r} Rounds</button>
-                       ))}
-                    </div>
+                     <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        {[3, 5, 10].map(r => (
+                          <button 
+                            key={r} 
+                            onClick={() => setRoundCount(r)} 
+                            aria-pressed={roundCount === r}
+                            style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: roundCount === r ? 'var(--brand)' : 'var(--border)', background: roundCount === r ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: roundCount === r ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}
+                          >
+                            {r} Rounds
+                          </button>
+                        ))}
+                     </div>
                   </div>
                </div>
 
@@ -406,11 +426,11 @@ export default function ChillOutHub() {
                           textAlign: 'left'
                         }}
                       >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '12px', overflow: 'hidden', background: 'var(--bg-main)', border: '1px solid var(--border)' }}>
-                          {p.avatar_url ? <img src={p.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users size={16} /></div>}
+                         <div style={{ width: '36px', height: '36px', borderRadius: '12px', overflow: 'hidden', background: 'var(--bg-main)', border: '1px solid var(--border)' }}>
+                          {p.avatar_url ? <img src={p.avatar_url} alt={p.full_name || 'Peer'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={p.full_name || 'Peer'}><Users size={16} /></div>}
                         </div>
                         <span style={{ fontSize: '0.9rem', fontWeight: 900, flex: 1, color: 'var(--text-main)' }}>{p.full_name}</span>
-                        {selectedPlayers.includes(p.id) && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}><CheckCircle2 size={18} color="var(--brand)" /></motion.div>}
+                        {selectedPlayers.includes(p.id) && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}><CheckCircle2 size={18} color="var(--brand)" aria-label="Selected" /></motion.div>}
                       </button>
                     ))
                   )}

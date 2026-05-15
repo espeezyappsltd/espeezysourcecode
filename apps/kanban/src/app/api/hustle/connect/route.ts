@@ -63,8 +63,8 @@ export async function POST() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com'
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
-    refresh_url: `${appUrl}/dashboard/hustle/connect?refresh=1`,
-    return_url: `${appUrl}/dashboard/hustle/connect?success=1`,
+    refresh_url: `${appUrl}/hustle/connect?refresh=1`,
+    return_url: `${appUrl}/hustle/connect?success=1`,
     type: 'account_onboarding',
   })
 

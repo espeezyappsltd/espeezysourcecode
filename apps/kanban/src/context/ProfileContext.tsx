@@ -52,12 +52,25 @@ export function ProfileProvider({
     }
 
     if (data) {
-      setProfile(data)
-      PersistentCache.set(`profile_${currentUserId}`, data, 3600000) // 1 Hour TTL
+      const typed = data as Profile
+      setProfile(typed)
+      PersistentCache.set(`profile_${currentUserId}`, typed, 3600000) // 1 Hour TTL
     } else {
       setProfile(null)
     }
   }, [initialUserId, supabase, user])
+
+  // Enhanced setProfile that persists to cache
+  const setProfileWithCache = useCallback((value: React.SetStateAction<Profile | null>) => {
+    setProfile((prev) => {
+      const next = typeof value === 'function' ? value(prev) : value
+      const currentUserId = user?.id || initialUserId
+      if (currentUserId && next) {
+        PersistentCache.set(`profile_${currentUserId}`, next, 3600000)
+      }
+      return next
+    })
+  }, [initialUserId, user])
 
   useEffect(() => {
     let mounted = true
@@ -163,7 +176,7 @@ export function ProfileProvider({
   }, [initialUserId, supabase, user])
 
   return (
-    <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile }}>
+    <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile: setProfileWithCache }}>
       {children}
     </ProfileContext.Provider>
   )

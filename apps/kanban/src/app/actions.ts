@@ -52,13 +52,13 @@ export async function updateUserGameStats(userId: string, xpEarned: number, won:
       .from('user_game_stats')
       .select('total_xp, wins, games_played')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     const newData = {
       user_id: userId,
-      total_xp: (currentStats.total_xp || 0) + xpEarned,
-      wins: (currentStats.wins || 0) + (won ? 1 : 0),
-      games_played: (currentStats.games_played || 0) + 1,
+      total_xp: (currentStats?.total_xp || 0) + xpEarned,
+      wins: (currentStats?.wins || 0) + (won ? 1 : 0),
+      games_played: (currentStats?.games_played || 0) + 1,
       updated_at: new Date().toISOString()
     }
 
@@ -75,5 +75,41 @@ export async function updateUserGameStats(userId: string, xpEarned: number, won:
   } catch (err: any) {
     console.error('Stats update failed:', err.message)
     throw new Error(`Admin Node Error: ${err.message}`)
+  }
+}
+export async function handleTaskStatusUpdate(taskId: string, newStatus: string, groupId: string, userId: string) {
+  try {
+    const adminDb = getAdminDb()
+    
+    // Fetch current task to ensure we have all fields for the workflow
+    const { data: task, error: fetchError } = await adminDb
+      .from('tasks')
+      .select('*')
+      .eq('id', taskId)
+      .single()
+
+    if (fetchError || !task) throw new Error('Task not found')
+
+    const payload = {
+      action: 'update' as const,
+      task: {
+        ...task,
+        status: newStatus as any,
+      },
+      userId
+    }
+
+    // Since we are in a server action, we can't easily use the 'start' helper if it depends on a specific environment,
+    // but we can call the workflow function directly or via the API.
+    // However, the best way is to trigger the same workflow logic.
+    
+    const { taskWorkflow } = await import('@/workflows/taskWorkflow')
+    await taskWorkflow(payload)
+
+    revalidatePath('/', 'layout')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Status update failed:', err.message)
+    throw new Error(`Task Loop Error: ${err.message}`)
   }
 }

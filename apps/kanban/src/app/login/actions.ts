@@ -57,25 +57,14 @@ export async function signup(formData: FormData) {
       email,
       password,
       email_confirm: true,
+      user_metadata: {
+        school_id,
+        legal_accepted,
+      }
     })
     
     if (createUserError || !createdUser.user) {
       throw createUserError ?? new Error('Signup failed')
-    }
-
-    const { error: profileError } = await adminDb
-      .from('profiles')
-      .insert({
-        id: createdUser.user.id,
-        email,
-        school_id,
-        legal_accepted: true,
-        total_score: 0,
-      })
-
-    if (profileError) {
-      await adminAuth.admin.deleteUser(createdUser.user.id)
-      throw profileError
     }
 
     revalidatePath('/', 'layout')

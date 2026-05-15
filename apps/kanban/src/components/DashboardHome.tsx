@@ -135,8 +135,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
               }}
+              aria-label={showMembers ? "Hide Team Roster" : "Show Team Roster"}
             >
-              <Users size={16} />
+              <Users size={16} aria-hidden="true" />
               Team Roster
               <span style={{
                 background: showMembers ? 'white' : 'var(--brand)',
@@ -170,7 +171,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             }}>
 
               {/* Active Members */}
-              <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Active Members</div>
+              <h2 style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Active Members</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                 {members.map(m => {
                   const isSelf = m.id === profile?.id
@@ -190,7 +191,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                       cursor: 'pointer',
                       transition: 'transform 0.2s'
                     }}
-                      onClick={() => router.push(`/dashboard/network/profile/${m.id}`)}
+                      onClick={() => router.push(`/network/profile/${m.id}`)}
                     >
                       <div style={{ position: 'relative' }}>
                         <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, color: 'var(--brand)', border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -216,7 +217,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               {pendingRequests.length > 0 && (
                 <>
                   <div style={{ height: '1px', background: 'var(--border)', margin: '0.5rem 0' }} />
-                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Incoming Requests ({pendingRequests.length})</div>
+                  <h2 style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Incoming Requests ({pendingRequests.length})</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                     {pendingRequests.map(r => (
                       <div key={r.id} style={{
@@ -257,7 +258,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             <Zap size={16} fill="currentColor" aria-hidden="true" /> New Task
           </button>
           <button
-            onClick={() => router.push(`/dashboard/analytics/${groupId}`)}
+            onClick={() => router.push(`/analytics/${groupId}`)}
             className="btn btn-secondary btn-inline"
             aria-label="View group updates and progress"
             style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', fontWeight: 800 }}
@@ -319,8 +320,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as 'board' | 'calendar')}
               className={`control-tab ${activeTab === tab.id ? 'active' : ''}`}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              aria-label={`Switch to ${tab.label}`}
             >
-              {tab.icon} {tab.label}
+              <span aria-hidden="true">{tab.icon}</span> {tab.label}
             </button>
           ))}
         </div>
@@ -329,7 +332,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           <button className="panel-tool" data-tooltip="Update view" aria-label="Refresh board data" onClick={() => setSyncToken(v => v + 1)}>
             <Activity size={16} aria-hidden="true" />
           </button>
-          <button className="panel-tool" data-tooltip="Board Settings" aria-label="Open board settings" onClick={() => router.push('/dashboard/settings')}>
+          <button className="panel-tool" data-tooltip="Board Settings" aria-label="Open board settings" onClick={() => router.push('/settings')}>
             <TrendingUp size={16} aria-hidden="true" />
           </button>
         </div>
@@ -392,7 +395,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             </div>
             <div
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', cursor: 'pointer' }}
-              onClick={() => router.push('/dashboard/network')}
+              onClick={() => router.push('/network')}
             >
               <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Connection</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

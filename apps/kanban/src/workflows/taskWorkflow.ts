@@ -40,6 +40,9 @@ export async function taskWorkflow(payload: TaskWorkflowPayload) {
     const created = await insertTask(payload.task)
     await logActivity(payload.userId, payload.task.group_id, 'task_created', `Created task: ${payload.task.title}`, { task_id: created.id })
     await notifyAssignees(payload.task.assignees, payload.task.title, created.id, payload.userId)
+    if (payload.task.status === 'Done') {
+      await checkAndDistributeScore(created.id, payload.task.assignees)
+    }
     return { taskId: created.id }
   }
 
@@ -50,7 +53,45 @@ export async function taskWorkflow(payload: TaskWorkflowPayload) {
   await updateTask(payload.task)
   await logActivity(payload.userId, payload.task.group_id, 'task_updated', `Updated task: ${payload.task.title}`, { task_id: payload.task.id })
   await notifyAssignees(payload.task.assignees, payload.task.title, payload.task.id, payload.userId)
+  
+  if (payload.task.status === 'Done') {
+    await checkAndDistributeScore(payload.task.id, payload.task.assignees)
+  }
+  
   return { taskId: payload.task.id }
+}
+
+async function checkAndDistributeScore(taskId: string, assignees: string[]) {
+  'use step'
+  const db = getAdminDb()
+  
+  const { data: task, error: fetchError } = await db
+    .from('tasks')
+    .select('score_awarded')
+    .eq('id', taskId)
+    .single()
+    
+  if (fetchError || !task) return
+  if (task.score_awarded) return
+
+  // Award 15 points to each assignee
+  for (const userId of assignees) {
+    const { data: profile } = await db
+      .from('profiles')
+      .select('total_score')
+      .eq('id', userId)
+      .single()
+      
+    if (profile) {
+      await db
+        .from('profiles')
+        .update({ total_score: (profile.total_score || 0) + 15 })
+        .eq('id', userId)
+    }
+  }
+
+  // Mark score as awarded
+  await db.from('tasks').update({ score_awarded: true }).eq('id', taskId)
 }
 
 async function insertTask(task: TaskPayload) {
@@ -130,7 +171,7 @@ async function notifyAssignees(assignees: string[], title: string, taskId: strin
       type: 'task_created',
       title: 'New task assigned',
       message: `You were assigned to ${title}`,
-      link: `/dashboard?taskId=${taskId}`
+      link: `/?taskId=${taskId}`
     }))
   )
 

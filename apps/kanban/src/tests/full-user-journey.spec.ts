@@ -134,7 +134,7 @@ const DOWNLOAD_DIR = path.join(process.cwd(), 'test-results', 'downloads')
 
 // ── Helpers ─────────────────────────────────────────────────────────
 async function waitForDashboard(page: Page) {
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 25_000 })
+  await expect(page).toHaveURL(/\/$/, { timeout: 25_000 })
 }
 
 /** Dismiss the Next.js dev error overlay if present (e.g. GlobalAnnouncement subscribe error) */
@@ -247,7 +247,7 @@ test.describe('Espeezy — Full User Journey', () => {
     // ── Pre-populate profile to skip the onboarding modal ────────────
     console.log(`      ✓ Profile pre-populated (placeholder for Firestore set)`)
     
-    await page.goto('/dashboard', { waitUntil: 'domcontentloaded', timeout: 45_000 })
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 45_000 })
     console.log(`      post-goto URL: ${page.url()}`)
     await waitForDashboard(page)
     await dismissDevOverlay(page)
@@ -255,11 +255,11 @@ test.describe('Espeezy — Full User Journey', () => {
 
     // ── 2. UPDATE PROFILE ───────────────────────────────────────────
     console.log(`[2/10] Updating profile settings`)
-    await page.goto('/dashboard/settings', { waitUntil: 'domcontentloaded' })
+    await page.goto('/settings', { waitUntil: 'domcontentloaded' })
     await dismissDevOverlay(page)
 
     // Wait for settings URL in case there was a redirect
-    await expect(page).toHaveURL(/\/dashboard\/settings/, { timeout: 10_000 })
+    await expect(page).toHaveURL(/\/settings/, { timeout: 10_000 })
 
     // Confirm Settings page loaded (profile pre-populated → no onboarding modal)
     await expect(page.locator('h1:has-text("Settings")')).toBeVisible({ timeout: 20_000 })
@@ -276,7 +276,7 @@ test.describe('Espeezy — Full User Journey', () => {
 
     // ── 3. CREATE TEAM ──────────────────────────────────────────────
     console.log(`[3/10] Creating team: ${TEAM_NAME}`)
-    await page.goto('/dashboard/join', { waitUntil: 'domcontentloaded' })
+    await page.goto('/join', { waitUntil: 'domcontentloaded' })
     await dismissDevOverlay(page)
     await expect(page.locator('h2:has-text("Create Team")')).toBeVisible({ timeout: 15_000 })
 
@@ -333,11 +333,11 @@ test.describe('Espeezy — Full User Journey', () => {
 
     // ── 6. VIEW ANALYTICS PAGE & VERIFY KPIs ────────────────────────
     console.log(`[6/10] Navigating to analytics page`)
-    await page.goto('/dashboard/analytics', { waitUntil: 'domcontentloaded' })
+    await page.goto('/analytics', { waitUntil: 'domcontentloaded' })
     await dismissDevOverlay(page)
 
-    // Should redirect to /dashboard/analytics/<groupId>
-    await expect(page).toHaveURL(/\/dashboard\/analytics\/[a-f0-9-]+/, { timeout: 15_000 })
+    // Should redirect to /analytics/<groupId>
+    await expect(page).toHaveURL(/\/analytics\/[a-f0-9-]+/, { timeout: 15_000 })
     const analyticsUrl = page.url()
     console.log(`      Analytics URL: ${analyticsUrl}`)
 
@@ -389,7 +389,7 @@ test.describe('Espeezy — Full User Journey', () => {
 
     // ── 8. PERSONAL DATA EXPORT (Settings → Privacy) ────────────────
     console.log(`[8/10] Exporting personal data archive from Settings`)
-    await page.goto('/dashboard/settings', { waitUntil: 'domcontentloaded' })
+    await page.goto('/settings', { waitUntil: 'domcontentloaded' })
     await dismissDevOverlay(page)
     await expect(page.locator('h1:has-text("Settings")')).toBeVisible({ timeout: 20_000 })
 
@@ -466,7 +466,7 @@ test.describe('Espeezy — Full User Journey', () => {
     // ── 9. DELETE ACCOUNT ───────────────────────────────────────────
     console.log(`[9/10] Deleting account`)
     // Navigate fresh to settings to avoid stale state
-    await page.goto('/dashboard/settings', { waitUntil: 'domcontentloaded' })
+    await page.goto('/settings', { waitUntil: 'domcontentloaded' })
     await dismissDevOverlay(page)
     await expect(page.locator('h1:has-text("Settings")')).toBeVisible({ timeout: 20_000 })
 
@@ -491,7 +491,7 @@ test.describe('Espeezy — Full User Journey', () => {
     console.log(`[9/10] ✓ Account deleted — redirected to /login`)
 
     // Verify can no longer access the dashboard
-    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' })
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
     await expect(page).toHaveURL(/\/login/, { timeout: 15_000 })
     console.log(`[10/10] ✓ Dashboard access blocked after deletion — /login confirmed`)
 

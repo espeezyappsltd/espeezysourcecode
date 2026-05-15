@@ -7,23 +7,25 @@ export const db = createBrowserSupabaseClient()
 // --- AUTH SHIM ---
 export const auth = {
   get currentUser() {
-    return {
-      uid: '00000000-0000-0000-0000-000000000000',
-      email: 'test@example.com',
-      displayName: 'Test User',
-    }
+    // Note: This is synchronous in Firebase but asynchronous in Supabase.
+    // For now, we return a partial user from the current session if available.
+    return (db as any)._session?.user || null
   },
   signOut: () => db.auth.signOut(),
   onAuthStateChanged: (cb: any) => {
-    // Immediate callback for testing
-    setTimeout(() => {
-      cb({
-        uid: '00000000-0000-0000-0000-000000000000',
-        email: 'test@example.com',
-        displayName: 'Test User',
-      });
-    }, 0);
-    return { subscription: { unsubscribe: () => { } } };
+    const { data } = db.auth.onAuthStateChange((event, session) => {
+      // Store session for the synchronous currentUser getter
+      ;(db as any)._session = session
+      cb(session?.user || null)
+    })
+    
+    // Trigger immediate callback if session exists
+    db.auth.getSession().then(({ data: { session } }) => {
+      ;(db as any)._session = session
+      cb(session?.user || null)
+    })
+
+    return { subscription: { unsubscribe: () => data.subscription.unsubscribe() } }
   },
 } as any
 
@@ -46,19 +48,11 @@ export const getDownloadURL = async (path: string) => {
 export const storageRef = ref
 
 // --- DATABASE SHIM ---
-export const database = {
-  ref: (path: string) => ({
-    on: (evt: string, cb: any) => cb({ val: () => ({}) }),
-    off: () => { },
-    set: async () => { },
-    update: async () => { },
-    remove: async () => { },
-    push: () => ({ key: 'mock-key', set: async () => { } }),
-    onDisconnect: () => ({ remove: () => { } }),
-  })
-} as any
+// Legacy database shim removed as it is no longer used.
 
 // --- FIRESTORE SHIM ---
+// These helpers map Firestore-like syntax to Supabase calls.
+// They are kept as thin wrappers to avoid refactoring 20+ files.
 export const collection = (_db: any, name: string) => name
 export const doc = (_db: any, name: string, id: string) => ({ table: name, id })
 export const query = (table: string, ...constraints: any[]) => {
@@ -162,6 +156,7 @@ export const writeBatch = (_db?: any) => {
     }
   }
 }
+
 
 // For backward compatibility
 export const createClient = () => db

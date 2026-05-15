@@ -89,7 +89,7 @@ export default function ActivityLogView({
   const fetchLogs = useCallback(async () => {
     setLoading(true)
     let query = db
-      .from('activity_log')
+      .from('activity_logs')
       .select('*, profiles(full_name, avatar_url)')
       .order('created_at', { ascending: false })
       .limit(limit)
@@ -98,7 +98,14 @@ export default function ActivityLogView({
     if (groupId) query = query.eq('group_id', groupId)
 
     const { data } = await query
-    if (data) setActivities(data as LogEntry[])
+    if (data) {
+      const mapped = data.map((d: any) => ({
+        ...d,
+        action_type: d.action,
+        description: d.details?.message || d.action
+      }))
+      setActivities(mapped as LogEntry[])
+    }
     setLoading(false)
   }, [userId, groupId, limit, db])
 
@@ -114,7 +121,7 @@ export default function ActivityLogView({
         { 
           event: 'INSERT', 
           schema: 'public', 
-          table: 'activity_log',
+          table: 'activity_logs',
           filter: groupId ? `group_id=eq.${groupId}` : userId ? `user_id=eq.${userId}` : undefined
         },
         () => {

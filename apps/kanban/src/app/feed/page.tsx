@@ -234,7 +234,9 @@ export default function FeedPage() {
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
           <Avatar profile={profile as unknown as PostAuthor} size={38} />
           <div style={{ flex: 1 }}>
+            <label htmlFor="feed-composer" className="sr-only">What's on your mind?</label>
             <textarea
+              id="feed-composer"
               value={composerText}
               onChange={e => setComposerText(e.target.value)}
               placeholder="What's on your mind?"
@@ -384,12 +386,12 @@ function PostCard({
       {/* Reaction counts row */}
       {totalReactions > 0 && (
         <div style={{ padding: '0.5rem 1.25rem 0', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <div style={{ display: 'flex', gap: '2px' }}>
+          <div style={{ display: 'flex', gap: '2px' }} aria-hidden="true">
             {reactionCounts.slice(0, 3).map(([r]) => (
               <span key={r} style={{ fontSize: '0.8rem' }}>{REACTION_META[r].emoji}</span>
             ))}
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>{totalReactions.toLocaleString()}</span>
+          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }} aria-label={`${totalReactions} reactions`}>{totalReactions.toLocaleString()}</span>
         </div>
       )}
 
@@ -401,19 +403,26 @@ function PostCard({
             onClick={onToggleReactionPicker}
             active={!!userReaction}
             label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : '👍 React'}
+            ariaLabel="Open reaction picker"
+            ariaExpanded={showReactionPicker}
           />
           {showReactionPicker && (
-            <div style={{
-              position: 'absolute', bottom: '110%', left: 0,
-              background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '12px', padding: '0.5rem', display: 'flex', gap: '0.25rem',
-              zIndex: 100, boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            }}>
+            <div 
+              role="group"
+              aria-label="Reaction picker"
+              style={{
+                position: 'absolute', bottom: '110%', left: 0,
+                background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px', padding: '0.5rem', display: 'flex', gap: '0.25rem',
+                zIndex: 100, boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              }}
+            >
               {(Object.entries(REACTION_META) as [Reaction, typeof REACTION_META[Reaction]][]).map(([key, meta]) => (
                 <button
                   key={key}
                   onClick={() => onReaction(post.id, key)}
                   title={meta.label}
+                  aria-label={meta.label}
                   style={{
                     background: userReaction === key ? 'rgba(16,185,129,0.2)' : 'transparent',
                     border: 'none', cursor: 'pointer', fontSize: '1.3rem', padding: '0.3rem',
@@ -422,7 +431,7 @@ function PostCard({
                   onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.35)')}
                   onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  {meta.emoji}
+                  <span aria-hidden="true">{meta.emoji}</span>
                 </button>
               ))}
             </div>
@@ -432,6 +441,8 @@ function PostCard({
         <ActionButton
           onClick={onToggleComments}
           label={`💬 ${commentCount > 0 ? commentCount : ''} Comment${commentCount !== 1 ? 's' : ''}`}
+          ariaLabel={`${commentCount} comments. Click to expand.`}
+          ariaExpanded={!!comments || loadingComments}
         />
       </div>
 
@@ -453,7 +464,9 @@ function PostCard({
           {/* Comment input */}
           <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginTop: '0.5rem' }}>
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: '#0d0d0d', borderRadius: '20px', padding: '0.4rem 0.75rem', gap: '0.5rem' }}>
+              <label htmlFor={`comment-${post.id}`} className="sr-only">Write a comment</label>
               <input
+                id={`comment-${post.id}`}
                 value={commentText}
                 onChange={e => onCommentTextChange(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSubmitComment() }}}
@@ -488,15 +501,19 @@ function Avatar({ profile, size = 36 }: { profile?: PostAuthor | null; size?: nu
   )
 }
 
-function ActionButton({ onClick, label, active }: { onClick: () => void; label: string; active?: boolean }) {
+function ActionButton({ onClick, label, active, ariaLabel, ariaExpanded }: { onClick: () => void; label: string; active?: boolean; ariaLabel?: string; ariaExpanded?: boolean }) {
   return (
-    <button onClick={onClick} style={{
-      background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem 0.75rem',
-      borderRadius: '8px', color: active ? '#10B981' : 'rgba(255,255,255,0.5)',
-      fontWeight: 700, fontSize: '0.78rem', transition: 'background 0.15s',
-    }}
-    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    <button 
+      onClick={onClick} 
+      aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      style={{
+        background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem 0.75rem',
+        borderRadius: '8px', color: active ? '#10B981' : 'rgba(255,255,255,0.5)',
+        fontWeight: 700, fontSize: '0.78rem', transition: 'background 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
     >
       {label}
     </button>
@@ -507,13 +524,14 @@ function VisibilityToggle({ value, onChange }: { value: 'public' | 'connections'
   return (
     <button
       onClick={() => onChange(value === 'public' ? 'connections' : 'public')}
+      aria-label={`Current visibility: ${value}. Click to toggle.`}
       style={{
         display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255,255,255,0.06)',
         border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.3rem 0.6rem',
         color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer',
       }}
     >
-      {value === 'public' ? <Globe size={11} /> : <Users size={11} />}
+      {value === 'public' ? <Globe size={11} aria-hidden="true" /> : <Users size={11} aria-hidden="true" />}
       {value === 'public' ? 'Public' : 'Connections'}
     </button>
   )

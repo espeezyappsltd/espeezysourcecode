@@ -206,10 +206,11 @@ function LoginContent() {
           {authTab === 'email' || isSignUp ? (
             <>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Authentication Identity</label>
+                <label className="form-label" htmlFor="email" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Authentication Identity</label>
                 <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
+                  <User size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
                   <input
+                    id="email"
                     className="form-input"
                     type="email"
                     required
@@ -222,7 +223,7 @@ function LoginContent() {
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label className="form-label" htmlFor="password" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span>Access Secret</span>
                   {!isSignUp && (
                     <button
@@ -230,14 +231,16 @@ function LoginContent() {
                       onClick={handleResetPassword}
                       style={{ background: 'none', border: 'none', color: 'var(--brand, #10b981)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                       disabled={isResetting}
+                      aria-label="Send password recovery link"
                     >
                       {isResetting ? 'Processing...' : 'Recovery link'}
                     </button>
                   )}
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
+                  <Lock size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
                   <input
+                    id="password"
                     className="form-input"
                     type="password"
                     required
@@ -252,10 +255,11 @@ function LoginContent() {
           ) : (
             <>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Phone Identity</label>
+                <label className="form-label" htmlFor="phone">Phone Identity</label>
                 <div style={{ position: 'relative' }}>
-                  <Phone size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
+                  <Phone size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
                   <input
+                    id="phone"
                     className="form-input"
                     type="tel"
                     required
@@ -270,13 +274,14 @@ function LoginContent() {
 
               {otpSent && (
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <label className="form-label" htmlFor="otp" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Authorization Code</span>
                     <button type="button" onClick={() => setOtpSent(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', cursor: 'pointer' }}>Retry identity</button>
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <HashIcon size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
+                    <HashIcon size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
                     <input
+                      id="otp"
                       className="form-input"
                       type="text"
                       required
@@ -346,12 +351,12 @@ function LoginContent() {
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <button onClick={handleGoogleLogin} style={{ padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
-                <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.56 2.68-3.86 2.68-6.62z" fill="#4285F4"/><path d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.92-2.26c-.8.54-1.84.86-3.03.86-2.33 0-4.3-1.57-5-3.68H.98V13.1A8.99 8.99 0 0 0 9 18z" fill="#34A853"/><path d="M4 10.74A5.4 5.4 0 0 1 3.72 9c0-.6.1-1.18.28-1.74V5H.98A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.98 4.1L4 10.74z" fill="#FBBC05"/><path d="M9 3.58c1.32 0 2.5.46 3.43 1.36l2.57-2.58C13.45.9 11.43 0 9 0A8.99 8.99 0 0 0 .98 5L4 7.26C4.7 5.15 6.67 3.58 9 3.58z" fill="#EA4335"/></svg>
+              <button onClick={handleGoogleLogin} aria-label="Sign in with Google" style={{ padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
+                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.56 2.68-3.86 2.68-6.62z" fill="#4285F4"/><path d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.92-2.26c-.8.54-1.84.86-3.03.86-2.33 0-4.3-1.57-5-3.68H.98V13.1A8.99 8.99 0 0 0 9 18z" fill="#34A853"/><path d="M4 10.74A5.4 5.4 0 0 1 3.72 9c0-.6.1-1.18.28-1.74V5H.98A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.98 4.1L4 10.74z" fill="#FBBC05"/><path d="M9 3.58c1.32 0 2.5.46 3.43 1.36l2.57-2.58C13.45.9 11.43 0 9 0A8.99 8.99 0 0 0 .98 5L4 7.26C4.7 5.15 6.67 3.58 9 3.58z" fill="#EA4335"/></svg>
                 Google
               </button>
-              <button onClick={handleGithubLogin} style={{ padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
-                <ExternalLink size={18} color="rgba(255,255,255,0.4)" />
+              <button onClick={handleGithubLogin} aria-label="Sign in with GitHub" style={{ padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
+                <ExternalLink size={18} color="rgba(255,255,255,0.4)" aria-hidden="true" />
                 GitHub
               </button>
             </div>

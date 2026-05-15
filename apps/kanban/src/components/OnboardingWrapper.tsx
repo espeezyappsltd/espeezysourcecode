@@ -6,7 +6,7 @@ import { OnboardingWrapperProps } from '@/types/ui'
 import { useProfile } from '@/context/ProfileContext'
 
 export default function OnboardingWrapper({ user, profile: initialProfile, children }: OnboardingWrapperProps) {
-  const { profile: contextProfile } = useProfile()
+  const { profile: contextProfile, loading } = useProfile()
   const profile = contextProfile || initialProfile
   
   const [mounted, setMounted] = useState(false)
@@ -14,12 +14,26 @@ export default function OnboardingWrapper({ user, profile: initialProfile, child
 
   useEffect(() => {
     setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || loading) return
+
+    const isDismissed = localStorage.getItem('espeezy_onboarding_dismissed') === 'true'
+    
+    if (isDismissed) {
+      setShowOnboarding(false)
+      return
+    }
+
     if (!profile?.full_name || !profile?.avatar_url) {
       setShowOnboarding(true)
+    } else {
+      setShowOnboarding(false)
     }
-  }, [profile])
+  }, [profile, loading, mounted])
 
-  if (!mounted) {
+  if (!mounted || (loading && !profile)) {
     return <div style={{ visibility: 'hidden' }}>{children}</div>
   }
 

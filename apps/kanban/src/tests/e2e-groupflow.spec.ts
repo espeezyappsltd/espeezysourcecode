@@ -35,13 +35,13 @@ test.describe('End-to-End: Espeezy Control Station', () => {
       await p.click('button[type="submit"]');
       
       // Wait for Dashboard landing
-      await expect(p).toHaveURL(/\/dashboard/);
+      await expect(p).toHaveURL(/\/$/);
       await expect(p.locator('text=Academic Hub Active')).toBeVisible();
     }
 
     // 2. TEAM INITIALIZATION (User 0 creates the team)
     await pages[0].click('text=Join or Create Team');
-    await expect(pages[0]).toHaveURL(/\/dashboard\/join/);
+    await expect(pages[0]).toHaveURL(/\/join/);
     
     await pages[0].fill('input[id="name"]', 'Alpha Test Team');
     await pages[0].fill('input[id="module_code"]', moduleCode);
@@ -49,7 +49,7 @@ test.describe('End-to-End: Espeezy Control Station', () => {
     await pages[0].click('button:has-text("Create Workspace")');
 
     // Wait for redirect to Dashboard with Kanban
-    await expect(pages[0]).toHaveURL(/\/dashboard/);
+    await expect(pages[0]).toHaveURL(/\/$/);
     await expect(pages[0].locator('text=Alpha Test Team')).toBeVisible();
 
     // 3. TEAM COALESCENCE (Users 1-3 join the team)
@@ -60,7 +60,7 @@ test.describe('End-to-End: Espeezy Control Station', () => {
       await p.fill('input[id="join_password"]', joinPassword);
       await p.click('button:has-text("Join Team")');
       
-      await expect(p).toHaveURL(/\/dashboard/);
+      await expect(p).toHaveURL(/\/$/);
       await expect(p.locator('text=Alpha Test Team')).toBeVisible();
     }
 

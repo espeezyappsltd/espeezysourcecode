@@ -25,39 +25,5 @@ export default async function FeedLayout({
     redirect('/login')
   }
 
-  const { data: profile } = await db
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  const initialTheme = {
-    palette: profile?.theme_config?.palette || 'Google Light',
-    bgUrl: profile?.custom_bg_url
-  }
-
-  return (
-    <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
-      <GlobalLoadingProvider>
-        <ProfileProvider userId={user.id} initialProfile={profile as import('@/types/auth').Profile | null}>
-          <div className="dashboard-layout">
-            <PresenceProvider user={user}>
-              <NotificationProvider>
-                <Sidebar user={user} />
-
-                <main className="main-content">
-                  <ConnectionAlertTray />
-                  {children}
-                </main>
-
-                <GlobalAnnouncement />
-                <SupportChat />
-                <BottomNav />
-              </NotificationProvider>
-            </PresenceProvider>
-          </div>
-        </ProfileProvider>
-      </GlobalLoadingProvider>
-    </ThemeProvider>
-  )
+  return <>{children}</>
 }

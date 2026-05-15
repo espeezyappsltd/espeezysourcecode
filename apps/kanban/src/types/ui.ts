@@ -162,12 +162,13 @@ export type OnboardingModalProps = {
 }
 
 export type TaskModalProps = {
-  task: import('./database').Task | null
+  task: import('./database').Task | null | undefined
   groupId: string
   onClose: () => void
   onRefresh: () => Promise<void> | void
   onTaskSaved?: () => Promise<void> | void
   initialDueDate?: string
+  initialStatus?: import('./database').TaskStatus
   onlineUserIds?: Set<string>
 }
 

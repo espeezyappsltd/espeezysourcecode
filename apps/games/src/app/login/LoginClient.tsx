@@ -390,6 +390,9 @@ export default function LoginClient() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/login`,
+          data: {
+            legal_accepted: legalAccepted,
+          }
         },
       });
       if (signUpError) {

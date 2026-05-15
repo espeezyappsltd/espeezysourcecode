@@ -145,7 +145,7 @@ async function handleCheckoutCompleted(db: AdminDb, userId: string, payload: Pay
     type: 'payment_completed',
     title: 'Protocol Authorization Secured',
     message: `Thank you, Scholar. Your institutional clearance for ${planLabel} is now active.`,
-    link: `/dashboard/invoice/${paymentId}`,
+    link: `/invoice/${paymentId}`,
     created_at: new Date().toISOString()
   })
 }

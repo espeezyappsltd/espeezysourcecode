@@ -8,7 +8,8 @@ import {
   ArrowRight, 
   Sparkles, 
   ShieldCheck,
-  Zap
+  Zap,
+  X
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
@@ -32,11 +33,15 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
   const [selectedAvatar, setSelectedAvatar] = useState('')
   const [saving, setSaving] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const { refreshProfile, setProfile } = useProfile()
+  const [neverShowAgain, setNeverShowAgain] = useState(false)
+  const { profile, refreshProfile, setProfile } = useProfile()
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    if (profile?.full_name) {
+      setFullName(profile.full_name)
+    }
+  }, [profile])
 
   const db = createBrowserSupabaseClient()
 
@@ -48,6 +53,9 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
     if (step === 2 && !selectedAvatar) return
     
     if (step === 3) {
+      if (neverShowAgain) {
+        localStorage.setItem('espeezy_onboarding_dismissed', 'true')
+      }
       onComplete()
       return
     }
@@ -112,6 +120,28 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
         display: 'flex', flexDirection: 'column'
       }}>
         
+        {/* Close Button */}
+        <button 
+          onClick={() => {
+            if (neverShowAgain) {
+              localStorage.setItem('espeezy_onboarding_dismissed', 'true')
+            }
+            onComplete()
+          }}
+          style={{
+            position: 'absolute', top: '1.5rem', right: '1.5rem',
+            background: 'none', border: 'none', color: 'var(--text-sub)',
+            cursor: 'pointer', padding: '0.5rem', borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-sub)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'none'}
+          aria-label="Close onboarding"
+        >
+          <X size={24} />
+        </button>
+
         {/* Progress Bar */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '3rem' }}>
           {[1, 2, 3].map(i => (
@@ -131,16 +161,29 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>Welcome to Espeezy</h1>
             <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Lets set up your profile. What name should we show in the dashboard?</p>
             
-            <div className="form-group">
-               <label className="form-label" style={{ fontSize: '0.8rem', opacity: 0.7 }}>YOUR FULL NAME</label>
-               <input 
-                 type="text" className="form-input" 
-                 value={fullName} onChange={e => setFullName(e.target.value)} 
-                 placeholder="e.g. Alan Turing"
-                 autoFocus
-                 style={{ fontSize: '1.25rem', padding: '1rem' }}
-               />
-            </div>
+             <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.8rem', opacity: 0.7 }}>YOUR FULL NAME</label>
+                <input 
+                  type="text" className="form-input" 
+                  value={fullName} onChange={e => setFullName(e.target.value)} 
+                  placeholder="e.g. Alan Turing"
+                  autoFocus
+                  style={{ fontSize: '1.25rem', padding: '1rem' }}
+                />
+             </div>
+
+             <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <input 
+                  type="checkbox" 
+                  id="neverShowAgain"
+                  checked={neverShowAgain} 
+                  onChange={e => setNeverShowAgain(e.target.checked)} 
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--brand)' }}
+                />
+                <label htmlFor="neverShowAgain" style={{ fontSize: '0.9rem', color: 'var(--text-sub)', cursor: 'pointer' }}>
+                  Never show this again
+                </label>
+             </div>
             
             <button 
               onClick={handleNext} 

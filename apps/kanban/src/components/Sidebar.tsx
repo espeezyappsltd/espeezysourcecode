@@ -102,7 +102,7 @@ function ProfileAvatar({
       alt={alt}
       size={size}
       fallback={fallback}
-      imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      imgStyle={{ width: '100%', height: 'auto', aspectRatio: '1/1', objectFit: 'cover' }}
     />
   )
 }
@@ -515,8 +515,8 @@ export default function Sidebar({ user }: SidebarProps) {
 
         {isOpen && (
           <div style={{ padding: '0 1rem 0.5rem' }}>
-            <Link href="/fund" className="support-link" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.625rem 1rem', borderRadius: '12px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', textDecoration: 'none', transition: 'all 0.2s' }}>
-              <Heart size={14} color="var(--brand)" />
+            <Link href="/fund" className="support-link" aria-label="Support the Developers: Even $5 keeps a feature alive" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.625rem 1rem', borderRadius: '12px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', textDecoration: 'none', transition: 'all 0.2s' }}>
+              <Heart size={14} color="var(--brand)" aria-hidden="true" />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-0.01em' }}>Support the Devs</div>
                 <div style={{ fontSize: '0.58rem', color: 'var(--text-sub)', fontWeight: 600 }}>Even $5 keeps a feature alive</div>
@@ -549,10 +549,10 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.4rem' }}>
-            <button onClick={toggleTheme} style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Toggle Aesthetics" className="panel-tool">
+            <button onClick={toggleTheme} style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Toggle Aesthetics" aria-label="Toggle Theme" className="panel-tool">
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button onClick={handleSignOut} style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="End Session" className="panel-tool">
+            <button onClick={handleSignOut} style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="End Session" aria-label="Sign Out" className="panel-tool">
               <LogOut size={18} />
             </button>
           </div>

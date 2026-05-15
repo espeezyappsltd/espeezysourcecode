@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import Image from 'next/image'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
@@ -31,6 +31,7 @@ export default function TaskModal({
   onRefresh,
   onTaskSaved,
   initialDueDate,
+  initialStatus,
   onlineUserIds
 }: TaskModalProps) {
   const db = useMemo(() => createBrowserSupabaseClient(), [])
@@ -41,7 +42,7 @@ export default function TaskModal({
 
   const [title, setTitle] = useState(task?.title || '')
   const [description, setDescription] = useState(task?.description || '')
-  const [status, setStatus] = useState<TaskStatus>(task?.status || 'To Do')
+  const [status, setStatus] = useState<TaskStatus>(task?.status || initialStatus || 'To Do')
   const [category, setCategory] = useState<TaskCategory>(task?.category || 'Implementation')
   const [assignees, setAssignees] = useState<string[]>(task?.assignees || [])
   const [dueDate, setDueDate] = useState<string>(
@@ -150,6 +151,15 @@ export default function TaskModal({
       db.removeChannel(channel)
     }
   }, [db, isEditMode, task])
+
+  // Accessibility: Handle Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -461,7 +471,7 @@ export default function TaskModal({
                      return (
                        <div 
                          key={userId} 
-                         onClick={() => router.push(`/dashboard/network/profile/${userId}`)}
+                         onClick={() => router.push(`/network/profile/${userId}`)}
                          style={{ 
                            width: '24px', height: '24px', borderRadius: '50%', 
                            border: '2px solid var(--bg-sub)', marginLeft: i === 0 ? 0 : '-8px',
@@ -492,7 +502,7 @@ export default function TaskModal({
                </div>
             )}
           </h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }} aria-label="Close modal">
              <X size={20} />
           </button>
         </div>
@@ -503,8 +513,9 @@ export default function TaskModal({
           {/* Form Fields */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1rem' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Task Name</label>
+              <label className="form-label" htmlFor="task-title">Task Name</label>
               <input 
+                id="task-title"
                 className="form-input" 
                 value={title} 
                 onChange={e => setTitle(e.target.value)} 
@@ -516,12 +527,13 @@ export default function TaskModal({
             
             <div className="form-group" style={{ marginBottom: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <label className="form-label" style={{ marginBottom: 0 }}>Description</label>
+                <label className="form-label" htmlFor="task-desc" style={{ marginBottom: 0 }}>Description</label>
                 <button
                   type="button"
                   onClick={handleAIGenerate}
                   disabled={aiLoading || !title.trim()}
                   className="secondary-button"
+                  aria-label="Use AI to generate description"
                   style={{
                     padding: '0.55rem 0.85rem',
                     fontSize: '0.85rem',
@@ -534,6 +546,7 @@ export default function TaskModal({
                 </button>
               </div>
               <textarea 
+                id="task-desc"
                 className="form-input" 
                 value={description || ''} 
                 onChange={e => setDescription(e.target.value)} 
@@ -553,22 +566,23 @@ export default function TaskModal({
 
              <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
                <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
-                 <label className="form-label">Status</label>
-                 <select className="form-input" value={status} onChange={e => setStatus(e.target.value as TaskStatus)}>
+                 <label className="form-label" htmlFor="task-status">Status</label>
+                 <select id="task-status" className="form-input" value={status} onChange={e => setStatus(e.target.value as TaskStatus)}>
                    {COLUMNS.map(c => <option key={c} value={c}>{c}</option>)}
                  </select>
                </div>
                
                <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
-                  <label className="form-label">Category</label>
-                  <select className="form-input" value={category} onChange={e => setCategory(e.target.value as TaskCategory)}>
+                  <label className="form-label" htmlFor="task-category">Category</label>
+                  <select id="task-category" className="form-input" value={category} onChange={e => setCategory(e.target.value as TaskCategory)}>
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                
                <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
-                 <label className="form-label" style={{ color: 'var(--error)' }}>Due Date</label>
+                 <label className="form-label" htmlFor="task-date" style={{ color: 'var(--error)' }}>Due Date</label>
                  <input 
+                   id="task-date"
                    type="date"
                    className="form-input"
                    value={dueDate}
@@ -583,7 +597,9 @@ export default function TaskModal({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <label className="form-label" style={{ margin: 0 }}>Assignments</label>
                 <div style={{ position: 'relative', width: '100%', maxWidth: '220px' }}>
+                  <label htmlFor="member-search" className="sr-only">Search collaborators</label>
                   <input 
+                    id="member-search"
                     type="text" 
                     placeholder="Search collaborators..."
                     value={searchQuery}
@@ -620,7 +636,17 @@ export default function TaskModal({
                     return (
                       <div 
                         key={member.id}
+                        tabIndex={0}
+                        role="checkbox"
+                        aria-checked={isAssigned}
+                        aria-label={`Assign to ${member.full_name || 'Member'}`}
                         onClick={() => toggleMemberAssignment(member.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleMemberAssignment(member.id);
+                          }
+                        }}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -631,8 +657,11 @@ export default function TaskModal({
                           border: isAssigned ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                           cursor: 'pointer',
                           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                          position: 'relative'
+                          position: 'relative',
+                          outline: 'none'
                         }}
+                        onFocus={(e) => e.currentTarget.style.borderColor = 'var(--brand)'}
+                        onBlur={(e) => e.currentTarget.style.borderColor = isAssigned ? 'var(--brand)' : 'var(--border)'}
                       >
                         <div style={{ position: 'relative', flexShrink: 0 }}>
                           {member.avatar_url ? (

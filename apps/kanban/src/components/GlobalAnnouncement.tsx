@@ -6,13 +6,14 @@ import { AlertCircle, X, Shield, Activity, Globe } from 'lucide-react'
 import { db, createBrowserSupabaseClient } from '@/lib/db-client'
 
 interface AnnouncementConfig {
-  key: string
-  is_active: boolean
-  value: {
+  id: string
+  config_key: string
+  config_value: {
     title: string
     message: string
     style: 'elite' | 'alert'
   }
+  is_active: boolean
 }
 
 export default function GlobalAnnouncement() {
@@ -36,10 +37,10 @@ export default function GlobalAnnouncement() {
       const { data } = await db
         .from('platform_config')
         .select('*')
-        .eq('key', 'global_announcement')
+        .eq('config_key', 'global_announcement')
         .single()
       
-      if (data) setConfig(data)
+      if (data) setConfig(data as AnnouncementConfig)
     }
     fetchConfig()
 
@@ -48,7 +49,7 @@ export default function GlobalAnnouncement() {
 
   if (!isClient || !isVisible || !config?.is_active) return null
 
-  const { title, message, style } = config.value || { title: 'Institutional Update', message: '', style: 'elite' }
+  const { title, message, style } = config.config_value || { title: 'Institutional Update', message: '', style: 'elite' }
 
   return (
     <AnimatePresence>

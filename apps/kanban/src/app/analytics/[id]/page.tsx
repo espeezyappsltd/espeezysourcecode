@@ -153,20 +153,35 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   }))
 
   // --- EXPORT ---
+  // --- EXPORT ---
   const exportToCSV = async () => {
     setLoading(true)
     try {
       const logs = await fetchActivityLogByGroup(groupId)
-      const headers = ['Type', 'User', 'Description', 'Timestamp']
+      const headers = ['Type', 'User', 'Description', 'Timestamp', 'Impact Score']
       const rows = logs.map((l: any) => {
-        return [l.action_type || l.action, l.user_name || 'System', l.description || l.message, l.created_at]
+        return [l.action_type || l.action, l.user_name || 'System', l.description || l.message, l.created_at, l.impact_score || 0]
       })
-      const csvContent = [headers, ...rows].map(e => e.map((c: string) => `"${c}"`).join(',')).join('\n')
+      
+      // Add member summary to CSV
+      rows.push([])
+      rows.push(['MEMBER SUMMARY'])
+      rows.push(['Name', 'Completed Tasks', 'Assigned Tasks', 'Total Score'])
+      members.forEach(m => {
+        rows.push([
+          m.full_name || 'Anonymous',
+          calculateMemberEffort(m.id),
+          tasks.filter(t => t.assignees?.includes(m.id)).length,
+          m.total_score || 0
+        ])
+      })
+
+      const csvContent = [headers, ...rows].map(e => e.map((c: any) => `"${c}"`).join(',')).join('\n')
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.setAttribute('href', url)
-      link.setAttribute('download', `Espeezy_${group?.module_code || 'Report'}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.setAttribute('download', `Espeezy_Intelligence_${group?.module_code || 'Report'}_${new Date().toISOString().split('T')[0]}.csv`)
       document.body.appendChild(link); link.click(); document.body.removeChild(link)
     } catch (err) {
       console.error('Export error:', err)
@@ -250,6 +265,25 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           </button>
         </div>
       </header>
+
+      {/* Printable Executive Summary */}
+      <section className="print-only" style={{ display: 'none', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Executive Project Intelligence Report</h2>
+        <p style={{ fontSize: '0.9rem', color: '#333' }}>
+          This report provides a snapshot of team collaboration and project progress for <strong>{group?.name}</strong> ({group?.module_code}).
+          Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase' }}>Project Health</h3>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{completionRate}% Complete • {riskLevel} Risk • {overdueTasks} Overdue</p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase' }}>Team Contribution</h3>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{members.length} Active Scholars • {totalGroupEffort} Tasks Resolved</p>
+          </div>
+        </div>
+      </section>
 
       {/* KPI Row */}
       <div className="kpi-grid" style={{ 
@@ -527,6 +561,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         @media print {
           @page { margin: 1cm; }
           button, .print-hide, .btn, .panel-tool, header .btn-inline { display: none !important; }
+          .print-only { display: block !important; }
           body { background: white !important; color: black !important; padding: 0 !important; }
           .page-fade { animation: none !important; transform: none !important; }
           .kpi-grid { gap: 0.5rem !important; }

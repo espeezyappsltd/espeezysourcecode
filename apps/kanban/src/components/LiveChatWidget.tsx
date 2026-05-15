@@ -126,19 +126,22 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
   return (
     <>
       {newUserEvent && newUserEvent.username && (
-        <div style={{ position: 'fixed', right: '1rem', bottom: '5.5rem', zIndex: 1200, background: '#111827', color: '#f9fafb', border: '1px solid #374151', borderRadius: '10px', padding: '0.6rem 0.8rem', fontSize: '0.8rem', boxShadow: '0 6px 20px rgba(0,0,0,0.35)' }}>
+        <div style={{ position: 'fixed', right: '1.5rem', bottom: '6rem', zIndex: 1200, background: 'white', color: '#0f172a', border: '1px solid rgba(15,23,42,0.1)', borderRadius: '12px', padding: '0.75rem 1rem', fontSize: '0.85rem', fontWeight: 600, boxShadow: '0 10px 40px rgba(15,23,42,0.12)', borderLeft: '4px solid #6366f1' }}>
           {newUserEvent.username} joined live chat
         </div>
       )}
 
       {open && (
-        <div style={{ position: 'fixed', right: '1rem', bottom: '4.5rem', width: '320px', maxHeight: '420px', zIndex: 1200, background: '#0f172a', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <strong style={{ fontSize: '0.85rem' }}>Live Chat ({appScope})</strong>
-            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'transparent', color: '#cbd5e1', border: 'none', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1, padding: '0.25rem 0.5rem' }}>X</button>
+        <div style={{ position: 'fixed', right: '1.5rem', bottom: '5.5rem', width: '340px', maxHeight: '500px', zIndex: 1200, background: 'white', color: '#0f172a', border: '1px solid rgba(15,23,42,0.12)', borderRadius: '20px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 50px rgba(15,23,42,0.15)' }}>
+          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(15,23,42,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} />
+              <strong style={{ fontSize: '0.9rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Community Support</strong>
+            </div>
+            <button type='button' onClick={() => setOpen(false)} aria-label="Close chat" style={{ background: 'rgba(15,23,42,0.05)', color: '#64748b', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 900 }}>✕</button>
           </div>
 
-          <div style={{ padding: '0.5rem 0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(15,23,42,0.06)' }}>
             <input
               value={username}
               onChange={(e) => {
@@ -148,30 +151,37 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
                   window.localStorage.setItem(CHAT_USER_KEY, JSON.stringify({ userId, username: clean, created: new Date().toISOString() }))
                 }
               }}
-              placeholder='username'
-              style={{ width: '100%', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#111827', color: '#f9fafb', padding: '0.45rem 0.55rem', fontSize: '0.8rem' }}
+              placeholder='Set your username'
+              style={{ width: '100%', borderRadius: '10px', border: '1px solid rgba(15,23,42,0.1)', background: '#f1f5f9', color: '#0f172a', padding: '0.55rem 0.75rem', fontSize: '0.85rem', outline: 'none' }}
             />
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#ffffff' }}>
             {orderedMessages.map((m) => (
-              <div key={m.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '0.45rem 0.55rem' }}>
-                <div style={{ fontSize: '0.72rem', color: '#93c5fd', fontWeight: 700 }}>{m.username}</div>
-                <div style={{ fontSize: '0.82rem', color: '#e5e7eb', wordBreak: 'break-word' }}>{m.message}</div>
+              <div key={m.id} style={{ alignSelf: m.username === username ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, marginBottom: '0.2rem', textAlign: m.username === username ? 'right' : 'left', padding: '0 0.4rem' }}>{m.username}</div>
+                <div style={{ background: m.username === username ? '#6366f1' : '#f1f5f9', color: m.username === username ? 'white' : '#0f172a', borderRadius: '14px', borderTopRightRadius: m.username === username ? '2px' : '14px', borderTopLeftRadius: m.username === username ? '14px' : '2px', padding: '0.6rem 0.8rem', fontSize: '0.85rem', lineHeight: 1.4, boxShadow: m.username === username ? '0 4px 12px rgba(99,102,241,0.2)' : 'none' }}>
+                  {m.message}
+                </div>
               </div>
             ))}
-            {orderedMessages.length === 0 && <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>No messages yet. Say hi.</div>}
+            {orderedMessages.length === 0 && (
+              <div style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', marginTop: '2rem' }}>
+                <p>No messages yet.</p>
+                <p style={{ fontSize: '0.75rem' }}>Be the first to say hello!</p>
+              </div>
+            )}
           </div>
 
-          <form onSubmit={sendMessage} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '0.6rem', display: 'flex', gap: '0.4rem' }}>
+          <form onSubmit={sendMessage} style={{ borderTop: '1px solid rgba(15,23,42,0.06)', padding: '0.85rem 1rem', display: 'flex', gap: '0.5rem', background: 'white' }}>
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder='Type message'
+              placeholder='Type a message...'
               maxLength={1000}
-              style={{ flex: 1, borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#111827', color: '#f9fafb', padding: '0.45rem 0.55rem', fontSize: '0.8rem' }}
+              style={{ flex: 1, borderRadius: '12px', border: '1px solid rgba(15,23,42,0.1)', background: '#ffffff', color: '#0f172a', padding: '0.6rem 0.8rem', fontSize: '0.85rem', outline: 'none' }}
             />
-            <button type='submit' disabled={loading || username.trim().length < 3} style={{ borderRadius: '8px', border: 'none', background: '#6366f1', color: 'white', padding: '0.45rem 0.7rem', fontSize: '0.8rem', cursor: 'pointer' }}>
+            <button type='submit' disabled={loading || username.trim().length < 3} style={{ borderRadius: '12px', border: 'none', background: '#6366f1', color: 'white', padding: '0.6rem 1rem', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', transition: 'transform 0.1s ease', opacity: (loading || username.trim().length < 3) ? 0.5 : 1 }}>
               Send
             </button>
           </form>
@@ -181,10 +191,19 @@ export default function LiveChatWidget({ appScope }: { appScope: 'prereg' | 'gam
       <button
         type='button'
         onClick={() => setOpen((v) => !v)}
-        style={{ position: 'fixed', right: '1rem', bottom: '1rem', zIndex: 1200, border: 'none', borderRadius: '999px', width: '52px', height: '52px', background: '#6366f1', color: 'white', fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 20px rgba(99,102,241,0.4)' }}
+        style={{ position: 'fixed', right: '1.5rem', bottom: '1.5rem', zIndex: 1200, border: 'none', borderRadius: '18px', padding: '0 1.5rem', height: '48px', background: '#0f172a', color: 'white', fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 25px rgba(15,23,42,0.25)', display: 'flex', alignItems: 'center', gap: '0.6rem', transition: 'all 0.2s ease' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)'
+          e.currentTarget.style.boxShadow = '0 12px 30px rgba(15,23,42,0.3)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.boxShadow = '0 8px 25px rgba(15,23,42,0.25)'
+        }}
         aria-label='Toggle live chat'
       >
-        Chat
+        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+        Live Support
       </button>
     </>
   )

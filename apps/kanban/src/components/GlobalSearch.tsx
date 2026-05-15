@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import Image from 'next/image'
 
 import React, { useState, useEffect, useRef } from 'react'
@@ -132,17 +132,17 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
     setIsOpen(false)
     setQuery('')
     
-    let path = '/dashboard'
+    let path = '/'
     let label = 'Navigating...'
 
     if (result.type === 'profile') {
-      path = `/dashboard/network/profile/${result.id}`
+      path = `/network/profile/${result.id}`
       label = `Opening ${result.title}...`
     } else if (result.type === 'task') {
-      path = `/dashboard?taskId=${result.id}`
+      path = `/?taskId=${result.id}`
       label = `Opening Task: ${result.title}...`
     } else if (result.type === 'group') {
-      path = `/dashboard/network` 
+      path = `/network` 
       label = `Finding Team: ${result.title}...`
     }
 

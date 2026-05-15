@@ -205,7 +205,7 @@ export async function fetchCommitsByUser(userId: string, rowLimit = 3) {
 export async function fetchActivityLogByGroup(groupId: string) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
-    .from('activity_log')
+    .from('activity_logs')
     .select('id, user_id, group_id, action, details, created_at')
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
@@ -215,6 +215,13 @@ export async function fetchActivityLogByGroup(groupId: string) {
 
 export async function fetchNotificationSettings(userId: string): Promise<DashboardNotificationSettings> {
   const profile = await fetchProfileById(userId)
+  if (!profile) {
+    return {
+      email_notifications: true,
+      push_notifications: true,
+      marketing_emails: false,
+    }
+  }
   return {
     email_notifications: (profile as any).email_notifications ?? true,
     push_notifications: (profile as any).push_notifications ?? true,
@@ -340,4 +347,70 @@ export async function createGameSession(payload: Record<string, unknown>) {
   const db = createBrowserSupabaseClient()
   const { error } = await db.from('game_sessions').insert(payload)
   if (error) throw error
+}
+
+/** ── TEAM MANAGEMENT ────────────────────────────────────────────── */
+
+export async function createTeam(name: string, description: string, ownerId: string) {
+  const db = createBrowserSupabaseClient()
+  
+  // 1. Create Team
+  const { data: team, error: teamError } = await db
+    .from('teams')
+    .insert({ name, description })
+    .select()
+    .single()
+  
+  if (teamError) throw teamError
+
+  // 2. Add Creator as Owner
+  const { error: memberError } = await db
+    .from('team_members')
+    .insert({
+      team_id: team.id,
+      user_id: ownerId,
+      role: 'owner'
+    })
+  
+  if (memberError) throw memberError
+
+  // 3. Update Profile with group_id (compatibility)
+  await updateProfileById(ownerId, { group_id: team.id })
+
+  return team
+}
+
+export async function joinTeam(teamId: string, userId: string, role: string = 'member') {
+  const db = createBrowserSupabaseClient()
+
+  // 1. Check if user is educator
+  const profile = await fetchProfileById(userId)
+  const finalRole = profile?.is_educator ? 'viewer' : role
+
+  // 2. Join Team
+  const { error: memberError } = await db
+    .from('team_members')
+    .insert({
+      team_id: teamId,
+      user_id: userId,
+      role: finalRole
+    })
+  
+  if (memberError) throw memberError
+
+  // 3. Update Profile
+  await updateProfileById(userId, { group_id: teamId })
+
+  return { success: true }
+}
+
+export async function fetchUserTeams(userId: string) {
+  const db = createBrowserSupabaseClient()
+  const { data, error } = await db
+    .from('team_members')
+    .select('team_id, role, teams(*)')
+    .eq('user_id', userId)
+  
+  if (error) throw error
+  return data
 }

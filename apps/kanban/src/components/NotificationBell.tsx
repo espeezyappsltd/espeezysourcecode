@@ -196,7 +196,7 @@ export default function NotificationBell() {
                                      type: 'connection_accepted',
                                      title: 'Request Accepted',
                                      message: `You are now connected.`,
-                                     link: `/dashboard/network/profile/${myId}`,
+                                     link: `/network/profile/${myId}`,
                                      created_at: new Date().toISOString()
                                    });
                                  } catch (err) {
@@ -233,7 +233,7 @@ export default function NotificationBell() {
                                onClick={() => {
                                  const senderId = notif.metadata?.sender_id;
                                  if (senderId) {
-                                   window.location.href = `/dashboard/network/profile/${senderId}`;
+                                   window.location.href = `/network/profile/${senderId}`;
                                  }
                                }}
                              >
@@ -250,7 +250,7 @@ export default function NotificationBell() {
                                onClick={() => {
                                  markAsRead(notif.id);
                                  const roomId = notif.metadata?.room_id;
-                                 if (roomId) window.location.href = `/dashboard/chillout/room/${roomId}`;
+                                 if (roomId) window.location.href = `/chillout/room/${roomId}`;
                                }}
                              >
                                 Accept & Join

@@ -133,35 +133,40 @@ export default function SettingsPage() {
 
       try {
         const data: any = await fetchProfileById(user.id)
-        setFullName(data.full_name || '')
-        setCourseName(data.course_name || '')
-        setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
-        setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
-        setRank(data.rank || 'Senior')
-        setTagline(data.tagline || '')
-        setBiography(data.biography || '')
-        setStack(data.stack || '')
-        setAvatarUrl(data.avatar_url || '')
-        setPhoneNumber(data.phone_number || '')
-        setCountryCode(data.country_code || '')
-        setProtectAvatar(data.protect_avatar || false)
-        setIsPhoneVerified(data.is_phone_verified || false)
-        
-        // Fetch group if exists
-        let groupData = null
-        if (data.group_id) {
-          groupData = await fetchGroupById(data.group_id)
-          setIsEncrypted(groupData?.is_encrypted || false)
-        }
+        if (data) {
+          setFullName(data.full_name || '')
+          setCourseName(data.course_name || '')
+          setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
+          setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
+          setRank(data.rank || 'Senior')
+          setTagline(data.tagline || '')
+          setBiography(data.biography || '')
+          setStack(data.stack || '')
+          setAvatarUrl(data.avatar_url || '')
+          setPhoneNumber(data.phone_number || '')
+          setCountryCode(data.country_code || '')
+          setProtectAvatar(data.protect_avatar || false)
+          setIsPhoneVerified(data.is_phone_verified || false)
+          
+          // Fetch group if exists
+          let groupData = null
+          if (data.group_id) {
+            groupData = await fetchGroupById(data.group_id)
+            setIsEncrypted(groupData?.is_encrypted || false)
+          }
 
-        // Parallelize Secondary Context Fetches
-        const contextFetches = []
-        contextFetches.push(fetchJoinRequests(user.id))
-        if (data.group_id) contextFetches.push(fetchTeam(data.group_id))
-        
-        await Promise.all(contextFetches)
-        
-        setProfile({ id: data.id || user.id, ...data, groups: groupData } as unknown as Profile)
+          // Parallelize Secondary Context Fetches
+          const contextFetches = []
+          contextFetches.push(fetchJoinRequests(user.id))
+          if (data.group_id) contextFetches.push(fetchTeam(data.group_id))
+          
+          await Promise.all(contextFetches)
+          
+          setProfile({ id: data.id || user.id, ...data, groups: groupData } as unknown as Profile)
+        } else {
+          // Handle case where profile doesn't exist yet
+          setProfile({ id: user.id, email: user.email } as unknown as Profile)
+        }
       } catch (err) {
         console.error('Fetch user data error:', err)
       }

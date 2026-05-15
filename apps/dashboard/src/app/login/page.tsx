@@ -40,6 +40,9 @@ function LoginContent() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/login`,
+            data: {
+              legal_accepted: legalAccepted,
+            }
           },
         })
 

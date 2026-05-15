@@ -14,6 +14,7 @@ import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import LiveChatWidget from '@/components/LiveChatWidget'
+import ScreenshotGallery from '@/components/ScreenshotGallery'
 import { supabase } from '@/lib/supabase-client'
 import { submitPreregistration } from '@/services/preregister'
 
@@ -368,25 +369,7 @@ export default function PreRegisterPage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-            {[
-              { src: '/screenshots/dashboard.png', title: 'Smart Dashboard', desc: 'Track contribution, deadlines, and progress in one place.' },
-              { src: '/screenshots/admin.png', title: 'Institutional Control', desc: 'Educator-grade visibility and actionable insights for teams.' },
-              { src: '/screenshots/terminal.png', title: 'Secure Core', desc: 'Fast, dependable infrastructure designed for real workloads.' },
-              { src: '/screenshots/mobile.png', title: 'Mobile Experience', desc: 'Collaborate and stay synced from anywhere.' }
-            ].map((img, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(15,23,42,0.09)', background: 'white', boxShadow: '0 2px 12px rgba(15,23,42,0.06)' }}>
-                <div style={{ aspectRatio: '16 / 10', overflow: 'hidden', position: 'relative' }}>
-                  <Image src={img.src} alt={img.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover', display: 'block' }} />
-                </div>
-                <div style={{ padding: '1rem' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: '0 0 0.35rem' }}>{img.title}</h3>
-                  <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>{img.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          <ScreenshotGallery />
         </div>
       </section>
 

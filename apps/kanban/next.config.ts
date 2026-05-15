@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   outputFileTracingRoot: monorepoRoot,
+  // basePath: '/dashboard',
   experimental: {
   },
 }

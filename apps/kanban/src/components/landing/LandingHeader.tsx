@@ -1,14 +1,14 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { auth } from '@/lib/firebase'
-import { onAuthStateChanged, User } from 'firebase/auth'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { ChevronDown, Search, Code, Menu, X, MessageSquarePlus } from 'lucide-react'
 import { NavMenus, NavCategory, NavItem } from '@/types/landing'
 import LanguageSelector from '@/components/LanguageSelector'
+import { auth, onAuthStateChanged } from '@/lib/db-client'
+import { User } from '@supabase/supabase-js'
 
 interface LandingHeaderProps {
   navMenus: NavMenus
@@ -20,7 +20,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsubscribe = onAuthStateChanged(auth, (u: any) => {
       setUser(u)
     })
     return () => unsubscribe()
@@ -248,7 +248,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
 
         {user ? (
           <Link
-            href="/dashboard"
+            href="/"
             style={{
               background: '#10b981',
               color: '#0a0a0a',
@@ -340,7 +340,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                 <Link href="/docs" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Help Center</Link>
                 <LanguageSelector />
                 {user ? (
-                  <Link href="/dashboard" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+                  <Link href="/" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
                 ) : (
                   <>
                     <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Sign in</Link>

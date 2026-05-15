@@ -733,7 +733,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         showLobby={showLobby}
         groupMembers={groupMembers}
         userId={user.id}
-        onViewProfile={(memberId) => router.push(`/dashboard/network/profile/${memberId}`)}
+        onViewProfile={(memberId) => router.push(`/network/profile/${memberId}`)}
       />
 
       <MessageList

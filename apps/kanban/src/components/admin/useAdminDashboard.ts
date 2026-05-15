@@ -82,7 +82,7 @@ export function useAdminDashboard() {
         'You do not have administrative clearance for this terminal.',
         'error',
       )
-      router.push('/dashboard')
+      router.push('/')
     }
   }, [profile, profileLoading, router, addToast])
 
@@ -328,7 +328,7 @@ export function useAdminDashboard() {
   /** Navigates to the theme studio from the UI Orchestrator card. */
   const handleLaunchStudio = useCallback(() => {
     addToast('Orchestrator Initialized', 'Rerouting terminal to design studio...', 'success')
-    router.push('/dashboard/settings?tab=themes')
+    router.push('/settings?tab=themes')
   }, [addToast, router])
 
   // ── Return the full public API of this hook ────────────────────────────────

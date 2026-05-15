@@ -42,6 +42,19 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: postsError.message }, { status: 500 })
     }
 
+    const postIds = (postRows ?? []).map(p => p.id)
+    
+    // Fetch reactions for these posts
+    const { data: reactionRows } = postIds.length 
+      ? await adminDb.from('post_reactions').select('post_id, user_id, reaction').in('post_id', postIds)
+      : { data: [] }
+    
+    // Fetch comment counts
+    // Note: In a larger app, we'd use a view or a more efficient count query
+    const { data: commentCounts } = postIds.length
+      ? await adminDb.from('post_comments').select('post_id').in('post_id', postIds)
+      : { data: [] }
+
     const authorIds = Array.from(new Set((postRows ?? []).map((post) => post.author_id).filter(Boolean)))
     const { data: authorRows } = authorIds.length
       ? await adminDb
@@ -53,6 +66,8 @@ export async function GET(req: NextRequest) {
     const authorsById = new Map((authorRows ?? []).map((author) => [author.id, author]))
     const posts = (postRows ?? []).map((post) => {
       const author = authorsById.get(post.author_id)
+      const postReactions = (reactionRows ?? []).filter(r => r.post_id === post.id)
+      const postCommentCount = (commentCounts ?? []).filter(c => c.post_id === post.id).length
 
       return {
         ...post,
@@ -63,8 +78,8 @@ export async function GET(req: NextRequest) {
           ...(author.avatar_url ? { avatar_url: author.avatar_url } : {}),
           ...(author.role ? { role: author.role } : {}),
         } : null,
-        reactions: [],
-        comments: [],
+        reactions: postReactions.map(r => ({ reaction: r.reaction, user_id: r.user_id })),
+        comments: [{ count: postCommentCount }],
       }
     })
 

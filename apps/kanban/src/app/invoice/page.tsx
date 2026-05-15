@@ -70,7 +70,7 @@ function InvoiceListPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {filteredInvoices.map(inv => (
-            <Link key={inv.id} href={`/dashboard/invoice/${inv.id}`} style={{ textDecoration: 'none' }}>
+            <Link key={inv.id} href={`/invoice/${inv.id}`} style={{ textDecoration: 'none' }}>
               <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.2)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}>
