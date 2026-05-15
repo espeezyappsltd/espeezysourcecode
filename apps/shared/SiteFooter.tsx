@@ -30,7 +30,7 @@ const DOCS_LINKS = [
 
 const INFRA_LINKS = [
   { href: 'https://espeezy.com/docs/infra/payments', label: 'Stripe Integration' },
-  { href: 'https://espeezy.com/docs/infra/sync', label: 'Firebase Sync' },
+  { href: 'https://espeezy.com/docs/infra/sync', label: 'Supabase Sync' },
   { href: 'https://espeezy.com/docs/infra/presence', label: 'Real-time Presence' },
   { href: 'https://espeezy.com/docs/vision', label: 'Our Vision' },
   { href: 'https://espeezy.com/docs/impact', label: 'Impact Stats' },
@@ -104,7 +104,7 @@ export default function SiteFooter() {
           </p>
 
           <p style={{ fontSize: '0.82rem', lineHeight: 1.6, color: '#475569', marginBottom: '1rem', maxWidth: '240px' }}>
-            Built on Next.js and Firebase. Integrates with Canvas, Blackboard, and Moodle.
+            Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle.
             Payments via Stripe. Real-time sync across all your devices.
           </p>
 

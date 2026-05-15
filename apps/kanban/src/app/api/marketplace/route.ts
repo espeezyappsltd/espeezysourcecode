@@ -16,22 +16,40 @@ const AssetSchema = z.object({
   is_featured: z.boolean().optional(),
 })
 
-// GET: List all assets (optionally by category/tag)
+// GET: List all assets with pagination and search
 export async function GET(req: Request) {
   await rateLimit(req)
   const supabase = await createClient()
   const { searchParams } = new URL(req.url)
   const category = searchParams.get('category')
   const tag = searchParams.get('tag')
-  let q = supabase.from('marketplace_assets').select('*').order('created_at', { ascending: false })
+  const queryStr = searchParams.get('q')
+  const cursor = searchParams.get('cursor')
+  const limit = Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 50)
+
+  let q = supabase
+    .from('marketplace_assets')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit + 1)
+
   if (category) q = q.eq('category', category)
   if (tag) q = q.contains('tags', [tag])
-  const { data, error } = await q.limit(50)
+  if (queryStr) q = q.ilike('title', `%${queryStr}%`)
+  if (cursor) q = q.lt('created_at', cursor)
+
+  const { data: rows, error } = await q
+  
   if (error) return NextResponse.json({
     error: 'Could not load assets.',
     message: 'Something went wrong. Please refresh or contact support if this continues.'
   }, { status: 500 })
-  return NextResponse.json({ assets: data }, { status: 200 })
+
+  const hasMore = (rows?.length ?? 0) > limit
+  const assets = hasMore ? rows?.slice(0, limit) : rows
+  const nextCursor = hasMore ? assets?.[assets.length - 1].created_at : null
+
+  return NextResponse.json({ assets, nextCursor }, { status: 200 })
 }
 
 // POST: Create new asset

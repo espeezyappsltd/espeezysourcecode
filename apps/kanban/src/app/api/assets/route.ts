@@ -10,22 +10,41 @@ const QUOTAS = {
   admin: 100 * 1024 * 1024 * 1024, // 100GB
 }
 
-// GET /api/assets - List user assets
+// GET /api/assets - List user assets with pagination and search
 export async function GET(req: NextRequest) {
   try {
     const user = await getRequestUser(req)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const { searchParams } = new URL(req.url)
+    const queryStr = searchParams.get('q')
+    const cursor = searchParams.get('cursor')
+    const limit = Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 50)
+
     const adminDb = getAdminDb()
-    const { data: assets, error } = await adminDb
+    let query = adminDb
       .from('personal_assets')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
+      .limit(limit + 1)
+
+    if (queryStr) {
+      query = query.ilike('title', `%${queryStr}%`)
+    }
+    if (cursor) {
+      query = query.lt('created_at', cursor)
+    }
+
+    const { data: rows, error } = await query
 
     if (error) throw error
 
-    return NextResponse.json({ assets })
+    const hasMore = (rows?.length ?? 0) > limit
+    const assets = hasMore ? rows?.slice(0, limit) : rows
+    const nextCursor = hasMore ? assets?.[assets.length - 1].created_at : null
+
+    return NextResponse.json({ assets, nextCursor })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }

@@ -7,32 +7,13 @@ import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
 
 const SCREENSHOTS = [
-  { src: SCREENSHOT_ASSETS.TASK_INTERFACE, title: 'Task Interface', category: 'Productivity' },
-  { src: SCREENSHOT_ASSETS.PROJECT_OVERVIEW, title: 'Project Overview', category: 'Management' },
   { src: SCREENSHOT_ASSETS.CONTRIBUTION_METRICS, title: 'Contribution Metrics', category: 'Analytics' },
-  { src: SCREENSHOT_ASSETS.TEAM_MANAGEMENT, title: 'Team Management', category: 'Collaboration' },
-  { src: SCREENSHOT_ASSETS.DASHBOARD_VIEW, title: 'Dashboard View', category: 'Overview' },
+  { src: SCREENSHOT_ASSETS.TASK_INTERFACE, title: 'Task Interface', category: 'Productivity' },
   { src: SCREENSHOT_ASSETS.COLLABORATION_HUB, title: 'Collaboration Hub', category: 'Communication' },
-  { src: SCREENSHOT_ASSETS.RESOURCE_CENTER, title: 'Resource Center', category: 'Resources' },
   { src: SCREENSHOT_ASSETS.ANALYTICS_ENGINE, title: 'Analytics Engine', category: 'Data' },
-  { src: SCREENSHOT_ASSETS.USER_PROFILE, title: 'User Profile', category: 'Personal' },
-  { src: SCREENSHOT_ASSETS.SETTINGS_PANEL, title: 'Settings Panel', category: 'Configuration' },
-  { src: SCREENSHOT_ASSETS.NOTIFICATION_SYSTEM, title: 'Notification System', category: 'Alerts' },
-  { src: SCREENSHOT_ASSETS.WORKFLOWS, title: 'Workflows', category: 'Automation' },
-  { src: SCREENSHOT_ASSETS.DEEP_INSIGHTS, title: 'Deep Insights', category: 'Insights' },
-  { src: SCREENSHOT_ASSETS.PERFORMANCE_TRACKING, title: 'Performance Tracking', category: 'Performance' },
-  { src: SCREENSHOT_ASSETS.LIVE_UPDATES, title: 'Live Updates', category: 'Real-time' },
-  { src: SCREENSHOT_ASSETS.GROUP_CHAT, title: 'Group Chat', category: 'Social' },
-  { src: SCREENSHOT_ASSETS.ASSET_MARKETPLACE, title: 'Asset Marketplace', category: 'Economy' },
-  { src: SCREENSHOT_ASSETS.ADMIN_CONSOLE, title: 'Admin Console', category: 'Control' },
   { src: SCREENSHOT_ASSETS.GLOBAL_NETWORK, title: 'Global Network', category: 'Community' },
   { src: SCREENSHOT_ASSETS.SIDE_HUSTLE, title: 'Side Hustle', category: 'Income' },
   { src: SCREENSHOT_ASSETS.EARNING_PORTAL, title: 'Earning Portal', category: 'Finance' },
-  { src: SCREENSHOT_ASSETS.TASK_MARKETPLACE, title: 'Task Marketplace', category: 'Work' },
-  { src: SCREENSHOT_ASSETS.INTERNAL_NODE, title: 'Internal Node', category: 'Network' },
-  { src: SCREENSHOT_ASSETS.SYSTEM_STATUS, title: 'System Status', category: 'Infrastructure' },
-  { src: SCREENSHOT_ASSETS.MOBILE_EXPERIENCE, title: 'Mobile Experience', category: 'Mobile' },
-  { src: SCREENSHOT_ASSETS.SETTINGS_MOBILE, title: 'Settings Mobile', category: 'Settings' },
 ]
 
 export default function ScreenshotGallery() {
@@ -50,16 +31,6 @@ export default function ScreenshotGallery() {
   const filteredScreenshots = filter === 'All' 
     ? SCREENSHOTS 
     : SCREENSHOTS.filter(s => s.category === filter)
-
-  // Carousel logic for infinite loop background animation
-  const [offset, setOffset] = useState(0)
-  
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setOffset(prev => (prev + 0.5) % (SCREENSHOTS.length * 300))
-    }, 30)
-    return () => clearInterval(timer)
-  }, [])
 
   return (
     <div className="w-full" style={{ position: 'relative', paddingBottom: '4rem' }}>
@@ -203,45 +174,6 @@ export default function ScreenshotGallery() {
             </motion.div>
           ))}
         </AnimatePresence>
-      </div>
-
-      {/* Infinite Horizontal Scroller for extra flair */}
-      <div style={{ 
-        marginTop: '6rem', 
-        overflow: 'hidden', 
-        whiteSpace: 'nowrap',
-        maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-        WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-        opacity: 0.4
-      }}>
-        <div style={{ 
-          display: 'inline-block', 
-          transform: `translateX(-${offset}px)`,
-          transition: 'transform 0.03s linear'
-        }}>
-          {[...SCREENSHOTS, ...SCREENSHOTS, ...SCREENSHOTS].map((img, i) => (
-            <div key={i} style={{ 
-              display: 'inline-block', 
-              width: '120px', 
-              height: '80px', 
-              marginRight: '1rem', 
-              borderRadius: '12px', 
-              overflow: 'hidden',
-              border: '1px solid rgba(15,23,42,0.1)',
-              background: '#f1f5f9',
-              position: 'relative'
-            }}>
-              <Image 
-                src={img.src} 
-                alt="" 
-                fill 
-                sizes="80px" 
-                quality={20} // Tiny thumbnail quality
-                style={{ objectFit: 'cover', opacity: 0.6 }} 
-              />
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Lightbox */}

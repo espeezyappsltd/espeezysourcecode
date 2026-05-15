@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   LayoutGrid, Milestone, Users, ShoppingBag,
-  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart
+  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info
 } from 'lucide-react'
 
 const BRAND = '#10b981'
@@ -89,7 +89,7 @@ const docsContent: Record<string, DocEntry> = {
   'features/kanban': {
     title: 'Digital Kanban Board',
     icon: <LayoutGrid size={40} />,
-    tagline: 'A visual task board that makes every contribution visible, timestamped, and impossible to dispute.',
+    tagline: 'A visual task board that makes every contribution visible, timestamped, and impossible to ignore.',
     sections: [
       {
         heading: 'How the board works',
@@ -151,7 +151,7 @@ const docsContent: Record<string, DocEntry> = {
   'features/network': {
     title: 'Peer Network',
     icon: <Users size={40} />,
-    tagline: 'A searchable directory of students and researchers across your institution and beyond.',
+    tagline: 'A searchable directory of students and researchers at your institution and beyond.',
     sections: [
       {
         heading: 'How the network works',
@@ -206,7 +206,7 @@ const docsContent: Record<string, DocEntry> = {
   'features/skirmish': {
     title: 'Skirmish Games',
     icon: <Gamepad2 size={40} />,
-    tagline: 'Live academic quiz battles that make revision feel like a game and build genuine subject mastery.',
+    tagline: 'Live academic quiz battles that make revision engaging while building genuine subject mastery.',
     sections: [
       {
         heading: 'How a Skirmish works',
@@ -465,6 +465,83 @@ const docsContent: Record<string, DocEntry> = {
       },
     ],
     eli12: 'More than half of all students have had a teammate who did almost nothing but got the same grade. That is a huge problem. Espeezy is tracking how many students we help, and we share those numbers openly so you can see we are actually making a difference.',
+  },
+
+  'accessibility': {
+    title: 'Accessibility Guide',
+    icon: <Accessibility size={40} />,
+    tagline: 'Espeezy is built for everyone. We strive for WCAG 2.1 AA compliance across all our applications.',
+    sections: [
+      {
+        heading: 'Visual Accessibility',
+        body: 'We use a contrast-aware design system. All text-to-background ratios are at least 4.5:1 (AA) and often exceed 7:1 (AAA). We avoid using color as the only way to convey information.',
+        items: [
+          'High-contrast color tokens for both light and dark modes',
+          'Scalable typography that respects browser font size settings',
+          'Support for system-level high contrast modes'
+        ]
+      },
+      {
+        heading: 'Keyboard Navigation',
+        body: 'Espeezy is fully navigable via keyboard. We use logical tab ordering and visible focus indicators on all interactive elements.',
+        items: [
+          'Tab through all menus, buttons, and form fields',
+          'Enter and Space keys for activation',
+          'Escape key to close modals and overlays',
+          'Ctrl+F (or Cmd+F) global search shortcut'
+        ]
+      },
+      {
+        heading: 'Screen Reader Support',
+        body: 'We use semantic HTML5 elements and ARIA roles to ensure that assistive technologies can interpret the structure and state of our applications accurately.',
+        items: [
+          'Proper use of <main>, <nav>, <section>, and <h1>-<h6> tags',
+          'ARIA labels on icon-only buttons',
+          'Live regions for real-time notifications',
+          'Skip-to-content links for quick navigation'
+        ]
+      }
+    ],
+    eli12: 'We make sure people who cannot use a mouse or see the screen very well can still use Espeezy. We use bright colors that are easy to read and make sure you can do everything using just your keyboard.',
+  },
+
+  'features': {
+    title: 'Module Guide',
+    icon: <Info size={40} />,
+    tagline: 'A comprehensive guide to every module available in the Espeezy ecosystem.',
+    sections: [
+      {
+        heading: 'Kanban Board',
+        body: 'The heart of Espeezy. Track tasks, assign work, and monitor contribution in real time. Features drag-and-drop, file attachments, and an immutable audit trail.',
+        items: ['Task assignment', 'Effort estimation', 'Timestamped activity logs']
+      },
+      {
+        heading: 'Academic Roadmap',
+        body: 'Plan your project across five key stages. Set milestones and visualize your progress on a Gantt-style timeline.',
+        items: ['Stage-based planning', 'Milestone tracking', 'Progress visualization']
+      },
+      {
+        heading: 'Peer Network',
+        body: 'Find collaborators and build your academic reputation. Your contribution score follows you across projects.',
+        items: ['Skill-based search', 'Public profiles', 'Contribution ratings']
+      },
+      {
+        heading: 'Marketplace',
+        body: 'Exchange study materials and digital assets. Buy or sell templates, guides, and datasets using Espeezy Credits.',
+        items: ['Peer-to-peer exchange', 'Resource ratings', 'Credit-based economy']
+      },
+      {
+        heading: 'Side Hustle',
+        body: 'Earn credits by completing tasks for others. A managed marketplace for academic and creative side work.',
+        items: ['Task browsing', 'Bank connection via Stripe', 'Secure payouts']
+      },
+      {
+        heading: 'Skirmish Games',
+        body: 'Gamify your revision. Join live quiz battles and track your subject mastery.',
+        items: ['Multiplayer quizzes', 'AI-generated questions', 'Performance analytics']
+      }
+    ],
+    eli12: 'Espeezy has different rooms for different jobs. One room for planning (Roadmap), one for doing work (Kanban), one for meeting friends (Network), and one for revision (Skirmish). This guide tells you how to use each one.',
   },
 }
 

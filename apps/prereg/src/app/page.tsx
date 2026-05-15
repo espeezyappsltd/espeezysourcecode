@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
-import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
@@ -125,14 +124,14 @@ import { supabase } from '@/lib/supabase-client'
 import { submitPreregistration } from '@/services/preregister'
 
 const COMING_FEATURES = [
-  { icon: <Zap size={20} />, title: 'Unified Project Hub', desc: 'A high-performance workspace that integrates Kanban boards, shared documents, and group chat, eliminating the need to jump between multiple apps to manage your academic life.', tag: 'Productivity' },
-  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'Real-time tracking logs every task update and document edit, generating verifiable accountability reports that ensure every student\'s work is recognized and fairly credited.', tag: 'Visibility' },
+  { icon: <Zap size={20} />, title: 'Unified Project Hub', desc: 'A high-performance workspace that integrates Kanban boards, shared documents, and group chat, so you never have to switch between apps to manage your academic work.', tag: 'Productivity' },
+  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'Real-time tracking logs every task update and document edit, generating verifiable accountability reports to ensure every student\'s work is recognized and fairly credited.', tag: 'Visibility' },
   { icon: <BookOpen size={20} />, title: 'Deep LMS Sync', desc: 'Bi-directional connectors for Canvas, Blackboard, and Moodle automatically sync your assignments, deadlines, and grades into your centralized Espeezy dashboard.', tag: 'Integrations' },
-  { icon: <GraduationCap size={20} />, title: 'Smart Study Groups', desc: 'AI-driven matching algorithm connects you with peers in your courses who complement your strengths and weaknesses, forming optimal study groups that boost everyone\'s performance.', tag: 'Collaboration' },
-  { icon: <TrendingUp size={20} />, title: 'Performance Analytics', desc: 'Advanced analytics engine identifies your work patterns and provides actionable insights to help you optimize your contribution and maximize your grades.', tag: 'Insights' },
-  { icon: <Cpu size={20} />, title: 'AI-Powered Insights', desc: 'Intelligent analytics that identify your strengths and weaknesses in group projects, offering personalized recommendations to help you improve and excel in your coursework.', tag: 'Intelligence' },
-  { icon: <Globe size={20} />, title: 'Global Peer Network', desc: 'A verified student-only platform that connects you with peers studying the same courses worldwide, facilitating secure resource sharing and cross-institutional study groups.', tag: 'Community' },
-  { icon: <Users size={20} />, title: 'Digital Asset Marketplace', desc: 'A secure platform where you can find and sell digital assets for Espeezy Credits, a virtual currency that can be used to purchase exclusive features and services or expchange for pro features.', tag: 'Opportunities' },
+  { icon: <GraduationCap size={20} />, title: 'Smart Study Groups', desc: 'Our AI-driven matching algorithm connects you with peers who complement your strengths, forming optimal study groups that boost collective performance.', tag: 'Collaboration' },
+  { icon: <TrendingUp size={20} />, title: 'Performance Analytics', desc: 'Advanced analytics identify your work patterns and provide actionable insights to help you optimize your contributions and maximize your grades.', tag: 'Insights' },
+  { icon: <Cpu size={20} />, title: 'AI-Powered Insights', desc: 'Intelligent analytics that identify your strengths in group projects, offering personalized recommendations to help you improve and excel in your coursework.', tag: 'Intelligence' },
+  { icon: <Globe size={20} />, title: 'Global Peer Network', desc: 'A verified, student-only platform connecting you with peers worldwide, facilitating secure resource sharing and cross-institutional study groups.', tag: 'Community' },
+  { icon: <Users size={20} />, title: 'Digital Asset Marketplace', desc: 'A secure platform where you can trade digital assets for Espeezy Credits, which can be used for exclusive features or exchanged for Pro membership.', tag: 'Opportunities' },
 ]
 
 const NAV_LINKS = [
@@ -330,12 +329,12 @@ export default function PreRegisterPage() {
 
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
           style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, maxWidth: '820px', margin: '0 auto 1.25rem' }}>
-          Make all your team contributions<br /><span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>impossible to miss.</span>
+          Make every team contribution<br /><span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>impossible to miss.</span>
         </motion.h2>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
           style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-          {config.brand_name} shows exactly who did what in group work, so you can grade based on real data.
+          {config.brand_name} tracks exactly who does what in group projects, providing the transparent data needed for fair grading.
         </motion.p>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
@@ -427,11 +426,11 @@ export default function PreRegisterPage() {
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Free Forever Plan · Early Access</span>
                   </div>
                   <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 1.9rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '1rem 0 0.5rem', lineHeight: 1.1 }}>
-                    Stop group work free-riding.<br />
-                    <span style={{ color: 'var(--brand)' }}>See exactly who did what.</span>
+                    Get credit for every contribution.<br />
+                    <span style={{ color: 'var(--brand)' }}>Make your work impossible to miss.</span>
                   </h2>
                   <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                    Join the waitlist for the only platform that tracks individual contributions in real-time.
+                    Join the waitlist for the only platform that tracks individual contributions in real time.
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <label htmlFor="prereg-email" className="sr-only">Email address (required)</label>
@@ -485,13 +484,13 @@ export default function PreRegisterPage() {
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 'clamp(2.8rem, 8vw, 6rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, maxWidth: '960px', margin: '0 auto 1.5rem' }}>
-            The only platform that makes your full efforts{' '}
+            The only platform that makes every contribution{' '}
             <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              visible.
+              impossible to miss.
             </span>
           </h2>
           <p style={{ color: '#64748b', maxWidth: '680px', margin: '0 auto 3rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
-            No more guessing who did what. Espeezy provides the real-time data needed to ensure every contribution is recognized and graded accurately.
+            Eliminate the guesswork. Espeezy provides the real-time data required to ensure every contribution is recognized and graded fairly.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
@@ -556,7 +555,7 @@ export default function PreRegisterPage() {
             Be part of the<br /><span style={{ color: 'var(--brand)' }}>founding generation.</span>
           </h2>
           <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            One mission: Eliminate group work free-riding. Join millions of students securing a future where grading is based on real data.
+            One mission: Eliminate group work free-riding. Join the thousands of students building a future where grades are earned, not shared.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

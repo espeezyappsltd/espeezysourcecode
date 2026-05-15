@@ -33,7 +33,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       title: 'Infrastructure',
       items: [
         { label: 'Stripe Integration', href: '/docs/infra/payments' },
-        { label: 'Firebase Sync', href: '/docs/infra/sync' },
+        { label: 'Supabase Sync', href: '/docs/infra/sync' },
         { label: 'Real-time Presence', href: '/docs/infra/presence' },
       ],
     },

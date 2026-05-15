@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status') ?? 'open'
     const mine = searchParams.get('mine') === '1'
     const category = searchParams.get('category')
+    const queryStr = searchParams.get('q')
     const cursor = searchParams.get('cursor')
     const PAGE_SIZE = 20
 
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (category) query = query.eq('category', category)
+    if (queryStr) query = query.ilike('title', `%${queryStr}%`)
     if (cursor) query = query.lt('created_at', cursor)
 
     const { data: rows, error: tasksError } = await query
