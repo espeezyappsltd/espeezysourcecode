@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Espeezy: Early Access',
-    description: 'The platform that gives every student a fair voice.',
+    description: 'The platform that gives every student an equitable voice.',
     url: 'https://espeezy.com/preregister',
     siteName: 'Espeezy',
     type: 'website',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary',
     title: 'Espeezy: Early Access',
-    description: 'The platform that gives every student a fair voice.',
+    description: 'The platform that gives every student an equitable voice.',
     creator: '@espeezy',
   },
 }

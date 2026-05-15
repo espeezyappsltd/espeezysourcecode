@@ -16,7 +16,7 @@ export default function LandingMission() {
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div style={{ background: '#111111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222222' }}>
                      <div style={{ color: '#10b981', marginBottom: '1rem' }}><CheckCircle size={20} /></div>
-                     <div style={{ fontWeight: 650, fontSize: '1rem', marginBottom: '0.5rem', color: '#f3f4f6' }}>Fair Recognition</div>
+                     <div style={{ fontWeight: 650, fontSize: '1rem', marginBottom: '0.5rem', color: '#f3f4f6' }}>Accurate Recognition</div>
                      <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, lineHeight: 1.5 }}>Show exactly what you contributed to every project.</p>
                   </div>
                   <div style={{ background: '#111111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222222' }}>

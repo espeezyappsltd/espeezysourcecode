@@ -18,7 +18,7 @@ export async function rateLimit(req: Request) {
     if (entry.count > MAX_REQUESTS) {
       return NextResponse.json({
         error: 'Rate limit exceeded',
-        message: 'Whoa, you’re going too fast! Please check back in a minute so everyone gets a fair shot.'
+        message: 'Whoa, you’re going too fast! Please check back in a minute so everyone gets an equal shot.'
       }, { status: 429 })
     }
   }

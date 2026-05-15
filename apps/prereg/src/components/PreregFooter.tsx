@@ -90,7 +90,7 @@ export default function PreregFooter() {
           </div>
 
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: '#64748b', marginBottom: '1.5rem', maxWidth: '240px' }}>
-            The collaborative education platform built for fairness. Every student gets credit
+            The collaborative education platform built for equitable collaboration. Every student gets credit
             for the work they actually do. Free, open, and made for real group projects.
           </p>
 

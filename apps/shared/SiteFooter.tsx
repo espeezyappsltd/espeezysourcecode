@@ -100,7 +100,7 @@ export default function SiteFooter() {
           </div>
 
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: '#64748b', marginBottom: '1.5rem', maxWidth: '240px' }}>
-            Espeezy shows exactly who did what in group work, so you can grade fairly based on real data. Every student gets credit for the work they actually do.
+            Espeezy shows exactly who did what in group work, so you can grade accurately based on real data. Every student gets credit for the work they actually do.
           </p>
 
           <p style={{ fontSize: '0.82rem', lineHeight: 1.6, color: '#475569', marginBottom: '1rem', maxWidth: '240px' }}>

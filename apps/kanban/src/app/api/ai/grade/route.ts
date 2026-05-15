@@ -47,7 +47,7 @@ Respond ONLY with a JSON object:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a rigorous but fair academic skirmish judge. Evaluate accuracy against reference truth. Be witty and brief.' },
+          { role: 'system', content: 'You are a rigorous but objective academic skirmish judge. Evaluate accuracy against reference truth. Be witty and brief.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.2,

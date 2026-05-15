@@ -125,7 +125,7 @@ import { submitPreregistration } from '@/services/preregister'
 
 const COMING_FEATURES = [
   { icon: <Zap size={20} />, title: 'Unified Project Hub', desc: 'A high-performance workspace that integrates Kanban boards, shared documents, and group chat, so you never have to switch between apps to manage your academic work.', tag: 'Productivity' },
-  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'Real-time tracking logs every task update and document edit, generating verifiable accountability reports to ensure every student\'s work is recognized and fairly credited.', tag: 'Visibility' },
+  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'Real-time tracking logs every task update and document edit, generating verifiable accountability reports to ensure every student\'s work is recognized and accurately credited.', tag: 'Visibility' },
   { icon: <BookOpen size={20} />, title: 'Deep LMS Sync', desc: 'Bi-directional connectors for Canvas, Blackboard, and Moodle automatically sync your assignments, deadlines, and grades into your centralized Espeezy dashboard.', tag: 'Integrations' },
   { icon: <GraduationCap size={20} />, title: 'Smart Study Groups', desc: 'Our AI-driven matching algorithm connects you with peers who complement your strengths, forming optimal study groups that boost collective performance.', tag: 'Collaboration' },
   { icon: <TrendingUp size={20} />, title: 'Performance Analytics', desc: 'Advanced analytics identify your work patterns and provide actionable insights to help you optimize your contributions and maximize your grades.', tag: 'Insights' },
@@ -334,7 +334,7 @@ export default function PreRegisterPage() {
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
           style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-          {config.brand_name} tracks exactly who does what in group projects, providing the transparent data needed for fair grading.
+          {config.brand_name} tracks exactly who does what in group projects, providing the transparent data needed for accurate grading.
         </motion.p>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
@@ -490,14 +490,14 @@ export default function PreRegisterPage() {
             </span>
           </h2>
           <p style={{ color: '#64748b', maxWidth: '680px', margin: '0 auto 3rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
-            Eliminate the guesswork. Espeezy provides the real-time data required to ensure every contribution is recognized and graded fairly.
+            Eliminate the guesswork. Espeezy provides the real-time data required to ensure every contribution is recognized and graded accurately.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
-              { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not fairly recognised in group assessments.' },
+              { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not accurately recognised in group assessments.' },
               { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
               { icon: <TrendingUp size={22} />, stat: '3x', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
-              { icon: <Globe size={22} />, stat: '195', label: 'countries where fair access to quality educational tools remains a critical gap.' },
+              { icon: <Globe size={22} />, stat: '195', label: 'countries where equitable access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 style={{ padding: '1.75rem 1.5rem', background: 'white', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '16px', textAlign: 'left', boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>

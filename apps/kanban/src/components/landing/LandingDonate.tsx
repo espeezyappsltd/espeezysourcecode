@@ -138,7 +138,7 @@ export default function LandingDonate() {
                 {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="var(--brand)" color="var(--brand)" />)}
               </div>
               <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, fontStyle: 'italic', margin: '0 0 0.75rem' }}>
-                &quot;Espeezy replaced three separate tools for my team. The transparency alone is worth every penny  -  finally, group work that&apos;s actually fair.&quot;
+                &quot;Espeezy replaced three separate tools for my team. The transparency alone is worth every penny  -  finally, group work that&apos;s actually equitable.&quot;
               </p>
               <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}> -  Kenji T., Computer Science, Tokyo</p>
             </motion.div>

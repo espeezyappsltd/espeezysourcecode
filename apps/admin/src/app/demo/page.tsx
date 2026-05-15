@@ -128,7 +128,7 @@ export default function DemoPage() {
            <div>
               <h3 style={{ margin: '0 0 0.5rem', fontWeight: 800 }}>About this Academic Sandbox</h3>
               <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', margin: 0, lineHeight: 1.6 }}>
-                Espeezy is part of a 2026 research module focusing on <strong>Fair Group Work</strong>. 
+                Espeezy is part of a 2026 research module focusing on <strong>Equitable Group Work</strong>. 
                 In this demo environment, database writes are disabled. Full features like real-time activity tracking, 
                 Score Extraction, and Work History are available in the authenticated platform.
               </p>

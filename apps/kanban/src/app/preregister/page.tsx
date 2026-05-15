@@ -18,7 +18,7 @@ import { submitPreregistration } from '@/services/preregister'
 // ─── Coming Features ─────────────────────────────────────────────────────────
 const COMING_FEATURES = [
   { icon: <Cpu size={20} />, title: 'Your Personal AI Coach', desc: 'Imagine having a smart tutor that knows your course content, adapts to how you learn best, and helps you crush your assignments.', tag: 'Smart Learning' },
-  { icon: <BarChart2 size={20} />, title: 'No More Freeloaders', desc: 'Crystal-clear analytics show exactly who did what in group projects. Say goodbye to carrying the team without credit.', tag: 'Fairness' },
+  { icon: <BarChart2 size={20} />, title: 'No More Freeloaders', desc: 'Crystal-clear analytics show exactly who did what in group projects. Say goodbye to carrying the team without credit.', tag: 'Accountability' },
   { icon: <Zap size={20} />, title: 'Supercharged Collaboration', desc: 'Everything you need in one fast, beautiful workspace. Plan, track, and execute group tasks seamlessly without the usual stress.', tag: 'Productivity' },
   { icon: <Heart size={20} />, title: 'Built-in Wellbeing Support', desc: 'We keep an eye on your workload to prevent burnout. Get gentle nudges when it’s time to take a break and recharge.', tag: 'Mental Health' },
   { icon: <BookOpen size={20} />, title: 'Syncs with Your School', desc: 'Connects right into Canvas, Blackboard, or Moodle so you don’t have to copy-paste your work everywhere.', tag: 'Integrations' },
@@ -142,7 +142,7 @@ export default function PreRegisterPage() {
           style={{ fontSize: 'clamp(2.8rem, 8vw, 6rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, margin: '0 auto 1.5rem', maxWidth: '960px' }}>
           The platform that gives every student a{' '}
           <span style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #34d399 50%, #ffffff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            fair voice.
+            equitable voice.
           </span>
         </motion.h1>
 
@@ -318,15 +318,15 @@ export default function PreRegisterPage() {
             <span style={{ color: 'var(--brand)' }}>We are fixing it.</span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-            Every year millions of students receive the same grade despite wildly different contributions. Educators lack visibility. High performers burn out. Free riders pass. {config.brand_name} ends this cycle  -  with data, transparency, and fairness at its core.
+            Every year millions of students receive the same grade despite wildly different contributions. Educators lack visibility. High performers burn out. Free riders pass. {config.brand_name} ends this cycle  -  with data, transparency, and accountability at its core.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
-              { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not fairly recognised in group assessments.' },
+              { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not accurately recognised in group assessments.' },
               { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
               { icon: <TrendingUp size={22} />, stat: '3x', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
-              { icon: <Globe size={22} />, stat: '195', label: 'countries where fair access to quality educational tools remains a critical gap.' },
+              { icon: <Globe size={22} />, stat: '195', label: 'countries where equitable access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 style={{ padding: '1.75rem 1.5rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', textAlign: 'left' }}>
@@ -399,7 +399,7 @@ export default function PreRegisterPage() {
             <span style={{ color: 'var(--brand)' }}>founding generation.</span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            5 million pre-registrations. One mission. Free, fair, and powerful education infrastructure  -  for every student on the planet.
+            5 million pre-registrations. One mission. Free, equitable, and powerful education infrastructure  -  for every student on the planet.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -419,7 +419,7 @@ export default function PreRegisterPage() {
           <div style={{ marginBottom: '2.5rem', maxWidth: '600px' }}>
             <h3 style={{ color: 'white', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.75rem' }}>About the Project</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-              Hey there! We&apos;re building Espeezy to make student collaboration fairer and completely stress-free. It&apos;s an open, fast, and secure platform powered by modern technologies like Next.js and Firebase. By signing up now with your email, you help us understand how many students need this, which speeds up our development. We promise no spam - just early access!
+              Hey there! We&apos;re building Espeezy to make student collaboration more equitable and completely stress-free. It&apos;s an open, fast, and secure platform powered by modern technologies like Next.js and Firebase. By signing up now with your email, you help us understand how many students need this, which speeds up our development. We promise no spam - just early access!
             </p>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '2rem' }}>

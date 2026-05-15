@@ -26,7 +26,7 @@ function ThankYouContent() {
           <span style={{ color: 'var(--brand)' }}>means everything.</span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, fontSize: '1rem', marginBottom: '2.5rem' }}>
-          You have just helped build free, fair, and powerful education infrastructure for students worldwide. A receipt has been sent to your email. We will keep you updated as each feature ships.
+          You have just helped build free, equitable, and powerful education infrastructure for students worldwide. A receipt has been sent to your email. We will keep you updated as each feature ships.
         </p>
         <div style={{ display: 'flex', gap: '0.875rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/preregister" style={{ padding: '0.875rem 1.75rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

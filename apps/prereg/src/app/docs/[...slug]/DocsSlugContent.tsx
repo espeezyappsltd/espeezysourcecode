@@ -38,7 +38,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Step 2: Set up your workspace',
-        body: 'Every project lives inside a workspace. A workspace represents your course or module. You set the name, subject area, deadline, and the grading weight of collaboration (used by the AI fairness monitor). You can connect your LMS (Canvas, Blackboard, Moodle) to auto-import assignments and deadlines.',
+        body: 'Every project lives inside a workspace. A workspace represents your course or module. You set the name, subject area, deadline, and the grading weight of collaboration (used by the AI transparency monitor). You can connect your LMS (Canvas, Blackboard, Moodle) to auto-import assignments and deadlines.',
         items: ['One workspace per course or group project', 'LMS sync pulls assignment titles, due dates, and members', 'Workspace settings can be locked by an educator or left open to the group'],
       },
       {
@@ -101,8 +101,8 @@ const docsContent: Record<string, DocEntry> = {
         items: ['Effort points translate directly into contribution score', 'File attachments are version-controlled (upload a new file to keep history)', '@mentions trigger real-time notifications to the mentioned user', 'Subtasks show a progress bar on the parent card'],
       },
       {
-        heading: 'The fairness monitor',
-        body: 'The AI fairness monitor runs in the background and calculates the distribution of effort points across all team members. If one person is assigned more than 40% of the total effort with more than 3 days remaining before the deadline, the system sends an automated alert to all workspace members and flags the imbalance on the board sidebar. Educators can configure the sensitivity threshold.',
+        heading: 'The transparency monitor',
+        body: 'The AI transparency monitor runs in the background and calculates the distribution of effort points across all team members. If one person is assigned more than 40% of the total effort with more than 3 days remaining before the deadline, the system sends an automated alert to all workspace members and flags the imbalance on the board sidebar. Educators can configure the sensitivity threshold.',
       },
       {
         heading: 'Filters and views',
@@ -374,7 +374,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Study methodology',
-        body: 'The dissertation study was conducted over one academic semester with two cohorts of undergraduate students completing assessed group reports. The control group (n=38) used standard institutional tools (email, shared Google Docs, Moodle submission). The experimental group (n=41) completed the same project type using Espeezy, with full contribution visibility enabled: every task assignment, status change, and commit was timestamped and visible to all team members and the supervising educator. Output quality was measured independently by two academic markers using a standardised rubric scoring depth of analysis, evidence of individual contribution, structural coherence, and reference quality. Pre- and post-study surveys measured self-reported motivation, perceived fairness, and effort intent.',
+        body: 'The dissertation study was conducted over one academic semester with two cohorts of undergraduate students completing assessed group reports. The control group (n=38) used standard institutional tools (email, shared Google Docs, Moodle submission). The experimental group (n=41) completed the same project type using Espeezy, with full contribution visibility enabled: every task assignment, status change, and commit was timestamped and visible to all team members and the supervising educator. Output quality was measured independently by two academic markers using a standardised rubric scoring depth of analysis, evidence of individual contribution, structural coherence, and reference quality. Pre- and post-study surveys measured self-reported motivation, perceived equity, and effort intent.',
       },
       {
         heading: 'Finding 1: measurable improvement in final report quality',
@@ -433,13 +433,13 @@ const docsContent: Record<string, DocEntry> = {
   'impact': {
     title: 'Impact Stats',
     icon: <BarChart size={40} />,
-    tagline: 'What the research says about fairness, collaboration, and what Espeezy is working to change.',
+    tagline: 'What the research says about transparency, collaboration, and what Espeezy is working to change.',
     sections: [
       {
         heading: 'The scale of the problem',
         body: 'Group work is a core part of higher education globally. Researchers estimate that between 40% and 70% of undergraduate assessment includes a group component. Yet in most of these cases, individual contribution is neither tracked nor differentiated. This means a significant portion of degree grades are awarded to students based partly on their teammates work rather than their own.',
         items: [
-          '73% of students report feeling their individual effort is not fairly recognised in group projects (source: Espeezy pre-launch survey, n=4,200)',
+          '73% of students report feeling their individual effort is not accurately recognised in group projects (source: Espeezy pre-launch survey, n=4,200)',
           '61% of students admit to having coasted in at least one group project (same survey)',
           '2.4 billion students worldwide would benefit from transparent collaboration tools',
           '195 countries where equitable access to quality educational tools remains a gap',
@@ -451,7 +451,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Retention and completion',
-        body: 'Students who feel their work is recognised are three times more likely to complete a course. Students who experience persistent free-riding in group projects are 2.1 times more likely to drop out of their programme entirely. Addressing fairness in group work is therefore not just an equity issue: it is a student retention issue with direct financial implications for institutions.',
+        body: 'Students who feel their work is recognised are three times more likely to complete a course. Students who experience persistent free-riding in group projects are 2.1 times more likely to drop out of their programme entirely. Addressing equity in group work is therefore not just an equity issue: it is a student retention issue with direct financial implications for institutions.',
       },
       {
         heading: 'Our targets for the first 24 months',

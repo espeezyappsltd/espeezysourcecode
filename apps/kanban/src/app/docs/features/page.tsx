@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -63,7 +63,7 @@ export default function FeaturesDocs() {
     {
       icon: <FileCheck size={24} />,
       title: 'Work Proof (Audit Logs)',
-      eli12: "A digital history book. It logs every piece of work done by every person, so everyone gets the credit they deserve fairly."
+      eli12: "A digital history book. It logs every piece of work done by every person, so everyone gets the credit they deserve accurately."
     }
   ]
 

@@ -29,7 +29,7 @@ export default function PreregFooter() {
         }}
       >
         <p style={{ margin: 0, fontSize: '0.9rem' }}>
-          Espeezy Kanban. Fair collaboration for every team.
+          Espeezy Kanban. Accurate collaboration for every team.
         </p>
         <nav aria-label="Footer links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <a href="https://espeezy.com" style={linkStyle}>Home</a>
