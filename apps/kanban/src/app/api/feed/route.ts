@@ -16,9 +16,6 @@ const createPostSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const user = await getRequestUser(req)
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
     const adminDb = getAdminDb()
 
     const { searchParams } = new URL(req.url)

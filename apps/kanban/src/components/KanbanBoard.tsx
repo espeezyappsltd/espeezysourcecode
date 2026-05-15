@@ -7,6 +7,7 @@ import { Task, TaskStatus, Profile } from '@/types/database';
 import { KanbanBoardProps } from '@/types/ui';
 import TaskModal from './TaskModal';
 import TeamChat from './TeamChat';
+import KanbanOnboardingModal from './KanbanOnboardingModal';
 import { AlertCircle, RefreshCw, CloudOff, Plus } from 'lucide-react';
 import { fetchGroupMembers } from '@/services/dashboard';
 import { handleTaskStatusUpdate } from '@/app/actions';
@@ -23,6 +24,7 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
   const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [activeColumn, setActiveColumn] = useState<TaskStatus | undefined>();
   const isOnline = useConnectivity();
 
@@ -30,11 +32,7 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 
   // Contextual Help Button
   const openKanbanHelp = () => {
-    window.dispatchEvent(new CustomEvent('open-help-tray'));
-    setTimeout(() => {
-      const el = document.querySelector('a[href="/docs/features/kanban"]');
-      if (el) (el as HTMLElement).focus();
-    }, 350);
+    setIsOnboardingOpen(true);
   };
 
   // Handle "New Task" signal from DashboardHome
@@ -104,6 +102,12 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
       db.removeChannel(channel);
     };
   }, [groupId]);
+
+  useEffect(() => {
+    const handler = () => setIsOnboardingOpen(true);
+    window.addEventListener('open-kanban-onboarding', handler);
+    return () => window.removeEventListener('open-kanban-onboarding', handler);
+  }, []);
 
   // CRUD
   const createTask = async (task: Partial<Task>) => {
@@ -299,6 +303,10 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
           onTaskSaved={() => setIsModalOpen(false)}
           onlineUserIds={new Set(groupMembers.map(m => m.id))}
         />
+      )}
+
+      {isOnboardingOpen && (
+        <KanbanOnboardingModal onClose={() => setIsOnboardingOpen(false)} />
       )}
       </div>
     </div>

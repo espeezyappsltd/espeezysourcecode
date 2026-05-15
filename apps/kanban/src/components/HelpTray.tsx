@@ -69,13 +69,30 @@ export default function HelpTray() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           {FEATURE_GUIDES.map((f) => (
-            <Link key={f.title} href={f.link} style={{ display: "block", padding: "1.1rem 1.2rem", borderRadius: 14, background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.13)", color: "#2563eb", fontWeight: 800, fontSize: "1.05rem", textDecoration: "none", marginBottom: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.3rem" }}>
-                <BookOpen size={18} />
-                <span>{f.title}</span>
-              </div>
-              <div style={{ color: "#64748b", fontWeight: 500, fontSize: "0.97rem" }}>{f.desc}</div>
-            </Link>
+            f.title === "Kanban Board" ? (
+              <button 
+                key={f.title} 
+                onClick={() => {
+                  setOpen(false);
+                  window.dispatchEvent(new CustomEvent('open-kanban-onboarding'));
+                }}
+                style={{ textAlign: 'left', cursor: 'pointer', width: '100%', display: "block", padding: "1.1rem 1.2rem", borderRadius: 14, background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.13)", color: "#2563eb", fontWeight: 800, fontSize: "1.05rem", textDecoration: "none", marginBottom: 0 }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.3rem" }}>
+                  <BookOpen size={18} />
+                  <span>{f.title}</span>
+                </div>
+                <div style={{ color: "#64748b", fontWeight: 500, fontSize: "0.97rem" }}>{f.desc}</div>
+              </button>
+            ) : (
+              <Link key={f.title} href={f.link} style={{ display: "block", padding: "1.1rem 1.2rem", borderRadius: 14, background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.13)", color: "#2563eb", fontWeight: 800, fontSize: "1.05rem", textDecoration: "none", marginBottom: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.3rem" }}>
+                  <BookOpen size={18} />
+                  <span>{f.title}</span>
+                </div>
+                <div style={{ color: "#64748b", fontWeight: 500, fontSize: "0.97rem" }}>{f.desc}</div>
+              </Link>
+            )
           ))}
         </div>
       </div>

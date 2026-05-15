@@ -29,7 +29,7 @@ export function ProfileProvider({
     if (initialProfile) return initialProfile
     return initialUserId ? PersistentCache.get<Profile>(`profile_${initialUserId}`) : null
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialProfile)
   const [user, setUser] = useState<User | null>(null)
 
   const refreshProfile = useCallback(async () => {
@@ -77,7 +77,7 @@ export function ProfileProvider({
 
     supabase.auth.getUser().then(({ data, error }) => {
       if (!mounted) return
-      if (error) {
+      if (error && error.message !== 'Auth session missing!') {
         console.error('Auth getUser error:', error.message)
       }
       setUser(data.user ?? null)
@@ -109,7 +109,10 @@ export function ProfileProvider({
       return
     }
 
-    setLoading(true)
+    // Only trigger loading if it's a real user and we don't have their data yet
+    if (currentUserId !== '00000000-0000-0000-0000-000000000000' && !profile) {
+      setLoading(true)
+    }
 
     let active = true
 

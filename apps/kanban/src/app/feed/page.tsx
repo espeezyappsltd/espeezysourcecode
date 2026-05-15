@@ -6,7 +6,7 @@ import Image from 'next/image'
 import {
   Heart, Flame, HandMetal, Lightbulb, PartyPopper, ThumbsUp,
   MessageCircle, Send, Image as ImageIcon, X, ChevronDown, Loader2,
-  Globe, Users, Lock, MoreHorizontal, Trash2, Pencil
+  Globe, Users, Lock, MoreHorizontal, Trash2, Pencil, Sparkles
 } from 'lucide-react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { useProfile } from '../../context/ProfileContext'
@@ -227,52 +227,96 @@ export default function FeedPage() {
     reactions.find(r => r.user_id === profile?.id)?.reaction
 
   return (
-    <div style={{ maxWidth: '680px', margin: '0 auto', padding: '1.5rem 1rem' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '1.5rem 1rem' }}>
+      
+      {/* IG-like Public Header */}
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem', marginTop: '1rem' }}>
+        <h1 style={{ fontSize: '2.2rem', fontWeight: 950, letterSpacing: '-0.05em', marginBottom: '0.5rem', background: 'linear-gradient(to right, #10B981, #3B82F6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          Academic Journeys
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', fontWeight: 600, maxWidth: '400px', margin: '0 auto' }}>
+          Real-time signals from students building the future. Share your milestones.
+        </p>
+      </div>
 
-      {/* Composer */}
-      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-          <Avatar profile={profile as unknown as PostAuthor} size={38} />
-          <div style={{ flex: 1 }}>
-            <label htmlFor="feed-composer" className="sr-only">What's on your mind?</label>
-            <textarea
-              id="feed-composer"
-              value={composerText}
-              onChange={e => setComposerText(e.target.value)}
-              placeholder="What's on your mind?"
-              rows={composerText.length > 80 ? 4 : 2}
-              onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitPost() }}
-              style={{
-                width: '100%', background: 'transparent', border: 'none', outline: 'none',
-                color: '#F3F4F6', fontSize: '0.95rem', lineHeight: 1.6, resize: 'none',
-                fontFamily: 'inherit', boxSizing: 'border-box',
-              }}
-            />
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <VisibilityToggle value={composerVisibility} onChange={setComposerVisibility} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ fontSize: '0.72rem', color: composerText.length > 1900 ? '#EF4444' : 'rgba(255,255,255,0.2)' }}>
-                  {composerText.length}/2000
-                </span>
-                <button
-                  onClick={submitPost}
-                  disabled={!composerText.trim() || posting}
-                  style={{
-                    padding: '0.45rem 1.1rem', background: '#10B981', border: 'none', borderRadius: '8px',
-                    color: '#000', fontWeight: 800, fontSize: '0.8rem', cursor: (!composerText.trim() || posting) ? 'not-allowed' : 'pointer',
-                    opacity: (!composerText.trim() || posting) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '0.35rem',
-                  }}
-                >
-                  {posting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
-                  Post
-                </button>
+      {!profile && (
+        <div style={{ 
+          background: 'rgba(16, 185, 129, 0.05)', 
+          border: '1px solid rgba(16, 185, 129, 0.15)', 
+          borderRadius: '20px', 
+          padding: '2rem', 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <Sparkles size={32} color="#10B981" style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '0.5rem', color: '#F3F4F6' }}>Join the Journey</h2>
+          <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>Sign in to share your academic milestones and connect with other builders.</p>
+          <button 
+            onClick={() => router.push('/login')}
+            style={{ 
+              padding: '0.75rem 1.75rem', 
+              background: '#10B981', 
+              border: 'none', 
+              borderRadius: '12px', 
+              color: '#000', 
+              fontWeight: 800, 
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
+            }}
+          >
+            Get Started
+          </button>
+        </div>
+      )}
+
+      {/* Composer (Only for logged in) */}
+      {profile && (
+        <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+            <Avatar profile={profile as unknown as PostAuthor} size={38} />
+            <div style={{ flex: 1 }}>
+              <label htmlFor="feed-composer" className="sr-only">What's on your mind?</label>
+              <textarea
+                id="feed-composer"
+                value={composerText}
+                onChange={e => setComposerText(e.target.value)}
+                placeholder="What's on your mind?"
+                rows={composerText.length > 80 ? 4 : 2}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitPost() }}
+                style={{
+                  width: '100%', background: 'transparent', border: 'none', outline: 'none',
+                  color: '#F3F4F6', fontSize: '0.95rem', lineHeight: 1.6, resize: 'none',
+                  fontFamily: 'inherit', boxSizing: 'border-box',
+                }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <VisibilityToggle value={composerVisibility} onChange={setComposerVisibility} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '0.72rem', color: composerText.length > 1900 ? '#EF4444' : 'rgba(255,255,255,0.2)' }}>
+                    {composerText.length}/2000
+                  </span>
+                  <button
+                    onClick={submitPost}
+                    disabled={!composerText.trim() || posting}
+                    style={{
+                      padding: '0.45rem 1.1rem', background: '#10B981', border: 'none', borderRadius: '8px',
+                      color: '#000', fontWeight: 800, fontSize: '0.8rem', cursor: (!composerText.trim() || posting) ? 'not-allowed' : 'pointer',
+                      opacity: (!composerText.trim() || posting) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '0.35rem',
+                    }}
+                  >
+                    {posting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                    Post
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Feed */}
       {loading && (

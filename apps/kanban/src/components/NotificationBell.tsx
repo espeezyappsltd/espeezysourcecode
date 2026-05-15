@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect, useRef, CSSProperties } from 'react'
 import { Bell, Check, Clock, ExternalLink, Inbox } from 'lucide-react'
 import { useNotifications } from './NotificationProvider'
 import { createClient } from '@/lib/supabase/client'

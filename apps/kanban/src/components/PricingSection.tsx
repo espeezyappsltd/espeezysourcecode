@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { Shield, Sparkles, CheckCircle2, ArrowRight, Loader2, Key, Zap, Crown, Rocket } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import TransientError from '@/components/TransientError'

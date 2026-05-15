@@ -21,9 +21,10 @@ export default async function FeedLayout({
   const db = await createServerSupabaseClient()
   const { data: { user } } = await db.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
+  // Removing forced redirect to allow for a public academic feed
+  // if (!user) {
+  //   redirect('/login')
+  // }
 
   return <>{children}</>
 }
