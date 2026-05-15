@@ -215,7 +215,7 @@ export default function FundPage() {
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pre-Register</Link>
           <Link href="/pricing" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pricing</Link>
-          <a href="#donate-form" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none' }}>Fund</a>
+          <a href="#donate-form" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none' }}>Accelerate</a>
         </div>
       </nav>
 
@@ -223,19 +223,19 @@ export default function FundPage() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
             <Heart size={14} color="#10b981" />
-            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Mission Support</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Platform Acceleration</span>
           </div>
         </motion.div>
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.8 }}
           style={{ fontSize: 'clamp(2.5rem, 7vw, 5rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, maxWidth: '800px', margin: '0 auto 1.5rem', color: '#0f172a' }}>
-          Build the future of{' '}
+          Accelerate the future of{' '}
           <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            free education.
+            collaborative learning.
           </span>
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
           style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto 1rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65, fontWeight: 500 }}>
-          Espeezy shows exactly who did what in group work. Help speed up the develpment process to deliver features you find most useful. 100% goes to engineering and infrastructure.
+          We are building the infrastructure for a more transparent academic world. Direct your resources toward the milestones that matter most to your team. 100% of contributions are deployed to engineering and global infrastructure.
         </motion.p>
       </section>
 
@@ -248,11 +248,11 @@ export default function FundPage() {
                 <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Secure Payment via Stripe</span>
               </div>
               <h2 style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.04em', margin: '0.875rem 0 0.5rem', lineHeight: 1.1, color: '#0f172a' }}>
-                Make a move.<br />
-                <span style={{ color: '#10b981' }}>Any amount. Any time.</span>
+                Fuel the build.<br />
+                <span style={{ color: '#10b981' }}>Select your contribution level.</span>
               </h2>
               <p style={{ color: '#64748b', fontSize: '0.83rem', lineHeight: 1.55, marginBottom: '1.75rem' }}>
-                100% directly to engineering and infrastructure. 
+                Deploy resources directly to the feature roadmap.
               </p>
 
               <form onSubmit={handleDonate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -278,7 +278,7 @@ export default function FundPage() {
 
                 <select value={featureTag} onChange={e => setFeatureTag(e.target.value)}
                   style={{ padding: '0.875rem 1rem', borderRadius: '10px', border: '1px solid rgba(15,23,42,0.12)', background: '#f8fafc', color: '#475569', fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}>
-                  <option value="">Support general development</option>
+                  <option value="">Accelerate the general build</option>
                   {FUND_FEATURES.map(f => <option key={f.title} value={f.title}>{f.title}</option>)}
                 </select>
 
@@ -303,7 +303,7 @@ export default function FundPage() {
 
                 <button type="submit" disabled={submitting || displayAmount < 1}
                   style={{ padding: '1rem', borderRadius: '10px', background: displayAmount >= 1 ? 'var(--brand)' : '#e2e8f0', color: displayAmount >= 1 ? 'white' : '#94a3b8', fontWeight: 800, fontSize: '0.95rem', border: 'none', cursor: displayAmount >= 1 ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', transition: 'background 0.15s' }}>
-                  {submitting ? 'Redirecting to Stripe…' : displayAmount >= 1 ? `Donate $${displayAmount.toFixed(2)} →` : 'Enter an amount'}
+                  {submitting ? 'Redirecting to Stripe…' : displayAmount >= 1 ? `Contribute $${displayAmount.toFixed(2)} →` : 'Select an amount'}
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -315,8 +315,8 @@ export default function FundPage() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem', color: '#0f172a' }}>What cooking...</h2>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>These are real costs. Click any feature to see exactly what the money is for.</p>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem', color: '#0f172a' }}>Milestone Roadmap</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>Transparency is our core. Select a milestone below to view its technical requirements and deployment plan.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {FUND_FEATURES.map((f, i) => (
                 <div key={i}
@@ -341,7 +341,7 @@ export default function FundPage() {
                         <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid rgba(15,23,42,0.07)' }}>
                           <div style={{ marginTop: '1rem' }}>
                             <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.6, marginBottom: '0.875rem' }}>
-                              <strong style={{ color: '#475569', display: 'block', marginBottom: '0.25rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Why it costs money</strong>
+                              <strong style={{ color: '#475569', display: 'block', marginBottom: '0.25rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Technical Requirements</strong>
                               {f.why}
                             </p>
                             <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
@@ -351,7 +351,7 @@ export default function FundPage() {
                           </div>
                           <button onClick={e => { e.stopPropagation(); setFeatureTag(f.title); document.getElementById('donate-form')?.scrollIntoView({ behavior: 'smooth' }) }}
                             style={{ marginTop: '1rem', padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', color: 'var(--brand)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-                            Support this feature <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                            Fund this milestone <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
                           </button>
                         </div>
                       </motion.div>
