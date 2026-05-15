@@ -232,6 +232,37 @@ const docsContent: Record<string, DocEntry> = {
     eli12: 'It is like Kahoot but smarter. You and your friends join a live quiz about your subject. Questions pop up on screen and you have a few seconds to answer. The faster and more correct you are, the higher you score. At the end, Espeezy shows you what you need to study more.',
   },
 
+  'features/hustle': {
+    title: 'Side Hustle',
+    icon: <ShoppingBag size={40} />,
+    tagline: 'A managed marketplace for academic and creative side work where students earn credits for their skills.',
+    sections: [
+      {
+        heading: 'What is the Side Hustle?',
+        body: 'The Side Hustle is a curated task marketplace within Espeezy. It allows students with specific skills (research, coding, graphic design, proofreading) to find paid opportunities posted by other students or external partners. Unlike the general Marketplace which is for sharing existing resources, the Side Hustle is for active service delivery.',
+      },
+      {
+        heading: 'How to find and accept tasks',
+        body: 'Tasks are listed in the Hustle dashboard and categorised by skill type, estimated duration, and credit reward. You can filter by "Quick Tasks" (under 30 minutes) or "Project Tasks" (multi-day). Before accepting a task, you can see the posters rating and previous feedback. Once you accept, a private workspace is created for the duration of the task.',
+        items: ['Skills-based task matching', 'Verified posters only', 'Secure workspace for every hustle'],
+      },
+      {
+        heading: 'The credit system and payouts',
+        body: 'Hustles are paid in Espeezy Credits. When a task is posted, the credits are moved into an Espeezy account. Once the task is marked as complete and the poster confirms receipt, the credits are released to the worker. Pro members can redeem these credits for cash payouts to their bank account via Stripe Connect.',
+        items: ['Secure payments for all tasks', 'Pro members can cash out to bank', 'Redeem credits for months of Espeezy Pro'],
+      },
+      {
+        heading: 'Quality and dispute resolution',
+        body: 'If a poster is unhappy with the work delivered, they can initiate a dispute. An Espeezy moderator (or a senior student with a high reputation score) will review the deliverables and the task brief to make a final decision. Users with a history of poor quality or non-payment are permanently banned from the Hustle network.',
+      },
+      {
+        heading: 'Institutional tasks',
+        body: 'Universities can post "Campus Hustles" such as student ambassador roles, research assistant tasks, or peer mentoring opportunities. These are marked with a verified institution badge and often pay higher credit rates or direct cash rewards.',
+      },
+    ],
+    eli12: 'It is like having a part-time job inside Espeezy. If you are great at something, like making posters or fixing code, you can find other students who need help and get paid in points. If you have a Pro account, you can even turn those points into real money in your bank account.',
+  },
+
   'features/search': {
     title: 'Smart Search',
     icon: <Search size={40} />,

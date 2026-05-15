@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, Zap, Shield, Sparkles, Globe, BarChart } from 'lucide-react'
+import { BookOpen, Zap, Shield, Sparkles, Globe, BarChart, ShoppingBag } from 'lucide-react'
 
 export default function DocsHomePage() {
   const sections = [
@@ -8,6 +8,7 @@ export default function DocsHomePage() {
     { icon: <Globe size={20} />, title: 'Peer Network', desc: 'Find collaborators and share resources across your institution.', href: '/docs/features/network' },
     { icon: <Shield size={20} />, title: 'Infrastructure', desc: 'Stripe, Supabase sync, and real-time presence architecture.', href: '/docs/infra/payments' },
     { icon: <BarChart size={20} />, title: 'Impact Stats', desc: 'See how Espeezy is changing education globally.', href: '/docs/impact' },
+    { icon: <ShoppingBag size={20} />, title: 'Side Hustle', desc: 'A managed task marketplace for academic and creative side work.', href: '/docs/features/hustle' },
     { icon: <Sparkles size={20} />, title: 'Our Vision', desc: 'The mission behind building the most transparent LMS on Earth.', href: '/docs/vision' },
   ]
 

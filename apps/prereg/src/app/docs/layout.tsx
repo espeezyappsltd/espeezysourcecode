@@ -25,6 +25,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         { label: 'Academic Roadmap', href: '/docs/features/roadmap' },
         { label: 'Peer Network', href: '/docs/features/network' },
         { label: 'Marketplace', href: '/docs/features/marketplace' },
+        { label: 'Side Hustle', href: '/docs/features/hustle' },
         { label: 'Skirmish Games', href: '/docs/features/skirmish' },
         { label: 'Smart Search', href: '/docs/features/search' },
       ],

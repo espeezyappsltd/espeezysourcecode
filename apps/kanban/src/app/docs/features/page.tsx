@@ -27,13 +27,18 @@ export default function FeaturesDocs() {
     },
     {
       icon: <ShoppingBag size={24} />,
-      title: 'Share & Borrow',
-      eli12: "Need a textbook or a specific tool? You can borrow items from other students in the marketplace, just like a library."
+      title: 'Marketplace',
+      eli12: "Need a textbook or a specific tool? You can find and share resources from other students in the marketplace."
     },
     {
       icon: <Gamepad2 size={24} />,
       title: 'Skirmish Games',
       eli12: "Fun, quick games where you can compete with your friends to see who knows the most about your subjects."
+    },
+    {
+      icon: <ShoppingBag size={24} />,
+      title: 'Side Hustle',
+      eli12: "Like a part-time job inside the app. If you have skills like coding or design, you can help others and earn points or even real money."
     },
     {
       icon: <Search size={24} />,
