@@ -1,17 +1,16 @@
-import type { NextConfig } from 'next'
-import path from 'node:path'
+const path = require('path')
 
 const monorepoRoot = path.join(process.cwd(), '../../')
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Deployed to Vercel - server mode (no static export)
   images: {
     unoptimized: true,
   },
   outputFileTracingRoot: monorepoRoot,
-  // basePath: '/dashboard',
   experimental: {
   },
 }
 
-export default nextConfig
+module.exports = nextConfig

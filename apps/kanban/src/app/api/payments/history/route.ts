@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       throw p2pError
     }
 
-    const profileIds = Array.from(new Set((p2pRows ?? []).flatMap((row: any) => [row.sender_id, row.recipient_id]).filter(Boolean)))
+    const profileIds = Array.from(new Set((p2pRows ?? []).flatMap((row) => [row.sender_id, row.recipient_id]).filter(Boolean)))
     const { data: profileRows, error: profileError } = profileIds.length > 0
       ? await adminDb.from('profiles').select('*').in('id', profileIds)
       : { data: [], error: null }
@@ -51,15 +51,13 @@ export async function GET(req: NextRequest) {
       throw profileError
     }
 
-    const profileMap = new Map((profileRows ?? []).map((profile: any) => [profile.id, profile]))
-    const p2pTransfers = (p2pRows ?? []).map((row: any) => {
-      const data = row
-
+    const profileMap = new Map((profileRows ?? []).map((profile) => [profile.id, profile]))
+    const p2pTransfers = (p2pRows ?? []).map((row) => {
       return {
-        ...data,
+        ...row,
         type: 'p2p',
-        sender: profileMap.get(data.sender_id) ?? null,
-        recipient: profileMap.get(data.recipient_id) ?? null
+        sender: profileMap.get(row.sender_id) ?? null,
+        recipient: profileMap.get(row.recipient_id) ?? null
       }
     })
 
@@ -75,7 +73,7 @@ export async function GET(req: NextRequest) {
       throw paymentError
     }
 
-    const payments = (paymentRows ?? []).map((payment: any) => ({
+    const payments = (paymentRows ?? []).map((payment) => ({
       ...payment,
       type: 'upgrade',
       amount_cents: payment.amount_total,
@@ -83,9 +81,9 @@ export async function GET(req: NextRequest) {
     }))
 
     // 3. Combine and Sort
-    const combined = [...p2pTransfers, ...payments].sort((a: any, b: any) => {
-      const dateA = new Date(a.created_at || a.updated_at).getTime()
-      const dateB = new Date(b.created_at || b.updated_at).getTime()
+    const combined = [...p2pTransfers, ...payments].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime()
+      const dateB = new Date(b.created_at).getTime()
       return dateB - dateA
     })
 
@@ -99,8 +97,9 @@ export async function GET(req: NextRequest) {
       limit,
       total_count: combined.length 
     })
-  } catch (err: any) {
-    console.error('Payment history error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Payment history error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

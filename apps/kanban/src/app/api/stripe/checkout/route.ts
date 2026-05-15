@@ -28,11 +28,11 @@ const PLAN_CONFIG: Record<z.infer<typeof checkoutSchema>['plan'], { priceEnvKey:
  * - Public: accepts email for pre-registration signups
  */
 export async function POST(req: Request) {
-  let stripe
+  let stripe: Stripe
   try {
     stripe = getStripeClient()
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Stripe is not configured' }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Stripe is not configured' }, { status: 500 })
   }
 
   try {
@@ -44,13 +44,14 @@ export async function POST(req: Request) {
     }
 
     return handleAuthenticatedCheckout(stripe, req, body)
-  } catch (error: any) {
-    console.error('Stripe Checkout Error:', error.message)
-    return NextResponse.json({ error: error.message || 'Stripe session creation failed.' }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Stripe session creation failed.'
+    console.error('Stripe Checkout Error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
-async function handleAuthenticatedCheckout(stripe: any, req: Request, body: any) {
+async function handleAuthenticatedCheckout(stripe: Stripe, req: Request, body: unknown) {
   const user = await getRequestUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -100,7 +101,7 @@ async function handleAuthenticatedCheckout(stripe: any, req: Request, body: any)
  * Public checkout for pre-registration signups (no Firebase auth required)
  * Creates a Stripe checkout session with email in metadata for webhook to create user
  */
-async function handlePublicCheckout(stripe: any, body: any) {
+async function handlePublicCheckout(stripe: Stripe, body: unknown) {
   const parsed = publicCheckoutSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid request. Required: plan, email' }, { status: 422 })
@@ -116,7 +117,7 @@ async function handlePublicCheckout(stripe: any, body: any) {
     return NextResponse.json({ error: 'Stripe is not configured correctly.' }, { status: 500 })
   }
 
-  const sessionParams: any = {
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: config.mode,
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],

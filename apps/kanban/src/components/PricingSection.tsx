@@ -221,7 +221,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                   'Public peer-networking access',
                   'Standard AI synthesis usage',
                   'Real-time document sync',
-                  'Up to 5MB storage per project'
+                  '1GB encrypted cloud storage'
                 ].map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
                     <CheckCircle2 size={16} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0, marginTop: '3px' }} />
@@ -298,7 +298,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                   'Unlimited active project hubs',
                   'Advanced contribution heatmaps',
                   'Export-ready research reports',
-                  '1GB encrypted cloud storage',
+                  '5GB encrypted cloud storage',
                   'Priority academic support',
                   'Early access to new modules'
                 ].map((f, i) => (
@@ -379,7 +379,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                   'Premium AI quota and faster responses',
                   'Advanced governance and role controls',
                   'Priority queue on heavy collaboration periods',
-                  '10GB encrypted cloud storage',
+                  '20GB encrypted cloud storage',
                   'Dedicated onboarding and support lane'
                 ].map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>

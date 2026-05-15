@@ -9,7 +9,7 @@ import TaskModal from './TaskModal';
 import TeamChat from './TeamChat';
 import KanbanOnboardingModal from './KanbanOnboardingModal';
 import { AlertCircle, RefreshCw, CloudOff, Plus } from 'lucide-react';
-import { fetchGroupMembers } from '@/services/dashboard';
+import { fetchGroupMembers, createTask as createTaskApi } from '@/services/dashboard';
 import { handleTaskStatusUpdate } from '@/app/actions';
 import { db } from '@/lib/db-client';
 
@@ -66,8 +66,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
             setTasks(prev => [...prev, payload.new as Task]);
           } else if (payload.eventType === 'UPDATE') {
             setTasks(prev => prev.map(t => t.id === payload.new.id ? payload.new as Task : t));
-          } else if (payload.eventType === 'DELETE') {
-            setTasks(prev => prev.filter(t => t.id === payload.old.id));
+          } else if (payload.eventType === 'DELETE' && payload.old) {
+            const oldId = (payload.old as { id: string }).id;
+            setTasks(prev => prev.filter(t => t.id === oldId));
           }
         }
       )
@@ -77,10 +78,10 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
         // We can use this to update online status in parent or local state
         window.dispatchEvent(new CustomEvent('presence-sync', { detail: state }));
       })
-      .on('presence', { event: 'join', key: profile.id }, ({ newPresences }) => {
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
         console.log('Joined:', newPresences);
       })
-      .on('presence', { event: 'leave', key: profile.id }, ({ leftPresences }) => {
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
         console.log('Left:', leftPresences);
       })
       .subscribe(async (status) => {
@@ -116,8 +117,8 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
     try {
       const newTask = await createTaskApi(task);
       setTasks(prev => [...prev, newTask]);
-    } catch (e: any) {
-      setError(e.message || 'Failed to create task.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to create task.');
     } finally {
       setLoading(false);
     }
@@ -130,8 +131,8 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
     
     try {
       await handleTaskStatusUpdate(taskId, newStatus, groupId, profile.id);
-    } catch (e: any) {
-      setError(e.message || 'Failed to update task.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to update task.');
       setTasks(oldTasks); // Rollback
     }
   };

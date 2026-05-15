@@ -43,6 +43,7 @@ export default function PersonalAssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'file' | 'link' | 'marketplace_ref'>('all')
+  const [currentFolder, setCurrentFolder] = useState('/')
   const [showUploadModal, setShowUploadModal] = useState(false)
   
   const fetchAssets = useCallback(async () => {
@@ -78,7 +79,11 @@ export default function PersonalAssetsPage() {
     }
   }
 
-  const filteredAssets = assets.filter(a => filter === 'all' || a.asset_type === filter)
+  const filteredAssets = assets.filter(a => {
+    const matchesFilter = filter === 'all' || a.asset_type === filter
+    const matchesFolder = a.folder === currentFolder
+    return matchesFilter && matchesFolder
+  })
   
   const tier = (profile?.subscription_plan?.toLowerCase() as keyof typeof QUOTAS) || 'free'
   const quota = QUOTAS[tier]
@@ -126,6 +131,22 @@ export default function PersonalAssetsPage() {
         </div>
       </div>
 
+      {/* Breadcrumbs */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '0.85rem', fontWeight: 700 }}>
+        <button onClick={() => setCurrentFolder('/')} style={{ background: 'none', border: 'none', color: currentFolder === '/' ? 'white' : 'var(--text-sub)', cursor: 'pointer' }}>Root</button>
+        {currentFolder !== '/' && currentFolder.split('/').filter(Boolean).map((f, i, arr) => (
+          <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ opacity: 0.3 }}>/</span>
+            <button 
+              onClick={() => setCurrentFolder('/' + arr.slice(0, i + 1).join('/'))} 
+              style={{ background: 'none', border: 'none', color: i === arr.length - 1 ? 'white' : 'var(--text-sub)', cursor: 'pointer' }}
+            >
+              {f}
+            </button>
+          </div>
+        ))}
+      </div>
+
       {/* Controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', background: 'var(--bg-sub)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
@@ -151,16 +172,34 @@ export default function PersonalAssetsPage() {
           ))}
         </div>
 
-        <button 
-          onClick={() => setShowUploadModal(true)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem',
-            background: 'var(--brand)', color: 'black', borderRadius: '16px', border: 'none',
-            fontWeight: 950, fontSize: '0.9rem', cursor: 'pointer'
-          }}
-        >
-          <Plus size={18} /> Add Asset
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button 
+            onClick={() => {
+              const name = prompt('Folder name:')
+              if (name) {
+                // In a real app we'd create a dummy entry or just let users upload to new paths
+                setCurrentFolder(currentFolder === '/' ? `/${name}` : `${currentFolder}/${name}`)
+              }
+            }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem',
+              background: 'var(--bg-sub)', color: 'white', borderRadius: '16px', border: '1px solid var(--border)',
+              fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer'
+            }}
+          >
+            New Folder
+          </button>
+          <button 
+            onClick={() => setShowUploadModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem',
+              background: 'var(--brand)', color: 'black', borderRadius: '16px', border: 'none',
+              fontWeight: 950, fontSize: '0.9rem', cursor: 'pointer'
+            }}
+          >
+            <Plus size={18} /> Add Asset
+          </button>
+        </div>
       </div>
 
       {/* Grid */}
@@ -183,9 +222,10 @@ export default function PersonalAssetsPage() {
         </div>
       )}
 
-      {/* Upload Modal Placeholder */}
+      {/* Upload Modal */}
       {showUploadModal && (
         <UploadModal 
+          currentFolder={currentFolder}
           onClose={() => setShowUploadModal(false)} 
           onSuccess={() => { setShowUploadModal(false); fetchAssets(); }} 
         />
@@ -262,20 +302,42 @@ function AssetCard({ asset, onDelete }: { asset: Asset, onDelete: () => void }) 
   )
 }
 
-function UploadModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
-  const [form, setForm] = useState({ title: '', description: '', asset_type: 'file' as const, asset_url: '', category: '' })
+function UploadModal({ currentFolder, onClose, onSuccess }: { currentFolder: string, onClose: () => void, onSuccess: () => void }) {
+  const [form, setForm] = useState({ title: '', description: '', asset_type: 'file' as Asset['asset_type'], asset_url: '', category: '' })
+  const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleSumbit = async () => {
-    if (!form.title || !form.asset_url) return setError('Title and URL are required')
+    if (!form.title && !file) return setError('Title or file is required')
+    if (form.asset_type === 'link' && !form.asset_url) return setError('URL is required for links')
+    
     setLoading(true)
+    setError('')
+    
     try {
-      const res = await fetch('/api/assets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, size_bytes: form.asset_type === 'file' ? 1024 * 1024 : 0 }) // Mocking size for links/refs
-      })
+      let res: Response
+
+      if (form.asset_type === 'file' && file) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('title', form.title || file.name)
+        formData.append('description', form.description)
+        formData.append('category', form.category)
+        formData.append('folder', currentFolder)
+
+        res = await fetch('/api/assets', {
+          method: 'POST',
+          body: formData
+        })
+      } else {
+        res = await fetch('/api/assets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...form, folder: currentFolder, size_bytes: 0 })
+        })
+      }
+
       if (res.ok) onSuccess()
       else {
         const d = await res.json()
@@ -310,6 +372,35 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: (
             </div>
           </div>
 
+          {form.asset_type === 'file' ? (
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Upload File</label>
+              <input 
+                type="file" 
+                onChange={e => {
+                  const f = e.target.files?.[0]
+                  if (f) {
+                    setFile(f)
+                    if (!form.title) setForm(prev => ({ ...prev, title: f.name }))
+                  }
+                }}
+                style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-sub)', border: '1px dashed var(--border)', borderRadius: '12px', color: 'white' }}
+              />
+            </div>
+          ) : (
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Link URL</label>
+              <input 
+                type="url" 
+                className="form-input" 
+                value={form.asset_url} 
+                onChange={e => setForm(f => ({ ...f, asset_url: e.target.value }))}
+                placeholder="https://..."
+                style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)' }}
+              />
+            </div>
+          )}
+
           <div>
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Title</label>
             <input 
@@ -318,18 +409,6 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: (
               value={form.title} 
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g. Design System V1"
-              style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>{form.asset_type === 'file' ? 'File URL' : 'Link URL'}</label>
-            <input 
-              type="url" 
-              className="form-input" 
-              value={form.asset_url} 
-              onChange={e => setForm(f => ({ ...f, asset_url: e.target.value }))}
-              placeholder="https://..."
               style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)' }}
             />
           </div>
@@ -355,7 +434,7 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: (
             style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
             {loading && <Loader2 size={16} className="animate-spin" />}
-            Save Asset
+            {form.asset_type === 'file' ? 'Upload & Save' : 'Save Link'}
           </button>
         </div>
       </div>

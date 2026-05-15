@@ -18,7 +18,7 @@ export const collection = (_db: any, name: string) => name
 export const doc = (_db: any, name: string, id: string) => ({ table: name, id })
 
 export const query = (table: string, ...constraints: any[]) => {
-  let builder = db.from(table).select('*')
+  let builder: any = db.from(table).select('*')
   constraints.forEach(c => {
     if (c?.type === 'where') builder = builder.eq(c.field, c.value)
     if (c?.type === 'orderBy') builder = builder.order(c.field, { ascending: c.dir === 'asc' })

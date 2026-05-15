@@ -78,10 +78,10 @@ export default function ChillOutHub() {
   const [roundCount, setRoundCount] = useState<number>(5)
   
   const [isGenerating, setIsGenerating] = useState(false)
-  const [questions, setQuestions] = useState<any[]>([])
+  const [questions, setQuestions] = useState<{ question: string; type: string; difficulty_multiplier: number }[]>([])
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
-  const [onlineProfiles, setOnlineProfiles] = useState<any[]>([])
-  const [userStats, setUserStats] = useState<any | null>(null)
+  const [onlineProfiles, setOnlineProfiles] = useState<Profile[]>([])
+  const [userStats, setUserStats] = useState<{ level: number; total_xp: number; wins: number; games_played: number; rank_title?: string } | null>(null)
 
   // 1. Fetch Stats & Profiles
   useEffect(() => {
@@ -102,10 +102,10 @@ export default function ChillOutHub() {
         if (onlineUsers.size > 0) {
           const ids = Array.from(onlineUsers)
           const profilesData = await fetchProfilesByIds(ids.slice(0, 10))
-          setOnlineProfiles(profilesData.filter((p: any) => p.id !== profile?.id))
+          setOnlineProfiles(profilesData.filter((p) => p.id !== profile?.id))
         }
-      } catch (err: any) {
-        console.error('Fetch data error:', err.message)
+      } catch (err: unknown) {
+        console.error('Fetch data error:', err instanceof Error ? err.message : 'unknown error')
       }
     }
     fetchData()

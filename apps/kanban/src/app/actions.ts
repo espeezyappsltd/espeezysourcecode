@@ -39,9 +39,10 @@ export async function distributeTaskScore(taskId: string, assignees: string[]) {
 
     revalidatePath('/', 'layout')
     return { success: true }
-  } catch (err: any) {
-    console.error('Score distribution failed:', err.message)
-    throw new Error(`Critical Error: ${err.message}`)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Score distribution failed:', message)
+    throw new Error(`Critical Error: ${message}`)
   }
 }
 
@@ -72,9 +73,10 @@ export async function updateUserGameStats(userId: string, xpEarned: number, won:
 
     revalidatePath('//chillout', 'page')
     return { success: true, stats: newData }
-  } catch (err: any) {
-    console.error('Stats update failed:', err.message)
-    throw new Error(`Admin Node Error: ${err.message}`)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Stats update failed:', message)
+    throw new Error(`Admin Node Error: ${message}`)
   }
 }
 export async function handleTaskStatusUpdate(taskId: string, newStatus: string, groupId: string, userId: string) {
@@ -94,7 +96,7 @@ export async function handleTaskStatusUpdate(taskId: string, newStatus: string, 
       action: 'update' as const,
       task: {
         ...task,
-        status: newStatus as any,
+        status: newStatus as 'todo' | 'in_progress' | 'done',
       },
       userId
     }
@@ -108,8 +110,9 @@ export async function handleTaskStatusUpdate(taskId: string, newStatus: string, 
 
     revalidatePath('/', 'layout')
     return { success: true }
-  } catch (err: any) {
-    console.error('Status update failed:', err.message)
-    throw new Error(`Task Loop Error: ${err.message}`)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Status update failed:', message)
+    throw new Error(`Task Loop Error: ${message}`)
   }
 }

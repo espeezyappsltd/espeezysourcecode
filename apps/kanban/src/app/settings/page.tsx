@@ -8,7 +8,7 @@ import {
   Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, MapPin,
   UserMinus, Eye, ShieldAlert, Activity as PulseIcon, History, Mail,
-  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search, MessageSquare, Phone, Globe
+  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search, MessageSquare, Phone, Globe, HardDrive
 } from 'lucide-react'
 import { detectCountry, getFlagComponent } from '@/utils/geo'
 import ActiveUsersList from '@/components/ActiveUsersList'
@@ -112,11 +112,12 @@ export default function SettingsPage() {
   }, [])
 
   const fetchJoinRequests = useCallback(async (userId: string) => {
-    const requests = (await fetchMessagesForUser(userId))
-      .filter((m: any) => m.content?.includes('[JOIN REQUEST]'))
-      .map((m: any) => m.group_id)
+    const messages = await fetchMessagesForUser(userId)
+    const requests = messages
+      .filter((m) => m.content?.includes('[JOIN REQUEST]'))
+      .map((m) => m.group_id)
 
-    setSentRequests(Array.from(new Set(requests)))
+    setSentRequests(Array.from(new Set(requests as string[])))
   }, [])
 
   const fetchTeam = useCallback(async (groupId: string) => {
@@ -127,12 +128,12 @@ export default function SettingsPage() {
   const fetchUserData = useCallback(async () => {
     const user = await getAuthUser()
     if (user) {
-      const providers: string[] = (user as any).app_metadata?.providers || []
+      const providers = (user.app_metadata?.providers as string[]) || []
       setIsGithubLinked(providers.includes('github'))
       setIsGoogleLinked(providers.includes('google'))
 
       try {
-        const data: any = await fetchProfileById(user.id)
+        const data = await fetchProfileById(user.id)
         if (data) {
           setFullName(data.full_name || '')
           setCourseName(data.course_name || '')
@@ -222,8 +223,8 @@ export default function SettingsPage() {
       }
       refreshProfile()
       addToast('Profile Synchronized', 'Your academic journey and identity details have been successfully updated.', 'success')
-    } catch (err: any) {
-      setError(`Identity Sync Error: ${err.message || 'Verification failed'}`)
+    } catch (err: unknown) {
+      setError(`Identity Sync Error: ${err instanceof Error ? err.message : 'Verification failed'}`)
     }
     setSaving(false)
   }
@@ -269,7 +270,7 @@ export default function SettingsPage() {
     try {
       await updateProfileById(profile.id, { protect_avatar: val })
       addToast('Protection Updated', val ? 'Manual avatar locked.' : 'Provider sync enabled.', 'success')
-    } catch (err: any) {
+    } catch (err: unknown) {
       addToast('Protocol Error', 'Failed to update protection status.', 'error')
     }
   }
@@ -291,7 +292,7 @@ export default function SettingsPage() {
       const publicUrl = await getDownloadURL(storageRef)
 
       if (type === 'avatar') {
-        const updateData: any = { avatar_url: publicUrl, manual_avatar_url: publicUrl }
+        const updateData = { avatar_url: publicUrl, manual_avatar_url: publicUrl }
         await updateProfileById(profile.id, updateData)
         setAvatarUrl(publicUrl)
       } else {
@@ -326,8 +327,8 @@ export default function SettingsPage() {
       }
       setIsEncrypted(nextValue)
       addToast('Visibility Changed', `Group visibility is now set to ${nextValue ? 'Encrypted' : 'Public'}.`, 'success')
-    } catch (err: any) {
-      setError(`Failed to update visibility: ${err.message}`)
+    } catch (err: unknown) {
+      setError(`Failed to update visibility: ${err instanceof Error ? err.message : 'unknown error'}`)
     }
     setUpdatingGroup(false)
   }
@@ -364,8 +365,8 @@ export default function SettingsPage() {
       await fetchUserData()
       refreshProfile()
       addToast('Team Switched', 'You have been successfully re-assigned to the new project group.', 'success')
-    } catch (err: any) {
-      setError(`Sync failed: ${err.message}`)
+    } catch (err: unknown) {
+      setError(`Sync failed: ${err instanceof Error ? err.message : 'unknown error'}`)
     }
     setSwitching(false)
   }
@@ -448,6 +449,7 @@ export default function SettingsPage() {
           { id: 'appearance', label: 'Design', icon: PaletteIcon },
           { id: 'security', label: 'Security', icon: Shield },
           { id: 'billing', label: 'Go Pro', icon: CreditCard },
+          { id: 'storage', label: 'Storage Node', icon: HardDrive },
           { id: 'data', label: 'Privacy', icon: AlertTriangle },
           { id: 'support', label: 'Feedback', icon: MessageSquare },
         ].filter(t => !t.hidden).map(tab => (
@@ -548,6 +550,68 @@ export default function SettingsPage() {
           </div>
         )}
       
+        {activeTab === 'storage' && profile && (
+          <div className="auth-card" style={{ maxWidth: '100%' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Personal Storage Node</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Manage your academic assets, private folders, and storage capacity.</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <HardDrive size={24} color="var(--brand)" />
+                    <h3 style={{ margin: 0, fontWeight: 900 }}>Storage Status</h3>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--brand)' }}>
+                    {((profile.storage_used || 0) / (1024 * 1024)).toFixed(1)} MB Used
+                  </span>
+                </div>
+
+                <div style={{ height: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden', marginBottom: '1rem' }}>
+                  <div 
+                    style={{ 
+                      height: '100%', 
+                      background: 'var(--brand)', 
+                      width: `${Math.min(100, ((profile.storage_used || 0) / (profile.subscription_plan === 'premium' ? 20 * 1024 * 1024 * 1024 : profile.subscription_plan === 'pro' ? 5 * 1024 * 1024 * 1024 : 1024 * 1024 * 1024)) * 100)}%`,
+                      borderRadius: '100px'
+                    }} 
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)' }}>
+                  <span>Tier: {profile.subscription_plan?.toUpperCase() || 'FREE'}</span>
+                  <span>Quota: {profile.subscription_plan === 'premium' ? '20GB' : profile.subscription_plan === 'pro' ? '5GB' : '1GB'}</span>
+                </div>
+
+                <button 
+                  onClick={() => window.location.href = '/assets'}
+                  className="btn btn-primary" 
+                  style={{ marginTop: '2rem', width: '100%' }}
+                >
+                  Manage Assets
+                </button>
+              </div>
+
+              <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem' }}>
+                <h3 style={{ margin: '0 0 1rem', fontWeight: 900, fontSize: '1rem' }}>Storage Features</h3>
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {[
+                    'Private Folders & CRUD',
+                    'Direct Asset Linking',
+                    'Automated Instructions',
+                    'Secure RLS Protocol'
+                  ].map(f => (
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-sub)', fontWeight: 700 }}>
+                      <CheckCircle2 size={16} color="var(--success)" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'billing' && profile && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Subscription & Billing</h2>
@@ -1399,7 +1463,7 @@ export default function SettingsPage() {
                         setPendingAchievements(null)
                         setSaveConfirmation(false)
                         refreshProfile()
-                      } catch (err: any) {
+                      } catch (err: unknown) {
                         setError("Synchronization failed.")
                       }
                       setSaving(false)

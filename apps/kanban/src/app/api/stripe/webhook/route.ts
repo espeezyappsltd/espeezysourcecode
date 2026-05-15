@@ -22,8 +22,8 @@ export async function POST(req: Request) {
   try {
     stripe = getStripeClient()
     webhookSecret = getStripeWebhookSecret()
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Stripe not configured' }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Stripe not configured' }, { status: 500 })
   }
 
   const rawBody = Buffer.from(await req.arrayBuffer())
@@ -31,8 +31,8 @@ export async function POST(req: Request) {
   let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret)
-  } catch (error: any) {
-    return NextResponse.json({ error: `Stripe webhook verification failed: ${error.message}` }, { status: 400 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: `Stripe webhook verification failed: ${error instanceof Error ? error.message : 'unknown error'}` }, { status: 400 })
   }
 
   if (event.type === 'checkout.session.completed') {
@@ -164,8 +164,8 @@ async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
         console.log(`[webhook] Created new profile for public signup: ${profile?.id ?? 'unknown'} (${email})`)
       }
     }
-  } catch (err) {
-    console.error('[webhook] subscription update error:', err)
+  } catch (err: unknown) {
+    console.error('[webhook] subscription update error:', err instanceof Error ? err.message : 'unknown error')
   }
 }
 
@@ -191,8 +191,8 @@ async function handleDonationWebhook(session: Stripe.Checkout.Session) {
     }
 
     await upsertDonationToSupabase(session)
-  } catch (err) {
-    console.error('[webhook] donation upsert error:', err)
+  } catch (err: unknown) {
+    console.error('[webhook] donation upsert error:', err instanceof Error ? err.message : 'unknown error')
   }
 }
 
@@ -224,8 +224,8 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
         .select('*')
         .in('id', [transfer.sender_id, transfer.recipient_id])
 
-      const sender = (profiles ?? []).find((profile: any) => profile.id === transfer.sender_id)
-      const recipient = (profiles ?? []).find((profile: any) => profile.id === transfer.recipient_id)
+      const sender = (profiles ?? []).find((p) => p.id === transfer.sender_id) as { id: string; username?: string; full_name?: string; total_score?: number; email?: string; espeezy_email?: string } | undefined
+      const recipient = (profiles ?? []).find((p) => p.id === transfer.recipient_id) as { id: string; username?: string; full_name?: string; total_score?: number; email?: string; espeezy_email?: string } | undefined
 
       if (sender && recipient) {
         const impactScore = 15
@@ -274,7 +274,7 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
     } else {
       await adminDb.from('p2p_transfers').update({ status: 'failed', failed_at: new Date().toISOString() }).eq('id', transferId)
     }
-  } catch (err) {
-    console.error('[webhook] P2P transfer error:', err)
+  } catch (err: unknown) {
+    console.error('[webhook] P2P transfer error:', err instanceof Error ? err.message : 'unknown error')
   }
 }

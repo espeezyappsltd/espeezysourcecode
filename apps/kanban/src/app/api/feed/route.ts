@@ -84,9 +84,10 @@ export async function GET(req: NextRequest) {
       posts,
       nextCursor: posts.length === PAGE_SIZE ? posts[posts.length - 1].created_at : null,
     })
-  } catch (err: any) {
-    console.error('Feed Fetch Error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Feed Fetch Error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -146,8 +147,9 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ post }, { status: 201 })
-  } catch (err: any) {
-    console.error('Post creation error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Post creation error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

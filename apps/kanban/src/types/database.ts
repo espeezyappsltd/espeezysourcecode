@@ -19,6 +19,7 @@ export type Profile = {
   id: string; // matches auth.users UUID
   email: string | null;
   full_name: string | null;
+  username?: string | null;
   avatar_url: string | null;
   course_name: string | null;
   enrollment_year: number | null;
@@ -38,7 +39,12 @@ export type Profile = {
   stack?: string | null;
   last_seen?: string | null;
   storage_used?: number;
+  is_educator?: boolean | null;
   achievements?: Achievement[] | null;
+  email_notifications?: boolean;
+  push_notifications?: boolean;
+  marketing_emails?: boolean;
+  account_status?: 'active' | 'suspended' | 'pending';
 };
 
 export type TaskStatus = 'To Do' | 'In Progress' | 'In Review' | 'Done';
@@ -75,6 +81,7 @@ export type Commit = {
   lines_added: number;
   lines_deleted: number;
   author_email: string | null;
+  author_id: string | null;
   task_id: string | null;
   impact_score: number;
   created_at: string;
@@ -83,6 +90,7 @@ export type Commit = {
 export type Artifact = {
   id: string;
   task_id: string;
+  group_id: string;
   file_url: string;
   uploaded_by: string | null;
   endorsements_count: number;
@@ -93,5 +101,14 @@ export type AIUsage = {
   id: string;
   profile_id: string;
   action: string;
+  created_at: string;
+};
+
+export type ActivityLog = {
+  id: string;
+  user_id: string;
+  group_id: string | null;
+  action: string;
+  details: Record<string, unknown>;
   created_at: string;
 };

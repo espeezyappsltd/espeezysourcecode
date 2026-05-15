@@ -23,8 +23,9 @@ export async function GET() {
     }
 
     return NextResponse.json({ categories: categories || [] })
-  } catch (err: any) {
-    console.error('Games Categories Error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Games Categories Error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

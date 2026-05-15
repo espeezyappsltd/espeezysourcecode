@@ -134,7 +134,7 @@ export function useAdminDashboard() {
 
       // Convert the config rows array into a key-indexed map
       const configMap = configSnap.docs.reduce(
-        (acc: PlatformConfig, doc: any) => {
+        (acc: PlatformConfig, doc) => {
           const item = doc.data() as { key: string } & ConfigEntry
           return { ...acc, [item.key]: item }
         },
@@ -162,7 +162,7 @@ export function useAdminDashboard() {
         cac,
         nrr,
       })
-      setRecentUsers(recentSnap.docs.map((d: any) => ({ id: d.id, ...d.data() } as unknown as RecentUser)))
+      setRecentUsers(recentSnap.docs.map((d) => ({ id: d.id, ...d.data() } as unknown as RecentUser)))
       setConfig(configMap)
     } catch (err) {
       console.error('Fetch admin data error:', err instanceof Error ? err.message : err)
@@ -184,13 +184,11 @@ export function useAdminDashboard() {
     })
 
     // New Profile listener
-    const profileUnsub = onSnapshot(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(1)), (snap: any) => {
-      snap.docChanges().forEach((change: any) => {
-        if (change.type === 'added') {
-          addToast('Institutional Event', 'User registration detected. Refreshing terminal...', 'success')
-          fetchAdminData()
-        }
-      })
+    const profileUnsub = onSnapshot(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(1)), (snap) => {
+      // Assuming snapshot returns a way to see changes or we just refresh
+      // For this shim, snapshot triggers on any change in the query
+      addToast('Institutional Event', 'User registration detected. Refreshing terminal...', 'success')
+      fetchAdminData()
     })
 
     return () => {

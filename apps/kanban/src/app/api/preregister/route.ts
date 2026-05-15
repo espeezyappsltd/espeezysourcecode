@@ -334,8 +334,8 @@ export async function GET(req: Request) {
 	try {
 		const count = await getRegistrationCount()
 		return jsonWithCors(req, { count: count ?? 0 })
-	} catch (err) {
-		console.error('[preregister GET]', err)
+	} catch (err: unknown) {
+		console.error('[preregister GET]', err instanceof Error ? err.message : 'unknown error')
 		return jsonWithCors(req, { count: 0 })
 	}
 }
@@ -544,8 +544,8 @@ export async function POST(req: Request) {
 			count: count ?? 0,
 			login_ready: true,
 		})
-	} catch (err) {
-		console.error('[preregister] Supabase error:', err)
+	} catch (err: unknown) {
+		console.error('[preregister] Supabase error:', err instanceof Error ? err.message : 'unknown error')
 		return jsonWithCors(req, { error: 'Service temporarily unavailable.' }, { status: 503 })
 	}
 }

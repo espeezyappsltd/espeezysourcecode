@@ -51,7 +51,7 @@ function HustlePage() {
   const [isConnected, setIsConnected] = useState(false)
 
   // Fetch Logic
-  const fetchItems = useCallback(async (currentTab: TabType, query = '', cursor = null) => {
+  const fetchItems = useCallback(async (currentTab: TabType, query = '', cursor: string | null = null) => {
     setLoading(true)
     try {
       let endpoint = ''
@@ -65,10 +65,12 @@ function HustlePage() {
       const res = await fetch(`${endpoint}${cursor ? `&cursor=${cursor}` : ''}`)
       if (res.ok) {
         const data = await res.json()
-        const newItems = data.tasks || data.assets || []
+        const newItems: HustleItem[] = data.tasks || data.assets || []
         setItems(prev => cursor ? [...prev, ...newItems] : newItems)
         setNextCursor(data.nextCursor || null)
       }
+    } catch (err: unknown) {
+      console.error('Hustle fetch error:', err instanceof Error ? err.message : 'unknown error')
     } finally {
       setLoading(false)
     }

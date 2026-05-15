@@ -5,6 +5,7 @@ import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/clie
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Listing, MarketplaceCategory } from '@/types/marketplace'
+import { Profile } from '@/types/database'
 
 export function useMarketplace() {
   const [listings, setListings] = useState<Listing[]>([])
@@ -42,7 +43,7 @@ export function useMarketplace() {
       }
 
       // Extract unique owner IDs
-      const ownerIds = Array.from(new Set((listingsData as any[]).map(l => l.owner_id).filter(Boolean)))
+      const ownerIds = Array.from(new Set(listingsData.map(l => l.owner_id).filter(Boolean)))
 
       if (ownerIds.length > 0) {
         // Fetch profiles for owner enrichment
@@ -53,27 +54,27 @@ export function useMarketplace() {
         
         if (profilesError) {
           console.error('Profile fetch error:', profilesError)
-          setListings(listingsData as any[])
+          setListings(listingsData as Listing[])
         } else {
-          const profileMap = (profilesData || []).reduce((acc: Record<string, any>, p: any) => {
-            acc[p.id] = p
+          const profileMap = (profilesData || []).reduce((acc: Record<string, Profile>, p) => {
+            acc[p.id] = p as Profile
             return acc
           }, {})
 
-          const merged = (listingsData as any[]).map(l => ({
+          const merged = listingsData.map(l => ({
             ...l,
             profiles: profileMap[l.owner_id]
-          }))
+          })) as Listing[]
 
           setListings(merged)
           localStorage.setItem('gf_marketplace_cache', JSON.stringify(merged))
         }
       } else {
-        setListings(listingsData as any[])
+        setListings(listingsData as Listing[])
         localStorage.setItem('gf_marketplace_cache', JSON.stringify(listingsData))
       }
-    } catch (err: any) {
-      console.error('Fetch error:', err.message)
+    } catch (err: unknown) {
+      console.error('Fetch error:', err instanceof Error ? err.message : 'unknown error')
       setListings([])
     } finally {
       setLoading(false)

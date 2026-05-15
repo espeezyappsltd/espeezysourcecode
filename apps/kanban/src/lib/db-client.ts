@@ -12,8 +12,8 @@ export const auth = {
     return (db as any)._session?.user || null
   },
   signOut: () => db.auth.signOut(),
-  onAuthStateChanged: (cb: any) => {
-    const { data } = db.auth.onAuthStateChange((event, session) => {
+  onAuthStateChanged: (cb: (user: any) => void) => {
+    const { data } = db.auth.onAuthStateChange((_event, session) => {
       // Store session for the synchronous currentUser getter
       ;(db as any)._session = session
       cb(session?.user || null)
@@ -27,14 +27,14 @@ export const auth = {
 
     return { subscription: { unsubscribe: () => data.subscription.unsubscribe() } }
   },
-} as any
+}
 
 export const onAuthStateChanged = auth.onAuthStateChanged;
 
 // --- STORAGE SHIM ---
 export const storage = db.storage
-export const ref = (_storage: any, path: string) => path
-export const uploadBytes = async (path: string, file: any) => {
+export const ref = (_storage: unknown, path: string) => path
+export const uploadBytes = async (path: string, file: File | Blob | ArrayBuffer) => {
   const bucket = path.split('/')[0]
   const filePath = path.split('/').slice(1).join('/')
   return db.storage.from(bucket).upload(filePath, file)
@@ -53,26 +53,30 @@ export const storageRef = ref
 // --- FIRESTORE SHIM ---
 // These helpers map Firestore-like syntax to Supabase calls.
 // They are kept as thin wrappers to avoid refactoring 20+ files.
-export const collection = (_db: any, name: string) => name
-export const doc = (_db: any, name: string, id: string) => ({ table: name, id })
-export const query = (table: string, ...constraints: any[]) => {
-  const q = { table, constraints: [] as any[], columns: '*' }
+
+type QueryConstraint = { field?: string; op?: string; value?: unknown; limit?: number; dir?: string; columns?: string }
+type ShimQuery = { table: string; constraints: QueryConstraint[]; columns: string }
+
+export const collection = (_db: unknown, name: string) => name
+export const doc = (_db: unknown, name: string, id: string) => ({ table: name, id })
+export const query = (table: string, ...constraints: QueryConstraint[]) => {
+  const q: ShimQuery = { table, constraints: [] as QueryConstraint[], columns: '*' }
   constraints.forEach(c => {
     if (c.columns) q.columns = c.columns
     else q.constraints.push(c)
   })
   return q
 }
-export const where = (field: string, op: string, value: any) => ({ field, op, value })
+export const where = (field: string, op: string, value: unknown): QueryConstraint => ({ field, op, value })
 export const limit = (n: number) => ({ limit: n })
 export const orderBy = (field: string, dir: string) => ({ field, dir })
 export const selectCols = (cols: string) => ({ columns: cols })
 
-export const getDocs = async (q: any) => {
-  let builder: any = db.from(q.table).select(q.columns || '*')
+export const getDocs = async (q: ShimQuery) => {
+  let builder = db.from(q.table).select(q.columns || '*')
   if (q.constraints) {
-    q.constraints.forEach((c: any) => {
-      if (c.op === '==' || c.op === 'eq') builder = builder.eq(c.field, c.value)
+    q.constraints.forEach((c) => {
+      if ((c.op === '==' || c.op === 'eq') && c.field) builder = builder.eq(c.field, c.value)
       if (c.limit) builder = builder.limit(c.limit)
       if (c.field && c.dir) builder = builder.order(c.field, { ascending: c.dir === 'asc' })
     })
@@ -80,7 +84,7 @@ export const getDocs = async (q: any) => {
   const { data } = await builder
   const tableName = q.table
   return {
-    docs: (data ?? []).map((d: any) => ({
+    docs: (data ?? []).map((d: Record<string, any>) => ({
       id: d.id,
       data: () => d,
       exists: () => true,
@@ -92,7 +96,7 @@ export const getDocs = async (q: any) => {
   }
 }
 
-export const getDoc = async (docRef: any, columns: string = '*') => {
+export const getDoc = async (docRef: { table: string, id: string }, columns: string = '*') => {
   const { data } = await db.from(docRef.table).select(columns).eq('id', docRef.id).single()
   return {
     id: docRef.id,
@@ -101,18 +105,18 @@ export const getDoc = async (docRef: any, columns: string = '*') => {
   }
 }
 
-export const getCountFromServer = async (q: any) => {
-  let builder: any = db.from(typeof q === 'string' ? q : q.table).select('id', { count: 'exact', head: true })
-  if (q.constraints) {
-    q.constraints.forEach((c: any) => {
-      if (c.op === '==' || c.op === 'eq') builder = builder.eq(c.field, c.value)
+export const getCountFromServer = async (q: ShimQuery | string) => {
+  let builder = db.from(typeof q === 'string' ? q : q.table).select('id', { count: 'exact', head: true })
+  if (typeof q !== 'string' && q.constraints) {
+    q.constraints.forEach((c) => {
+      if ((c.op === '==' || c.op === 'eq') && c.field) builder = builder.eq(c.field, c.value)
     })
   }
   const { count } = await builder
   return { data: () => ({ count: count || 0 }) }
 }
 
-export const onSnapshot = (q: any, cb: any) => {
+export const onSnapshot = (q: ShimQuery, cb: (snapshot: any) => void) => {
   const channel = db.channel(`snapshot-${q.table}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: q.table }, () => {
       getDocs(q).then(cb)
@@ -125,28 +129,28 @@ export const onSnapshot = (q: any, cb: any) => {
   }
 }
 
-export const setDoc = async (docRef: any, data: any) => {
+export const setDoc = async (docRef: { table: string, id: string }, data: Record<string, unknown>) => {
   return db.from(docRef.table).upsert({ id: docRef.id, ...data })
 }
-export const updateDoc = async (docRef: any, data: any) => {
+export const updateDoc = async (docRef: { table: string, id: string }, data: Record<string, unknown>) => {
   return db.from(docRef.table).update(data).eq('id', docRef.id)
 }
-export const deleteDoc = async (docRef: any) => {
+export const deleteDoc = async (docRef: { table: string, id: string }) => {
   return db.from(docRef.table).delete().eq('id', docRef.id)
 }
-export const addDoc = async (table: string, data: any) => {
+export const addDoc = async (table: string, data: Record<string, unknown>) => {
   return db.from(table).insert(data)
 }
-export const writeBatch = (_db?: any) => {
-  const operations: (() => Promise<any>)[] = []
+export const writeBatch = (_db?: unknown) => {
+  const operations: (() => Promise<unknown>)[] = []
   return {
-    update: (docRef: any, data: any) => {
+    update: (docRef: { table: string, id: string }, data: Record<string, unknown>) => {
       operations.push(() => updateDoc(docRef, data))
     },
-    set: (docRef: any, data: any) => {
+    set: (docRef: { table: string, id: string }, data: Record<string, unknown>) => {
       operations.push(() => setDoc(docRef, data))
     },
-    delete: (docRef: any) => {
+    delete: (docRef: { table: string, id: string }) => {
       operations.push(() => deleteDoc(docRef))
     },
     commit: async () => {

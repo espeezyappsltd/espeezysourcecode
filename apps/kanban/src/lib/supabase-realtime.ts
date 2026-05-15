@@ -9,7 +9,9 @@ export function getKanbanChannel(groupId: string) {
   return supabase.channel(`room:${groupId}:kanban`, { config: { private: true } })
 }
 
-export async function subscribeKanban(groupId: string, onChange: (payload: any) => void) {
+import { Task } from '@/types/database'
+
+export async function subscribeKanban(groupId: string, onChange: (payload: Partial<Task>) => void) {
   await supabase.realtime.setAuth()
   const channel = getKanbanChannel(groupId)
   channel
@@ -20,7 +22,7 @@ export async function subscribeKanban(groupId: string, onChange: (payload: any) 
   return channel
 }
 
-export async function broadcastKanbanChange(groupId: string, event: 'INSERT'|'UPDATE'|'DELETE', payload: any) {
+export async function broadcastKanbanChange(groupId: string, event: 'INSERT'|'UPDATE'|'DELETE', payload: Partial<Task>) {
   await supabase.realtime.setAuth()
   const channel = getKanbanChannel(groupId)
   await channel.send({

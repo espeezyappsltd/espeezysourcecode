@@ -45,8 +45,8 @@ export async function GET(req: NextRequest) {
     const nextCursor = hasMore ? assets?.[assets.length - 1].created_at : null
 
     return NextResponse.json({ assets, nextCursor })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
 }
 
@@ -56,15 +56,59 @@ export async function POST(req: NextRequest) {
     const user = await getRequestUser(req)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const body = await req.json()
-    const { title, description, asset_type, asset_url, size_bytes = 0, category } = body
+    const contentType = req.headers.get('content-type') || ''
+    const adminDb = getAdminDb()
+    
+    let title: string
+    let description: string | null = null
+    let asset_type: 'file' | 'link' | 'marketplace_ref' = 'file'
+    let asset_url: string
+    let size_bytes: number = 0
+    let category: string | null = null
+    let folder: string = '/'
 
-    if (!title || !asset_type || !asset_url) {
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData()
+      const file = formData.get('file') as File | null
+      title = formData.get('title') as string || file?.name || 'Untitled Asset'
+      description = formData.get('description') as string
+      category = formData.get('category') as string
+      folder = formData.get('folder') as string || '/'
+      
+      if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+      
+      size_bytes = file.size
+      asset_type = 'file'
+
+      // Upload to Storage
+      const path = `${user.id}/${folder.replace(/^\/+|\/+$/g, '')}/${file.name}`.replace(/\/+/g, '/')
+      const { data: storageData, error: storageError } = await adminDb.storage
+        .from('user-assets')
+        .upload(path, file, { upsert: true, contentType: file.type })
+
+      if (storageError) throw storageError
+
+      // Get public URL
+      const { data: { publicUrl } } = adminDb.storage
+        .from('user-assets')
+        .getPublicUrl(path)
+      
+      asset_url = publicUrl
+    } else {
+      const body = await req.json()
+      title = body.title
+      description = body.description
+      asset_type = body.asset_type || 'link'
+      asset_url = body.asset_url
+      size_bytes = body.size_bytes || 0
+      category = body.category
+      folder = body.folder || '/'
+    }
+
+    if (!title || !asset_url) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const adminDb = getAdminDb()
-    
     // 1. Check Quota
     const { data: profile, error: profileError } = await adminDb
       .from('profiles')
@@ -84,7 +128,7 @@ export async function POST(req: NextRequest) {
       }, { status: 403 })
     }
 
-    // 2. Insert Asset
+    // 2. Insert Asset Metadata
     const { data: asset, error: insertError } = await adminDb
       .from('personal_assets')
       .insert({
@@ -94,7 +138,8 @@ export async function POST(req: NextRequest) {
         asset_type,
         asset_url,
         size_bytes,
-        category
+        category,
+        folder
       })
       .select()
       .single()
@@ -107,9 +152,33 @@ export async function POST(req: NextRequest) {
       amount: size_bytes 
     })
 
+    // 4. Seed README if it's the first asset
+    const { count } = await adminDb
+      .from('personal_assets')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+
+    if (count === 1) {
+      // Seed README.txt
+      const readmeContent = `Welcome to your Espeezy Storage!\n\nThis is your private node for academic assets.\nHappy building!`
+      const readmePath = `${user.id}/README.txt`
+      await adminDb.storage.from('user-assets').upload(readmePath, readmeContent, { contentType: 'text/plain' })
+      
+      // Also insert into table
+      await adminDb.from('personal_assets').insert({
+        user_id: user.id,
+        title: 'README.txt',
+        description: 'Storage instructions',
+        asset_type: 'file',
+        asset_url: adminDb.storage.from('user-assets').getPublicUrl(readmePath).data.publicUrl,
+        size_bytes: readmeContent.length,
+        folder: '/'
+      })
+    }
+
     return NextResponse.json({ asset }, { status: 201 })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
 }
 
@@ -125,17 +194,32 @@ export async function DELETE(req: NextRequest) {
 
     const adminDb = getAdminDb()
 
-    // 1. Get asset to know its size
+    // 1. Get asset to know its size and URL/path
     const { data: asset, error: fetchError } = await adminDb
       .from('personal_assets')
-      .select('size_bytes')
+      .select('size_bytes, asset_url, asset_type, folder, title')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
     if (fetchError) throw fetchError
 
-    // 2. Delete asset
+    // 2. Delete from Storage if it's a file
+    if (asset.asset_type === 'file') {
+      // Extract path from URL or reconstruct it
+      // Standard path: user_id/folder/title
+      const cleanFolder = asset.folder.replace(/^\/+|\/+$/g, '')
+      const storagePath = `${user.id}/${cleanFolder ? cleanFolder + '/' : ''}${asset.title}`.replace(/\/+/g, '/')
+      
+      const { error: storageDeleteError } = await adminDb.storage
+        .from('user-assets')
+        .remove([storagePath])
+      
+      // We don't strictly throw here if file is missing (maybe already gone)
+      if (storageDeleteError) console.error('Storage delete error:', storageDeleteError)
+    }
+
+    // 3. Delete from DB
     const { error: deleteError } = await adminDb
       .from('personal_assets')
       .delete()
@@ -144,14 +228,14 @@ export async function DELETE(req: NextRequest) {
 
     if (deleteError) throw deleteError
 
-    // 3. Update profile storage_used (negative amount)
+    // 4. Update profile storage_used (negative amount)
     await adminDb.rpc('increment_storage_used', { 
       user_id: user.id, 
       amount: -asset.size_bytes 
     })
 
     return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
 }

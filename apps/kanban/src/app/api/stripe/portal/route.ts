@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function POST() {
-  let stripe
+  let stripe: import('stripe').default
   try {
     stripe = getStripeClient()
   } catch (error: unknown) {

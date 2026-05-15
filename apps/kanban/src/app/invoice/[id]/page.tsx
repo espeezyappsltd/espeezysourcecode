@@ -10,7 +10,7 @@ function InvoiceDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { profile } = useProfile()
-  const [invoice, setInvoice] = useState<any>(null)
+  const [invoice, setInvoice] = useState<{ id: string; status: string; currency?: string; created_at: string; completed_at?: string; amount_cents: number; net_cents?: number; note?: string; plan_label?: string; invoice_number?: string } | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -24,7 +24,7 @@ function InvoiceDetailPage() {
           const data = await res.json()
           // In a real app, we'd have a specific GET /api/payments/[id]
           // but we'll search the history for now as a fallback
-          const found = data.transfers?.find((t: any) => t.id === params.id)
+          const found = data.transfers?.find((t: { id: string }) => t.id === params.id)
           setInvoice(found)
         }
       } catch (err) {

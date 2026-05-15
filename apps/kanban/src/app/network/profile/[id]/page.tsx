@@ -24,14 +24,14 @@ export default function StudentProfilePage() {
   const router = useRouter()
   const studentId = params.id as string
 
-  const [member, setMember] = useState<any | null>(null)
-  const [me, setMe] = useState<any | null>(null)
+  const [member, setMember] = useState<(Profile & { groups?: any }) | null>(null)
+  const [me, setMe] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'pending' | 'connected'>('idle')
   const [activeTab, setActiveTab] = useState<'info' | 'accomplishments'>('info')
   const { withLoading, showConfirmation } = useSmartLoading()
 
-  const formatRelativeTime = (date: any) => {
+  const formatRelativeTime = (date: string | number | Date | null) => {
     if (!date) return 'Unknown'
     const now = new Date()
     const targetDate = date.seconds ? new Date(date.seconds * 1000) : new Date(date)
@@ -68,8 +68,8 @@ export default function StudentProfilePage() {
         if (currentUser) {
           const conns = await fetchConnectionRecords(currentUser.id, studentId)
           
-          const connection = conns.find((c: any) => c.status === 'connected' || c.status === 'accepted')
-          const pendingSentByMe = conns.find((c: any) => c.user_id === currentUser.id && c.status === 'pending')
+          const connection = conns.find((c) => c.status === 'connected' || c.status === 'accepted')
+          const pendingSentByMe = conns.find((c) => c.user_id === currentUser.id && c.status === 'pending')
 
           if (connection) {
             setConnectionStatus('connected')
@@ -80,8 +80,8 @@ export default function StudentProfilePage() {
           }
         }
       }
-    } catch (err: any) {
-      console.error('Profile fetch error:', err.message)
+    } catch (err: unknown) {
+      console.error('Profile fetch error:', err instanceof Error ? err.message : 'unknown error')
     }
 
     setLoading(false)
@@ -110,7 +110,7 @@ export default function StudentProfilePage() {
           type: 'success',
           onConfirm: () => {}
         })
-      } catch (err: any) {
+      } catch (err: unknown) {
         throw err
       }
     }, 'Authenticating Request...')

@@ -35,7 +35,18 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   
   const { others, me, updateMyState } = usePresence(roomId);
   
-  const [storage, updateStorage] = useSyncedObject<any>(`rooms/${roomId}/state`, {
+  interface SkirmishState {
+    quizStatus: 'setup' | 'playing' | 'results'
+    quizQuestions: any[]
+    currentQuestionIndex: number
+    quizScores: { userId: string; userName: string; points: number }[]
+    roundStartTime: number
+    timerDuration: number
+    config: { difficulty: string; mode: string }
+    activeTurnUserId?: string | null
+  }
+  
+  const [storage, updateStorage] = useSyncedObject<SkirmishState>(`rooms/${roomId}/state`, {
     quizStatus: 'setup',
     quizQuestions: [],
     currentQuestionIndex: 0,
@@ -107,8 +118,8 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
 
   const handleFinalizeStats = useCallback(async () => {
     if (!profile?.id || !scores) return
-    const myScore = scores.find((s: any) => s.userId === profile.id)?.points || 0
-    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map((s: any) => s.points))
+    const myScore = scores.find((s) => s.userId === profile.id)?.points || 0
+    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map((s) => s.points))
 
     await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
   }, [profile, scores])
@@ -142,7 +153,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     if (nextIdx < currentQList.length) {
       const nextQ = currentQList[nextIdx]
       const nextDuration = (nextQ?.difficulty_multiplier || 2) * 10
-      const players = [userId, ...others.map((o: any) => o.userId)].filter(Boolean)
+      const players = [userId, ...others.map((o) => o.userId)].filter(Boolean)
       
       await updateStorage({
         quizScores: currentScores,
@@ -373,7 +384,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                      transition={{ repeat: Infinity, duration: 1.5 }}
                      style={{ padding: '6px 16px', background: isMyTurn ? 'var(--brand)' : 'var(--bg-sub)', color: isMyTurn ? 'white' : 'var(--text-sub)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                    >
-                      {isMyTurn ? '⚡ IT IS YOUR TURN TO SYNTHESIZE' : `🔍 ${(others as any[]).find(o => o.userId === activeTurnId)?.name || 'A Peer'} is currently being evaluated...`}
+                      {isMyTurn ? '⚡ IT IS YOUR TURN TO SYNTHESIZE' : `🔍 ${others.find(o => o.userId === activeTurnId)?.name || 'A Peer'} is currently being evaluated...`}
                    </motion.div>
                 </div>
              </div>
@@ -504,7 +515,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                   <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--brand)', padding: '2px', border: activeTurnId === profile?.id ? '2px solid var(--success)' : 'none' }}>
                      <img src={profile?.avatar_url || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                   </div>
-                   {others.map((o: any) => (
+                   {others.map((o) => (
                     <div key={o.userId} style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--bg-sub)', padding: '2px', border: activeTurnId === o.userId ? '2px solid var(--success)' : 'none' }}>
                       <img src={o.avatar || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                     </div>

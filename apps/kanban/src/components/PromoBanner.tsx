@@ -51,7 +51,7 @@ export default function PromoBanner() {
           table: 'platform_config',
           filter: `config_key=eq.main_banner`
         },
-        (payload: any) => {
+        (payload: { new: PlatformConfig }) => {
           if (payload.new && typeof payload.new === 'object') {
             setConfig(payload.new as PlatformConfig)
           }

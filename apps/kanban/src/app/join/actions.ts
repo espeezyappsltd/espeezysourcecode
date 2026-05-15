@@ -46,8 +46,8 @@ export async function createGroup(formData: FormData) {
 
     revalidatePath('/', 'layout')
     redirect('/')
-  } catch (err: any) {
-    redirect('/join?error=' + encodeURIComponent(err.message))
+  } catch (err: unknown) {
+    redirect('/join?error=' + encodeURIComponent(err instanceof Error ? err.message : 'unknown error'))
   }
 }
 
@@ -104,8 +104,8 @@ export async function joinGroup(formData: FormData) {
 
     revalidatePath('/', 'layout')
     redirect('/')
-  } catch (err: any) {
-    redirect('/join?error=' + encodeURIComponent(err.message))
+  } catch (err: unknown) {
+    redirect('/join?error=' + encodeURIComponent(err instanceof Error ? err.message : 'unknown error'))
   }
 }
 
@@ -161,8 +161,8 @@ export async function kickUser(userId: string) {
 
     revalidatePath('//settings')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'unknown error' }
   }
 }
 
@@ -213,8 +213,8 @@ export async function sendJoinRequest(groupId: string, senderName: string) {
     }
 
     return { success: true }
-  } catch (err: any) {
-    throw new Error(err.message)
+  } catch (err: unknown) {
+    throw new Error(err instanceof Error ? err.message : 'unknown error')
   }
 }
 
@@ -252,8 +252,8 @@ export async function acceptJoinRequest(requestId: string) {
 
     revalidatePath('/')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'unknown error' }
   }
 }
 
@@ -271,7 +271,7 @@ export async function declineJoinRequest(requestId: string) {
 
     revalidatePath('/')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'unknown error' }
   }
 }

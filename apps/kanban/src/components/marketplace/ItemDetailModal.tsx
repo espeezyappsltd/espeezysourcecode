@@ -110,11 +110,11 @@ export function ItemDetailModal({ listing, onClose }: ItemDetailModalProps) {
                       if (res.ok) {
                         alert('Added to your Personal Inventory!')
                       } else {
-                        const d = await res.json()
+                        const d = await res.json() as { error?: string }
                         alert(d.error || 'Failed to save')
                       }
-                    } catch (e) {
-                      alert('Network error')
+                    } catch (err: unknown) {
+                      alert(err instanceof Error ? err.message : 'Network error')
                     }
                   }}
                   aria-label="Save to Personal Inventory"

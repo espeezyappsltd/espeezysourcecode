@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       throw tasksError
     }
 
-    const profileIds = Array.from(new Set((rows ?? []).flatMap((row: any) => [row.poster_id, row.assignee_id]).filter(Boolean)))
+    const profileIds = Array.from(new Set((rows ?? []).flatMap((row) => [row.poster_id, row.assignee_id]).filter(Boolean)))
     const { data: profiles, error: profilesError } = profileIds.length > 0
       ? await adminDb.from('profiles').select('*').in('id', profileIds)
       : { data: [], error: null }
@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
       throw profilesError
     }
 
-    const profileMap = new Map((profiles ?? []).map((profile: any) => [profile.id, profile]))
-    const tasks = (rows ?? []).map((data: any) => {
+    const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
+    const tasks = (rows ?? []).map((data) => {
       return {
         ...data,
         created_at: data.created_at,
@@ -67,9 +67,10 @@ export async function GET(req: NextRequest) {
     const nextCursor = hasMore ? finalTasks[finalTasks.length - 1].created_at : null
 
     return NextResponse.json({ tasks: finalTasks, nextCursor })
-  } catch (err: any) {
-    console.error('Hustle Tasks Fetch Error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Hustle Tasks Fetch Error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -131,8 +132,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ task }, { status: 201 })
-  } catch (err: any) {
-    console.error('Task creation error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('Task creation error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

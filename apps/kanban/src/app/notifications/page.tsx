@@ -46,8 +46,8 @@ export default function NotificationsPage() {
     try {
       await updateNotificationSetting(user.id, key, value)
       addToast('Success', 'Preferences updated', 'success')
-    } catch (err: any) {
-      console.error('Update settings error:', err.message)
+    } catch (err: unknown) {
+      console.error('Update settings error:', err instanceof Error ? err.message : 'unknown error')
     }
   }
 
@@ -75,8 +75,8 @@ export default function NotificationsPage() {
       })
 
       addToast('Success', 'Connection established!', 'success')
-    } catch (err: any) {
-      addToast('Error', 'Failed to accept connection', 'error')
+    } catch (err: unknown) {
+      addToast('Error', err instanceof Error ? err.message : 'Failed to accept connection', 'error')
     }
     setLoading(false)
   }

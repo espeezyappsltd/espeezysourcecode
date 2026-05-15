@@ -75,11 +75,11 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
     if (user.id === '00000000-0000-0000-0000-000000000000') {
       setSaving(true)
       // Local-only update for mock user
-      setProfile((prev: any) => ({
-        ...prev,
+      setProfile((prev: Profile | null) => ({
+        ...(prev || {}),
         full_name: fullName,
         avatar_url: selectedAvatar
-      }))
+      } as Profile))
       setTimeout(() => {
         setSaving(false)
         handleNext()

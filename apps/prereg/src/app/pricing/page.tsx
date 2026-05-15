@@ -18,7 +18,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
     href: '/',
     cta: 'Join Early Access',
     description: 'Stop group work free-riding. Core collaboration tools with transparent contribution tracking for every student.',
-    features: ['Basic kanban workspace', 'Contribution proof tracking', 'Free forever for students'],
+    features: ['Basic kanban workspace', 'Contribution proof tracking', '1GB storage included'],
   },
   {
     name: 'Espeezy Pro',
@@ -27,7 +27,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
     href: PLAN_PAYMENT_LINKS.pro,
     cta: 'Choose Pro',
     description: 'The main paid plan for students who want better execution, deeper analytics, and a measurable academic edge.',
-    features: ['Unlimited workspaces', 'AI Study Coach credits', 'Personal performance insights'],
+    features: ['Unlimited workspaces', 'AI Study Coach credits', '5GB storage included'],
   },
   {
     name: 'Espeezy Premium',
@@ -36,7 +36,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
     href: PLAN_PAYMENT_LINKS.premium,
     cta: 'Choose Premium',
     description: 'For team leads and heavier collaboration workflows that need deeper analytics and intervention tools.',
-    features: ['Everything in Pro', 'Advanced AI access', 'Academic integrity reports'],
+    features: ['Everything in Pro', 'Advanced AI access', '20GB storage included'],
   },
   {
     name: 'Premium Lifetime Access',

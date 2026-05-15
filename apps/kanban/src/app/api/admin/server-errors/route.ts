@@ -12,7 +12,7 @@ async function requireAdmin() {
   if (!profile) {
     return { user: null, error: NextResponse.json({ error: 'Failed to verify permissions' }, { status: 500 }) }
   }
-  if ((profile as any).role !== 'admin') {
+  if ((profile as Profile).role !== 'admin') {
     return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
   return { user, error: null }
@@ -37,7 +37,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ errors: data ?? [] })
-  } catch (dbErr: any) {
-    return NextResponse.json({ error: dbErr.message }, { status: 500 })
+  } catch (dbErr: unknown) {
+    return NextResponse.json({ error: dbErr instanceof Error ? dbErr.message : 'unknown error' }, { status: 500 })
   }
 }

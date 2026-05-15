@@ -81,7 +81,7 @@ export class DateTime {
   /**
    * Ensures a value is a valid Date object.
    */
-  static toDate(value: any): Date {
+  static toDate(value: string | number | Date): Date {
     const d = new Date(value)
     return isNaN(d.getTime()) ? new Date() : d
   }

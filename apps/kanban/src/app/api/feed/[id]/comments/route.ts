@@ -17,8 +17,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     if (error) throw error
 
     return NextResponse.json({ comments })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'unknown error' }, { status: 500 })
   }
 }
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     if (error) throw error
 
     return NextResponse.json({ comment })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'unknown error' }, { status: 500 })
   }
 }

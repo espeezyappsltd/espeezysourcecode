@@ -120,7 +120,7 @@ export default function FeedPage() {
           table: 'posts',
           filter: `visibility=eq.public`
         },
-        (payload: any) => {
+        (payload: { new: { id: string; author_id: string; visibility: string } }) => {
           // Only reload if the new post is not from the current user
           if (payload.new && payload.new.author_id !== profile?.id) {
             loadPosts()

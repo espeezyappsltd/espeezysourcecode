@@ -27,7 +27,7 @@
         "./src/*"
       ],
       "@shared-types/*": [
-        "../../shared/types/*"
+        "../prereg/src/types/*"
       ],
       "@shared/*": [
         "../prereg/src/*"

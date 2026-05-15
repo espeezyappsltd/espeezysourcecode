@@ -47,6 +47,7 @@ export type Profile = {
   spotify_refresh_token?: string | null;
   spotify_token_expires_at?: string | null;
   spotify_connected?: boolean;
+  is_educator?: boolean | null;
 };
 
 export type ActiveUser = {

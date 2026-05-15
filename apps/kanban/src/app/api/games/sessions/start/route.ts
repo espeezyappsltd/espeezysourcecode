@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   }
 
   const shuffled = questions.sort(() => Math.random() - 0.5).slice(0, questionCount)
-  const questionIds = shuffled.map((q: { id: string }) => q.id)
+  const questionIds = shuffled.map((q) => q.id)
 
   const playMode = user ? 'member' : 'guest'
   const accessToken = playMode === 'guest' ? makeAccessToken() : null

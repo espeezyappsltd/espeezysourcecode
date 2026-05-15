@@ -26,8 +26,8 @@ export default function WelcomeOnboarding({ profile }: { profile: Profile }) {
     try {
       await createTeam(teamName, teamDesc, profile.id)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message || 'Failed to create team')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create team')
     } finally {
       setLoading(false)
     }
@@ -40,8 +40,8 @@ export default function WelcomeOnboarding({ profile }: { profile: Profile }) {
     try {
       await joinTeam(teamId, profile.id)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message || 'Failed to join team. Check the Team ID.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to join team. Check the Team ID.')
     } finally {
       setLoading(false)
     }

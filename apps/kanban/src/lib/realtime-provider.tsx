@@ -46,7 +46,7 @@ export function usePresence(roomId: string) {
     setMe(prev => prev ? { ...prev, ...patch } : null)
   }, [])
 
-  return { others: [], me, updateMyState }
+  return { others: [] as PresenceState[], me, updateMyState }
 }
 
 export function useSyncedObject<T>(path: string, initialValue: T) {

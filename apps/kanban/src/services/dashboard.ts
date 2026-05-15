@@ -1,5 +1,5 @@
 import { createBrowserSupabaseClient } from '@/lib/db-client'
-import type { Group, Profile, Task } from '@/types/database'
+import type { Group, Profile, Task, Artifact, Commit, ActivityLog } from '@/types/database'
 
 export type JoinRequestWithProfile = {
   id: string
@@ -156,7 +156,7 @@ export async function fetchPendingJoinRequests(groupId: string): Promise<JoinReq
   if (profileError) throw profileError
 
   const profileMap = new Map<string, { id: string; full_name: string | null; avatar_url: string | null }>(
-    (profiles ?? []).map((profile: any) => [
+    (profiles ?? []).map((profile) => [
       profile.id,
       {
         id: profile.id,
@@ -171,38 +171,38 @@ export async function fetchPendingJoinRequests(groupId: string): Promise<JoinReq
   }))
 }
 
-export async function fetchArtifactsByGroup(groupId: string) {
+export async function fetchArtifactsByGroup(groupId: string): Promise<Artifact[]> {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('artifacts').select('id, task_id, file_url, uploaded_by, endorsements_count, created_at').eq('group_id', groupId)
+  const { data, error } = await db.from('artifacts').select('id, task_id, group_id, file_url, uploaded_by, endorsements_count, created_at').eq('group_id', groupId)
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as Artifact[]
 }
 
-export async function fetchArtifactsByUser(userId: string, rowLimit = 3) {
+export async function fetchArtifactsByUser(userId: string, rowLimit = 3): Promise<Artifact[]> {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('artifacts')
-    .select('id, task_id, file_url, uploaded_by, endorsements_count, created_at')
+    .select('id, task_id, group_id, file_url, uploaded_by, endorsements_count, created_at')
     .eq('uploaded_by', userId)
     .order('created_at', { ascending: false })
     .limit(rowLimit)
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as Artifact[]
 }
 
-export async function fetchCommitsByUser(userId: string, rowLimit = 3) {
+export async function fetchCommitsByUser(userId: string, rowLimit = 3): Promise<Commit[]> {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('commits')
-    .select('hash, message, lines_added, lines_deleted, author_email, task_id, impact_score, created_at')
+    .select('hash, message, lines_added, lines_deleted, author_email, author_id, task_id, impact_score, created_at')
     .eq('author_id', userId)
     .order('created_at', { ascending: false })
     .limit(rowLimit)
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as Commit[]
 }
 
-export async function fetchActivityLogByGroup(groupId: string) {
+export async function fetchActivityLogByGroup(groupId: string): Promise<ActivityLog[]> {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('activity_logs')
@@ -210,7 +210,7 @@ export async function fetchActivityLogByGroup(groupId: string) {
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as unknown as ActivityLog[]
 }
 
 export async function fetchNotificationSettings(userId: string): Promise<DashboardNotificationSettings> {
@@ -223,9 +223,9 @@ export async function fetchNotificationSettings(userId: string): Promise<Dashboa
     }
   }
   return {
-    email_notifications: (profile as any).email_notifications ?? true,
-    push_notifications: (profile as any).push_notifications ?? true,
-    marketing_emails: (profile as any).marketing_emails ?? false,
+    email_notifications: profile.email_notifications ?? true,
+    push_notifications: profile.push_notifications ?? true,
+    marketing_emails: profile.marketing_emails ?? false,
   }
 }
 

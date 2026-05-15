@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import type { Profile } from '@/types/auth'
 import ChatRoom from './ChatRoom'
 import { getUnicodeFlag } from '@/utils/geo'

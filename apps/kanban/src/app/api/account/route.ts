@@ -56,9 +56,10 @@ export async function GET(req: Request) {
       }
     })
 
-  } catch (err: any) {
-    console.error("Export Engine Failure:", err.message)
-    return new NextResponse(`Server Fault: ${err.message}`, { status: 500 })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    console.error("Export Engine Failure:", msg)
+    return new NextResponse(`Server Fault: ${msg}`, { status: 500 })
   }
 }
 
@@ -84,8 +85,9 @@ export async function DELETE(req: Request) {
 
     return new NextResponse('Account successfully terminated.', { status: 200 })
 
-  } catch (err: any) {
-    console.error("Termination Engine Failure:", err.message)
-    return new NextResponse(`Server Fault: ${err.message}`, { status: 500 })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    console.error("Termination Engine Failure:", msg)
+    return new NextResponse(`Server Fault: ${msg}`, { status: 500 })
   }
 }
