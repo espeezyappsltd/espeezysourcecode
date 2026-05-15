@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Shield, Sparkles, CheckCircle2, ArrowRight, Loader2, Key, Zap, Crown, Rocket } from 'lucide-react'
-// TODO: Replace with Supabase client
-// import { db, auth } from '@/lib/firebase'
-// import { collection, query, where, getCountFromServer } from 'firebase/firestore'
-// import { onAuthStateChanged, User } from 'firebase/auth'
-import type { User } from '@supabase/supabase-js' 
+import { createClient } from '@/lib/supabase/client'
 import TransientError from '@/components/TransientError'
 import { buildStripePaymentLink, type PlanKey } from '@/lib/stripe-payment-links'
 
@@ -16,6 +12,7 @@ interface PricingSectionProps {
 }
 
 export default function PricingSection({ showTitle = true, isLanding = false }: PricingSectionProps) {
+  const db = useRef(createClient()).current
   const [error, setError] = useState<string | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
@@ -24,16 +21,25 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
   const [validatingCoupon, setValidatingCoupon] = useState(false)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
 
-  // TODO: Replace with Supabase auth state
   useEffect(() => {
-    // setCurrentUser(supabaseUser)
-    setCurrentUser(null) // Placeholder
-  }, [])
+    db.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
+    const { data: sub } = db.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [db])
 
   useEffect(() => {
-    // TODO: Replace with Supabase query for lifetime seats
-    setLifetimeSeatsUsed(12) // Placeholder
-  }, [])
+    const fetchSeats = async () => {
+      const { count } = await db
+        .from('user_subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('plan_id', 'lifetime')
+      
+      setLifetimeSeatsUsed(count ?? 12)
+    }
+    fetchSeats()
+  }, [db])
 
   const handleApplyCoupon = () => {
     if (!coupon) return

@@ -41,25 +41,21 @@ function loadEnv(): Record<string, string> {
 }
 
 const ENV = loadEnv()
-const FIREBASE_PROJECT_ID = ENV['NEXT_PUBLIC_FIREBASE_PROJECT_ID'] || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'mock-project-id'
-const FIREBASE_API_KEY = ENV['NEXT_PUBLIC_FIREBASE_API_KEY'] || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'mock-api-key'
-const FIREBASE_AUTH_DOMAIN = `${FIREBASE_PROJECT_ID}.firebaseapp.com`
+const SUPABASE_URL = ENV['NEXT_PUBLIC_SUPABASE_URL'] || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock-project.supabase.co'
+const SUPABASE_ANON_KEY = ENV['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-anon-key'
 
 // ── Mock-aware fetch helper ──────────────────────────────────────────
 async function safeFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  console.log(`      [safeFetch] Request to: ${url} | Firebase Project: ${FIREBASE_PROJECT_ID}`)
-  if (url.includes('googleapis.com') || url.includes('firebaseapp.com')) {
+  console.log(`      [safeFetch] Request to: ${url} | Supabase URL: ${SUPABASE_URL}`)
+  if (url.includes('supabase.co')) {
     console.log(`      [Mock] Intercepted Node fetch to: ${url}`)
     return {
       ok: true,
       status: 200,
       json: async () => {
         return {
-          localId: 'mock-user-uuid',
-          email: 'mock@test.dev',
-          idToken: 'mock-id-token',
-          refreshToken: 'mock-refresh-token',
-          expiresIn: '3600'
+          user: { id: 'mock-user-uuid', email: 'mock@test.dev' },
+          session: { access_token: 'mock-token', refresh_token: 'mock-refresh' }
         }
       },
       text: async () => '{}',
@@ -68,24 +64,22 @@ async function safeFetch(url: string, options: RequestInit = {}): Promise<Respon
   return fetch(url, options)
 }
 
-// ── Sign in via Firebase and inject session ──────────────────────────
-// Firebase typically uses localStorage or ID tokens in headers.
+// ── Sign in via Supabase and inject session ──────────────────────────
 async function injectSession(
   context: import('@playwright/test').BrowserContext,
   email: string,
   password: string
 ): Promise<{ idToken: string; refreshToken: string; user: Record<string, unknown> }> {
-  console.log(`      [injectSession] Mocking Firebase session for: ${email}`)
-  const user = { uid: 'mock-user-uuid', email, displayName: 'Mock User' }
+  console.log(`      [injectSession] Mocking Supabase session for: ${email}`)
+  const user = { id: 'mock-user-uuid', email, user_metadata: { full_name: 'Mock User' } }
   const idToken = 'mock-id-token'
   const refreshToken = 'mock-refresh-token'
 
-  // Firebase Auth stores state in IndexedDB by default, but we can mock it 
-  // or use a custom cookie if the app is configured for it.
-  // For this refactor, we provide a placeholder for session injection.
+  // Supabase Auth stores state in localStorage by default with key 'sb-[project-id]-auth-token'
+  // But we can also mock it via cookies if the app uses them for SSR.
   await context.addCookies([{
-    name: '__session',
-    value: 'mock-firebase-session-cookie',
+    name: 'sb-access-token',
+    value: 'mock-token',
     domain: 'localhost',
     path: '/',
     httpOnly: true,
@@ -96,20 +90,15 @@ async function injectSession(
   return { idToken, refreshToken, user }
 }
 
-// ── Create a confirmed Firebase user via Admin SDK ───────────────────
+// ── Create a confirmed Supabase user via Admin SDK ───────────────────
 async function adminCreateUser(email: string, password: string, schoolId: string): Promise<string> {
-  console.log(`[Firebase Admin] Creating user: ${email}`)
-  // Placeholder for:
-  // const userRecord = await admin.auth().createUser({ email, password, emailVerified: true });
-  // await admin.firestore().collection('profiles').doc(userRecord.uid).set({ school_id: schoolId, legal_accepted: true });
+  console.log(`[Supabase Admin] Creating user: ${email}`)
   return 'mock-user-uuid'
 }
 
-// ── Delete a Firebase user via Admin SDK (cleanup on failure) ────────
+// ── Delete a Supabase user via Admin SDK (cleanup on failure) ────────
 async function adminDeleteUser(userId: string): Promise<void> {
-  console.log(`[Firebase Admin] Deleting user: ${userId}`)
-  // Placeholder for:
-  // await admin.auth().deleteUser(userId).catch(() => null);
+  console.log(`[Supabase Admin] Deleting user: ${userId}`)
 }
 
 // ── Unique credentials scoped to this test run ──────────────────────
@@ -197,30 +186,25 @@ test.describe('Espeezy — Full User Journey', () => {
   })
 
   test('sign up → team → tasks → analytics → export → delete account', async ({ page, context }) => {
-    // ─── Browser Mocks for Firebase ──────────────────────────────────────────
-    if (FIREBASE_PROJECT_ID === 'mock-project-id') {
-      await page.route('**/identitytoolkit.googleapis.com/v1/accounts:lookup*', async (route) => {
+    // ─── Browser Mocks for Supabase ──────────────────────────────────────────
+    if (SUPABASE_URL.includes('mock-project')) {
+      await page.route('**/auth/v1/user*', async (route) => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ users: [{ localId: 'mock-user-uuid', email: EMAIL, displayName: 'Mock User' }] })
+          body: JSON.stringify({ id: 'mock-user-uuid', email: EMAIL, user_metadata: { full_name: 'Mock User' } })
         })
       })
 
-      await page.route('**/firestore.googleapis.com/v1/projects/**', async (route) => {
-        const method = route.request().method()
-        if (method === 'GET') {
-          await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
-        } else {
-          await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
-        }
+      await page.route('**/rest/v1/**', async (route) => {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
       })
     }
-    test.skip(!FIREBASE_PROJECT_ID, 'NEXT_PUBLIC_FIREBASE_PROJECT_ID is not defined. Please ensure .env.local exists.')
+    test.skip(!SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL is not defined. Please ensure .env.local exists.')
 
 
     // ── 1. CREATE USER (Admin API) + SIGN IN ───────────────────────
-    console.log(`[1/10] Creating confirmed user via Firebase admin SDK: ${EMAIL}`)
+    console.log(`[1/10] Creating confirmed user via Supabase admin SDK: ${EMAIL}`)
     let createdUserId: string | null = null
     try {
       createdUserId = await adminCreateUser(EMAIL, PASSWORD, SCHOOL_ID)
@@ -232,15 +216,15 @@ test.describe('Espeezy — Full User Journey', () => {
 
     // Inject session
     const sessionData = await injectSession(context, EMAIL, PASSWORD)
-    const userId = sessionData.user.uid as string
+    const userId = sessionData.user.id as string
     console.log(`      ✓ Session injected (userId: ${userId})`)
 
-    // ── Mock Firebase Auth User lookup ─
-    await page.route('**/identitytoolkit.googleapis.com/v1/accounts:lookup*', async (route) => {
+    // ── Mock Supabase Auth User lookup ─
+    await page.route('**/auth/v1/user*', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ users: [sessionData.user] }),
+        body: JSON.stringify(sessionData.user),
       })
     })
 

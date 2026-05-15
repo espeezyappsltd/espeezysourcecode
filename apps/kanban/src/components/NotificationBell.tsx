@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useRef, useEffect, type CSSProperties } from 'react'
 import { Bell, Check, Clock, ExternalLink, Inbox } from 'lucide-react'
 import { useNotifications } from './NotificationProvider'
-import { db, auth, doc, updateDoc, deleteDoc, addDoc, collection, setDoc } from '@/lib/db-client'
+import { createClient } from '@/lib/supabase/client'
 import { Notification } from '@/types/ui'
 
 export default function NotificationBell() {
+  const db = useRef(createClient()).current
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({})
@@ -177,13 +177,12 @@ export default function NotificationBell() {
                                  const senderId = notif.metadata?.sender_id;
                                  if (!senderId) return;
 
-                                 const user = auth.currentUser;
+                                 const { data: { user } } = await db.auth.getUser()
                                  if (!user) return;
-                                 const myId = user.uid;
+                                 const myId = user.id;
 
-                                 const connId = [myId, senderId].sort().join('_')
                                  try {
-                                   await setDoc(doc(db, 'user_connections', connId), {
+                                   await db.from('user_connections').upsert({
                                      user_id: myId,
                                      target_id: senderId,
                                      status: 'connected',
@@ -191,7 +190,7 @@ export default function NotificationBell() {
                                    });
                                    markAsRead(notif.id);
                                    // Notify sender back
-                                   await addDoc(collection(db, 'notifications'), {
+                                   await db.from('notifications').insert({
                                      user_id: senderId,
                                      type: 'connection_accepted',
                                      title: 'Request Accepted',
@@ -204,7 +203,7 @@ export default function NotificationBell() {
                                  }
                                }}
                              >
-                                Accept
+                                 Accept
                              </button>
                              <button 
                                className="btn-sm btn-ghost" 
@@ -212,20 +211,19 @@ export default function NotificationBell() {
                                onClick={async () => {
                                  const senderId = notif.metadata?.sender_id;
                                  if (!senderId) return;
-                                 const user = auth.currentUser;
+                                 const { data: { user } } = await db.auth.getUser()
                                  if (!user) return;
-                                 const myId = user.uid;
+                                 const myId = user.id;
 
-                                 const connId = [myId, senderId].sort().join('_')
                                  try {
-                                   await deleteDoc(doc(db, 'user_connections', connId));
+                                   await db.from('user_connections').delete().match({ user_id: myId, target_id: senderId });
                                    markAsRead(notif.id);
                                  } catch (err) {
                                    console.error('Decline connection error:', err instanceof Error ? err.message : err)
                                  }
                                }}
                              >
-                                Decline
+                                 Decline
                              </button>
                              <button 
                                className="btn-sm btn-ghost" 

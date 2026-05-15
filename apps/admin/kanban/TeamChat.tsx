@@ -1,3 +1,0 @@
-// MOVED FROM src/components/TeamChat.tsx
-
-// ...existing code from src/components/TeamChat.tsx...

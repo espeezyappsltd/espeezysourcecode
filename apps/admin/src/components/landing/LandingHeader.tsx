@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { auth } from '@/lib/firebase'
-import { onAuthStateChanged, User } from 'firebase/auth'
+import { createClient } from '@/lib/supabase/client'
+import { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
@@ -15,16 +15,18 @@ interface LandingHeaderProps {
 }
 
 export default function LandingHeader({ navMenus }: LandingHeaderProps) {
+  const db = useRef(createClient()).current
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u)
+    db.auth.getUser().then(({ data: { user } }) => setUser(user))
+    const { data: sub } = db.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
     })
-    return () => unsubscribe()
-  }, [])
+    return () => sub.subscription.unsubscribe()
+  }, [db])
 
   // Smooth-scroll to a hash anchor; falls back to normal navigation for full paths
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {

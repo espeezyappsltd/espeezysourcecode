@@ -3,9 +3,9 @@ import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const { id: postId } = params
+    const { id: postId } = await context.params
     const db = getAdminDb()
 
     const { data: comments, error } = await db
@@ -22,13 +22,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getRequestUser(req)
+    const user = await getRequestUser(request)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { id: postId } = params
-    const { content, parent_id } = await req.json()
+    const { id: postId } = await context.params
+    const { content, parent_id } = await request.json()
     const db = getAdminDb()
 
     const { data: comment, error } = await db

@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react';
 import { getGamesByCategoryPaginated } from '@/services/categories-paginated';
 import type { Game } from '@/types/games';

@@ -29,6 +29,9 @@
       "@shared-types/*": [
         "./src/types/*"
       ],
+      "@shared/assets": [
+        "../shared/assets/index.ts"
+      ],
       "@shared/*": [
         "../shared/*"
       ]
@@ -38,6 +41,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "../shared/**/*.ts",
+    "../shared/**/*.tsx",
     "out/types/**/*.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"

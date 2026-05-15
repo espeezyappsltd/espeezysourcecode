@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react'
 
 import { useNotifications } from './NotificationProvider'
 import { UserPlus, X, Check, RefreshCw } from 'lucide-react'
-import { db, auth } from '@/lib/firebase'
-import { collection, query, where, getDocs, updateDoc, deleteDoc, doc, onSnapshot, addDoc, writeBatch } from 'firebase/firestore'
+import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types/database'
 
 type ConnectionRequest = {
@@ -18,91 +17,90 @@ type ConnectionRequest = {
 
 
 export default function ConnectionAlertTray() {
+  const db = useRef(createClient()).current
   const [requests, setRequests] = useState<ConnectionRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const { addToast } = useNotifications()
 
-  const fetchRequests = async () => {
-    const user = auth.currentUser
+  const fetchRequests = useCallback(async () => {
+    const { data: { user } } = await db.auth.getUser()
     if (!user) return
     try {
-      const q = query(
-        collection(db, 'user_connections'),
-        where('target_id', '==', user.uid),
-        where('status', '==', 'pending')
-      )
-      const snap = await getDocs(q)
-      const data = await Promise.all(snap.docs.map(async d => {
-        const conn = d.data()
-        const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', conn.user_id)))
-        return {
-          id: d.id,
-          ...conn,
-          profiles: pSnap.empty ? null : pSnap.docs[0].data()
-        }
-      }))
-      setRequests(data as ConnectionRequest[])
+      const { data, error } = await db
+        .from('user_connections')
+        .select(`
+          *,
+          profiles:user_id (*)
+        `)
+        .eq('target_id', user.id)
+        .eq('status', 'pending')
+      
+      if (error) throw error
+      setRequests(data as unknown as ConnectionRequest[])
     } catch (err) {
       console.error('Error fetching connection requests:', err instanceof Error ? err.message : err)
     } finally {
       setLoading(false)
     }
-  }
+  }, [db])
 
   useEffect(() => {
-    queueMicrotask(() => {
-      void fetchRequests()
-    })
-    const user = auth.currentUser
-    if (!user) return
-    const q = query(
-      collection(db, 'user_connections'),
-      where('target_id', '==', user.uid)
-    )
-    const unsubscribe = onSnapshot(q, () => {
-      fetchRequests()
-    })
-    return () => unsubscribe()
-  }, [])
+    fetchRequests()
+    
+    const setupSubscription = async () => {
+      const { data: { user } } = await db.auth.getUser()
+      if (!user) return
+
+      const channel = db.channel('connection_requests')
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'user_connections',
+          filter: `target_id=eq.${user.id}`
+        }, () => {
+          fetchRequests()
+        })
+        .subscribe()
+      
+      return () => {
+        db.removeChannel(channel)
+      }
+    }
+
+    setupSubscription()
+  }, [db, fetchRequests])
 
   const handleAction = async (requestId: string, senderId: string, action: 'accept' | 'ignore') => {
     setProcessingId(requestId)
     try {
-      const user = auth.currentUser
+      const { data: { user } } = await db.auth.getUser()
       if (!user) return
+
       if (action === 'accept') {
-        await updateDoc(doc(db, 'user_connections', requestId), { status: 'connected' })
-        await addDoc(collection(db, 'notifications'), {
+        await db.from('user_connections').update({ status: 'connected' }).eq('id', requestId)
+        await db.from('notifications').insert({
           user_id: senderId,
           type: 'connection_accepted',
           title: 'Connection Established',
           message: 'Your connection request was accepted.',
-          link: `/dashboard/network/profile/${user.uid}`,
+          link: `/dashboard/network/profile/${user.id}`,
           created_at: new Date().toISOString()
         })
         addToast('Connected!', 'You are now connected with a new specialist.', 'success')
       } else {
-        await deleteDoc(doc(db, 'user_connections', requestId))
+        await db.from('user_connections').delete().eq('id', requestId)
         addToast('Request Ignored', 'The connection request has been removed.', 'info')
       }
-      const qNotif = query(
-        collection(db, 'notifications'),
-        where('user_id', '==', user.uid),
-        where('type', '==', 'connection_request')
-      )
-      const notifSnap = await getDocs(qNotif)
-      if (!notifSnap.empty) {
-        const batch = writeBatch(db)
-        notifSnap.docs.forEach(d => {
-          const data = d.data()
-          if (data.metadata?.sender_id === senderId) {
-            batch.update(d.ref, { read: true })
-          }
-        })
-        await batch.commit()
-      }
-      await fetchRequests()
+
+      // Mark related notifications as read
+      await db.from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('type', 'connection_request')
+        .match({ 'metadata->sender_id': senderId })
+
+      fetchRequests()
     } catch (err) {
       addToast('Sync Error', err instanceof Error ? err.message : String(err), 'error')
     } finally {

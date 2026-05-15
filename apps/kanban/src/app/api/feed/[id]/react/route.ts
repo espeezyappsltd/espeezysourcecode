@@ -3,13 +3,13 @@ import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getRequestUser(req)
+    const user = await getRequestUser(request)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     
-    const { id: postId } = params
-    const { reaction } = await req.json()
+    const { id: postId } = await context.params
+    const { reaction } = await request.json()
     const db = getAdminDb()
 
     // Upsert reaction: if same user+post, update reaction; else insert

@@ -55,13 +55,17 @@ function FlagDisplay({ countryCode }: { countryCode?: string }) {
   )
 }
 
-import { db, auth, doc, getDoc, getDocs, query, collection, where, limit, setDoc, addDoc } from '@/lib/db-client'
+import { createClient } from '@/lib/supabase/client'
 
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
+  const db = useRef(createClient()).current
   const [me, setMe] = useState<{ id: string; email?: string; full_name?: string } | null>(null)
   type Achievement = {
     type: 'artifact' | 'commit'
     id: string
+    created_at: string
+    title?: string
+    content?: string
     [key: string]: unknown
   }
   const [achievements, setAchievements] = useState<Achievement[]>([])
@@ -71,26 +75,30 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
 
   useEffect(() => {
     async function checkConnection() {
-      const user = auth.currentUser
+      const { data: { user } } = await db.auth.getUser()
       if (!user) return
-      setMe({ id: user.uid, email: user.email || '', full_name: user.displayName || 'Me' })
+      setMe({ id: user.id, email: user.email || '', full_name: user.user_metadata?.full_name || 'Me' })
 
-      const connId = [user.uid, member.id].sort().join('_')
-      const snap = await getDoc(doc(db, 'user_connections', connId))
-      if (snap.exists()) setIsConnected(true)
+      const { data } = await db
+        .from('user_connections')
+        .select('*')
+        .or(`and(user_id.eq.${user.id},target_id.eq.${member.id}),and(user_id.eq.${member.id},target_id.eq.${user.id})`)
+        .single()
+      
+      if (data) setIsConnected(true)
     }
 
     async function fetchAchievements() {
       try {
-        const artQ = query(collection(db, 'artifacts'), where('user_id', '==', member.id), limit(2))
-        const comQ = query(collection(db, 'commits'), where('user_id', '==', member.id), limit(2))
-        
-        const [artSnap, comSnap] = await Promise.all([getDocs(artQ), getDocs(comQ)])
+        const [artRes, comRes] = await Promise.all([
+          db.from('artifacts').select('*').eq('user_id', member.id).limit(2),
+          db.from('commits').select('*').eq('user_id', member.id).limit(2)
+        ])
         
         const combined = [
-          ...artSnap.docs.map(d => ({ type: 'artifact' as const, ...d.data(), id: d.id })),
-          ...comSnap.docs.map(d => ({ type: 'commit' as const, ...d.data(), id: d.id }))
-        ]
+          ...(artRes.data || []).map(d => ({ type: 'artifact' as const, ...d })),
+          ...(comRes.data || []).map(d => ({ type: 'commit' as const, ...d }))
+        ] as Achievement[]
         setAchievements(combined)
       } catch (err) {
         console.error('Achievements error:', err instanceof Error ? err.message : err)
@@ -99,30 +107,29 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
 
     checkConnection()
     fetchAchievements()
-  }, [member.id])
+  }, [member.id, db])
 
   const handleConnect = async () => {
     setLoading(true)
-    const user = auth.currentUser
+    const { data: { user } } = await db.auth.getUser()
     if (!user) return
 
     try {
       // 1. Create a pending connection
-      const connId = [user.uid, member.id].sort().join('_')
-      await setDoc(doc(db, 'user_connections', connId), {
-        user_id: user.uid,
+      await db.from('user_connections').upsert({
+        user_id: user.id,
         target_id: member.id,
         status: 'pending',
         created_at: new Date().toISOString()
       })
 
       // 2. Insert a notification for the target user
-      await addDoc(collection(db, 'notifications'), {
+      await db.from('notifications').insert({
         user_id: member.id,
         type: 'connection_request',
         title: 'New Connection Request',
-        message: `${user.displayName || user.email} wants to connect with you.`,
-        metadata: { sender_id: user.uid },
+        message: `${user.user_metadata?.full_name || user.email} wants to connect with you.`,
+        metadata: { sender_id: user.id },
         created_at: new Date().toISOString()
       })
 

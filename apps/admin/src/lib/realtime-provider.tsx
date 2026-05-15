@@ -1,19 +1,8 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
-import { 
-  ref, 
-  onValue, 
-  set, 
-  push, 
-  onDisconnect, 
-  serverTimestamp, 
-  update,
-  remove,
-  runTransaction
-} from 'firebase/database'
-import { database, auth } from './firebase'
-import { onAuthStateChanged } from 'firebase/auth'
+import { db } from './db-client'
+import { RealtimeChannel } from '@supabase/supabase-js'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -21,7 +10,7 @@ interface PresenceState {
   userId: string
   name: string
   avatar?: string
-  lastSeen: number | object
+  lastSeen: string
   cursor?: { x: number; y: number }
   status?: 'online' | 'idle' | 'typing'
   draggingTaskId?: string | null
@@ -39,11 +28,9 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    const connectedRef = ref(database, '.info/connected')
-    const unsubscribe = onValue(connectedRef, (snap) => {
-      setIsConnected(snap.val() === true)
-    })
-    return () => unsubscribe()
+    // Supabase is technically always connected if the client is initialized,
+    // but we can track the socket status if needed.
+    setIsConnected(true)
   }, [])
 
   return (
@@ -59,123 +46,160 @@ export const useRealtime = () => useContext(RealtimeContext)
 
 /**
  * usePresence
- * Tracks who is online in a specific room and their temporary state (cursors, typing).
+ * Tracks who is online in a specific room using Supabase Presence.
  */
 export function usePresence(roomId: string) {
   const [others, setOthers] = useState<Record<string, PresenceState>>({})
   const [me, setMe] = useState<PresenceState | null>(null)
+  const channelRef = useRef<RealtimeChannel | null>(null)
   
   useEffect(() => {
-    const user = auth.currentUser
-    if (!user) return
+    const fetchUserAndSubscribe = async () => {
+      const { data: { user } } = await db.auth.getUser()
+      if (!user) return
 
-    const roomPresenceRef = ref(database, `rooms/${roomId}/presence`)
-    const myPresenceRef = ref(database, `rooms/${roomId}/presence/${user.uid}`)
-    
-    // Set up presence on connect
-    const myState: PresenceState = {
-      userId: user.uid,
-      name: user.displayName || user.email || 'Anonymous',
-      avatar: user.photoURL || undefined,
-      lastSeen: serverTimestamp(),
-      status: 'online'
-    }
-    
-    set(myPresenceRef, myState)
-    onDisconnect(myPresenceRef).remove()
-
-    // Listen for others
-    const unsubscribe = onValue(roomPresenceRef, (snap) => {
-      const data = snap.val() || {}
-      const filtered: Record<string, PresenceState> = {}
-      Object.keys(data).forEach(uid => {
-        if (uid !== user.uid) filtered[uid] = data[uid]
+      const channel = db.channel(`room:${roomId}`, {
+        config: {
+          presence: {
+            key: user.id,
+          },
+        },
       })
-      setOthers(filtered)
-      if (data[user.uid]) setMe(data[user.uid])
-    })
+
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const state = channel.presenceState<PresenceState>()
+          const filtered: Record<string, PresenceState> = {}
+          Object.keys(state).forEach(key => {
+            if (key !== user.id) filtered[key] = state[key][0]
+          })
+          setOthers(filtered)
+          if (state[user.id]) setMe(state[user.id][0])
+        })
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await channel.track({
+              userId: user.id,
+              name: user.user_metadata?.full_name || user.email || 'Anonymous',
+              avatar: user.user_metadata?.avatar_url,
+              lastSeen: new Date().toISOString(),
+              status: 'online'
+            })
+          }
+        })
+
+      channelRef.current = channel
+    }
+
+    fetchUserAndSubscribe()
 
     return () => {
-      unsubscribe()
-      remove(myPresenceRef)
+      if (channelRef.current) {
+        channelRef.current.unsubscribe()
+      }
     }
   }, [roomId])
 
-  const updateMyState = useCallback((patch: Partial<PresenceState>) => {
-    const user = auth.currentUser
-    if (!user) return
-    const myPresenceRef = ref(database, `rooms/${roomId}/presence/${user.uid}`)
-    update(myPresenceRef, { ...patch, lastSeen: serverTimestamp() })
-  }, [roomId])
+  const updateMyState = useCallback(async (patch: Partial<PresenceState>) => {
+    if (channelRef.current) {
+      const { data: { user } } = await db.auth.getUser()
+      if (!user) return
+      
+      await channelRef.current.track({
+        ...me,
+        ...patch,
+        lastSeen: new Date().toISOString()
+      })
+    }
+  }, [me])
 
   return { others: Object.values(others), me, updateMyState }
 }
 
 /**
  * useSyncedObject
- * Syncs a single object (e.g., Kanban card properties) in real-time.
+ * Syncs a single object using Supabase Broadcast or Table changes.
+ * Note: Realtime Database 'path' logic maps to Table + ID in Supabase.
  */
-export function useSyncedObject<T>(path: string, initialValue: T) {
+export function useSyncedObject<T>(table: string, id: string, initialValue: T) {
   const [value, setValue] = useState<T>(initialValue)
-  const isInitialLoad = useRef(true)
 
   useEffect(() => {
-    const objectRef = ref(database, path)
-    const unsubscribe = onValue(objectRef, (snap) => {
-      const data = snap.val()
-      if (data !== null) {
-        setValue(data)
-      }
-      isInitialLoad.current = false
+    // Initial fetch
+    db.from(table).select('*').eq('id', id).single().then(({ data }) => {
+      if (data) setValue(data)
     })
-    return () => unsubscribe()
-  }, [path])
 
-  const updateObject = useCallback((newValue: Partial<T>) => {
-    const objectRef = ref(database, path)
-    update(objectRef, newValue as any)
-  }, [path])
+    const channel = db.channel(`sync:${table}:${id}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table, 
+        filter: `id=eq.${id}` 
+      }, (payload) => {
+        if (payload.new) setValue(payload.new as T)
+      })
+      .subscribe()
 
-  const atomicUpdate = useCallback((updater: (current: T) => T) => {
-    const objectRef = ref(database, path)
-    runTransaction(objectRef, (current) => {
-      return updater(current || initialValue)
-    })
-  }, [path, initialValue])
+    return () => {
+      db.removeChannel(channel)
+    }
+  }, [table, id])
 
-  return [value, updateObject, atomicUpdate] as const
+  const updateObject = useCallback(async (newValue: Partial<T>) => {
+    await db.from(table).update(newValue as any).eq('id', id)
+  }, [table, id])
+
+  return [value, updateObject] as const
 }
 
 /**
  * useSyncedList
- * Syncs a list of items (e.g., Chat messages, Kanban cards).
+ * Syncs a list of items from a Supabase table.
  */
-export function useSyncedList<T>(path: string) {
+export function useSyncedList<T>(table: string, filterField?: string, filterValue?: any) {
   const [list, setList] = useState<{ id: string; data: T }[]>([])
 
+  const fetchList = useCallback(async () => {
+    let query = db.from(table).select('*')
+    if (filterField && filterValue) {
+      query = query.eq(filterField, filterValue)
+    }
+    const { data } = await query.order('created_at', { ascending: true })
+    if (data) {
+      setList(data.map((item: any) => ({ id: item.id, data: item as T })))
+    }
+  }, [table, filterField, filterValue])
+
   useEffect(() => {
-    const listRef = ref(database, path)
-    const unsubscribe = onValue(listRef, (snap) => {
-      const data = snap.val() || {}
-      const items = Object.keys(data).map(key => ({
-        id: key,
-        data: data[key] as T
-      }))
-      setList(items)
-    })
-    return () => unsubscribe()
-  }, [path])
+    fetchList()
 
-  const pushItem = useCallback((item: T) => {
-    const listRef = ref(database, path)
-    const newItemRef = push(listRef)
-    return set(newItemRef, { ...item, createdAt: serverTimestamp() })
-  }, [path])
+    const channel = db.channel(`list:${table}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table,
+        ...(filterField && filterValue ? { filter: `${filterField}=eq.${filterValue}` } : {})
+      }, () => {
+        fetchList()
+      })
+      .subscribe()
 
-  const removeItem = useCallback((id: string) => {
-    const itemRef = ref(database, `${path}/${id}`)
-    return remove(itemRef)
-  }, [path])
+    return () => {
+      db.removeChannel(channel)
+    }
+  }, [table, filterField, filterValue, fetchList])
+
+  const pushItem = useCallback(async (item: T) => {
+    const { data, error } = await db.from(table).insert(item as any).select().single()
+    if (error) throw error
+    return data
+  }, [table])
+
+  const removeItem = useCallback(async (id: string) => {
+    const { error } = await db.from(table).delete().eq('id', id)
+    if (error) throw error
+  }, [table])
 
   return { list, pushItem, removeItem }
 }

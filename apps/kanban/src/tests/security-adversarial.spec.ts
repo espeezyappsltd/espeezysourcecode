@@ -198,7 +198,7 @@ test.describe('2. Authentication & Authorisation Bypass', () => {
   test('Cookie injection attempt rejected', async ({ request }) => {
     const resp = await request.get('/api/feed', {
       headers: {
-        Cookie: 'fb-auth-token=fake_token; fb-refresh-token=fake_refresh',
+        Cookie: 'sb-auth-token=fake_token; sb-refresh-token=fake_refresh',
       },
     })
     expect([401, 403]).toContain(resp.status())
@@ -478,7 +478,8 @@ test.describe('8. Sensitive Data Exposure', () => {
     const resp = await apiPost(request, '/api/preregister', {})
     const text = await resp.text()
     expect(text).not.toContain('postgresql://')
-    expect(text).not.toContain('firebase-adminsdk')
+    expect(text).not.toContain('supabase-service-role')
+    expect(text).not.toContain('sb-anon-key')
     expect(text).not.toContain('postgres://')
   })
 

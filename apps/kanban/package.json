@@ -21,7 +21,6 @@
     "canvas-confetti": "^1.9.4",
     "country-flag-icons": "^1.6.17",
     "date-fns": "^4.1.0",
-    "firebase": "^12.13.0",
     "framer-motion": "^12.38.0",
     "jspdf": "^4.2.1",
     "libphonenumber-js": "^1.13.1",

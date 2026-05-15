@@ -1,7 +1,10 @@
 import type { NextConfig } from 'next'
 import path from 'node:path'
 
-const monorepoRoot = path.join(process.cwd(), '../../')
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const monorepoRoot = path.resolve(__dirname, '../../')
 
 const nextConfig: NextConfig = {
   // Deployed to Vercel — server mode (no static export)
@@ -13,6 +16,9 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: monorepoRoot,
   turbopack: {
     root: monorepoRoot,
+    resolveAlias: {
+      '@shared/assets': path.resolve(monorepoRoot, 'apps/shared/assets/index.ts'),
+    },
   },
 }
 

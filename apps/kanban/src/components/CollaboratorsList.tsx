@@ -1,13 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import type { Profile } from '@/types/database'
-// TODO: Replace with Supabase client
-// import { db, auth } from '@/lib/firebase'
-// import { collection, query, where, getDocs, setDoc, doc, addDoc, limit, orderBy, or } from 'firebase/firestore'
 import { Users, UserPlus, Check, ExternalLink, Shield, Sparkles } from 'lucide-react'
 import { getFlagComponent } from '@/utils/geo'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
+import { createClient } from '@/lib/supabase/client'
 
 interface CollaboratorsListProps {
   currentGroupId: string | null;
@@ -15,6 +11,7 @@ interface CollaboratorsListProps {
 }
 
 export default function CollaboratorsList({ currentGroupId, onViewProfile }: CollaboratorsListProps) {
+  const db = useRef(createClient()).current
   const [collaborators, setCollaborators] = useState<Profile[]>([])
   const [personalNetwork, setPersonalNetwork] = useState<Profile[]>([])
   const [suggested, setSuggested] = useState<Profile[]>([])
@@ -22,20 +19,33 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
   const [loading, setLoading] = useState(true)
 
   const fetchCollaborators = useCallback(async () => {
-    // TODO: Replace with Supabase logic
-    setCollaborators([])
-  }, [currentGroupId])
+    if (!currentGroupId) return
+    const { data } = await db.from('profiles').select('*').eq('group_id', currentGroupId).limit(10)
+    if (data) setCollaborators(data as Profile[])
+  }, [currentGroupId, db])
 
   const fetchSuggested = useCallback(async () => {
-    // TODO: Replace with Supabase logic
-    setSuggested([])
-  }, [currentGroupId])
+    const { data: { user } } = await db.auth.getUser()
+    if (!user) return
+    const { data } = await db.from('profiles').select('*').neq('id', user.id).limit(5)
+    if (data) setSuggested(data as Profile[])
+  }, [db])
 
   const fetchConnections = useCallback(async () => {
-    // TODO: Replace with Supabase logic
-    setConnections(new Set())
-    setPersonalNetwork([])
-  }, [])
+    const { data: { user } } = await db.auth.getUser()
+    if (!user) return
+    
+    const { data: connData } = await db
+      .from('user_connections')
+      .select('target_id, profiles:target_id (*)')
+      .eq('user_id', user.id)
+      .eq('status', 'connected')
+    
+    if (connData) {
+      setConnections(new Set(connData.map(c => c.target_id)))
+      setPersonalNetwork(connData.map(c => c.profiles) as unknown as Profile[])
+    }
+  }, [db])
 
   useEffect(() => {
     let active = true
@@ -53,7 +63,24 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
   }, [currentGroupId, fetchCollaborators, fetchConnections, fetchSuggested])
 
   const handleConnect = async (targetId: string) => {
-    // TODO: Replace with Supabase logic
+    const { data: { user } } = await db.auth.getUser()
+    if (!user) return
+
+    await db.from('user_connections').upsert({
+      user_id: user.id,
+      target_id: targetId,
+      status: 'pending'
+    })
+    
+    await db.from('notifications').insert({
+      user_id: targetId,
+      type: 'connection_request',
+      title: 'New Connection Request',
+      message: `${user.user_metadata?.full_name || 'Someone'} wants to connect.`,
+      metadata: { sender_id: user.id },
+      created_at: new Date().toISOString()
+    })
+
     setConnections(prev => new Set([...Array.from(prev), targetId]))
     void fetchConnections()
   }
