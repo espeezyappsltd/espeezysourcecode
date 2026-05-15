@@ -15,6 +15,89 @@ import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
+
+function HeroVisual({ registeredCount }: { registeredCount: number }) {
+  return (
+    <div style={{ position: 'relative', marginTop: '4rem', width: '100%', maxWidth: '1000px', margin: '4rem auto 0' }}>
+      {/* Join Badge */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ delay: 1, type: 'spring' }}
+        style={{ 
+          position: 'absolute', top: '-2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 20,
+          background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(12px)', border: '1px solid rgba(16,185,129,0.3)',
+          padding: '10px 24px', borderRadius: '100px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+          display: 'flex', alignItems: 'center', gap: '12px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {[1,2,3].map(i => (
+            <div key={i} style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid #0f172a', marginLeft: i > 1 ? '-8px' : 0, background: i === 1 ? '#6366f1' : i === 2 ? '#10b981' : '#f59e0b' }} />
+          ))}
+        </div>
+        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'white', letterSpacing: '-0.01em' }}>
+          Join <span style={{ color: 'var(--brand)' }}>{registeredCount.toLocaleString()}</span> members already onboard
+        </span>
+      </motion.div>
+
+      {/* Screenshot Layout */}
+      <div style={{ position: 'relative', height: 'clamp(300px, 50vw, 500px)', width: '100%', perspective: '1000px' }}>
+        
+        {/* Landscape Main (Dashboard) */}
+        <motion.div
+          initial={{ opacity: 0, rotateX: 10, y: 40 }}
+          animate={{ opacity: 1, rotateX: 0, y: 0 }}
+          transition={{ duration: 1, ease: 'easeOut' }}
+          style={{ 
+            position: 'absolute', inset: 0, zIndex: 5, borderRadius: '24px', overflow: 'hidden', 
+            border: '1px solid rgba(15,23,42,0.1)', boxShadow: '0 30px 60px rgba(15,23,42,0.15)',
+            background: '#fff'
+          }}
+        >
+          <img src="/screenshots/dashboard.png" alt="Espeezy Dashboard" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </motion.div>
+
+        {/* Portrait Left (Mobile Experience) */}
+        <motion.div
+          initial={{ opacity: 0, x: -60, rotateY: 15 }}
+          animate={{ opacity: 1, x: -100, rotateY: 20 }}
+          whileInView={{ x: [-100, -110, -100], transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' } }}
+          style={{ 
+            position: 'absolute', top: '15%', left: '10%', width: '180px', height: '360px', zIndex: 10,
+            borderRadius: '32px', overflow: 'hidden', border: '8px solid #0f172a',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', display: 'none'
+          }}
+          className="show-desktop"
+        >
+          <img src="/screenshots/mobile.png" alt="Mobile App" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </motion.div>
+
+        {/* Portrait Right (Project View) */}
+        <motion.div
+          initial={{ opacity: 0, x: 60, rotateY: -15 }}
+          animate={{ opacity: 1, x: 100, rotateY: -20 }}
+          whileInView={{ x: [100, 110, 100], transition: { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 } }}
+          style={{ 
+            position: 'absolute', top: '10%', right: '10%', width: '180px', height: '360px', zIndex: 10,
+            borderRadius: '32px', overflow: 'hidden', border: '8px solid #0f172a',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', display: 'none'
+          }}
+          className="show-desktop"
+        >
+          <img src="/screenshots/Screen_Shot_2026-05-14_at_23.11.51.png" alt="Task Interface" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </motion.div>
+
+      </div>
+
+      <style jsx>{`
+        @media (min-width: 1024px) {
+          .show-desktop { display: block !important; }
+        }
+      `}</style>
+    </div>
+  )
+}
 import { supabase } from '@/lib/supabase-client'
 import { submitPreregistration } from '@/services/preregister'
 
@@ -233,7 +316,9 @@ export default function PreRegisterPage() {
         </motion.p>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
-        <UserRegistrationCounter registeredCount={registeredCount} goal={goal} authUserCount={authUserCount} />
+
+        {/* Hero Visual Section */}
+        <HeroVisual registeredCount={registeredCount} />
 
         {authUser && (
           <div style={{ margin: '2rem auto 0', maxWidth: '680px', background: 'white', border: '1px solid rgba(15,23,42,0.1)', borderRadius: '14px', padding: '1rem', textAlign: 'left', boxShadow: '0 8px 30px rgba(15,23,42,0.08)' }}>

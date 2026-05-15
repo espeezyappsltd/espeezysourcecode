@@ -9,71 +9,117 @@ test.describe('Espeezy Teams & Realtime Sync', () => {
 
   test('Simulate 2 users: Team creation, RBAC roles, Realtime Tasks, and Completion', async ({ browser }) => {
     const sessionSuffix = Date.now().toString().slice(-6);
-    const userA = { email: `owner_${sessionSuffix}@edu.com`, password: 'Test1234!', name: 'Owner User' };
-    const userB = { email: `admin_${sessionSuffix}@edu.com`, password: 'Test1234!', name: 'Admin User' };
+    // Use unique emails to avoid conflicts with existing users
+    const userA = { email: `owner_${sessionSuffix}@test.com`, password: 'TestPassword123!', name: 'Owner User' };
+    const userB = { email: `admin_${sessionSuffix}@test.com`, password: 'TestPassword123!', name: 'Admin User' };
 
     const contextA = await browser.newContext();
     const contextB = await browser.newContext();
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
-    // 1. SIGNUP USER A (OWNER)
-    await pageA.goto('/login');
-    await pageA.click('text=/Don.*t have an account/i');
-    await pageA.fill('input[type="email"]', userA.email);
-    await pageA.fill('input[type="password"]', userA.password);
-    await pageA.check('input[type="checkbox"]'); // Legal accepted
-    await pageA.click('button[type="submit"]');
-    await expect(pageA).toHaveURL(/\/$/);
+    pageA.on('console', msg => console.log(`[PAGE A] ${msg.text()}`));
+    pageB.on('console', msg => console.log(`[PAGE B] ${msg.text()}`));
+
+    // Helper to handle signup/login (handles potential email confirmation delay by assuming auto-confirm is ON in dev)
+    const authFlow = async (page: any, user: typeof userA) => {
+      await page.goto('/login?signup=true', { waitUntil: 'networkidle', timeout: 60000 });
+      
+      await page.fill('input[id="email"]', user.email);
+      await page.fill('input[id="password"]', user.password);
+      await page.check('input[id="legal"]');
+      await page.click('button[type="submit"]');
+      
+      // If we see "Check your email", we might be stuck. 
+      // In local dev/testing, we expect auto-redirect to '/'
+      try {
+        await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
+      } catch (e) {
+        console.log("Likely waiting for email confirmation. Attempting direct login if auto-confirm failed.");
+        await page.goto('/login');
+        await page.fill('input[id="email"]', user.email);
+        await page.fill('input[id="password"]', user.password);
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL(/\/$/);
+      }
+    };
+
+    // 1. AUTH USER A (OWNER)
+    console.log("Starting Auth for User A...");
+    await authFlow(pageA, userA);
+    console.log("User A Authed. Waiting for WelcomeOnboarding...");
     await expect(pageA.locator('text=Welcome to the Hub')).toBeVisible();
 
     // 2. CREATE TEAM (USER A)
+    console.log("User A creating team...");
     await pageA.click('text=Create New Team');
     await pageA.fill('input[placeholder="e.g. Capstone Alpha"]', `Team ${sessionSuffix}`);
     await pageA.fill('textarea[placeholder="What is this team building?"]', 'E2E Realtime Test Project');
     await pageA.click('button:has-text("Start Team")');
 
-    // Wait for Dashboard
+    // Wait for Dashboard and grab Team ID
+    console.log("Waiting for Dashboard for User A...");
     await expect(pageA.locator('text=TEAM:')).toBeVisible();
-    const teamIdText = await pageA.locator('text=TEAM:').innerText();
-    // Assuming Team ID is visible or we can get it from URL if we redirected
-    // For this test, let's assume we can copy it or it's in the console
-    const teamId = await pageA.evaluate(() => window.location.search.split('team=')[1] || localStorage.getItem('last_team_id'));
     
-    // 3. SIGNUP USER B (ADMIN)
-    await pageB.goto('/login');
-    await pageB.click('text=/Don.*t have an account/i');
-    await pageB.fill('input[type="email"]', userB.email);
-    await pageB.fill('input[type="password"]', userB.password);
-    await pageB.check('input[type="checkbox"]');
-    await pageB.click('button[type="submit"]');
+    const teamId = await pageA.evaluate(() => {
+      const el = document.querySelector('#copy-team-id');
+      // Look for UUID in the DOM
+      return document.body.innerHTML.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)?.[0];
+    });
+
+    console.log(`Detected Team ID: ${teamId}`);
+    expect(teamId).toBeDefined();
+
+    // 3. AUTH USER B (ADMIN)
+    console.log("Starting Auth for User B...");
+    await authFlow(pageB, userB);
+    console.log("User B Authed. Waiting for WelcomeOnboarding...");
     await expect(pageB.locator('text=Welcome to the Hub')).toBeVisible();
 
     // 4. JOIN TEAM (USER B)
-    // Note: We need a way to pass the Team ID to User B.
-    // In a real E2E, we'd grab it from User A's dashboard.
-    // For simulation, we'll assume the Team ID is available.
-    // await pageB.click('text=Join Existing Team');
-    // await pageB.fill('input[placeholder="Paste UUID here..."]', teamId);
-    // await pageB.click('button:has-text("Join Project")');
+    console.log(`User B joining team ${teamId}...`);
+    await pageB.click('text=Join Existing Team');
+    await pageB.fill('input[placeholder="Paste UUID here..."]', teamId!);
+    await pageB.click('button:has-text("Join Project")');
+
+    // Wait for User B to land on Dashboard
+    console.log("Waiting for User B Dashboard...");
+    await expect(pageB.locator(`text=Team ${sessionSuffix}`)).toBeVisible();
 
     // 5. REALTIME COLLABORATION
+    console.log("User A creating task...");
     // User A creates a task
     await pageA.click('text=New Task');
-    await pageA.fill('input[placeholder="Task Title"]', 'Critical Deliverable');
+    await pageA.fill('input[id="task-title"]', `Task ${sessionSuffix}`);
+    await pageA.fill('textarea[id="task-desc"]', 'Simulated task for realtime verification');
+    // Ensure we select a due date (it's required by some validation)
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    const dateStr = tomorrow.toISOString().split('T')[0];
+    await pageA.fill('input[id="task-date"]', dateStr);
+    
     await pageA.click('button:has-text("Save Task")');
 
     // User B sees the task via Realtime
-    // await expect(pageB.locator('text=Critical Deliverable')).toBeVisible();
+    console.log("Waiting for User B to see the task via Realtime...");
+    await expect(pageB.locator(`text=Task ${sessionSuffix}`)).toBeVisible({ timeout: 15000 });
 
     // User B moves task to 'Done'
-    // await pageB.click('text=Critical Deliverable');
-    // await pageB.selectOption('select[name="status"]', 'Done');
-    // await pageB.click('button:has-text("Update Status")');
+    console.log("User B updating task to Done...");
+    await pageB.click(`text=Task ${sessionSuffix}`);
+    await pageB.selectOption('select[id="task-status"]', 'Done');
+    await pageB.click('button:has-text("Save Task")');
 
     // 6. VERIFY ANALYTICS
+    console.log("Verifying Analytics...");
     await pageA.click('text=Group Updates');
-    // await expect(pageA.locator('text=100%')).toBeVisible();
+    await expect(pageA).toHaveURL(/\/analytics\/.*/);
+    
+    // Check if progress chart or percentage is visible
+    // We updated the completion calculation, so 100% should appear
+    await expect(pageA.locator('text=100%')).toBeVisible({ timeout: 15000 });
+
+    // Verify PDF Print section (it's hidden but exists in DOM)
+    await expect(pageA.locator('text=Executive Project Intelligence Report')).toBeAttached();
 
     await contextA.close();
     await contextB.close();

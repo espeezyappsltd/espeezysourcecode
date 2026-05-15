@@ -116,6 +116,17 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 TEAM: <span style={{ color: 'var(--brand)' }}>{group?.name || 'STARTING UP...'}</span>
               </span>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(groupId);
+                  addToast('ID Copied', 'Team ID has been copied to clipboard.', 'success');
+                }}
+                style={{ background: 'none', border: 'none', padding: 0, color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                title="Copy Team ID"
+                id="copy-team-id"
+              >
+                <span style={{ fontSize: '0.6rem', marginLeft: '0.5rem', opacity: 0.6 }}>ID: {groupId.slice(0, 8)}...</span>
+              </button>
             </div>
 
             <button

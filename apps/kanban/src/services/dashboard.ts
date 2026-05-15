@@ -37,7 +37,7 @@ export async function fetchProfileById(userId: string) {
     } as unknown as Profile
   }
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen').eq('id', userId).maybeSingle()
+  const { data, error } = await db.from('profiles').select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen, storage_used').eq('id', userId).maybeSingle()
   if (error) throw error
   return data as Profile
 }

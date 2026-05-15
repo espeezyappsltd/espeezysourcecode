@@ -33,13 +33,21 @@ function LoginContent() {
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
   const [sendingOtp, setSendingOtp] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
+  const [checkingAuth, setCheckingAuth] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
   const [loading, setLoading] = useState(false)
 
   // Client-side guard: Bounce authenticated users back to dashboard
   useEffect(() => {
+    console.log("LOGIN: useEffect trigger");
+    const authTimeout = setTimeout(() => {
+      console.log("LOGIN: Safety timeout fired");
+      setCheckingAuth(false);
+    }, 2000);
+
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+      console.log("LOGIN: getSession finished", session ? "Session" : "No Session");
+      clearTimeout(authTimeout);
       if (session) {
         router.replace('/')
       } else {

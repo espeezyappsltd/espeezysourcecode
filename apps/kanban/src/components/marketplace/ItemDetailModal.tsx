@@ -92,12 +92,41 @@ export function ItemDetailModal({ listing, onClose }: ItemDetailModalProps) {
                    <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 800 }}>Institutional Specialist / {listing.profiles?.role}</div>
                 </div>
               </div>
-              <button 
-                className="btn btn-primary"
-                style={{ width: '100%', marginTop: '2rem', padding: '1.25rem', borderRadius: '20px', fontWeight: 950, fontSize: '1rem' }}
-              >
-                Request Access via Node
-              </button>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                <button 
+                  className="btn btn-primary"
+                  style={{ flex: 2, padding: '1.25rem', borderRadius: '20px', fontWeight: 950, fontSize: '1rem' }}
+                >
+                  Request Access via Node
+                </button>
+                <button 
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/inventory', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ listing_id: listing.id })
+                      })
+                      if (res.ok) {
+                        alert('Added to your Personal Inventory!')
+                      } else {
+                        const d = await res.json()
+                        alert(d.error || 'Failed to save')
+                      }
+                    } catch (e) {
+                      alert('Network error')
+                    }
+                  }}
+                  aria-label="Save to Personal Inventory"
+                  style={{ 
+                    flex: 1, padding: '1.25rem', borderRadius: '20px', fontWeight: 950, fontSize: '0.9rem',
+                    background: 'var(--bg-sub)', border: '1px solid var(--border)', color: 'white', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                  }}
+                >
+                  SAVE
+                </button>
+              </div>
             </div>
           </div>
         </div>

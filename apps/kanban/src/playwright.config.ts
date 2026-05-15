@@ -17,13 +17,18 @@ export default defineConfig({
     ['json', { outputFile: 'playwright-report/results.json' }],
   ],
   use: {
-    actionTimeout: 0,
+    actionTimeout: 30000,
+    navigationTimeout: 60000,
     trace: 'on-first-retry',
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3001',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
   projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
 
     {
       name: 'firefox',

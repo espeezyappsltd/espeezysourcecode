@@ -37,6 +37,7 @@ export type Profile = {
   biography?: string | null;
   stack?: string | null;
   last_seen?: string | null;
+  storage_used?: number;
   achievements?: Achievement[] | null;
 };
 

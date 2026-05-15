@@ -11,6 +11,8 @@
   ],
   "scripts": {
     "dev": "next dev",
+    "stop": "taskkill /F /IM node.exe /T || killall node || true",
+    "shortcuts": "node ./scripts/seed-shortcuts.mjs",
     "dev:prereg": "npm --prefix apps/prereg run dev",
     "dev:games": "npm --prefix apps/games run dev",
     "dev:dashboard": "npm --prefix apps/dashboard run dev",
