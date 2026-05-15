@@ -27,7 +27,7 @@ const DOCS_LINKS = [
 
 const INFRA_LINKS = [
   { href: '/docs/infra/presence', label: 'Real-time Presence'  },
-  { href: '/docs/infra/sync', label: 'Firebase Sync'  },
+  { href: '/docs/infra/sync', label: 'Real-time Sync'  },
   { href: '/docs/infra/payments', label: 'Stripe Integration' },
   { href: '/docs/vision', label: 'Our Vision' },
   { href: '/docs/impact', label: 'Impact Stats' },
@@ -95,7 +95,7 @@ export default function PreregFooter() {
           </p>
 
           <p style={{ fontSize: '0.82rem', lineHeight: 1.6, color: '#475569', marginBottom: '1rem', maxWidth: '240px' }}>
-            Built on Next.js and Firebase. Integrates with Canvas, Blackboard, and Moodle.
+            Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle.
             Payments via Stripe. Real-time sync across all your devices.
           </p>
 

@@ -74,8 +74,8 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Self-hosted deployment (for institutions)',
-        body: 'Universities and colleges that need to host Espeezy within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Firebase Firestore and Auth, and runs on any Node 24-compatible server or Vercel/Cloudflare Workers. A Docker image is provided for easy deployment.',
-        items: ['Docker image available: ghcr.io/espeezy/app:latest', 'Environment variables required: FIREBASE_PROJECT_ID, FIREBASE_SERVICE_ACCOUNT_KEY', 'SSO integration via SAML 2.0 and OAuth 2.0 (institutional IdP)'],
+        body: 'Universities and colleges that need to host Espeezy within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Supabase (PostgreSQL and GoTrue Auth), and runs on any Node 24-compatible server or Vercel/Cloudflare Workers. A Docker image is provided for easy deployment.',
+        items: ['Docker image available: ghcr.io/espeezy/app:latest', 'Environment variables required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY', 'SSO integration via SAML 2.0 and OAuth 2.0 (institutional IdP)'],
       },
       {
         heading: 'LMS integration setup',
@@ -287,32 +287,32 @@ const docsContent: Record<string, DocEntry> = {
   },
 
   'infra/sync': {
-    title: 'Firebase Sync',
+    title: 'Supabase Real-time',
     icon: <Globe size={40} />,
     tagline: 'The real-time data layer that keeps every workspace in sync across all devices and all users, instantly.',
     sections: [
       {
-        heading: 'What Firebase does',
-        body: 'Espeezy uses Google Firebase Firestore as its primary database. Firestore is a NoSQL document database that supports real-time listeners: when data changes in the database, every connected client that is subscribed to that data receives the update in milliseconds without needing to refresh the page.',
+        heading: 'What Supabase does',
+        body: 'Espeezy uses Supabase (PostgreSQL) as its primary database. It leverages Supabase Realtime for instant synchronization: when data changes in the database, every connected client that is subscribed to that channel receives the update in milliseconds without needing to refresh the page.',
       },
       {
         heading: 'How task updates propagate',
-        body: 'When you drag a Kanban card from In Progress to Done, Espeezy writes the new state and a timestamp to Firestore. Every teammate who has that workspace open sees the card move in real time on their own screen. The update round-trip (your action to their screen) typically takes under 100 milliseconds on a normal broadband connection.',
+        body: 'When you drag a Kanban card from In Progress to Done, Espeezy writes the new state and a timestamp to PostgreSQL. Every teammate who has that workspace open sees the card move in real time on their own screen via the Realtime channel. The update round-trip Typically takes under 100 milliseconds.',
       },
       {
         heading: 'Conflict resolution',
-        body: 'If two users try to move the same card at exactly the same time, Firestore uses its built-in optimistic concurrency to resolve the conflict: the last write wins, and all clients converge to the same final state. For critical fields like assignee or due date, Espeezy uses server-side transactions to prevent data corruption.',
+        body: 'If two users try to move the same card at exactly the same time, Supabase uses its built-in optimistic concurrency to resolve the conflict: the last write wins, and all clients converge to the same final state. For critical fields, Espeezy uses server-side RPC functions to prevent data corruption.',
       },
       {
         heading: 'Offline support',
-        body: 'Firestore has built-in offline persistence. If you lose your internet connection, you can keep working. Your changes are stored locally in IndexedDB. When your connection returns, Firestore automatically syncs your offline changes with the server and resolves any conflicts.',
+        body: 'The Supabase client has robust caching. If you lose your internet connection, your changes are stored locally. When your connection returns, the client automatically syncs your offline changes with the server and resolves any conflicts using a last-in-wins strategy.',
       },
       {
-        heading: 'Security rules',
-        body: 'Firestore Security Rules enforce that users can only read and write data they are authorised to access. For example, a student can only read workspace data if they are a member of that workspace. Rules are deployed as code and version-controlled, meaning every change to access rules is auditable.',
+        heading: 'Security policies',
+        body: 'PostgreSQL Row-Level Security (RLS) policies enforce that users can only read and write data they are authorised to access. For example, a student can only read workspace data if they are a member of that workspace. Policies are defined in SQL and version-controlled.',
       },
     ],
-    eli12: 'Firebase is the invisible engine underneath Espeezy. When you update a task, Firebase sends that change to your teammates screens in less than a second, like passing a note to someone sitting next to you but they are actually on the other side of the world.',
+    eli12: 'Supabase is the invisible engine underneath Espeezy. When you update a task, it sends that change to your teammates screens in less than a second, like passing a note to someone sitting next to you but they are actually on the other side of the world.',
   },
 
   'infra/presence': {
@@ -338,7 +338,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'How it is built',
-        body: 'Presence is powered by Firebase Realtime Database (separate from Firestore), which is optimised for high-frequency small writes. Each connected client writes a heartbeat every 30 seconds. If the client disconnects, Firebase automatically removes the presence record using the onDisconnect() handler, which fires even if the user just closes their laptop.',
+        body: 'Presence is powered by Supabase Realtime Presence, which is optimized for high-frequency small writes. Each connected client broadcasts a heartbeat. If the client disconnects, Supabase automatically handles the presence state change, ensuring that your team status is always accurate even if you just close your laptop.',
       },
     ],
     eli12: 'It is like the little green dot on WhatsApp but for your whole team. You can see who is online right now, who was just here a minute ago, and even see their cursor moving around on the shared task board. No more "did you see my message?" moments.',
@@ -412,11 +412,11 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Cybersecurity dimension of the research',
-        body: 'As a cybersecurity component, the dissertation evaluated the threat model for a contribution-tracking platform handling authenticated student activity data. Key threats analysed included contribution data tampering (a student or administrator altering timestamps or task assignments retroactively), session hijacking in shared student network environments, and data exposure via misconfigured Firebase security rules. Mitigations implemented and evaluated: all contribution events are write-once and server-timestamped via Firebase Admin SDK, preventing client-side timestamp manipulation. Row-level security rules restrict each user to read/write only their own profile and contribution records. The penetration testing phase (using OWASP ZAP and manual testing against the OWASP Top 10) returned zero critical or high-severity vulnerabilities in the final build. This security model is directly relevant to academic integrity: an immutable audit trail means contribution records cannot be disputed or altered after assessment.',
+        body: 'As a cybersecurity component, the dissertation evaluated the threat model for a contribution-tracking platform handling authenticated student activity data. Key threats analysed included contribution data tampering (a student or administrator altering timestamps or task assignments retroactively), session hijacking in shared student network environments, and data exposure via misconfigured access policies. Mitigations implemented and evaluated: all contribution events are write-once and server-timestamped via PostgreSQL triggers, preventing client-side timestamp manipulation. Row-Level Security (RLS) policies restrict each user to read/write only their own profile and contribution records. The penetration testing phase (using OWASP ZAP and manual testing against the OWASP Top 10) returned zero critical or high-severity vulnerabilities in the final build. This security model is directly relevant to academic integrity: an immutable audit trail means contribution records cannot be disputed or altered after assessment.',
         items: [
           'Threat: contribution data tampering. Mitigated via write-once server-timestamps',
-          'Threat: session hijacking. Mitigated via short-lived Firebase ID tokens + HTTPS-only cookies',
-          'Threat: data exposure. Mitigated via row-level Firestore security rules',
+          'Threat: session hijacking. Mitigated via short-lived Supabase Auth tokens + HTTPS-only cookies',
+          'Threat: data exposure. Mitigated via Row-Level Security (RLS) policies',
           'OWASP ZAP scan result: 0 critical, 0 high-severity findings in final build',
           'Academic integrity implication: immutable audit trail = contribution records cannot be altered post-assessment',
         ],
