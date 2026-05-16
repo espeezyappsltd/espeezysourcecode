@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -23,12 +23,12 @@ import RemoteAvatar from '@/components/common/RemoteAvatar'
 type Reaction = 'like' | 'love' | 'fire' | 'clap' | 'insightful' | 'celebrate'
 
 const REACTION_META: Record<Reaction, { emoji: string; label: string; Icon: typeof Heart }> = {
-  like:        { emoji: '👍', label: 'Like',       Icon: ThumbsUp },
-  love:        { emoji: '❤️', label: 'Love',       Icon: Heart },
-  fire:        { emoji: '🔥', label: 'Fire',       Icon: Flame },
-  clap:        { emoji: '👏', label: 'Clap',       Icon: HandMetal },
-  insightful:  { emoji: '💡', label: 'Insightful', Icon: Lightbulb },
-  celebrate:   { emoji: '🎉', label: 'Celebrate',  Icon: PartyPopper },
+  like:        { emoji: '??', label: 'Like',       Icon: ThumbsUp },
+  love:        { emoji: '??', label: 'Love',       Icon: Heart },
+  fire:        { emoji: '??', label: 'Fire',       Icon: Flame },
+  clap:        { emoji: '??', label: 'Clap',       Icon: HandMetal },
+  insightful:  { emoji: '??', label: 'Insightful', Icon: Lightbulb },
+  celebrate:   { emoji: '??', label: 'Celebrate',  Icon: PartyPopper },
 }
 
 interface Post {
@@ -43,6 +43,7 @@ interface Post {
   reactions: { reaction: Reaction; user_id: string }[]
   comments: { count: number }[]
 }
+interface PostAuthor { id: string; full_name?: string | null; avatar_url?: string | null; username?: string | null; }
 
 interface Comment {
   id: string
@@ -52,7 +53,10 @@ interface Comment {
   author: Partial<Profile> | null
 }
 
-export default function FeedPage() { return (
+export default function FeedPage() {
+  const { profile } = useProfile();
+  const router = useRouter();
+  return (
   
     <div style={{ maxWidth: '640px', margin: '0 auto', padding: '1.5rem 1rem' }}>
       
@@ -191,7 +195,7 @@ export default function FeedPage() { return (
   )
 }
 
-// â”€â”€â”€ PostCard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── PostCard ────────────────────────────────────────────────────────────────
 function PostCard({
   post, currentUserId, onReaction, userReaction, reactionCounts, totalReactions,
   commentCount, comments, loadingComments, onToggleComments,
@@ -273,7 +277,7 @@ function PostCard({
           <ActionButton
             onClick={onToggleReactionPicker}
             active={!!userReaction}
-            label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : 'ðŸ‘ React'}
+            label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : '👍 React'}
             ariaLabel="Open reaction picker"
             ariaExpanded={showReactionPicker}
           />
@@ -311,7 +315,7 @@ function PostCard({
 
         <ActionButton
           onClick={onToggleComments}
-          label={`ðŸ’¬ ${commentCount > 0 ? commentCount : ''} Comment${commentCount !== 1 ? 's' : ''}`}
+          label={`💬 ${commentCount > 0 ? commentCount : ''} Comment${commentCount !== 1 ? 's' : ''}`}
           ariaLabel={`${commentCount} comments. Click to expand.`}
           ariaExpanded={!!comments || loadingComments}
         />
@@ -320,7 +324,7 @@ function PostCard({
       {/* Comments section */}
       {(comments || loadingComments) && (
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1rem 1.25rem' }}>
-          {loadingComments && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>Loadingâ€¦</div>}
+          {loadingComments && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>Loading…</div>}
           {comments?.map(c => (
             <div key={c.id} style={{ display: 'flex', gap: '0.6rem', marginBottom: '0.75rem' }}>
               <Avatar profile={c.author} size={28} />
@@ -341,7 +345,7 @@ function PostCard({
                 value={commentText}
                 onChange={e => onCommentTextChange(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSubmitComment() }}}
-                placeholder="Write a commentâ€¦"
+                placeholder="Write a comment…"
                 maxLength={500}
                 style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#E5E7EB', fontSize: '0.83rem', fontFamily: 'inherit' }}
               />

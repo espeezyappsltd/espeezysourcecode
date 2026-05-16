@@ -1,30 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { db } from '@/lib/db-client'
-
-// Secure CRUD for marketplace listings
-export async function GET(req: NextRequest) {
-  // List all active listings
-  const listings = await db.from('marketplace_listings').select('*').eq('status', 'active')
-  return NextResponse.json({ listings })
-}
-
-export async function POST(req: NextRequest) {
-  const session = await getServerSession()
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const body = await req.json()
-  const { title, description, asset_url, price_cents } = body
-  const { data, error } = await db.from('marketplace_listings').insert({
-    user_id: session.user.id,
-    title,
-    description,
-    asset_url,
-    price_cents,
-    status: 'active',
-  }).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return NextResponse.json({ listing: data })
-}
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server'
