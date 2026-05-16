@@ -1,9 +1,12 @@
 import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 // import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { sendP2PTransactionEmail } from '@/services/email'
 import { getStripeClient, getStripeWebhookSecret } from '@/utils/stripe'
+import type { Profile } from '@/types/database'
+import { getErrorMessage } from '@/utils/errors'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -22,8 +25,8 @@ export async function POST(req: Request) {
   try {
     stripe = getStripeClient()
     webhookSecret = getStripeWebhookSecret()
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Stripe not configured' }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error, 'Stripe not configured') }, { status: 500 })
   }
 
   const rawBody = Buffer.from(await req.arrayBuffer())
@@ -31,8 +34,8 @@ export async function POST(req: Request) {
   let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret)
-  } catch (error: any) {
-    return NextResponse.json({ error: `Stripe webhook verification failed: ${error.message}` }, { status: 400 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: `Stripe webhook verification failed: ${getErrorMessage(error)}` }, { status: 400 })
   }
 
   if (event.type === 'checkout.session.completed') {
@@ -207,7 +210,7 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
     if (!adminDb) return
     const { data: transfer, error: transferError } = await adminDb
       .from('p2p_transfers')
-      .select('*')
+      .select(Q.p2pTransfer)
       .eq('id', transferId)
       .single()
     if (transferError || !transfer) return
@@ -221,11 +224,25 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
 
       const { data: profiles } = await adminDb
         .from('profiles')
-        .select('*')
+        .select(Q.profile.webhook)
         .in('id', [transfer.sender_id, transfer.recipient_id])
 
-      const sender = (profiles ?? []).find((profile: any) => profile.id === transfer.sender_id)
-      const recipient = (profiles ?? []).find((profile: any) => profile.id === transfer.recipient_id)
+      const sender = (profiles ?? []).find((p) => p.id === transfer.sender_id) as {
+        id: string
+        username?: string
+        full_name?: string
+        total_score?: number
+        email?: string
+        espeezy_email?: string
+      } | undefined
+      const recipient = (profiles ?? []).find((p) => p.id === transfer.recipient_id) as {
+        id: string
+        username?: string
+        full_name?: string
+        total_score?: number
+        email?: string
+        espeezy_email?: string
+      } | undefined
 
       if (sender && recipient) {
         const impactScore = 15

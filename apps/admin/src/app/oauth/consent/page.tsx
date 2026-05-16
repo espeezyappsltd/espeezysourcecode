@@ -29,11 +29,11 @@ function ConsentContent() {
   const router = useRouter()
   const db = useMemo(() => createBrowserSupabaseClient(), [])
 
-  const clientId     = searchParams.get('client_id') ?? ''
-  const redirectUri  = searchParams.get('redirect_uri') ?? ''
-  const scopeParam   = searchParams.get('scope') ?? ''
-  const state        = searchParams.get('state') ?? ''
-  const responseType = searchParams.get('response_type') ?? ''
+  const clientId     = searchParams?.get('client_id') ?? ''
+  const redirectUri  = searchParams?.get('redirect_uri') ?? ''
+  const scopeParam   = searchParams?.get('scope') ?? ''
+  const state        = searchParams?.get('state') ?? ''
+  const responseType = searchParams?.get('response_type') ?? ''
 
   const [user, setUser]           = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -62,7 +62,7 @@ function ConsentContent() {
   // Redirect unauthenticated users to login
   useEffect(() => {
     if (!authLoading && !user && !paramError) {
-      const returnTo = encodeURIComponent(`/oauth/consent?${searchParams.toString()}`)
+      const returnTo = encodeURIComponent(`/oauth/consent?${searchParams?.toString() ?? ''}`)
       router.replace(`/login?redirect=${returnTo}`)
     }
   }, [authLoading, user, paramError, router, searchParams])

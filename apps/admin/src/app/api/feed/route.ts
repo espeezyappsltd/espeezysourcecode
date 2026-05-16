@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
+import { getErrorMessage } from '@/utils/errors'
 export const dynamic = 'force-dynamic'
 
 
@@ -72,9 +73,9 @@ export async function GET(req: NextRequest) {
       posts,
       nextCursor: posts.length === PAGE_SIZE ? posts[posts.length - 1].created_at : null,
     })
-  } catch (err: any) {
-    console.error('Feed Fetch Error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    console.error('Feed Fetch Error:', getErrorMessage(err))
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
   }
 }
 
@@ -134,8 +135,8 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ post }, { status: 201 })
-  } catch (err: any) {
-    console.error('Post creation error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    console.error('Post creation error:', getErrorMessage(err))
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
   }
 }

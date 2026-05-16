@@ -133,7 +133,7 @@ export default function AdminDashboardHeader({ onRefresh, isRefreshing }: Props)
           role="status"
           aria-label="Service health indicators"
         >
-          <StatusDot label="FIREBASE_NODE: OK" />
+          <StatusDot label="SUPABASE_NODE: OK" />
           <StatusDot label="STRIPE_PIPELINE: OK" />
         </div>
 

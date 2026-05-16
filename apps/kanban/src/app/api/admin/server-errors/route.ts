@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 import { Profile } from '@/types/auth'
@@ -29,7 +30,7 @@ export async function GET() {
   try {
     const { data, error: dbErr } = await db
       .from('server_error_log')
-      .select('*')
+      .select(Q.serverError)
       .order('created_at', { ascending: false })
       .limit(100)
 

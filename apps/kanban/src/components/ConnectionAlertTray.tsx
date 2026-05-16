@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNotifications } from './NotificationProvider'
 import { UserPlus, X, Check, RefreshCw } from 'lucide-react'
-import { db, auth, collection, query, where, getDocs, updateDoc, deleteDoc, doc, onSnapshot, addDoc, writeBatch, selectCols } from '@/lib/db-client'
+import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types/database'
 
 type ConnectionRequest = {
@@ -15,95 +14,96 @@ type ConnectionRequest = {
   profiles: Profile | null
 }
 
-
 export default function ConnectionAlertTray() {
+  const db = useRef(createClient()).current
   const [requests, setRequests] = useState<ConnectionRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const { addToast } = useNotifications()
 
-  const fetchRequests = async () => {
-    const user = auth.currentUser
+  const fetchRequests = useCallback(async () => {
+    const { data: { user } } = await db.auth.getUser()
     if (!user) return
     try {
-      const q = query(
-        collection(db, 'user_connections'),
-        where('target_id', '==', user.id),
-        where('status', '==', 'pending')
-      )
-      const snap = await getDocs(q)
-      const data = await Promise.all(snap.docs.map(async (d) => {
-        const conn = d.data() as Omit<ConnectionRequest, 'id' | 'profiles'>
-        if (!conn.user_id) return null
+      const { data, error } = await db
+        .from('user_connections')
+        .select(`
+          *,
+          profiles:user_id (*)
+        `)
+        .eq('target_id', user.id)
+        .eq('status', 'pending')
 
-        const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', conn.user_id), selectCols('id, full_name, avatar_url')))
-        return {
-          id: d.id,
-          ...conn,
-          profiles: pSnap.empty ? null : pSnap.docs[0].data() as Profile
-        }
-      }))
-      setRequests(data.filter(Boolean) as ConnectionRequest[])
+      if (error) throw error
+      setRequests(data as unknown as ConnectionRequest[])
     } catch (err) {
       console.error('Error fetching connection requests:', err instanceof Error ? err.message : err)
     } finally {
       setLoading(false)
     }
-  }
+  }, [db])
 
   useEffect(() => {
-    queueMicrotask(() => {
-      void fetchRequests()
-    })
-    const user = auth.currentUser
-    if (!user) return
-    const q = query(
-      collection(db, 'user_connections'),
-      where('target_id', '==', user.id)
-    )
-    const unsubscribe = onSnapshot(q, () => {
-      fetchRequests()
-    })
-    return () => unsubscribe()
-  }, [])
+    fetchRequests()
+
+    const setupSubscription = async () => {
+      const { data: { user } } = await db.auth.getUser()
+      if (!user) return
+
+      const channel = db
+        .channel('connection_requests')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_connections',
+            filter: `target_id=eq.${user.id}`,
+          },
+          () => {
+            fetchRequests()
+          },
+        )
+        .subscribe()
+
+      return () => {
+        db.removeChannel(channel)
+      }
+    }
+
+    setupSubscription()
+  }, [db, fetchRequests])
 
   const handleAction = async (requestId: string, senderId: string, action: 'accept' | 'ignore') => {
     setProcessingId(requestId)
     try {
-      const user = auth.currentUser
+      const { data: { user } } = await db.auth.getUser()
       if (!user) return
+
       if (action === 'accept') {
-        await updateDoc(doc(db, 'user_connections', requestId), { status: 'connected' })
-        await addDoc(collection(db, 'notifications'), {
+        await db.from('user_connections').update({ status: 'connected' }).eq('id', requestId)
+        await db.from('notifications').insert({
           user_id: senderId,
           type: 'connection_accepted',
           title: 'Connection Established',
           message: 'Your connection request was accepted.',
-          link: `/dashboard/network/profile/${user.id}`,
-          created_at: new Date().toISOString()
+          link: `/network/profile/${user.id}`,
+          created_at: new Date().toISOString(),
         })
         addToast('Connected!', 'You are now connected with a new specialist.', 'success')
       } else {
-        await deleteDoc(doc(db, 'user_connections', requestId))
+        await db.from('user_connections').delete().eq('id', requestId)
         addToast('Request Ignored', 'The connection request has been removed.', 'info')
       }
-      const qNotif = query(
-        collection(db, 'notifications'),
-        where('user_id', '==', user.id),
-        where('type', '==', 'connection_request')
-      )
-      const notifSnap = await getDocs(qNotif)
-      if (!notifSnap.empty) {
-        const batch = writeBatch(db)
-        notifSnap.docs.forEach((d) => {
-          const data = d.data() as { metadata?: { sender_id?: string } };
-          if (data.metadata?.sender_id === senderId) {
-            batch.update(d.ref, { read: true });
-          }
-        });
-        await batch.commit()
-      }
-      await fetchRequests()
+
+      await db
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('type', 'connection_request')
+        .match({ 'metadata->sender_id': senderId })
+
+      fetchRequests()
     } catch (err) {
       addToast('Sync Error', err instanceof Error ? err.message : String(err), 'error')
     } finally {
@@ -119,12 +119,12 @@ export default function ConnectionAlertTray() {
     <>
       <div className="connection-tray-container" style={{ margin: '0 0 var(--gap-md) 0', animation: 'slideInDown 0.4s cubic-bezier(0.23, 1, 0.32, 1)' }}>
         {requests.map((req) => (
-          <div 
-            key={req.id} 
-            style={{ 
-              background: 'rgba(var(--brand-rgb), 0.05)', 
-              border: '1px solid var(--brand)', 
-              borderRadius: '16px', 
+          <div
+            key={req.id}
+            style={{
+              background: 'rgba(var(--brand-rgb), 0.05)',
+              border: '1px solid var(--brand)',
+              borderRadius: '16px',
               padding: '0.75rem 1.25rem',
               display: 'flex',
               alignItems: 'center',
@@ -132,7 +132,7 @@ export default function ConnectionAlertTray() {
               gap: '1rem',
               flexWrap: 'wrap',
               boxShadow: '0 4px 15px rgba(var(--brand-rgb), 0.1)',
-              marginBottom: requests.length > 1 ? '0.5rem' : 0
+              marginBottom: requests.length > 1 ? '0.5rem' : 0,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
@@ -152,10 +152,10 @@ export default function ConnectionAlertTray() {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 disabled={processingId === req.id}
-                style={{ 
-                  padding: '0.5rem 1.25rem', 
-                  borderRadius: '10px', 
-                  background: 'var(--brand)', 
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  borderRadius: '10px',
+                  background: 'var(--brand)',
                   color: 'white',
                   border: 'none',
                   fontSize: '0.75rem',
@@ -164,7 +164,7 @@ export default function ConnectionAlertTray() {
                   boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.2)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.4rem'
+                  gap: '0.4rem',
                 }}
                 onClick={() => handleAction(req.id, req.user_id, 'accept')}
               >
@@ -173,10 +173,10 @@ export default function ConnectionAlertTray() {
               </button>
               <button
                 disabled={processingId === req.id}
-                style={{ 
-                  padding: '0.5rem 1.25rem', 
-                  borderRadius: '10px', 
-                  background: 'var(--danger)', 
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  borderRadius: '10px',
+                  background: 'var(--danger)',
                   color: 'white',
                   border: 'none',
                   fontSize: '0.75rem',
@@ -185,7 +185,7 @@ export default function ConnectionAlertTray() {
                   boxShadow: '0 4px 10px rgba(var(--danger-rgb), 0.2)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.4rem'
+                  gap: '0.4rem',
                 }}
                 onClick={() => handleAction(req.id, req.user_id, 'ignore')}
               >

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 import { Profile } from '@/types/auth'
@@ -27,14 +28,14 @@ export async function GET() {
   try {
     const { data: agentsList, error: agentsError } = await db
       .from('agents')
-      .select('*')
+      .select(Q.agents.list)
       .order('specialisation', { ascending: true })
     if (agentsError) {
       throw agentsError
     }
     
     // Resolve "pair" information manually
-    const agents = (agentsList ?? []).map((agent: Agent) => {
+    const agents = (agentsList ?? []).map((agent) => {
       if (agent.pair_id) {
         const pair = (agentsList ?? []).find((a) => a.id === agent.pair_id)
         if (pair) {
@@ -46,10 +47,11 @@ export async function GET() {
 
     const { data: tasks, error: tasksError } = await db
       .from('agent_tasks')
-      .select('*')
+      .select(Q.agents.task)
       .neq('status', 'done')
       .order('status', { ascending: true })
       .order('created_at', { ascending: false })
+      .limit(100)
 
     if (tasksError) {
       throw tasksError
@@ -87,7 +89,7 @@ export async function POST(req: Request) {
     const { data: saved, error } = await db
       .from('agents')
       .insert(agentData)
-      .select('*')
+      .select(Q.agents.list)
       .single()
 
     if (error || !saved) {

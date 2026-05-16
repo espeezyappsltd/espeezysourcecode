@@ -22,7 +22,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const { id } = await params
   const { ok, data, status } = await supaRest(
-    `user_profiles?id=eq.${encodeURIComponent(id)}&select=*`,
+    `user_profiles?id=eq.${encodeURIComponent(id)}&select=id,supabase_user_id,firebase_uid,email,username,display_name,avatar_url,app_role,is_banned,created_at,updated_at`,
     'GET',
   )
 

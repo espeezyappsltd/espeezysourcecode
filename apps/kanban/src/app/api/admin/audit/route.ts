@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { Q } from '@/lib/query-columns'
 import { requireAdmin, isAuthError } from '@/utils/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -31,7 +32,7 @@ export async function GET(req: Request) {
 
   let query = ctx.svc
     .from('audit_logs')
-    .select('*', { count: 'exact' })
+    .select(Q.auditLog, { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (action)        query = query.ilike('action', `%${action}%`)

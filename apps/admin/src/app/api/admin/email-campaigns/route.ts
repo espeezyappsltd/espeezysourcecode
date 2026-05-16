@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 import { sendEmail } from '@/services/email'
 import { z } from 'zod'
+import { getErrorMessage } from '@/utils/errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +20,7 @@ async function requireAdmin() {
   if (!profile) {
     return { user: null, error: NextResponse.json({ error: 'Failed to verify permissions' }, { status: 500 }) }
   }
-  if ((profile as any).role !== 'admin') {
+  if (profile.role !== 'admin') {
     return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
   return { user, error: null }
@@ -34,7 +36,7 @@ export async function GET() {
   try {
     const { data, error: dbErr } = await db
       .from('marketing_campaigns')
-      .select('*')
+      .select(Q.marketingCampaign)
       .order('created_at', { ascending: false })
       .limit(50)
 
@@ -43,8 +45,8 @@ export async function GET() {
     }
 
     return NextResponse.json({ campaigns: data ?? [] })
-  } catch (dbErr: any) {
-    return NextResponse.json({ error: dbErr.message }, { status: 500 })
+  } catch (dbErr: unknown) {
+    return NextResponse.json({ error: getErrorMessage(dbErr) }, { status: 500 })
   }
 }
 
@@ -104,8 +106,8 @@ export async function POST(req: Request) {
     }
 
     campaignId = campaign.id
-  } catch (insertErr: any) {
-    return NextResponse.json({ error: insertErr.message ?? 'Insert failed' }, { status: 500 })
+  } catch (insertErr: unknown) {
+    return NextResponse.json({ error: getErrorMessage(insertErr, 'Insert failed') }, { status: 500 })
   }
 
   // 2. Fetch all opted-in users
@@ -123,9 +125,9 @@ export async function POST(req: Request) {
     list = (recipients ?? [])
       .map((recipient) => ({ id: recipient.id, email: recipient.email, full_name: recipient.full_name }))
       .filter(r => !!r.email)
-  } catch (recipientsErr: any) {
+  } catch (recipientsErr: unknown) {
     await db.from('marketing_campaigns').update({ status: 'failed' }).eq('id', campaignId)
-    return NextResponse.json({ error: recipientsErr.message ?? 'Failed to fetch recipients' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(recipientsErr, 'Failed to fetch recipients') }, { status: 500 })
   }
 
   let sentCount = 0
@@ -177,7 +179,7 @@ export async function POST(req: Request) {
         if (notifErr) {
           throw notifErr
         }
-      } catch (notifErr: any) {
+      } catch (notifErr: unknown) {
         await db.from('marketing_campaigns').update({
           status: 'sent',
           sent_count: sentCount,
@@ -185,7 +187,7 @@ export async function POST(req: Request) {
         }).eq('id', campaignId)
         return NextResponse.json({
           error: 'Emails sent but notifications failed',
-          details: notifErr.message,
+          details: getErrorMessage(notifErr),
           campaign_id: campaignId,
           sent_count: sentCount,
           total_recipients: list.length,
@@ -209,10 +211,10 @@ export async function POST(req: Request) {
     if (finalUpdateErr) {
       throw finalUpdateErr
     }
-  } catch (finalUpdateErr: any) {
+  } catch (finalUpdateErr: unknown) {
     return NextResponse.json({
       error: 'Failed to update campaign status',
-      details: finalUpdateErr.message,
+      details: getErrorMessage(finalUpdateErr),
       campaign_id: campaignId,
       sent_count: sentCount,
       total_recipients: list.length,

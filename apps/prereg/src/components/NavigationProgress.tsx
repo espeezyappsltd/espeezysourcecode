@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useCentralLoading } from 'apps/shared/CentralLoadingProvider'
+import { useCentralLoading } from '@shared/CentralLoadingProvider'
 import { usePathname } from 'next/navigation'
 
 export default function NavigationProgress() {

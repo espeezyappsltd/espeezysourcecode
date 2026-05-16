@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
-    import { CategoryTabs } from 'apps/shared/CategoryTabs'
+    import { CategoryTabs } from '@shared/CategoryTabs'
 
 const SCREENSHOTS = [
   { src: SCREENSHOT_ASSETS.CONTRIBUTION_METRICS, title: 'Contribution Metrics', category: 'Analytics' },

@@ -36,3 +36,6 @@ export const useLoading = () => {
   if (!context) throw new Error('useLoading must be used within a CentralLoadingProvider');
   return context;
 };
+
+/** @deprecated Use `useLoading` */
+export const useCentralLoading = useLoading;

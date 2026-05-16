@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import type Stripe from 'stripe'
+import Stripe from 'stripe'
 import { getAppUrl, getStripeClient, getStripeFundProductId } from '@/utils/stripe'
 
 export const dynamic = 'force-dynamic'
@@ -103,8 +103,19 @@ export async function POST(req: Request) {
     const knownPriceId = GBP_PRICE_MAP[amountCents]
     const stripeProductId = getStripeFundProductId(featureTag || 'general')
 
-    // TODO: Update this to use the correct Stripe type for your version, or use 'any' as a temporary fix
-    const lineItem: any = knownPriceId
+    type DonateLineItem =
+      | { price: string; quantity: number }
+      | {
+          price_data: {
+            currency: string
+            unit_amount: number
+            product?: string
+            product_data?: { name: string; description?: string; images?: string[] }
+          }
+          quantity: number
+        }
+
+    const lineItem: DonateLineItem = knownPriceId
       ? { price: knownPriceId, quantity: 1 }
       : {
           price_data: stripeProductId

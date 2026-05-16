@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
+import type { LaunchConfigKey, LaunchConfigMap } from '@/types/launch'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const db = getAdminDb()
 
-  const keys = ['launch_date', 'launch_message', 'preregister_goal', 'preregister_open', 'brand_name']
-  const config: Record<string, any> = {}
+  const keys: LaunchConfigKey[] = ['launch_date', 'launch_message', 'preregister_goal', 'preregister_open', 'brand_name']
+  const config: LaunchConfigMap = {}
 
   try {
     const { data, error } = await db
@@ -21,7 +22,9 @@ export async function GET() {
     }
 
     for (const row of data ?? []) {
-      config[row.key] = row.value
+      if (keys.includes(row.key as LaunchConfigKey)) {
+        config[row.key as LaunchConfigKey] = row.value
+      }
     }
 
     return NextResponse.json({ config })
@@ -38,7 +41,7 @@ export async function PUT(req: Request) {
   }
 
   const profile = await getUserProfile(user.uid)
-  if (!profile || (profile as any).role !== 'admin') {
+  if (!profile || profile.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -15,10 +15,29 @@ export async function GET(req: Request) {
     const adminDb = getAdminDb()
     const uid = user.id
 
+    const EXPORT_TASK_LIMIT = 250
+    const EXPORT_ARTIFACT_LIMIT = 250
+
     const [profileResult, tasksResult, artifactsResult] = await Promise.all([
-      adminDb.from('profiles').select('*').eq('id', uid).single(),
-      adminDb.from('tasks').select('*').contains('assignees', [uid]),
-      adminDb.from('artifacts').select('*').eq('uploaded_by', uid),
+      adminDb
+        .from('profiles')
+        .select(
+          'id, full_name, email, username, avatar_url, role, subscription_plan, tier, created_at, updated_at',
+        )
+        .eq('id', uid)
+        .single(),
+      adminDb
+        .from('tasks')
+        .select('id, title, status, group_id, assignees, created_at, updated_at, due_date')
+        .contains('assignees', [uid])
+        .order('updated_at', { ascending: false })
+        .limit(EXPORT_TASK_LIMIT),
+      adminDb
+        .from('artifacts')
+        .select('id, file_url, task_id, uploaded_by, endorsements_count, created_at')
+        .eq('uploaded_by', uid)
+        .order('created_at', { ascending: false })
+        .limit(EXPORT_ARTIFACT_LIMIT),
     ])
 
     if (profileResult.error) {

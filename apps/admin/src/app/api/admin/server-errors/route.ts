@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
+import { getErrorMessage } from '@/utils/errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +14,7 @@ async function requireAdmin() {
   if (!profile) {
     return { user: null, error: NextResponse.json({ error: 'Failed to verify permissions' }, { status: 500 }) }
   }
-  if ((profile as any).role !== 'admin') {
+  if (profile.role !== 'admin') {
     return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
   return { user, error: null }
@@ -28,7 +30,7 @@ export async function GET() {
   try {
     const { data, error: dbErr } = await db
       .from('server_error_log')
-      .select('*')
+      .select(Q.serverError)
       .order('created_at', { ascending: false })
       .limit(100)
 
@@ -37,7 +39,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ errors: data ?? [] })
-  } catch (dbErr: any) {
-    return NextResponse.json({ error: dbErr.message }, { status: 500 })
+  } catch (dbErr: unknown) {
+    return NextResponse.json({ error: getErrorMessage(dbErr) }, { status: 500 })
   }
 }

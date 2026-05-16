@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 // import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { sendP2PTransactionEmail } from '@/services/email'
@@ -207,7 +208,7 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
     if (!adminDb) return
     const { data: transfer, error: transferError } = await adminDb
       .from('p2p_transfers')
-      .select('*')
+      .select(Q.p2pTransfer)
       .eq('id', transferId)
       .single()
     if (transferError || !transfer) return
@@ -221,7 +222,7 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
 
       const { data: profiles } = await adminDb
         .from('profiles')
-        .select('*')
+        .select(Q.profile.webhook)
         .in('id', [transfer.sender_id, transfer.recipient_id])
 
       const sender = (profiles ?? []).find((p) => p.id === transfer.sender_id) as { id: string; username?: string; full_name?: string; total_score?: number; email?: string; espeezy_email?: string } | undefined

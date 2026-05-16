@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { createCheckoutSession } from '@/services/stripe'
 export const dynamic = 'force-dynamic'
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
   // 1. Fetch listing details
   const { data: listing, error: listErr } = await db
     .from('marketplace_listings')
-    .select('*')
+    .select(Q.marketplace.listing)
     .eq('id', listingId)
     .single()
 

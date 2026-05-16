@@ -134,7 +134,7 @@ async function getRegistrationCount() {
   if (!cfg) return null
   if (cfg.issue) return null
 
-  const res = await fetch(`${cfg.url}/rest/v1/pre_registrations?select=*&limit=0`, {
+  const res = await fetch(`${cfg.url}/rest/v1/pre_registrations?select=id&limit=0`, {
     method: 'GET',
     headers: {
       apikey: cfg.key,

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { Q } from '@/lib/query-columns'
 import { requireAdmin, isAuthError, writeAuditLog } from '@/utils/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -11,7 +12,7 @@ export async function GET() {
 
   const { data, error } = await ctx.svc
     .from('platform_config')
-    .select('*')
+    .select(Q.platformConfig)
     .order('key')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

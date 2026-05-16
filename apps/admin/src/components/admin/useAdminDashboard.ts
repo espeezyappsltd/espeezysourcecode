@@ -16,6 +16,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Q } from '@/lib/query-columns'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
 import type {
@@ -124,8 +125,8 @@ export function useAdminDashboard() {
         db.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'pro'),
         db.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'premium'),
         db.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'lifetime'),
-        db.from('profiles').select('*').order('created_at', { ascending: false }).limit(8),
-        db.from('platform_config').select('*')
+        db.from('profiles').select(Q.profile.recentAdmin).order('created_at', { ascending: false }).limit(8),
+        db.from('platform_config').select(Q.platformConfig)
       ])
 
       const totalUsers = totalUsersCount.count || 0
@@ -162,7 +163,7 @@ export function useAdminDashboard() {
         cac,
         nrr,
       })
-      setRecentUsers((recentRes.data || []).map(d => ({ id: d.id, ...d } as unknown as RecentUser)))
+      setRecentUsers((recentRes.data || []).map((d) => d as unknown as RecentUser))
       setConfig(configMap)
     } catch (err) {
       console.error('Fetch admin data error:', err instanceof Error ? err.message : err)

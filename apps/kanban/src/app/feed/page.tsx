@@ -9,7 +9,7 @@ import {
   Globe, Users, Lock, MoreHorizontal, Trash2, Pencil, Sparkles
 } from 'lucide-react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
-import { useProfile } from '../../context/ProfileContext'
+import { useProfile } from '@/context/ProfileContext'
 import type { Profile } from '@/types/database'
 import {
   fetchFeedPosts,

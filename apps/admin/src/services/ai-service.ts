@@ -1,3 +1,5 @@
+import type { z } from 'zod'
+
 /**
  * AIService Abstraction Layer
  * 
@@ -20,7 +22,7 @@ export type AIOptions = {
 export interface IAIProvider {
   generateText(prompt: string, options?: AIOptions): Promise<string>
   generateChat(messages: AIMessage[], options?: AIOptions): Promise<string>
-  extractStructuredData<T>(prompt: string, schema: any): Promise<T>
+  extractStructuredData<T>(prompt: string, schema: z.ZodType<T> | Record<string, unknown>): Promise<T>
 }
 
 // Current Implementation (Gemini/Firebase AI Logic)
@@ -43,7 +45,7 @@ export class GeminiProvider implements IAIProvider {
     return "Gemini Chat Response"
   }
 
-  async extractStructuredData<T>(prompt: string, schema: any): Promise<T> {
+  async extractStructuredData<T>(prompt: string, schema: z.ZodType<T> | Record<string, unknown>): Promise<T> {
     console.log('Extracting structured data with Gemini...', prompt)
     return {} as T
   }
@@ -74,7 +76,7 @@ export class AIService {
     return this.provider.generateChat(messages, options)
   }
 
-  async extract<T>(prompt: string, schema: any): Promise<T> {
+  async extract<T>(prompt: string, schema: z.ZodType<T> | Record<string, unknown>): Promise<T> {
     return this.provider.extractStructuredData<T>(prompt, schema)
   }
 }

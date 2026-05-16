@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     // 1. Fetch listing details
     const { data: listing, error: fetchError } = await adminDb
       .from('marketplace_listings')
-      .select('*')
+      .select(Q.marketplace.listing)
       .eq('id', listing_id)
       .single()
 

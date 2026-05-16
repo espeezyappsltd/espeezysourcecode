@@ -260,7 +260,7 @@ export default function IndustrialGateway() {
         flexDirection: 'column', 
         gap: '0.5rem' 
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Wifi size={12} /> FIREBASE_NODE_{systemStatus.db.toUpperCase()}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Wifi size={12} /> SUPABASE_NODE_{systemStatus.db.toUpperCase()}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Cpu size={12} /> AUTH_CORE_{systemStatus.auth.toUpperCase()}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ShieldAlert size={12} /> IPS_ACTIVE_V4</div>
       </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getRequestUser } from '@/lib/supabase/admin'
+import { getErrorMessage } from '@/utils/errors'
 export const dynamic = 'force-dynamic'
 
 
@@ -62,8 +63,8 @@ Respond ONLY with a JSON object:
     const result = JSON.parse(data?.choices?.[0]?.message?.content)
 
     return new NextResponse(JSON.stringify(result), { status: 200 })
-  } catch (err: any) {
-    console.error('Grading Error:', err.message)
+  } catch (err: unknown) {
+    console.error('Grading Error:', getErrorMessage(err))
     return new NextResponse(JSON.stringify({ error: 'Evaluation failed.' }), { status: 500 })
   }
 }

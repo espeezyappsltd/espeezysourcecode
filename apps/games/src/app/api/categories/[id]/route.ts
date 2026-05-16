@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateCategory, deleteCategory } from '@/services/categories';
+import { getErrorMessage } from '@/utils/errors';
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -7,16 +8,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!name) return NextResponse.json({ error: 'Name required' }, { status: 400 });
     const category = await updateCategory(params.id, name);
     return NextResponse.json(category);
-  } catch (error) {
-    return NextResponse.json({ error: (error as any).message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await deleteCategory(params.id);
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: (error as any).message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

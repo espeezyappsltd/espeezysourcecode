@@ -1,4 +1,5 @@
-import { createBrowserSupabaseClient } from '@/lib/db-client'
+﻿import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { Q } from '@/lib/query-columns'
 import type { Group, Profile, Task } from '@/types/database'
 
 export type JoinRequestWithProfile = {
@@ -28,9 +29,13 @@ export async function getAuthUser() {
 
 export async function fetchProfileById(userId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('*').eq('id', userId).single()
+  const { data, error } = await db
+    .from('profiles')
+    .select('id, full_name, email, username, avatar_url, role, subscription_plan, tier, group_id, total_score, email_notifications, push_notifications, marketing_emails, course_name, enrollment_year, completion_year, created_at, updated_at')
+    .eq('id', userId)
+    .single()
   if (error) throw error
-  return data as Profile
+  return data as unknown as Profile
 }
 
 export async function updateProfileById(userId: string, updates: Record<string, unknown>) {
@@ -41,9 +46,9 @@ export async function updateProfileById(userId: string, updates: Record<string, 
 
 export async function fetchGroupById(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('groups').select('*').eq('id', groupId).single()
+  const { data, error } = await db.from('groups').select(Q.group).eq('id', groupId).single()
   if (error) throw error
-  return data as Group
+  return data as unknown as Group
 }
 
 export async function updateGroupById(groupId: string, updates: Record<string, unknown>) {
@@ -54,27 +59,27 @@ export async function updateGroupById(groupId: string, updates: Record<string, u
 
 export async function fetchGroupsOrderedByName() {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('groups').select('*').order('name', { ascending: true })
+  const { data, error } = await db.from('groups').select(Q.group).order('name', { ascending: true })
   if (error) throw error
-  return (data ?? []) as Group[]
+  return (data ?? []) as unknown as Group[]
 }
 
 export async function fetchGroupMembers(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('*').eq('group_id', groupId)
+  const { data, error } = await db.from('profiles').select(Q.profile.groupMember).eq('group_id', groupId)
   if (error) throw error
-  return (data ?? []) as Profile[]
+  return (data ?? []) as unknown as Profile[]
 }
 
 export async function fetchGroupMembersByScore(groupId: string) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('profiles')
-    .select('*')
+    .select(Q.profile.groupMember)
     .eq('group_id', groupId)
     .order('total_score', { ascending: false })
   if (error) throw error
-  return (data ?? []) as Profile[]
+  return (data ?? []) as unknown as Profile[]
 }
 
 export async function fetchProfilesByIds(ids: string[]) {
@@ -82,21 +87,28 @@ export async function fetchProfilesByIds(ids: string[]) {
   if (safeIds.length === 0) return [] as Profile[]
 
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('*').in('id', safeIds)
+  const { data, error } = await db.from('profiles').select(Q.profile.card).in('id', safeIds)
   if (error) throw error
-  return (data ?? []) as Profile[]
+  return (data ?? []) as unknown as Profile[]
 }
 
 export async function fetchGroupTasks(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('tasks').select('*').eq('group_id', groupId)
+  const { data, error } = await db.from('tasks').select(Q.task).eq('group_id', groupId)
   if (error) throw error
-  return (data ?? []) as Task[]
+  return (data ?? []) as unknown as Task[]
 }
 
 export async function fetchPersonalPendingTaskCount(groupId: string, userId: string) {
-  const tasks = await fetchGroupTasks(groupId)
-  return tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.includes(userId) && task.status !== 'Done').length
+  const db = createBrowserSupabaseClient()
+  const { count, error } = await db
+    .from('tasks')
+    .select('id', { count: 'exact', head: true })
+    .eq('group_id', groupId)
+    .contains('assignees', [userId])
+    .neq('status', 'Done')
+  if (error) throw error
+  return count ?? 0
 }
 
 export async function fetchPendingJoinRequests(groupId: string): Promise<JoinRequestWithProfile[]> {
@@ -138,7 +150,7 @@ export async function fetchPendingJoinRequests(groupId: string): Promise<JoinReq
 
 export async function fetchArtifactsByGroup(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('artifacts').select('*').eq('group_id', groupId)
+  const { data, error } = await db.from('artifacts').select(Q.artifact).eq('group_id', groupId)
   if (error) throw error
   return data ?? []
 }
@@ -147,7 +159,7 @@ export async function fetchArtifactsByUser(userId: string, rowLimit = 3) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('artifacts')
-    .select('*')
+    .select(Q.artifact)
     .eq('uploaded_by', userId)
     .order('created_at', { ascending: false })
     .limit(rowLimit)
@@ -159,7 +171,7 @@ export async function fetchCommitsByUser(userId: string, rowLimit = 3) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('commits')
-    .select('*')
+    .select(Q.commit)
     .eq('author_id', userId)
     .order('created_at', { ascending: false })
     .limit(rowLimit)
@@ -171,9 +183,10 @@ export async function fetchActivityLogByGroup(groupId: string) {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('activity_log')
-    .select('*')
+    .select(Q.activityLog)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
+    .limit(100)
   if (error) throw error
   return data ?? []
 }
@@ -204,7 +217,12 @@ export async function createUserFeedback(userId: string, message: string, catego
 
 export async function fetchMessagesForUser(userId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('messages').select('*').eq('user_id', userId)
+  const { data, error } = await db
+    .from('messages')
+    .select(Q.message)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(100)
   if (error) throw error
   return data ?? []
 }
@@ -213,8 +231,8 @@ export async function fetchConnectionRecords(userA: string, userB: string) {
   const db = createBrowserSupabaseClient()
 
   const [first, second] = await Promise.all([
-    db.from('user_connections').select('*').eq('user_id', userA).eq('target_id', userB),
-    db.from('user_connections').select('*').eq('user_id', userB).eq('target_id', userA),
+    db.from('user_connections').select(Q.userConnection).eq('user_id', userA).eq('target_id', userB),
+    db.from('user_connections').select(Q.userConnection).eq('user_id', userB).eq('target_id', userA),
   ])
 
   if (first.error) throw first.error
@@ -283,7 +301,7 @@ export async function setConnectionAccepted(userA: string, userB: string) {
 
 export async function fetchUserGameStats(userId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('user_game_stats').select('*').eq('user_id', userId).single()
+  const { data, error } = await db.from('user_game_stats').select(Q.userGameStats).eq('user_id', userId).single()
   if (error) return null
   return data
 }

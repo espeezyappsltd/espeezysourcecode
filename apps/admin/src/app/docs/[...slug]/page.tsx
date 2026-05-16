@@ -93,7 +93,7 @@ const docsContent: Record<string, { title: string, icon: React.ReactNode, conten
 
 export default function DynamicDocPage() {
   const params = useParams()
-  const slug = (params.slug as string[]).join('/')
+  const slug = ((params?.slug as string[] | undefined) ?? []).join('/')
   const item = docsContent[slug]
 
   if (!item) {

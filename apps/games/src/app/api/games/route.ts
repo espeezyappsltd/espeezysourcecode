@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addGame, getCategoriesWithGames } from '@/services/categories';
+import type { Category } from '@/types/games';
+import type { GameWithCategory } from '@/types/api';
+import { getErrorMessage } from '@/utils/errors';
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,18 +10,23 @@ export async function POST(req: NextRequest) {
     if (!categoryId || !name || !url) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     const game = await addGame(categoryId, name, url);
     return NextResponse.json(game);
-  } catch (error) {
-    return NextResponse.json({ error: (error as any).message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
-// Optionally, GET all games (flattened) if needed
 export async function GET() {
   try {
     const categories = await getCategoriesWithGames();
-    const games = categories.flatMap((cat: any) => (cat.games || []).map((g: any) => ({ ...g, category: cat.name, categoryId: cat.id })));
+    const games = categories.flatMap((cat: Category) =>
+      (cat.games ?? []).map((g) => ({
+        ...g,
+        category: cat.name,
+        categoryId: cat.id,
+      } satisfies GameWithCategory)),
+    );
     return NextResponse.json(games);
-  } catch (error) {
-    return NextResponse.json({ error: (error as any).message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

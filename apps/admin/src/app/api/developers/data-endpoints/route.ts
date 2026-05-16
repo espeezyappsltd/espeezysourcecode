@@ -4,23 +4,27 @@ import { DATA_API_DATASETS } from '@/config/dataApiCatalog'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'espeezylearning'
-  
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL ||
+    ''
+
   return NextResponse.json({
-    platform: 'Firebase',
-    service: 'Data Connect',
+    platform: 'Supabase',
+    service: 'PostgREST',
+    projectUrl: supabaseUrl,
     generatedAt: new Date().toISOString(),
     endpoints: DATA_API_DATASETS.map((dataset) => ({
       ...dataset,
-      protocol: 'GraphQL',
-      hint: `Use Firebase Data Connect SDK to query the ${dataset.table} collection.`
+      protocol: 'REST',
+      hint: `Query the public.${dataset.table} table via Supabase client or REST.`,
     })),
     usage: {
       client: {
-        method: 'Firebase SDK',
-        auth: 'Firebase Auth (Identity Platform)',
+        method: '@supabase/supabase-js',
+        auth: 'Supabase Auth (JWT)',
       },
-      note: 'The legacy Supabase REST API has been decommissioned. Please migrate to the Firebase Data Connect GraphQL interface.',
+      note: 'Use the Supabase anon key for client reads and the service role key only on trusted servers.',
     },
   })
 }

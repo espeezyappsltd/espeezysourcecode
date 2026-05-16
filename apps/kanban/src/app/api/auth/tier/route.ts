@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import { getAdminDb } from '@/lib/supabase/admin'
 import { canAccessFeature, FEATURE_TIERS } from '@/lib/tier-utils'
 import type { JwtPayload } from '@/types/jwt'
+import { CACHE_HEADERS, getCached } from '@/utils/server-cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +21,6 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const feature = searchParams.get('feature') as keyof typeof FEATURE_TIERS | null
 
-  // Get auth token from Authorization header
   const authHeader = req.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -28,64 +29,48 @@ export async function GET(req: Request) {
   const token = authHeader.slice(7)
   const payload = decodeJwt(token)
 
-  if (!payload || !payload.sub) {
+  if (!payload?.sub) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
   }
 
   const userId = payload.sub
   const userEmail = payload.email
 
-  // Get Supabase config
-  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.PROJECT_URL ?? '').trim()
-  const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SECRET_KEY ?? '').trim()
+  const tier = await getCached(`auth:tier:${userId}`, 30_000, async () => {
+    const adminDb = getAdminDb()
+    const { data } = await adminDb
+      .from('profiles')
+      .select('tier, subscription_plan')
+      .eq('id', userId)
+      .maybeSingle()
 
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json({ error: 'Service misconfigured' }, { status: 500 })
-  }
+    return data?.tier ?? data?.subscription_plan ?? 'free'
+  })
 
-  // Get user's tier from profiles table
-  const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=tier`, {
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-    },
-  }).catch(() => null)
-
-  let tier = 'free'
-  if (profileRes?.ok) {
-    const profiles = await profileRes.json().catch(() => [])
-    if (Array.isArray(profiles) && profiles.length > 0) {
-      tier = profiles[0].tier ?? 'free'
-    }
-  }
-
-  // If no feature requested, return tier info
   if (!feature) {
-    return NextResponse.json({
-      user_id: userId,
-      email: userEmail,
-      tier,
-    })
+    return NextResponse.json(
+      { user_id: userId, email: userEmail, tier },
+      { headers: CACHE_HEADERS.private },
+    )
   }
 
-  // Check if feature exists
   if (!(feature in FEATURE_TIERS)) {
-    return NextResponse.json(
-      { error: `Unknown feature: ${feature}` },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: `Unknown feature: ${feature}` }, { status: 400 })
   }
 
   const requiredTier = FEATURE_TIERS[feature]
   const hasAccess = canAccessFeature(tier, requiredTier)
 
-  return NextResponse.json({
-    user_id: userId,
-    email: userEmail,
-    tier,
-    feature,
-    required_tier: requiredTier,
-    has_access: hasAccess,
-    ...(hasAccess ? {} : { error: `Requires ${requiredTier} subscription` }),
-  }, { status: hasAccess ? 200 : 403 })
+  return NextResponse.json(
+    {
+      user_id: userId,
+      email: userEmail,
+      tier,
+      feature,
+      required_tier: requiredTier,
+      has_access: hasAccess,
+      ...(hasAccess ? {} : { error: `Requires ${requiredTier} subscription` }),
+    },
+    { status: hasAccess ? 200 : 403, headers: CACHE_HEADERS.private },
+  )
 }

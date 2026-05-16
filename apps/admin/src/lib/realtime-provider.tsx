@@ -147,7 +147,7 @@ export function useSyncedObject<T>(table: string, id: string, initialValue: T) {
   }, [table, id])
 
   const updateObject = useCallback(async (newValue: Partial<T>) => {
-    await db.from(table).update(newValue as any).eq('id', id)
+    await db.from(table).update(newValue as Record<string, unknown>).eq('id', id)
   }, [table, id])
 
   return [value, updateObject] as const
@@ -157,17 +157,26 @@ export function useSyncedObject<T>(table: string, id: string, initialValue: T) {
  * useSyncedList
  * Syncs a list of items from a Supabase table.
  */
-export function useSyncedList<T>(table: string, filterField?: string, filterValue?: any) {
+export function useSyncedList<T extends Record<string, unknown>>(
+  table: string,
+  filterField?: string,
+  filterValue?: string | number | boolean,
+) {
   const [list, setList] = useState<{ id: string; data: T }[]>([])
 
   const fetchList = useCallback(async () => {
     let query = db.from(table).select('*')
-    if (filterField && filterValue) {
+    if (filterField && filterValue !== undefined) {
       query = query.eq(filterField, filterValue)
     }
     const { data } = await query.order('created_at', { ascending: true })
     if (data) {
-      setList(data.map((item: any) => ({ id: item.id, data: item as T })))
+      setList(
+        (data as T[]).map((item, index) => ({
+          id: typeof item.id === 'string' ? item.id : `${table}-${index}`,
+          data: item,
+        })),
+      )
     }
   }, [table, filterField, filterValue])
 
@@ -190,8 +199,8 @@ export function useSyncedList<T>(table: string, filterField?: string, filterValu
     }
   }, [table, filterField, filterValue, fetchList])
 
-  const pushItem = useCallback(async (item: T) => {
-    const { data, error } = await db.from(table).insert(item as any).select().single()
+  const pushItem = useCallback(async (item: Omit<T, 'id'> & Partial<Pick<T, 'id'>>) => {
+    const { data, error } = await db.from(table).insert(item as Record<string, unknown>).select().single()
     if (error) throw error
     return data
   }, [table])

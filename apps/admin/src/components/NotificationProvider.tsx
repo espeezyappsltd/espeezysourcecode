@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { X, Info, CheckCircle2, AlertCircle, Timer } from 'lucide-react'
 import { Notification, NotificationContextType, Toast } from '@/types/ui'
+import { getErrorMessage } from '@/utils/errors'
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
@@ -43,8 +44,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       setNotifications((data ?? []) as Notification[])
       baselineLoadedRef.current = true
-    } catch (err: any) {
-      console.error('Error fetching notifications:', err.message)
+    } catch (err: unknown) {
+      console.error('Error fetching notifications:', getErrorMessage(err))
     }
   }, [db, userId])
 
@@ -161,8 +162,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         .eq('user_id', userId)
 
       if (error) throw error
-    } catch (err: any) {
-      console.error('Persistence error (markAsRead):', err.message)
+    } catch (err: unknown) {
+      console.error('Persistence error (markAsRead):', getErrorMessage(err))
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n))
       addToast('Check connection', 'We couldn\'t update that just now.', 'error')
     }
@@ -182,8 +183,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         .eq('read', false)
 
       if (error) throw error
-    } catch (err: any) {
-      console.error('Persistence error (markAllAsRead):', err.message)
+    } catch (err: unknown) {
+      console.error('Persistence error (markAllAsRead):', getErrorMessage(err))
       setNotifications(original)
       addToast('Check connection', 'We couldn\'t clear your notifications.', 'error')
     }

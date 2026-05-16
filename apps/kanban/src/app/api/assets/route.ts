@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
     const adminDb = getAdminDb()
     let query = adminDb
       .from('personal_assets')
-      .select('*')
+      .select(Q.personalAsset)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit + 1)

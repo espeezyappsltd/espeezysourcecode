@@ -9,7 +9,7 @@ export function getKanbanChannel(groupId: string) {
   return supabase.channel(`room:${groupId}:kanban`, { config: { private: true } })
 }
 
-export async function subscribeKanban(groupId: string, onChange: (payload: any) => void) {
+export async function subscribeKanban(groupId: string, onChange: (payload: Record<string, unknown>) => void) {
   await supabase.realtime.setAuth()
   const channel = getKanbanChannel(groupId)
   channel
@@ -20,7 +20,7 @@ export async function subscribeKanban(groupId: string, onChange: (payload: any) 
   return channel
 }
 
-export async function broadcastKanbanChange(groupId: string, event: 'INSERT'|'UPDATE'|'DELETE', payload: any) {
+export async function broadcastKanbanChange(groupId: string, event: 'INSERT'|'UPDATE'|'DELETE', payload: Record<string, unknown>) {
   await supabase.realtime.setAuth()
   const channel = getKanbanChannel(groupId)
   await channel.send({

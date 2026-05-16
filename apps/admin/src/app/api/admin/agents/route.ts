@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
+import type { Agent, AgentPairRef } from '@/types/agents'
+import { getErrorMessage } from '@/utils/errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +11,7 @@ async function requireAdmin() {
   const user = await getAuthUser()
   if (!user) return null
   const profile = await getUserProfile(user.uid)
-  if (!profile || (profile as any).role !== 'admin') return null
+  if (!profile || profile.role !== 'admin') return null
   
   const db = getAdminDb()
   if (!db) return null
@@ -32,11 +35,13 @@ export async function GET() {
     }
     
     // Resolve "pair" information manually
-    const agents = (agentsList ?? []).map((agent: any) => {
+    type AgentListRow = Pick<Agent, 'id' | 'name' | 'status' | 'specialisation' | 'pair_id'>
+    type AgentListItem = AgentListRow & { pair: AgentPairRef | null }
+    const agents: AgentListItem[] = (agentsList ?? []).map((agent: AgentListRow) => {
       if (agent.pair_id) {
-        const pair = (agentsList ?? []).find((a: any) => a.id === agent.pair_id)
+        const pair = (agentsList ?? []).find((a) => a.id === agent.pair_id)
         if (pair) {
-          return { ...agent, pair: { id: (pair as any).id, name: (pair as any).name } }
+          return { ...agent, pair: { id: pair.id, name: pair.name } }
         }
       }
       return { ...agent, pair: null }
@@ -44,10 +49,11 @@ export async function GET() {
 
     const { data: tasks, error: tasksError } = await db
       .from('agent_tasks')
-      .select('id, agent_id, task, status, created_at')
+      .select('id, agent_id, task, status, priority, created_at, updated_at')
       .neq('status', 'done')
       .order('status', { ascending: true })
       .order('created_at', { ascending: false })
+      .limit(100)
 
     if (tasksError) {
       throw tasksError
@@ -85,7 +91,7 @@ export async function POST(req: Request) {
     const { data: saved, error } = await db
       .from('agents')
       .insert(agentData)
-      .select('*')
+      .select('id, name, specialisation, role, status, system_prompt, capabilities, pair_id, created_at')
       .single()
 
     if (error || !saved) {
@@ -93,7 +99,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ agent: saved }, { status: 201 })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }

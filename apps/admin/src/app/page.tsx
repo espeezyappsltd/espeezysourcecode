@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Activity, Users, FolderKanban, MessageSquare, AlertCircle, RefreshCcw, Shield, Database, LayoutDashboard } from 'lucide-react'
+import { Activity, Users, FolderKanban, MessageSquare, RefreshCcw, Shield, Database, LayoutDashboard } from 'lucide-react'
+import type { AdminActivityEvent, AdminPlatformMetrics } from '@/types/admin'
+import { getErrorMessage } from '@/utils/errors'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 // Mock chart data for visual density
@@ -22,8 +24,8 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [needsLogin, setNeedsLogin] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
-  const [metrics, setMetrics] = useState<any>(null)
-  const [activityFeed, setActivityFeed] = useState<any[]>([])
+  const [metrics, setMetrics] = useState<AdminPlatformMetrics | null>(null)
+  const [activityFeed, setActivityFeed] = useState<AdminActivityEvent[]>([])
   const router = useRouter()
   const supabase = createClient()
 
@@ -61,8 +63,8 @@ export default function AdminDashboard() {
 
       setMetrics(data.metrics)
       setActivityFeed(data.recentActivity || [])
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard data')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load dashboard data'))
     } finally {
       setLoading(false)
     }
@@ -96,8 +98,9 @@ export default function AdminDashboard() {
 
           <form onSubmit={async (e) => {
             e.preventDefault();
-            const email = (e.target as any).email.value;
-            const password = (e.target as any).password.value;
+            const form = e.currentTarget;
+            const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+            const password = (form.elements.namedItem('password') as HTMLInputElement).value;
             setLoading(true);
             setLoginError(null);
             const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -203,7 +206,7 @@ export default function AdminDashboard() {
               {activityFeed.length === 0 ? (
                 <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', textAlign: 'center', padding: '2rem 0' }}>No recent activity.</div>
               ) : (
-                activityFeed.map((event: any) => (
+                activityFeed.map((event) => (
                   <div key={event.id} style={{ display: 'flex', gap: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.01)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.03)' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand)', marginTop: '6px', flexShrink: 0 }} />
                     <div>

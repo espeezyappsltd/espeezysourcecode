@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
+import { CACHE_HEADERS, getCached } from '@/utils/server-cache'
 
 export const dynamic = 'force-dynamic'
+
+const METRICS_CACHE_MS = 20_000
 
 const API_ORIGIN = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
 
@@ -56,7 +59,7 @@ async function fetchCount(
 ): Promise<number | null> {
   try {
     const qp = extraQuery ? `&${extraQuery}` : ''
-    const res = await fetch(`${cfg.url}/rest/v1/${tableName}?select=*&limit=0${qp}`, {
+    const res = await fetch(`${cfg.url}/rest/v1/${tableName}?select=id&limit=0${qp}`, {
       method: 'GET',
       headers: {
         apikey: cfg.key,
@@ -204,27 +207,29 @@ async function fetchFromSupabase(): Promise<LiveMetrics | null> {
   const cfg = getSupabaseConfig()
   if (!cfg) return null
 
-  const [preregCount, authUserCount, lifetimeUsed, donationFundMetrics, donationsRpc, donationsTable] = await Promise.all([
+  const [preregCount, lifetimeUsed, donationFundMetrics, donationsRpc] = await Promise.all([
     fetchCount(cfg, 'pre_registrations'),
-    fetchAuthUserCount(cfg),
     fetchCount(cfg, 'profiles', 'subscription_plan=eq.lifetime'),
     fetchDonationFundMetrics(cfg),
     fetchDonationTotals(cfg),
-    fetchDonationTotalsFromTable(cfg),
   ])
 
   if (preregCount === null || lifetimeUsed === null) return null
 
-  const donations = donationFundMetrics
+  let donations = donationFundMetrics
     ? { total_cents: donationFundMetrics.total_cents, count: donationFundMetrics.donation_count }
-    : (donationsRpc ?? donationsTable ?? { total_cents: 0, count: 0 })
-  const authCount = authUserCount ?? 0
+    : (donationsRpc ?? { total_cents: 0, count: 0 })
+
+  if (!donationFundMetrics && !donationsRpc) {
+    const tableFallback = await fetchDonationTotalsFromTable(cfg)
+    donations = tableFallback ?? donations
+  }
 
   return {
     // Registered count displayed on UI should come directly from pre_registrations.
     registered_count: preregCount,
     preregistration_count: preregCount,
-    auth_user_count: authCount,
+    auth_user_count: preregCount,
     donation_total_cents: donations.total_cents,
     donation_count: donations.count,
     donation_supporters_count: donationFundMetrics?.supporters_count ?? donations.count,
@@ -290,24 +295,21 @@ async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
 }
 
 export async function GET(req: Request) {
-  const supabaseMetrics = await fetchFromSupabase()
-  if (supabaseMetrics) {
-    lastKnownMetrics = supabaseMetrics
-    return NextResponse.json(supabaseMetrics, {
-      headers: { 'Cache-Control': 'no-store, max-age=0' },
-    })
-  }
+  const metrics = await getCached('prereg:live-metrics', METRICS_CACHE_MS, async () => {
+    const supabaseMetrics = await fetchFromSupabase()
+    if (supabaseMetrics) {
+      lastKnownMetrics = supabaseMetrics
+      return supabaseMetrics
+    }
 
-  const proxyMetrics = await fetchFromProxy(req)
-  if (proxyMetrics) {
-    lastKnownMetrics = proxyMetrics
-    return NextResponse.json(proxyMetrics, {
-      headers: { 'Cache-Control': 'no-store, max-age=0' },
-    })
-  }
+    const proxyMetrics = await fetchFromProxy(req)
+    if (proxyMetrics) {
+      lastKnownMetrics = proxyMetrics
+      return proxyMetrics
+    }
 
-  return NextResponse.json({ ...lastKnownMetrics, source: 'snapshot' }, {
-    status: 200,
-    headers: { 'Cache-Control': 'no-store, max-age=0' },
+    return { ...lastKnownMetrics, source: 'snapshot' as const }
   })
+
+  return NextResponse.json(metrics, { headers: CACHE_HEADERS.publicShort })
 }

@@ -8,6 +8,7 @@ import { KanbanBoardProps } from '@/types/ui';
 import TaskModal from './TaskModal';
 import TeamChat from './TeamChat';
 import { AlertCircle, RefreshCw, CloudOff } from 'lucide-react';
+import { getErrorMessage } from '@/utils/errors';
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done'];
 
@@ -46,8 +47,8 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
       if (memberError) throw new Error(memberError);
       setTasks(tasks || []);
       setGroupMembers(profiles || []);
-    } catch (e: any) {
-      setError(e.message || 'Failed to load board data.');
+    } catch (e: unknown) {
+      setError(getErrorMessage(e, 'Failed to load board data.'));
     } finally {
       setLoading(false);
     }
@@ -70,8 +71,8 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
       const { task: newTask, error } = await res.json();
       if (error) throw new Error(error);
       setTasks(prev => [...prev, newTask]);
-    } catch (e: any) {
-      setError(e.message || 'Failed to create task.');
+    } catch (e: unknown) {
+      setError(getErrorMessage(e, 'Failed to create task.'));
     } finally {
       setLoading(false);
     }
@@ -89,8 +90,8 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
       const { task: updatedTask, error } = await res.json();
       if (error) throw new Error(error);
       setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
-    } catch (e: any) {
-      setError(e.message || 'Failed to update task.');
+    } catch (e: unknown) {
+      setError(getErrorMessage(e, 'Failed to update task.'));
     } finally {
       setLoading(false);
     }

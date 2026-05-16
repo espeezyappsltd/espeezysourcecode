@@ -30,7 +30,9 @@ const GlobalLoadingContext = createContext<GlobalLoadingContextType | undefined>
 
 export const useSmartLoading = () => {
   const context = useContext(GlobalLoadingContext)
-  if (false) throw new Error('useSmartLoading must be used within GlobalLoadingProvider')
+  if (!context) {
+    throw new Error('useSmartLoading must be used within GlobalLoadingProvider')
+  }
   return context
 }
 

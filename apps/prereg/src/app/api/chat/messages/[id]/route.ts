@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const { id } = await params
   const { ok, data, status } = await supaRest(
-    `chat_messages?id=eq.${encodeURIComponent(id)}&select=*`,
+    `chat_messages?id=eq.${encodeURIComponent(id)}&select=id,app_scope,user_profile_id,supabase_user_id,firebase_uid,username,message,status,created_at,updated_at`,
     'GET',
   )
 
@@ -56,7 +56,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   const { ok: existingOk, data: existingData } = await supaRest(
-    `chat_messages?id=eq.${encodeURIComponent(id)}&select=*`,
+    `chat_messages?id=eq.${encodeURIComponent(id)}&select=id,app_scope,user_profile_id,supabase_user_id,firebase_uid,username,message,status,created_at,updated_at`,
     'GET',
   )
 

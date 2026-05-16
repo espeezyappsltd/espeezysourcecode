@@ -174,7 +174,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                 {members.map(m => {
                   const isSelf = m.id === profile?.id
-                  const lastSeenDate = (m as any).last_seen ? new Date((m as any).last_seen) : null
+                  const lastSeenDate = m.last_seen ? new Date(m.last_seen) : null
                   const isOnline = lastSeenDate && (new Date().getTime() - lastSeenDate.getTime() < 120000)
 
                   return (

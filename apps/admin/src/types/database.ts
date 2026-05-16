@@ -48,6 +48,11 @@ export type Profile = {
   spotify_token_expires_at?: string | null;
   spotify_connected?: boolean;
   is_educator?: boolean | null;
+  last_seen?: string | null;
+  email_notifications?: boolean;
+  push_notifications?: boolean;
+  marketing_emails?: boolean;
+  country_code?: string | null;
 };
 
 export type ActiveUser = {

@@ -7,7 +7,7 @@ import { Suspense } from 'react'
 
 function ThankYouContent() {
   const params = useSearchParams()
-  const sessionId = params.get('session_id')
+  const sessionId = params?.get('session_id')
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center', position: 'relative' }}>

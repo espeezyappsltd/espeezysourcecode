@@ -5,17 +5,12 @@
  *
  * Custom hook that owns ALL state and data-fetching for the Admin Dashboard.
  * No UI code lives here  -  just data, effects, and callbacks.
- *
- * Why a hook?
- *   - Keeps page.tsx and every sub-component free of business logic.
- *   - Makes every action testable in isolation.
- *   - A single place to change the data layer later (e.g. swap direct Supabase
- *     calls for API service calls) without touching any component.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { db, collection, query, where, getDocs, getDoc, doc, updateDoc, onSnapshot, orderBy, limit, getCountFromServer, selectCols } from '@/lib/db-client'
+import { createClient } from '@/lib/supabase/client'
+import { Q } from '@/lib/query-columns'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
 import type {
@@ -26,9 +21,6 @@ import type {
   PlatformConfig,
   ConfigEntry,
 } from './types'
-
-// ── Default values defined outside the hook ────────────────────────────────────
-// Keeps them stable across renders (no new object reference each call).
 
 const DEFAULT_STATS: AdminStats = { users: 0, pro: 0, premium: 0, revenue: 0 }
 
@@ -43,24 +35,21 @@ const DEFAULT_LAUNCH_CONFIG: LaunchConfig = {
 
 const SEED_LOGS: SystemLog[] = [
   { t: '13:42:01', m: 'AUTH_GATEWAY: [200] OK' },
-  { t: '13:42:05', m: 'FIREBASE_SYNC: Institutional Node Established' },
+  { t: '13:42:05', m: 'DATABASE_UPLINK: Supabase Node Established' },
   { t: '13:42:12', m: 'STRIPE_WEBHOOK: Listening on events' },
   { t: '13:42:18', m: 'ELITE30_CHECK: 4 redemptions validated' },
 ]
 
-// ── Hook ───────────────────────────────────────────────────────────────────────
-
 export function useAdminDashboard() {
+  const db = useMemo(() => createClient(), [])
   const { profile, loading: profileLoading } = useProfile()
   const router = useRouter()
   const { addToast } = useNotifications()
 
-  // ── Auth / verification state ──
   const [isVerified, setIsVerified] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
   const [verifying, setVerifying] = useState(false)
 
-  // ── Dashboard data ──
   const [stats, setStats] = useState<AdminStats>(DEFAULT_STATS)
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([])
   const [loading, setLoading] = useState(true)
@@ -68,12 +57,10 @@ export function useAdminDashboard() {
   const [config, setConfig] = useState<PlatformConfig>({})
   const [savingConfig, setSavingConfig] = useState(false)
 
-  // ── Launch config ──
   const [launchConfig, setLaunchConfig] = useState<LaunchConfig>(DEFAULT_LAUNCH_CONFIG)
   const [preregCount, setPreregCount] = useState(0)
   const [savingLaunchConfig, setSavingLaunchConfig] = useState(false)
 
-  // ── Effect: redirect non-admins ────────────────────────────────────────────
   useEffect(() => {
     if (profileLoading) return
     if (!profile || profile.role !== 'admin') {
@@ -86,11 +73,9 @@ export function useAdminDashboard() {
     }
   }, [profile, profileLoading, router, addToast])
 
-  // ── Effect: live terminal log heartbeat ────────────────────────────────────
   useEffect(() => {
     if (!isVerified) return
 
-    // Show seed logs immediately on verification
     queueMicrotask(() => setSystemLogs(SEED_LOGS))
 
     const interval = setInterval(() => {
@@ -98,59 +83,51 @@ export function useAdminDashboard() {
       const nodeId = Math.floor(Math.random() * 100)
       setSystemLogs((prev) => [
         { t: time, m: `UPLINK_EVENT: Heartbeat detected from Node_${nodeId}` },
-        ...prev.slice(0, 7), // keep the last 7 + the new one = 8 visible lines
+        ...prev.slice(0, 7),
       ])
     }, 5000)
 
     return () => clearInterval(interval)
   }, [isVerified])
 
-  // ── fetchAdminData ─────────────────────────────────────────────────────────
-  // All aggregation and list queries run in parallel.
   const fetchAdminData = useCallback(async () => {
     setLoading(true)
 
     try {
       const [
-        totalUsersSnap,
-        proUsersSnap,
-        premiumUsersSnap,
-        lifetimeUsersSnap,
-        recentSnap,
-        configSnap,
+        totalUsersCount,
+        proUsersCount,
+        premiumUsersCount,
+        lifetimeUsersCount,
+        recentRes,
+        configRes,
       ] = await Promise.all([
-        getCountFromServer(collection(db, 'profiles')),
-        getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'pro'))),
-        getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'premium'))),
-        getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'lifetime'))),
-        getDocs(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(8), selectCols('id, full_name, avatar_url, role, created_at'))),
-        getDocs(query(collection(db, 'platform_config')))
+        db.from('profiles').select('*', { count: 'exact', head: true }),
+        db.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'pro'),
+        db.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'premium'),
+        db.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'lifetime'),
+        db.from('profiles').select(Q.profile.recentAdmin).order('created_at', { ascending: false }).limit(8),
+        db.from('platform_config').select(Q.platformConfig),
       ])
 
-      const totalUsers = totalUsersSnap.data().count
-      const proUsers = proUsersSnap.data().count
-      const premiumUsers = premiumUsersSnap.data().count
-      const lifetimeUsers = lifetimeUsersSnap.data().count
+      const totalUsers = totalUsersCount.count || 0
+      const proUsers = proUsersCount.count || 0
+      const premiumUsers = premiumUsersCount.count || 0
+      const lifetimeUsers = lifetimeUsersCount.count || 0
 
-      // Convert the config rows array into a key-indexed map
-      const configMap = configSnap.docs.reduce(
-        (acc: PlatformConfig, doc) => {
-          const item = doc.data() as unknown as { key: string } & ConfigEntry
-          return { ...acc, [item.key]: item }
+      const configMap = (configRes.data || []).reduce<PlatformConfig>(
+        (acc, item) => {
+          return { ...acc, [item.key as string]: item as unknown as ConfigEntry }
         },
         {} as PlatformConfig,
       )
 
-      // --- Metrics Calculation (simple demo logic, replace with real formulas as needed) ---
       const revenue = proUsers * 4.99 + premiumUsers * 14.99 + lifetimeUsers * 99
-      // LTV: (ARPU * Gross Margin %) / Churn Rate (demo: ARPU = revenue/totalUsers, margin=0.8, churn=0.03)
       const arpu = totalUsers > 0 ? revenue / totalUsers : 0
       const grossMargin = 0.8
       const churnRate = 0.03
       const ltv = churnRate > 0 ? Math.round((arpu * grossMargin) / churnRate) : 0
-      // CAC: demo value (replace with real acquisition cost tracking)
       const cac = 25
-      // NRR: demo value (replace with real retention calculation)
       const nrr = 0.92
 
       setStats({
@@ -162,42 +139,42 @@ export function useAdminDashboard() {
         cac,
         nrr,
       })
-      setRecentUsers(recentSnap.docs.map((d) => ({ id: d.id, ...d.data() } as unknown as RecentUser)))
+      setRecentUsers((recentRes.data || []).map((d) => d as unknown as RecentUser))
       setConfig(configMap)
     } catch (err) {
       console.error('Fetch admin data error:', err instanceof Error ? err.message : err)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [db])
 
-  // ── Effect: fetch data + real-time subscriptions once verified ─────────────
   useEffect(() => {
     if (!isVerified) return
 
     queueMicrotask(() => void fetchAdminData())
 
-    // Platform Config listener
-    const configUnsub = onSnapshot(query(collection(db, 'platform_config')), () => {
-      addToast('Platform Real-time Sync', 'Marketing configuration updated.', 'success')
-      fetchAdminData()
-    })
+    const configChannel = db
+      .channel('platform_config_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'platform_config' }, () => {
+        addToast('Platform Real-time Sync', 'Marketing configuration updated.', 'success')
+        fetchAdminData()
+      })
+      .subscribe()
 
-    // New Profile listener
-    const profileUnsub = onSnapshot(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(1)), (snap) => {
-      // Assuming snapshot returns a way to see changes or we just refresh
-      // For this shim, snapshot triggers on any change in the query
-      addToast('Institutional Event', 'User registration detected. Refreshing terminal...', 'success')
-      fetchAdminData()
-    })
+    const profileChannel = db
+      .channel('profile_changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'profiles' }, () => {
+        addToast('Institutional Event', 'User registration detected. Refreshing terminal...', 'success')
+        fetchAdminData()
+      })
+      .subscribe()
 
     return () => {
-      configUnsub()
-      profileUnsub()
+      db.removeChannel(configChannel)
+      db.removeChannel(profileChannel)
     }
-  }, [isVerified, addToast, fetchAdminData])
+  }, [isVerified, addToast, fetchAdminData, db])
 
-  // ── Effect: load launch config and pre-reg count ───────────────────────────
   useEffect(() => {
     if (!isVerified) return
 
@@ -212,16 +189,13 @@ export function useAdminDashboard() {
         if (cfg) setLaunchConfig((prev) => ({ ...prev, ...cfg }))
         setPreregCount(count ?? 0)
       } catch {
-        // Non-critical  -  silently ignore; the form just shows empty defaults
+        // Non-critical
       }
     }
 
     loadLaunchConfig()
   }, [isVerified])
 
-  // ── Actions ────────────────────────────────────────────────────────────────
-
-  /** Saves all launch config fields to the API and shows a toast. */
   const saveLaunchConfig = useCallback(async () => {
     setSavingLaunchConfig(true)
     try {
@@ -242,9 +216,6 @@ export function useAdminDashboard() {
     setSavingLaunchConfig(false)
   }, [launchConfig, addToast])
 
-  /**
-   * Performs a quick user action (ban / upgrade / unlock) from the user list.
-   */
   const handleUserAction = useCallback(
     async (userId: string, action: 'unlock' | 'upgrade' | 'ban') => {
       addToast(
@@ -261,17 +232,17 @@ export function useAdminDashboard() {
             : { role: 'user' }
 
       try {
-        await updateDoc(doc(db, 'profiles', userId), updateData)
+        const { error } = await db.from('profiles').update(updateData).eq('id', userId)
+        if (error) throw error
         addToast('Operation Success', 'Database synchronized.', 'success')
         fetchAdminData()
       } catch (err) {
         addToast('Command Failed', err instanceof Error ? err.message : String(err), 'error')
       }
     },
-    [addToast, fetchAdminData],
+    [addToast, fetchAdminData, db],
   )
 
-  /** Updates a single key in the platform_config table. */
   const updatePlatformConfig = useCallback(
     async (
       key: string,
@@ -279,29 +250,18 @@ export function useAdminDashboard() {
     ) => {
       setSavingConfig(true)
       try {
-        // In Firestore, we use the document ID if the key is the ID, 
-        // or we query for the doc with that key field.
-        // Assuming 'key' is the doc ID for simplicity or querying:
-        const q = query(collection(db, 'platform_config'), where('key', '==', key))
-        const snap = await getDocs(q)
-        if (!snap.empty) {
-          await updateDoc(doc(db, 'platform_config', snap.docs[0].id), updates)
-          addToast('State Persisted', `${key} re-routed successfully.`, 'success')
-          fetchAdminData()
-        }
+        const { error } = await db.from('platform_config').update(updates).eq('key', key)
+        if (error) throw error
+        addToast('State Persisted', `${key} re-routed successfully.`, 'success')
+        fetchAdminData()
       } catch (err) {
         addToast('Sync Error', err instanceof Error ? err.message : String(err), 'error')
       }
       setSavingConfig(false)
     },
-    [addToast, fetchAdminData],
+    [addToast, fetchAdminData, db],
   )
 
-  /**
-   * Verifies the admin clearance code.
-   * The code is intentionally simple  -  the real gate is the server-side
-   * role check in the layout and every API route.
-   */
   const handleVerify = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
@@ -323,26 +283,19 @@ export function useAdminDashboard() {
     [verificationCode, addToast],
   )
 
-  /** Navigates to the theme studio from the UI Orchestrator card. */
   const handleLaunchStudio = useCallback(() => {
     addToast('Orchestrator Initialized', 'Rerouting terminal to design studio...', 'success')
     router.push('/settings?tab=themes')
   }, [addToast, router])
 
-  // ── Return the full public API of this hook ────────────────────────────────
   return {
-    // profile
     profile,
     profileLoading,
-
-    // verification
     isVerified,
     verificationCode,
     setVerificationCode,
     verifying,
     handleVerify,
-
-    // dashboard data
     stats,
     recentUsers,
     loading,
@@ -350,15 +303,11 @@ export function useAdminDashboard() {
     config,
     setConfig,
     savingConfig,
-
-    // launch config
     launchConfig,
     setLaunchConfig,
     preregCount,
     savingLaunchConfig,
     saveLaunchConfig,
-
-    // actions
     fetchAdminData,
     handleUserAction,
     updatePlatformConfig,

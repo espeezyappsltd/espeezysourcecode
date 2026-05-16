@@ -42,7 +42,7 @@ const LEGAL_LINKS = [
   { href: 'https://espeezy.com/fund', label: 'Donate' },
 ]
 
-import { useCentralLoading } from 'apps/shared/CentralLoadingProvider'
+import { useCentralLoading } from './CentralLoadingProvider'
 
 function FooterLink({ href, children, external = false }: { href: string; children: React.ReactNode; external?: boolean }) {
   const { startLoading } = useCentralLoading();

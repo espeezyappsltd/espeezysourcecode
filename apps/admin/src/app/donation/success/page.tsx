@@ -10,7 +10,7 @@ function DonationSuccessContent() {
   const [amount, setAmount] = useState<string | null>(null)
 
   useEffect(() => {
-    const a = searchParams.get('amount')
+    const a = searchParams?.get('amount')
     if (a) setAmount(a)
   }, [searchParams])
 

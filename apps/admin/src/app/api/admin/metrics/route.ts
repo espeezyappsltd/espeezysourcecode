@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Q } from '@/lib/query-columns';
 import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server';
 
 export async function GET() {
@@ -47,12 +48,14 @@ export async function GET() {
   
   const { data: metrics, error: metricsError } = await adminSupabase
     .from('admin_platform_metrics')
-    .select('*')
+    .select(Q.adminMetrics)
     .single();
 
   const { data: recentActivity, error: activityError } = await adminSupabase
     .from('admin_recent_activity')
-    .select('*');
+    .select('id, event_type, description, user_id, created_at')
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   if (metricsError) {
     console.error('Admin metrics error:', metricsError);

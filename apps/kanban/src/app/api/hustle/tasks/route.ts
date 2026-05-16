@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     let query = adminDb
       .from('hustle_tasks')
-      .select('*')
+      .select(Q.hustleTask)
       .order('created_at', { ascending: false })
       .limit(PAGE_SIZE + 1)
 
@@ -45,14 +46,14 @@ export async function GET(req: NextRequest) {
 
     const profileIds = Array.from(new Set((rows ?? []).flatMap((row) => [row.poster_id, row.assignee_id]).filter(Boolean)))
     const { data: profiles, error: profilesError } = profileIds.length > 0
-      ? await adminDb.from('profiles').select('*').in('id', profileIds)
+      ? await adminDb.from('profiles').select(Q.profile.card).in('id', profileIds)
       : { data: [], error: null }
 
     if (profilesError) {
       throw profilesError
     }
 
-    const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
+    const profileMap = new Map((profiles ?? []).map((profile) => [profile.id as string, profile]))
     const tasks = (rows ?? []).map((data) => {
       return {
         ...data,
@@ -124,7 +125,7 @@ export async function POST(req: NextRequest) {
         connection_only: !!connection_only,
         status: 'open',
       })
-      .select('*')
+      .select(Q.hustleTask)
       .single()
 
     if (insertError || !task) {

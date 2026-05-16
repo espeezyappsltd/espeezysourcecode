@@ -88,7 +88,7 @@ export const faqs: FAQ[] = [
   },
   {
     q: 'How is student work protected?',
-    a: 'The app uses authenticated Firebase flows, Firestore security rules, controlled admin writes, and guarded API routes to protect user data.',
+    a: 'The app uses Supabase Auth, row-level security policies, controlled admin writes, and guarded API routes to protect user data.',
   },
   {
     q: 'Can teams collaborate in real time?',

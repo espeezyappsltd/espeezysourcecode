@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { X, Zap } from 'lucide-react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
+import type { RealtimePostgresPayload } from '@/types/api'
 
 interface PlatformConfig {
   id: string
@@ -51,10 +52,9 @@ export default function PromoBanner() {
           table: 'platform_config',
           filter: `config_key=eq.main_banner`
         },
-        (payload: unknown) => {
-          const p = payload as any;
-          if (p.new && typeof p.new === 'object') {
-            setConfig(p.new as PlatformConfig)
+        (payload: RealtimePostgresPayload) => {
+          if (payload.new && typeof payload.new === 'object') {
+            setConfig(payload.new as unknown as PlatformConfig)
           }
         }
       )

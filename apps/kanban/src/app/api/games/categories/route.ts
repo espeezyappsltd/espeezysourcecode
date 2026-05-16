@@ -1,28 +1,34 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
+import { CACHE_HEADERS, getCached } from '@/utils/server-cache'
 
 export const dynamic = 'force-dynamic'
+
+const CATEGORY_COLUMNS =
+  'id, name, slug, description, difficulty_tier, prize_pool_cents, is_active, icon_url'
 
 // GET /api/games/categories  -  public categories for standalone games
 export async function GET() {
   try {
-    const adminDb = getAdminDb()
-    if (!adminDb) {
-      return NextResponse.json({ categories: [] })
-    }
+    const categories = await getCached('games:categories:active', 300_000, async () => {
+      const adminDb = getAdminDb()
+      if (!adminDb) return []
 
-    const { data: categories, error } = await adminDb
-      .from('quiz_categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('prize_pool_cents', { ascending: false })
+      const { data, error } = await adminDb
+        .from('quiz_categories')
+        .select(CATEGORY_COLUMNS)
+        .eq('is_active', true)
+        .order('prize_pool_cents', { ascending: false })
+        .limit(100)
 
-    if (error) {
-      console.error('Games Categories Error:', error.message)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+      if (error) throw error
+      return data ?? []
+    })
 
-    return NextResponse.json({ categories: categories || [] })
+    return NextResponse.json(
+      { categories },
+      { headers: CACHE_HEADERS.publicMedium },
+    )
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'unknown error'
     console.error('Games Categories Error:', message)

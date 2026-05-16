@@ -74,9 +74,9 @@ const TRUST = [
 export default function CheckoutFlow() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const planKey = getPlanKey(searchParams.get('plan'))
-  const coupon = searchParams.get('coupon') ?? ''
-  const userId = searchParams.get('uid') ?? ''
+  const planKey = getPlanKey(searchParams?.get('plan') ?? null)
+  const coupon = searchParams?.get('coupon') ?? ''
+  const userId = searchParams?.get('uid') ?? ''
 
   const plan = PLANS[planKey] ?? PLANS.pro
   const [step, setStep] = useState<'review' | 'processing'>('review')

@@ -18,8 +18,10 @@ import {
   createFeedComment,
 } from '@/services/feed'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
+import type { RealtimePostgresPayload } from '@/types/api'
+import type { FeedPost, FeedComment, FeedReaction, FeedPostAuthor } from '@/types/feed'
 
-type Reaction = 'like' | 'love' | 'fire' | 'clap' | 'insightful' | 'celebrate'
+type Reaction = FeedReaction
 
 const REACTION_META: Record<Reaction, { emoji: string; label: string; Icon: typeof Heart }> = {
   like:        { emoji: '👍', label: 'Like',       Icon: ThumbsUp },
@@ -30,40 +32,11 @@ const REACTION_META: Record<Reaction, { emoji: string; label: string; Icon: type
   celebrate:   { emoji: '🎉', label: 'Celebrate',  Icon: PartyPopper },
 }
 
-interface PostAuthor {
-  id: string
-  full_name: string
-  username?: string
-  avatar_url?: string
-  role?: string
-}
-
-interface Post {
-  id: string
-  content: string
-  media_urls: string[]
-  post_type: string
-  visibility: string
-  created_at: string
-  edited_at?: string
-  author: PostAuthor
-  reactions: { reaction: Reaction; user_id: string }[]
-  comments: { count: number }[]
-}
-
-interface Comment {
-  id: string
-  content: string
-  created_at: string
-  parent_id?: string
-  author: PostAuthor
-}
-
 export default function FeedPage() {
   const { profile } = useProfile()
   const router = useRouter()
   const db = useMemo(() => createBrowserSupabaseClient(), [])
-  const [posts, setPosts] = useState<Post[]>([])
+  const [posts, setPosts] = useState<FeedPost[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [cursor, setCursor] = useState<string | null>(null)
@@ -71,7 +44,7 @@ export default function FeedPage() {
   const [composerText, setComposerText] = useState('')
   const [composerVisibility, setComposerVisibility] = useState<'public' | 'connections'>('public')
   const [posting, setPosting] = useState(false)
-  const [expandedComments, setExpandedComments] = useState<Record<string, Comment[]>>({})
+  const [expandedComments, setExpandedComments] = useState<Record<string, FeedComment[]>>({})
   const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({})
   const [commentText, setCommentText] = useState<Record<string, string>>({})
   const [submittingComment, setSubmittingComment] = useState<Record<string, boolean>>({})
@@ -113,6 +86,7 @@ export default function FeedPage() {
     const channel = db
       .channel('feed_realtime')
       .on(
+        // @ts-expect-error Supabase client typings omit postgres_changes filter overload
         'postgres_changes',
         {
           event: 'INSERT',
@@ -120,9 +94,9 @@ export default function FeedPage() {
           table: 'posts',
           filter: `visibility=eq.public`
         },
-        (payload: any) => {
+        (payload: RealtimePostgresPayload<{ author_id: string }>) => {
           // Only reload if the new post is not from the current user
-          if (payload.new && payload.new.author_id !== profile?.id) {
+          if (payload.new?.author_id && payload.new.author_id !== profile?.id) {
             loadPosts()
           }
         }
@@ -217,13 +191,13 @@ export default function FeedPage() {
     return `${Math.floor(secs / 86400)}d ago`
   }
 
-  function groupReactions(reactions: Post['reactions']) {
+  function groupReactions(reactions: FeedPost['reactions']) {
     const counts: Record<Reaction, number> = {} as Record<Reaction, number>
     for (const r of reactions) counts[r.reaction] = (counts[r.reaction] ?? 0) + 1
     return Object.entries(counts).sort((a, b) => b[1] - a[1]) as [Reaction, number][]
   }
 
-  const userReaction = (reactions: Post['reactions']) =>
+  const userReaction = (reactions: FeedPost['reactions']) =>
     reactions.find(r => r.user_id === profile?.id)?.reaction
 
   return (
@@ -232,7 +206,7 @@ export default function FeedPage() {
       {/* Composer */}
       <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-          <Avatar profile={profile as unknown as PostAuthor} size={38} />
+          <Avatar profile={profile ? { id: profile.id, full_name: profile.full_name ?? 'User', avatar_url: profile.avatar_url ?? undefined, role: profile.role ?? undefined } : null} size={38} />
           <div style={{ flex: 1 }}>
             <textarea
               value={composerText}
@@ -325,18 +299,19 @@ function PostCard({
   commentText, onCommentTextChange, onSubmitComment, submittingComment,
   showReactionPicker, onToggleReactionPicker, timeAgo
 }: {
-  post: Post; currentUserId: string
+  post: FeedPost; currentUserId: string
   onReaction: (id: string, r: Reaction) => void
   userReaction?: Reaction; reactionCounts: [Reaction, number][]
   totalReactions: number; commentCount: number
-  comments?: Comment[]; loadingComments?: boolean
+  comments?: FeedComment[]; loadingComments?: boolean
   onToggleComments: () => void; commentText: string
   onCommentTextChange: (t: string) => void
   onSubmitComment: () => void; submittingComment?: boolean
   showReactionPicker: boolean; onToggleReactionPicker: () => void
   timeAgo: string
 }) {
-  const isOwn = post.author.id === currentUserId
+  const author = post.author ?? { id: '', full_name: 'Unknown' }
+  const isOwn = author.id === currentUserId
 
   return (
     <div style={{
@@ -345,11 +320,11 @@ function PostCard({
     }}>
       {/* Header */}
       <div style={{ padding: '1rem 1.25rem 0.75rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-        <Avatar profile={post.author} size={40} />
+        <Avatar profile={author} size={40} />
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#F3F4F6' }}>{post.author.full_name}</span>
-            {post.author.role === 'admin' && (
+            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#F3F4F6' }}>{author.full_name}</span>
+            {author.role === 'admin' && (
               <span style={{ background: '#10B98130', color: '#10B981', fontSize: '0.6rem', fontWeight: 900, padding: '1px 6px', borderRadius: '4px', letterSpacing: '0.08em' }}>ADMIN</span>
             )}
           </div>
@@ -476,7 +451,7 @@ function PostCard({
   )
 }
 
-function Avatar({ profile, size = 36 }: { profile?: PostAuthor | null; size?: number }) {
+function Avatar({ profile, size = 36 }: { profile?: FeedPostAuthor | null; size?: number }) {
   return (
     <RemoteAvatar
       src={profile?.avatar_url}

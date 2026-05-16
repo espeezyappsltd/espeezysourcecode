@@ -6,6 +6,7 @@ import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare }
 
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import type { ChatMessageRow } from '@/types/chat'
 
 type ChatHistoryMessage = {
   id: string
@@ -23,12 +24,11 @@ interface ChatRoomProps {
 
 export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
   const db = createBrowserSupabaseClient()
-  const { list: liveMessages, pushItem: sendLiveMessage } = useSyncedList<{
-    senderId: string;
-    senderName: string;
-    text: string;
-    timestamp: string;
-  }>(`rooms/${roomId}/chat`);
+  const { list: liveMessages, pushItem: sendLiveMessage } = useSyncedList<ChatMessageRow>(
+    'chat_messages',
+    'room_id',
+    roomId,
+  );
   
   const { others, me, updateMyState } = usePresence(roomId);
   const [history, setHistory] = useState<ChatHistoryMessage[]>([]);
@@ -82,10 +82,11 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
 
     // 1. Instant Real-time Broadcast via RTDB
     sendLiveMessage({
-      senderId: currentUser.id,
-      senderName: currentUser.name,
-      text,
-      timestamp: new Date().toISOString(),
+      room_id: roomId,
+      sender_id: currentUser.id,
+      content: text,
+      metadata: { sender_name: currentUser.name },
+      created_at: new Date().toISOString(),
     });
 
     const messageContent = text;
@@ -196,7 +197,7 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
 
         {/* Render Live Messages from RTDB */}
         {liveMessages?.map((msg) => {
-          const isMe = msg.data.senderId === currentUser.id;
+          const isMe = msg.data.sender_id === currentUser.id;
           return (
             <div
               key={msg.id}
@@ -220,9 +221,9 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
                 fontWeight: 600,
                 boxShadow: 'var(--shadow-sm)'
               }}>
-                {msg.data.text}
+                {msg.data.content}
                 <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '0.4rem', textAlign: isMe ? 'right' : 'left' }}>
-                  {new Date(msg.data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.data.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
             </div>

@@ -3,16 +3,24 @@ import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+const DEFAULT_LIMIT = 100
+const MAX_LIMIT = 200
+
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id: postId } = await context.params
     const db = getAdminDb()
+    const limit = Math.min(
+      MAX_LIMIT,
+      Math.max(1, parseInt(request.nextUrl.searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10)),
+    )
 
     const { data: comments, error } = await db
       .from('post_comments')
       .select('id, content, created_at, parent_id, author:profiles(id, full_name, avatar_url, role)')
       .eq('post_id', postId)
       .order('created_at', { ascending: true })
+      .limit(limit)
 
     if (error) throw error
 

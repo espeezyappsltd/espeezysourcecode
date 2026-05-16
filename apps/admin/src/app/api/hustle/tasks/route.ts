@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
+import type { Profile } from '@/types/database'
+import type { HustleTaskRow } from '@/types/api'
+import { getErrorMessage } from '@/utils/errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     let query = adminDb
       .from('hustle_tasks')
-      .select('*')
+      .select(Q.hustleTask)
       .order('created_at', { ascending: false })
       .limit(PAGE_SIZE + 1)
 
@@ -41,22 +45,22 @@ export async function GET(req: NextRequest) {
       throw tasksError
     }
 
-    const profileIds = Array.from(new Set((rows ?? []).flatMap((row: any) => [row.poster_id, row.assignee_id]).filter(Boolean)))
+    const profileIds = Array.from(new Set((rows ?? []).flatMap((row: HustleTaskRow) => [row.poster_id, row.assignee_id]).filter(Boolean)))
     const { data: profiles, error: profilesError } = profileIds.length > 0
-      ? await adminDb.from('profiles').select('*').in('id', profileIds)
+      ? await adminDb.from('profiles').select(Q.profile.card).in('id', profileIds)
       : { data: [], error: null }
 
     if (profilesError) {
       throw profilesError
     }
 
-    const profileMap = new Map((profiles ?? []).map((profile: any) => [profile.id, profile]))
-    const tasks = (rows ?? []).map((data: any) => {
+    const profileMap = new Map((profiles ?? []).map((profile) => [profile.id as string, profile]))
+    const tasks = (rows ?? []).map((data: HustleTaskRow) => {
       return {
         ...data,
         created_at: data.created_at,
         poster: profileMap.get(data.poster_id) ?? null,
-        assignee: profileMap.get(data.assignee_id) ?? null
+        assignee: data.assignee_id ? profileMap.get(data.assignee_id) ?? null : null
       }
     })
 
@@ -65,9 +69,9 @@ export async function GET(req: NextRequest) {
     const nextCursor = hasMore ? finalTasks[finalTasks.length - 1].created_at : null
 
     return NextResponse.json({ tasks: finalTasks, nextCursor })
-  } catch (err: any) {
-    console.error('Hustle Tasks Fetch Error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    console.error('Hustle Tasks Fetch Error:', getErrorMessage(err))
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
   }
 }
 
@@ -121,7 +125,7 @@ export async function POST(req: NextRequest) {
         connection_only: !!connection_only,
         status: 'open',
       })
-      .select('*')
+      .select(Q.hustleTask)
       .single()
 
     if (insertError || !task) {
@@ -129,8 +133,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ task }, { status: 201 })
-  } catch (err: any) {
-    console.error('Task creation error:', err.message)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    console.error('Task creation error:', getErrorMessage(err))
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
   }
 }

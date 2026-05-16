@@ -99,8 +99,9 @@ export async function processTaskCommitWebhook(rawBody: string, signature: strin
     }
 
     return new NextResponse('Webhook processed successfully', { status: 200 })
-  } catch (err: any) {
-    console.error('Webhook Error:', err.message)
-    return new NextResponse(`Server Error: ${err.message}`, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Webhook processing failed'
+    console.error('Webhook Error:', message)
+    return new NextResponse(`Server Error: ${message}`, { status: 500 })
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { Q } from '@/lib/query-columns'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 import { sendEmail } from '@/services/email'
@@ -35,7 +36,7 @@ export async function GET() {
   try {
     const { data, error: dbErr } = await db
       .from('marketing_campaigns')
-      .select('*')
+      .select(Q.marketingCampaign)
       .order('created_at', { ascending: false })
       .limit(50)
 

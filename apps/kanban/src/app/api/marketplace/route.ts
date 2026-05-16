@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { Q } from '@/lib/query-columns'
 import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server'
 import { rateLimit } from '../../../proxy'
 
@@ -29,7 +30,7 @@ export async function GET(req: Request) {
 
   let q = supabase
     .from('marketplace_assets')
-    .select('*')
+    .select(Q.marketplace.asset)
     .order('created_at', { ascending: false })
     .limit(limit + 1)
 
@@ -69,7 +70,7 @@ export async function POST(req: Request) {
   }, { status: 422 })
   const asset = { ...parse.data, user_id: user.id }
   const admin = createAdminSupabaseClient()
-  const { data, error } = await admin.from('marketplace_assets').insert([asset]).select('*').single()
+  const { data, error } = await admin.from('marketplace_assets').insert([asset]).select(Q.marketplace.asset).single()
   if (error) return NextResponse.json({
     error: 'Could not create asset.',
     message: 'Something went wrong. Please refresh or contact support.'

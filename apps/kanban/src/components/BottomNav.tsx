@@ -14,14 +14,12 @@ import {
   DollarSign
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
-import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useRouter } from 'next/navigation'
 
 export default function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const { unreadCount } = useNotifications()
-  const { withLoading } = useSmartLoading()
 
   const navLinks = [
     { name: 'Board', path: '/', icon: LayoutDashboard },

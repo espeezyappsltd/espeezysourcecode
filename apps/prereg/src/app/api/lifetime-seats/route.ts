@@ -20,7 +20,7 @@ async function getCountDirect(): Promise<number | null> {
   if (!cfg) return null
 
   try {
-    const res = await fetch(`${cfg.url}/rest/v1/profiles?select=*&subscription_plan=eq.lifetime&limit=0`, {
+    const res = await fetch(`${cfg.url}/rest/v1/profiles?select=id&subscription_plan=eq.lifetime&limit=0`, {
       method: 'GET',
       headers: {
         apikey: cfg.key,

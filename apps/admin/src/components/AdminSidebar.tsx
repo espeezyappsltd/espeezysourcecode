@@ -113,8 +113,8 @@ export default function AdminSidebar({ adminEmail, adminName }: Props) {
             // Exact match for the overview link; prefix match for sub-sections
             const isActive =
               link.href === '/admin'
-                ? pathname === '/admin'
-                : pathname.startsWith(link.href)
+                ? (pathname ?? '') === '/admin'
+                : (pathname ?? '').startsWith(link.href)
 
             return (
               <li key={link.href}>
