@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import NavigationProgress from '@/components/NavigationProgress'
 import PreregFooter from '@/components/PreregFooter'
+import { CentralLoadingProvider } from 'apps/shared/CentralLoadingProvider'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
@@ -55,9 +56,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <NavigationProgress />
-        {children}
-        <PreregFooter />
+        <CentralLoadingProvider>
+          <NavigationProgress />
+          {children}
+          <PreregFooter />
+        </CentralLoadingProvider>
         <Analytics />
       </body>
     </html>

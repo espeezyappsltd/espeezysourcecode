@@ -42,7 +42,10 @@ const LEGAL_LINKS = [
   { href: 'https://espeezy.com/fund', label: 'Donate' },
 ]
 
+import { useCentralLoading } from 'apps/shared/CentralLoadingProvider'
+
 function FooterLink({ href, children, external = false }: { href: string; children: React.ReactNode; external?: boolean }) {
+  const { startLoading } = useCentralLoading();
   return (
     <a
       href={href}
@@ -51,6 +54,12 @@ function FooterLink({ href, children, external = false }: { href: string; childr
       style={{ fontSize: '0.875rem', color: '#64748b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
       onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
       onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
+      onClick={e => {
+        // Only trigger loader for internal links
+        if (!external && href && !href.startsWith('http') && !href.startsWith('mailto') && !href.startsWith('#')) {
+          startLoading('Navigating...')
+        }
+      }}
     >
       {children}
       {external && <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>↗</span>}

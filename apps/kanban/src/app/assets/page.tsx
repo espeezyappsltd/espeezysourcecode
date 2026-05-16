@@ -28,6 +28,7 @@ interface Asset {
   category?: string
   size_bytes: number
   created_at: string
+  folder?: string
 }
 
 const QUOTAS = {

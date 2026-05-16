@@ -7,7 +7,7 @@ import { NotificationProvider } from '@/components/NotificationProvider'
 import { ThemeProvider } from '@/context/ThemeContext'
 
 import OnboardingWrapper from '@/components/OnboardingWrapper'
-import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
+import { CentralLoadingProvider } from 'apps/shared/CentralLoadingProvider'
 import { ProfileProvider } from '@/context/ProfileContext'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
@@ -55,7 +55,7 @@ export default async function RootLayout({
     <html lang="en">
       <body style={{ margin: 0, padding: 0, background: '#000', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
         <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
-          <GlobalLoadingProvider>
+          <CentralLoadingProvider>
             <ProfileProvider userId={user.id} initialProfile={profile as any}>
               <OnboardingWrapper profile={profile as any} user={user as any}>
                 <div className="dashboard-layout">
@@ -76,7 +76,7 @@ export default async function RootLayout({
                 </div>
               </OnboardingWrapper>
             </ProfileProvider>
-          </GlobalLoadingProvider>
+          </CentralLoadingProvider>
         </ThemeProvider>
       </body>
     </html>

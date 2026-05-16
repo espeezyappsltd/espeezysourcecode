@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useCentralLoading } from 'apps/shared/CentralLoadingProvider'
 import { usePathname } from 'next/navigation'
 
 export default function NavigationProgress() {
@@ -27,6 +28,7 @@ export default function NavigationProgress() {
   }, [pathname])
 
   // On mount, listen for clicks on <a> tags to start the bar
+  const { startLoading } = useCentralLoading();
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       const target = (e.target as HTMLElement).closest('a')
@@ -51,6 +53,9 @@ export default function NavigationProgress() {
         }
       }
       rafRef.current = requestAnimationFrame(tick)
+
+      // Trigger central loader for high-end feel
+      startLoading('Navigating...')
     }
 
     document.addEventListener('click', handleClick)
@@ -59,7 +64,7 @@ export default function NavigationProgress() {
       if (timerRef.current) clearTimeout(timerRef.current)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [])
+  }, [startLoading])
 
   if (!visible) return null
 
