@@ -124,7 +124,7 @@ export function useAdminDashboard() {
         getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'premium'))),
         getCountFromServer(query(collection(db, 'profiles'), where('subscription_plan', '==', 'lifetime'))),
         getDocs(query(collection(db, 'profiles'), orderBy('created_at', 'desc'), limit(8), selectCols('id, full_name, avatar_url, role, created_at'))),
-        getDocs(collection(db, 'platform_config'))
+        getDocs(query(collection(db, 'platform_config')))
       ])
 
       const totalUsers = totalUsersSnap.data().count
@@ -178,7 +178,7 @@ export function useAdminDashboard() {
     queueMicrotask(() => void fetchAdminData())
 
     // Platform Config listener
-    const configUnsub = onSnapshot(collection(db, 'platform_config'), () => {
+    const configUnsub = onSnapshot(query(collection(db, 'platform_config')), () => {
       addToast('Platform Real-time Sync', 'Marketing configuration updated.', 'success')
       fetchAdminData()
     })
