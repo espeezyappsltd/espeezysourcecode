@@ -1,10 +1,10 @@
 import { createClient as createBrowserSupabaseClient } from './supabase/client'
 export { createBrowserSupabaseClient }
 
-// Export a real Supabase client instead of the Firebase shim.
+// Export a real Supabase client only. No shims.
 export const db = createBrowserSupabaseClient()
 
-// --- AUTH SHIM ---
+// --- AUTH ---
 export const auth = {
   get currentUser() {
     // Note: This is synchronous in Firebase but asynchronous in Supabase.
@@ -29,7 +29,7 @@ export const auth = {
 
 export const onAuthStateChanged = auth.onAuthStateChanged;
 
-// --- STORAGE SHIM ---
+// --- STORAGE ---
 export const storage = db.storage
 export const ref = (_storage: unknown, path: string) => path
 export const uploadBytes = async (path: string, file: File | Blob | ArrayBuffer) => {
@@ -45,20 +45,19 @@ export const getDownloadURL = async (path: string) => {
 }
 export const storageRef = ref
 
-// --- DATABASE SHIM ---
-// Legacy database shim removed as it is no longer used.
+// --- DATABASE ---
 
-// --- FIRESTORE SHIM ---
+// --- FIRESTORE HELPERS ---
 // These helpers map Firestore-like syntax to Supabase calls.
 // They are kept as thin wrappers to avoid refactoring 20+ files.
 
 type QueryConstraint = { field?: string; op?: string; value?: unknown; limit?: number; dir?: string; columns?: string }
-type ShimQuery = { table: string; constraints: QueryConstraint[]; columns: string }
+type QueryObject = { table: string; constraints: QueryConstraint[]; columns: string }
 
 export const collection = (_db: unknown, name: string) => name
 export const doc = (_db: unknown, name: string, id: string) => ({ table: name, id })
 export const query = (table: string, ...constraints: QueryConstraint[]) => {
-  const q: ShimQuery = { table, constraints: [] as QueryConstraint[], columns: '*' }
+  const q: QueryObject = { table, constraints: [] as QueryConstraint[], columns: '*' }
   constraints.forEach(c => {
     if (c.columns) q.columns = c.columns
     else q.constraints.push(c)
@@ -84,7 +83,7 @@ export interface FirestoreLikeSnapshot {
   docChanges: () => never[];
 }
 
-export const getDocs = async (q: ShimQuery): Promise<FirestoreLikeSnapshot> => {
+export const getDocs = async (q: QueryObject): Promise<FirestoreLikeSnapshot> => {
   let builder = db.from(q.table).select(q.columns || '*');
   if (q.constraints) {
     q.constraints.forEach((c) => {
@@ -123,7 +122,7 @@ export const getDoc = async (docRef: { table: string, id: string }, columns: str
   }
 }
 
-export const getCountFromServer = async (q: ShimQuery | string) => {
+export const getCountFromServer = async (q: QueryObject | string) => {
   let builder = db.from(typeof q === 'string' ? q : q.table).select('id', { count: 'exact', head: true })
   if (typeof q !== 'string' && q.constraints) {
     q.constraints.forEach((c) => {
@@ -134,7 +133,7 @@ export const getCountFromServer = async (q: ShimQuery | string) => {
   return { data: () => ({ count: count || 0 }) }
 }
 
-export const onSnapshot = (q: ShimQuery, cb: (snapshot: { docs: { id: string; data: () => Record<string, unknown>; exists: () => boolean; ref: { table: string; id: string } }[]; empty: boolean; size: number; docChanges: () => never[] }) => void) => {
+export const onSnapshot = (q: QueryObject, cb: (snapshot: { docs: { id: string; data: () => Record<string, unknown>; exists: () => boolean; ref: { table: string; id: string } }[]; empty: boolean; size: number; docChanges: () => never[] }) => void) => {
   const channel = db.channel(`snapshot-${q.table}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: q.table }, () => {
       getDocs(q).then(cb)
