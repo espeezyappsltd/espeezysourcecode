@@ -8,6 +8,9 @@ import { MarketplaceSidebar } from '@/components/marketplace/MarketplaceSidebar'
 import { PostListingModal } from '@/components/marketplace/PostListingModal'
 import { ItemDetailModal } from '@/components/marketplace/ItemDetailModal'
 import { OnboardingModal } from '@/components/marketplace/OnboardingModal'
+import { StripeOnboarding } from '@/components/marketplace/StripeOnboarding'
+import { StripeWithdraw } from '@/components/marketplace/StripeWithdraw'
+import { StripeInstructions } from '@/components/marketplace/StripeInstructions'
 
 const CATEGORIES = ['All', 'Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other']
 
@@ -32,11 +35,24 @@ export default function MarketplacePage() {
     fetchListings
   } = useMarketplace()
 
+  // Placeholder: fetch user balance from profile (replace with real hook or prop)
+  const [balanceCents, setBalanceCents] = React.useState(0)
+  React.useEffect(() => {
+    // Fetch balance from API (replace with real endpoint)
+    fetch('/api/account')
+      .then(res => res.json())
+      .then(data => setBalanceCents(data.balance_cents || 0))
+      .catch(() => setBalanceCents(0))
+  }, [])
+
   return (
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '6rem', position: 'relative' }}>
-      
+      {/* STRIPE INSTRUCTIONS & ONBOARDING */}
+      <StripeInstructions />
+      <StripeOnboarding />
+      <StripeWithdraw balanceCents={balanceCents} />
+
       <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-        
         {/* MODULAR SIDEBAR */}
         <MarketplaceSidebar 
           categories={CATEGORIES} 
@@ -45,7 +61,6 @@ export default function MarketplacePage() {
         />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
           {/* SEARCH & CONTROL HEADER */}
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <div style={{ position: 'relative', flex: 1 }}>
@@ -68,7 +83,6 @@ export default function MarketplacePage() {
                 }}
               />
             </div>
-            
             <button 
               onClick={() => setIsPosting(true)}
               style={{
