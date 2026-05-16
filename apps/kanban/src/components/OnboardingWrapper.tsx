@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import OnboardingModal from './OnboardingModal'
 import { OnboardingWrapperProps } from '@/types/ui'
 import { useProfile } from '@/context/ProfileContext'
+import { isMockDisplayName } from '@/components/onboarding/CyclingNamePlaceholder'
 
 export default function OnboardingWrapper({ user, profile: initialProfile, children }: OnboardingWrapperProps) {
   const { profile: contextProfile, loading } = useProfile()
@@ -26,7 +27,8 @@ export default function OnboardingWrapper({ user, profile: initialProfile, child
       return
     }
 
-    if (!profile?.full_name || !profile?.avatar_url) {
+    const needsName = !profile?.full_name || isMockDisplayName(profile.full_name)
+    if (needsName || !profile?.avatar_url) {
       setShowOnboarding(true)
     } else {
       setShowOnboarding(false)

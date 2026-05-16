@@ -1,33 +1,38 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId, useCallback, useRef, type CSSProperties } from 'react'
 import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
-import {Profile} from '@/types/auth'
-
-import { 
-  CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
+import {
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
   ShieldCheck,
   Zap,
-  X
+  X,
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
-
-const PRESET_AVATARS = [
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar1&backgroundColor=1a73e8',
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar2&backgroundColor=34a853',
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar3&backgroundColor=ea4335',
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar4&backgroundColor=fbbc04',
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar5&backgroundColor=9334e1',
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar6&backgroundColor=111111',
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar7&backgroundColor=ef4444',
-  'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar8&backgroundColor=22c55e',
-]
-
 import { OnboardingModalProps } from '@/types/ui'
 import { useProfile } from '@/context/ProfileContext'
+import { CyclingNamePlaceholder, isMockDisplayName } from '@/components/onboarding/CyclingNamePlaceholder'
+
+const PRESET_AVATARS = [
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar1&backgroundColor=1a73e8', label: 'Blue geometric' },
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar2&backgroundColor=34a853', label: 'Green geometric' },
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar3&backgroundColor=ea4335', label: 'Red geometric' },
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar4&backgroundColor=fbbc04', label: 'Yellow geometric' },
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar5&backgroundColor=9334e1', label: 'Purple geometric' },
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar6&backgroundColor=111111', label: 'Dark geometric' },
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar7&backgroundColor=ef4444', label: 'Coral geometric' },
+  { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar8&backgroundColor=22c55e', label: 'Mint geometric' },
+]
+
+const STEP_LABELS = ['Name', 'Avatar', 'Complete'] as const
+
+const focusRing: CSSProperties = {
+  outline: '2px solid var(--brand)',
+  outlineOffset: '2px',
+}
 
 export default function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
   const [step, setStep] = useState(1)
@@ -35,259 +40,439 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
   const [selectedAvatar, setSelectedAvatar] = useState('')
   const [saving, setSaving] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [neverShowAgain, setNeverShowAgain] = useState(false)
+  const [nameFieldFocused, setNameFieldFocused] = useState(false)
   const { profile, refreshProfile, setProfile } = useProfile()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
+
+  const titleId = useId()
+  const descId = useId()
+  const nameLabelId = useId()
+  const nameHintId = useId()
+  const nameInputId = useId()
+  const nameDecorId = useId()
+  const statusId = useId()
 
   useEffect(() => {
     setMounted(true)
-    if (profile?.full_name) {
+    if (profile?.full_name && !isMockDisplayName(profile.full_name)) {
       setFullName(profile.full_name)
     }
   }, [profile])
+
+  useEffect(() => {
+    if (!mounted) return
+    closeBtnRef.current?.focus()
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevOverflow
+    }
+  }, [mounted])
+
+  const handleDismiss = useCallback(() => {
+    onComplete()
+  }, [onComplete])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        handleDismiss()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleDismiss])
 
   const db = createBrowserSupabaseClient()
 
   if (!mounted) return null
 
-
   const handleNext = async () => {
-    if (step === 1 && !fullName) return
+    if (step === 1 && !fullName.trim()) return
     if (step === 2 && !selectedAvatar) return
-    
+
     if (step === 3) {
-      if (neverShowAgain) {
-        localStorage.setItem('espeezy_onboarding_dismissed', 'true')
-      }
       onComplete()
       return
     }
-    
+
     setStep(step + 1)
     if (step === 2) {
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#1a73e8', '#34a853', '#ea4335', '#fbbc04']
-      })
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (!reduceMotion) {
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#1a73e8', '#34a853', '#ea4335', '#fbbc04'],
+        })
+      }
     }
   }
 
   const saveIdentity = async () => {
     if (user.id === '00000000-0000-0000-0000-000000000000') {
-      // Generate a unique UUID for the mock user
-      const generateUUID = () => {
-        // Simple UUID v4 generator
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
-      };
-      const uniqueId = generateUUID();
+      const generateUUID = () =>
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0
+          const v = c === 'x' ? r : (r & 0x3) | 0x8
+          return v.toString(16)
+        })
+      const uniqueId = generateUUID()
       setSaving(true)
-      // Local-only update for mock user using uniqueId
-      setProfile((prev) => {
-        return {
-          id: prev?.id && prev.id !== '00000000-0000-0000-0000-000000000000' ? prev.id : uniqueId,
-          email: prev?.email || '',
-          course_name: prev?.course_name || '',
-          enrollment_year: prev?.enrollment_year || 0,
-          completion_year: prev?.completion_year || 0,
-          full_name: fullName ? fullName : '',
-          username: fullName ? fullName.toLowerCase().replace(/\s+/g, '') : '',
-          avatar_url: selectedAvatar || '',
-          updated_at: new Date().toISOString(),
-          created_at: prev?.created_at || new Date().toISOString(),
-          role: prev?.role || '',
-          rank: typeof prev?.rank === 'string' ? prev.rank : prev?.rank != null ? String(prev.rank) : null,
-          badges_count: prev?.badges_count || 0,
-          school_id: prev?.school_id || '',
-          group_id: prev?.group_id || '',
-          total_score: prev?.total_score || 0,
-        };
-      })
+      setProfile((prev) => ({
+        id: prev?.id && prev.id !== '00000000-0000-0000-0000-000000000000' ? prev.id : uniqueId,
+        email: prev?.email || '',
+        course_name: prev?.course_name || '',
+        enrollment_year: prev?.enrollment_year || 0,
+        completion_year: prev?.completion_year || 0,
+        full_name: fullName.trim(),
+        username: fullName.trim().toLowerCase().replace(/\s+/g, ''),
+        avatar_url: selectedAvatar || '',
+        updated_at: new Date().toISOString(),
+        created_at: prev?.created_at || new Date().toISOString(),
+        role: prev?.role || '',
+        rank: typeof prev?.rank === 'string' ? prev.rank : prev?.rank != null ? String(prev.rank) : null,
+        badges_count: prev?.badges_count || 0,
+        school_id: prev?.school_id || '',
+        group_id: prev?.group_id || '',
+        total_score: prev?.total_score || 0,
+      }))
       setTimeout(() => {
         setSaving(false)
-        handleNext()
+        void handleNext()
       }, 500)
       return
     }
 
     setSaving(true)
-    const { error } = await db
-      .from('profiles')
-      .upsert({ 
-        id: user.id,
-        username: fullName.toLowerCase().replace(/\s+/g, ''), 
-        avatar_url: selectedAvatar,
-        updated_at: new Date().toISOString()
-      })
-    
+    const { error } = await db.from('profiles').upsert({
+      id: user.id,
+      full_name: fullName.trim(),
+      username: fullName.trim().toLowerCase().replace(/\s+/g, ''),
+      avatar_url: selectedAvatar,
+      updated_at: new Date().toISOString(),
+    })
+
     setSaving(false)
     if (!error) {
       await refreshProfile()
-      handleNext()
+      void handleNext()
     }
   }
 
   return (
-    <div className="onboarding-overlay" style={{
-      position: 'fixed', inset: 0, zIndex: 10000,
-      background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      animation: 'fadeIn 0.3s ease-out'
-    }}>
-      <div className="onboarding-content" style={{
-        maxWidth: '500px', width: '90%', background: 'var(--surface)',
-        borderRadius: '32px', border: '1px solid var(--border)',
-        padding: '2rem 1.5rem', position: 'relative', overflowY: 'auto',
-        maxHeight: 'calc(100dvh - 8rem)',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-        display: 'flex', flexDirection: 'column'
-      }}>
-        
-        {/* Close Button */}
-        <button 
-          onClick={() => {
-            if (neverShowAgain) {
-              localStorage.setItem('espeezy_onboarding_dismissed', 'true')
-            }
-            onComplete()
-          }}
+    <div
+      className="onboarding-overlay"
+      role="presentation"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 10000,
+        background: 'rgba(0,0,0,0.85)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleDismiss()
+      }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descId}
+        className="onboarding-content"
+        style={{
+          maxWidth: '500px',
+          width: '90%',
+          background: 'var(--surface)',
+          borderRadius: '32px',
+          border: '1px solid var(--border)',
+          padding: '2rem 1.5rem',
+          position: 'relative',
+          overflowY: 'auto',
+          maxHeight: 'calc(100dvh - 8rem)',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <button
+          ref={closeBtnRef}
+          type="button"
+          onClick={handleDismiss}
           style={{
-            position: 'absolute', top: '1.5rem', right: '1.5rem',
-            background: 'none', border: 'none', color: 'var(--text-sub)',
-            cursor: 'pointer', padding: '0.5rem', borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.2s'
+            position: 'absolute',
+            top: '1.5rem',
+            right: '1.5rem',
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-sub)',
+            cursor: 'pointer',
+            padding: '0.5rem',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '44px',
+            minHeight: '44px',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-sub)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          aria-label="Close onboarding"
+          aria-label="Close profile setup"
+          onFocus={(e) => Object.assign(e.currentTarget.style, focusRing)}
+          onBlur={(e) => {
+            e.currentTarget.style.outline = ''
+            e.currentTarget.style.outlineOffset = ''
+          }}
         >
-          <X size={24} />
+          <X size={24} aria-hidden="true" />
         </button>
 
-        {/* Progress Bar */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '3rem' }}>
-          {[1, 2, 3].map(i => (
-            <div key={i} style={{ 
-              flex: 1, height: '4px', borderRadius: '10px',
-              background: i <= step ? 'var(--brand)' : 'var(--bg-main)',
-              transition: 'all 0.3s'
-            }} />
-          ))}
+        <div
+          role="progressbar"
+          aria-label="Profile setup progress"
+          aria-valuemin={1}
+          aria-valuemax={3}
+          aria-valuenow={step}
+          aria-valuetext={`Step ${step} of 3: ${STEP_LABELS[step - 1]}`}
+          style={{ display: 'flex', gap: '8px', marginBottom: '3rem' }}
+        >
+          {STEP_LABELS.map((label, i) => {
+            const stepNum = i + 1
+            const active = stepNum <= step
+            return (
+              <div
+                key={label}
+                style={{
+                  flex: 1,
+                  height: '4px',
+                  borderRadius: '10px',
+                  background: active ? 'var(--brand)' : 'var(--bg-main)',
+                }}
+                aria-hidden="true"
+              />
+            )
+          })}
         </div>
 
+        <p id={statusId} className="sr-only" aria-live="polite" aria-atomic="true">
+          Step {step} of 3: {STEP_LABELS[step - 1]}
+        </p>
+
         {step === 1 && (
-          <div style={{ animation: 'slideIn 0.4s ease-out' }}>
-            <div style={{ padding: '1rem', background: 'rgba(26, 115, 232, 0.1)', color: 'var(--brand)', borderRadius: '16px', display: 'inline-flex', marginBottom: '1.5rem' }}>
+          <div>
+            <div
+              style={{
+                padding: '1rem',
+                background: 'rgba(26, 115, 232, 0.1)',
+                color: 'var(--brand)',
+                borderRadius: '16px',
+                display: 'inline-flex',
+                marginBottom: '1.5rem',
+              }}
+              aria-hidden="true"
+            >
               <ShieldCheck size={32} />
             </div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>Welcome to Espeezy</h1>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Lets set up your profile. What name should we show in the dashboard?</p>
-            
-             <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem', opacity: 0.7 }}>YOUR FULL NAME</label>
-                <input 
-                  type="text" className="form-input" 
-                  value={fullName} onChange={e => setFullName(e.target.value)} 
-                  placeholder="e.g. Alan Turing"
-                  autoFocus
-                  style={{ fontSize: '1.25rem', padding: '1rem' }}
-                />
-             </div>
+            <h1 id={titleId} style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>
+              Welcome to Espeezy
+            </h1>
+            <p id={descId} style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
+              Let&apos;s set up your profile. What name should we show in the dashboard?
+            </p>
 
-             <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <input 
-                  type="checkbox" 
-                  id="neverShowAgain"
-                  checked={neverShowAgain} 
-                  onChange={e => setNeverShowAgain(e.target.checked)} 
-                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--brand)' }}
+            <div className="form-group">
+              <label id={nameLabelId} className="form-label" htmlFor={nameInputId} style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+                Your full name
+              </label>
+              <p id={nameHintId} style={{ fontSize: '0.85rem', color: 'var(--text-sub)', margin: '0.35rem 0 0.75rem' }}>
+                Enter your first and last name as you would like peers to see it.
+              </p>
+              <div style={{ position: 'relative' }}>
+                {!fullName && !nameFieldFocused && <CyclingNamePlaceholder id={nameDecorId} />}
+                <input
+                  id={nameInputId}
+                  type="text"
+                  className="form-input"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  onFocus={() => setNameFieldFocused(true)}
+                  onBlur={() => setNameFieldFocused(false)}
+                  placeholder=""
+                  autoComplete="name"
+                  required
+                  aria-required="true"
+                  aria-labelledby={nameLabelId}
+                  aria-describedby={nameHintId}
+                  style={{
+                    fontSize: '1.25rem',
+                    padding: '1rem',
+                    position: 'relative',
+                    zIndex: 1,
+                    background: 'transparent',
+                    minHeight: '44px',
+                  }}
                 />
-                <label htmlFor="neverShowAgain" style={{ fontSize: '0.9rem', color: 'var(--text-sub)', cursor: 'pointer' }}>
-                  Never show this again
-                </label>
-             </div>
-            
-            <button 
-              onClick={handleNext} 
-              disabled={!fullName}
-              className="btn btn-primary" 
-              style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void handleNext()}
+              disabled={!fullName.trim()}
+              aria-disabled={!fullName.trim()}
+              className="btn btn-primary"
+              style={{
+                marginTop: '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.75rem',
+                minHeight: '44px',
+                width: '100%',
+              }}
             >
-              Continue <ArrowRight size={20} />
+              Continue
+              <ArrowRight size={20} aria-hidden="true" />
             </button>
           </div>
         )}
 
         {step === 2 && (
-          <div style={{ animation: 'slideIn 0.4s ease-out' }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1.5rem' }}>Choose an Avatar</h2>
-            <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Select a profile icon to represent you in the workspace.</p>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '3rem' }}>
-              {PRESET_AVATARS.map((url, i) => (
-                <button 
-                  key={i}
-                  onClick={() => setSelectedAvatar(url)}
-                  style={{
-                    padding: 0, border: selectedAvatar === url ? '3px solid var(--brand)' : '1px solid var(--border)',
-                    borderRadius: '50%', overflow: 'hidden', background: 'var(--bg-main)',
-                    cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                    transform: selectedAvatar === url ? 'scale(1.1)' : 'scale(1)'
-                  }}
-                >
-                  <Image 
-                    src={url} 
-                    alt="Avatar option" 
-                    width={100}
-                    height={100}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                  />
-                </button>
-              ))}
-            </div>
-            
-            <button 
-              onClick={saveIdentity} 
-              disabled={!selectedAvatar || saving}
-              className="btn btn-primary" 
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
+          <div>
+            <h2 id={titleId} style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1.5rem' }}>
+              Choose an Avatar
+            </h2>
+            <p id={descId} style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>
+              Select a profile icon to represent you in the workspace.
+            </p>
+
+            <div
+              role="radiogroup"
+              aria-label="Avatar options, choose one"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '3rem' }}
             >
-              {saving ? 'Saving...' : 'Finish Setup'} <CheckCircle2 size={20} />
+              {PRESET_AVATARS.map((avatar) => {
+                const selected = selectedAvatar === avatar.url
+                return (
+                  <button
+                    key={avatar.url}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    aria-label={avatar.label}
+                    onClick={() => setSelectedAvatar(avatar.url)}
+                    style={{
+                      padding: 0,
+                      border: selected ? '3px solid var(--brand)' : '1px solid var(--border)',
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                      background: 'var(--bg-main)',
+                      cursor: 'pointer',
+                      minWidth: '44px',
+                      minHeight: '44px',
+                      aspectRatio: '1',
+                    }}
+                    onFocus={(e) => Object.assign(e.currentTarget.style, focusRing)}
+                    onBlur={(e) => {
+                      e.currentTarget.style.outline = ''
+                      e.currentTarget.style.outlineOffset = ''
+                    }}
+                  >
+                    <Image
+                      src={avatar.url}
+                      alt=""
+                      width={100}
+                      height={100}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void saveIdentity()}
+              disabled={!selectedAvatar || saving}
+              aria-disabled={!selectedAvatar || saving}
+              aria-busy={saving}
+              className="btn btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.75rem',
+                minHeight: '44px',
+                width: '100%',
+              }}
+            >
+              {saving ? 'Saving profile…' : 'Finish setup'}
+              <CheckCircle2 size={20} aria-hidden="true" />
             </button>
           </div>
         )}
 
         {step === 3 && (
-          <div style={{ textAlign: 'center', animation: 'slideIn 0.4s ease-out' }}>
-            <div style={{ 
-              width: '100px', height: '100px', background: 'var(--success)', color: 'white', 
-              borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 2rem', boxShadow: '0 0 30px rgba(34, 197, 94, 0.4)'
-            }}>
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                width: '100px',
+                height: '100px',
+                background: 'var(--success)',
+                color: 'white',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 2rem',
+                boxShadow: '0 0 30px rgba(34, 197, 94, 0.4)',
+              }}
+              aria-hidden="true"
+            >
               <Sparkles size={48} />
             </div>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>All Set!</h2>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Your profile is ready. Welcome to the team, {fullName.split(' ')[0]}.</p>
-            
-            <button 
-              onClick={handleNext} 
-              className="btn btn-primary" 
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
+            <h2 id={titleId} style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>
+              All Set!
+            </h2>
+            <p id={descId} style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
+              Your profile is ready. Welcome to the team, {fullName.split(' ')[0]}.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => void handleNext()}
+              className="btn btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.75rem',
+                minHeight: '44px',
+                width: '100%',
+                margin: '0 auto',
+              }}
             >
-              Go to Dashboard <Zap size={20} />
+              Go to Dashboard
+              <Zap size={20} aria-hidden="true" />
             </button>
           </div>
         )}
-
       </div>
-      
-      <style jsx>{`
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+      <style jsx global>{`
+        @media (prefers-reduced-motion: reduce) {
+          .onboarding-overlay,
+          .onboarding-content * {
+            animation: none !important;
+            transition: none !important;
+          }
+        }
       `}</style>
     </div>
   )
