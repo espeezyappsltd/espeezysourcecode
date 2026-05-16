@@ -28,7 +28,7 @@ export default function ConnectionAlertTray() {
     try {
       const q = query(
         collection(db, 'user_connections'),
-        where('target_id', '==', user.uid),
+        where('target_id', '==', user.id),
         where('status', '==', 'pending')
       )
       const snap = await getDocs(q)
@@ -59,7 +59,7 @@ export default function ConnectionAlertTray() {
     if (!user) return
     const q = query(
       collection(db, 'user_connections'),
-      where('target_id', '==', user.uid)
+      where('target_id', '==', user.id)
     )
     const unsubscribe = onSnapshot(q, () => {
       fetchRequests()
@@ -79,7 +79,7 @@ export default function ConnectionAlertTray() {
           type: 'connection_accepted',
           title: 'Connection Established',
           message: 'Your connection request was accepted.',
-          link: `/dashboard/network/profile/${user.uid}`,
+          link: `/dashboard/network/profile/${user.id}`,
           created_at: new Date().toISOString()
         })
         addToast('Connected!', 'You are now connected with a new specialist.', 'success')
@@ -89,18 +89,18 @@ export default function ConnectionAlertTray() {
       }
       const qNotif = query(
         collection(db, 'notifications'),
-        where('user_id', '==', user.uid),
+        where('user_id', '==', user.id),
         where('type', '==', 'connection_request')
       )
       const notifSnap = await getDocs(qNotif)
       if (!notifSnap.empty) {
         const batch = writeBatch(db)
-        notifSnap.docs.forEach((d: any) => {
-          const data = d.data()
+        notifSnap.docs.forEach((d) => {
+          const data = d.data() as { metadata?: { sender_id?: string } };
           if (data.metadata?.sender_id === senderId) {
-            batch.update(d.ref, { read: true })
+            batch.update(d.ref, { read: true });
           }
-        })
+        });
         await batch.commit()
       }
       await fetchRequests()
