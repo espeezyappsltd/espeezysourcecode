@@ -8,7 +8,7 @@ import {
 import { usePresence } from '@/components/PresenceProvider'
 import ActivityLogView from '@/components/ActivityLogView'
 import { useNotifications } from '@/components/NotificationProvider'
-import { Group, Task, Profile as ProfileDB } from '@/types/database'
+import { Group, Task, Profile as ProfileDB, Artifact, ActivityLogRow } from '@/types/database'
 import { Profile } from '@/types/auth'
 import Link from 'next/link'
 import {
@@ -54,7 +54,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const [tasks, setTasks] = useState<Task[]>([])
   const [taskSearch, setTaskSearch] = useState('')
   const [members, setMembers] = useState<ProfileDB[]>([])
-  const [artifacts, setArtifacts] = useState<Record<string, any>[]>([])
+  const [artifacts, setArtifacts] = useState<Artifact[]>([])
   const [mounted, setMounted] = useState(false)
   const { onlineUsers } = usePresence()
 
@@ -90,7 +90,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       if (memberCheck) {
         setTasks(groupTasks as Task[])
         setMembers(groupMembers as ProfileDB[])
-        setArtifacts(groupArtifacts as Record<string, any>[])
+        setArtifacts(groupArtifacts)
       } else {
         setMembers(groupMembers as ProfileDB[])
       }
@@ -159,7 +159,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     try {
       const logs = await fetchActivityLogByGroup(groupId)
       const headers = ['Type', 'User', 'Description', 'Timestamp', 'Impact Score']
-      const rows = logs.map((l: any) => {
+      const rows = logs.map((l: ActivityLogRow) => {
         return [l.action_type || l.action, l.user_name || 'System', l.description || l.message, l.created_at, l.impact_score || 0]
       })
       
@@ -176,7 +176,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         ])
       })
 
-      const csvContent = [headers, ...rows].map(e => e.map((c: any) => `"${c}"`).join(',')).join('\n')
+      const csvContent = [headers, ...rows].map(e => e.map((c) => `"${String(c ?? '')}"`).join(',')).join('\n')
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')

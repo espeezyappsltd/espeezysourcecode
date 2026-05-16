@@ -1,5 +1,6 @@
 import { createBrowserSupabaseClient } from '@/lib/db-client'
-import type { Group, Profile, Task, Artifact, Commit, ActivityLog } from '@/types/database'
+import type { Group, Profile, Task, Artifact, Commit, ActivityLogRow } from '@/types/database'
+import type { Profile as AuthProfile } from '@/types/auth'
 
 export type JoinRequestWithProfile = {
   id: string
@@ -26,20 +27,35 @@ export async function getAuthUser() {
   return data.user ?? null
 }
 
-export async function fetchProfileById(userId: string) {
+export async function fetchProfileById(userId: string): Promise<AuthProfile | null> {
   if (userId === '00000000-0000-0000-0000-000000000000') {
     return {
       id: userId,
       full_name: 'Test User',
       subscription_plan: 'pro',
       group_id: '00000000-0000-0000-0000-000000000000',
-      theme_config: { palette: 'Google Light' }
-    } as unknown as Profile
+      theme_config: { palette: 'Google Light' },
+      email: 'test@example.com',
+      avatar_url: null,
+      course_name: null,
+      enrollment_year: null,
+      completion_year: null,
+      role: null,
+      rank: null,
+      badges_count: null,
+      school_id: null,
+      total_score: 0,
+      created_at: new Date().toISOString(),
+    }
   }
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('profiles').select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen, storage_used').eq('id', userId).maybeSingle()
+  const { data, error } = await db
+    .from('profiles')
+    .select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen, storage_used, country_code, theme_config, custom_bg_url, protect_avatar, is_phone_verified')
+    .eq('id', userId)
+    .maybeSingle()
   if (error) throw error
-  return data as Profile
+  return data as AuthProfile | null
 }
 
 export async function updateProfileById(userId: string, updates: Record<string, unknown>) {
@@ -202,7 +218,7 @@ export async function fetchCommitsByUser(userId: string, rowLimit = 3): Promise<
   return (data ?? []) as Commit[]
 }
 
-export async function fetchActivityLogByGroup(groupId: string): Promise<ActivityLog[]> {
+export async function fetchActivityLogByGroup(groupId: string): Promise<ActivityLogRow[]> {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('activity_logs')
@@ -210,7 +226,7 @@ export async function fetchActivityLogByGroup(groupId: string): Promise<Activity
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []) as unknown as ActivityLog[]
+  return (data ?? []) as ActivityLogRow[]
 }
 
 export async function fetchNotificationSettings(userId: string): Promise<DashboardNotificationSettings> {

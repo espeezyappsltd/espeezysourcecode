@@ -144,7 +144,7 @@ export default function SettingsPage() {
           setBiography(data.biography || '')
           setStack(data.stack || '')
           setAvatarUrl(data.avatar_url || '')
-          setCountryCode((data as any)?.country_code || '')
+          setCountryCode(data.country_code || '')
           // setProtectAvatar is skipped because 'protect_avatar' does not exist on Profile
           setProtectAvatar(false)
           // setIsPhoneVerified is skipped because 'is_phone_verified' does not exist on Profile

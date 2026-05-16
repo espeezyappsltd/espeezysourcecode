@@ -8,38 +8,19 @@ import {
   ArrowRight, X, Save, RotateCcw, Terminal, Send
 } from 'lucide-react'
 
-type AgentStatus = 'active' | 'paused' | 'training'
-type AgentSpec = 'frontend' | 'backend' | 'devops'
-type AgentRole = 'builder' | 'validator'
-type TaskStatus = 'not_started' | 'in_progress' | 'review' | 'done' | 'blocked'
-type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
+import type {
+  Agent,
+  AgentSpec,
+  AgentRole,
+  AgentStatus,
+  AgentTask,
+  AgentTaskPriority,
+  AgentTaskStatus,
+} from '@/types/agents'
 
-interface Agent {
-  id: string
-  name: string
-  specialisation: AgentSpec
-  role: AgentRole
-  status: AgentStatus
-  capabilities: string[]
-  tasks_completed: number
-  system_prompt?: string
-  pair?: { id: string; name: string } | null
-}
-
-interface Task {
-  id: string
-  title: string
-  description?: string
-  status: TaskStatus
-  priority: TaskPriority
-  assigned_agent_id?: string
-  agent?: { id: string; name: string; specialisation: string } | null
-  created_at: string
-  started_at?: string
-  completed_at?: string
-  output_artifacts?: unknown[]
-  logs?: string
-}
+type Task = AgentTask
+type TaskStatus = AgentTaskStatus
+type TaskPriority = AgentTaskPriority
 
 const SPEC_ICON: Record<AgentSpec, typeof Bot> = { frontend: Layout, backend: Server, devops: Zap }
 const SPEC_COLOR: Record<AgentSpec, string> = {

@@ -3,8 +3,7 @@ import { redirect } from 'next/navigation'
 import { ProfileProvider } from '@/context/ProfileContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { NotificationProvider } from '@/components/NotificationProvider'
-import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
-
+import type { Profile } from '@/types/auth'
 export const dynamic = 'force-dynamic'
 
 export default async function TerminalLayout({
@@ -38,13 +37,11 @@ export default async function TerminalLayout({
 
   return (
     <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
-      <GlobalLoadingProvider>
-        <ProfileProvider userId={user.id} initialProfile={profile as any}>
-           <NotificationProvider>
-             {children}
-           </NotificationProvider>
-        </ProfileProvider>
-      </GlobalLoadingProvider>
+      <ProfileProvider userId={user.id} initialProfile={profile as Profile}>
+        <NotificationProvider>
+          {children}
+        </NotificationProvider>
+      </ProfileProvider>
     </ThemeProvider>
   )
 }

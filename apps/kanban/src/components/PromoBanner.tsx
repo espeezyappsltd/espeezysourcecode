@@ -47,7 +47,8 @@ export default function PromoBanner() {
     const channel = db
       .channel('platform_config_realtime')
       .on(
-        'postgres_changes' as any,
+        // @ts-expect-error Supabase client typings omit postgres_changes filter overload
+        'postgres_changes',
         {
           event: '*',
           schema: 'public',

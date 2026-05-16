@@ -112,3 +112,12 @@ export type ActivityLog = {
   details: Record<string, unknown>;
   created_at: string;
 };
+
+/** Extended fields used in analytics export and legacy log rows */
+export type ActivityLogRow = ActivityLog & {
+  action_type?: string;
+  user_name?: string;
+  description?: string;
+  message?: string;
+  impact_score?: number;
+};

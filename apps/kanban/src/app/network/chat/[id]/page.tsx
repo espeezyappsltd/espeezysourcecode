@@ -23,6 +23,7 @@ import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useNotifications } from '@/components/NotificationProvider'
 import Image from 'next/image'
 import { listingSchema } from '@/utils/validation'
+import type { ListingCondition } from '@/types/marketplace'
 
 interface Listing {
   id: string
@@ -510,7 +511,7 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Condition</label>
                   <select 
                     value={condition}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCondition(e.target.value as any)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCondition(e.target.value as ListingCondition)}
                     style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
                   >
                     <option value="New">New</option>

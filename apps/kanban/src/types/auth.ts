@@ -36,7 +36,10 @@ export type Profile = {
   username?: string
   country_code?: string
   storage_used ?: number // in bytes
-  [key: string]: any // Allow additional properties for flexibility
+  email_notifications?: boolean
+  push_notifications?: boolean
+  marketing_emails?: boolean
+  [key: string]: unknown
 };
 
 export type ActiveUser = {

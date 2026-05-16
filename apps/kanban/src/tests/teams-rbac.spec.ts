@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * E2E Simulation: Teams, RBAC, and Realtime Collaboration
@@ -22,7 +22,7 @@ test.describe('Espeezy Teams & Realtime Sync', () => {
     pageB.on('console', msg => console.log(`[PAGE B] ${msg.text()}`));
 
     // Helper to handle signup/login (handles potential email confirmation delay by assuming auto-confirm is ON in dev)
-    const authFlow = async (page: any, user: typeof userA) => {
+    const authFlow = async (page: Page, user: typeof userA) => {
       await page.goto('/login?signup=true', { waitUntil: 'networkidle', timeout: 60000 });
       
       await page.fill('input[id="email"]', user.email);

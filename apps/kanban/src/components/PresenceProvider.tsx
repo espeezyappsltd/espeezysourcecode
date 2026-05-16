@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useTransition, useMemo } from 'react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
-import { PresenceContextType } from '@/types/ui'
+import { PresenceContextType, LayoutUser } from '@/types/ui'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 
@@ -15,7 +15,7 @@ const PresenceContext = createContext<PresenceContextType>({
 export const usePresence = () => useContext(PresenceContext)
 
 type PresenceProviderProps = {
-  user?: { id: string; full_name?: string }
+  user?: LayoutUser
   children: React.ReactNode
 }
 

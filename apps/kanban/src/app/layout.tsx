@@ -1,15 +1,17 @@
-import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
-import { redirect } from 'next/navigation'
+import { createServerSupabaseClient } from '@/lib/db'
 import Sidebar from '@/components/Sidebar'
+import type { Profile } from '@/types/auth'
+import { createMockProfile, isMockUserId } from '@/utils/mock-profile'
+import { toLayoutUser } from '@/utils/layout-user'
 import BottomNav from '@/components/BottomNav'
 import { PresenceProvider } from '@/components/PresenceProvider'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { ThemeProvider } from '@/context/ThemeContext'
 
 import OnboardingWrapper from '@/components/OnboardingWrapper'
-import { CentralLoadingProvider } from '../../../shared/CentralLoadingProvider'
+import { KanbanProviders } from '@/components/KanbanProviders'
 import { ProfileProvider } from '@/context/ProfileContext'
-import PageTransitionWrapper from '../../../shared/PageTransitionWrapper'
+import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import SupportChat from '@/components/SupportChat'
@@ -36,16 +38,11 @@ export default async function RootLayout({
     created_at: new Date().toISOString(),
   }
 
-  const profile = user.id !== '00000000-0000-0000-0000-000000000000' ? (await db
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()).data : {
-      id: user.id,
-      full_name: 'Test User',
-      subscription_plan: 'pro',
-      theme_config: { palette: 'Google Light' }
-    }
+  const profile: Profile | null = !isMockUserId(user.id)
+    ? ((await db.from('profiles').select('*').eq('id', user.id).single()).data as Profile | null)
+    : createMockProfile(user.id)
+
+  const layoutUser = toLayoutUser(user)
 
   const initialTheme = {
     palette: profile?.theme_config?.palette || 'Google Light',
@@ -56,13 +53,13 @@ export default async function RootLayout({
     <html lang="en">
       <body style={{ margin: 0, padding: 0, background: '#000', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
         <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
-          <CentralLoadingProvider>
-            <ProfileProvider userId={user.id} initialProfile={profile as any}>
-              <OnboardingWrapper profile={profile as any} user={user as any}>
+          <KanbanProviders>
+            <ProfileProvider userId={user.id} initialProfile={profile}>
+              <OnboardingWrapper profile={profile} user={layoutUser}>
                 <div className="dashboard-layout">
                   <NotificationProvider>
-                    <PresenceProvider user={user as any}>
-                      <Sidebar user={user as any} />
+                    <PresenceProvider user={layoutUser}>
+                      <Sidebar user={layoutUser} />
 
                       <main className="main-content">
                         <ConnectionAlertTray />
@@ -79,7 +76,7 @@ export default async function RootLayout({
                 </div>
               </OnboardingWrapper>
             </ProfileProvider>
-          </CentralLoadingProvider>
+          </KanbanProviders>
         </ThemeProvider>
       </body>
     </html>

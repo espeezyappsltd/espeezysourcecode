@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { Profile } from '@/types/database'
+import type { QuizQuestion } from '@/types/quiz'
 import { usePresence } from '@/components/PresenceProvider'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
@@ -80,7 +81,7 @@ export default function ChillOutHub() {
   const [roundCount, setRoundCount] = useState<number>(5)
   
   const [isGenerating, setIsGenerating] = useState(false)
-  const [questions, setQuestions] = useState<{ question: string; type: string; difficulty_multiplier: number }[]>([])
+  const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [onlineProfiles, setOnlineProfiles] = useState<Profile[]>([])
   const [userStats, setUserStats] = useState<{ level: number; total_xp: number; wins: number; games_played: number; rank_title?: string } | null>(null)
@@ -212,22 +213,12 @@ export default function ChillOutHub() {
             );
           }
 
-          router.push(`/chillout/room/${roomId}?id=${roomId}`)},
-          
-          'Initializing Skirmish...')}
-
-        }
-        
-  // Add userStats definition (example: useState or useAppSelector)
-  // If you have a Redux store or context, replace this with the appropriate hook
-  // Example with useState (replace with real logic as needed):
-  const [userStats, setUserStats] = useState({
-    level: 1,
-    rank_title: 'Novice Scholar',
-    total_xp: 0,
-    wins: 0,
-    games_played: 0,
-  });
+          router.push(`/chillout/room/${roomId}?id=${roomId}`)
+        },
+        'Initializing Skirmish...'
+      )
+    }
+  }
 
   return (
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '4rem' }}>
@@ -288,10 +279,8 @@ export default function ChillOutHub() {
         </div>
       </header>
 
-      {/* ── CONTENT RENDERING ────────────────────────────────────── */}
-      // Add this at the top of your component (or where appropriate)
-      // Example initialization, adjust as needed:
-      const [isGenerating, setIsGenerating] = useState(false);
+    
+      
 
       {isGenerating ? (
         <div style={{ height: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
@@ -532,3 +521,4 @@ export default function ChillOutHub() {
       <div className="neural-bg" />
     </div>
   )
+}

@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { jsPDF } from 'jspdf'
 import { updateUserGameStats } from '@/app/actions'
 import { SkirmishTimer } from '@/components/skirmish/SkirmishTimer'
+import type { SkirmishState } from '@/types/quiz'
 
 export default function QuizRoomPage() {
   const params = useParams()
@@ -34,17 +35,6 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const router = useRouter()
   
   const { others, me, updateMyState } = usePresence(roomId);
-  
-  interface SkirmishState {
-    quizStatus: 'setup' | 'playing' | 'results'
-    quizQuestions: any[]
-    currentQuestionIndex: number
-    quizScores: { userId: string; userName: string; points: number }[]
-    roundStartTime: number
-    timerDuration: number
-    config: { difficulty: string; mode: string }
-    activeTurnUserId?: string | null
-  }
   
   const [storage, updateStorage] = useSyncedObject<SkirmishState>(`rooms/${roomId}/state`, {
     quizStatus: 'setup',

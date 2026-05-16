@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 import { Profile } from '@/types/auth'
+import type { Agent } from '@/types/agents'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,11 +34,11 @@ export async function GET() {
     }
     
     // Resolve "pair" information manually
-    const agents = (agentsList ?? []).map((agent: any) => {
+    const agents = (agentsList ?? []).map((agent: Agent) => {
       if (agent.pair_id) {
-        const pair = (agentsList ?? []).find((a: any) => a.id === agent.pair_id)
+        const pair = (agentsList ?? []).find((a) => a.id === agent.pair_id)
         if (pair) {
-          return { ...agent, pair: { id: (pair as any).id, name: (pair as any).name } }
+          return { ...agent, pair: { id: pair.id, name: pair.name } }
         }
       }
       return { ...agent, pair: null }
@@ -94,7 +95,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ agent: saved }, { status: 201 })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to create agent'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -38,8 +38,14 @@ export interface KanbanBoardProps {
   newTaskSignal?: number;
 }
 
+export type LayoutUser = {
+  id: string
+  full_name?: string
+  user_metadata?: { full_name?: string }
+}
+
 export interface SidebarProps {
-  user: { id: string };
+  user: LayoutUser;
 }
 
 export type ChatPayload = {
@@ -144,8 +150,8 @@ export type PresenceContextType = {
 }
 
 export type OnboardingWrapperProps = {
-  profile?: { full_name?: string; avatar_url?: string } | null
-  user: { id: string }
+  profile?: Profile | null
+  user: LayoutUser
   children: React.ReactNode
 }
 
