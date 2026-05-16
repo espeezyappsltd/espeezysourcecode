@@ -37,6 +37,7 @@
     "typecheck:games": "npm --prefix apps/games run typecheck",
     "typecheck:dashboard": "npm --prefix apps/dashboard run typecheck",
     "typecheck:admin": "npm --prefix apps/admin run typecheck",
+    "typecheck:kanban": "npm --prefix apps/kanban run typecheck",
     "test": "playwright test",
     "test:critical": "playwright test tests/critical.spec.ts",
     "deploy:resilient": "bash ./scripts/deploy-resilient.sh",
@@ -47,7 +48,9 @@
     "predeploy:dashboard": "npm --prefix apps/dashboard run predeploy:check",
     "predeploy:admin": "npm --prefix apps/admin run predeploy:check",
     "predeploy:core": "npm --prefix apps/core run predeploy:check",
-    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:dashboard ; npm run predeploy:admin ; npm run predeploy:core"
+    "predeploy:kanban": "npm --prefix apps/kanban run predeploy:check",
+    "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban ; npm run predeploy:dashboard ; npm run predeploy:admin ; npm run predeploy:core",
+    "build:kanban": "npm --prefix apps/kanban run build"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.2.0",

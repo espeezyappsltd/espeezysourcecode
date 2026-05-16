@@ -22,6 +22,9 @@
 
 # markup and supabase schema migrations
 *.md
+!internaldocs/README.md
+!apps/kanban/README.md
+!apps/games/README.md
 *.sql
 
 
