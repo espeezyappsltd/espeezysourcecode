@@ -56,6 +56,97 @@ interface Comment {
 export default function FeedPage() {
   const { profile } = useProfile();
   const router = useRouter();
+
+  // Composer state
+  const [composerText, setComposerText] = useState<string>('');
+  const [composerVisibility, setComposerVisibility] = useState<'public' | 'private'>('public');
+  const [posting, setPosting] = useState<boolean>(false);
+
+  // Feed state
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+
+  // Comments state
+  const [expandedComments, setExpandedComments] = useState<Record<string, Comment[]>>({});
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
+  const [commentText, setCommentText] = useState<Record<string, string>>({});
+  const [submittingComment, setSubmittingComment] = useState<Record<string, boolean>>({});
+
+  // Reaction picker state
+  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Handler: submit post
+  const submitPost = useCallback(() => {
+    if (!composerText.trim() || posting) return;
+    setPosting(true);
+    // TODO: Implement post creation logic
+    setTimeout(() => {
+      setPosting(false);
+      setComposerText('');
+    }, 1000);
+  }, [composerText, posting]);
+
+  // Handler: toggle reaction
+  const toggleReaction = useCallback((postId: string, reaction: Reaction) => {
+    // TODO: Implement reaction logic
+  }, []);
+
+  // Handler: user reaction
+  const userReaction = useCallback((reactions: { reaction: Reaction; user_id: string }[]): Reaction | undefined => {
+    // TODO: Implement user reaction lookup
+    return undefined;
+  }, []);
+
+  // Handler: group reactions
+  const groupReactions = useCallback((reactions: { reaction: Reaction; user_id: string }[]): [Reaction, number][] => {
+    // TODO: Implement grouping logic
+    return [];
+  }, []);
+
+  // Handler: load comments
+  const loadComments = useCallback((postId: string) => {
+    // TODO: Implement comment loading
+  }, []);
+
+  // Handler: submit comment
+  const submitComment = useCallback((postId: string) => {
+    // TODO: Implement comment submission
+  }, []);
+
+  // Handler: time ago
+  const timeAgo = useCallback((date: string) => {
+    // TODO: Implement time ago formatting
+    return '';
+  }, []);
+
+  // Handler: VisibilityToggle stub
+  const VisibilityToggle = ({ value, onChange }: { value: 'public' | 'private'; onChange: (v: 'public' | 'private') => void }) => (
+    <button type="button" onClick={() => onChange(value === 'public' ? 'private' : 'public')} style={{ padding: '0.3rem 0.8rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-sub)', color: 'var(--text-main)', fontWeight: 700, fontSize: '0.8rem' }}>
+      {value === 'public' ? '🌍 Public' : '🔒 Private'}
+    </button>
+  );
+
+  // Handler: Avatar stub
+  const Avatar = ({ profile, size }: { profile: PostAuthor | null | undefined; size: number }) => (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      {profile?.avatar_url ? (
+        <Image src={profile.avatar_url} alt={profile.full_name || 'User'} width={size} height={size} />
+      ) : (
+        <span style={{ fontSize: size * 0.5, color: '#888' }}>{profile?.full_name?.[0] || '?'}</span>
+      )}
+    </div>
+  );
+
+  // Handler: ActionButton stub
+  const ActionButton = ({ onClick, active, label, ariaLabel, ariaExpanded }: { onClick: () => void; active?: boolean; label: string; ariaLabel?: string; ariaExpanded?: boolean }) => (
+    <button onClick={onClick} aria-label={ariaLabel} aria-expanded={ariaExpanded} style={{ background: active ? '#10B981' : 'rgba(255,255,255,0.04)', color: active ? '#000' : '#fff', border: 'none', borderRadius: '8px', padding: '0.4rem 1rem', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', marginRight: '0.5rem' }}>{label}</button>
+  );
+
   return (
   
     <div style={{ maxWidth: '640px', margin: '0 auto', padding: '1.5rem 1rem' }}>

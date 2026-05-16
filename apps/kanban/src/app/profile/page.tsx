@@ -6,35 +6,38 @@ import { User, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, Fingerpri
 import { useProfile } from '@/context/ProfileContext'
 import { getFlagComponent } from '@/utils/geo'
 import { fetchArtifactsByUser, fetchCommitsByUser, updateProfileById } from '@/services/dashboard'
+import type { Artifact, Commit } from '@/types/database'
 
 export default function ProfilePage() {
    const { profile, loading, refreshProfile } = useProfile()
    const [isEditingBio, setIsEditingBio] = useState(false)
    const [bioText, setBioText] = useState('')
    const [isSaving, setIsSaving] = useState(false)
-   const [achievements, setAchievements] = useState<any[]>([])
+   const [achievements, setAchievements] = useState<Array<{ type: 'artifact' | 'commit'; title?: string; content?: string; created_at: string }>>([])
 
-   useEffect(() => {
-     async function fetchAchievements() {
-       if (!profile?.id) return
-       
-       try {
+    useEffect(() => {
+       async function fetchAchievements() {
+          if (!profile?.id) return
+          try {
              const [artifacts, commits] = await Promise.all([
                 fetchArtifactsByUser(profile.id, 3),
                 fetchCommitsByUser(profile.id, 3),
              ])
-
-         const combined = [
-                ...artifacts.map((d: any) => ({ type: 'artifact', ...d })),
-                ...commits.map((d: any) => ({ type: 'commit', ...d }))
-         ]
-         setAchievements(combined)
-       } catch (err: any) {
-         console.error('Fetch achievements error:', err.message)
+             const combined = [
+                ...artifacts.map((d: Artifact) => ({ type: 'artifact' as const, title: d.task_id, content: d.file_url, created_at: d.created_at })),
+                ...commits.map((d: Commit) => ({ type: 'commit' as const, title: d.message, content: d.hash, created_at: d.created_at })),
+             ]
+             setAchievements(combined)
+          } catch (err) {
+             if (err instanceof Error) {
+                console.error('Fetch achievements error:', err.message)
+             } else {
+                console.error('Fetch achievements error:', err)
+             }
+          }
        }
-     }
-     fetchAchievements()
-   }, [profile?.id])
+       fetchAchievements()
+    }, [profile?.id])
 
    const score = profile?.total_score || 0
    const levelData = useMemo(() => {
@@ -61,9 +64,13 @@ export default function ProfilePage() {
             await updateProfileById(profile.id, { biography: bioText })
         await refreshProfile()
         setIsEditingBio(false)
-      } catch (err: any) {
-        console.error('Save bio error:', err.message)
-      }
+         } catch (err) {
+            if (err instanceof Error) {
+               console.error('Save bio error:', err.message)
+            } else {
+               console.error('Save bio error:', err)
+            }
+         }
       setIsSaving(false)
    }
 

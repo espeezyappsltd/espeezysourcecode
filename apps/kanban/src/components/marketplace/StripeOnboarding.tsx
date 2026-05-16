@@ -15,8 +15,12 @@ export function StripeOnboarding() {
       } else {
         setError(data.error || 'Failed to initiate Stripe onboarding.')
       }
-    } catch (err: any) {
-      setError(err.message || 'Unknown error')
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Unknown error')
+      }
     } finally {
       setLoading(false)
     }

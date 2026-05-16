@@ -99,12 +99,12 @@ export default function ActivityLogView({
 
     const { data } = await query
     if (data) {
-      const mapped = data.map((d: any) => ({
+      const mapped = data.map((d: LogEntry & { action?: string; details?: { message?: string } }) => ({
         ...d,
-        action_type: d.action,
-        description: d.details?.message || d.action
+        action_type: d.action ?? d.action_type,
+        description: d.details?.message || d.action || d.description
       }))
-      setActivities(mapped as LogEntry[])
+      setActivities(mapped)
     }
     setLoading(false)
   }, [userId, groupId, limit, db])

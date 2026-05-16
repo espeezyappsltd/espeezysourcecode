@@ -32,15 +32,15 @@ export default function ConnectionAlertTray() {
         where('status', '==', 'pending')
       )
       const snap = await getDocs(q)
-      const data = await Promise.all(snap.docs.map(async (d: any) => {
-        const conn = d.data() as any
+      const data = await Promise.all(snap.docs.map(async (d) => {
+        const conn = d.data() as Omit<ConnectionRequest, 'id' | 'profiles'>
         if (!conn.user_id) return null
-        
+
         const pSnap = await getDocs(query(collection(db, 'profiles'), where('id', '==', conn.user_id), selectCols('id, full_name, avatar_url')))
         return {
           id: d.id,
           ...conn,
-          profiles: pSnap.empty ? null : pSnap.docs[0].data()
+          profiles: pSnap.empty ? null : pSnap.docs[0].data() as Profile
         }
       }))
       setRequests(data.filter(Boolean) as ConnectionRequest[])

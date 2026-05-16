@@ -20,7 +20,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u: any) => {
+    const unsubscribe = onAuthStateChanged(auth, (u: User | null) => {
       setUser(u)
     })
     return () => unsubscribe()
