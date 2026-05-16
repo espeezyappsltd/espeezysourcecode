@@ -93,6 +93,15 @@ const docsContent: Record<string, { title: string, icon: React.ReactNode, conten
 
 export default function DynamicDocPage() {
   const params = useParams()
+  if (!params || !params.slug) {
+    return (
+      <div style={{ textAlign: 'center', padding: '10rem 0' }}>
+        <h1 style={{ fontSize: '4rem', fontWeight: 900, marginBottom: '2rem' }}>404</h1>
+        <p style={{ color: '#9ca3af', marginBottom: '3rem' }}>This documentation segment remains classified or does not exist.</p>
+        <Link href="/docs" style={{ color: '#10b981', fontWeight: 700, textDecoration: 'none' }}>← Return to Archive</Link>
+      </div>
+    )
+  }
   const slug = (params.slug as string[]).join('/')
   const item = docsContent[slug]
 

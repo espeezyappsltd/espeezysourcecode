@@ -18,7 +18,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
-import { Profile } from '@/types/auth'
+import { Profile } from '@/types/database'
 import { usePresence } from '@/components/PresenceProvider'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
@@ -93,11 +93,30 @@ export default function ChillOutHub() {
         const stats = await fetchUserGameStats(profile.id)
 
         if (!stats) {
-          const newStats = { user_id: profile.id, total_xp: 0, level: 1 }
+          const newStats = {
+            user_id: profile.id,
+            total_xp: 0,
+            level: 1,
+            wins: 0,
+            games_played: 0,
+            rank_title: 'Novice Scholar',
+          }
           await upsertUserGameStats(profile.id, newStats)
-          setUserStats(newStats)
+          setUserStats({
+            level: 1,
+            total_xp: 0,
+            wins: 0,
+            games_played: 0,
+            rank_title: 'Novice Scholar',
+          })
         } else {
-          setUserStats(stats)
+          setUserStats({
+            level: 1, // You can adjust this if you have a level calculation
+            total_xp: stats.total_points ?? 0,
+            wins: stats.wins ?? 0,
+            games_played: stats.total_games ?? 0,
+            rank_title: 'Novice Scholar', // Or derive from stats if you have logic
+          })
         }
 
         if (onlineUsers.size > 0) {
@@ -211,7 +230,7 @@ export default function ChillOutHub() {
                    <div style={{ width: '200px', height: '6px', background: 'var(--bg-main)', borderRadius: '10px', overflow: 'hidden' }}>
                       <motion.div 
                         initial={{ width: 0 }} 
-                        animate={{ width: `${(userStats?.total_xp % 100)}%` }}
+                        animate={{ width: `${(userStats?.total_xp ?? 0) % 100}%` }}
                         style={{ height: '100%', background: 'var(--brand)' }} 
                       />
                    </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { useProfile } from '../../context/ProfileContext'
+import type { Profile } from '@/types/database'
 import {
   fetchFeedPosts,
   createFeedPost,
@@ -30,14 +31,6 @@ const REACTION_META: Record<Reaction, { emoji: string; label: string; Icon: type
   celebrate:   { emoji: '🎉', label: 'Celebrate',  Icon: PartyPopper },
 }
 
-interface PostAuthor {
-  id: string
-  full_name: string
-  username?: string
-  avatar_url?: string
-  role?: string
-}
-
 interface Post {
   id: string
   content: string
@@ -45,8 +38,8 @@ interface Post {
   post_type: string
   visibility: string
   created_at: string
-  edited_at?: string
-  author: PostAuthor
+  edited_at?: string | null
+  author: Partial<Profile> | null
   reactions: { reaction: Reaction; user_id: string }[]
   comments: { count: number }[]
 }
@@ -56,16 +49,9 @@ interface Comment {
   content: string
   created_at: string
   parent_id?: string
-  author: PostAuthor
+  author: Partial<Profile> | null
 }
 
-export default function FeedPage() {
-  const { profile } = useProfile()
-  const router = useRouter()
-  const db = useMemo(() => createBrowserSupabaseClient(), [])
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
   const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [composerText, setComposerText] = useState('')
@@ -364,7 +350,7 @@ export default function FeedPage() {
   )
 }
 
-// ─── PostCard ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ PostCard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PostCard({
   post, currentUserId, onReaction, userReaction, reactionCounts, totalReactions,
   commentCount, comments, loadingComments, onToggleComments,
@@ -446,7 +432,7 @@ function PostCard({
           <ActionButton
             onClick={onToggleReactionPicker}
             active={!!userReaction}
-            label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : '👍 React'}
+            label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : 'ðŸ‘ React'}
             ariaLabel="Open reaction picker"
             ariaExpanded={showReactionPicker}
           />
@@ -484,7 +470,7 @@ function PostCard({
 
         <ActionButton
           onClick={onToggleComments}
-          label={`💬 ${commentCount > 0 ? commentCount : ''} Comment${commentCount !== 1 ? 's' : ''}`}
+          label={`ðŸ’¬ ${commentCount > 0 ? commentCount : ''} Comment${commentCount !== 1 ? 's' : ''}`}
           ariaLabel={`${commentCount} comments. Click to expand.`}
           ariaExpanded={!!comments || loadingComments}
         />
@@ -493,7 +479,7 @@ function PostCard({
       {/* Comments section */}
       {(comments || loadingComments) && (
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1rem 1.25rem' }}>
-          {loadingComments && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>Loading…</div>}
+          {loadingComments && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>Loadingâ€¦</div>}
           {comments?.map(c => (
             <div key={c.id} style={{ display: 'flex', gap: '0.6rem', marginBottom: '0.75rem' }}>
               <Avatar profile={c.author} size={28} />
@@ -514,7 +500,7 @@ function PostCard({
                 value={commentText}
                 onChange={e => onCommentTextChange(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSubmitComment() }}}
-                placeholder="Write a comment…"
+                placeholder="Write a commentâ€¦"
                 maxLength={500}
                 style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#E5E7EB', fontSize: '0.83rem', fontFamily: 'inherit' }}
               />
@@ -580,3 +566,5 @@ function VisibilityToggle({ value, onChange }: { value: 'public' | 'connections'
     </button>
   )
 }
+
+

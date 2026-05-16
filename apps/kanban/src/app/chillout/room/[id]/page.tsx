@@ -360,8 +360,8 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                 <SkirmishTimer 
                   roundStartTime={roundStartTime || 0} 
                   timerDuration={timerDuration || 20}
-                  activeTurnId={activeTurnId}
-                  currentProfileId={profile?.id || null}
+                  activeTurnId={activeTurnId ?? null}
+                  currentProfileId={profile?.id ?? null}
                   onTimeOut={handleSkipRound}
                 />
              </div>
