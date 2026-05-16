@@ -9,11 +9,7 @@ const nextConfig = {
     unoptimized: true,
   },
   outputFileTracingRoot: monorepoRoot,
-  experimental: {
-    turbo: {
-      root: monorepoRoot,
-    },
-  },
+  // Removed unsupported 'turbo' key from experimental
 }
 
 module.exports = nextConfig

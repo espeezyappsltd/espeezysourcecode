@@ -11,14 +11,7 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   outputFileTracingRoot: monorepoRoot,
-  experimental: {
-    turbo: {
-      root: monorepoRoot,
-      resolveAlias: {
-        '@shared/assets': '../shared/assets/index.ts',
-      },
-    },
-  },
+  // Removed unsupported 'turbo' key from experimental
 }
 
 module.exports = nextConfig

@@ -6,6 +6,9 @@ import { supabase } from '@/lib/supabase-client'
 
 function SsoBridgeContent() {
   const router = useRouter()
+
+  // wrap the component using useSearchParams() in a <Suspense> boundary
+  
   const searchParams = useSearchParams()
   const [error, setError] = useState('')
 

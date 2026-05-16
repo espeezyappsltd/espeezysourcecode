@@ -8,14 +8,7 @@ const nextConfig = {
     unoptimized: true,
   },
   outputFileTracingRoot: monorepoRoot,
-  experimental: {
-    turbo: {
-      root: monorepoRoot,
-      resolveAlias: {
-        '@shared': path.resolve(process.cwd(), '../prereg/src'),
-      },
-    },
-  },
+  // Removed unsupported 'turbo' key from experimental
 }
 
 module.exports = nextConfig
