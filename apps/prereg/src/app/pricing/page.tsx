@@ -17,8 +17,8 @@ const STRIPE_SUPPORT_PRODUCTS = [
     tag: 'Entry Tier',
     href: '/',
     cta: 'Join Early Access',
-    description: 'Stop group work free-riding. Core collaboration tools with transparent contribution tracking for every student.',
-    features: ['Basic kanban workspace', 'Contribution proof tracking', '1GB storage included'],
+    description: 'Core collaboration tools with a shared contribution record for every student.',
+    features: ['Basic kanban workspace', 'Contribution proof records', '1GB storage included'],
   },
   {
     name: 'Espeezy Pro',

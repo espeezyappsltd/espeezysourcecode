@@ -13,7 +13,7 @@ export default function GettingStartedPage() {
     {
       step: '03',
       title: 'Configure Protocols',
-      desc: 'Set contribution rules, deadlines, and accountability thresholds. The AI advisor will monitor workload distribution and flag imbalances before they become problems.',
+      desc: 'Set contribution rules, deadlines, and team expectations. The AI advisor reviews workload distribution and highlights imbalances before they become problems.',
     },
   ]
 
@@ -24,7 +24,7 @@ export default function GettingStartedPage() {
         Quick Start Guide
       </h1>
       <p style={{ fontSize: '1.1rem', color: '#9ca3af', lineHeight: 1.65, marginBottom: '3rem', maxWidth: '640px' }}>
-        Get your team collaborating accurately and transparently in three steps. No credit card required for the core platform.
+        Get your team collaborating with a clear academic record in three steps. No credit card required for the core platform.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '4rem' }}>

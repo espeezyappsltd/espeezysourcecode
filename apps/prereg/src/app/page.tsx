@@ -125,7 +125,7 @@ import { submitPreregistration } from '@/services/preregister'
 
 const COMING_FEATURES = [
   { icon: <Zap size={20} />, title: 'Unified Project Hub', desc: 'A high-performance workspace that integrates Kanban boards, shared documents, and group chat, so you never have to switch between apps to manage your academic work.', tag: 'Productivity' },
-  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'Real-time tracking logs every task update and document edit, generating verifiable accountability reports to ensure every student\'s work is recognized and accurately credited.', tag: 'Visibility' },
+  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'A shared activity log for task updates and document edits, with exportable reports that build an academic record you can use for grading, job applications, and proving your skills.', tag: 'Visibility' },
   { icon: <BookOpen size={20} />, title: 'Deep LMS Sync', desc: 'Bi-directional connectors for Canvas, Blackboard, and Moodle automatically sync your assignments, deadlines, and grades into your centralized Espeezy dashboard.', tag: 'Integrations' },
   { icon: <GraduationCap size={20} />, title: 'Smart Study Groups', desc: 'Our AI-driven matching algorithm connects you with peers who complement your strengths, forming optimal study groups that boost collective performance.', tag: 'Collaboration' },
   { icon: <TrendingUp size={20} />, title: 'Performance Analytics', desc: 'Advanced analytics identify your work patterns and provide actionable insights to help you optimize your contributions and maximize your grades.', tag: 'Insights' },
@@ -329,12 +329,12 @@ export default function PreRegisterPage() {
 
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
           style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, maxWidth: '820px', margin: '0 auto 1.25rem' }}>
-          Make every team contribution<br /><span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>impossible to miss.</span>
+          Give every team contribution<br /><span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>the credit it deserves.</span>
         </motion.h2>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
           style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-          {config.brand_name} tracks exactly who does what in group projects, providing the transparent data needed for accurate grading.
+          {config.brand_name} records who contributed what in group projects, with a clear academic record for grading, job applications, and proving your skills.
         </motion.p>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
@@ -427,10 +427,10 @@ export default function PreRegisterPage() {
                   </div>
                   <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 1.9rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '1rem 0 0.5rem', lineHeight: 1.1 }}>
                     Get credit for every contribution.<br />
-                    <span style={{ color: 'var(--brand)' }}>Make your work impossible to miss.</span>
+                    <span style={{ color: 'var(--brand)' }}>Show your work clearly.</span>
                   </h2>
                   <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                    Join the waitlist for the only platform that tracks individual contributions in real time.
+                    Join the waitlist for a platform that records individual contributions as your team works.
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <label htmlFor="prereg-email" className="sr-only">Email address (required)</label>
@@ -472,7 +472,7 @@ export default function PreRegisterPage() {
               Get a first look at the product.
             </h2>
             <p style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto', fontSize: '1rem', lineHeight: 1.6 }}>
-              Built for students, educators, and institutions who need transparency and speed.
+              Built for students, educators, and institutions who need clarity and speed.
             </p>
           </div>
 
@@ -484,18 +484,18 @@ export default function PreRegisterPage() {
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 'clamp(2.8rem, 8vw, 6rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, maxWidth: '960px', margin: '0 auto 1.5rem' }}>
-            The only platform that makes every contribution{' '}
+            A shared record that makes every contribution{' '}
             <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              impossible to miss.
+              easy to see.
             </span>
           </h2>
           <p style={{ color: '#64748b', maxWidth: '680px', margin: '0 auto 3rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
-            Eliminate the guesswork. Espeezy provides the real-time data required to ensure every contribution is recognized and graded accurately.
+            Less guesswork for teams and educators. Espeezy keeps a clear contribution history that becomes an academic record for grades, portfolios, and employers.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {[
               { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not accurately recognised in group assessments.' },
-              { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide will benefit from transparent, equitable collaboration tools.' },
+              { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide could benefit from group-work tools with academic records for résumés and skill proof.' },
               { icon: <TrendingUp size={22} />, stat: '3x', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
               { icon: <Globe size={22} />, stat: '195', label: 'countries where equitable access to quality educational tools remains a critical gap.' },
             ].map((item, i) => (
@@ -555,7 +555,7 @@ export default function PreRegisterPage() {
             Be part of the<br /><span style={{ color: 'var(--brand)' }}>founding generation.</span>
           </h2>
           <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            One mission: Eliminate group work free-riding. Join the thousands of students building a future where grades are earned, not shared.
+            One mission: Document real work in group projects with an academic record you can show graders, recruiters, and hiring teams. Join students building proof of what each person contributed.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

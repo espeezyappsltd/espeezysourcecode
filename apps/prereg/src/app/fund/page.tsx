@@ -71,7 +71,7 @@ const FUND_FEATURES = [
     need: '$9,500',
     tag: 'Analytics',
     why: 'Processing contribution heatmaps, velocity graphs, and anomaly detection in real-time for classrooms of 200+ students demands dedicated data pipeline infrastructure beyond what serverless free tiers allow.',
-    deliverable: 'Educators see every student\'s daily contribution level, flag free-rider patterns automatically, and export grade-ready reports in one click.',
+    deliverable: 'Educators see each student\'s daily contribution level, spot uneven workload early, and export grade-ready reports in one click.',
   }
 ]
 

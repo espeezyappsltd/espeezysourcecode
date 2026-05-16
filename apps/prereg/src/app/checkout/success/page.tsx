@@ -98,7 +98,7 @@ const TIER_CONTENT = {
     badgeSub:  'Full Premium access · Cancel any time',
     nextSteps: [
       'Log in at espeezy.com to activate your account',
-      'Set up group health monitoring on your active workspace',
+      'Set up group health overview on your active workspace',
       'Explore the Academic Integrity report for your current project',
     ],
     icon:    <Star size={44} color="white" fill="white" />,

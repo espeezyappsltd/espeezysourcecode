@@ -38,7 +38,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Step 2: Set up your workspace',
-        body: 'Every project lives inside a workspace. A workspace represents your course or module. You set the name, subject area, deadline, and the grading weight of collaboration (used by the AI transparency monitor). You can connect your LMS (Canvas, Blackboard, Moodle) to auto-import assignments and deadlines.',
+        body: 'Every project lives inside a workspace. A workspace represents your course or module. You set the name, subject area, deadline, and the grading weight of collaboration (used by the team balance summary). You can connect your LMS (Canvas, Blackboard, Moodle) to auto-import assignments and deadlines.',
         items: ['One workspace per course or group project', 'LMS sync pulls assignment titles, due dates, and members', 'Workspace settings can be locked by an educator or left open to the group'],
       },
       {
@@ -51,7 +51,7 @@ const docsContent: Record<string, DocEntry> = {
         body: 'Use the Kanban board to create task cards. Each card has a title, description, assignee, due date, and effort estimate. The AI will flag tasks that look unevenly distributed based on effort points compared to team size. You can add subtasks, attach files, and link tasks to roadmap milestones.',
       },
       {
-        heading: 'Step 5: Track and submit',
+        heading: 'Step 5: Record and submit',
         body: 'As tasks move through the board columns (Backlog, In Progress, Review, Done), Espeezy logs every state change with a timestamp and the user who made it. This contribution log is what generates your individual contribution score, which educators can optionally view. At submission time, you can export a full contribution report as a PDF.',
       },
     ],
@@ -89,7 +89,7 @@ const docsContent: Record<string, DocEntry> = {
   'features/kanban': {
     title: 'Digital Kanban Board',
     icon: <LayoutGrid size={40} />,
-    tagline: 'A visual task board that makes every contribution visible, timestamped, and impossible to ignore.',
+    tagline: 'A visual task board that makes every contribution visible, timestamped, and easy to review.',
     sections: [
       {
         heading: 'How the board works',
@@ -101,8 +101,8 @@ const docsContent: Record<string, DocEntry> = {
         items: ['Effort points translate directly into contribution score', 'File attachments are version-controlled (upload a new file to keep history)', '@mentions trigger real-time notifications to the mentioned user', 'Subtasks show a progress bar on the parent card'],
       },
       {
-        heading: 'The transparency monitor',
-        body: 'The AI transparency monitor runs in the background and calculates the distribution of effort points across all team members. If one person is assigned more than 40% of the total effort with more than 3 days remaining before the deadline, the system sends an automated alert to all workspace members and flags the imbalance on the board sidebar. Educators can configure the sensitivity threshold.',
+        heading: 'Team balance summary',
+        body: 'The team balance summary runs in the background and calculates the distribution of effort points across all team members. If one person is assigned more than 40% of the total effort with more than 3 days remaining before the deadline, the system sends an automated alert to all workspace members and highlights the imbalance on the board sidebar. Educators can configure the sensitivity threshold.',
       },
       {
         heading: 'Filters and views',
@@ -349,7 +349,7 @@ const docsContent: Record<string, DocEntry> = {
   'infra/presence': {
     title: 'Real-time Presence',
     icon: <Eye size={40} />,
-    tagline: 'Live indicators that show exactly who is active in your workspace, what they are viewing, and when they were last seen.',
+    tagline: 'Live indicators that show who is active in your workspace, what they are viewing, and when they were last seen.',
     sections: [
       {
         heading: 'Online indicators',
@@ -543,13 +543,13 @@ const docsContent: Record<string, DocEntry> = {
     sections: [
       {
         heading: 'Kanban Board',
-        body: 'The heart of Espeezy. Track tasks, assign work, and monitor contribution in real time. Features drag-and-drop, file attachments, and an immutable audit trail.',
+        body: 'The heart of Espeezy. Organize tasks, assign work, and keep a shared contribution record as you go. Features drag-and-drop, file attachments, and an immutable audit trail.',
         items: ['Task assignment', 'Effort estimation', 'Timestamped activity logs']
       },
       {
         heading: 'Academic Roadmap',
         body: 'Plan your project across five key stages. Set milestones and visualize your progress on a Gantt-style timeline.',
-        items: ['Stage-based planning', 'Milestone tracking', 'Progress visualization']
+        items: ['Stage-based planning', 'Milestone records', 'Progress visualization']
       },
       {
         heading: 'Peer Network',
