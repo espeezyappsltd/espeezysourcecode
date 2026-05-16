@@ -101,9 +101,9 @@ export default function ActivityLogView({
     if (data) {
       const mapped = data.map((d: LogEntry & { action?: string; details?: { message?: string } }) => ({
         ...d,
-        action_type: d.action ?? d.action_type,
+        action_type: d.action ?? d.action_type as LogEntry['action_type'],
         description: d.details?.message || d.action || d.description
-      }))
+      })) as LogEntry[]
       setActivities(mapped)
     }
     setLoading(false)

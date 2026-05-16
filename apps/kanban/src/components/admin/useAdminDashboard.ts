@@ -135,7 +135,7 @@ export function useAdminDashboard() {
       // Convert the config rows array into a key-indexed map
       const configMap = configSnap.docs.reduce(
         (acc: PlatformConfig, doc) => {
-          const item = doc.data() as { key: string } & ConfigEntry
+          const item = doc.data() as unknown as { key: string } & ConfigEntry
           return { ...acc, [item.key]: item }
         },
         {} as PlatformConfig,

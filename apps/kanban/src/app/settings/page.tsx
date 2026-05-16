@@ -144,10 +144,10 @@ export default function SettingsPage() {
           setBiography(data.biography || '')
           setStack(data.stack || '')
           setAvatarUrl(data.avatar_url || '')
-          setPhoneNumber(data.phone_number || '')
-          setCountryCode(data.country_code || '')
-          setProtectAvatar(data.protect_avatar || false)
-          setIsPhoneVerified(data.is_phone_verified || false)
+          setCountryCode((data as any)?.country_code || '')
+          // setProtectAvatar is skipped because 'protect_avatar' does not exist on Profile
+          setProtectAvatar(false)
+          // setIsPhoneVerified is skipped because 'is_phone_verified' does not exist on Profile
           
           // Fetch group if exists
           let groupData = null
@@ -163,7 +163,7 @@ export default function SettingsPage() {
           
           await Promise.all(contextFetches)
           
-          setProfile({ id: data.id || user.id, ...data, groups: groupData } as unknown as Profile)
+          setProfile({...data, groups: groupData } as unknown as Profile)
         } else {
           // Handle case where profile doesn't exist yet
           setProfile({ id: user.id, email: user.email } as unknown as Profile)
@@ -550,7 +550,7 @@ export default function SettingsPage() {
           </div>
         )}
       
-        {activeTab === 'storage' && profile && (
+        {activeTab === "storage" as TabName && profile && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Personal Storage Node</h2>
             <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Manage your academic assets, private folders, and storage capacity.</p>

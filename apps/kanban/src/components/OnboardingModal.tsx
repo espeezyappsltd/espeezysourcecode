@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
+import {Profile} from '@/types/auth'
+
 import { 
   CheckCircle2, 
   ArrowRight, 
@@ -73,13 +75,37 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
 
   const saveIdentity = async () => {
     if (user.id === '00000000-0000-0000-0000-000000000000') {
+      // Generate a unique UUID for the mock user
+      const generateUUID = () => {
+        // Simple UUID v4 generator
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+      const uniqueId = generateUUID();
       setSaving(true)
-      // Local-only update for mock user
-      setProfile((prev: Profile | null) => ({
-        ...(prev || {}),
-        full_name: fullName,
-        avatar_url: selectedAvatar
-      } as Profile))
+      // Local-only update for mock user using uniqueId
+      setProfile((prev) => {
+        return {
+          id: prev?.id && prev.id !== '00000000-0000-0000-0000-000000000000' ? prev.id : uniqueId,
+          email: prev?.email || '',
+          course_name: prev?.course_name || '',
+          enrollment_year: prev?.enrollment_year || 0,
+          completion_year: prev?.completion_year || 0,
+          full_name: fullName ? fullName : '',
+          username: fullName ? fullName.toLowerCase().replace(/\s+/g, '') : '',
+          avatar_url: selectedAvatar || '',
+          updated_at: new Date().toISOString(),
+          created_at: prev?.created_at || new Date().toISOString(),
+          role: prev?.role || '',
+          rank: typeof prev?.rank === 'string' ? prev.rank : prev?.rank != null ? String(prev.rank) : null,
+          badges_count: prev?.badges_count || 0,
+          school_id: prev?.school_id || '',
+          group_id: prev?.group_id || '',
+          total_score: prev?.total_score || 0,
+        };
+      })
       setTimeout(() => {
         setSaving(false)
         handleNext()
@@ -92,7 +118,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
       .from('profiles')
       .upsert({ 
         id: user.id,
-        full_name: fullName, 
+        username: fullName.toLowerCase().replace(/\s+/g, ''), 
         avatar_url: selectedAvatar,
         updated_at: new Date().toISOString()
       })

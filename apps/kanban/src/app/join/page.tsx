@@ -26,9 +26,10 @@ function SubmitButton({ label, secondary = false }: { label: string, secondary?:
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
+
 function JoinGroupContent() {
-  const searchParams = useSearchParams()
-  const error = searchParams.get('error')
+   const searchParams = useSearchParams()
+   const error = searchParams?.get('error')
 
   return (
     <main className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4rem' }}>

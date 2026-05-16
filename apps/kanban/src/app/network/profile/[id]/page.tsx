@@ -22,7 +22,7 @@ import {
 export default function StudentProfilePage() {
   const params = useParams()
   const router = useRouter()
-  const studentId = params.id as string
+  const studentId = (params?.id ?? '') as string
 
   const [member, setMember] = useState<(Profile & { groups?: any }) | null>(null)
   const [me, setMe] = useState<Profile | null>(null)
@@ -34,7 +34,12 @@ export default function StudentProfilePage() {
   const formatRelativeTime = (date: string | number | Date | null) => {
     if (!date) return 'Unknown'
     const now = new Date()
-    const targetDate = date.seconds ? new Date(date.seconds * 1000) : new Date(date)
+    let targetDate: Date
+    if (typeof date === 'object' && date !== null && 'seconds' in date && typeof (date as any).seconds === 'number') {
+      targetDate = new Date((date as any).seconds * 1000)
+    } else {
+      targetDate = new Date(date)
+    }
     const diff = now.getTime() - targetDate.getTime()
     const mins = Math.floor(diff / 60000)
     if (mins < 1) return 'Just now'
@@ -51,7 +56,12 @@ export default function StudentProfilePage() {
   const fetchProfileData = async () => {
     setLoading(true)
     const currentUser = await getAuthUser()
-    setMe(currentUser)
+    if (currentUser) {
+      const myProfile = await fetchProfileById(currentUser.id)
+      setMe(myProfile)
+    } else {
+      setMe(null)
+    }
 
     try {
       const profileData = await fetchProfileById(studentId)

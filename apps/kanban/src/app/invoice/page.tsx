@@ -4,20 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { FileText, ChevronRight, Clock, CheckCircle, AlertCircle, Search, Filter } from 'lucide-react'
 import Link from 'next/link'
 import { useProfile } from '@/context/ProfileContext'
-
-
-type Invoice = {
-  id: string;
-  status: string;
-  currency?: string;
-  created_at: string;
-  completed_at?: string;
-  amount_cents: number;
-  net_cents?: number;
-  note?: string;
-  plan_label?: string;
-  invoice_number?: string;
-};
+import { Invoice } from '@/types/invoice'
 
 function InvoiceListPage() {
   const { profile } = useProfile();
@@ -94,12 +81,12 @@ function InvoiceListPage() {
                   </div>
                   <div>
                     <h4 style={{ margin: 0, color: 'white', fontWeight: 800, fontSize: '1rem' }}>{inv.plan_label || inv.note || 'Scholar Upgrade'}</h4>
-                    <p style={{ margin: '0.2rem 0 0', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', fontWeight: 600 }}>{inv.invoice_number || `INV-${inv.id.slice(0, 8).toUpperCase()}`} • {fmtDate(inv.created_at || inv.completed_at)}</p>
+                    <p style={{ margin: '0.2rem 0 0', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', fontWeight: 600 }}>{inv.invoice_number || `INV-${inv.id.slice(0, 8).toUpperCase()}`} • {fmtDate((inv.created_at || inv.completed_at) ?? '')}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: 0, color: 'white', fontWeight: 900, fontSize: '1.1rem' }}>{fmtCurrency(inv.amount_cents || inv.net_cents, inv.currency)}</p>
+                    <p style={{ margin: 0, color: 'white', fontWeight: 900, fontSize: '1.1rem' }}>{fmtCurrency((inv.amount_cents ?? inv.net_cents ?? 0), inv.currency)}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'flex-end', marginTop: '0.2rem' }}>
                       {inv.status === 'completed' || inv.status === 'paid' ? (
                         <><CheckCircle size={12} color="#10b981" /> <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, textTransform: 'uppercase' }}>Paid</span></>

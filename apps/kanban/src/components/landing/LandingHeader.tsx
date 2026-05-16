@@ -20,10 +20,15 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u: User | null) => {
-      setUser(u)
+    const { subscription } = onAuthStateChanged((u: { id?: string; email?: string } | null) => {
+      // Only set user if the returned object has the required User fields
+      if (u && 'id' in u && 'email' in u) {
+        setUser(u as User)
+      } else {
+        setUser(null)
+      }
     })
-    return () => unsubscribe()
+    return () => subscription.unsubscribe()
   }, [])
 
   // Smooth-scroll to a hash anchor; falls back to normal navigation for full paths

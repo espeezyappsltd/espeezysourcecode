@@ -33,6 +33,10 @@ export type Profile = {
   spotify_refresh_token?: string | null;
   spotify_token_expires_at?: string | null;
   spotify_connected?: boolean;
+  username?: string
+  country_code?: string
+  storage_used ?: number // in bytes
+  [key: string]: any // Allow additional properties for flexibility
 };
 
 export type ActiveUser = {
