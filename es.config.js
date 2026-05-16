@@ -1,6 +1,7 @@
 require('esbuild').build({
     // the entry point file described above
-    entryPoints: ['src/app/page.tsx'],
+    entryPoints: ['src/app/page.tsx', 'apps/kanban/page.tsx'],
+
     platform: 'browser',
     format: 'iife',
     bundle: true,

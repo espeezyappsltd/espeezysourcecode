@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
+    import { CategoryTabs } from 'apps/shared/CategoryTabs'
 
 const SCREENSHOTS = [
   { src: SCREENSHOT_ASSETS.CONTRIBUTION_METRICS, title: 'Contribution Metrics', category: 'Analytics' },
@@ -36,28 +37,7 @@ export default function ScreenshotGallery() {
     <div className="w-full" style={{ position: 'relative', paddingBottom: '4rem' }}>
       
       {/* Category Filter */}
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '3rem' }}>
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            style={{
-              padding: '0.5rem 1.25rem',
-              borderRadius: '100px',
-              border: '1px solid rgba(15,23,42,0.08)',
-              background: filter === cat ? 'var(--brand)' : 'white',
-              color: filter === cat ? 'white' : '#64748b',
-              fontSize: '0.8rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              transition: '0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: filter === cat ? '0 8px 20px rgba(16,185,129,0.2)' : 'none'
-            }}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      <CategoryTabs categories={categories} selected={filter} onSelect={setFilter} />
 
       {/* Main Grid */}
       <div style={{ 

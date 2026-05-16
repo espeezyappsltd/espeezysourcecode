@@ -1103,10 +1103,12 @@ export default function SettingsPage() {
               {(() => {
                 type GroupSummary = { name?: string | null; module_code?: string | null }
                 const groupRelation = (profile as Profile & { groups?: GroupSummary | GroupSummary[] }).groups
-                const groupData = Array.isArray(groupRelation)
-                  ? groupRelation[0]
-                  : groupRelation
-                
+                let groupData: GroupSummary | null = null
+                if (Array.isArray(groupRelation)) {
+                  groupData = groupRelation.length > 0 ? groupRelation[0] : null
+                } else if (groupRelation && typeof groupRelation === 'object') {
+                  groupData = groupRelation
+                }
                 return (
                   <div>
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Team</div>

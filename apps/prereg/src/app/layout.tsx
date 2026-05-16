@@ -3,6 +3,7 @@ import './globals.css'
 import NavigationProgress from '@/components/NavigationProgress'
 import PreregFooter from '@/components/PreregFooter'
 import { CentralLoadingProvider } from 'apps/shared/CentralLoadingProvider'
+import PageTransitionWrapper from 'apps/shared/PageTransitionWrapper'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
@@ -58,7 +59,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <CentralLoadingProvider>
           <NavigationProgress />
-          {children}
+          <PageTransitionWrapper>
+            {children}
+          </PageTransitionWrapper>
           <PreregFooter />
         </CentralLoadingProvider>
         <Analytics />

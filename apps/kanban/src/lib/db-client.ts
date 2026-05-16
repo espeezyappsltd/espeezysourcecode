@@ -9,22 +9,20 @@ export const auth = {
   get currentUser() {
     // Note: This is synchronous in Firebase but asynchronous in Supabase.
     // For now, we return a partial user from the current session if available.
-    return (db as any)._session?.user || null
+    return (db as { _session?: { user?: { id?: string; email?: string } } })._session?.user || null
   },
   signOut: () => db.auth.signOut(),
-  onAuthStateChanged: (cb: (user: any) => void) => {
+  onAuthStateChanged: (cb: (user: { id?: string; email?: string } | null) => void) => {
     const { data } = db.auth.onAuthStateChange((_event, session) => {
       // Store session for the synchronous currentUser getter
-      ;(db as any)._session = session
+      ;(db as { _session?: { user?: { id?: string; email?: string } } | null })._session = session
       cb(session?.user || null)
     })
-    
     // Trigger immediate callback if session exists
     db.auth.getSession().then(({ data: { session } }) => {
-      ;(db as any)._session = session
+      ;(db as { _session?: { user?: { id?: string; email?: string } } | null })._session = session
       cb(session?.user || null)
     })
-
     return { subscription: { unsubscribe: () => data.subscription.unsubscribe() } }
   },
 }
@@ -72,29 +70,49 @@ export const limit = (n: number) => ({ limit: n })
 export const orderBy = (field: string, dir: string) => ({ field, dir })
 export const selectCols = (cols: string) => ({ columns: cols })
 
-export const getDocs = async (q: ShimQuery) => {
-  let builder = db.from(q.table).select(q.columns || '*')
+export interface FirestoreLikeDoc {
+  id: string;
+  data: () => Record<string, unknown>;
+  exists: () => boolean;
+  ref: { table: string; id: string };
+}
+
+export interface FirestoreLikeSnapshot {
+  docs: FirestoreLikeDoc[];
+  empty: boolean;
+  size: number;
+  docChanges: () => never[];
+}
+
+export const getDocs = async (q: ShimQuery): Promise<FirestoreLikeSnapshot> => {
+  let builder = db.from(q.table).select(q.columns || '*');
   if (q.constraints) {
     q.constraints.forEach((c) => {
-      if ((c.op === '==' || c.op === 'eq') && c.field) builder = builder.eq(c.field, c.value)
-      if (c.limit) builder = builder.limit(c.limit)
-      if (c.field && c.dir) builder = builder.order(c.field, { ascending: c.dir === 'asc' })
-    })
+      if ((c.op === '==' || c.op === 'eq') && c.field) builder = builder.eq(c.field, c.value);
+      if (c.limit) builder = builder.limit(c.limit);
+      if (c.field && c.dir) builder = builder.order(c.field, { ascending: c.dir === 'asc' });
+    });
   }
-  const { data } = await builder
-  const tableName = q.table
+  const { data } = await builder;
+  const tableName = q.table;
+  const docs: FirestoreLikeDoc[] = Array.isArray(data)
+    ? data.map((d) => {
+        const docData = d as unknown as Record<string, unknown>;
+        return {
+          id: String(docData.id),
+          data: () => docData,
+          exists: () => true,
+          ref: { table: tableName, id: String(docData.id) },
+        };
+      })
+    : [];
   return {
-    docs: (data ?? []).map((d: Record<string, any>) => ({
-      id: d.id,
-      data: () => d,
-      exists: () => true,
-      ref: { table: tableName, id: d.id }
-    })),
-    empty: (data ?? []).length === 0,
-    size: (data ?? []).length,
-    docChanges: () => []
-  }
-}
+    docs,
+    empty: docs.length === 0,
+    size: docs.length,
+    docChanges: () => [],
+  };
+};
 
 export const getDoc = async (docRef: { table: string, id: string }, columns: string = '*') => {
   const { data } = await db.from(docRef.table).select(columns).eq('id', docRef.id).single()
@@ -116,7 +134,7 @@ export const getCountFromServer = async (q: ShimQuery | string) => {
   return { data: () => ({ count: count || 0 }) }
 }
 
-export const onSnapshot = (q: ShimQuery, cb: (snapshot: any) => void) => {
+export const onSnapshot = (q: ShimQuery, cb: (snapshot: { docs: { id: string; data: () => Record<string, unknown>; exists: () => boolean; ref: { table: string; id: string } }[]; empty: boolean; size: number; docChanges: () => never[] }) => void) => {
   const channel = db.channel(`snapshot-${q.table}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: q.table }, () => {
       getDocs(q).then(cb)

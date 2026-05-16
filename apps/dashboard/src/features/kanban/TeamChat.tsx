@@ -446,6 +446,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
   useEffect(() => {
     let active = true
+    let channel: ReturnType<typeof supabase.channel> | null = null
 
     const loadMessages = async () => {
       const { data, error } = await supabase
@@ -462,7 +463,25 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         return
       }
 
-      const normalized = (data ?? []).map((row: any) => ({
+      const normalized = (data ?? []).map((row: {
+        id: string;
+        group_id: string;
+        user_id: string;
+        content: string;
+        created_at: string;
+        is_deleted: boolean;
+        profiles?: {
+          full_name: string | null;
+          avatar_url: string | null;
+          role: string | null;
+        } | Array<{
+          full_name: string | null;
+          avatar_url: string | null;
+          role: string | null;
+        }>;
+        payload?: ChatPayload;
+        pending?: boolean;
+      }) => ({
         ...row,
         profiles: Array.isArray(row.profiles) ? row.profiles[0] : row.profiles,
       }))
@@ -511,7 +530,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
     loadMembers()
 
-    const channel = supabase
+    channel = supabase
       .channel(`team-members:${groupId}`)
       .on(
         'postgres_changes',
@@ -522,7 +541,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
     return () => {
       active = false
-      supabase.removeChannel(channel)
+      if (channel) supabase.removeChannel(channel)
     }
   }, [isOpen, groupId])
 
@@ -569,8 +588,12 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         `Sent a ${payload?.type || 'text'} message`,
         { message_id: data.id }
       )
-    } catch (err: any) {
-      console.error('Send message error:', err.message)
+    } catch (err) {
+      if (err && typeof err === 'object' && 'message' in err) {
+        console.error('Send message error:', (err as { message: string }).message)
+      } else {
+        console.error('Send message error:', err)
+      }
     }
   }
 
@@ -595,8 +618,12 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
          'Deleted a message',
          { message_id: msgId }
        )
-    } catch (err: any) {
-       console.error('Delete message error:', err.message)
+    } catch (err) {
+       if (err && typeof err === 'object' && 'message' in err) {
+         console.error('Delete message error:', (err as { message: string }).message)
+       } else {
+         console.error('Delete message error:', err)
+       }
      }
   }
 
@@ -630,8 +657,12 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
             name: file.name
           }
        )
-    } catch (err: any) {
-       console.error('File upload error:', err.message)
+    } catch (err) {
+       if (err && typeof err === 'object' && 'message' in err) {
+         console.error('File upload error:', (err as { message: string }).message)
+       } else {
+         console.error('File upload error:', err)
+       }
      } finally {
        setUploading(false)
      }

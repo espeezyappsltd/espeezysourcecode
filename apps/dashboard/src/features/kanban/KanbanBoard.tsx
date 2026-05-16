@@ -114,7 +114,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
   useEffect(() => {
     let active = true
-    let channel: any = null
+    let channel: ReturnType<typeof supabase.channel> | null = null
 
     const initialize = async () => {
       await Promise.all([
@@ -438,7 +438,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                       <div
                         key={task.id}
                         draggable
-                        onDragStart={(e) => handleDragStart(e as any, task.id)}
+                        onDragStart={(e: React.DragEvent<HTMLDivElement>) => handleDragStart(e, task.id)}
                         onDragEnd={handleDragEnd}
                         onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
                         style={{

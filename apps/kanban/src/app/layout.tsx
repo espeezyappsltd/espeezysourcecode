@@ -7,8 +7,9 @@ import { NotificationProvider } from '@/components/NotificationProvider'
 import { ThemeProvider } from '@/context/ThemeContext'
 
 import OnboardingWrapper from '@/components/OnboardingWrapper'
-import { CentralLoadingProvider } from 'apps/shared/CentralLoadingProvider'
+import { CentralLoadingProvider } from '../../../shared/CentralLoadingProvider'
 import { ProfileProvider } from '@/context/ProfileContext'
+import PageTransitionWrapper from '../../../shared/PageTransitionWrapper'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import SupportChat from '@/components/SupportChat'
@@ -65,7 +66,9 @@ export default async function RootLayout({
 
                       <main className="main-content">
                         <ConnectionAlertTray />
-                        {children}
+                        <PageTransitionWrapper>
+                          {children}
+                        </PageTransitionWrapper>
                       </main>
 
                       <GlobalAnnouncement />

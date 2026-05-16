@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { TaskModalProps } from '@/types/ui'
 import { Profile } from '@/types/auth'
 import { TaskStatus, Artifact, TaskCategory } from '@/types/database'
+import { CategoryTabs } from '../../../shared/CategoryTabs'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { logActivity } from '@/utils/logging'
 import { taskSchema } from '@/utils/validation'
@@ -572,11 +573,13 @@ export default function TaskModal({
                  </select>
                </div>
                
-               <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
+               <div className="form-group" style={{ flex: '1 1 100%', marginBottom: 0 }}>
                   <label className="form-label" htmlFor="task-category">Category</label>
-                  <select id="task-category" className="form-input" value={category} onChange={e => setCategory(e.target.value as TaskCategory)}>
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <CategoryTabs
+                    categories={CATEGORIES}
+                    selected={category}
+                    onSelect={cat => setCategory(cat as TaskCategory)}
+                  />
                 </div>
                
                <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
