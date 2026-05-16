@@ -5,37 +5,51 @@ import { FileText, ChevronRight, Clock, CheckCircle, AlertCircle, Search, Filter
 import Link from 'next/link'
 import { useProfile } from '@/context/ProfileContext'
 
+
+type Invoice = {
+  id: string;
+  status: string;
+  currency?: string;
+  created_at: string;
+  completed_at?: string;
+  amount_cents: number;
+  net_cents?: number;
+  note?: string;
+  plan_label?: string;
+  invoice_number?: string;
+};
+
 function InvoiceListPage() {
-  const { profile } = useProfile()
-  const [invoices, setInvoices] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
+  const { profile } = useProfile();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
     async function fetchInvoices() {
-      setLoading(true)
+      setLoading(true);
       try {
-        const res = await fetch('/api/payments/history')
+        const res = await fetch('/api/payments/history');
         if (res.ok) {
-          const data = await res.json()
-          setInvoices(data.transfers || [])
+          const data = await res.json();
+          setInvoices((data.transfers || []) as Invoice[]);
         }
       } catch (err) {
-        console.error('Failed to fetch invoices:', err)
+        console.error('Failed to fetch invoices:', err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    fetchInvoices()
-  }, [])
+    fetchInvoices();
+  }, []);
 
   const filteredInvoices = invoices.filter(inv => {
-    if (filter === 'all') return true
-    return inv.status === filter
-  })
+    if (filter === 'all') return true;
+    return inv.status === filter;
+  });
 
-  const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-  const fmtCurrency = (cents: number, curr?: string) => (cents / 100).toLocaleString('en-GB', { style: 'currency', currency: curr || 'GBP' })
+  const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const fmtCurrency = (cents: number, curr?: string) => (cents / 100).toLocaleString('en-GB', { style: 'currency', currency: curr || 'GBP' });
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1rem' }}>
