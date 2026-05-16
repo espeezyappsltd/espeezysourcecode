@@ -121,7 +121,7 @@ export default function Home() {
             textDecoration: 'none',
             transition: 'background 0.2s'
           }}>
-            Open Kanban MVP
+            Open Kanban
           </a>
         </div>
       </div>

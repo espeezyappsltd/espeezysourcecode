@@ -113,40 +113,6 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
   }
 
   const saveIdentity = async () => {
-    if (user.id === '00000000-0000-0000-0000-000000000000') {
-      const generateUUID = () =>
-        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-          const r = (Math.random() * 16) | 0
-          const v = c === 'x' ? r : (r & 0x3) | 0x8
-          return v.toString(16)
-        })
-      const uniqueId = generateUUID()
-      setSaving(true)
-      setProfile((prev) => ({
-        id: prev?.id && prev.id !== '00000000-0000-0000-0000-000000000000' ? prev.id : uniqueId,
-        email: prev?.email || '',
-        course_name: prev?.course_name || '',
-        enrollment_year: prev?.enrollment_year || 0,
-        completion_year: prev?.completion_year || 0,
-        full_name: fullName.trim(),
-        username: fullName.trim().toLowerCase().replace(/\s+/g, ''),
-        avatar_url: selectedAvatar || '',
-        updated_at: new Date().toISOString(),
-        created_at: prev?.created_at || new Date().toISOString(),
-        role: prev?.role || '',
-        rank: typeof prev?.rank === 'string' ? prev.rank : prev?.rank != null ? String(prev.rank) : null,
-        badges_count: prev?.badges_count || 0,
-        school_id: prev?.school_id || '',
-        group_id: prev?.group_id || '',
-        total_score: prev?.total_score || 0,
-      }))
-      setTimeout(() => {
-        setSaving(false)
-        void handleNext()
-      }, 500)
-      return
-    }
-
     setSaving(true)
     const { error } = await db.from('profiles').upsert({
       id: user.id,

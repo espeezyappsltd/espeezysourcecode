@@ -12,12 +12,6 @@ export async function login(formData: FormData) {
     redirect(`/login?error=${encodeURIComponent('Security protocol triggered: Automated access denied.')}`)
   }
 
-  // NOTE: Firebase login is typically handled client-side to get the ID token.
-  // This server action is a placeholder or can be used for session verification.
-  // For now, we redirect to a client-side login flow or assume the client handles it.
-  // If the user is using Firebase UI or similar, this might not be needed.
-  
-  // However, for compatibility with the existing form, we'll suggest client-side login.
   redirect('/login?error=' + encodeURIComponent('Please sign in using the secure terminal interface.'))
 }
 

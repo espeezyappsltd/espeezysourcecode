@@ -1,18 +1,14 @@
+import { cache } from 'react'
 import { createClient as createServerSupabaseClient } from '@/lib/supabase/server'
 import { getAdminDb } from '@/lib/supabase/admin'
+import { Q } from '@/lib/query-columns'
+import type { Profile } from '@/types/auth'
 
 export async function getAuthUser() {
   const db = await createServerSupabaseClient()
-  const { data: { user: realUser } } = await db.auth.getUser()
-    .catch(() => ({ data: { user: null } }))
+  const { data: { user } } = await db.auth.getUser().catch(() => ({ data: { user: null } }))
 
-  // MOCK USER FOR TESTING
-  const user = realUser || {
-    id: '00000000-0000-0000-0000-000000000000',
-    email: 'test@example.com',
-    aud: 'authenticated',
-    role: 'authenticated',
-  }
+  if (!user) return null
 
   return {
     uid: user.id,
@@ -27,24 +23,28 @@ export async function getUid() {
   return user?.uid ?? null
 }
 
-export async function getUserProfile(uid: string) {
-  if (uid === '00000000-0000-0000-0000-000000000000') {
-    return {
-      id: uid,
-      full_name: 'Test User',
-      subscription_plan: 'pro',
-      group_id: '00000000-0000-0000-0000-000000000000', // Use a valid UUID for mock group
-      theme_config: { palette: 'Google Light' }
-    }
-  }
+/** Deduplicated per-request profile fetch for layout + dashboard. */
+export const getCachedUserProfile = cache(async (uid: string): Promise<Profile | null> => {
+  const db = await createServerSupabaseClient()
+  const { data, error } = await db
+    .from('profiles')
+    .select(Q.profile.layout)
+    .eq('id', uid)
+    .maybeSingle()
+
+  if (!error && data) return data as Profile
 
   const adminDb = getAdminDb()
-  const { data, error } = await adminDb
+  const { data: adminData, error: adminError } = await adminDb
     .from('profiles')
-    .select('*')
+    .select(Q.profile.layout)
     .eq('id', uid)
-    .single()
+    .maybeSingle()
 
-  if (error || !data) return null
-  return data
+  if (adminError || !adminData) return null
+  return adminData as Profile
+})
+
+export async function getUserProfile(uid: string) {
+  return getCachedUserProfile(uid)
 }

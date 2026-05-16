@@ -49,6 +49,12 @@ dist/
 # Ignore all .next files (Next.js)
 .next/
 
+# Playwright
+playwright-report/
+test-results/
+src/playwright-report/
+src/test-results/
+
 # Ignore all .nuxt files (Nuxt.js)
 .nuxt/
 

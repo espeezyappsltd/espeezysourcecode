@@ -34,13 +34,8 @@ export const useRealtime = () => useContext(RealtimeContext)
 
 // ─── MOCK HOOKS ──────────────────────────────────────────────────────────────
 
-export function usePresence(roomId: string) {
-  const [me, setMe] = useState<PresenceState | null>({
-    userId: '00000000-0000-0000-0000-000000000000',
-    name: 'Test User',
-    lastSeen: Date.now(),
-    status: 'online'
-  })
+export function usePresence(_roomId: string) {
+  const [me, setMe] = useState<PresenceState | null>(null)
   
   const updateMyState = useCallback((patch: Partial<PresenceState>) => {
     setMe(prev => prev ? { ...prev, ...patch } : null)

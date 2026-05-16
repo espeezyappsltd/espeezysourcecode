@@ -28,7 +28,6 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const { profile } = useProfile()
   
   const userId = user?.id
-  const isMockUser = userId === '00000000-0000-0000-0000-000000000000'
   const userName = user?.full_name
   const groupId = profile?.group_id
 
@@ -36,7 +35,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const previousOnlineRef = useRef<Set<string>>(new Set())
 
   const setTypingStatus = useCallback(async (isTyping: boolean) => {
-    if (!userId || isMockUser) return
+    if (!userId) return
     try {
       const { error } = await db
         .from('presence')
@@ -59,7 +58,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   }, [db, groupId, userId])
 
   useEffect(() => {
-    if (!userId || isMockUser) return
+    if (!userId) return
 
     let active = true
 

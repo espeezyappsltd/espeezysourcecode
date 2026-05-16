@@ -5,6 +5,7 @@ import type { User } from '@supabase/supabase-js'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { PersistentCache } from '@/utils/cache'
 import { Profile } from '@/types/auth'
+import { Q } from '@/lib/query-columns'
 
 type ProfileContextType = {
   profile: Profile | null
@@ -29,20 +30,16 @@ export function ProfileProvider({
     if (initialProfile) return initialProfile
     return initialUserId ? PersistentCache.get<Profile>(`profile_${initialUserId}`) : null
   })
-  const [loading, setLoading] = useState(!initialProfile)
+  const [loading, setLoading] = useState(!initialProfile && !!initialUserId)
   const [user, setUser] = useState<User | null>(null)
 
   const refreshProfile = useCallback(async () => {
     const currentUserId = user?.id || initialUserId
     if (!currentUserId) return
 
-    if (currentUserId === '00000000-0000-0000-0000-000000000000') {
-      return // Skip DB fetch for mock user
-    }
-
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(Q.profile.layout)
       .eq('id', currentUserId)
       .maybeSingle()
 
@@ -109,22 +106,21 @@ export function ProfileProvider({
       return
     }
 
-    // Only trigger loading if it's a real user and we don't have their data yet
-    if (currentUserId !== '00000000-0000-0000-0000-000000000000' && !profile) {
+    if (initialProfile?.id === currentUserId) {
+      setLoading(false)
+      return
+    }
+
+    if (!profile) {
       setLoading(true)
     }
 
     let active = true
 
     const loadProfile = async () => {
-      if (currentUserId === '00000000-0000-0000-0000-000000000000') {
-        setLoading(false)
-        return
-      }
-
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(Q.profile.layout)
         .eq('id', currentUserId)
         .maybeSingle()
 
@@ -176,7 +172,7 @@ export function ProfileProvider({
       active = false
       supabase.removeChannel(channel)
     }
-  }, [initialUserId, supabase, user])
+  }, [initialProfile, initialUserId, profile, supabase, user])
 
   return (
     <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile: setProfileWithCache }}>

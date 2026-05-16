@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
@@ -34,36 +34,40 @@ function LoginContent() {
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
   const [sendingOtp, setSendingOtp] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const [isResetting, setIsResetting] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Client-side guard: Bounce authenticated users back to dashboard
+  const goToDashboard = useCallback(() => {
+    const next = searchParams?.get('next')
+    const path =
+      next && next.startsWith('/') && !next.startsWith('//') && !next.includes(':') ? next : '/'
+    router.replace(path)
+    router.refresh()
+  }, [router, searchParams])
+
+  // Redirect authenticated users straight to the dashboard
   useEffect(() => {
-    console.log("LOGIN: useEffect trigger");
-    const authTimeout = setTimeout(() => {
-      console.log("LOGIN: Safety timeout fired");
-      setCheckingAuth(false);
-    }, 2000);
+    let cancelled = false
 
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
-      console.log("LOGIN: getSession finished", session ? "Session" : "No Session");
-      clearTimeout(authTimeout);
+      if (cancelled) return
       if (session) {
-        router.replace('/')
+        goToDashboard()
       } else {
         setCheckingAuth(false)
       }
     })
 
-    // Listen for auth state changes (e.g. after OAuth redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
-      if (session) {
-        router.replace('/')
-      }
+      if (session) goToDashboard()
     })
-    return () => subscription?.unsubscribe()
-  }, [router, supabase])
+
+    return () => {
+      cancelled = true
+      subscription?.unsubscribe()
+    }
+  }, [goToDashboard, supabase])
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,13 +77,17 @@ function LoginContent() {
     try {
       if (isSignUp) {
         if (!legalAccepted) throw new Error('Please accept the legal policies.')
-        const { error } = await supabase.auth.signUp({ email, password })
+        const { data, error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
+        if (data.session) {
+          goToDashboard()
+          return
+        }
         setResetMessage('Check your email to confirm your account before signing in.')
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        router.push('/')
+        goToDashboard()
       }
     } catch (err: unknown) {
       setAuthError(getErrorMessage(err))

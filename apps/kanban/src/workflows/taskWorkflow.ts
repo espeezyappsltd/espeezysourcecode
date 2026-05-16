@@ -142,17 +142,26 @@ async function logActivity(
   'use step'
 
   const db = getAdminDb()
-  const { error } = await db.from('activity_log').insert({ 
-    user_id: userId, 
-    group_id: groupId, 
-    action_type: actionType, 
-    description, 
-    metadata 
-  })
-
-  if (error) {
-    throw error
+  const row = {
+    user_id: userId,
+    group_id: groupId,
+    action_type: actionType,
+    description,
+    metadata,
   }
+
+  const [{ error: legacyError }, { error: logsError }] = await Promise.all([
+    db.from('activity_log').insert(row),
+    db.from('activity_logs').insert({
+      user_id: userId,
+      group_id: groupId,
+      action: actionType,
+      details: description,
+    }),
+  ])
+
+  if (legacyError) throw legacyError
+  if (logsError) throw logsError
 }
 
 async function notifyAssignees(assignees: string[], title: string, taskId: string, actingUserId: string) {

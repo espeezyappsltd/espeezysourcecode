@@ -267,7 +267,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </header>
 
       {/* Printable Executive Summary */}
-      <section className="print-only" style={{ display: 'none', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
+      <section className="print-only" data-testid="analytics-executive-report" style={{ display: 'none', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Executive Project Intelligence Report</h2>
         <p style={{ fontSize: '0.9rem', color: '#333' }}>
           This report provides a snapshot of team collaboration and project progress for <strong>{group?.name}</strong> ({group?.module_code}).
@@ -293,14 +293,14 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         marginBottom: '1.5rem' 
       }}>
         {[
-          { icon: <Zap size={18} />, label: 'Project Progress', value: `${completionRate}%`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
-          { icon: <CheckCircle2 size={18} />, label: 'Completed Tasks', value: `${doneTasks}/${tasks.length}`, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { icon: <Users size={18} />, label: 'Team Members', value: `${members.length} / ${group?.capacity || 5}`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
-          { icon: <AlertCircle size={18} />, label: 'Risk Assessment', value: riskLevel, color: riskLevel === 'Optimal' ? '#10b981' : '#ef4444', bg: riskLevel === 'Optimal' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' },
-          { icon: <ShieldCheck size={18} />, label: 'Evidence Density', value: evidenceDensity, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { icon: <Timer size={18} />, label: 'Overdue Tasks', value: overdueTasks, color: overdueTasks > 0 ? '#ef4444' : '#10b981', bg: overdueTasks > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
+          { testId: 'analytics-kpi-progress', icon: <Zap size={18} />, label: 'Project Progress', value: `${completionRate}%`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
+          { testId: 'analytics-kpi-completed', icon: <CheckCircle2 size={18} />, label: 'Completed Tasks', value: `${doneTasks}/${tasks.length}`, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+          { testId: 'analytics-kpi-members', icon: <Users size={18} />, label: 'Team Members', value: `${members.length} / ${group?.capacity || 5}`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
+          { testId: 'analytics-kpi-risk', icon: <AlertCircle size={18} />, label: 'Risk Assessment', value: riskLevel, color: riskLevel === 'Optimal' ? '#10b981' : '#ef4444', bg: riskLevel === 'Optimal' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' },
+          { testId: 'analytics-kpi-evidence', icon: <ShieldCheck size={18} />, label: 'Evidence Density', value: evidenceDensity, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+          { testId: 'analytics-kpi-overdue', icon: <Timer size={18} />, label: 'Overdue Tasks', value: overdueTasks, color: overdueTasks > 0 ? '#ef4444' : '#10b981', bg: overdueTasks > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
         ].map(kpi => (
-          <div key={kpi.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'var(--kpi-p)', display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="kpi-card-print">
+          <div key={kpi.label} data-testid={kpi.testId} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'var(--kpi-p)', display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="kpi-card-print">
             <div style={{ padding: '0.5rem', background: kpi.bg, color: kpi.color, borderRadius: '10px', flexShrink: 0 }} className="print-hide">{kpi.icon}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: kpi.color, lineHeight: 1 }}>{kpi.value}</div>

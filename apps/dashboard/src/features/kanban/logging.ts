@@ -10,7 +10,6 @@ const inferAppScope = () => {
   if (path.startsWith('/games')) return 'games'
   if (path.startsWith('/kanban')) return 'kanban'
   if (path.startsWith('/prereg')) return 'prereg'
-  if (path.startsWith('/mvp')) return 'kanban'
   return 'system'
 }
 

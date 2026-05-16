@@ -28,26 +28,6 @@ export async function getAuthUser() {
 }
 
 export async function fetchProfileById(userId: string): Promise<AuthProfile | null> {
-  if (userId === '00000000-0000-0000-0000-000000000000') {
-    return {
-      id: userId,
-      full_name: 'Test User',
-      subscription_plan: 'pro',
-      group_id: '00000000-0000-0000-0000-000000000000',
-      theme_config: { palette: 'Google Light' },
-      email: 'test@example.com',
-      avatar_url: null,
-      course_name: null,
-      enrollment_year: null,
-      completion_year: null,
-      role: null,
-      rank: null,
-      badges_count: null,
-      school_id: null,
-      total_score: 0,
-      created_at: new Date().toISOString(),
-    }
-  }
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('profiles')
@@ -65,18 +45,6 @@ export async function updateProfileById(userId: string, updates: Record<string, 
 }
 
 export async function fetchGroupById(groupId: string) {
-  if (groupId === '00000000-0000-0000-0000-000000000000') {
-    return {
-      id: groupId,
-      name: 'Mock Group',
-      module_code: 'MOCK101',
-      is_encrypted: false,
-      description: 'This is a mock group for development.',
-      rules: 'Be kind.',
-      capacity: 10,
-      created_at: new Date().toISOString()
-    } as unknown as Group
-  }
   const db = createBrowserSupabaseClient()
   const { data, error } = await db.from('groups').select('id, name, module_code, is_encrypted, description, rules, capacity, created_at').eq('id', groupId).maybeSingle()
   if (error) throw error

@@ -98,7 +98,7 @@ export function CyclingNamePlaceholder({ id }: { id: string }) {
           </motion.span>
         </AnimatePresence>
       )}
-    </motion.div>
+    </div>
   )
 }
 

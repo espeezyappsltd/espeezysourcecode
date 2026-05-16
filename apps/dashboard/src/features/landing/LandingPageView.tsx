@@ -146,10 +146,10 @@ function AccountAccessSection({
             </p>
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
               <a
-                href="/mvp"
+                href="https://kanban.espeezy.com"
                 style={{ color: '#a7f3d0', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
               >
-                Open Kanban MVP
+                Open Kanban
               </a>
               <button
                 type="button"
