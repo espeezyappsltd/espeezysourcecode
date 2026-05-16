@@ -25,15 +25,15 @@ export async function GET() {
     { data: planDistribution },
     { data: dailySignups },
   ] = await Promise.all([
-    svc.from('profiles').select('*', { count: 'exact', head: true }),
-    svc.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'pro'),
-    svc.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'premium'),
-    svc.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'lifetime'),
-    svc.from('profiles').select('*', { count: 'exact', head: true }).eq('is_banned', true),
-    svc.from('groups').select('*', { count: 'exact', head: true }),
-    svc.from('groups').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-    svc.from('tasks').select('*', { count: 'exact', head: true }),
-    svc.from('tasks').select('*', { count: 'exact', head: true }).eq('status', 'Done'),
+    svc.from('profiles').select('id', { count: 'exact', head: true }),
+    svc.from('profiles').select('id', { count: 'exact', head: true }).eq('subscription_plan', 'pro'),
+    svc.from('profiles').select('id', { count: 'exact', head: true }).eq('subscription_plan', 'premium'),
+    svc.from('profiles').select('id', { count: 'exact', head: true }).eq('subscription_plan', 'lifetime'),
+    svc.from('profiles').select('id', { count: 'exact', head: true }).eq('is_banned', true),
+    svc.from('groups').select('id', { count: 'exact', head: true }),
+    svc.from('groups').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    svc.from('tasks').select('id', { count: 'exact', head: true }),
+    svc.from('tasks').select('id', { count: 'exact', head: true }).eq('status', 'Done'),
     svc.from('profiles')
       .select('id, full_name, email, subscription_plan, created_at, role, avatar_url')
       .order('created_at', { ascending: false })

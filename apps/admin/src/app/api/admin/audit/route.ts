@@ -31,7 +31,7 @@ export async function GET(req: Request) {
 
   let query = ctx.svc
     .from('audit_logs')
-    .select('*', { count: 'exact' })
+    .select('id, action, user_id, created_at, details', { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (action)        query = query.ilike('action', `%${action}%`)

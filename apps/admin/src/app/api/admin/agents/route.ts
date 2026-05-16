@@ -25,7 +25,7 @@ export async function GET() {
   try {
     const { data: agentsList, error: agentsError } = await db
       .from('agents')
-      .select('*')
+      .select('id, name, status, specialisation, pair_id, created_at')
       .order('specialisation', { ascending: true })
     if (agentsError) {
       throw agentsError
@@ -44,7 +44,7 @@ export async function GET() {
 
     const { data: tasks, error: tasksError } = await db
       .from('agent_tasks')
-      .select('*')
+      .select('id, agent_id, task, status, created_at')
       .neq('status', 'done')
       .order('status', { ascending: true })
       .order('created_at', { ascending: false })

@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data, error } = await ctx.svc
     .from('system_announcements')
-    .select('*')
+    .select('id, title, message, created_at, status')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
