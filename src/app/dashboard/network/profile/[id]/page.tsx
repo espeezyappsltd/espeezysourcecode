@@ -25,7 +25,7 @@ import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
 export default function StudentProfilePage() {
   const params = useParams()
-  const router = useRouter()
+  const nextRouter = useRouter()
   const studentId = params.id as string
 
   const [member, setMember] = useState<any | null>(null)
@@ -158,7 +158,7 @@ export default function StudentProfilePage() {
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', marginTop: '1rem' }}>
         <button 
-          onClick={() => router.back()}
+          onClick={() => nextRouter.back()}
           style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-main)' }}
         >
           <ChevronLeft size={20} />
@@ -219,7 +219,7 @@ export default function StudentProfilePage() {
                  key={item.id}
                  onClick={() => {
                    if (item.disabled) return;
-                   if (item.id === 'chat') router.push(`/dashboard/network/chat/${studentId}`);
+                   if (item.id === 'chat') nextRouter.push(`/dashboard/network/chat/${studentId}`);
                    else setActiveTab(item.id as 'info' | 'accomplishments');
                  }}
                  style={{ 

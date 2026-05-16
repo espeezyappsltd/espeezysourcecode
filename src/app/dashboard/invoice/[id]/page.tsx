@@ -8,7 +8,7 @@ import { useProfile } from '@/context/ProfileContext'
 
 function InvoiceDetailPage() {
   const params = useParams()
-  const router = useRouter()
+  const nextRouter = useRouter()
   const { profile } = useProfile()
   const [invoice, setInvoice] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -60,7 +60,7 @@ function InvoiceDetailPage() {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontWeight: 700, fontSize: '0.9rem' }}>
+      <button onClick={() => nextRouter.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontWeight: 700, fontSize: '0.9rem' }}>
         <ArrowLeft size={16} /> Back
       </button>
 

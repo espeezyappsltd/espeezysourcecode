@@ -41,6 +41,23 @@ export default function GamesLobbyClient() {
     )
   }, [categories, search])
 
+  const allGames = useMemo(() => {
+    const list = [...filtered]
+    // Inject Flappy Bird if it's not already in the categories (standalone/client-side)
+    if (!list.find(g => g.slug === 'flappybird')) {
+      list.push({
+        id: 'flappybird-client',
+        slug: 'flappybird',
+        name: 'Flappy Scholar',
+        description: 'Navigate through knowledge gaps in this classic skill-based arcade game.',
+        difficulty_tier: 'medium',
+        prize_pool_cents: 0,
+        is_seasonal: false
+      })
+    }
+    return list
+  }, [filtered])
+
   return (
     <main style={{ maxWidth: 1080, margin: '0 auto', padding: '2.5rem 1rem 4rem' }}>
       <header style={{ marginBottom: '1.5rem' }}>
@@ -65,7 +82,7 @@ export default function GamesLobbyClient() {
       {loading ? <p style={{ color: 'var(--text-sub)' }}>Loading games...</p> : null}
 
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.9rem' }}>
-        {filtered.map((c) => (
+        {allGames.map((c) => (
           <article key={c.id} style={{ border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: 14, padding: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'flex-start' }}>
               <h2 style={{ margin: 0, fontSize: '1.05rem', letterSpacing: '-0.02em' }}>{c.name}</h2>
