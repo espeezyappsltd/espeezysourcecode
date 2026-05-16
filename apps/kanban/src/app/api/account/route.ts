@@ -1,3 +1,30 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { db } from '@/lib/db-client'
+
+// Secure CRUD for account credits
+export async function GET(req: NextRequest) {
+  const session = await getServerSession()
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data, error } = await db.from('account_credits').select('*').eq('user_id', session.user.id).single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json({ credits: data })
+}
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession()
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const body = await req.json()
+  const { points, balance_cents, stripe_account_id } = body
+  const { data, error } = await db.from('account_credits').upsert({
+    user_id: session.user.id,
+    points,
+    balance_cents,
+    stripe_account_id,
+  }, { onConflict: 'user_id' }).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json({ credits: data })
+}
 import { NextResponse } from 'next/server'
 import { getAdminAuth, getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'

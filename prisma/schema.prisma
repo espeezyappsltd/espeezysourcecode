@@ -1,0 +1,32 @@
+// Prisma schema for Supabase Postgres
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model marketplace_listings {
+  id           String   @id @default(uuid())
+  user_id      String
+  title        String
+  description  String?
+  asset_url    String?
+  price_cents  Int
+  status       String   @default("active")
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model account_credits {
+  id               String   @id @default(uuid())
+  user_id          String
+  points           Int      @default(0)
+  balance_cents    Int      @default(0)
+  stripe_account_id String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
