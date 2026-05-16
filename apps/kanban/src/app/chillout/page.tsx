@@ -40,11 +40,11 @@ const TOPICS = [
     color: 'var(--error)',
     description: 'Master the legal landscape of the digital academic frontier.'
   },
-  { 
-    id: 'logic_puzzles', 
-    name: 'Algorithmic Riddles', 
-    icon: BrainCircuit, 
-    color: 'var(--brand)',
+  {
+    id: 'logic',
+    name: 'Computing Logic',
+    icon: Cpu,
+    color: 'var(--warning)',
     description: 'Test your raw logic with complex computing patterns.'
   },
   { 
@@ -56,10 +56,10 @@ const TOPICS = [
   },
   { 
     id: 'institutional', 
-    name: 'Espeezy Protocols', 
+    name: 'Digital Marketing', 
     icon: Terminal, 
     color: 'var(--accent)',
-    description: "Deep dive into the app's advanced governance."
+    description: "SEO, SEM, and the art of online selling."
   }
 ]
 
@@ -68,7 +68,8 @@ export default function ChillOutHub() {
   const { profile } = useProfile()
   const { onlineUsers } = usePresence()
   const { addToast } = useNotifications()
-  const { withLoading } = useSmartLoading()
+  const loadingContext = useSmartLoading()
+  const withLoading = loadingContext?.withLoading
 
   const [step, setStep] = useState(1) // 1: Topic, 2: Config, 3: Preview, 4: Players
   const [selectedTopic, setSelectedTopic] = useState<typeof TOPICS[0] | null>(null)
@@ -177,35 +178,56 @@ export default function ChillOutHub() {
     }
 
     const roomId = `skirmish_${Date.now()}`
-    
-    await withLoading(async () => {
-      await createGameSession({
-        room_id: roomId,
-        creator_id: profile?.id,
-        topic_id: selectedTopic?.id,
-        difficulty,
-        mode: gameMode,
-        created_at: new Date().toISOString()
-      })
 
-      for (const playerId of selectedPlayers) {
-        await createNotification({
-          user_id: playerId,
-          type: 'skirmish_invite',
-          title: 'SKIRMISH DETECTED',
-          message: `${profile?.full_name || 'A Peer'} challenged you to ${difficulty} ${selectedTopic?.name}.`,
-          metadata: { room_id: roomId, topic_id: selectedTopic?.id, mode: gameMode, questions },
-        })
-      }
-      
-      // 3. SECURE HAND-OFF: Save questions for the room to pick up
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem(`skirmish_setup_${roomId}`, JSON.stringify({ questions, config: { difficulty, mode: gameMode } }))
-      }
-      
-      router.push(`/chillout/room/${roomId}?id=${roomId}`)
-    }, 'Initializing Competitive Flux...')
-  }
+    if (withLoading) {
+      await withLoading(
+        async () => {
+          await createGameSession({
+            room_id: roomId,
+            creator_id: profile?.id,
+            topic_id: selectedTopic?.id,
+            difficulty,
+            mode: gameMode,
+            created_at: new Date().toISOString()
+          })
+
+          for (const playerId of selectedPlayers) {
+            await createNotification({
+              user_id: playerId,
+              type: 'skirmish_invite',
+              title: 'SKIRMISH DETECTED',
+              message: `${profile?.full_name || 'A Peer'} challenged you to ${difficulty} ${selectedTopic?.name}.`,
+              metadata: { room_id: roomId, topic_id: selectedTopic?.id, mode: gameMode, questions },
+            })
+          }
+
+          // 3. SECURE HAND-OFF: Save questions for the room to pick up
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem(
+              `skirmish_setup_${roomId}`,
+              JSON.stringify({
+                questions: Array.isArray(questions) ? questions : [],
+                config: { difficulty, mode: gameMode }
+              })
+            );
+          }
+
+          router.push(`/chillout/room/${roomId}?id=${roomId}`)},
+          
+          'Initializing Skirmish...')}
+
+        }
+        
+  // Add userStats definition (example: useState or useAppSelector)
+  // If you have a Redux store or context, replace this with the appropriate hook
+  // Example with useState (replace with real logic as needed):
+  const [userStats, setUserStats] = useState({
+    level: 1,
+    rank_title: 'Novice Scholar',
+    total_xp: 0,
+    wins: 0,
+    games_played: 0,
+  });
 
   return (
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '4rem' }}>
@@ -267,6 +289,10 @@ export default function ChillOutHub() {
       </header>
 
       {/* ── CONTENT RENDERING ────────────────────────────────────── */}
+      // Add this at the top of your component (or where appropriate)
+      // Example initialization, adjust as needed:
+      const [isGenerating, setIsGenerating] = useState(false);
+
       {isGenerating ? (
         <div style={{ height: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
           <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }}>
@@ -506,4 +532,3 @@ export default function ChillOutHub() {
       <div className="neural-bg" />
     </div>
   )
-}

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { showToast } from '@/utils/toast';
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -185,7 +186,9 @@ export default function Sidebar({ user }: SidebarProps) {
   const { profile } = useProfile()
   const { currentPalette, setPalette } = useTheme()
   const { onlineUsers } = usePresence()
-  const { withLoading, showConfirmation } = useSmartLoading()
+  const smartLoading = useSmartLoading()
+  const withLoading = smartLoading?.withLoading
+  const showConfirmation = smartLoading?.showConfirmation
 
   const isProfileLoaded = Boolean(profile)
   const onlineCount = onlineUsers?.size ?? 0
@@ -261,26 +264,40 @@ export default function Sidebar({ user }: SidebarProps) {
   }
 
   const handleSignOut = () => {
-    showConfirmation({
-      title: 'End Session?',
-      message: 'Ready to sign out? Your team will be waiting when you get back.',
-      type: 'warning',
-      onConfirm: async () => {
-        await withLoading(async () => {
-          if (user?.id) {
-            await db
-              .from('profiles')
-              .update({ last_seen: new Date().toISOString() })
-              .eq('id', user.id)
-          }
+    if (typeof showConfirmation === 'function') {
+      showConfirmation({
+        title: 'End Session?',
+        message: 'Ready to sign out? Your team will be waiting when you get back.',
+        type: 'warning',
+        onConfirm: async () => {
+          if (typeof withLoading === 'function') {
+            await withLoading(async () => {
+              if (user?.id) {
+                await db
+                  .from('profiles')
+                  .update({ last_seen: new Date().toISOString() })
+                  .eq('id', user.id)
+              }
 
-          // TODO: Replace with Supabase signOut
-          await db.auth.signOut?.() // If using Supabase client, adjust as needed
-          window.location.href = '/login'
-        }, 'Signing you out...')
-      },
-      onCancel: () => {},
-    })
+              try {
+                if (db.auth && typeof db.auth.signOut === 'function') {
+                  const { error } = await db.auth.signOut()
+                  if (error) {
+                    showToast('Sign Out Error: ' + (error.message || 'An error occurred during sign out.'), 'error')
+                    console.error('Sign out error:', error)
+                  }
+                }
+              } catch (err) {
+                console.error('Unexpected sign out error:', err)
+              } finally {
+                window.location.href = '/login'
+              }
+            }, 'Signing you out...')
+          }
+        },
+        onCancel: () => {},
+      })
+    }
   }
 
   const isNavItemActive = (path: string, name: string) => {
