@@ -41,15 +41,18 @@ export default function PromoBanner() {
       })
 
     // Real-time subscription
+
+
+    // Fix: Use correct event type for Supabase JS v2
     const channel = db
       .channel('platform_config_realtime')
       .on(
-        'postgres_changes',
+        'postgres_changes' as any,
         {
           event: '*',
           schema: 'public',
           table: 'platform_config',
-          filter: `config_key=eq.main_banner`
+          filter: 'config_key=eq.main_banner',
         },
         (payload: { new: PlatformConfig }) => {
           if (payload.new && typeof payload.new === 'object') {

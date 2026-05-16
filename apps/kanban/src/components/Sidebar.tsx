@@ -285,14 +285,14 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const isNavItemActive = (path: string, name: string) => {
     if (name === 'Project Stats') {
-      return pathname.startsWith('/analytics')
+      return (pathname ?? '').startsWith('/analytics')
     }
 
     if (path === '/') {
-      return pathname === path
+      return (pathname ?? '') === path
     }
 
-    return pathname.startsWith(path)
+    return (pathname ?? '').startsWith(path)
   }
 
   if (!isClient) {
