@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
+import { Profile } from '@/types/auth'
 
 export const dynamic = 'force-dynamic'
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
+import { Profile } from '@/types/auth'
 
 export const dynamic = 'force-dynamic'
 const STRIPE_API_VERSION = '2026-04-22.dahlia' as const
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const profile = await getUserProfile(user.uid)
-  if (!profile || (profile as any).role !== 'admin') {
+  if (!profile || (profile as Profile).role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

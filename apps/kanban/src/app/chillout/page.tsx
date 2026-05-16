@@ -18,6 +18,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
+import { Profile } from '@/types/auth'
 import { usePresence } from '@/components/PresenceProvider'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'

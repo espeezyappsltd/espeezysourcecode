@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
 import { sendEmail } from '@/services/email'
+import { Profile } from '@/types/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'

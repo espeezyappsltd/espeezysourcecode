@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
+import { Profile } from '@/types/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,7 @@ export async function PUT(req: Request) {
   }
 
   const profile = await getUserProfile(user.uid)
-  if (!profile || (profile as any).role !== 'admin') {
+  if (!profile || (profile as Profile).role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
+import { Profile } from '@/types/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +9,7 @@ async function requireAdmin() {
   const user = await getAuthUser()
   if (!user) return null
   const profile = await getUserProfile(user.uid)
-  if (!profile || (profile as any).role !== 'admin') return null
+  if (!profile || (profile as Profile).role !== 'admin') return null
   
   const db = getAdminDb()
   if (!db) return null
