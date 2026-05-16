@@ -287,6 +287,7 @@ export default function FeedPage() {
 }
 
 // ─── PostCard ────────────────────────────────────────────────────────────────
+
 function PostCard({
   post, currentUserId, onReaction, userReaction, reactionCounts, totalReactions,
   commentCount, comments, loadingComments, onToggleComments,
@@ -304,7 +305,8 @@ function PostCard({
   showReactionPicker: boolean; onToggleReactionPicker: () => void
   timeAgo: string
 }) {
-  const isOwn = post.author.id === currentUserId
+
+  const isOwn = post.author?.id === currentUserId;
 
   return (
     <div style={{
@@ -313,11 +315,11 @@ function PostCard({
     }}>
       {/* Header */}
       <div style={{ padding: '1rem 1.25rem 0.75rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-        <Avatar profile={post.author} size={40} />
+        {post.author && <Avatar profile={post.author as PostAuthor} size={40} />}
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#F3F4F6' }}>{post.author.full_name}</span>
-            {post.author.role === 'admin' && (
+            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#F3F4F6' }}>{post.author?.full_name}</span>
+            {post.author?.role === 'admin' && (
               <span style={{ background: '#10B98130', color: '#10B981', fontSize: '0.6rem', fontWeight: 900, padding: '1px 6px', borderRadius: '4px', letterSpacing: '0.08em' }}>ADMIN</span>
             )}
           </div>
@@ -418,10 +420,10 @@ function PostCard({
           {loadingComments && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>Loading…</div>}
           {comments?.map(c => (
             <div key={c.id} style={{ display: 'flex', gap: '0.6rem', marginBottom: '0.75rem' }}>
-              <Avatar profile={c.author} size={28} />
+              <Avatar profile={c.author as PostAuthor} size={28} />
               <div style={{ flex: 1 }}>
                 <div style={{ background: '#0d0d0d', borderRadius: '10px', padding: '0.5rem 0.75rem' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.8rem', color: '#E5E7EB' }}>{c.author.full_name}</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.8rem', color: '#E5E7EB' }}>{c.author?.full_name ?? 'Unknown'}</span>
                   <p style={{ margin: '0.2rem 0 0', fontSize: '0.83rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>{c.content}</p>
                 </div>
               </div>
