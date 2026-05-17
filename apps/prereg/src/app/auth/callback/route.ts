@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { ESPEEZY_APP_ORIGINS, shouldForwardAuthToKanban } from '@shared/app-url'
+import { createClient } from '@/lib/supabase/server'
+import { ESPEEZY_APP_ORIGINS, sanitizeNextPath, shouldForwardAuthToKanban } from '@shared/app-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,7 @@ export async function GET(request: Request) {
   const next = searchParams.get('next') ?? '/'
   const errorParam = searchParams.get('error')
   const errorDesc = searchParams.get('error_description')
+  const code = searchParams.get('code')
   const isRecovery = searchParams.get('type') === 'recovery'
 
   if (shouldForwardAuthToKanban(requestUrl.hostname, searchParams)) {
@@ -24,11 +26,16 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(msg)}`)
   }
 
-  const isSafeRedirect = next.startsWith('/') && !next.startsWith('//') && !next.includes(':')
-  const safePath = isSafeRedirect ? next : '/'
-  const redirectPath = isRecovery ? '/reset-password' : safePath
-  const redirectUrl = new URL(redirectPath, origin)
-  redirectUrl.search = requestUrl.search
+  if (code) {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) {
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
+    }
+  }
 
-  return NextResponse.redirect(redirectUrl.toString())
+  const safePath = sanitizeNextPath(next)
+  const redirectPath = isRecovery ? '/reset-password' : safePath
+
+  return NextResponse.redirect(new URL(redirectPath, origin).toString())
 }

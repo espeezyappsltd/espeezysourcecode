@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
+import { useRecoverySession } from '@shared/useRecoverySession'
 
 const styles = {
   container: {
@@ -80,34 +81,37 @@ const styles = {
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: 600,
-    cursor: 'pointer',
   } as React.CSSProperties,
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { sessionReady, error: sessionError } = useRecoverySession(supabase, searchParams)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+
+  const displayError = formError ?? sessionError
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
+    setFormError(null)
 
-    if (!password) {
-      setError('Please enter a new password.')
+    if (!sessionReady) {
+      setFormError('Recovery session not ready. Request a new reset link.')
       return
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.')
+      setFormError('Password must be at least 8 characters.')
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.')
+      setFormError('Passwords do not match.')
       return
     }
 
@@ -115,17 +119,11 @@ export default function ResetPasswordPage() {
 
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password })
-      if (updateError) {
-        throw updateError
-      }
-
+      if (updateError) throw updateError
       setSuccess(true)
-      setTimeout(() => {
-        router.push('/login')
-      }, 2000)
+      setTimeout(() => router.push('/login'), 2000)
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to reset password. Please try again.'
-      setError(msg)
+      setFormError(err instanceof Error ? err.message : 'Failed to reset password.')
     } finally {
       setLoading(false)
     }
@@ -135,11 +133,9 @@ export default function ResetPasswordPage() {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
-          <h1 style={styles.heading}>Password Updated ✓</h1>
-          <p style={styles.subheading}>Your password has been successfully reset. Redirecting you to the login page...</p>
-          <div style={styles.success}>
-            You can now sign in with your new password.
-          </div>
+          <h1 style={styles.heading}>Password Updated</h1>
+          <p style={styles.subheading}>Redirecting to login…</p>
+          <div style={styles.success}>You can sign in with your new password.</div>
         </div>
       </div>
     )
@@ -150,9 +146,7 @@ export default function ResetPasswordPage() {
       <div style={styles.card}>
         <h1 style={styles.heading}>Reset Password</h1>
         <p style={styles.subheading}>Enter your new password below.</p>
-
-        {error && <div style={styles.error}>{error}</div>}
-
+        {displayError && <div style={styles.error}>{displayError}</div>}
         <form onSubmit={handleReset}>
           <input
             type="password"
@@ -161,7 +155,7 @@ export default function ResetPasswordPage() {
             placeholder="New password"
             style={styles.input}
             required
-            disabled={loading}
+            disabled={loading || !sessionReady}
           />
           <input
             type="password"
@@ -170,23 +164,35 @@ export default function ResetPasswordPage() {
             placeholder="Confirm password"
             style={styles.input}
             required
-            disabled={loading}
+            disabled={loading || !sessionReady}
           />
           <button
             type="submit"
-            style={{ ...styles.button, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
-            disabled={loading}
+            style={{ ...styles.button, opacity: loading || !sessionReady ? 0.7 : 1 }}
+            disabled={loading || !sessionReady}
           >
-            {loading ? 'Updating…' : 'Update Password'}
+            {loading ? 'Updating…' : sessionReady ? 'Update Password' : 'Verifying reset link…'}
           </button>
         </form>
-
         <div style={{ textAlign: 'center' }}>
-          <a href="/login" style={styles.link}>
-            Back to login
-          </a>
+          <a href="/login" style={styles.link}>Back to login</a>
         </div>
       </div>
     </div>
   )
 }
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          Loading…
+        </div>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
+  )
+}
+

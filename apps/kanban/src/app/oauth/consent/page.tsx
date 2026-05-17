@@ -63,7 +63,7 @@ function ConsentContent() {
   useEffect(() => {
     if (!authLoading && !user && !paramError) {
       const returnTo = encodeURIComponent(`/oauth/consent?${searchParams?.toString()}`)
-      router.replace(`/login?redirect=${returnTo}`)
+      router.replace(`/login?next=${encodeURIComponent(returnTo)}`)
     }
   }, [authLoading, user, paramError, router, searchParams])
 

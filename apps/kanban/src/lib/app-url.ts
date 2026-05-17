@@ -3,6 +3,7 @@ import {
   buildAuthCallbackUrl,
   resolveClientOrigin,
   resolveRequestOrigin,
+  sanitizeNextPath,
   shouldForwardAuthToKanban,
 } from '@shared/app-url'
 
@@ -11,6 +12,7 @@ export {
   buildAuthCallbackUrl,
   resolveClientOrigin,
   resolveRequestOrigin,
+  sanitizeNextPath,
   shouldForwardAuthToKanban,
 }
 

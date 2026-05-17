@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { ESPEEZY_APP_ORIGINS, shouldForwardAuthToKanban } from '@/lib/app-url'
+import { ESPEEZY_APP_ORIGINS, sanitizeNextPath, shouldForwardAuthToKanban } from '@/lib/app-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,8 +35,7 @@ export async function GET(request: Request) {
     }
   }
 
-  const isSafeRedirect = next.startsWith('/') && !next.startsWith('//') && !next.includes(':')
-  const safePath = isSafeRedirect ? next : '/'
+  const safePath = sanitizeNextPath(next)
   const redirectPath = isRecovery ? '/auth/reset-password' : safePath
 
   return NextResponse.redirect(new URL(redirectPath, origin).toString())

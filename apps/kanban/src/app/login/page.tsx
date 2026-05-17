@@ -39,7 +39,9 @@ function LoginContent() {
   const [isResetting, setIsResetting] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const redirectPath = sanitizeNextPath(searchParams?.get('next'))
+  const redirectPath = sanitizeNextPath(
+    searchParams?.get('next') ?? searchParams?.get('redirect'),
+  )
   const { isChecking, isRedirecting, redirectAfterSignIn } = useLoginAuthRedirect(
     supabase,
     redirectPath,

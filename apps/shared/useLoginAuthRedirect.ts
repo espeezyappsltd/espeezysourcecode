@@ -2,19 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AuthChangeEvent, Session, SupabaseClient } from '@supabase/supabase-js'
+import { sanitizeNextPath } from '@shared/app-url'
 
 export type LoginAuthStatus = 'checking' | 'ready' | 'redirecting'
 
-/** Max wait before showing the login form (getSession should resolve much sooner). */
-const AUTH_READY_FALLBACK_MS = 1200
+export { sanitizeNextPath }
 
-/** Reject open-redirect paths; allow only same-origin relative routes. */
-export function sanitizeNextPath(next: string | null | undefined, fallback = '/'): string {
-  if (!next || !next.startsWith('/') || next.startsWith('//') || next.includes(':')) {
-    return fallback
-  }
-  return next
-}
+/** Max wait before showing the login form (getSession should resolve much sooner). */
+const AUTH_READY_FALLBACK_MS = 600
 
 /**
  * Login-page auth probe: getSession first (works after Strict Mode remounts),

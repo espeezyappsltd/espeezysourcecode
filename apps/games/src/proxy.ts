@@ -59,8 +59,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  const devBypassEmails = ['kedogosospeter36@gmail.com']
-  if (user.email && devBypassEmails.includes(user.email)) {
+  const bypassEmails = (process.env.AUTH_TIER_BYPASS_EMAILS ?? '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+  if (user.email && bypassEmails.includes(user.email.toLowerCase())) {
     return supabaseResponse
   }
 

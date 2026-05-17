@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
+import { sanitizeNextPath } from '@shared/app-url'
 
 function SsoBridgeContent() {
   const router = useRouter()
@@ -12,20 +13,17 @@ function SsoBridgeContent() {
   const searchParams = useSearchParams()
   const [error, setError] = useState('')
 
-  const target = useMemo(() => {
-    const next = searchParams.get('next') || '/'
-    if (!next.startsWith('/') || next.startsWith('//')) {
-      return '/'
-    }
-    return next
-  }, [searchParams])
+  const target = useMemo(
+    () => sanitizeNextPath(searchParams.get('next')),
+    [searchParams],
+  )
 
   useEffect(() => {
     const run = async () => {
       try {
         const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
-        const accessToken = hash.get('access_token') || searchParams.get('access_token')
-        const refreshToken = hash.get('refresh_token') || searchParams.get('refresh_token')
+        const accessToken = hash.get('access_token')
+        const refreshToken = hash.get('refresh_token')
 
         if (!accessToken || !refreshToken) {
           router.replace(`/login?next=${encodeURIComponent(target)}`)

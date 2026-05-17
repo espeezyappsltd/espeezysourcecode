@@ -88,3 +88,11 @@ export function isLocalOrigin(origin: string): boolean {
     return false
   }
 }
+
+/** Reject open-redirect paths; allow only same-origin relative routes. */
+export function sanitizeNextPath(next: string | null | undefined, fallback = '/'): string {
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.includes(':')) {
+    return fallback
+  }
+  return next
+}
