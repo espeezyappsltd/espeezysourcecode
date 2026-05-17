@@ -26,21 +26,45 @@ export default function ConnectionAlertTray() {
 
   const fetchRequests = useCallback(async () => {
     const { data: { user } } = await db.auth.getUser()
-    if (!user) return
+    if (!user) {
+      setLoading(false)
+      return
+    }
     try {
-      const { data, error } = await db
+      const { data: rows, error } = await db
         .from('user_connections')
-        .select(`
-          *,
-          profiles:user_id (*)
-        `)
+        .select('id, user_id, target_id, status')
         .eq('target_id', user.id)
         .eq('status', 'pending')
-      
+
       if (error) throw error
-      setRequests(data as unknown as ConnectionRequest[])
+
+      if (!rows?.length) {
+        setRequests([])
+        return
+      }
+
+      const senderIds = rows.map((r) => r.user_id)
+      const { data: profiles, error: profileError } = await db
+        .from('profiles')
+        .select('*')
+        .in('id', senderIds)
+
+      if (profileError) throw profileError
+
+      const profileById = new Map((profiles ?? []).map((p) => [p.id, p as Profile]))
+      setRequests(
+        rows.map((row) => ({
+          ...row,
+          profiles: profileById.get(row.user_id) ?? null,
+        })),
+      )
     } catch (err) {
-      console.error('Error fetching connection requests:', err instanceof Error ? err.message : err)
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message: unknown }).message)
+          : String(err)
+      console.error('Error fetching connection requests:', message, err)
     } finally {
       setLoading(false)
     }
