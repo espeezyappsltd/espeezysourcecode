@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Bug, ExternalLink, Monitor, Play, Square } from 'lucide-react'
 import { PortControl } from './PortControl'
 import { ResourceMeter } from './ResourceMeter'
+import { formatLatencyMs } from '@/lib/dev-hub/format-latency'
 import type { DevAppRow, ProdFleetRow } from './types'
 
 type Props = {
@@ -50,7 +51,7 @@ export function AppCard({ app, busy, prodStatus, style, onStart, onDebug, onStop
           <span className={`dev-hub-prod-dot ${prodStatus.online ? 'dev-hub-prod-dot--live' : ''}`} />
           <span className="dev-hub-app-prod-host">{prodStatus.hostname}</span>
           <span className="dev-hub-app-prod-meta">
-            {prodStatus.online ? `${prodStatus.latencyMs ?? '—'}ms` : 'prod offline'}
+            {prodStatus.online ? formatLatencyMs(prodStatus.latencyMs) : 'prod offline'}
           </span>
           <ExternalLink size={12} />
         </a>

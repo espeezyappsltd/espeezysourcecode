@@ -1,4 +1,5 @@
 import { Activity, Cloud, Cpu, Gauge, HardDrive, Server } from 'lucide-react'
+import { formatLatencyMs } from '@/lib/dev-hub/format-latency'
 import type { HubMetrics } from './types'
 
 export function MetricsBar({ metrics }: { metrics: HubMetrics }) {
@@ -11,7 +12,7 @@ export function MetricsBar({ metrics }: { metrics: HubMetrics }) {
     },
     {
       label: 'Avg latency',
-      value: metrics.avgLatencyMs != null ? `${metrics.avgLatencyMs}ms` : '—',
+      value: formatLatencyMs(metrics.avgLatencyMs),
       color: '#06b6d4',
       icon: Gauge,
     },

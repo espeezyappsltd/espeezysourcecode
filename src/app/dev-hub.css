@@ -1564,9 +1564,42 @@
 }
 
 /* ── Production fleet cards ─────────────────────────────── */
+.dev-hub-prod-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+}
+
+.dev-hub-prod-summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dev-hub-prod-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dev-hub-prod-chip--accent {
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+}
+
 .dev-hub-prod-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1rem;
 }
 
@@ -1730,21 +1763,68 @@
   margin-bottom: 0.5rem;
 }
 
+.dev-hub-prod-latency-bar {
+  position: relative;
+  z-index: 1;
+  height: 4px;
+  margin: 0.5rem 0 0.25rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.dev-hub-prod-latency-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--prod-accent, #10b981), rgba(255, 255, 255, 0.35));
+  transition: width 0.35s ease;
+}
+
 .dev-hub-prod-footer {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-top: auto;
-  padding-top: 0.65rem;
+  padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.dev-hub-prod-metric-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.dev-hub-prod-metric-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+}
+
+.dev-hub-prod-metric-value {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+}
+
+.dev-hub-prod-metric-block--accent .dev-hub-prod-metric-value--latency {
+  color: var(--prod-accent, #10b981);
+  font-size: 0.85rem;
+}
+
+/* legacy metric spans (if referenced elsewhere) */
 .dev-hub-prod-metric {
   font-size: 0.65rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   color: var(--text-sub);
 }
 

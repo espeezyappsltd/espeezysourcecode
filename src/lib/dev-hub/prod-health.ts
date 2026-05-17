@@ -21,21 +21,21 @@ async function probeUrl(url: string): Promise<{ online: boolean; statusCode: num
 
   try {
     const res = await fetch(url, init)
-    const latencyMs = Date.now() - start
+    const latencyMs = Math.round(Date.now() - start)
     const online = res.ok || (res.status >= 200 && res.status < 500)
     return { online, statusCode: res.status, latencyMs }
   } catch {
     try {
       const start2 = Date.now()
       const res = await fetch(url, { ...init, method: 'HEAD' })
-      const latencyMs = Date.now() - start2
+      const latencyMs = Math.round(Date.now() - start2)
       return {
         online: res.ok || res.status < 500,
         statusCode: res.status,
         latencyMs,
       }
     } catch {
-      return { online: false, statusCode: null, latencyMs: Date.now() - start }
+      return { online: false, statusCode: null, latencyMs: Math.round(Date.now() - start) }
     }
   }
 }
