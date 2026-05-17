@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { AppPreviewPane } from '@/components/dev-hub/AppPreviewPane'
 import { DevHubShell } from '@/components/dev-hub/DevHubShell'
-import { PortControl } from '@/components/dev-hub/PortControl'
 import { ResizableWorkspace } from '@/components/dev-hub/ResizableWorkspace'
 import { WorkspacePanel } from '@/components/dev-hub/WorkspacePanel'
 import { usePoll } from '@/components/dev-hub/usePoll'
@@ -15,7 +15,7 @@ import type { DevAppRow, TerminalEntry } from '@/components/dev-hub/types'
 export default function AppWorkspacePage() {
   const params = useParams()
   const appId = String(params.appId ?? '')
-  const { prefs, setPrefs, resetLayout, hydrated } = useWorkspaceLayout(appId)
+  const { prefs, setPrefs, setPreviewMode, setPreviewA11y, resetLayout, hydrated } = useWorkspaceLayout(appId)
   const [app, setApp] = useState<DevAppRow | null>(null)
   const [logs, setLogs] = useState<string[]>([])
   const [terminalSessions, setTerminalSessions] = useState<TerminalEntry[]>([])
@@ -116,73 +116,32 @@ export default function AppWorkspacePage() {
   const warmingUp = status === 'starting' || (status === 'running' && !app?.healthy)
   const effectivePort = draftPort ?? app?.port ?? 3000
 
-  const preview = (
-    <>
-      <div className="dev-hub-preview-bar">
-        {app && (
-          <PortControl
-            appId={appId}
-            port={app.port}
-            defaultPort={app.defaultPort}
-            localHost={app.localHost}
-            compact
-            deferApply
-            disabled={actionBusy !== null}
-            onPortDraft={setDraftPort}
-            onApplied={() => void refreshApp()}
-          />
-        )}
-        <span className="dev-hub-preview-url">{previewUrl || `http://${app?.localHost ?? 'localhost'}:${effectivePort}`}</span>
-        <span className={`dev-hub-preview-status ${app?.healthy ? 'dev-hub-preview-status--ok' : ''}`}>
-          {status}
-          {app?.healthy ? ' · ready' : warmingUp ? ' · warming up' : ''}
-        </span>
-        <button
-          type="button"
-          className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline"
-          disabled={!isActive}
-          onClick={() => setIframeKey((k) => k + 1)}
-        >
-          <RefreshCw size={14} aria-hidden />
-          Refresh
-        </button>
-        <a
-          href={isActive ? previewUrl : undefined}
-          target="_blank"
-          rel="noreferrer"
-          className="dev-hub-action-btn btn btn-secondary btn-sm btn-inline"
-          style={{ pointerEvents: isActive ? 'auto' : 'none', opacity: isActive ? 1 : 0.4 }}
-        >
-          New tab
-        </a>
-      </div>
-      <div className="dev-hub-iframe-wrap">
-        {showPreview && previewUrl ? (
-          <>
-            <iframe key={iframeKey} src={previewUrl} title={app?.name ?? appId} />
-            {warmingUp && (
-              <div className="dev-hub-iframe-loading">
-                <span className="spinner-mini" />
-                Starting {app?.name ?? appId}…
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="dev-hub-iframe-placeholder">
-            <p>{status === 'error' ? 'App failed to start. Check logs.' : 'App is not running.'}</p>
-            <button
-              type="button"
-              className="dev-hub-action-btn btn btn-success btn-inline"
-              disabled={actionBusy !== null}
-              onClick={() => void runAction('start')}
-            >
-              {actionBusy === 'start' ? 'Starting…' : `Start ${app?.name ?? appId}`}
-            </button>
-          </div>
-        )}
-      </div>
-    </>
-  )
+  const preview = app ? (
+    <AppPreviewPane
+      appId={appId}
+      appName={app.name}
+      port={app.port}
+      defaultPort={app.defaultPort}
+      localHost={app.localHost}
+      previewUrl={previewUrl}
+      effectivePort={effectivePort}
+      status={status}
+      healthy={!!app.healthy}
+      warmingUp={warmingUp}
+      isActive={isActive}
+      showPreview={showPreview}
+      iframeKey={iframeKey}
+      actionBusy={actionBusy}
+      previewMode={prefs.previewMode}
+      a11y={prefs.previewA11y}
+      onPreviewMode={setPreviewMode}
+      onA11y={setPreviewA11y}
+      onPortDraft={setDraftPort}
+      onRefreshApp={() => void refreshApp()}
+      onRefreshIframe={() => setIframeKey((k) => k + 1)}
+      onStart={() => void runAction('start')}
+    />
+  ) : null
 
   const panel = (
     <WorkspacePanel

@@ -15,9 +15,14 @@ type Props = {
 export function ResizableWorkspace({ prefs, setPrefs, resetLayout, preview, panel }: Props) {
   const workspaceRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
+  const mode = prefs.previewMode
+  const isMax = mode === 'maximized'
+  const isMin = mode === 'minimized'
+  const canResize = mode === 'normal'
 
   const onResizeStart = useCallback(
     (e: React.MouseEvent) => {
+      if (!canResize) return
       e.preventDefault()
       dragging.current = true
       const workspace = workspaceRef.current
@@ -27,12 +32,7 @@ export function ResizableWorkspace({ prefs, setPrefs, resetLayout, preview, pane
         if (!dragging.current) return
         const rect = workspace.getBoundingClientRect()
         const x = ev.clientX - rect.left
-        let pct = (x / rect.width) * 100
-        if (prefs.panelFirst) {
-          pct = clamp(pct, 22, 78)
-        } else {
-          pct = clamp(pct, 22, 78)
-        }
+        const pct = clamp((x / rect.width) * 100, 22, 78)
         setPrefs({ splitPercent: pct })
       }
 
@@ -49,23 +49,42 @@ export function ResizableWorkspace({ prefs, setPrefs, resetLayout, preview, pane
       window.addEventListener('mousemove', onMove)
       window.addEventListener('mouseup', onUp)
     },
-    [prefs.panelFirst, setPrefs],
+    [canResize, setPrefs],
   )
 
-  const previewStyle = { flex: `0 0 ${prefs.splitPercent}%` }
-  const panelStyle = { flex: `0 0 ${100 - prefs.splitPercent}%`, minWidth: 260 }
+  const previewStyle = isMax
+    ? { flex: '1 1 100%', width: '100%', maxWidth: '100%' }
+    : isMin
+      ? { flex: '0 0 auto', width: '100%', maxHeight: '3.35rem', minHeight: 0 }
+      : { flex: `0 0 ${prefs.splitPercent}%` }
+
+  const panelStyle = isMax
+    ? { flex: '0 0 0', width: 0, minWidth: 0, overflow: 'hidden', opacity: 0, pointerEvents: 'none' as const }
+    : isMin
+      ? { flex: '1 1 auto', width: '100%', minWidth: 0 }
+      : { flex: `0 0 ${100 - prefs.splitPercent}%`, minWidth: 260 }
 
   const previewPane = (
-    <section className="dev-hub-preview" style={previewStyle}>
+    <section className={`dev-hub-preview ${isMax ? 'dev-hub-preview--maximized' : ''} ${isMin ? 'dev-hub-preview--minimized' : ''}`} style={previewStyle}>
       {preview}
     </section>
   )
 
   const panelPane = (
-    <aside className="dev-hub-panel" style={panelStyle}>
+    <aside className={`dev-hub-panel ${isMax ? 'dev-hub-panel--hidden' : ''}`} style={panelStyle} aria-hidden={isMax}>
       {panel}
     </aside>
   )
+
+  const handle = canResize ? (
+    <div
+      className="dev-hub-resize-handle"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize panels"
+      onMouseDown={onResizeStart}
+    />
+  ) : null
 
   return (
     <div className="dev-hub-workspace-wrap">
@@ -73,45 +92,41 @@ export function ResizableWorkspace({ prefs, setPrefs, resetLayout, preview, pane
         <span className="dev-hub-workspace-toolbar-label">Layout</span>
         <button
           type="button"
-          className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline"
+          className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline dev-hub-tap"
           onClick={() => setPrefs({ panelFirst: !prefs.panelFirst })}
           title="Swap panel side"
         >
           <ArrowLeftRight size={14} />
           Swap panels
         </button>
-        <button type="button" className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline" onClick={resetLayout} title="Reset layout">
+        <button
+          type="button"
+          className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline dev-hub-tap"
+          onClick={resetLayout}
+          title="Reset layout"
+        >
           <RotateCcw size={14} />
           Reset
         </button>
+        {isMax && (
+          <span className="dev-hub-workspace-hint">Fullscreen preview · Esc to exit</span>
+        )}
       </div>
 
       <div
         ref={workspaceRef}
-        className={`dev-hub-workspace dev-hub-workspace--flex ${prefs.panelFirst ? 'dev-hub-workspace--flipped' : ''}`}
+        className={`dev-hub-workspace dev-hub-workspace--flex dev-hub-workspace--preview-${mode} ${prefs.panelFirst ? 'dev-hub-workspace--flipped' : ''}`}
       >
         {prefs.panelFirst ? (
           <>
             {panelPane}
-            <div
-              className="dev-hub-resize-handle"
-              role="separator"
-              aria-orientation="vertical"
-              aria-label="Resize panels"
-              onMouseDown={onResizeStart}
-            />
+            {handle}
             {previewPane}
           </>
         ) : (
           <>
             {previewPane}
-            <div
-              className="dev-hub-resize-handle"
-              role="separator"
-              aria-orientation="vertical"
-              aria-label="Resize panels"
-              onMouseDown={onResizeStart}
-            />
+            {handle}
             {panelPane}
           </>
         )}
