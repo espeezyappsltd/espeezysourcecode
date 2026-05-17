@@ -5,6 +5,12 @@ export type DevAppDefinition = {
   packagePath: string
   /** Default local port (overridable via UI or DEV_HUB_PORT_<APP>). */
   port: number
+  /** Iframe preview path (auth-gated apps should use /login). */
+  previewPath?: string
+  /** Lightweight path for dev-hub HTTP health checks. */
+  healthPath?: string
+  /** Node inspector port when started in debug mode. */
+  inspectPort?: number
   productionUrl?: string
   accent: string
 }
@@ -17,6 +23,9 @@ export const DEV_APPS: DevAppDefinition[] = [
     description: 'Scholar workspace — kanban.espeezy.com',
     packagePath: 'apps/kanban',
     port: 3001,
+    inspectPort: 9231,
+    previewPath: '/login',
+    healthPath: '/login',
     productionUrl: 'https://kanban.espeezy.com',
     accent: '#10b981',
   },
@@ -26,6 +35,9 @@ export const DEV_APPS: DevAppDefinition[] = [
     description: 'Skirmish & quiz (Pro tier)',
     packagePath: 'apps/games',
     port: 3002,
+    inspectPort: 9232,
+    previewPath: '/login',
+    healthPath: '/login',
     productionUrl: 'https://games.espeezy.com',
     accent: '#6366f1',
   },
@@ -43,6 +55,7 @@ export const DEV_APPS: DevAppDefinition[] = [
     description: 'Admin console & operations',
     packagePath: 'apps/admin',
     port: 3004,
+    inspectPort: 9234,
     accent: '#f59e0b',
   },
   {
@@ -60,6 +73,7 @@ export const DEV_APPS: DevAppDefinition[] = [
     description: 'Developer launchpad — docs, tutorials & local app links',
     packagePath: 'apps/core',
     port: 3006,
+    inspectPort: 9236,
     accent: '#ec4899',
   },
 ]

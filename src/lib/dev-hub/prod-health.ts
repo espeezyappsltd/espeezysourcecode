@@ -7,6 +7,9 @@ export type ProdHealthResult = ProdDeployment & {
   checkedAt: number
 }
 
+const PROD_CACHE_MS = 45_000
+let prodCache: { at: number; fleet: ProdHealthResult[] } | null = null
+
 async function probeUrl(url: string): Promise<{ online: boolean; statusCode: number | null; latencyMs: number }> {
   const start = Date.now()
   const init: RequestInit = {
@@ -17,7 +20,7 @@ async function probeUrl(url: string): Promise<{ online: boolean; statusCode: num
   }
 
   try {
-    let res = await fetch(url, init)
+    const res = await fetch(url, init)
     const latencyMs = Date.now() - start
     const online = res.ok || (res.status >= 200 && res.status < 500)
     return { online, statusCode: res.status, latencyMs }
@@ -37,8 +40,13 @@ async function probeUrl(url: string): Promise<{ online: boolean; statusCode: num
   }
 }
 
-export async function checkProdFleet(): Promise<ProdHealthResult[]> {
-  const checkedAt = Date.now()
+export async function checkProdFleet(force = false): Promise<ProdHealthResult[]> {
+  const now = Date.now()
+  if (!force && prodCache && now - prodCache.at < PROD_CACHE_MS) {
+    return prodCache.fleet
+  }
+
+  const checkedAt = now
   const results = await Promise.all(
     PROD_DEPLOYMENTS.map(async (dep) => {
       const probe = await probeUrl(dep.url)
@@ -51,6 +59,7 @@ export async function checkProdFleet(): Promise<ProdHealthResult[]> {
       }
     }),
   )
+  prodCache = { at: now, fleet: results }
   return results
 }
 

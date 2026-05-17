@@ -39,16 +39,16 @@ export function uniqueTestEmail(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}@e2e.espeezy.test`
 }
 
-/** Wait until LoginAuthGate stops blocking clicks. */
+/** Wait until the login form is interactive. */
 export async function waitForLoginGate(page: Page): Promise<void> {
-  await page.waitForFunction(
-    () => {
-      const gate = document.querySelector('[data-login-auth-gate]')
-      if (!gate) return true
-      return gate.getAttribute('data-ready') === 'true'
-    },
-    { timeout: 45_000 },
-  )
+  await page.locator('#auth-email').waitFor({ state: 'visible', timeout: 45_000 })
+}
+
+export async function isAdminApiAvailable(config: SupabaseAdminConfig): Promise<boolean> {
+  const res = await fetch(`${config.url}/auth/v1/admin/users?page=1&per_page=1`, {
+    headers: adminHeaders(config.serviceRole),
+  })
+  return res.ok
 }
 
 function adminHeaders(serviceRole: string): Record<string, string> {

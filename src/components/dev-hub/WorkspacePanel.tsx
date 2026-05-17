@@ -1,8 +1,9 @@
 'use client'
 
-import { RotateCcw, Square, Play, Terminal } from 'lucide-react'
+import { Bug, RotateCcw, Square, Play, Terminal } from 'lucide-react'
 import { LogStream } from './LogStream'
-import type { TerminalEntry } from './types'
+import { ResourceMeter } from './ResourceMeter'
+import type { AppRuntime, TerminalEntry } from './types'
 import type { WorkspaceTab } from './useWorkspaceLayout'
 
 type Props = {
@@ -10,7 +11,10 @@ type Props = {
   onTab: (tab: WorkspaceTab) => void
   isActive: boolean
   actionBusy: string | null
+  runtime?: AppRuntime
+  accent?: string
   onStart: () => void
+  onDebug: () => void
   onStop: () => void
   onRestart: () => void
   logs: string[]
@@ -25,7 +29,10 @@ export function WorkspacePanel({
   onTab,
   isActive,
   actionBusy,
+  runtime,
+  accent,
   onStart,
+  onDebug,
   onStop,
   onRestart,
   logs,
@@ -60,17 +67,32 @@ export function WorkspacePanel({
         </button>
       </div>
 
+      {isActive && runtime?.resources && (
+        <ResourceMeter resources={runtime.resources} accent={accent} compact />
+      )}
+
       <div className="dev-hub-panel-controls">
         {!isActive ? (
-          <button
-            type="button"
-            className="dev-hub-action-btn btn btn-success btn-sm"
-            disabled={actionBusy !== null}
-            onClick={onStart}
-          >
-            <Play size={14} aria-hidden />
-            {actionBusy === 'start' ? 'Starting…' : 'Start'}
-          </button>
+          <>
+            <button
+              type="button"
+              className="dev-hub-action-btn btn btn-success btn-sm"
+              disabled={actionBusy !== null}
+              onClick={onStart}
+            >
+              <Play size={14} aria-hidden />
+              {actionBusy === 'start' ? 'Starting…' : 'Start'}
+            </button>
+            <button
+              type="button"
+              className="dev-hub-action-btn btn btn-secondary btn-sm"
+              disabled={actionBusy !== null}
+              onClick={onDebug}
+            >
+              <Bug size={14} aria-hidden />
+              {actionBusy === 'debug' ? 'Debugging…' : 'Debug'}
+            </button>
+          </>
         ) : (
           <button
             type="button"

@@ -91,6 +91,13 @@ export function useLoginAuthRedirect(supabase: SupabaseClient | null, redirectPa
   const handleSession = useCallback(
     (session: Session | null) => {
       if (resolvedRef.current || redirectedRef.current) return
+      const embed =
+        typeof window !== 'undefined' &&
+        (isEmbedPreview(new URLSearchParams(window.location.search)) || window.self !== window.top)
+      if (embed) {
+        markReady()
+        return
+      }
       if (session) {
         void redirectAfterSignIn()
       } else {
@@ -134,7 +141,11 @@ export function useLoginAuthRedirect(supabase: SupabaseClient | null, redirectPa
 
       if (event === 'SIGNED_IN' && session) {
         window.clearTimeout(fallbackId)
-        void redirectAfterSignIn()
+        const embed =
+          typeof window !== 'undefined' &&
+          (isEmbedPreview(new URLSearchParams(window.location.search)) || window.self !== window.top)
+        if (!embed) void redirectAfterSignIn()
+        else markReady()
         return
       }
 

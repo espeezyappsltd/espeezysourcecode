@@ -68,6 +68,7 @@ export function AppPreviewPane({
 }: Props) {
   const a11yMenuId = useId()
   const [a11yOpen, setA11yOpen] = useState(false)
+  const [iframeLoaded, setIframeLoaded] = useState(false)
   const a11yRef = useRef<HTMLDivElement>(null)
 
   const minimized = previewMode === 'minimized'
@@ -110,6 +111,11 @@ export function AppPreviewPane({
   const displayUrl = previewUrl || `http://${localHost}:${effectivePort}`
   const iframeSrc =
     previewUrl && showPreview ? withEmbedPreviewParam(previewUrl) : previewUrl
+  const showWarmOverlay = warmingUp && !iframeLoaded
+
+  useEffect(() => {
+    setIframeLoaded(false)
+  }, [iframeKey, iframeSrc])
 
   return (
     <div
@@ -256,9 +262,14 @@ export function AppPreviewPane({
                   height: `${100 / zoom}%`,
                 }}
               >
-                <iframe key={iframeKey} src={iframeSrc} title={`${appName} local preview`} />
+                <iframe
+                  key={iframeKey}
+                  src={iframeSrc}
+                  title={`${appName} local preview`}
+                  onLoad={() => setIframeLoaded(true)}
+                />
               </div>
-              {warmingUp && (
+              {showWarmOverlay && (
                 <div className="dev-hub-iframe-loading" aria-live="polite">
                   {!a11y.reducedMotion && <span className="spinner-mini" />}
                   Starting {appName}…

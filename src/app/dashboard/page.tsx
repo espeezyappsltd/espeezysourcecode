@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { DevHubShell } from '@/components/dev-hub/DevHubShell'
+import { FleetControls } from '@/components/dev-hub/FleetControls'
 import { MetricsBar } from '@/components/dev-hub/MetricsBar'
 import { ProdFleet } from '@/components/dev-hub/ProdFleet'
 import { AppCard } from '@/components/dev-hub/AppCard'
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const [prodFleet, setProdFleet] = useState<ProdFleetRow[]>([])
   const [metrics, setMetrics] = useState<HubMetrics>(EMPTY_METRICS)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [fleetBusy, setFleetBusy] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
@@ -44,13 +46,14 @@ export default function DashboardPage() {
     }
   }, [])
 
-  usePoll(refresh, 15000)
+  usePoll(refresh, 12_000)
 
-  async function control(appId: string, action: 'start' | 'stop', port?: number) {
+  async function control(appId: string, action: 'start' | 'stop' | 'debug', port?: number) {
     setBusyId(appId)
     try {
-      const needsBody = action === 'start' && port != null
-      await fetch(`/api/dev/apps/${appId}/${action}`, {
+      const path = action === 'debug' ? 'debug' : action
+      const needsBody = (action === 'start' || action === 'debug') && port != null
+      await fetch(`/api/dev/apps/${appId}/${path}`, {
         method: 'POST',
         headers: needsBody ? { 'Content-Type': 'application/json' } : undefined,
         body: needsBody ? JSON.stringify({ port }) : undefined,
@@ -61,10 +64,24 @@ export default function DashboardPage() {
     }
   }
 
+  async function fleetAction(action: 'start-all' | 'stop-all') {
+    setFleetBusy(true)
+    try {
+      await fetch('/api/dev/apps/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+      await refresh()
+    } finally {
+      setFleetBusy(false)
+    }
+  }
+
   return (
     <DevHubShell
       title="Espeezy Command Center"
-      subtitle="localhost URLs · configurable ports · DEV_HUB_PORT_* env overrides"
+      subtitle="Run · debug · monitor — lightweight hub on :3000 · apps on configurable ports"
     >
       <MetricsBar metrics={metrics} />
       {loadError && <p className="error-message dev-hub-alert">{loadError}</p>}
@@ -76,8 +93,15 @@ export default function DashboardPage() {
           <div className="dev-hub-section-eyebrow dev-hub-section-eyebrow--local">Local workspace</div>
           <h2 className="dev-hub-section-title">Development servers</h2>
           <p className="dev-hub-section-desc">
-            Start and stop apps on this machine. Open a workspace for logs, preview, and shell.
+            Start, debug with Node inspector, and watch RAM/CPU per app. Open a workspace for logs, preview, and shell.
           </p>
+          <FleetControls
+            metrics={metrics}
+            busy={fleetBusy}
+            onStartAll={() => void fleetAction('start-all')}
+            onStopAll={() => void fleetAction('stop-all')}
+            onRefresh={() => void refresh()}
+          />
         </div>
 
         <div className="dev-hub-apps">
@@ -89,6 +113,7 @@ export default function DashboardPage() {
               prodStatus={prodFleet.find((p) => p.appId === app.id)}
               style={{ animationDelay: `${i * 0.04}s` }}
               onStart={(port) => void control(app.id, 'start', port)}
+              onDebug={(port) => void control(app.id, 'debug', port)}
               onStop={() => void control(app.id, 'stop')}
               onRefresh={() => void refresh()}
             />

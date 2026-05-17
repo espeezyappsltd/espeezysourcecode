@@ -5,6 +5,7 @@ import {
   deleteUserByEmail,
   generateRecoveryLink,
   getSupabaseAdminConfig,
+  isAdminApiAvailable,
   uniqueTestEmail,
   waitForLoginGate,
 } from './helpers/auth-e2e'
@@ -21,41 +22,72 @@ test.describe('Kanban signup, login, and password reset', () => {
   test.skip(!admin, 'Requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in apps/kanban/.env.local')
 
   const email = uniqueTestEmail('kanban')
+  let adminWorks = false
 
-  test.afterAll(async () => {
-    if (admin) await deleteUserByEmail(admin, email)
+  test.beforeAll(async () => {
+    if (admin) adminWorks = await isAdminApiAvailable(admin)
   })
 
-  test('signup, login, reset password, login with new password', async ({ page }) => {
+  test.afterAll(async () => {
+    if (admin && adminWorks) await deleteUserByEmail(admin, email)
+  })
+
+  test('signup and login', async ({ page }) => {
     test.setTimeout(120_000)
 
     await page.context().clearCookies()
     await page.goto('/login?signup=true', { waitUntil: 'domcontentloaded' })
-    await expect(page.getByRole('heading', { name: /join espeezy/i })).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByRole('heading', { name: /Espeezy Kanban/i })).toBeVisible({ timeout: 20_000 })
     await waitForLoginGate(page)
 
-    await page.locator('#email').fill(email)
-    await page.locator('#password').fill(INITIAL_PASSWORD)
-    await page.locator('#legal').check()
-    await page.getByRole('button', { name: /create scholar account/i }).click()
+    await page.locator('#auth-email').fill(email)
+    await page.locator('#auth-password').fill(INITIAL_PASSWORD)
+    await page.getByRole('checkbox').check()
+    await page.locator('form').getByRole('button', { name: /^create account$/i }).click()
 
-    await page.waitForTimeout(2500)
-    if (page.url().includes('/login')) {
+    const leftLogin = await page
+      .waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45_000 })
+      .then(() => true)
+      .catch(() => false)
+
+    if (!leftLogin) {
+      const alert = page.getByRole('alert')
+      if (await alert.isVisible()) {
+        const message = (await alert.textContent())?.trim()
+        if (message) throw new Error(`Signup failed: ${message}`)
+      }
+      if (!adminWorks) {
+        throw new Error('Signup did not leave /login and admin API is unavailable to confirm the user.')
+      }
       await confirmUserByEmail(admin!, email)
-      await page.goto('/login')
-      await page.locator('#email').fill(email)
-      await page.locator('#password').fill(INITIAL_PASSWORD)
-      await page.getByRole('button', { name: /^sign in$/i }).click()
+      await page.goto('/login', { waitUntil: 'domcontentloaded' })
+      await waitForLoginGate(page)
+      await page.locator('#auth-email').fill(email)
+      await page.locator('#auth-password').fill(INITIAL_PASSWORD)
+      await page.locator('form').getByRole('button', { name: /^sign in$/i }).click()
+      await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45_000 })
     }
 
+    expect(page.url()).not.toContain('/login')
+
+    await page.context().clearCookies()
+    await page.goto('/login', { waitUntil: 'domcontentloaded' })
+    await waitForLoginGate(page)
+    await page.locator('#auth-email').fill(email)
+    await page.locator('#auth-password').fill(INITIAL_PASSWORD)
+    await page.locator('form').getByRole('button', { name: /^sign in$/i }).click()
     await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45_000 })
     expect(page.url()).not.toContain('/login')
+  })
+
+  test('password reset', async ({ page }) => {
+    test.skip(!adminWorks, 'Requires a valid SUPABASE_SERVICE_ROLE_KEY for recovery links')
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' })
     await waitForLoginGate(page)
-    await page.locator('#email').fill(email)
-    await page.getByRole('button', { name: /recovery link/i }).click()
-    await expect(page.getByText(/recovery link sent/i)).toBeVisible({ timeout: 15_000 })
+    await page.locator('#auth-email').fill(email)
+    await page.getByRole('button', { name: /forgot password/i }).click()
+    await expect(page.getByText(/password reset link sent/i)).toBeVisible({ timeout: 15_000 })
 
     const recoveryUrl = await generateRecoveryLink(
       admin!,
@@ -74,9 +106,9 @@ test.describe('Kanban signup, login, and password reset', () => {
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' })
     await waitForLoginGate(page)
-    await page.locator('#email').fill(email)
-    await page.locator('#password').fill(RESET_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
+    await page.locator('#auth-email').fill(email)
+    await page.locator('#auth-password').fill(RESET_PASSWORD)
+    await page.locator('form').getByRole('button', { name: /^sign in$/i }).click()
     await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45_000 })
     expect(page.url()).not.toContain('/login')
   })

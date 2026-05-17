@@ -1,406 +1,62 @@
-"use client"
+'use client'
 
-import { useState, useMemo } from 'react'
-import Image from 'next/image'
-import TransientError from '@/components/TransientError'
-import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
-import { BookOpen, User, Lock, ExternalLink, Activity } from 'lucide-react'
+import { Suspense, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient as createSupabaseClient } from '@/lib/supabase/client'
-import { Phone, Hash as HashIcon } from 'lucide-react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { Suspense } from 'react'
-import { buildAuthCallbackUrl, isEmbedPreview, resolveClientOrigin } from '@/lib/app-url'
-import { LoginAuthGate } from '@shared/LoginAuthGate'
-import { sanitizeNextPath, useLoginAuthRedirect } from '@shared/useLoginAuthRedirect'
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message
-  return 'An unexpected error occurred.'
-}
+import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
+import { SimpleAuthForm } from '@shared/SimpleAuthForm'
+import { sanitizeNextPath } from '@shared/app-url'
+import { useSimpleAuth } from '@shared/useSimpleAuth'
 
 function LoginContent() {
-  const SIGNUP_ENABLED = true
-  const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createSupabaseClient(), [])
-  const error = searchParams?.get('error')
-  const [resetMessage, setResetMessage] = useState<string | null>(null)
-  const [authTab, setAuthTab] = useState<'email' | 'phone'>(searchParams?.get('method') === 'phone' ? 'phone' : 'email')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [authError, setAuthError] = useState<string | null>(error ?? null)
-  const [isSignUp, setIsSignUp] = useState(SIGNUP_ENABLED && searchParams?.get('signup') === 'true')
-  const [legalAccepted, setLegalAccepted] = useState(false)
-  const [activePolicy, setActivePolicy] = useState<'privacy' | 'terms' | 'cookies' | null>(null)
-  const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
-  const [sendingOtp, setSendingOtp] = useState(false)
-  const [isResetting, setIsResetting] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const embedPreview = isEmbedPreview(searchParams)
   const redirectPath = sanitizeNextPath(
     searchParams?.get('next') ?? searchParams?.get('redirect'),
   )
-  const { isChecking, isRedirecting, redirectAfterSignIn } = useLoginAuthRedirect(
+  const recoveryRedirectTo = buildAuthCallbackUrl(resolveClientOrigin(), { recovery: true })
+  const defaultMode = searchParams?.get('signup') === 'true' ? 'signup' : 'signin'
+
+  const { ready, busy, error, info, signIn, signUp, resetPassword } = useSimpleAuth(
     supabase,
     redirectPath,
+    { recoveryRedirectTo },
   )
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setAuthError(null)
-
-    try {
-      if (isSignUp) {
-        if (!legalAccepted) throw new Error('Please accept the legal policies.')
-        const { data, error } = await supabase.auth.signUp({ email, password })
-        if (error) throw error
-        if (data.session) {
-          void redirectAfterSignIn()
-          return
-        }
-        setResetMessage('Check your email to confirm your account before signing in.')
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-        void redirectAfterSignIn()
-      }
-    } catch (err: unknown) {
-      setAuthError(getErrorMessage(err))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleResetPassword = async () => {
-    if (!email) {
-      setAuthError("Please enter your email address first.")
-      return
-    }
-    setIsResetting(true)
-    setAuthError(null)
-    try {
-      const origin = resolveClientOrigin()
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: buildAuthCallbackUrl(origin, { recovery: true }),
-      })
-      if (error) throw error
-      setResetMessage("Secure recovery link sent to " + email)
-    } catch (err: unknown) {
-      setAuthError(getErrorMessage(err))
-    } finally {
-      setIsResetting(false)
-    }
-  }
-
-  const oauthRedirectTo = buildAuthCallbackUrl(resolveClientOrigin())
-
-  const handleGithubLogin = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: oauthRedirectTo },
-    })
-  }
-
-  const handleGoogleLogin = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: oauthRedirectTo },
-    })
-  }
-
-  const handleRequestOtp = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (!phone.startsWith('+')) {
-      setAuthError('Please include the country code (e.g. +1 for USA)')
-      return
-    }
-    setSendingOtp(true)
-    setAuthError(null)
-    const { error } = await supabase.auth.signInWithOtp({ phone })
-    if (error) setAuthError(error.message)
-    else setOtpSent(true)
-    setSendingOtp(false)
-  }
-
-  const handleVerifyOtp = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    setSendingOtp(true)
-    setAuthError(null)
-    const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
-    if (error) setAuthError(error.message)
-    else redirectAfterSignIn('/')
-    setSendingOtp(false)
-  }
-
   return (
-    <LoginAuthGate isChecking={isChecking} isRedirecting={isRedirecting} variant="dark">
-    <div style={{
-      minHeight: embedPreview ? '100%' : '100vh',
-      width: '100%',
-      display: 'flex',
-      alignItems: embedPreview ? 'flex-start' : 'center',
-      justifyContent: 'center',
-      position: 'relative',
-      padding: embedPreview ? '1.25rem 1rem 2rem' : '1rem',
-      overflow: embedPreview ? 'auto' : 'hidden',
-      background: '#000',
-      boxSizing: 'border-box',
-    }}>
-      {/* Background Image */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <Image
-          src="/auth_bg.png"
-          alt="Auth Background"
-          fill
-          priority
-          quality={80}
-          style={{ objectFit: 'cover', opacity: 0.4 }}
-        />
-        {/* Dark overlay for text legibility */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%)' }} />
-      </div>
-
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          background: 'rgba(10, 10, 10, 0.4)',
-          backdropFilter: 'blur(40px)',
-          borderRadius: '40px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          padding: '3.5rem',
-          position: 'relative',
-          zIndex: 1,
-          boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
-          animation: 'fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <div style={{ background: 'linear-gradient(135deg, var(--brand, #10b981) 0%, #6366f1 100%)', width: '64px', height: '64px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 12px 24px rgba(16,185,129,0.25)' }}>
-            <BookOpen color="white" size={32} />
-          </div>
-          <h1 style={{ fontSize: '2.25rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em', margin: 0 }}>
-            {isSignUp ? 'Join Espeezy' : 'Secure Login'}
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '0.75rem', fontWeight: 600, fontSize: '1rem' }}>
-            {isSignUp ? "Connect with your project team." : "Enter your terminal credentials."}
-          </p>
-        </div>
-
-        {(error || authError || resetMessage) && (
-          <TransientError message={error || authError || resetMessage || ''} type={resetMessage ? 'success' : 'error'} />
-        )}
-
-        <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {!isSignUp && (
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', padding: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <button 
-                type="button" 
-                onClick={() => setAuthTab('email')}
-                style={{ flex: 1, padding: '0.7rem', borderRadius: '10px', background: authTab === 'email' ? 'rgba(255,255,255,0.08)' : 'transparent', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
-              >Email</button>
-              <button 
-                type="button" 
-                onClick={() => setAuthTab('phone')}
-                style={{ flex: 1, padding: '0.7rem', borderRadius: '10px', background: authTab === 'phone' ? 'rgba(255,255,255,0.08)' : 'transparent', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
-              >Phone</button>
-            </div>
-          )}
-
-          {authTab === 'email' || isSignUp ? (
-            <>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="email" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Authentication Identity</label>
-                <div style={{ position: 'relative' }}>
-                  <User size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
-                  <input
-                    id="email"
-                    className="form-input"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '1rem 1rem 1rem 3.5rem', borderRadius: '16px', fontSize: '1rem' }}
-                    placeholder="scholar@university.edu"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="password" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Access Secret</span>
-                  {!isSignUp && (
-                    <button
-                      type="button"
-                      onClick={handleResetPassword}
-                      style={{ background: 'none', border: 'none', color: 'var(--brand, #10b981)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}
-                      disabled={isResetting}
-                      aria-label="Send password recovery link"
-                    >
-                      {isResetting ? 'Processing...' : 'Recovery link'}
-                    </button>
-                  )}
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
-                  <input
-                    id="password"
-                    className="form-input"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '1rem 1rem 1rem 3.5rem', borderRadius: '16px', fontSize: '1rem' }}
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="phone">Phone Identity</label>
-                <div style={{ position: 'relative' }}>
-                  <Phone size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
-                  <input
-                    id="phone"
-                    className="form-input"
-                    type="tel"
-                    required
-                    disabled={otpSent}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '1rem 1rem 1rem 3.5rem', borderRadius: '16px' }}
-                    placeholder="+1 555 000 0000"
-                  />
-                </div>
-              </div>
-
-              {otpSent && (
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" htmlFor="otp" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Authorization Code</span>
-                    <button type="button" onClick={() => setOtpSent(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', cursor: 'pointer' }}>Retry identity</button>
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <HashIcon size={18} aria-hidden="true" style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
-                    <input
-                      id="otp"
-                      className="form-input"
-                      type="text"
-                      required
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '1rem 1rem 1rem 3.5rem', borderRadius: '16px' }}
-                      placeholder="6-digit code"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {otpSent ? (
-                <button type="button" className="btn btn-primary" onClick={handleVerifyOtp} disabled={sendingOtp || otp.length < 6} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 950 }}>
-                  {sendingOtp ? 'Verifying...' : 'Authorize Terminal'}
-                </button>
-              ) : (
-                <button type="button" className="btn btn-primary" onClick={handleRequestOtp} disabled={sendingOtp || phone.length < 8} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 950 }}>
-                  {sendingOtp ? 'Processing...' : 'Request Code'}
-                </button>
-              )}
-            </>
-          )}
-
-          {isSignUp && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-              <input
-                type="checkbox"
-                id="legal"
-                checked={legalAccepted}
-                onChange={(e) => setLegalAccepted(e.target.checked)}
-                required
-              />
-              <label htmlFor="legal" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
-                I accept the <button type="button" onClick={() => setActivePolicy('terms')} style={{ background: 'none', border: 'none', color: 'var(--brand, #10b981)', padding: 0, cursor: 'pointer', fontWeight: 700 }}>Terms</button>,
-                <button type="button" onClick={() => setActivePolicy('privacy')} style={{ background: 'none', border: 'none', color: 'var(--brand, #10b981)', padding: 0, cursor: 'pointer', fontWeight: 700 }}>Privacy</button>, and
-                <button type="button" onClick={() => setActivePolicy('cookies')} style={{ background: 'none', border: 'none', color: 'var(--brand, #10b981)', padding: 0, cursor: 'pointer', fontWeight: 700 }}>Cookies</button>.
-              </label>
-            </div>
-          )}
-
-          <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {(authTab === 'email' || isSignUp) && (
-              <button className="btn btn-primary" type="submit" disabled={loading} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 950, fontSize: '1.1rem', background: 'linear-gradient(135deg, var(--brand, #10b981) 0%, #059669 100%)', border: 'none' }}>
-                {loading ? (isSignUp ? 'Initializing Identity...' : 'Authorizing...') : (isSignUp ? 'Create Scholar Account' : 'Sign In')}
-              </button>
-            )}
-            
-            {SIGNUP_ENABLED && (
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 800 }}
-              >
-                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-              </button>
-            )}
-          </div>
-        </form>
-
-        {!isSignUp && (
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
-              <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Peer OAuth</span>
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <button onClick={handleGoogleLogin} aria-label="Sign in with Google" style={{ padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
-                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.56 2.68-3.86 2.68-6.62z" fill="#4285F4"/><path d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.92-2.26c-.8.54-1.84.86-3.03.86-2.33 0-4.3-1.57-5-3.68H.98V13.1A8.99 8.99 0 0 0 9 18z" fill="#34A853"/><path d="M4 10.74A5.4 5.4 0 0 1 3.72 9c0-.6.1-1.18.28-1.74V5H.98A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.98 4.1L4 10.74z" fill="#FBBC05"/><path d="M9 3.58c1.32 0 2.5.46 3.43 1.36l2.57-2.58C13.45.9 11.43 0 9 0A8.99 8.99 0 0 0 .98 5L4 7.26C4.7 5.15 6.67 3.58 9 3.58z" fill="#EA4335"/></svg>
-                Google
-              </button>
-              <button onClick={handleGithubLogin} aria-label="Sign in with GitHub" style={{ padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
-                <ExternalLink size={18} color="rgba(255,255,255,0.4)" aria-hidden="true" />
-                GitHub
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.2)', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-            <Activity size={14} color="var(--brand, #10b981)" /> 
-            Scholar Protocol Secured
-          </div>
-        </div>
-      </div>
-
-      {/* Policy Modals */}
-      {activePolicy === 'privacy' && <PrivacyPolicy onClose={() => setActivePolicy(null)} />}
-      {activePolicy === 'terms' && <TermsOfService onClose={() => setActivePolicy(null)} />}
-      {activePolicy === 'cookies' && <CookiePolicy onClose={() => setActivePolicy(null)} />}
-
-      <style jsx>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-      `}</style>
-    </div>
-    </LoginAuthGate>
+    <SimpleAuthForm
+      appName="Espeezy Kanban"
+      tagline="Sign in with your email and password."
+      busy={busy}
+      ready={ready}
+      error={error}
+      info={info}
+      defaultMode={defaultMode}
+      onSignIn={signIn}
+      onSignUp={signUp}
+      onResetPassword={resetPassword}
+    />
   )
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <div className="spinner" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#f4f6f8',
+            color: '#64748b',
+          }}
+        >
+          Loading…
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   )

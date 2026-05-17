@@ -1,4 +1,4 @@
-import { Activity, Cloud, Cpu, Gauge, Server } from 'lucide-react'
+import { Activity, Cloud, Cpu, Gauge, HardDrive, Server } from 'lucide-react'
 import type { HubMetrics } from './types'
 
 export function MetricsBar({ metrics }: { metrics: HubMetrics }) {
@@ -22,15 +22,15 @@ export function MetricsBar({ metrics }: { metrics: HubMetrics }) {
       icon: Activity,
     },
     {
-      label: 'Local stopped',
-      value: metrics.stopped,
-      color: 'var(--text-sub)',
-      icon: Server,
+      label: 'Fleet RAM',
+      value: metrics.totalMemoryMb != null ? `${metrics.totalMemoryMb} MB` : '—',
+      color: '#f472b6',
+      icon: HardDrive,
     },
     {
-      label: 'Errors',
-      value: metrics.errors,
-      color: metrics.errors ? '#ef4444' : 'var(--text-sub)',
+      label: 'Fleet CPU',
+      value: metrics.avgCpuPercent != null ? `${metrics.avgCpuPercent}%` : '—',
+      color: '#fbbf24',
       icon: Cpu,
     },
     {

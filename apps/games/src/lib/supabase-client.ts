@@ -1,4 +1,5 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveSupabaseEnv } from './supabase-env'
 
 let cachedClient: SupabaseClient | null = null
@@ -8,7 +9,7 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(url && anonKey)
 }
 
-/** Browser Supabase client. Returns null when env is not configured (login can still render). */
+/** Browser Supabase client (cookie session for middleware). */
 export function getSupabaseClient(): SupabaseClient | null {
   if (!isSupabaseConfigured()) return null
 
@@ -17,7 +18,7 @@ export function getSupabaseClient(): SupabaseClient | null {
   const { url, anonKey } = resolveSupabaseEnv()
   if (!url || !anonKey) return null
 
-  cachedClient = createClient(url, anonKey)
+  cachedClient = createBrowserClient(url, anonKey)
   return cachedClient
 }
 

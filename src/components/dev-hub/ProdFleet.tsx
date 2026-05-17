@@ -15,7 +15,7 @@ export function ProdFleet({ fleet }: { fleet: ProdFleetRow[] }) {
   const onlineCount = fleet.filter((f) => f.online).length
 
   return (
-    <section className="dev-hub-section" aria-label="Production deployments">
+    <section id="production" className="dev-hub-section" aria-label="Production deployments">
       <div className="dev-hub-section-head">
         <div className="dev-hub-section-eyebrow">
           <Globe size={12} />

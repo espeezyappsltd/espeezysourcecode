@@ -1,4 +1,11 @@
 export type AppRuntimeStatus = 'stopped' | 'starting' | 'running' | 'error'
+export type AppRunMode = 'dev' | 'debug'
+
+export type ProcessResource = {
+  pid: number
+  memoryMb: number | null
+  cpuPercent: number | null
+}
 
 export type AppRuntime = {
   appId: string
@@ -6,8 +13,11 @@ export type AppRuntime = {
   port: number
   pid?: number
   startedAt?: number
+  mode?: AppRunMode
+  inspectPort?: number
   logs: string[]
   lastError?: string
+  resources?: ProcessResource
 }
 
 export type DevAppRow = {
@@ -32,6 +42,9 @@ export type HubMetrics = {
   stopped: number
   errors: number
   hubPort: number
+  totalMemoryMb?: number
+  avgCpuPercent?: number | null
+  hubMemoryMb?: number
   prodTotal?: number
   prodOnline?: number
   prodOffline?: number

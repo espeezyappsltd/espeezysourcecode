@@ -1,9 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
 import { AppPreviewPane } from '@/components/dev-hub/AppPreviewPane'
 import { DevHubShell } from '@/components/dev-hub/DevHubShell'
 import { ResizableWorkspace } from '@/components/dev-hub/ResizableWorkspace'
@@ -58,21 +56,22 @@ export default function AppWorkspacePage() {
   usePoll(refreshTerminal, 1500, tab === 'terminal')
 
   const runAction = useCallback(
-    async (action: 'restart' | 'start' | 'stop') => {
+    async (action: 'restart' | 'start' | 'stop' | 'debug') => {
       if (actionLockRef.current) return
       actionLockRef.current = true
       setActionBusy(action)
       try {
         const port = draftPort ?? app?.port
-        const needsBody = (action === 'start' || action === 'restart') && port != null
-        await fetch(`/api/dev/apps/${appId}/${action}`, {
+        const path = action === 'debug' ? 'debug' : action
+        const needsBody = (action === 'start' || action === 'restart' || action === 'debug') && port != null
+        await fetch(`/api/dev/apps/${appId}/${path}`, {
           method: 'POST',
           headers: needsBody ? { 'Content-Type': 'application/json' } : undefined,
           body: needsBody ? JSON.stringify({ port }) : undefined,
         })
         void refreshApp()
         void refreshLogs()
-        if (action === 'restart' || action === 'start') setIframeKey((k) => k + 1)
+        if (action === 'restart' || action === 'start' || action === 'debug') setIframeKey((k) => k + 1)
       } finally {
         actionLockRef.current = false
         setActionBusy(null)
@@ -149,7 +148,10 @@ export default function AppWorkspacePage() {
       onTab={(t) => setPrefs({ tab: t })}
       isActive={isActive}
       actionBusy={actionBusy}
+      runtime={app?.runtime}
+      accent={app?.accent}
       onStart={() => void runAction('start')}
+      onDebug={() => void runAction('debug')}
       onStop={() => void runAction('stop')}
       onRestart={() => void runAction('restart')}
       logs={logs}
@@ -161,12 +163,7 @@ export default function AppWorkspacePage() {
   )
 
   return (
-    <DevHubShell title={app?.name ?? appId} subtitle={app?.description ?? 'App workspace'}>
-      <Link href="/dashboard" className="dev-hub-back dev-hub-tap">
-        <ArrowLeft size={16} aria-hidden />
-        All apps
-      </Link>
-
+    <DevHubShell title={app?.name ?? appId} subtitle={app?.description ?? 'App workspace'} fullHeight>
       {hydrated ? (
         <ResizableWorkspace prefs={prefs} setPrefs={setPrefs} resetLayout={resetLayout} preview={preview} panel={panel} />
       ) : (

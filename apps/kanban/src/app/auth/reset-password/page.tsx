@@ -19,6 +19,13 @@ function ResetPasswordContent() {
   const [sessionReady, setSessionReady] = useState(false)
 
   useEffect(() => {
+    const urlError = searchParams?.get('error')
+    if (urlError) {
+      setError(urlError)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
     let mounted = true
 
     const establishRecoverySession = async () => {
@@ -60,7 +67,9 @@ function ResetPasswordContent() {
         return
       }
 
-      setError('Recovery session not found. Please request a new password reset link.')
+      setError(
+        'Recovery session not found. Open the email link in the same browser where you requested the reset, or request a new link below.',
+      )
     }
 
     void establishRecoverySession()
@@ -202,19 +211,25 @@ function ResetPasswordContent() {
               {loading ? 'Updating Credentials...' : 'Update Password'}
             </button>
             {!sessionReady && (
-              <button
-                type="button"
-                onClick={() => router.push('/login')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'rgba(255,255,255,0.5)',
-                  cursor: 'pointer',
-                  fontSize: '0.85rem',
-                }}
-              >
-                Back to login to request a new link
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', textAlign: 'center', margin: 0, lineHeight: 1.5 }}>
+                  Tip: use the same browser for “Forgot password” and the email link. If Gmail wraps the link, choose “Go to site” or copy the link address.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push('/login')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--brand, #10b981)',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  Request a new reset link
+                </button>
+              </div>
             )}
           </form>
         )}

@@ -4,7 +4,7 @@ import path from 'node:path'
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
-  allowedDevOrigins: ['prereg.espeezy.com'],
+  allowedDevOrigins: ['prereg.espeezy.com', 'localhost', '127.0.0.1'],
 
   // In Next.js 16, outputFileTracingRoot is a top-level property.
   // This prevents "whole project" tracing warnings during the Turbopack build.

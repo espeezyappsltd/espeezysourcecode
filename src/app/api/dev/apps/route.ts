@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireDevHubAuth } from '@/lib/dev-hub/api'
 import { checkProdFleet, prodFleetMetrics } from '@/lib/dev-hub/prod-health'
-import { checkAppHealth, getMetrics, listAppRuntimes } from '@/lib/dev-hub/process-manager'
+import { attachResourceMetrics, checkAppHealth, getHubResource, getMetrics, listAppRuntimes } from '@/lib/dev-hub/process-manager'
 import { defaultPortForApp, getEffectivePort, isPortOverridden, localAppUrl, localDevHost } from '@/lib/dev-hub/ports'
 import { DEV_APPS } from '@/lib/dev-hub/registry'
 
@@ -12,6 +12,11 @@ export async function GET() {
   if (denied) return denied
 
   const runtimes = listAppRuntimes()
+  const hasRunning = runtimes.some((r) => r.status === 'running' || r.status === 'starting')
+  if (hasRunning) {
+    await attachResourceMetrics()
+  }
+
   const health = await Promise.all(
     DEV_APPS.map(async (def) => {
       const runtime = runtimes.find((r) => r.appId === def.id)
@@ -25,6 +30,7 @@ export async function GET() {
 
   return NextResponse.json({
     metrics: { ...getMetrics(), ...prodStats },
+    hubResource: getHubResource(),
     prodFleet,
     localHost: localDevHost(),
     apps: DEV_APPS.map((def) => {
@@ -39,7 +45,7 @@ export async function GET() {
         defaultPort: defaultPortForApp(def.id),
         portCustom: isPortOverridden(def.id),
         localHost: localDevHost(),
-        localUrl: localAppUrl(port),
+        localUrl: `${localAppUrl(port)}${def.previewPath ?? ''}`,
         runtime,
         healthy: healthMap[def.id] ?? false,
       }

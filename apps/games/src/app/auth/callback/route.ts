@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { completeAuthCallback, parseAuthCallbackParams } from '@shared/auth-callback'
 import { sanitizeNextPath } from '@shared/app-url'
 import { attachTierCacheCookie } from '@/lib/resolve-games-tier'
 import { fetchProfileTier, syncTierToJwt } from '@/lib/games-tier'
@@ -8,34 +9,25 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
-  const { searchParams } = requestUrl
-  const origin = requestUrl.origin
+  const { searchParams, origin } = requestUrl
+  const params = parseAuthCallbackParams(searchParams)
   const next = searchParams.get('next') ?? '/'
-  const errorParam = searchParams.get('error')
-  const errorDesc = searchParams.get('error_description')
-  const code = searchParams.get('code')
-  const isRecovery = searchParams.get('type') === 'recovery'
-
-  if (errorParam || errorDesc) {
-    const msg = errorDesc || errorParam || 'OAuth authentication failed'
-    console.error('[Games Auth Callback] Provider Error:', msg)
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(msg)}`)
-  }
 
   const supabase = await createClient()
+  const result = await completeAuthCallback(supabase, params)
 
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (error) {
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
-    }
+  if (!result.ok) {
+    const loginPath = params.isRecovery ? '/reset-password' : '/login'
+    return NextResponse.redirect(
+      `${origin}${loginPath}?error=${encodeURIComponent(result.message)}`,
+    )
   }
 
   const safePath = sanitizeNextPath(next)
-  const redirectPath = isRecovery ? '/reset-password' : safePath
+  const redirectPath = params.isRecovery ? '/reset-password' : safePath
   const response = NextResponse.redirect(new URL(redirectPath, origin).toString())
 
-  if (!isRecovery) {
+  if (!params.isRecovery) {
     const {
       data: { user },
     } = await supabase.auth.getUser()

@@ -1,9 +1,11 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import path from 'node:path'
 import { getEffectivePort, localAppUrl, setAppPort } from './ports'
+import { getHubProcessResource, sampleProcessResources, type ProcessResource } from './resource-metrics'
 import { DEV_APPS, getDevApp, hubListenPort, type DevAppDefinition } from './registry'
 
 export type AppRuntimeStatus = 'stopped' | 'starting' | 'running' | 'error'
+export type AppRunMode = 'dev' | 'debug'
 
 export type AppRuntime = {
   appId: string
@@ -11,8 +13,11 @@ export type AppRuntime = {
   port: number
   pid?: number
   startedAt?: number
+  mode?: AppRunMode
+  inspectPort?: number
   logs: string[]
   lastError?: string
+  resources?: ProcessResource
 }
 
 export type TerminalEntry = {
@@ -32,6 +37,7 @@ type ManagerState = {
   processes: Map<string, ChildProcess>
   terminal: TerminalEntry[]
   terminalCounter: number
+  hubResource?: ProcessResource
 }
 
 declare global {
@@ -81,13 +87,23 @@ function pushTerminalLog(entry: TerminalEntry, line: string) {
   }
 }
 
-function spawnDevApp(def: DevAppDefinition, port: number): ChildProcess {
+export type StartAppOptions = {
+  port?: number
+  debug?: boolean
+}
+
+function spawnDevApp(def: DevAppDefinition, port: number, options?: StartAppOptions): ChildProcess {
   const cwd = path.join(repoRoot(), def.packagePath)
-  // Run Next directly so hub-assigned ports win (package.json scripts often hard-code -p).
   const runner = process.platform === 'win32' ? 'npx.cmd' : 'npx'
+  const env: NodeJS.ProcessEnv = { ...process.env, FORCE_COLOR: '0', BROWSER: 'none' }
+
+  if (options?.debug && def.inspectPort) {
+    env.NODE_OPTIONS = `--inspect=127.0.0.1:${def.inspectPort}`
+  }
+
   return spawn(runner, ['next', 'dev', '-p', String(port)], {
     cwd,
-    env: { ...process.env, FORCE_COLOR: '0', BROWSER: 'none' },
+    env,
     shell: process.platform === 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],
   })
@@ -104,10 +120,13 @@ export function getAppRuntime(appId: string): AppRuntime | undefined {
 export async function checkAppHealth(appId: string): Promise<boolean> {
   const runtime = getState().apps.get(appId)
   if (!runtime) return false
+  const def = getDevApp(appId)
+  const path = def?.healthPath ?? def?.previewPath ?? '/'
+  const url = `${localAppUrl(runtime.port)}${path.startsWith('/') ? path : `/${path}`}`
   try {
-    const res = await fetch(localAppUrl(runtime.port), {
+    const res = await fetch(url, {
       method: 'GET',
-      signal: AbortSignal.timeout(2500),
+      signal: AbortSignal.timeout(10_000),
     })
     return res.ok || res.status < 500
   } catch {
@@ -128,7 +147,7 @@ export function configureAppPort(appId: string, port: number): AppRuntime {
   return runtime
 }
 
-export function startApp(appId: string, port?: number): AppRuntime {
+export function startApp(appId: string, port?: number, options?: StartAppOptions): AppRuntime {
   const state = getState()
   const def = getDevApp(appId)
   if (!def) throw new Error(`Unknown app: ${appId}`)
@@ -144,13 +163,19 @@ export function startApp(appId: string, port?: number): AppRuntime {
 
   const effectivePort = getEffectivePort(appId)
   const runtime = state.apps.get(appId)!
+  const debug = Boolean(options?.debug && def.inspectPort)
   runtime.port = effectivePort
   runtime.status = 'starting'
   runtime.startedAt = Date.now()
   runtime.lastError = undefined
-  pushLog(runtime, `Starting ${def.name} → ${localAppUrl(effectivePort)}`)
+  runtime.mode = debug ? 'debug' : 'dev'
+  runtime.inspectPort = debug ? def.inspectPort : undefined
+  runtime.resources = undefined
 
-  const child = spawnDevApp(def, effectivePort)
+  const modeLabel = debug ? `debug :${def.inspectPort}` : 'dev'
+  pushLog(runtime, `Starting ${def.name} (${modeLabel}) → ${localAppUrl(effectivePort)}`)
+
+  const child = spawnDevApp(def, effectivePort, options)
   state.processes.set(appId, child)
   runtime.pid = child.pid
 
@@ -171,6 +196,9 @@ export function startApp(appId: string, port?: number): AppRuntime {
   child.on('exit', (code) => {
     state.processes.delete(appId)
     runtime.status = code === 0 ? 'stopped' : 'error'
+    runtime.mode = undefined
+    runtime.inspectPort = undefined
+    runtime.resources = undefined
     if (code !== 0 && code !== null) {
       runtime.lastError = `Exited with code ${code}`
     }
@@ -178,6 +206,10 @@ export function startApp(appId: string, port?: number): AppRuntime {
   })
 
   return runtime
+}
+
+export function startAppDebug(appId: string, port?: number): AppRuntime {
+  return startApp(appId, port, { debug: true })
 }
 
 export function stopApp(appId: string): AppRuntime {
@@ -197,25 +229,92 @@ export function stopApp(appId: string): AppRuntime {
 
   runtime.status = 'stopped'
   runtime.pid = undefined
+  runtime.mode = undefined
+  runtime.inspectPort = undefined
+  runtime.resources = undefined
   pushLog(runtime, 'Stopped by hub.')
   return runtime
 }
 
-export function restartApp(appId: string, port?: number): AppRuntime {
+export function restartApp(appId: string, port?: number, options?: StartAppOptions): AppRuntime {
+  const runtime = getState().apps.get(appId)
+  const mode = options ?? (runtime?.mode === 'debug' ? { debug: true } : undefined)
   stopApp(appId)
-  return startApp(appId, port)
+  return startApp(appId, port, mode)
+}
+
+export type BatchResult = { appId: string; status: AppRuntimeStatus; error?: string }
+
+export function startAllApps(): BatchResult[] {
+  return DEV_APPS.map((def) => {
+    try {
+      const runtime = startApp(def.id)
+      return { appId: def.id, status: runtime.status }
+    } catch (err) {
+      return {
+        appId: def.id,
+        status: 'error' as const,
+        error: err instanceof Error ? err.message : 'Start failed',
+      }
+    }
+  })
+}
+
+export function stopAllApps(): BatchResult[] {
+  return DEV_APPS.map((def) => {
+    try {
+      const runtime = stopApp(def.id)
+      return { appId: def.id, status: runtime.status }
+    } catch (err) {
+      return {
+        appId: def.id,
+        status: 'error' as const,
+        error: err instanceof Error ? err.message : 'Stop failed',
+      }
+    }
+  })
+}
+
+export async function attachResourceMetrics(): Promise<void> {
+  const active = listAppRuntimes().filter(
+    (r) => (r.status === 'running' || r.status === 'starting') && r.pid,
+  )
+  const pids = active.map((r) => r.pid!)
+  const sampled = await sampleProcessResources(pids)
+
+  for (const runtime of active) {
+    runtime.resources = runtime.pid ? sampled.get(runtime.pid) : undefined
+  }
+
+  getState().hubResource = getHubProcessResource()
+}
+
+export function getHubResource(): ProcessResource {
+  return getState().hubResource ?? getHubProcessResource()
 }
 
 export function getMetrics() {
   const runtimes = listAppRuntimes()
   const running = runtimes.filter((r) => r.status === 'running' || r.status === 'starting').length
   const errors = runtimes.filter((r) => r.status === 'error').length
+  const totalMemoryMb = runtimes.reduce((sum, r) => sum + (r.resources?.memoryMb ?? 0), 0)
+  const cpuValues = runtimes
+    .map((r) => r.resources?.cpuPercent)
+    .filter((v): v is number => v != null)
+  const hub = getHubResource()
+
   return {
     totalApps: DEV_APPS.length,
     running,
     stopped: runtimes.filter((r) => r.status === 'stopped').length,
     errors,
     hubPort: hubListenPort(),
+    totalMemoryMb: Math.round((totalMemoryMb + (hub.memoryMb ?? 0)) * 10) / 10,
+    avgCpuPercent:
+      cpuValues.length > 0
+        ? Math.round((cpuValues.reduce((a, b) => a + b, 0) / cpuValues.length) * 10) / 10
+        : null,
+    hubMemoryMb: hub.memoryMb,
   }
 }
 

@@ -65,6 +65,7 @@ function isPublicRoute(pathname: string): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const isEmbed = request.nextUrl.searchParams.get('embed') === '1'
 
   let supabaseResponse = NextResponse.next({ request })
 
@@ -87,12 +88,19 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
-  if (user && pathname === '/login') {
+  if (user && pathname === '/login' && !isEmbed) {
     const next = sanitizeNextPath(request.nextUrl.searchParams.get('next'))
     const dest = request.nextUrl.clone()
     dest.pathname = next
     dest.search = ''
     return NextResponse.redirect(dest)
+  }
+
+  if (!user && pathname === '/' && isEmbed) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    loginUrl.searchParams.set('embed', '1')
+    return NextResponse.redirect(loginUrl)
   }
 
   if (isPublicRoute(pathname)) {
