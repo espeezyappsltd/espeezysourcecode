@@ -1,14 +1,17 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { buildAuthCallbackUrl, ESPEEZY_APP_ORIGINS, resolveClientOrigin } from '@shared/app-url'
+import { LoginAuthGate } from '@shared/LoginAuthGate'
+import { sanitizeNextPath, useLoginAuthRedirect } from '@shared/useLoginAuthRedirect'
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') || '/'
+  const next = sanitizeNextPath(searchParams.get('next'))
+  const { isChecking, isRedirecting, redirectAfterSignIn } = useLoginAuthRedirect(supabase, next)
   const initialError = searchParams.get('error') || ''
   const hasSupabaseConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   const missingConfigMessage = 'Missing local Supabase config. Create apps/prereg/.env.local first.'
@@ -21,17 +24,6 @@ function LoginContent() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [resetting, setResetting] = useState(false)
-
-  useEffect(() => {
-    let active = true
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!active || !session) return
-      window.location.replace(next)
-    })
-    return () => {
-      active = false
-    }
-  }, [next])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -67,7 +59,7 @@ function LoginContent() {
         }
 
         if (data.session) {
-          window.location.replace(next)
+          redirectAfterSignIn()
           return
         }
 
@@ -89,7 +81,7 @@ function LoginContent() {
         return
       }
 
-      window.location.replace(next)
+      redirectAfterSignIn()
     } catch {
       setError(missingConfigMessage)
       setLoading(false)
@@ -126,6 +118,7 @@ function LoginContent() {
   }
 
   return (
+    <LoginAuthGate isChecking={isChecking} isRedirecting={isRedirecting} variant="light">
     <div
       style={{
         minHeight: '100vh',
@@ -341,6 +334,7 @@ function LoginContent() {
         </form>
       </div>
     </div>
+    </LoginAuthGate>
   )
 }
 

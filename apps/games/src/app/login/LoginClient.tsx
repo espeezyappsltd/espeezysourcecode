@@ -1,10 +1,13 @@
 'use client'
 
-import { useState, useEffect, type CSSProperties, type ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
 import { resolveSupabaseEnv } from '@/lib/supabase-env'
+import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
+import { LoginAuthGate } from '@shared/LoginAuthGate'
+import { sanitizeNextPath, useLoginAuthRedirect } from '@shared/useLoginAuthRedirect'
 
 type AuthMode = 'signin' | 'signup'
 // ... rest of styles ...
@@ -346,7 +349,8 @@ function AuthForm({
 export default function LoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/';
+  const next = sanitizeNextPath(searchParams.get('next'));
+  const { isChecking, isRedirecting, redirectAfterSignIn } = useLoginAuthRedirect(supabase, next);
   const needsUpgrade = searchParams.get('upgrade') === '1';
 
   const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv();
@@ -361,17 +365,6 @@ export default function LoginClient() {
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetting, setResetting] = useState(false);
-
-  useEffect(() => {
-    let active = true
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!active || !session) return
-      router.replace(next)
-    })
-    return () => {
-      active = false
-    }
-  }, [next, router])
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -412,7 +405,7 @@ export default function LoginClient() {
         return;
       }
       if (data.session) {
-        window.location.replace(next)
+        redirectAfterSignIn()
         return
       }
       setSuccess('Account created. Check your email to confirm your account, then sign in.');
@@ -427,7 +420,7 @@ export default function LoginClient() {
       setLoading(false);
       return;
     }
-    window.location.replace(next)
+    redirectAfterSignIn()
   }
 
   const handleReset = async (e: React.MouseEvent) => {
@@ -439,7 +432,7 @@ export default function LoginClient() {
     setResetting(true);
     setError('');
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      redirectTo: buildAuthCallbackUrl(resolveClientOrigin(), { recovery: true }),
     });
     setResetting(false);
     if (resetError) {
@@ -454,6 +447,7 @@ export default function LoginClient() {
   }
 
   return (
+    <LoginAuthGate isChecking={isChecking} isRedirecting={isRedirecting} variant="dark">
     <AuthShell maxWidth="420px">
       <BrandHeader
         badgeLabel="games"
@@ -503,5 +497,6 @@ export default function LoginClient() {
         </a>
       </p>
     </AuthShell>
+    </LoginAuthGate>
   );
 }

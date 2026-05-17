@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import Image from 'next/image'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
 import { BookOpen, User, Lock, ExternalLink, Activity } from 'lucide-react'
 import { createClient as createSupabaseClient } from '@/lib/supabase/client'
-import type { Session } from '@supabase/supabase-js'
 import { Phone, Hash as HashIcon } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
+import { LoginAuthGate } from '@shared/LoginAuthGate'
+import { sanitizeNextPath, useLoginAuthRedirect } from '@shared/useLoginAuthRedirect'
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message
@@ -38,35 +39,11 @@ function LoginContent() {
   const [isResetting, setIsResetting] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const goToDashboard = useCallback(() => {
-    const next = searchParams?.get('next')
-    const path =
-      next && next.startsWith('/') && !next.startsWith('//') && !next.includes(':') ? next : '/'
-    if (typeof window !== 'undefined') {
-      window.location.replace(path)
-      return
-    }
-    router.replace(path)
-  }, [router, searchParams])
-
-  // Redirect authenticated users straight to the dashboard
-  useEffect(() => {
-    let cancelled = false
-
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
-      if (cancelled) return
-      if (session) goToDashboard()
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
-      if (session) goToDashboard()
-    })
-
-    return () => {
-      cancelled = true
-      subscription?.unsubscribe()
-    }
-  }, [goToDashboard, supabase])
+  const redirectPath = sanitizeNextPath(searchParams?.get('next'))
+  const { isChecking, isRedirecting, redirectAfterSignIn } = useLoginAuthRedirect(
+    supabase,
+    redirectPath,
+  )
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,14 +56,14 @@ function LoginContent() {
         const { data, error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
         if (data.session) {
-          goToDashboard()
+          redirectAfterSignIn()
           return
         }
         setResetMessage('Check your email to confirm your account before signing in.')
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        goToDashboard()
+        redirectAfterSignIn()
       }
     } catch (err: unknown) {
       setAuthError(getErrorMessage(err))
@@ -154,11 +131,12 @@ function LoginContent() {
     setAuthError(null)
     const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
     if (error) setAuthError(error.message)
-    else router.replace('/')
+    else redirectAfterSignIn('/')
     setSendingOtp(false)
   }
 
   return (
+    <LoginAuthGate isChecking={isChecking} isRedirecting={isRedirecting} variant="dark">
     <div style={{
       minHeight: '100vh',
       width: '100%',
@@ -408,6 +386,7 @@ function LoginContent() {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
       `}</style>
     </div>
+    </LoginAuthGate>
   )
 }
 
