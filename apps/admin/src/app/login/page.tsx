@@ -7,7 +7,7 @@ import { ShieldCheck } from 'lucide-react'
 function AdminLoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') ?? '/admin'
+  const redirectTo = searchParams?.get('redirect') ?? '/admin'
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')

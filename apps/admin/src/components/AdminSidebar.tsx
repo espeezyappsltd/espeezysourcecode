@@ -22,6 +22,8 @@ import {
   ScrollText,
   Settings,
   ShieldCheck,
+  BookOpen,
+  FolderOpen,
 } from 'lucide-react'
 import { ADMIN_NAV_ITEMS, hasAdminPermission, type AdminPermission, type AdminStaffRole } from '@/lib/admin-rbac'
 
@@ -34,6 +36,8 @@ const ICONS: Record<AdminPermission, React.ReactNode> = {
   audit: <ScrollText size={18} />,
   settings: <Settings size={18} />,
   chat: <ShieldCheck size={18} />,
+  learn: <BookOpen size={18} />,
+  files: <FolderOpen size={18} />,
 }
 
 interface Props {

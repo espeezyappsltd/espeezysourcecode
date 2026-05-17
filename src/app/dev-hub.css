@@ -429,6 +429,42 @@
   background: rgba(245, 158, 11, 0.08);
 }
 
+.dev-hub-login-divider {
+  margin: 1.75rem 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+.dev-hub-login-admin-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dev-hub-login-admin-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.dev-hub-login-admin-hint {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+.dev-hub-login-admin-success {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
 .dev-hub-admin-login-backdrop {
   position: fixed;
   inset: 0;

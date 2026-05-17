@@ -7,7 +7,7 @@ import { ChevronRight, LogOut, Menu, RefreshCw, X } from 'lucide-react'
 import { getNavApp } from './nav-config'
 import { useDevHubNav } from './DevHubNavContext'
 import { useDevHubShell } from './DevHubShellContext'
-import { DevHubAdminSignIn } from './DevHubAdminSignIn'
+import { DevHubAdminBadge } from './DevHubAdminBadge'
 
 export function DevHubTopBar() {
   const pathname = usePathname()
@@ -65,7 +65,7 @@ export function DevHubTopBar() {
       </div>
 
       <div className="dev-hub-topbar-actions">
-        <DevHubAdminSignIn />
+        <DevHubAdminBadge />
         <button
           type="button"
           className="btn btn-ghost btn-sm btn-inline dev-hub-tap"

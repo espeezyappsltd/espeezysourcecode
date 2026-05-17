@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "npx serve out -p 3004",
     "typecheck": "tsc --noEmit",
-    "predeploy:check": "npm run typecheck && npm run build"
+    "predeploy:check": "npm run typecheck && npm run build",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@radix-ui/react-toast": "^1.2.15",
@@ -26,6 +27,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -4,14 +4,15 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import {
+  BookOpen,
   Cloud,
+  ExternalLink,
   Gamepad2,
   LayoutDashboard,
   LayoutGrid,
   Server,
   Shield,
   Sparkles,
-  BookOpen,
   X,
 } from 'lucide-react'
 import { adminConsoleHref, DEV_HUB_ADMIN_TABS, DEV_HUB_NAV_APPS } from './nav-config'
@@ -19,7 +20,6 @@ import { useDevHubNav } from './DevHubNavContext'
 import { useDevHubShell } from './DevHubShellContext'
 import { useDevHubAdminSession } from './DevHubAdminSessionContext'
 import { hasHubAdminPermission } from '@/lib/hub-admin-rbac'
-import { ExternalLink, Shield } from 'lucide-react'
 import type { AppRuntimeStatus } from './types'
 
 const APP_ICONS: Record<string, typeof LayoutGrid> = {

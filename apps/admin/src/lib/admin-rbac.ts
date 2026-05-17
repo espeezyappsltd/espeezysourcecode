@@ -1,6 +1,5 @@
 /**
  * Admin staff RBAC — backed by public.admin_members (max 20 active).
- * Principle of least privilege: each role only gets explicit section keys.
  */
 
 export type AdminStaffRole = 'superuser' | 'admin' | 'moderator' | 'viewer'
@@ -14,6 +13,8 @@ export type AdminPermission =
   | 'audit'
   | 'settings'
   | 'chat'
+  | 'learn'
+  | 'files'
 
 export type AdminMember = {
   id: string
@@ -30,20 +31,26 @@ export type AdminMember = {
 
 const ROLE_PERMISSIONS: Record<AdminStaffRole, AdminPermission[] | ['*']> = {
   superuser: ['*'],
-  admin: ['overview', 'users', 'analytics', 'announcements', 'launch', 'audit', 'settings', 'chat'],
-  moderator: ['overview', 'users', 'analytics', 'announcements', 'chat'],
-  viewer: ['overview', 'analytics', 'chat'],
+  admin: [
+    'overview',
+    'users',
+    'analytics',
+    'announcements',
+    'launch',
+    'audit',
+    'settings',
+    'chat',
+    'learn',
+    'files',
+  ],
+  moderator: ['overview', 'users', 'analytics', 'announcements', 'chat', 'learn', 'files'],
+  viewer: ['overview', 'analytics', 'chat', 'learn'],
 }
+
+export const VAULT_QUOTA_BYTES = 5 * 1024 * 1024 * 1024
 
 export function normalizeAdminUsername(input: string): string {
   return input.trim().toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 24)
-}
-
-export function adminEmailForUsername(username: string): string {
-  const u = normalizeAdminUsername(username)
-  if (u === 'pete') return 'pete@espeezy.com'
-  if (/^admin\d{1,2}$/.test(u)) return `${u}@espeezy.com`
-  return `${u}@espeezy.com`
 }
 
 export function hasAdminPermission(role: AdminStaffRole, permission: AdminPermission): boolean {
@@ -61,15 +68,26 @@ export function canAccessAdminRoute(role: AdminStaffRole, pathname: string): boo
   if (pathname.startsWith('/admin/launch')) return hasAdminPermission(role, 'launch')
   if (pathname.startsWith('/admin/audit')) return hasAdminPermission(role, 'audit')
   if (pathname.startsWith('/admin/settings')) return hasAdminPermission(role, 'settings')
+  if (pathname.startsWith('/admin/learn')) return hasAdminPermission(role, 'learn')
+  if (pathname.startsWith('/admin/files')) return hasAdminPermission(role, 'files')
   return hasAdminPermission(role, 'overview')
 }
 
-export const ADMIN_NAV_ITEMS: { href: string; label: string; permission: AdminPermission }[] = [
-  { href: '/admin', label: 'Overview', permission: 'overview' },
-  { href: '/admin/users', label: 'Users', permission: 'users' },
-  { href: '/admin/analytics', label: 'Analytics', permission: 'analytics' },
+export type AdminNavItem = {
+  href: string
+  label: string
+  permission: AdminPermission
+  description?: string
+}
+
+export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
+  { href: '/admin', label: 'Home', permission: 'overview', description: 'Dashboard overview' },
+  { href: '/admin/users', label: 'Users', permission: 'users', description: 'User management' },
+  { href: '/admin/analytics', label: 'Analytics', permission: 'analytics', description: 'Metrics & charts' },
+  { href: '/admin/files', label: 'Files', permission: 'files', description: 'Private vault (5GB)' },
+  { href: '/admin/learn', label: 'Dev learning', permission: 'learn', description: 'Guides & onboarding' },
   { href: '/admin/announcements', label: 'Announcements', permission: 'announcements' },
   { href: '/admin/launch', label: 'Launch', permission: 'launch' },
-  { href: '/admin/audit', label: 'Audit Log', permission: 'audit' },
+  { href: '/admin/audit', label: 'Audit log', permission: 'audit' },
   { href: '/admin/settings', label: 'Settings', permission: 'settings' },
 ]

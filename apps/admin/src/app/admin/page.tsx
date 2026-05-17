@@ -1,88 +1,49 @@
 'use client'
 
-import { useAdminDashboard } from '../../components/admin/useAdminDashboard'
-import AdminVerificationGate from '../../components/admin/AdminVerificationGate'
-import AdminDashboardHeader from '../../components/admin/AdminDashboardHeader'
-import AdminMarketingPanel from '../../components/admin/AdminMarketingPanel'
-import AdminLaunchCenter from '../../components/admin/AdminLaunchCenter'
-import AdminAnalyticsGrid from '../../components/admin/AdminAnalyticsGrid'
-import AdminUserOrchestrator from '../../components/admin/AdminUserOrchestrator'
-import AdminLiveLogs from '../../components/admin/AdminLiveLogs'
-import AgentControlCentre from '@/components/AgentControlCentre'
-import AdminExtras from '@/components/AdminExtras'
+import { useEffect, useState } from 'react'
+import { useAdminOnboarding } from '@/context/AdminOnboardingContext'
+import { AdminPageHeader } from '@/components/console/AdminPageHeader'
+import Link from 'next/link'
+import { ADMIN_NAV_ITEMS } from '@/lib/admin-rbac'
 
-export default function AdminDashboard() {
-  const {
-    isVerified,
-    verificationCode,
-    setVerificationCode,
-    verifying,
-    handleVerify,
-    stats,
-    recentUsers,
-    loading,
-    systemLogs,
-    config,
-    savingConfig,
-    launchConfig,
-    setLaunchConfig,
-    preregCount,
-    savingLaunchConfig,
-    saveLaunchConfig,
-    fetchAdminData,
-    handleUserAction,
-    updatePlatformConfig,
-    handleLaunchStudio,
-  } = useAdminDashboard()
+export default function AdminHomePage() {
+  const { setPageHint } = useAdminOnboarding()
+  const [metrics, setMetrics] = useState<Record<string, unknown> | null>(null)
 
-  if (!isVerified) {
-    return (
-      <AdminVerificationGate
-        verificationCode={verificationCode}
-        onCodeChange={setVerificationCode}
-        onSubmit={handleVerify}
-        verifying={verifying}
-      />
-    )
-  }
+  useEffect(() => {
+    setPageHint('Dashboard overview — pick a section from the left menu or the cards below.')
+  }, [setPageHint])
+
+  useEffect(() => {
+    fetch('/api/admin/metrics', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then(setMetrics)
+      .catch(() => setMetrics(null))
+  }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050505', color: 'white', padding: '4rem 2rem' }}>
-      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+    <>
+      <AdminPageHeader
+        title="Home"
+        description="Google Cloud–style admin console. Each section includes onboarding tips on first visit."
+      />
 
-        <AdminDashboardHeader onRefresh={fetchAdminData} isRefreshing={loading} />
-
-        <AdminMarketingPanel
-          config={config}
-          onConfigChange={() => { /* re-fetch happens after each write */ }}
-          onUpdateConfig={updatePlatformConfig}
-          saving={savingConfig}
-        />
-
-        <AdminLaunchCenter
-          launchConfig={launchConfig}
-          onConfigChange={(updates) => setLaunchConfig((prev: import('../../components/admin/types').LaunchConfig) => ({ ...prev, ...updates }))}
-          preregCount={preregCount}
-          onSave={saveLaunchConfig}
-          saving={savingLaunchConfig}
-        />
-
-        <div style={{ marginBottom: '3rem', padding: '2.5rem', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '32px' }}>
-          <AgentControlCentre />
-        </div>
-
-        <div style={{ marginBottom: '3rem', padding: '2.5rem', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '32px' }}>
-          <AdminExtras />
-        </div>
-
-        <AdminAnalyticsGrid stats={stats} />
-
-        <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '1.5rem' }}>
-          <AdminUserOrchestrator users={recentUsers} loading={loading} onUserAction={handleUserAction} />
-          <AdminLiveLogs logs={systemLogs} onLaunchStudio={handleLaunchStudio} />
-        </div>
-
+      <div className="admin-console-card">
+        <h2>Platform snapshot</h2>
+        <pre style={{ fontSize: '0.75rem', overflow: 'auto', margin: 0, color: '#5f6368' }}>
+          {metrics ? JSON.stringify(metrics, null, 2) : 'Loading metrics…'}
+        </pre>
       </div>
-    </div>
+
+      <div className="admin-console-learn-grid">
+        {ADMIN_NAV_ITEMS.filter((n) => n.href !== '/admin').map((item) => (
+          <Link key={item.href} href={item.href} className="admin-console-learn-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <h3>{item.label}</h3>
+            <p>{item.description ?? `Open ${item.label}`}</p>
+            <span className="admin-console-btn">Open →</span>
+          </Link>
+        ))}
+      </div>
+    </>
   )
 }
