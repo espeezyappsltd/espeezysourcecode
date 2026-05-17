@@ -56,11 +56,10 @@ export const DEV_APPS: DevAppDefinition[] = [
   },
   {
     id: 'core',
-    name: 'Core',
-    description: 'Local-first core runtime',
+    name: 'Local Server',
+    description: 'Developer launchpad — docs, tutorials & local app links',
     packagePath: 'apps/core',
     port: 3006,
-    productionUrl: 'https://core.espeezy.com',
     accent: '#ec4899',
   },
 ]

@@ -2,8 +2,10 @@
 @import '../shared/design/base.css';
 
 :root {
-  --accent: #10b981;
-  --hero-gradient: linear-gradient(135deg, #059669 0%, #10b981 55%, #34d399 100%);
+  --accent: #ec4899;
+  --brand: #ec4899;
+  --brand-hover: #db2777;
+  --hero-gradient: linear-gradient(135deg, #be185d 0%, #ec4899 55%, #f9a8d4 100%);
 }
 
 body {
