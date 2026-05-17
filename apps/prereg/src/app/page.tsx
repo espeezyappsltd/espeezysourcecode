@@ -189,19 +189,18 @@ export default function PreRegisterPage() {
       }
     }
 
-    const refreshTier = (userId: string) => {
-      void supabase
-        .from('profiles')
-        .select('tier')
-        .eq('id', userId)
-        .maybeSingle()
-        .then(({ data: profile }) => {
-          if (!mounted) return
-          applyTier((profile as { tier?: string } | null)?.tier)
-        })
-        .catch(() => {
-          if (mounted) setUserTier('free')
-        })
+    const refreshTier = async (userId: string) => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('tier')
+          .eq('id', userId)
+          .maybeSingle()
+        if (!mounted) return
+        applyTier((profile as { tier?: string } | null)?.tier)
+      } catch {
+        if (mounted) setUserTier('free')
+      }
     }
 
     void supabase.auth.getSession().then(({ data: { session } }) => {

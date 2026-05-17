@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { createServerSupabaseClient } from '@/lib/db'
 import Sidebar from '@/components/Sidebar'
 import type { Profile } from '@/types/auth'
 import { toLayoutUser } from '@/utils/layout-user'
@@ -14,7 +13,7 @@ import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import SupportChat from '@/components/SupportChat'
-import { getCachedUserProfile } from '@/utils/auth-server'
+import { getCachedLayoutSession } from '@/utils/auth-server'
 import './prestige.css'
 import './globals.css'
 
@@ -40,10 +39,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const db = await createServerSupabaseClient()
-  const { data: { user } } = await db.auth.getUser()
-
-  const profile: Profile | null = user ? await getCachedUserProfile(user.id) : null
+  const { user, profile } = await getCachedLayoutSession()
   const layoutUser = user ? toLayoutUser(user) : null
   const needsTeamOnboarding = Boolean(user && !profile?.group_id)
 

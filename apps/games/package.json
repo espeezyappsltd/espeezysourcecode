@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "npx serve out -p 3002",
     "typecheck": "tsc --noEmit",
-    "predeploy:check": "npm run typecheck && npm run build"
+    "predeploy:check": "npm run typecheck && npm run build",
+    "test:e2e": "playwright test --config src/playwright.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

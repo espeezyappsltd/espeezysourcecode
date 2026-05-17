@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { resolveSupabaseEnv } from '@/lib/supabase-env'
+import { attachTierCacheCookie, resolveGamesTier } from '@/lib/resolve-games-tier'
+import { hasGamesAccess } from '@/lib/games-tier'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -67,23 +69,21 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse
   }
 
-  let tier = 'free'
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('tier')
-      .eq('id', user.id)
-      .single()
-    tier = (profile as { tier?: string } | null)?.tier ?? 'free'
-  } catch {
-    // treat as free on DB error
+  const { tier, source } = await resolveGamesTier(user, request, supabase)
+
+  if (source !== 'jwt') {
+    attachTierCacheCookie(supabaseResponse, tier)
   }
 
-  if (tier === 'free') {
+  if (!hasGamesAccess(tier)) {
     const upgradeUrl = request.nextUrl.clone()
     upgradeUrl.pathname = '/login'
     upgradeUrl.searchParams.set('upgrade', '1')
-    return NextResponse.redirect(upgradeUrl)
+    const redirect = NextResponse.redirect(upgradeUrl)
+    if (source !== 'jwt') {
+      attachTierCacheCookie(redirect, tier)
+    }
+    return redirect
   }
 
   return supabaseResponse
