@@ -59,7 +59,7 @@ export default function DashboardPage() {
   return (
     <DevHubShell
       title="Espeezy Command Center"
-      subtitle="Production fleet · local dev control · monorepo apps/"
+      subtitle="localhost URLs · configurable ports · DEV_HUB_PORT_* env overrides"
     >
       <MetricsBar metrics={metrics} />
       {loadError && <p className="error-message dev-hub-alert">{loadError}</p>}
@@ -85,6 +85,7 @@ export default function DashboardPage() {
               style={{ animationDelay: `${i * 0.04}s` }}
               onStart={() => void control(app.id, 'start')}
               onStop={() => void control(app.id, 'stop')}
+              onRefresh={() => void refresh()}
             />
           ))}
         </div>

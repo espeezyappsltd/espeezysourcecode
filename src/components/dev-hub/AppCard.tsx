@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ExternalLink, Monitor, Play, Square } from 'lucide-react'
+import { PortControl } from './PortControl'
 import type { DevAppRow, ProdFleetRow } from './types'
 
 type Props = {
@@ -11,9 +12,10 @@ type Props = {
   style?: React.CSSProperties
   onStart: () => void
   onStop: () => void
+  onRefresh: () => void
 }
 
-export function AppCard({ app, busy, prodStatus, style, onStart, onStop }: Props) {
+export function AppCard({ app, busy, prodStatus, style, onStart, onStop, onRefresh }: Props) {
   const status = app.runtime?.status ?? 'stopped'
   const isRunning = status === 'running' || status === 'starting'
 
@@ -47,11 +49,25 @@ export function AppCard({ app, busy, prodStatus, style, onStart, onStop }: Props
 
       <div className="dev-hub-app-meta">
         <span className={`dev-hub-pill ${isRunning ? 'dev-hub-pill--running' : ''}`}>{status}</span>
-        <span className="dev-hub-pill">local :{app.port}</span>
+        <span className="dev-hub-pill">
+          {app.localHost}:{app.port}
+        </span>
         {app.healthy && <span className="dev-hub-pill dev-hub-pill--healthy">HTTP OK</span>}
         {app.runtime?.pid && <span className="dev-hub-pill">pid {app.runtime.pid}</span>}
         {app.runtime?.lastError && <span className="dev-hub-pill dev-hub-pill--error">error</span>}
       </div>
+
+      {!isRunning && (
+        <PortControl
+          appId={app.id}
+          port={app.port}
+          defaultPort={app.defaultPort}
+          localHost={app.localHost}
+          compact
+          disabled={busy}
+          onApplied={onRefresh}
+        />
+      )}
 
       <div className="dev-hub-app-actions">
         {!isRunning ? (

@@ -3,6 +3,7 @@ export type DevAppDefinition = {
   name: string
   description: string
   packagePath: string
+  /** Default local port (overridable via UI or DEV_HUB_PORT_<APP>). */
   port: number
   productionUrl?: string
   accent: string
@@ -77,6 +78,4 @@ export function getDevApp(id: string): DevAppDefinition | undefined {
   return DEV_APPS.find((a) => a.id === id)
 }
 
-export function localAppUrl(port: number): string {
-  return `http://127.0.0.1:${port}`
-}
+export { localAppUrl, localDevHost, hubListenPort } from './ports'

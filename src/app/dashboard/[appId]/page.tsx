@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, RefreshCw, RotateCcw, Terminal } from 'lucide-react'
 import { DevHubShell } from '@/components/dev-hub/DevHubShell'
+import { PortControl } from '@/components/dev-hub/PortControl'
 import { ResizableWorkspace } from '@/components/dev-hub/ResizableWorkspace'
 import { usePoll } from '@/components/dev-hub/usePoll'
 import { useWorkspaceLayout } from '@/components/dev-hub/useWorkspaceLayout'
@@ -98,6 +99,17 @@ export default function AppWorkspacePage() {
   const preview = (
     <>
       <div className="dev-hub-preview-bar">
+        {app && (
+          <PortControl
+            appId={appId}
+            port={app.port}
+            defaultPort={app.defaultPort}
+            localHost={app.localHost}
+            compact
+            disabled={isActive || busy}
+            onApplied={() => void refreshApp()}
+          />
+        )}
         <span className="dev-hub-preview-url">{previewUrl || '—'}</span>
         <span className={`dev-hub-preview-status ${app?.healthy ? 'dev-hub-preview-status--ok' : ''}`}>
           {status}

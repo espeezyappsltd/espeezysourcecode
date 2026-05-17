@@ -287,6 +287,53 @@
   overflow: hidden;
 }
 
+.dev-hub-port-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.dev-hub-port-control--compact {
+  margin-bottom: 0.25rem;
+}
+
+.dev-hub-port-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+}
+
+.dev-hub-port-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.dev-hub-port-host {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.dev-hub-port-input {
+  width: 5.5rem;
+  min-height: 36px !important;
+  padding: 0.35rem 0.5rem !important;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem !important;
+}
+
+.dev-hub-port-error {
+  font-size: 0.72rem;
+  color: var(--error);
+  margin: 0;
+}
+
 .dev-hub-preview-bar {
   display: flex;
   align-items: center;

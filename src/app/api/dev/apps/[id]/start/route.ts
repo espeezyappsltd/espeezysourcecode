@@ -5,7 +5,7 @@ import { getDevApp } from '@/lib/dev-hub/registry'
 
 export const dynamic = 'force-dynamic'
 
-export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const denied = await requireDevHubAuth()
   if (denied) return denied
 
@@ -14,6 +14,14 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
     return NextResponse.json({ error: 'Unknown app' }, { status: 404 })
   }
 
-  const runtime = startApp(id)
+  const body = await req.json().catch(() => ({}))
+  const port =
+    typeof body.port === 'number'
+      ? body.port
+      : body.port != null
+        ? parseInt(String(body.port), 10)
+        : undefined
+
+  const runtime = startApp(id, Number.isFinite(port) ? port : undefined)
   return NextResponse.json({ runtime: getAppRuntime(id) ?? runtime })
 }

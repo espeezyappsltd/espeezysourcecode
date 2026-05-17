@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { requireDevHubAuth } from '@/lib/dev-hub/api'
 import { checkProdFleet, prodFleetMetrics } from '@/lib/dev-hub/prod-health'
 import { checkAppHealth, getMetrics, listAppRuntimes } from '@/lib/dev-hub/process-manager'
-import { DEV_APPS, localAppUrl } from '@/lib/dev-hub/registry'
+import { defaultPortForApp, getEffectivePort, isPortOverridden, localAppUrl, localDevHost } from '@/lib/dev-hub/ports'
+import { DEV_APPS } from '@/lib/dev-hub/registry'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,11 +26,20 @@ export async function GET() {
   return NextResponse.json({
     metrics: { ...getMetrics(), ...prodStats },
     prodFleet,
+    localHost: localDevHost(),
     apps: DEV_APPS.map((def) => {
       const runtime = runtimes.find((r) => r.appId === def.id)
+      const port = runtime?.port ?? getEffectivePort(def.id)
+      if (runtime && runtime.status === 'stopped') {
+        runtime.port = port
+      }
       return {
         ...def,
-        localUrl: localAppUrl(def.port),
+        port,
+        defaultPort: defaultPortForApp(def.id),
+        portCustom: isPortOverridden(def.id),
+        localHost: localDevHost(),
+        localUrl: localAppUrl(port),
         runtime,
         healthy: healthMap[def.id] ?? false,
       }

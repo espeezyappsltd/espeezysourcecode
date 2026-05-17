@@ -16,6 +16,9 @@ export type DevAppRow = {
   description: string
   packagePath: string
   port: number
+  defaultPort: number
+  portCustom?: boolean
+  localHost: string
   productionUrl?: string
   accent: string
   localUrl: string

@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import path from 'node:path'
-import { DEV_APPS, getDevApp, localAppUrl, type DevAppDefinition } from './registry'
+import { getEffectivePort, localAppUrl, setAppPort } from './ports'
+import { DEV_APPS, getDevApp, hubListenPort, type DevAppDefinition } from './registry'
 
 export type AppRuntimeStatus = 'stopped' | 'starting' | 'running' | 'error'
 
@@ -46,11 +47,12 @@ function getState(): ManagerState {
   if (!global.__espeezyDevHub) {
     const apps = new Map<string, AppRuntime>()
     for (const def of DEV_APPS) {
+      const port = getEffectivePort(def.id)
       apps.set(def.id, {
         appId: def.id,
         status: 'stopped',
-        port: def.port,
-        logs: [`[hub] Ready. Use Start to launch ${def.name} on port ${def.port}.`],
+        port,
+        logs: [`[hub] Ready. Use Start to launch ${def.name} at ${localAppUrl(port)}.`],
       })
     }
     global.__espeezyDevHub = {
@@ -79,15 +81,11 @@ function pushTerminalLog(entry: TerminalEntry, line: string) {
   }
 }
 
-function npmCommand(): string {
-  return process.platform === 'win32' ? 'npm.cmd' : 'npm'
-}
-
-function spawnDevApp(def: DevAppDefinition): ChildProcess {
+function spawnDevApp(def: DevAppDefinition, port: number): ChildProcess {
   const cwd = path.join(repoRoot(), def.packagePath)
   // Run Next directly so hub-assigned ports win (package.json scripts often hard-code -p).
   const runner = process.platform === 'win32' ? 'npx.cmd' : 'npx'
-  return spawn(runner, ['next', 'dev', '-p', String(def.port)], {
+  return spawn(runner, ['next', 'dev', '-p', String(port)], {
     cwd,
     env: { ...process.env, FORCE_COLOR: '0', BROWSER: 'none' },
     shell: process.platform === 'win32',
@@ -105,10 +103,9 @@ export function getAppRuntime(appId: string): AppRuntime | undefined {
 
 export async function checkAppHealth(appId: string): Promise<boolean> {
   const runtime = getState().apps.get(appId)
-  const def = getDevApp(appId)
-  if (!runtime || !def) return false
+  if (!runtime) return false
   try {
-    const res = await fetch(localAppUrl(def.port), {
+    const res = await fetch(localAppUrl(runtime.port), {
       method: 'GET',
       signal: AbortSignal.timeout(2500),
     })
@@ -118,7 +115,20 @@ export async function checkAppHealth(appId: string): Promise<boolean> {
   }
 }
 
-export function startApp(appId: string): AppRuntime {
+export function configureAppPort(appId: string, port: number): AppRuntime {
+  const def = getDevApp(appId)
+  if (!def) throw new Error(`Unknown app: ${appId}`)
+  const state = getState()
+  const runtime = state.apps.get(appId)
+  if (!runtime) throw new Error(`Unknown app: ${appId}`)
+
+  const nextPort = setAppPort(appId, port)
+  runtime.port = nextPort
+  pushLog(runtime, `Port set to ${nextPort} (${localAppUrl(nextPort)})`)
+  return runtime
+}
+
+export function startApp(appId: string, port?: number): AppRuntime {
   const state = getState()
   const def = getDevApp(appId)
   if (!def) throw new Error(`Unknown app: ${appId}`)
@@ -130,13 +140,17 @@ export function startApp(appId: string): AppRuntime {
     return runtime
   }
 
+  if (port != null) configureAppPort(appId, port)
+
+  const effectivePort = getEffectivePort(appId)
   const runtime = state.apps.get(appId)!
+  runtime.port = effectivePort
   runtime.status = 'starting'
   runtime.startedAt = Date.now()
   runtime.lastError = undefined
-  pushLog(runtime, `Starting ${def.name} → ${localAppUrl(def.port)}`)
+  pushLog(runtime, `Starting ${def.name} → ${localAppUrl(effectivePort)}`)
 
-  const child = spawnDevApp(def)
+  const child = spawnDevApp(def, effectivePort)
   state.processes.set(appId, child)
   runtime.pid = child.pid
 
@@ -201,7 +215,7 @@ export function getMetrics() {
     running,
     stopped: runtimes.filter((r) => r.status === 'stopped').length,
     errors,
-    hubPort: 3000,
+    hubPort: hubListenPort(),
   }
 }
 
