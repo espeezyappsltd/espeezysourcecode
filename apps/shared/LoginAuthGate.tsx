@@ -95,6 +95,8 @@ export function LoginAuthGate({
         aria-live="polite"
         aria-busy={showOverlay}
         aria-hidden={!showOverlay}
+        data-login-auth-gate=""
+        data-ready={showOverlay ? 'false' : 'true'}
         style={overlayStyle}
       >
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

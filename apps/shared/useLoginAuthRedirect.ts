@@ -11,6 +11,7 @@ export { sanitizeNextPath }
 
 /** Max wait before showing the login form (getSession should resolve much sooner). */
 const AUTH_READY_FALLBACK_MS = 600
+const GET_USER_TIMEOUT_MS = 10_000
 
 /**
  * Login-page auth probe: getSession first, confirm with getUser before redirect,
@@ -40,23 +41,45 @@ export function useLoginAuthRedirect(supabase: SupabaseClient | null, redirectPa
     [router],
   )
 
+  const releaseToLoginForm = useCallback(() => {
+    redirectedRef.current = false
+    resolvedRef.current = false
+    setStatus('ready')
+  }, [])
+
   const redirectAfterSignIn = useCallback(
     async (path?: string) => {
       if (redirectedRef.current || typeof window === 'undefined' || !supabase) return
 
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser()
+      let user = null
+      let error: Error | null = null
+      try {
+        const result = await Promise.race([
+          supabase.auth.getUser(),
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => reject(new Error('getUser timeout')), GET_USER_TIMEOUT_MS)
+          }),
+        ])
+        user = result.data.user
+        error = result.error
+      } catch {
+        await supabase.auth.signOut().catch(() => undefined)
+        releaseToLoginForm()
+        return
+      }
 
-      if (error || !user) return
+      if (error || !user) {
+        await supabase.auth.signOut().catch(() => undefined)
+        releaseToLoginForm()
+        return
+      }
 
       redirectedRef.current = true
       resolvedRef.current = true
       setStatus('redirecting')
       navigateAfterSignIn(path ?? redirectPathRef.current)
     },
-    [navigateAfterSignIn, supabase],
+    [navigateAfterSignIn, releaseToLoginForm, supabase],
   )
 
   const markReady = useCallback(() => {
