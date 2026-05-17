@@ -52,6 +52,6 @@ export function LoginAuthGate({
       <style dangerouslySetInnerHTML={{ __html: spinKeyframes }} />
       <div aria-hidden="true" style={spinnerStyle} />
       <span>{message}</span>
-    </motion.div>
+    </div>
   )
 }
