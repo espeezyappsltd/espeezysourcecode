@@ -8,7 +8,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3006",
     "build": "next build --webpack",
     "start": "next start -p 3000",
     "typecheck": "tsc --noEmit",

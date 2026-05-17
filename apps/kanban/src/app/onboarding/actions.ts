@@ -1,22 +1,45 @@
 'use server'
 
-import { getAdminDb } from '@/lib/supabase/admin'
+import { createClient as createServerSupabaseClient } from '@/lib/supabase/server'
 import { getUid } from '@/utils/auth-server'
 import { revalidatePath } from 'next/cache'
 
-async function ensureProfileRow(uid: string, email?: string | null) {
-  const adminDb = getAdminDb()
-  const { data: existing } = await adminDb
-    .from('profiles')
-    .select('id')
-    .eq('id', uid)
-    .maybeSingle()
+function formatActionError(err: unknown, fallback: string): string {
+  if (err && typeof err === 'object') {
+    const e = err as { message?: string; code?: string; hint?: string }
+    if (e.message?.includes('Invalid API key')) {
+      return 'Server misconfiguration: SUPABASE_SERVICE_ROLE_KEY in .env.local is invalid. Team setup uses your signed-in session instead — apply the latest database migration if this persists.'
+    }
+    if (e.code === '42501') {
+      return 'Permission denied. Run `npx supabase db push` from the repo root to apply onboarding permissions.'
+    }
+    if (e.message) return e.message
+  }
+  return fallback
+}
 
+function generateModuleCode(name: string): string {
+  const base = name.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 4).padEnd(4, 'X')
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase()
+  return (base + suffix).slice(0, 8)
+}
+
+async function getOnboardingDb() {
+  return createServerSupabaseClient()
+}
+
+async function ensureProfileRow(uid: string) {
+  const db = await getOnboardingDb()
+  const { data: existing } = await db.from('profiles').select('id').eq('id', uid).maybeSingle()
   if (existing) return
 
-  const { error } = await adminDb.from('profiles').insert({
+  const {
+    data: { user },
+  } = await db.auth.getUser()
+
+  const { error } = await db.from('profiles').insert({
     id: uid,
-    email: email ?? null,
+    email: user?.email ?? null,
     role: 'member',
   })
 
@@ -31,24 +54,26 @@ export async function createWorkspaceTeam(name: string, description: string) {
   if (!trimmedName) return { error: 'Team name is required' }
 
   try {
-    const adminDb = getAdminDb()
+    const db = await getOnboardingDb()
     await ensureProfileRow(uid)
 
-    const { data: group, error: groupError } = await adminDb
+    const { data: group, error: groupError } = await db
       .from('groups')
       .insert({
         name: trimmedName,
         description: description.trim() || null,
         owner_id: uid,
+        module_code: generateModuleCode(trimmedName),
+        capacity: 5,
       })
-      .select('id')
+      .select('id, module_code')
       .single()
 
     if (groupError || !group?.id) {
       throw groupError ?? new Error('Failed to create team')
     }
 
-    const { error: profileError } = await adminDb
+    const { error: profileError } = await db
       .from('profiles')
       .update({ group_id: group.id, role: 'admin' })
       .eq('id', uid)
@@ -56,9 +81,9 @@ export async function createWorkspaceTeam(name: string, description: string) {
     if (profileError) throw profileError
 
     revalidatePath('/', 'layout')
-    return { success: true, teamId: group.id }
+    return { success: true, teamId: group.id, moduleCode: group.module_code ?? undefined }
   } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'Failed to create team' }
+    return { error: formatActionError(err, 'Failed to create team') }
   }
 }
 
@@ -70,10 +95,10 @@ export async function joinWorkspaceTeam(teamId: string) {
   if (!trimmedId) return { error: 'Team ID is required' }
 
   try {
-    const adminDb = getAdminDb()
+    const db = await getOnboardingDb()
     await ensureProfileRow(uid)
 
-    const { data: group, error: groupError } = await adminDb
+    const { data: group, error: groupError } = await db
       .from('groups')
       .select('id, capacity')
       .eq('id', trimmedId)
@@ -82,18 +107,19 @@ export async function joinWorkspaceTeam(teamId: string) {
     if (groupError) throw groupError
     if (!group) return { error: 'Team not found. Check the Team ID.' }
 
-    const { count: memberCount, error: memberError } = await adminDb
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('group_id', group.id)
+    const { data: memberCount, error: memberError } = await db.rpc('group_member_count', {
+      target_group_id: group.id,
+    })
 
     if (memberError) throw memberError
 
     if ((memberCount ?? 0) >= (group.capacity || 5)) {
-      return { error: `This team has reached its maximum capacity of ${group.capacity || 5} members.` }
+      return {
+        error: `This team has reached its maximum capacity of ${group.capacity || 5} members.`,
+      }
     }
 
-    const { error: profileError } = await adminDb
+    const { error: profileError } = await db
       .from('profiles')
       .update({ group_id: group.id })
       .eq('id', uid)
@@ -103,6 +129,6 @@ export async function joinWorkspaceTeam(teamId: string) {
     revalidatePath('/', 'layout')
     return { success: true, teamId: group.id }
   } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'Failed to join team' }
+    return { error: formatActionError(err, 'Failed to join team') }
   }
 }

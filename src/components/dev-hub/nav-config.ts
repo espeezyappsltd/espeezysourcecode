@@ -18,3 +18,31 @@ export const DEV_HUB_NAV_APPS: DevHubNavApp[] = [
 export function getNavApp(id: string): DevHubNavApp | undefined {
   return DEV_HUB_NAV_APPS.find((a) => a.id === id)
 }
+
+/** Admin console tabs (admin.espeezy.com) — shown in hub sidebar for staff. */
+export type DevHubAdminTab = {
+  label: string
+  path: string
+  permission: 'overview' | 'users' | 'analytics' | 'announcements' | 'launch' | 'audit' | 'settings'
+}
+
+export const DEV_HUB_ADMIN_TABS: DevHubAdminTab[] = [
+  { label: 'Overview', path: '/admin', permission: 'overview' },
+  { label: 'Users', path: '/admin/users', permission: 'users' },
+  { label: 'Analytics', path: '/admin/analytics', permission: 'analytics' },
+  { label: 'Announcements', path: '/admin/announcements', permission: 'announcements' },
+  { label: 'Launch', path: '/admin/launch', permission: 'launch' },
+  { label: 'Audit log', path: '/admin/audit', permission: 'audit' },
+  { label: 'Settings', path: '/admin/settings', permission: 'settings' },
+]
+
+export function getAdminAppBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3004'
+  }
+  return process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3004'
+}
+
+export function adminConsoleHref(path: string): string {
+  return `${getAdminAppBaseUrl()}${path}`
+}

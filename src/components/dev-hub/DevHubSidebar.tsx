@@ -14,9 +14,12 @@ import {
   BookOpen,
   X,
 } from 'lucide-react'
-import { DEV_HUB_NAV_APPS } from './nav-config'
+import { adminConsoleHref, DEV_HUB_ADMIN_TABS, DEV_HUB_NAV_APPS } from './nav-config'
 import { useDevHubNav } from './DevHubNavContext'
 import { useDevHubShell } from './DevHubShellContext'
+import { useDevHubAdminSession } from './DevHubAdminSessionContext'
+import { hasHubAdminPermission } from '@/lib/hub-admin-rbac'
+import { ExternalLink, Shield } from 'lucide-react'
 import type { AppRuntimeStatus } from './types'
 
 const APP_ICONS: Record<string, typeof LayoutGrid> = {
@@ -38,6 +41,7 @@ export function DevHubSidebar() {
   const pathname = usePathname()
   const { apps, metrics } = useDevHubNav()
   const { mobileNavOpen, closeMobileNav } = useDevHubShell()
+  const { member: adminMember } = useDevHubAdminSession()
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -130,6 +134,35 @@ export function DevHubSidebar() {
             )
           })}
         </ul>
+
+        {adminMember && (
+          <>
+            <p className="dev-hub-sidebar-label">Admin console</p>
+            <ul className="dev-hub-sidebar-apps">
+              {DEV_HUB_ADMIN_TABS.filter((tab) =>
+                hasHubAdminPermission(adminMember.admin_role, tab.permission),
+              ).map((tab) => (
+                <li key={tab.path}>
+                  <a
+                    href={adminConsoleHref(tab.path)}
+                    className="dev-hub-nav-item dev-hub-nav-item--external"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMobileNav}
+                  >
+                    <span className="dev-hub-nav-icon-wrap" style={{ color: '#f59e0b' }}>
+                      <Shield size={17} aria-hidden />
+                    </span>
+                    <span className="dev-hub-nav-item-text">
+                      <span className="dev-hub-nav-item-title">{tab.label}</span>
+                    </span>
+                    <ExternalLink size={14} className="dev-hub-nav-external" aria-hidden />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </nav>
 
       <footer className="dev-hub-sidebar-foot">

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3005",
     "stop": "taskkill /F /IM node.exe /T || killall node || true",
     "build": "next build",
     "start": "npx serve out -p 3001",

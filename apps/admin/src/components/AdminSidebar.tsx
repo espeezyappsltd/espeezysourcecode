@@ -23,33 +23,27 @@ import {
   Settings,
   ShieldCheck,
 } from 'lucide-react'
+import { ADMIN_NAV_ITEMS, hasAdminPermission, type AdminPermission, type AdminStaffRole } from '@/lib/admin-rbac'
 
-// ── Nav link definition ────────────────────────────────────────────────────────
-
-interface NavLink {
-  href: string
-  label: string
-  icon: React.ReactNode
+const ICONS: Record<AdminPermission, React.ReactNode> = {
+  overview: <LayoutDashboard size={18} />,
+  users: <Users size={18} />,
+  analytics: <BarChart3 size={18} />,
+  announcements: <Megaphone size={18} />,
+  launch: <Rocket size={18} />,
+  audit: <ScrollText size={18} />,
+  settings: <Settings size={18} />,
+  chat: <ShieldCheck size={18} />,
 }
-
-const NAV_LINKS: NavLink[] = [
-  { href: '/admin', label: 'Overview', icon: <LayoutDashboard size={18} /> },
-  { href: '/admin/users', label: 'Users', icon: <Users size={18} /> },
-  { href: '/admin/analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-  { href: '/admin/announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
-  { href: '/admin/launch', label: 'Launch', icon: <Rocket size={18} /> },
-  { href: '/admin/audit', label: 'Audit Log', icon: <ScrollText size={18} /> },
-  { href: '/admin/settings', label: 'Settings', icon: <Settings size={18} /> },
-]
-
-// ── Component ──────────────────────────────────────────────────────────────────
 
 interface Props {
   adminEmail: string
   adminName: string
+  adminRole: AdminStaffRole
+  username: string
 }
 
-export default function AdminSidebar({ adminEmail, adminName }: Props) {
+export default function AdminSidebar({ adminEmail, adminName, adminRole, username }: Props) {
   const pathname = usePathname()
 
   return (
@@ -109,7 +103,7 @@ export default function AdminSidebar({ adminEmail, adminName }: Props) {
             gap: '0.25rem',
           }}
         >
-          {NAV_LINKS.map((link) => {
+          {ADMIN_NAV_ITEMS.filter((link) => hasAdminPermission(adminRole, link.permission)).map((link) => {
             // Exact match for the overview link; prefix match for sub-sections
             const isActive =
               link.href === '/admin'
@@ -135,7 +129,7 @@ export default function AdminSidebar({ adminEmail, adminName }: Props) {
                     transition: 'all 0.15s',
                   }}
                 >
-                  {link.icon}
+                  {ICONS[link.permission]}
                   {link.label}
                 </Link>
               </li>
@@ -168,6 +162,18 @@ export default function AdminSidebar({ adminEmail, adminName }: Props) {
           style={{
             fontSize: '0.7rem',
             color: 'rgba(255,255,255,0.3)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          @{username} · {adminRole}
+        </div>
+        <div
+          style={{
+            fontSize: '0.65rem',
+            color: 'rgba(255,255,255,0.25)',
+            marginTop: '0.2rem',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
