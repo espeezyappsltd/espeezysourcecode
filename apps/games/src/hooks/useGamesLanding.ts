@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase-client'
+import { getSupabaseClient } from '@/lib/supabase-client'
 import { useSupabaseUser } from './useSupabaseUser'
 import { fetchPreregisterCount, submitPreregister } from '@/services/preregister'
 
@@ -50,7 +50,8 @@ export function useGamesLanding() {
   }, [])
 
   async function handleLogout() {
-    await supabase.auth.signOut().catch(() => undefined)
+    const supabase = getSupabaseClient()
+    if (supabase) await supabase.auth.signOut().catch(() => undefined)
   }
 
   async function handleNotify(e: React.FormEvent) {

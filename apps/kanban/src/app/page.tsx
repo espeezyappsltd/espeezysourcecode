@@ -1,7 +1,7 @@
 
 import { getAuthUser, getCachedUserGroupId } from '@/utils/auth-server'
 import { redirect } from 'next/navigation'
-import DashboardHome from '@/components/DashboardHome'
+import { HomePickupShell } from '@/features/home-pickup/HomePickupShell'
 import WelcomeOnboarding from '@/components/WelcomeOnboarding'
 
 export const dynamic = 'force-dynamic'
@@ -16,5 +16,5 @@ export default async function DashboardPage() {
     return <WelcomeOnboarding />
   }
 
-  return <DashboardHome groupId={groupId} />
+  return <HomePickupShell groupId={groupId} />
 }

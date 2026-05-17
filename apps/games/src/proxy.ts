@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { resolveSupabaseEnv } from '@/lib/supabase-env'
 import { attachTierCacheCookie, resolveGamesTier } from '@/lib/resolve-games-tier'
 import { hasGamesAccess } from '@/lib/games-tier'
+import { sanitizeNextPath } from '@shared/app-url'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -31,10 +32,6 @@ export async function proxy(request: NextRequest) {
 
   let supabaseResponse = NextResponse.next({ request })
 
-  if (isPublicRoute) {
-    return supabaseResponse
-  }
-
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
@@ -53,6 +50,18 @@ export async function proxy(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+
+  if (user && pathname === '/login') {
+    const next = sanitizeNextPath(request.nextUrl.searchParams.get('next'))
+    const dest = request.nextUrl.clone()
+    dest.pathname = next
+    dest.search = ''
+    return NextResponse.redirect(dest)
+  }
+
+  if (isPublicRoute) {
+    return supabaseResponse
+  }
 
   if (!user) {
     const loginUrl = request.nextUrl.clone()

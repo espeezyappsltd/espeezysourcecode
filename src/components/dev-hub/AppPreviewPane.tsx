@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { PortControl } from './PortControl'
 import type { PreviewA11yPrefs, PreviewDisplayMode } from './useWorkspaceLayout'
+import { withEmbedPreviewParam } from '@shared/app-url'
 
 type Props = {
   appId: string
@@ -107,6 +108,8 @@ export function AppPreviewPane({
   }
 
   const displayUrl = previewUrl || `http://${localHost}:${effectivePort}`
+  const iframeSrc =
+    previewUrl && showPreview ? withEmbedPreviewParam(previewUrl) : previewUrl
 
   return (
     <div
@@ -253,7 +256,7 @@ export function AppPreviewPane({
                   height: `${100 / zoom}%`,
                 }}
               >
-                <iframe key={iframeKey} src={previewUrl} title={`${appName} local preview`} />
+                <iframe key={iframeKey} src={iframeSrc} title={`${appName} local preview`} />
               </div>
               {warmingUp && (
                 <div className="dev-hub-iframe-loading" aria-live="polite">

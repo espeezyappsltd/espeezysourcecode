@@ -30,7 +30,7 @@ function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, Task[]> {
   return map
 }
 
-export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
+export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardReady }: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,6 +42,7 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
   const isOnline = useConnectivity()
 
   const lastSignalRef = useRef(newTaskSignal)
+  const boardReadySent = useRef(false)
 
   const membersById = useMemo(() => {
     const m = new Map<string, Profile>()
@@ -111,6 +112,10 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
       .then(({ data }) => {
         if (data) setTasks(data as unknown as Task[])
         setLoading(false)
+        if (!boardReadySent.current) {
+          boardReadySent.current = true
+          onBoardReady?.()
+        }
       })
 
     return () => {

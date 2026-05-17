@@ -192,6 +192,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dashboard shell scrolls inside .main-content only (not the document body). */
+body:has(.dashboard-layout) {
+  overflow: hidden;
+  height: 100%;
+  height: var(--vh-dynamic);
+}
+
 .body-lock {
   overflow: hidden !important;
   position: fixed;
@@ -734,16 +741,30 @@ h1, h2, h3, h4, h5, h6 {
 
 .main-content {
   flex: 1;
+  min-height: 0; /* Required for overflow scroll inside flex dashboard-layout */
   height: 100vh;
   height: var(--vh-dynamic);
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   position: relative;
   background-color: var(--bg-main);
   padding: var(--p-safe);
   transition: all 0.3s ease;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+}
+
+.main-content.onboarding-shell {
+  flex: none;
+  width: 100%;
+  min-height: 0;
+  height: 100vh;
+  height: var(--vh-dynamic);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 768px) {
@@ -765,6 +786,7 @@ h1, h2, h3, h4, h5, h6 {
     padding: var(--p-safe);
     padding-top: calc(var(--h-nav) + var(--p-safe)); /* Space for Top Header */
     padding-bottom: calc(var(--h-mobile-bottom) + 3.5rem + env(safe-area-inset-bottom)); /* Aggressive space for Bottom Nav */
+    scroll-padding-top: calc(var(--h-nav) + var(--p-safe));
     height: var(--vh-dynamic);
     width: 100%;
   }
@@ -836,6 +858,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 1rem;
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

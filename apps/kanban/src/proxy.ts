@@ -1,8 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { resolveSupabaseAnonKey, resolveSupabaseUrl } from '@/lib/supabase/env'
+import { sanitizeNextPath } from '@shared/app-url'
 
-// Minimal in-memory rate limit for API routes (use Redis/Upstash in production)
 const WINDOW_MS = 60 * 1000
 const MAX_REQUESTS = 60
 const ipMap = new Map<string, { count: number; start: number }>()
@@ -21,7 +21,7 @@ export async function rateLimit(req: Request) {
         {
           error: 'Rate limit exceeded',
           message:
-            'Whoa, you’re going too fast! Please check back in a minute so everyone gets an equal shot.',
+            "Whoa, you're going too fast! Please check back in a minute so everyone gets an equal shot.",
         },
         { status: 429 },
       )
@@ -66,10 +66,6 @@ function isPublicRoute(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (isPublicRoute(pathname)) {
-    return NextResponse.next({ request })
-  }
-
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(resolveSupabaseUrl(), resolveSupabaseAnonKey(), {
@@ -90,6 +86,18 @@ export async function proxy(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+
+  if (user && pathname === '/login') {
+    const next = sanitizeNextPath(request.nextUrl.searchParams.get('next'))
+    const dest = request.nextUrl.clone()
+    dest.pathname = next
+    dest.search = ''
+    return NextResponse.redirect(dest)
+  }
+
+  if (isPublicRoute(pathname)) {
+    return supabaseResponse
+  }
 
   if (!user) {
     const loginUrl = request.nextUrl.clone()

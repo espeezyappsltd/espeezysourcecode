@@ -1,7 +1,9 @@
-import { supabase } from '@/lib/supabase-client';
+import { getSupabase } from '@/lib/supabase-client';
+
+const supabase = () => getSupabase();
 
 export async function getCategoriesWithGames() {
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from('categories')
     .select('id, name, games(id, name, url)')
     .order('name', { ascending: true });
@@ -10,7 +12,7 @@ export async function getCategoriesWithGames() {
 }
 
 export async function addCategory(name: string) {
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from('categories')
     .insert([{ name }])
     .select()
@@ -20,7 +22,7 @@ export async function addCategory(name: string) {
 }
 
 export async function updateCategory(id: string, name: string) {
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from('categories')
     .update({ name })
     .eq('id', id)
@@ -31,7 +33,7 @@ export async function updateCategory(id: string, name: string) {
 }
 
 export async function deleteCategory(id: string) {
-  const { error } = await supabase
+  const { error } = await supabase()
     .from('categories')
     .delete()
     .eq('id', id);
@@ -39,7 +41,7 @@ export async function deleteCategory(id: string) {
 }
 
 export async function addGame(categoryId: string, name: string, url: string) {
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from('games')
     .insert([{ category_id: categoryId, name, url }])
     .select()
@@ -49,7 +51,7 @@ export async function addGame(categoryId: string, name: string, url: string) {
 }
 
 export async function updateGame(id: string, name: string, url: string) {
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from('games')
     .update({ name, url })
     .eq('id', id)
@@ -60,7 +62,7 @@ export async function updateGame(id: string, name: string, url: string) {
 }
 
 export async function deleteGame(id: string) {
-  const { error } = await supabase
+  const { error } = await supabase()
     .from('games')
     .delete()
     .eq('id', id);

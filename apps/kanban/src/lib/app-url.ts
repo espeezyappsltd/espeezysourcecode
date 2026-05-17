@@ -1,6 +1,7 @@
 import {
   ESPEEZY_APP_ORIGINS,
   buildAuthCallbackUrl,
+  isEmbedPreview,
   resolveClientOrigin,
   resolveRequestOrigin,
   sanitizeNextPath,
@@ -10,6 +11,7 @@ import {
 export {
   ESPEEZY_APP_ORIGINS,
   buildAuthCallbackUrl,
+  isEmbedPreview,
   resolveClientOrigin,
   resolveRequestOrigin,
   sanitizeNextPath,

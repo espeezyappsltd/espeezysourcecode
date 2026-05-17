@@ -9,13 +9,18 @@ type SearchParamsLike = { get: (key: string) => string | null } | null
  * Establishes a Supabase recovery session from callback code, hash tokens, or existing session.
  */
 export function useRecoverySession(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient | null,
   searchParams: SearchParamsLike,
 ) {
   const [sessionReady, setSessionReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!supabase) {
+      setError('Authentication is temporarily unavailable. Please try again later.')
+      return
+    }
+
     let mounted = true
 
     const establishRecoverySession = async () => {

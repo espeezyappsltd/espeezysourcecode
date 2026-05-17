@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { AuthChangeEvent, Session, SupabaseClient } from '@supabase/supabase-js'
-import { sanitizeNextPath } from '@shared/app-url'
+import { isEmbedPreview, sanitizeNextPath } from '@shared/app-url'
 
 export type LoginAuthStatus = 'checking' | 'ready' | 'redirecting'
 
@@ -12,23 +13,51 @@ export { sanitizeNextPath }
 const AUTH_READY_FALLBACK_MS = 600
 
 /**
- * Login-page auth probe: getSession first (works after Strict Mode remounts),
- * onAuthStateChange for SIGNED_IN while the form is open, bounded fallback to ready.
+ * Login-page auth probe: getSession first, confirm with getUser before redirect,
+ * onAuthStateChange for SIGNED_IN, bounded fallback to ready. Uses client navigation
+ * in embed preview to avoid iframe reload loops with middleware.
  */
-export function useLoginAuthRedirect(supabase: SupabaseClient, redirectPath: string) {
+export function useLoginAuthRedirect(supabase: SupabaseClient | null, redirectPath: string) {
+  const router = useRouter()
   const [status, setStatus] = useState<LoginAuthStatus>('checking')
   const redirectedRef = useRef(false)
   const resolvedRef = useRef(false)
   const redirectPathRef = useRef(redirectPath)
   redirectPathRef.current = redirectPath
 
-  const redirectAfterSignIn = useCallback((path?: string) => {
-    if (redirectedRef.current || typeof window === 'undefined') return
-    redirectedRef.current = true
-    resolvedRef.current = true
-    setStatus('redirecting')
-    window.location.replace(path ?? redirectPathRef.current)
-  }, [])
+  const navigateAfterSignIn = useCallback(
+    (path: string) => {
+      if (typeof window === 'undefined') return
+      const embed =
+        isEmbedPreview(new URLSearchParams(window.location.search)) || window.self !== window.top
+      if (embed) {
+        router.replace(path)
+        router.refresh()
+        return
+      }
+      window.location.replace(path)
+    },
+    [router],
+  )
+
+  const redirectAfterSignIn = useCallback(
+    async (path?: string) => {
+      if (redirectedRef.current || typeof window === 'undefined' || !supabase) return
+
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser()
+
+      if (error || !user) return
+
+      redirectedRef.current = true
+      resolvedRef.current = true
+      setStatus('redirecting')
+      navigateAfterSignIn(path ?? redirectPathRef.current)
+    },
+    [navigateAfterSignIn, supabase],
+  )
 
   const markReady = useCallback(() => {
     if (resolvedRef.current || redirectedRef.current) return
@@ -40,7 +69,7 @@ export function useLoginAuthRedirect(supabase: SupabaseClient, redirectPath: str
     (session: Session | null) => {
       if (resolvedRef.current || redirectedRef.current) return
       if (session) {
-        redirectAfterSignIn()
+        void redirectAfterSignIn()
       } else {
         markReady()
       }
@@ -53,6 +82,13 @@ export function useLoginAuthRedirect(supabase: SupabaseClient, redirectPath: str
     redirectedRef.current = false
     resolvedRef.current = false
     setStatus('checking')
+
+    if (!supabase) {
+      markReady()
+      return () => {
+        active = false
+      }
+    }
 
     const fallbackId = window.setTimeout(() => {
       if (active) markReady()
@@ -68,24 +104,24 @@ export function useLoginAuthRedirect(supabase: SupabaseClient, redirectPath: str
       handleSession(session)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session) => {
-        if (!active || resolvedRef.current || redirectedRef.current) return
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session) => {
+      if (!active || resolvedRef.current || redirectedRef.current) return
 
-        if (event === 'SIGNED_IN' && session) {
-          window.clearTimeout(fallbackId)
-          redirectAfterSignIn()
-          return
-        }
+      if (event === 'SIGNED_IN' && session) {
+        window.clearTimeout(fallbackId)
+        void redirectAfterSignIn()
+        return
+      }
 
-        if (event === 'SIGNED_OUT') {
-          window.clearTimeout(fallbackId)
-          resolvedRef.current = false
-          redirectedRef.current = false
-          setStatus('ready')
-        }
-      },
-    )
+      if (event === 'SIGNED_OUT') {
+        window.clearTimeout(fallbackId)
+        resolvedRef.current = false
+        redirectedRef.current = false
+        setStatus('ready')
+      }
+    })
 
     return () => {
       active = false

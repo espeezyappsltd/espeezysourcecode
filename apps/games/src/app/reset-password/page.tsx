@@ -2,7 +2,8 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
+import { useMemo } from 'react'
+import { getSupabaseClient } from '@/lib/supabase-client'
 import { useRecoverySession } from '@shared/useRecoverySession'
 
 const styles = {
@@ -88,6 +89,7 @@ const styles = {
 function ResetPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const supabase = useMemo(() => getSupabaseClient(), [])
   const { sessionReady, error: sessionError } = useRecoverySession(supabase, searchParams)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -119,6 +121,10 @@ function ResetPasswordContent() {
     setLoading(true)
 
     try {
+      if (!supabase) {
+        setFormError('Authentication is temporarily unavailable.')
+        return
+      }
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) throw updateError
       setSuccess(true)

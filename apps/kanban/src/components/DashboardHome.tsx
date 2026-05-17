@@ -16,7 +16,13 @@ const DASHBOARD_TABS = [
   { id: 'calendar', label: 'Team Calendar', icon: <Calendar size={18} /> },
 ] as const
 
-export default function DashboardHome({ groupId }: { groupId: string }) {
+export default function DashboardHome({
+  groupId,
+  onWorkspaceReady,
+}: {
+  groupId: string
+  onWorkspaceReady?: () => void
+}) {
   const router = useRouter()
   const { profile } = useProfile()
   const { addToast } = useNotifications()
@@ -356,7 +362,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-xl)',
-        overflow: 'hidden',
+        overflow: 'visible',
         position: 'relative',
         transition: 'all 0.4s ease'
       }}>
@@ -372,7 +378,15 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           zIndex: 10
         }} />
         {activeTab === 'board'
-          ? <KanbanBoard groupId={groupId} key={`board-${syncToken}`} profile={profile} newTaskSignal={newTaskSignal} />
+          ? (
+            <KanbanBoard
+              groupId={groupId}
+              key={`board-${syncToken}`}
+              profile={profile}
+              newTaskSignal={newTaskSignal}
+              onBoardReady={onWorkspaceReady}
+            />
+          )
           : <CalendarView groupId={groupId} key={`cal-${syncToken}`} onTaskSaved={handleCalendarTaskSaved} />
         }
       </div>

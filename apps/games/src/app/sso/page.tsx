@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
+import { getSupabaseClient } from '@/lib/supabase-client'
 import { sanitizeNextPath } from '@shared/app-url'
 
 function SsoBridgeContent() {
@@ -27,6 +27,12 @@ function SsoBridgeContent() {
 
         if (!accessToken || !refreshToken) {
           router.replace(`/login?next=${encodeURIComponent(target)}`)
+          return
+        }
+
+        const supabase = getSupabaseClient()
+        if (!supabase) {
+          setError('Authentication is not configured.')
           return
         }
 

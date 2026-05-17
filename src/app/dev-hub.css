@@ -229,6 +229,10 @@
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .dev-hub-workspace-toolbar-label {
@@ -241,12 +245,15 @@
 }
 
 .dev-hub-workspace {
-  height: min(78vh, calc(100dvh - 7rem));
-  min-height: 420px;
-  border: 1px solid var(--border);
+  height: min(86vh, calc(100dvh - 5.5rem));
+  min-height: 520px;
+  border: 1px solid rgba(16, 185, 129, 0.12);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--surface);
+  background: linear-gradient(180deg, rgba(12, 12, 14, 0.98) 0%, rgba(6, 6, 8, 1) 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 24px 48px rgba(0, 0, 0, 0.45);
 }
 
 .dev-hub-workspace--flex {
@@ -498,7 +505,15 @@
 }
 
 .dev-hub-workspace--preview-maximized {
-  height: min(88vh, calc(100dvh - 5.5rem));
+  height: min(92vh, calc(100dvh - 4.5rem));
+}
+
+.dev-hub-workspace--preview-maximized .dev-hub-iframe-wrap {
+  min-height: 0;
+}
+
+.dev-hub-workspace--preview-maximized .dev-hub-iframe-zoom {
+  min-height: 100%;
 }
 
 .dev-hub-preview--maximized {
@@ -544,12 +559,17 @@
 }
 
 .dev-hub-iframe-wrap {
-  flex: 1;
-  min-height: 400px;
-  background: #050505;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  background: #030303;
   position: relative;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.dev-hub-iframe-zoom {
+  min-height: min(720px, 100%);
 }
 
 .dev-hub-preview--maximized .dev-hub-iframe-wrap {

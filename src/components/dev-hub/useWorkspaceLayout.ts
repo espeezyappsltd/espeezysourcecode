@@ -33,7 +33,7 @@ const DEFAULT_A11Y: PreviewA11yPrefs = {
 const STORAGE_KEY = 'espeezy-dev-hub-workspace-layout:v1'
 
 const DEFAULT_PREFS: WorkspaceLayoutPrefs = {
-  splitPercent: 68,
+  splitPercent: 58,
   panelFirst: false,
   tab: 'logs',
   previewMode: 'normal',

@@ -96,3 +96,23 @@ export function sanitizeNextPath(next: string | null | undefined, fallback = '/'
   }
   return next
 }
+
+const EMBED_QUERY = 'embed'
+
+/** True when rendered inside the dev-hub iframe preview (or explicitly tagged). */
+export function isEmbedPreview(searchParams?: URLSearchParams | null): boolean {
+  if (searchParams?.get(EMBED_QUERY) === '1') return true
+  if (typeof window !== 'undefined' && window.self !== window.top) return true
+  return false
+}
+
+/** Append embed=1 so login pages fit the dev-hub preview frame. */
+export function withEmbedPreviewParam(url: string): string {
+  try {
+    const parsed = new URL(url)
+    parsed.searchParams.set(EMBED_QUERY, '1')
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}

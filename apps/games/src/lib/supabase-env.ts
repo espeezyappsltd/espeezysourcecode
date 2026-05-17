@@ -18,6 +18,7 @@ export function resolveSupabaseEnv() {
   const anonKey = pickFirstNonEmpty([
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
     process.env.PUBLISHABLE_KEY,
     process.env.SUPABASE_ANON_KEY,
   ])

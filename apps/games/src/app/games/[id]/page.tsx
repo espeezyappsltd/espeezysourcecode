@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { Game } from '@/types/games';
-import { supabase } from '@/lib/supabase-client';
+import { getSupabaseClient } from '@/lib/supabase-client';
 import Image from 'next/image';
 
 export default function GameDetailPage() {
@@ -17,6 +17,12 @@ export default function GameDetailPage() {
   useEffect(() => {
     // Fetch game details only
     async function fetchGame() {
+      const supabase = getSupabaseClient()
+      if (!supabase) {
+        setError('Authentication is not configured.')
+        setLoading(false)
+        return
+      }
       const { data, error } = await supabase
         .from('games')
         .select('id, name, url, description, image_url, author, created_at, clicked_count')
@@ -31,9 +37,9 @@ export default function GameDetailPage() {
   // Handler for Play Game button
   const handlePlayGame = async () => {
     if (!game) return;
-    // Increment clicked_count in DB
+    const supabase = getSupabaseClient()
+    if (!supabase) return
     await supabase.rpc('increment_game_click', { game_id: game.id });
-    // Fetch updated count
     const { data, error } = await supabase
       .from('games')
       .select('clicked_count')

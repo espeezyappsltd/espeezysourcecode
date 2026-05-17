@@ -36,6 +36,7 @@ export interface KanbanBoardProps {
   groupId: string;
   profile: Profile;
   newTaskSignal?: number;
+  onBoardReady?: () => void;
 }
 
 export type LayoutUser = {

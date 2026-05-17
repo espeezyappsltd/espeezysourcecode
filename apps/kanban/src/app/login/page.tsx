@@ -9,7 +9,7 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import { Phone, Hash as HashIcon } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
-import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
+import { buildAuthCallbackUrl, isEmbedPreview, resolveClientOrigin } from '@/lib/app-url'
 import { LoginAuthGate } from '@shared/LoginAuthGate'
 import { sanitizeNextPath, useLoginAuthRedirect } from '@shared/useLoginAuthRedirect'
 
@@ -39,6 +39,7 @@ function LoginContent() {
   const [isResetting, setIsResetting] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const embedPreview = isEmbedPreview(searchParams)
   const redirectPath = sanitizeNextPath(
     searchParams?.get('next') ?? searchParams?.get('redirect'),
   )
@@ -58,14 +59,14 @@ function LoginContent() {
         const { data, error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
         if (data.session) {
-          redirectAfterSignIn()
+          void redirectAfterSignIn()
           return
         }
         setResetMessage('Check your email to confirm your account before signing in.')
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        redirectAfterSignIn()
+        void redirectAfterSignIn()
       }
     } catch (err: unknown) {
       setAuthError(getErrorMessage(err))
@@ -140,15 +141,16 @@ function LoginContent() {
   return (
     <LoginAuthGate isChecking={isChecking} isRedirecting={isRedirecting} variant="dark">
     <div style={{
-      minHeight: '100vh',
+      minHeight: embedPreview ? '100%' : '100vh',
       width: '100%',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: embedPreview ? 'flex-start' : 'center',
       justifyContent: 'center',
       position: 'relative',
-      padding: '1rem',
-      overflow: 'hidden',
-      background: '#000'
+      padding: embedPreview ? '1.25rem 1rem 2rem' : '1rem',
+      overflow: embedPreview ? 'auto' : 'hidden',
+      background: '#000',
+      boxSizing: 'border-box',
     }}>
       {/* Background Image */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>

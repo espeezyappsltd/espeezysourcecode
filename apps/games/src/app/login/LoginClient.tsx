@@ -1,16 +1,14 @@
 'use client'
 
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase-client'
-import { resolveSupabaseEnv } from '@/lib/supabase-env'
-import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
+import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase-client'
+import { buildAuthCallbackUrl, isEmbedPreview, resolveGamesClientOrigin } from '@/lib/app-url'
 import { LoginAuthGate } from '@shared/LoginAuthGate'
 import { sanitizeNextPath, useLoginAuthRedirect } from '@shared/useLoginAuthRedirect'
 
 type AuthMode = 'signin' | 'signup'
-// ... rest of styles ...
 
 const styles = {
   page: {
@@ -117,10 +115,36 @@ const styles = {
   } as CSSProperties,
 }
 
-function AuthShell({ maxWidth, centered, children }: { maxWidth: string; centered?: boolean; children: ReactNode }) {
+function AuthShell({
+  maxWidth,
+  centered,
+  embed,
+  children,
+}: {
+  maxWidth: string
+  centered?: boolean
+  embed?: boolean
+  children: ReactNode
+}) {
   return (
-    <div style={styles.page}>
-      <div style={{ ...styles.cardBase, maxWidth, ...(centered ? { textAlign: 'center' } : {}) }}>
+    <div
+      style={{
+        ...styles.page,
+        minHeight: embed ? '100%' : styles.page.minHeight,
+        alignItems: embed ? 'flex-start' : 'center',
+        padding: embed ? '1rem 0.75rem 1.5rem' : styles.page.padding,
+        overflow: embed ? 'auto' : undefined,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div
+        style={{
+          ...styles.cardBase,
+          maxWidth,
+          padding: embed ? '1.5rem' : styles.cardBase.padding,
+          ...(centered ? { textAlign: 'center' } : {}),
+        }}
+      >
         {children}
       </div>
     </div>
@@ -350,11 +374,11 @@ export default function LoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = sanitizeNextPath(searchParams.get('next'));
+  const embedPreview = isEmbedPreview(searchParams);
+  const configMissing = !isSupabaseConfigured();
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const { isChecking, isRedirecting, redirectAfterSignIn } = useLoginAuthRedirect(supabase, next);
   const needsUpgrade = searchParams.get('upgrade') === '1';
-
-  const { url: supabaseUrl, anonKey: supabaseKey } = resolveSupabaseEnv();
-  const configMissing = !supabaseUrl || !supabaseKey;
 
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
@@ -373,7 +397,7 @@ export default function LoginClient() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    if (supabase) await supabase.auth.signOut();
     router.replace('/login');
   };
 
@@ -382,6 +406,12 @@ export default function LoginClient() {
     setLoading(true);
     setError('');
     setSuccess('');
+
+    if (!supabase) {
+      setError('Authentication is temporarily unavailable. Please try again later.');
+      setLoading(false);
+      return;
+    }
 
     if (mode === 'signup') {
       if (!legalAccepted) {
@@ -405,7 +435,7 @@ export default function LoginClient() {
         return;
       }
       if (data.session) {
-        redirectAfterSignIn()
+        void redirectAfterSignIn()
         return
       }
       setSuccess('Account created. Check your email to confirm your account, then sign in.');
@@ -420,7 +450,7 @@ export default function LoginClient() {
       setLoading(false);
       return;
     }
-    redirectAfterSignIn()
+    void redirectAfterSignIn()
   }
 
   const handleReset = async (e: React.MouseEvent) => {
@@ -429,10 +459,14 @@ export default function LoginClient() {
       setError('Enter your email first, then click Reset Password.');
       return;
     }
+    if (!supabase) {
+      setError('Authentication is temporarily unavailable. Please try again later.');
+      return;
+    }
     setResetting(true);
     setError('');
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: buildAuthCallbackUrl(resolveClientOrigin(), { recovery: true }),
+      redirectTo: buildAuthCallbackUrl(resolveGamesClientOrigin(), { recovery: true }),
     });
     setResetting(false);
     if (resetError) {
@@ -448,7 +482,7 @@ export default function LoginClient() {
 
   return (
     <LoginAuthGate isChecking={isChecking} isRedirecting={isRedirecting} variant="dark">
-    <AuthShell maxWidth="420px">
+    <AuthShell maxWidth="420px" embed={embedPreview}>
       <BrandHeader
         badgeLabel="games"
         title={mode === 'signup' ? 'Create your account' : 'Sign in to play'}
