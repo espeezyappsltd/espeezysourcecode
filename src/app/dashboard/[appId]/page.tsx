@@ -5,16 +5,16 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, RefreshCw, RotateCcw, Terminal } from 'lucide-react'
 import { DevHubShell } from '@/components/dev-hub/DevHubShell'
+import { ResizableWorkspace } from '@/components/dev-hub/ResizableWorkspace'
 import { usePoll } from '@/components/dev-hub/usePoll'
+import { useWorkspaceLayout } from '@/components/dev-hub/useWorkspaceLayout'
 import type { DevAppRow, TerminalEntry } from '@/components/dev-hub/types'
-
-type PanelTab = 'logs' | 'terminal'
 
 export default function AppWorkspacePage() {
   const params = useParams()
   const appId = String(params.appId ?? '')
+  const { prefs, setPrefs, resetLayout, hydrated } = useWorkspaceLayout(appId)
   const [app, setApp] = useState<DevAppRow | null>(null)
-  const [tab, setTab] = useState<PanelTab>('logs')
   const [logs, setLogs] = useState<string[]>([])
   const [terminalSessions, setTerminalSessions] = useState<TerminalEntry[]>([])
   const [command, setCommand] = useState('')
@@ -22,6 +22,8 @@ export default function AppWorkspacePage() {
   const [busy, setBusy] = useState(false)
   const logEndRef = useRef<HTMLDivElement>(null)
   const autoStartRef = useRef(false)
+
+  const tab = prefs.tab
 
   const refreshApp = useCallback(async () => {
     const res = await fetch('/api/dev/apps', { cache: 'no-store' })
@@ -84,11 +86,152 @@ export default function AppWorkspacePage() {
       body: JSON.stringify({ command: cmd, cwd: app?.packagePath }),
     })
     await refreshTerminal()
-    setTab('terminal')
+    setPrefs({ tab: 'terminal' })
   }
 
-  const isRunning = app?.runtime?.status === 'running' || app?.runtime?.status === 'starting'
+  const status = app?.runtime?.status ?? 'stopped'
+  const isActive = status === 'running' || status === 'starting'
+  const showPreview = isActive
   const previewUrl = app?.localUrl ?? ''
+  const warmingUp = status === 'starting' || (status === 'running' && !app?.healthy)
+
+  const preview = (
+    <>
+      <div className="dev-hub-preview-bar">
+        <span className="dev-hub-preview-url">{previewUrl || '—'}</span>
+        <span className={`dev-hub-preview-status ${app?.healthy ? 'dev-hub-preview-status--ok' : ''}`}>
+          {status}
+          {app?.healthy ? ' · ready' : warmingUp ? ' · warming up' : ''}
+        </span>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm btn-inline"
+          disabled={!isActive}
+          onClick={() => setIframeKey((k) => k + 1)}
+        >
+          <RefreshCw size={14} />
+          Refresh view
+        </button>
+        <a
+          href={isActive ? previewUrl : undefined}
+          target="_blank"
+          rel="noreferrer"
+          className="btn btn-secondary btn-sm btn-inline"
+          style={{ pointerEvents: isActive ? 'auto' : 'none', opacity: isActive ? 1 : 0.4 }}
+        >
+          New tab
+        </a>
+      </div>
+      <div className="dev-hub-iframe-wrap">
+        {showPreview && previewUrl ? (
+          <>
+            <iframe key={iframeKey} src={previewUrl} title={app?.name ?? appId} />
+            {warmingUp && (
+              <div className="dev-hub-iframe-loading">
+                <span className="spinner-mini" />
+                Starting {app?.name ?? appId}…
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="dev-hub-iframe-placeholder">
+            <p>{status === 'error' ? 'App failed to start. Check logs.' : 'App is not running.'}</p>
+            <button
+              type="button"
+              className="btn btn-success btn-inline"
+              disabled={busy}
+              onClick={() => void runAction('start')}
+            >
+              Start {app?.name ?? appId}
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  )
+
+  const panel = (
+    <>
+      <div className="dev-hub-panel-tabs">
+        <button
+          type="button"
+          className={`dev-hub-panel-tab ${tab === 'logs' ? 'active' : ''}`}
+          onClick={() => setPrefs({ tab: 'logs' })}
+        >
+          Logs
+        </button>
+        <button
+          type="button"
+          className={`dev-hub-panel-tab ${tab === 'terminal' ? 'active' : ''}`}
+          onClick={() => setPrefs({ tab: 'terminal' })}
+        >
+          <Terminal size={12} style={{ display: 'inline', marginRight: 4 }} />
+          Bash
+        </button>
+      </div>
+
+      <div className="dev-hub-panel-controls">
+        {!isActive ? (
+          <button type="button" className="btn btn-success btn-sm" disabled={busy} onClick={() => void runAction('start')}>
+            Start
+          </button>
+        ) : (
+          <button type="button" className="btn btn-danger btn-sm" disabled={busy} onClick={() => void runAction('stop')}>
+            Stop
+          </button>
+        )}
+        <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void runAction('restart')}>
+          <RotateCcw size={14} />
+          Restart
+        </button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void refreshLogs()}>
+          <RefreshCw size={14} />
+          Logs
+        </button>
+      </div>
+
+      {tab === 'logs' ? (
+        <div className="dev-hub-log-view" role="log" aria-live="polite">
+          {logs.map((line, i) => (
+            <div key={`${i}-${line.slice(0, 24)}`} className="dev-hub-log-line">
+              {line}
+            </div>
+          ))}
+          <div ref={logEndRef} />
+        </div>
+      ) : (
+        <div className="dev-hub-log-view" role="log">
+          {terminalSessions.length === 0 && (
+            <p className="dev-hub-log-line" style={{ color: 'var(--text-sub)' }}>
+              Run bash or PowerShell commands against the monorepo root (or app folder).
+            </p>
+          )}
+          {terminalSessions.map((session) => (
+            <div key={session.id} style={{ marginBottom: '1rem' }}>
+              {session.logs.map((line, i) => (
+                <div key={`${session.id}-${i}`} className="dev-hub-log-line">
+                  {line}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <form className="dev-hub-terminal-input" onSubmit={(e) => void submitTerminal(e)}>
+        <input
+          className="form-input"
+          value={command}
+          onChange={(e) => setCommand(e.target.value)}
+          placeholder="Shell command (bash / PowerShell)…"
+          spellCheck={false}
+        />
+        <button type="submit" className="btn btn-primary btn-sm btn-inline">
+          Run
+        </button>
+      </form>
+    </>
+  )
 
   return (
     <DevHubShell title={app?.name ?? appId} subtitle={app?.description ?? 'App workspace'}>
@@ -97,124 +240,11 @@ export default function AppWorkspacePage() {
         All apps
       </Link>
 
-      <div className="dev-hub-workspace">
-        <section className="dev-hub-preview">
-          <div className="dev-hub-preview-bar">
-            <span className="dev-hub-preview-url">{previewUrl || '—'}</span>
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm btn-inline"
-              disabled={!isRunning}
-              onClick={() => setIframeKey((k) => k + 1)}
-            >
-              <RefreshCw size={14} />
-              Refresh view
-            </button>
-            <a
-              href={isRunning ? previewUrl : undefined}
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-secondary btn-sm btn-inline"
-              style={{ pointerEvents: isRunning ? 'auto' : 'none', opacity: isRunning ? 1 : 0.4 }}
-            >
-              New tab
-            </a>
-          </div>
-          <div className="dev-hub-iframe-wrap">
-            {isRunning && previewUrl ? (
-              <iframe key={iframeKey} src={previewUrl} title={app?.name ?? appId} />
-            ) : (
-              <div className="dev-hub-iframe-placeholder">
-                <p>App is not running.</p>
-                <button type="button" className="btn btn-success btn-inline" disabled={busy} onClick={() => void runAction('start')}>
-                  Start {app?.name ?? appId}
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        <aside className="dev-hub-panel">
-          <div className="dev-hub-panel-tabs">
-            <button
-              type="button"
-              className={`dev-hub-panel-tab ${tab === 'logs' ? 'active' : ''}`}
-              onClick={() => setTab('logs')}
-            >
-              Logs
-            </button>
-            <button
-              type="button"
-              className={`dev-hub-panel-tab ${tab === 'terminal' ? 'active' : ''}`}
-              onClick={() => setTab('terminal')}
-            >
-              <Terminal size={12} style={{ display: 'inline', marginRight: 4 }} />
-              Bash
-            </button>
-          </div>
-
-          <div className="dev-hub-panel-controls">
-            {!isRunning ? (
-              <button type="button" className="btn btn-success btn-sm" disabled={busy} onClick={() => void runAction('start')}>
-                Start
-              </button>
-            ) : (
-              <button type="button" className="btn btn-danger btn-sm" disabled={busy} onClick={() => void runAction('stop')}>
-                Stop
-              </button>
-            )}
-            <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void runAction('restart')}>
-              <RotateCcw size={14} />
-              Restart
-            </button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void refreshLogs()}>
-              <RefreshCw size={14} />
-              Logs
-            </button>
-          </div>
-
-          {tab === 'logs' ? (
-            <div className="dev-hub-log-view" role="log" aria-live="polite">
-              {logs.map((line, i) => (
-                <div key={`${i}-${line.slice(0, 24)}`} className="dev-hub-log-line">
-                  {line}
-                </div>
-              ))}
-              <div ref={logEndRef} />
-            </div>
-          ) : (
-            <div className="dev-hub-log-view" role="log">
-              {terminalSessions.length === 0 && (
-                <p className="dev-hub-log-line" style={{ color: 'var(--text-sub)' }}>
-                  Run bash or PowerShell commands against the monorepo root (or app folder).
-                </p>
-              )}
-              {terminalSessions.map((session) => (
-                <div key={session.id} style={{ marginBottom: '1rem' }}>
-                  {session.logs.map((line, i) => (
-                    <div key={`${session.id}-${i}`} className="dev-hub-log-line">
-                      {line}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
-
-          <form className="dev-hub-terminal-input" onSubmit={(e) => void submitTerminal(e)}>
-            <input
-              className="form-input"
-              value={command}
-              onChange={(e) => setCommand(e.target.value)}
-              placeholder="Shell command (bash / PowerShell)…"
-              spellCheck={false}
-            />
-            <button type="submit" className="btn btn-primary btn-sm btn-inline">
-              Run
-            </button>
-          </form>
-        </aside>
-      </div>
+      {hydrated ? (
+        <ResizableWorkspace prefs={prefs} setPrefs={setPrefs} resetLayout={resetLayout} preview={preview} panel={panel} />
+      ) : (
+        <p className="dev-hub-empty">Loading workspace…</p>
+      )}
     </DevHubShell>
   )
 }

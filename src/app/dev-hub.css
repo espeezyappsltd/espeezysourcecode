@@ -218,11 +218,30 @@
   min-width: 5rem;
 }
 
+.dev-hub-workspace-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dev-hub-workspace-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dev-hub-workspace-toolbar-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-sub);
+  margin-right: 0.25rem;
+}
+
 .dev-hub-workspace {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 0;
-  height: calc(100vh - 5rem);
+  height: calc(100vh - 6.5rem);
   min-height: 520px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -230,19 +249,42 @@
   background: var(--surface);
 }
 
-@media (max-width: 1024px) {
-  .dev-hub-workspace {
-    grid-template-columns: 1fr;
-    height: auto;
-    min-height: 0;
-  }
+.dev-hub-workspace--flex {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.dev-hub-workspace--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sub);
+  padding: 3rem;
+}
+
+.dev-hub-resize-handle {
+  flex: 0 0 6px;
+  cursor: col-resize;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  transition: background 0.15s;
+  position: relative;
+  z-index: 2;
+}
+
+.dev-hub-resize-handle:hover,
+.dev-hub-resize-handle:active {
+  background: rgba(16, 185, 129, 0.25);
 }
 
 .dev-hub-preview {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-right: 1px solid var(--border);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .dev-hub-preview-bar {
@@ -292,11 +334,69 @@
   text-align: center;
 }
 
+.dev-hub-iframe-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #a7f3d0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.dev-hub-preview-status {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-sub);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dev-hub-preview-status--ok {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
 .dev-hub-panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
   background: var(--bg-sub);
+  border-left: 1px solid var(--border);
+}
+
+.dev-hub-workspace--flipped .dev-hub-panel {
+  border-left: none;
+  border-right: 1px solid var(--border);
+}
+
+@media (max-width: 1024px) {
+  .dev-hub-workspace--flex {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .dev-hub-preview,
+  .dev-hub-panel {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-height: 360px;
+  }
+
+  .dev-hub-resize-handle {
+    flex: 0 0 6px;
+    width: 100%;
+    height: 6px;
+    cursor: row-resize;
+  }
 }
 
 .dev-hub-panel-tabs {

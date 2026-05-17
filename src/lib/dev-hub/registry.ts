@@ -6,8 +6,6 @@ export type DevAppDefinition = {
   port: number
   productionUrl?: string
   accent: string
-  /** Extra args after `npm run dev` (e.g. Next port override). */
-  devArgs?: string[]
 }
 
 /** Espeezy monorepo apps only (under apps/ + this hub on :3000). */
@@ -53,7 +51,6 @@ export const DEV_APPS: DevAppDefinition[] = [
     packagePath: 'apps/prereg',
     port: 3005,
     productionUrl: 'https://espeezy.com/#register',
-    devArgs: ['--', '-p', '3005'],
     accent: '#8b5cf6',
   },
   {
@@ -63,7 +60,6 @@ export const DEV_APPS: DevAppDefinition[] = [
     packagePath: 'apps/core',
     port: 3006,
     productionUrl: 'https://core.espeezy.com',
-    devArgs: ['--', '-p', '3006'],
     accent: '#ec4899',
   },
 ]

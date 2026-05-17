@@ -85,8 +85,9 @@ function npmCommand(): string {
 
 function spawnDevApp(def: DevAppDefinition): ChildProcess {
   const cwd = path.join(repoRoot(), def.packagePath)
-  const args = ['run', 'dev', ...(def.devArgs ?? [])]
-  return spawn(npmCommand(), args, {
+  // Run Next directly so hub-assigned ports win (package.json scripts often hard-code -p).
+  const runner = process.platform === 'win32' ? 'npx.cmd' : 'npx'
+  return spawn(runner, ['next', 'dev', '-p', String(def.port)], {
     cwd,
     env: { ...process.env, FORCE_COLOR: '0', BROWSER: 'none' },
     shell: process.platform === 'win32',
