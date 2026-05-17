@@ -13,6 +13,7 @@ export function generateStaticParams() {
     { slug: ['infra', 'payments'] },
     { slug: ['infra', 'sync'] },
     { slug: ['infra', 'presence'] },
+    { slug: ['refund-policy'] },
     { slug: ['vision'] },
     { slug: ['impact'] },
   ]

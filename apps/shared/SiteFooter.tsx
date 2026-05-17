@@ -39,6 +39,7 @@ const INFRA_LINKS = [
 const LEGAL_LINKS = [
   { href: 'https://espeezy.com/terms', label: 'Terms of Service' },
   { href: 'https://espeezy.com/privacy', label: 'Privacy Policy' },
+  { href: 'https://espeezy.com/docs/refund-policy', label: 'Refund Policy' },
   { href: 'https://espeezy.com/fund', label: 'Donate' },
 ]
 

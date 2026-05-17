@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   LayoutGrid, Milestone, Users, ShoppingBag,
-  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info
+  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info, RotateCcw
 } from 'lucide-react'
 
 const BRAND = '#10b981'
@@ -299,7 +299,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Subscription plans',
-        body: 'Pro subscriptions are billed monthly or annually. You can upgrade, downgrade, or cancel at any time from your account settings. When you cancel, you retain access until the end of your current billing period. Espeezy does not charge cancellation fees. Annual subscribers who cancel early receive a prorated refund for unused months.',
+        body: 'Pro subscriptions are billed monthly or annually. You can upgrade, downgrade, or cancel at any time from your account settings. When you cancel, you retain access until the end of your current billing period. Espeezy does not charge cancellation fees. Refund eligibility is set out in the Refund Policy (/docs/refund-policy).',
       },
       {
         heading: 'Institutional billing',
@@ -373,6 +373,59 @@ const docsContent: Record<string, DocEntry> = {
       },
     ],
     eli12: 'It is like the little green dot on WhatsApp but for your whole team. You can see who is online right now, who was just here a minute ago, and even see their cursor moving around on the shared task board. No more "did you see my message?" moments.',
+  },
+
+  'refund-policy': {
+    title: 'Refund Policy',
+    icon: <RotateCcw size={40} />,
+    tagline: 'How refunds work for Espeezy Pro subscriptions, Marketplace credits, and other paid features.',
+    sections: [
+      {
+        heading: 'Overview',
+        body: 'Espeezy processes payments through Stripe. This policy explains when refunds are available, how to request one, and what is not refundable. Unless required by law, all refunds are issued to the original payment method in GBP (or the currency shown at checkout).',
+        items: [
+          'Last updated: May 2026',
+          'Applies to espeezy.com and linked Espeezy apps',
+          'Questions: support@espeezy.com',
+        ],
+      },
+      {
+        heading: 'Pro subscriptions',
+        body: 'Monthly Pro plans: you may cancel at any time from account settings. Access continues until the end of the current billing period. We do not refund partial months unless required by UK consumer law or where a billing error occurred on our side.',
+        items: [
+          'Annual Pro plans: if you cancel within 14 days of purchase and have not materially used paid-only features, contact support for a full refund',
+          'After 14 days, annual plans may receive a prorated refund for unused whole months at our discretion',
+          'Duplicate charges or failed-service outages caused by Espeezy are refunded in full after verification',
+        ],
+      },
+      {
+        heading: 'Marketplace credits and digital goods',
+        body: 'Espeezy Credits purchased in bundles are non-refundable once spent on a Marketplace download or licence. Unspent credit balances may be refunded within 14 days of purchase if no credits from that bundle have been used.',
+        items: [
+          'Marketplace purchases (templates, guides, datasets) are final once downloaded',
+          'If a listing is materially misdescribed or unavailable, contact support within 7 days for review',
+          'Creator payouts already issued may limit the refund we can offer on a related purchase',
+        ],
+      },
+      {
+        heading: 'Crowdfunding and donations',
+        body: 'Contributions made on the Support Us / fund pages are voluntary donations to platform development. They are non-refundable except where a payment was taken in error (duplicate charge, wrong amount) or where UK law requires otherwise.',
+      },
+      {
+        heading: 'Institutional and enterprise billing',
+        body: 'Universities and organisations on custom invoices follow the terms in their signed agreement. Refund or credit requests must be raised by the billing contact named on the invoice within 30 days of the charge date.',
+      },
+      {
+        heading: 'How to request a refund',
+        body: 'Email support@espeezy.com from the address on your Espeezy account. Include your account email, the date and amount of the charge, and the Stripe receipt ID if you have it. We aim to respond within 3 business days and to complete approved refunds within 5–10 business days (bank processing times may vary).',
+        items: [
+          'Chargebacks: please contact us first so we can resolve the issue faster',
+          'UK consumers: statutory rights under the Consumer Rights Act 2015 are not affected by this policy',
+          'EU/EEA consumers: you may have additional withdrawal rights for distance contracts where applicable',
+        ],
+      },
+    ],
+    eli12: 'If you paid for something by mistake or something broke on our side, email support and we will sort it out. Money you already spent on downloads or used-up credits usually cannot be returned, but subscription mistakes and billing errors often can.',
   },
 
   'vision': {

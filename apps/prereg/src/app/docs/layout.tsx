@@ -39,6 +39,12 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       ],
     },
     {
+      title: 'Legal',
+      items: [
+        { label: 'Refund Policy', href: '/docs/refund-policy' },
+      ],
+    },
+    {
       title: 'Vision',
       items: [
         { label: 'Our Vision', href: '/docs/vision' },
