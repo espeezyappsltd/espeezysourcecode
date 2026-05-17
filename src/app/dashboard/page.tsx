@@ -46,10 +46,15 @@ export default function DashboardPage() {
 
   usePoll(refresh, 15000)
 
-  async function control(appId: string, action: 'start' | 'stop') {
+  async function control(appId: string, action: 'start' | 'stop', port?: number) {
     setBusyId(appId)
     try {
-      await fetch(`/api/dev/apps/${appId}/${action}`, { method: 'POST' })
+      const needsBody = action === 'start' && port != null
+      await fetch(`/api/dev/apps/${appId}/${action}`, {
+        method: 'POST',
+        headers: needsBody ? { 'Content-Type': 'application/json' } : undefined,
+        body: needsBody ? JSON.stringify({ port }) : undefined,
+      })
       await refresh()
     } finally {
       setBusyId(null)
@@ -83,7 +88,7 @@ export default function DashboardPage() {
               busy={busyId === app.id}
               prodStatus={prodFleet.find((p) => p.appId === app.id)}
               style={{ animationDelay: `${i * 0.04}s` }}
-              onStart={() => void control(app.id, 'start')}
+              onStart={(port) => void control(app.id, 'start', port)}
               onStop={() => void control(app.id, 'stop')}
               onRefresh={() => void refresh()}
             />

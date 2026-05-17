@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ExternalLink, Monitor, Play, Square } from 'lucide-react'
 import { PortControl } from './PortControl'
@@ -10,7 +11,7 @@ type Props = {
   busy: boolean
   prodStatus?: ProdFleetRow
   style?: React.CSSProperties
-  onStart: () => void
+  onStart: (port?: number) => void
   onStop: () => void
   onRefresh: () => void
 }
@@ -18,6 +19,11 @@ type Props = {
 export function AppCard({ app, busy, prodStatus, style, onStart, onStop, onRefresh }: Props) {
   const status = app.runtime?.status ?? 'stopped'
   const isRunning = status === 'running' || status === 'starting'
+  const [draftPort, setDraftPort] = useState(app.port)
+
+  useEffect(() => {
+    setDraftPort(app.port)
+  }, [app.port])
 
   return (
     <article className="dev-hub-app-card control-card-entrance" style={style}>
@@ -64,14 +70,16 @@ export function AppCard({ app, busy, prodStatus, style, onStart, onStop, onRefre
           defaultPort={app.defaultPort}
           localHost={app.localHost}
           compact
+          deferApply
           disabled={busy}
+          onPortDraft={setDraftPort}
           onApplied={onRefresh}
         />
       )}
 
       <div className="dev-hub-app-actions">
         {!isRunning ? (
-          <button type="button" className="btn btn-success btn-sm" disabled={busy} onClick={onStart}>
+          <button type="button" className="btn btn-success btn-sm" disabled={busy} onClick={() => onStart(draftPort)}>
             <Play size={14} />
             Start
           </button>

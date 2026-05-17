@@ -73,14 +73,14 @@ export function ResizableWorkspace({ prefs, setPrefs, resetLayout, preview, pane
         <span className="dev-hub-workspace-toolbar-label">Layout</span>
         <button
           type="button"
-          className="btn btn-ghost btn-sm btn-inline"
+          className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline"
           onClick={() => setPrefs({ panelFirst: !prefs.panelFirst })}
           title="Swap panel side"
         >
           <ArrowLeftRight size={14} />
           Swap panels
         </button>
-        <button type="button" className="btn btn-ghost btn-sm btn-inline" onClick={resetLayout} title="Reset layout">
+        <button type="button" className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline" onClick={resetLayout} title="Reset layout">
           <RotateCcw size={14} />
           Reset
         </button>

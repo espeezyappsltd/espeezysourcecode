@@ -241,8 +241,8 @@
 }
 
 .dev-hub-workspace {
-  height: calc(100vh - 6.5rem);
-  min-height: 520px;
+  height: min(78vh, calc(100dvh - 7rem));
+  min-height: 420px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -282,9 +282,32 @@
 .dev-hub-preview {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
   min-width: 0;
   overflow: hidden;
+}
+
+.dev-hub-tap {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dev-hub-action-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  width: auto !important;
+  flex: 1 1 auto;
+  min-width: 4.5rem;
+  min-height: 38px !important;
+}
+
+.dev-hub-port-hint {
+  font-size: 0.68rem;
+  color: var(--text-sub);
+  margin: 0.15rem 0 0;
 }
 
 .dev-hub-port-control {
@@ -414,10 +437,28 @@
 .dev-hub-panel {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
   min-width: 0;
+  height: 100%;
   background: var(--bg-sub);
   border-left: 1px solid var(--border);
+}
+
+.dev-hub-panel-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.dev-hub-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .dev-hub-workspace--flipped .dev-hub-panel {
@@ -426,23 +467,52 @@
 }
 
 @media (max-width: 1024px) {
-  .dev-hub-workspace--flex {
-    flex-direction: column;
+  .dev-hub-workspace {
     height: auto;
+    min-height: 0;
   }
 
-  .dev-hub-preview,
+  .dev-hub-workspace--flex {
+    flex-direction: column;
+    min-height: min(92dvh, 900px);
+  }
+
+  .dev-hub-preview {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-height: 38vh;
+    max-height: 48vh;
+  }
+
+  .dev-hub-preview .dev-hub-iframe-wrap {
+    min-height: 30vh;
+  }
+
   .dev-hub-panel {
     flex: 1 1 auto !important;
     width: 100% !important;
-    min-height: 360px;
+    min-height: 42vh;
+    max-height: none;
+  }
+
+  .dev-hub-panel-inner {
+    min-height: 42vh;
+  }
+
+  .dev-hub-log-view {
+    min-height: 28vh;
   }
 
   .dev-hub-resize-handle {
-    flex: 0 0 6px;
+    flex: 0 0 8px;
     width: 100%;
-    height: 6px;
+    height: 8px;
     cursor: row-resize;
+  }
+
+  .dev-hub-panel-controls .dev-hub-action-btn {
+    min-height: 44px !important;
+    flex: 1 1 30%;
   }
 }
 
@@ -490,17 +560,23 @@
 }
 
 .dev-hub-log-view {
-  flex: 1;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
   overflow: auto;
+  overflow-x: auto;
   padding: 0.75rem 1rem;
-  font-family: ui-monospace, 'Cascadia Code', monospace;
-  font-size: 0.7rem;
-  line-height: 1.55;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: clamp(0.65rem, 1.8vw, 0.78rem);
+  line-height: 1.5;
   color: #a7f3d0;
   background: #030303;
-  min-height: 280px;
-  max-height: 50vh;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dev-hub-log-line--muted {
+  color: var(--text-sub);
 }
 
 .dev-hub-log-view::-webkit-scrollbar {
@@ -511,7 +587,8 @@
 .dev-hub-log-line {
   white-space: pre-wrap;
   word-break: break-word;
-  margin-bottom: 0.15rem;
+  overflow-wrap: anywhere;
+  margin-bottom: 0.12rem;
 }
 
 .dev-hub-terminal-input {

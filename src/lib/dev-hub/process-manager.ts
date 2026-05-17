@@ -201,9 +201,9 @@ export function stopApp(appId: string): AppRuntime {
   return runtime
 }
 
-export function restartApp(appId: string): AppRuntime {
+export function restartApp(appId: string, port?: number): AppRuntime {
   stopApp(appId)
-  return startApp(appId)
+  return startApp(appId, port)
 }
 
 export function getMetrics() {

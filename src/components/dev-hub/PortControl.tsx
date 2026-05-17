@@ -9,6 +9,9 @@ type Props = {
   localHost: string
   disabled?: boolean
   compact?: boolean
+  /** When true, port is sent with Start/Restart — no separate Apply click. */
+  deferApply?: boolean
+  onPortDraft?: (port: number) => void
   onApplied?: () => void
 }
 
@@ -19,6 +22,8 @@ export function PortControl({
   localHost,
   disabled,
   compact,
+  deferApply,
+  onPortDraft,
   onApplied,
 }: Props) {
   const [value, setValue] = useState(String(port))
@@ -28,6 +33,11 @@ export function PortControl({
   useEffect(() => {
     setValue(String(port))
   }, [port])
+
+  function emitDraft(next: string) {
+    const n = parseInt(next, 10)
+    if (Number.isFinite(n)) onPortDraft?.(n)
+  }
 
   async function applyPort(nextPort: number) {
     setSaving(true)
@@ -67,29 +77,39 @@ export function PortControl({
           className="form-input dev-hub-port-input"
           value={value}
           disabled={disabled || saving}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value)
+            emitDraft(e.target.value)
+          }}
+          onBlur={() => {
+            if (deferApply) return
+            const n = parseInt(value, 10)
+            if (Number.isFinite(n) && n !== port) void applyPort(n)
+          }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !deferApply) {
               const n = parseInt(value, 10)
               if (Number.isFinite(n)) void applyPort(n)
             }
           }}
         />
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm btn-inline"
-          disabled={disabled || saving || parseInt(value, 10) === port}
-          onClick={() => {
-            const n = parseInt(value, 10)
-            if (Number.isFinite(n)) void applyPort(n)
-          }}
-        >
-          {saving ? '…' : 'Apply'}
-        </button>
-        {port !== defaultPort && (
+        {!deferApply && (
           <button
             type="button"
-            className="btn btn-ghost btn-sm btn-inline"
+            className="dev-hub-action-btn btn btn-secondary btn-sm btn-inline"
+            disabled={disabled || saving || parseInt(value, 10) === port}
+            onClick={() => {
+              const n = parseInt(value, 10)
+              if (Number.isFinite(n)) void applyPort(n)
+            }}
+          >
+            {saving ? '…' : 'Apply'}
+          </button>
+        )}
+        {port !== defaultPort && !deferApply && (
+          <button
+            type="button"
+            className="dev-hub-action-btn btn btn-ghost btn-sm btn-inline"
             disabled={disabled || saving}
             title={`Reset to default :${defaultPort}`}
             onClick={() => void applyPort(defaultPort)}
@@ -98,6 +118,9 @@ export function PortControl({
           </button>
         )}
       </div>
+      {deferApply && (
+        <p className="dev-hub-port-hint">Port applies when you click Start or Restart.</p>
+      )}
       {error && <p className="dev-hub-port-error">{error}</p>}
     </div>
   )
