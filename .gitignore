@@ -28,6 +28,7 @@ test-results/
 !apps/kanban/README.md
 !apps/games/README.md
 *.sql
+!supabase/migrations/*.sql
 
 
 # production
