@@ -1,15 +1,30 @@
 const path = require('path')
 
-const monorepoRoot = path.join(process.cwd(), '../../')
+/** Repo root (espeezy monorepo) — required for serverless file tracing. */
+const monorepoRoot = path.join(__dirname, '../..')
+/** Cross-app UI shared by kanban, games, etc. */
+const sharedDir = path.join(__dirname, '../shared')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Deployed to Vercel - server mode (no static export)
   images: {
     unoptimized: true,
   },
   outputFileTracingRoot: monorepoRoot,
-  experimental: {
+  outputFileTracingIncludes: {
+    '/*': ['../shared/**/*'],
+  },
+  turbopack: {
+    resolveAlias: {
+      '@shared': sharedDir,
+    },
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@shared': sharedDir,
+    }
+    return config
   },
 }
 
