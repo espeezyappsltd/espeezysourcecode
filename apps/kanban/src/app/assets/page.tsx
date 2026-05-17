@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { 
@@ -10,9 +10,15 @@ import {
   ExternalLink,
   Loader2,
   HardDrive,
-  Filter,
-  MoreVertical
+  Coins,
+  Pencil,
 } from 'lucide-react'
+import {
+  MAX_ASSET_CREDIT_VALUE,
+  creditsToGbpEquivalent,
+  formatCreditCapHint,
+  formatCredits,
+} from '@/lib/credits'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
@@ -29,6 +35,7 @@ interface Asset {
   size_bytes: number
   created_at: string
   folder?: string
+  credit_value?: number
 }
 
 const QUOTAS = {
@@ -46,6 +53,7 @@ export default function PersonalAssetsPage() {
   const [filter, setFilter] = useState<'all' | 'file' | 'link' | 'marketplace_ref'>('all')
   const [currentFolder, setCurrentFolder] = useState('/')
   const [showUploadModal, setShowUploadModal] = useState(false)
+  const [totalCreditValue, setTotalCreditValue] = useState(0)
   
   const fetchAssets = useCallback(async () => {
     setLoading(true)
@@ -54,6 +62,7 @@ export default function PersonalAssetsPage() {
       if (res.ok) {
         const data = await res.json()
         setAssets(data.assets || [])
+        setTotalCreditValue(data.totalCreditValue ?? 0)
       }
     } catch (err) {
       addToast('Error', 'Failed to load assets', 'error')
@@ -106,9 +115,36 @@ export default function PersonalAssetsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem', flexWrap: 'wrap', gap: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 950, letterSpacing: '-0.05em', color: 'white', margin: 0 }}>
-            Personal <span style={{ color: 'var(--brand)' }}>Inventory</span>
+            Personal <span style={{ color: 'var(--brand)' }}>Arsenal</span>
           </h1>
-          <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem', fontWeight: 600 }}>Your secure node for academic assets and marketplace refs.</p>
+          <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem', fontWeight: 600, maxWidth: '520px' }}>
+            Academic assets with Espeezy credit values for marketplace listings and cash conversion. {formatCreditCapHint()}.
+          </p>
+          <div
+            style={{
+              marginTop: '1.25rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1.25rem',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: '14px',
+            }}
+          >
+            <Coins size={20} color="var(--brand)" />
+            <motion.div>
+              <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Total arsenal value
+              </div>
+              <motion.div style={{ fontSize: '1.15rem', fontWeight: 950, color: 'white' }}>
+                {formatCredits(totalCreditValue)}
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', marginLeft: '0.5rem' }}>
+                  â‰ˆ Â£{creditsToGbpEquivalent(totalCreditValue).toFixed(2)}
+                </span>
+              </motion.div>
+            </motion.div>
+          </div>
         </div>
 
         <div style={{ width: '320px', background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
@@ -216,8 +252,18 @@ export default function PersonalAssetsPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
           <AnimatePresence>
-            {filteredAssets.map((asset, idx) => (
-              <AssetCard key={asset.id} asset={asset} onDelete={() => handleDelete(asset.id)} />
+            {filteredAssets.map((asset) => (
+              <AssetCard
+                key={asset.id}
+                asset={asset}
+                onDelete={() => handleDelete(asset.id)}
+                onCreditUpdated={(credit_value) => {
+                  setAssets((prev) =>
+                    prev.map((a) => (a.id === asset.id ? { ...a, credit_value } : a)),
+                  )
+                  setTotalCreditValue((prev) => prev - (asset.credit_value ?? 0) + credit_value)
+                }}
+              />
             ))}
           </AnimatePresence>
         </div>
@@ -236,8 +282,45 @@ export default function PersonalAssetsPage() {
   )
 }
 
-function AssetCard({ asset, onDelete }: { asset: Asset, onDelete: () => void }) {
+function AssetCard({
+  asset,
+  onDelete,
+  onCreditUpdated,
+}: {
+  asset: Asset
+  onDelete: () => void
+  onCreditUpdated: (creditValue: number) => void
+}) {
+  const { addToast } = useNotifications()
+  const [editingCredit, setEditingCredit] = useState(false)
+  const [creditInput, setCreditInput] = useState(String(asset.credit_value ?? 0))
+  const [savingCredit, setSavingCredit] = useState(false)
   const Icon = asset.asset_type === 'file' ? File : asset.asset_type === 'link' ? LinkIcon : ShoppingBag
+
+  const saveCreditValue = async () => {
+    const next = parseInt(creditInput, 10)
+    if (Number.isNaN(next) || next < 0 || next > MAX_ASSET_CREDIT_VALUE) {
+      addToast('Invalid value', `Enter 0â€“${MAX_ASSET_CREDIT_VALUE} credits.`, 'error')
+      return
+    }
+    setSavingCredit(true)
+    try {
+      const res = await fetch('/api/assets', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: asset.id, credit_value: next }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Update failed')
+      onCreditUpdated(data.asset.credit_value ?? next)
+      setEditingCredit(false)
+      addToast('Updated', 'Asset credit value saved.', 'success')
+    } catch (e) {
+      addToast('Error', e instanceof Error ? e.message : 'Could not update credit value', 'error')
+    } finally {
+      setSavingCredit(false)
+    }
+  }
   
   return (
     <motion.div
@@ -281,6 +364,51 @@ function AssetCard({ asset, onDelete }: { asset: Asset, onDelete: () => void }) 
         </div>
         
         <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)', lineHeight: 1.5, height: '2.4rem', overflow: 'hidden' }}>{asset.description || 'No description provided.'}</p>
+
+        <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'var(--bg-sub)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: editingCredit ? '0.5rem' : 0 }}>
+            <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Asset value</span>
+            {!editingCredit && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCreditInput(String(asset.credit_value ?? 0))
+                  setEditingCredit(true)
+                }}
+                style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', padding: 4 }}
+                aria-label="Edit credit value"
+              >
+                <Pencil size={14} />
+              </button>
+            )}
+          </div>
+          {editingCredit ? (
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                type="number"
+                min={0}
+                max={MAX_ASSET_CREDIT_VALUE}
+                value={creditInput}
+                onChange={(e) => setCreditInput(e.target.value)}
+                className="form-input"
+                style={{ flex: 1, padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+              />
+              <button type="button" className="btn btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} disabled={savingCredit} onClick={saveCreditValue}>
+                {savingCredit ? '…' : 'Save'}
+              </button>
+              <button type="button" className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} onClick={() => setEditingCredit(false)}>
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--brand)' }}>
+              {formatCredits(asset.credit_value ?? 0)}
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-sub)', marginLeft: '0.35rem' }}>
+                ≈ £{creditsToGbpEquivalent(asset.credit_value ?? 0).toFixed(2)}
+              </span>
+            </div>
+          )}
+        </div>
         
         <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 700 }}>
@@ -304,7 +432,7 @@ function AssetCard({ asset, onDelete }: { asset: Asset, onDelete: () => void }) 
 }
 
 function UploadModal({ currentFolder, onClose, onSuccess }: { currentFolder: string, onClose: () => void, onSuccess: () => void }) {
-  const [form, setForm] = useState({ title: '', description: '', asset_type: 'file' as Asset['asset_type'], asset_url: '', category: '' })
+  const [form, setForm] = useState({ title: '', description: '', asset_type: 'file' as Asset['asset_type'], asset_url: '', category: '', credit_value: '0' })
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -326,6 +454,7 @@ function UploadModal({ currentFolder, onClose, onSuccess }: { currentFolder: str
         formData.append('description', form.description)
         formData.append('category', form.category)
         formData.append('folder', currentFolder)
+        formData.append('credit_value', form.credit_value || '0')
 
         res = await fetch('/api/assets', {
           method: 'POST',
@@ -335,7 +464,12 @@ function UploadModal({ currentFolder, onClose, onSuccess }: { currentFolder: str
         res = await fetch('/api/assets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...form, folder: currentFolder, size_bytes: 0 })
+          body: JSON.stringify({
+            ...form,
+            folder: currentFolder,
+            size_bytes: 0,
+            credit_value: parseInt(form.credit_value, 10) || 0,
+          })
         })
       }
 
@@ -423,6 +557,24 @@ function UploadModal({ currentFolder, onClose, onSuccess }: { currentFolder: str
               placeholder="A brief summary of this asset..."
               style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', minHeight: '80px', resize: 'none' }}
             />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+              Asset value (credits)
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={MAX_ASSET_CREDIT_VALUE}
+              className="form-input"
+              value={form.credit_value}
+              onChange={(e) => setForm((f) => ({ ...f, credit_value: e.target.value }))}
+              style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)' }}
+            />
+            <p style={{ margin: '0.5rem 0 0', fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 600 }}>
+              {formatCreditCapHint()} · 50 credits ≈ 1 month Pro
+            </p>
           </div>
         </div>
 

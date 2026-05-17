@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { fetchMarketplaceAssets, MarketplaceAsset } from '@/services/marketplace'
+import { creditsToGbpEquivalent, formatCredits } from '@/lib/credits'
 
 const CATEGORY_COLORS: Record<string, string> = {
   Graphics: '#10b981',
@@ -59,7 +60,13 @@ export default function MarketplaceGallery() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto' }}>
                   <span style={{ color: CATEGORY_COLORS[asset.category] || '#64748b', fontWeight: 800, fontSize: '0.95rem' }}>{asset.category}</span>
-                  {asset.price ? <span style={{ color: '#f59e42', fontWeight: 900, marginLeft: 8 }}>${asset.price}</span> : <span style={{ color: '#10b981', fontWeight: 900, marginLeft: 8 }}>Free</span>}
+                  {asset.price ? (
+                    <span style={{ color: '#f59e42', fontWeight: 900, marginLeft: 8 }} title={`≈ £${creditsToGbpEquivalent(asset.price).toFixed(2)} cash equivalent`}>
+                      {formatCredits(asset.price)}
+                    </span>
+                  ) : (
+                    <span style={{ color: '#10b981', fontWeight: 900, marginLeft: 8 }}>Free</span>
+                  )}
                 </div>
                 <a href={asset.asset_url} target='_blank' rel='noopener' style={{ marginTop: 10, padding: '10px 0', borderRadius: 8, background: 'linear-gradient(90deg, #10b981 0%, #6366f1 100%)', color: 'white', fontWeight: 900, textAlign: 'center', textDecoration: 'none', fontSize: '1rem', letterSpacing: '-0.01em', boxShadow: '0 2px 8px rgba(16,185,129,0.08)' }}>Download</a>
               </div>

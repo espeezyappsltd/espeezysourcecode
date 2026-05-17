@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { Q } from '@/lib/query-columns'
 import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server'
 import { rateLimit } from '../../../proxy'
+import { marketplaceCreditPriceSchema } from '@/lib/credit-schema'
+import { validateCreditValue } from '@/lib/credits'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +15,7 @@ const AssetSchema = z.object({
   asset_url: z.string().url(),
   preview_url: z.string().url().optional(),
   tags: z.array(z.string()).optional(),
-  price: z.number().min(0).optional(),
+  price: marketplaceCreditPriceSchema,
   is_featured: z.boolean().optional(),
 })
 
@@ -66,9 +68,19 @@ export async function POST(req: Request) {
   const parse = AssetSchema.safeParse(body)
   if (!parse.success) return NextResponse.json({
     error: 'Invalid input',
-    message: 'Please check your asset details and try again.'
+    message: parse.error.issues[0]?.message ?? 'Please check your asset details and try again.',
   }, { status: 422 })
-  const asset = { ...parse.data, user_id: user.id }
+
+  let price = parse.data.price
+  if (price !== undefined) {
+    const creditCheck = validateCreditValue(price)
+    if (!creditCheck.ok) {
+      return NextResponse.json({ error: 'Invalid credit value', message: creditCheck.message }, { status: 422 })
+    }
+    price = creditCheck.value
+  }
+
+  const asset = { ...parse.data, price, user_id: user.id }
   const admin = createAdminSupabaseClient()
   const { data, error } = await admin.from('marketplace_assets').insert([asset]).select(Q.marketplace.asset).single()
   if (error) return NextResponse.json({

@@ -43,6 +43,13 @@ Required environment variables (see `src/lib/supabase/env.ts`):
 
 Unauthenticated users are redirected to `/login`. Public routes (login, auth callbacks, docs, legal pages) are allowlisted in `src/proxy.ts`.
 
+## Espeezy Credits (assets & marketplace)
+
+- **50 credits** ≈ 1 month Pro (£4.99 reference)
+- **Max asset / listing value: 100 credits** (2 months Pro) — enforced in `/api/assets` and `/api/marketplace`
+- Personal arsenal stores `credit_value` in `personal_assets.metadata`
+- Marketplace digital listings use `price` as **credit** amount (not USD)
+
 ## E2E tests
 
 ```bash

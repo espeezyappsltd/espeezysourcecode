@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AssetSchema, createMarketplaceAsset } from '@/services/marketplace'
+import { formatCreditCapHint, MAX_ASSET_CREDIT_VALUE } from '@/lib/credits'
 import { z } from 'zod'
 
 const CATEGORIES = [
@@ -31,7 +32,13 @@ export default function MarketplaceAssetUploader({ onUpload }: { onUpload?: () =
       price: form.price ? Number(form.price) : undefined,
     })
     if (!parsed.success) {
-      setError(parsed.error.issues?.[0]?.message || 'Invalid input')
+      const issue = parsed.error.issues?.[0]
+      setError(
+        issue?.message ||
+          (issue?.code === 'too_big'
+            ? `Price cannot exceed ${MAX_ASSET_CREDIT_VALUE} credits (2 months Pro).`
+            : 'Invalid input'),
+      )
       setSubmitting(false)
       return
     }
@@ -58,7 +65,8 @@ export default function MarketplaceAssetUploader({ onUpload }: { onUpload?: () =
         <input required placeholder='Asset File URL' value={form.asset_url} onChange={e => setForm(f => ({ ...f, asset_url: e.target.value }))} style={{ padding: 12, borderRadius: 8, border: '1px solid #222', background: '#181828', color: 'white', fontWeight: 700 }} />
         <input placeholder='Preview Image URL' value={form.preview_url} onChange={e => setForm(f => ({ ...f, preview_url: e.target.value }))} style={{ padding: 12, borderRadius: 8, border: '1px solid #222', background: '#181828', color: 'white', fontWeight: 700 }} />
         <input placeholder='Tags (comma separated)' value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} style={{ padding: 12, borderRadius: 8, border: '1px solid #222', background: '#181828', color: 'white', fontWeight: 700 }} />
-        <input placeholder='Price (leave blank for free)' type='number' min='0' value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} style={{ padding: 12, borderRadius: 8, border: '1px solid #222', background: '#181828', color: 'white', fontWeight: 700 }} />
+        <input placeholder={`Credit price (0–${MAX_ASSET_CREDIT_VALUE}, blank = free)`} type='number' min='0' max={MAX_ASSET_CREDIT_VALUE} value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} style={{ padding: 12, borderRadius: 8, border: '1px solid #222', background: '#181828', color: 'white', fontWeight: 700 }} />
+        <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>{formatCreditCapHint()} · 50 credits ≈ 1 month Pro</p>
         {error && <div style={{ color: '#ff4d4f', fontWeight: 700 }}>{error}</div>}
         <button type='submit' disabled={submitting} style={{ padding: 14, borderRadius: 8, background: 'linear-gradient(90deg, #10b981 0%, #6366f1 100%)', color: 'white', fontWeight: 900, fontSize: '1rem', border: 'none', marginTop: 8, cursor: 'pointer', opacity: submitting ? 0.7 : 1 }}>Upload Asset</button>
       </div>

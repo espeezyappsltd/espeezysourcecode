@@ -1,0 +1,19 @@
+import { NextResponse } from 'next/server'
+import { requireDevHubAuth } from '@/lib/dev-hub/api'
+import { startApp, getAppRuntime } from '@/lib/dev-hub/process-manager'
+import { getDevApp } from '@/lib/dev-hub/registry'
+
+export const dynamic = 'force-dynamic'
+
+export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const denied = await requireDevHubAuth()
+  if (denied) return denied
+
+  const { id } = await ctx.params
+  if (!getDevApp(id)) {
+    return NextResponse.json({ error: 'Unknown app' }, { status: 404 })
+  }
+
+  const runtime = startApp(id)
+  return NextResponse.json({ runtime: getAppRuntime(id) ?? runtime })
+}

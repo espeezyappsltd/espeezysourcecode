@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { marketplaceCreditPriceSchema } from '@/lib/credit-schema'
 
 export const AssetSchema = z.object({
   id: z.string().uuid().optional(),
@@ -9,7 +10,8 @@ export const AssetSchema = z.object({
   asset_url: z.string().url(),
   preview_url: z.string().url().optional(),
   tags: z.array(z.string()).optional(),
-  price: z.number().min(0).optional(),
+  /** Listing price in Espeezy Credits (max 100 = 2 months Pro). */
+  price: marketplaceCreditPriceSchema,
   is_featured: z.boolean().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
