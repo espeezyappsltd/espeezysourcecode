@@ -10,8 +10,8 @@ export function useSupabaseUser() {
   useEffect(() => {
     let active = true
 
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active) setUser(data.user)
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) setUser(data.session?.user ?? null)
     })
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {

@@ -181,33 +181,41 @@ export default function PreRegisterPage() {
   useEffect(() => {
     let mounted = true
 
-    const loadUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!mounted) return
-
-      setSession(session)
-      setAuthUser(session?.user ?? null)
-
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('tier')
-          .eq('id', session.user.id)
-          .maybeSingle()
-        const tier = (profile as { tier?: string } | null)?.tier
-        if (tier === 'pro' || tier === 'premium' || tier === 'free') {
-          setUserTier(tier)
-        } else {
-          setUserTier('free')
-        }
+    const applyTier = (tier: string | undefined) => {
+      if (tier === 'pro' || tier === 'premium' || tier === 'free') {
+        setUserTier(tier)
       } else {
-        setUserTier('unknown')
+        setUserTier('free')
       }
     }
 
-    void loadUser()
+    const refreshTier = (userId: string) => {
+      void supabase
+        .from('profiles')
+        .select('tier')
+        .eq('id', userId)
+        .maybeSingle()
+        .then(({ data: profile }) => {
+          if (!mounted) return
+          applyTier((profile as { tier?: string } | null)?.tier)
+        })
+        .catch(() => {
+          if (mounted) setUserTier('free')
+        })
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return
+      setSession(session)
+      setAuthUser(session?.user ?? null)
+      if (session?.user) {
+        refreshTier(session.user.id)
+      } else {
+        setUserTier('unknown')
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return
       setSession(session)
       setAuthUser(session?.user ?? null)
@@ -217,17 +225,7 @@ export default function PreRegisterPage() {
         return
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tier')
-        .eq('id', session.user.id)
-        .maybeSingle()
-      const tier = (profile as { tier?: string } | null)?.tier
-      if (tier === 'pro' || tier === 'premium' || tier === 'free') {
-        setUserTier(tier)
-      } else {
-        setUserTier('free')
-      }
+      refreshTier(session.user.id)
     })
 
     return () => {

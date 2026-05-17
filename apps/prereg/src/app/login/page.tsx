@@ -1,8 +1,9 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
+import { buildAuthCallbackUrl, ESPEEZY_APP_ORIGINS, resolveClientOrigin } from '@shared/app-url'
 
 function LoginContent() {
   const router = useRouter()
@@ -20,6 +21,17 @@ function LoginContent() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [resetting, setResetting] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active || !session) return
+      window.location.replace(next)
+    })
+    return () => {
+      active = false
+    }
+  }, [next])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -55,7 +67,7 @@ function LoginContent() {
         }
 
         if (data.session) {
-          router.replace(next)
+          window.location.replace(next)
           return
         }
 
@@ -77,7 +89,7 @@ function LoginContent() {
         return
       }
 
-      router.replace(next)
+      window.location.replace(next)
     } catch {
       setError(missingConfigMessage)
       setLoading(false)
@@ -101,7 +113,7 @@ function LoginContent() {
     setSuccess('')
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      redirectTo: buildAuthCallbackUrl(resolveClientOrigin(ESPEEZY_APP_ORIGINS.prereg), { recovery: true }),
     })
 
     setResetting(false)

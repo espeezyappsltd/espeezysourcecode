@@ -48,3 +48,25 @@ export const getCachedUserProfile = cache(async (uid: string): Promise<Profile |
 export async function getUserProfile(uid: string) {
   return getCachedUserProfile(uid)
 }
+
+/** Lightweight group membership check for dashboard routing. */
+export const getCachedUserGroupId = cache(async (uid: string): Promise<string | null> => {
+  const db = await createServerSupabaseClient()
+  const { data, error } = await db
+    .from('profiles')
+    .select('group_id')
+    .eq('id', uid)
+    .maybeSingle()
+
+  if (!error && data?.group_id) return data.group_id as string
+
+  const adminDb = getAdminDb()
+  const { data: adminData, error: adminError } = await adminDb
+    .from('profiles')
+    .select('group_id')
+    .eq('id', uid)
+    .maybeSingle()
+
+  if (adminError || !adminData?.group_id) return null
+  return adminData.group_id as string
+})

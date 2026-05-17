@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useState, useEffect, type CSSProperties, type ReactNode } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
@@ -362,6 +362,17 @@ export default function LoginClient() {
   const [resetSent, setResetSent] = useState(false);
   const [resetting, setResetting] = useState(false);
 
+  useEffect(() => {
+    let active = true
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active || !session) return
+      router.replace(next)
+    })
+    return () => {
+      active = false
+    }
+  }, [next, router])
+
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
     setError('');
@@ -401,8 +412,8 @@ export default function LoginClient() {
         return;
       }
       if (data.session) {
-        router.replace(next);
-        return;
+        window.location.replace(next)
+        return
       }
       setSuccess('Account created. Check your email to confirm your account, then sign in.');
       setMode('signin');
@@ -416,8 +427,8 @@ export default function LoginClient() {
       setLoading(false);
       return;
     }
-    router.replace(next);
-  };
+    window.location.replace(next)
+  }
 
   const handleReset = async (e: React.MouseEvent) => {
     e.preventDefault();

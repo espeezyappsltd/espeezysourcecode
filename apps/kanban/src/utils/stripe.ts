@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { z } from 'zod'
+import { ESPEEZY_APP_ORIGINS, resolveRequestOrigin } from '@shared/app-url'
 
 export const STRIPE_API_VERSION = '2026-04-22.dahlia' as const
 
@@ -25,8 +26,8 @@ export function getStripeWebhookSecret(): string {
   return webhookSecret
 }
 
-export function getAppUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com').replace(/\/$/, '')
+export function getAppUrl(request?: Request | { headers: Headers } | null): string {
+  return resolveRequestOrigin(request, ESPEEZY_APP_ORIGINS.kanban)
 }
 
 export function getStripePortalConfigurationId(): string | undefined {

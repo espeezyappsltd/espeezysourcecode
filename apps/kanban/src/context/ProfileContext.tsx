@@ -30,7 +30,11 @@ export function ProfileProvider({
     if (initialProfile) return initialProfile
     return initialUserId ? PersistentCache.get<Profile>(`profile_${initialUserId}`) : null
   })
-  const [loading, setLoading] = useState(!initialProfile && !!initialUserId)
+  const [loading, setLoading] = useState(() => {
+    if (!initialUserId) return false
+    if (initialProfile?.id === initialUserId) return false
+    return !PersistentCache.get<Profile>(`profile_${initialUserId}`)
+  })
   const [user, setUser] = useState<User | null>(null)
 
   const refreshProfile = useCallback(async () => {
@@ -106,13 +110,16 @@ export function ProfileProvider({
       return
     }
 
-    if (initialProfile?.id === currentUserId) {
-      setLoading(false)
-      return
-    }
+    const cached = PersistentCache.get<Profile>(`profile_${currentUserId}`)
+    const hasSeed =
+      initialProfile?.id === currentUserId ||
+      profile?.id === currentUserId ||
+      cached?.id === currentUserId
 
-    if (!profile) {
+    if (!hasSeed) {
       setLoading(true)
+    } else {
+      setLoading(false)
     }
 
     let active = true
@@ -172,7 +179,7 @@ export function ProfileProvider({
       active = false
       supabase.removeChannel(channel)
     }
-  }, [initialProfile, initialUserId, profile, supabase, user])
+  }, [initialProfile, initialUserId, supabase, user])
 
   return (
     <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile: setProfileWithCache }}>

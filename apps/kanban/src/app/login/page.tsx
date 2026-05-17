@@ -10,6 +10,7 @@ import type { Session } from '@supabase/supabase-js'
 import { Phone, Hash as HashIcon } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
+import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message
@@ -34,7 +35,6 @@ function LoginContent() {
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
   const [sendingOtp, setSendingOtp] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
   const [isResetting, setIsResetting] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -42,8 +42,11 @@ function LoginContent() {
     const next = searchParams?.get('next')
     const path =
       next && next.startsWith('/') && !next.startsWith('//') && !next.includes(':') ? next : '/'
+    if (typeof window !== 'undefined') {
+      window.location.replace(path)
+      return
+    }
     router.replace(path)
-    router.refresh()
   }, [router, searchParams])
 
   // Redirect authenticated users straight to the dashboard
@@ -52,11 +55,7 @@ function LoginContent() {
 
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (cancelled) return
-      if (session) {
-        goToDashboard()
-      } else {
-        setCheckingAuth(false)
-      }
+      if (session) goToDashboard()
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
@@ -104,8 +103,9 @@ function LoginContent() {
     setIsResetting(true)
     setAuthError(null)
     try {
+      const origin = resolveClientOrigin()
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+        redirectTo: buildAuthCallbackUrl(origin, { recovery: true }),
       })
       if (error) throw error
       setResetMessage("Secure recovery link sent to " + email)
@@ -116,15 +116,23 @@ function LoginContent() {
     }
   }
 
+  const oauthRedirectTo = buildAuthCallbackUrl(resolveClientOrigin())
+
   const handleGithubLogin = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    await supabase.auth.signInWithOAuth({ provider: 'github' });
-  };
+    e.preventDefault()
+    await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: { redirectTo: oauthRedirectTo },
+    })
+  }
 
   const handleGoogleLogin = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
-  };
+    e.preventDefault()
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: oauthRedirectTo },
+    })
+  }
 
   const handleRequestOtp = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -148,14 +156,6 @@ function LoginContent() {
     if (error) setAuthError(error.message)
     else router.replace('/')
     setSendingOtp(false)
-  }
-
-  if (checkingAuth) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <div className="spinner" />
-      </div>
-    )
   }
 
   return (

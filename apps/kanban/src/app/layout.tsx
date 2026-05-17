@@ -45,6 +45,7 @@ export default async function RootLayout({
 
   const profile: Profile | null = user ? await getCachedUserProfile(user.id) : null
   const layoutUser = user ? toLayoutUser(user) : null
+  const needsTeamOnboarding = Boolean(user && !profile?.group_id)
 
   const initialTheme = {
     palette: profile?.theme_config?.palette || 'Google Light',
@@ -58,9 +59,15 @@ export default async function RootLayout({
           <KanbanProviders>
             {user && layoutUser ? (
               <ProfileProvider userId={user.id} initialProfile={profile}>
-                <OnboardingWrapper profile={profile} user={layoutUser}>
-                  <DashboardShell user={layoutUser}>{children}</DashboardShell>
-                </OnboardingWrapper>
+                {needsTeamOnboarding ? (
+                  <main className="main-content onboarding-shell">
+                    <PageTransitionWrapper>{children}</PageTransitionWrapper>
+                  </main>
+                ) : (
+                  <OnboardingWrapper profile={profile} user={layoutUser}>
+                    <DashboardShell user={layoutUser}>{children}</DashboardShell>
+                  </OnboardingWrapper>
+                )}
               </ProfileProvider>
             ) : (
               children

@@ -9,7 +9,7 @@ import { isMockDisplayName } from '@/components/onboarding/CyclingNamePlaceholde
 export default function OnboardingWrapper({ user, profile: initialProfile, children }: OnboardingWrapperProps) {
   const { profile: contextProfile, loading } = useProfile()
   const profile = contextProfile || initialProfile
-  
+
   const [mounted, setMounted] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
@@ -21,7 +21,7 @@ export default function OnboardingWrapper({ user, profile: initialProfile, child
     if (!mounted || loading) return
 
     const isDismissed = localStorage.getItem('espeezy_onboarding_dismissed') === 'true'
-    
+
     if (isDismissed) {
       setShowOnboarding(false)
       return
@@ -35,8 +35,8 @@ export default function OnboardingWrapper({ user, profile: initialProfile, child
     }
   }, [profile, loading, mounted])
 
-  if (!mounted || (loading && !profile)) {
-    return <div style={{ visibility: 'hidden' }}>{children}</div>
+  if (!mounted) {
+    return <>{children}</>
   }
 
   if (showOnboarding) {

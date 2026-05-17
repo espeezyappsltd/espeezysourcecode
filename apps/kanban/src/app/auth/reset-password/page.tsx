@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
-import { useRouter } from 'next/navigation'
-import { ShieldCheck, Lock, Activity } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ShieldCheck, Lock } from 'lucide-react'
 import TransientError from '@/components/TransientError'
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -19,21 +20,63 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     let mounted = true
-    const checkSession = async () => {
-      const result = await supabase.auth.getSession()
-      if (!mounted) return
-      if (!result?.data?.session) {
-        setError('Recovery session not found. Please request a new password reset link.')
+
+    const establishRecoverySession = async () => {
+      const code = searchParams?.get('code')
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        if (!mounted) return
+        if (exchangeError) {
+          setError(exchangeError.message)
+          return
+        }
+        setSessionReady(true)
         return
       }
-      setSessionReady(true)
+
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+      const accessToken = hash.get('access_token')
+      const refreshToken = hash.get('refresh_token')
+
+      if (accessToken && refreshToken) {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+        if (!mounted) return
+        if (sessionError) {
+          setError(sessionError.message)
+          return
+        }
+        window.history.replaceState({}, document.title, window.location.pathname)
+        setSessionReady(true)
+        return
+      }
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!mounted) return
+      if (session) {
+        setSessionReady(true)
+        return
+      }
+
+      setError('Recovery session not found. Please request a new password reset link.')
     }
-    checkSession()
+
+    void establishRecoverySession()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+        setSessionReady(true)
+        setError(null)
+      }
+    })
 
     return () => {
       mounted = false
+      subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [searchParams, supabase])
 
   const getErrorMessage = (err: unknown) => {
     if (err instanceof Error) return err.message
@@ -158,9 +201,38 @@ export default function ResetPasswordPage() {
             <button className="btn btn-primary" type="submit" disabled={loading || !sessionReady} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem' }}>
               {loading ? 'Updating Credentials...' : 'Update Password'}
             </button>
+            {!sessionReady && (
+              <button
+                type="button"
+                onClick={() => router.push('/login')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.5)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                }}
+              >
+                Back to login to request a new link
+              </button>
+            )}
           </form>
         )}
       </div>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#fff' }} role="status">
+          Loading recovery…
+        </div>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
   )
 }
