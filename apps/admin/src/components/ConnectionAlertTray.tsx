@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNotifications } from './NotificationProvider'
 import { UserPlus, X, Check, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { Profile } from '@/types/database'
 
 type ConnectionRequest = {
@@ -45,31 +46,48 @@ export default function ConnectionAlertTray() {
     }
   }, [db])
 
-  useEffect(() => {
-    fetchRequests()
-    
-    const setupSubscription = async () => {
-      const { data: { user } } = await db.auth.getUser()
-      if (!user) return
+  const fetchRequestsRef = useRef(fetchRequests)
+  fetchRequestsRef.current = fetchRequests
 
-      const channel = db.channel('connection_requests')
-        .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'user_connections',
-          filter: `target_id=eq.${user.id}`
-        }, () => {
-          fetchRequests()
-        })
+  useEffect(() => {
+    let cancelled = false
+    let channel: RealtimeChannel | null = null
+
+    const start = async () => {
+      await fetchRequestsRef.current()
+
+      const { data: { user } } = await db.auth.getUser()
+      if (cancelled || !user) return
+
+      channel = db
+        .channel(`connection_requests:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_connections',
+            filter: `target_id=eq.${user.id}`,
+          },
+          () => {
+            if (!cancelled) void fetchRequestsRef.current()
+          },
+        )
         .subscribe()
-      
-      return () => {
-        db.removeChannel(channel)
+
+      if (cancelled && channel) {
+        void db.removeChannel(channel)
+        channel = null
       }
     }
 
-    setupSubscription()
-  }, [db, fetchRequests])
+    void start()
+
+    return () => {
+      cancelled = true
+      if (channel) void db.removeChannel(channel)
+    }
+  }, [db])
 
   const handleAction = async (requestId: string, senderId: string, action: 'accept' | 'ignore') => {
     setProcessingId(requestId)

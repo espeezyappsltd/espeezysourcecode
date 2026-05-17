@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNotifications } from './NotificationProvider'
 import { UserPlus, X, Check, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { Profile } from '@/types/database'
 
 type ConnectionRequest = {
@@ -43,15 +44,21 @@ export default function ConnectionAlertTray() {
     }
   }, [db])
 
+  const fetchRequestsRef = useRef(fetchRequests)
+  fetchRequestsRef.current = fetchRequests
+
   useEffect(() => {
-    fetchRequests()
+    let cancelled = false
+    let channel: RealtimeChannel | null = null
 
-    const setupSubscription = async () => {
+    const start = async () => {
+      await fetchRequestsRef.current()
+
       const { data: { user } } = await db.auth.getUser()
-      if (!user) return
+      if (cancelled || !user) return
 
-      const channel = db
-        .channel('connection_requests')
+      channel = db
+        .channel(`connection_requests:${user.id}`)
         .on(
           'postgres_changes',
           {
@@ -61,18 +68,24 @@ export default function ConnectionAlertTray() {
             filter: `target_id=eq.${user.id}`,
           },
           () => {
-            fetchRequests()
+            if (!cancelled) void fetchRequestsRef.current()
           },
         )
         .subscribe()
 
-      return () => {
-        db.removeChannel(channel)
+      if (cancelled && channel) {
+        void db.removeChannel(channel)
+        channel = null
       }
     }
 
-    setupSubscription()
-  }, [db, fetchRequests])
+    void start()
+
+    return () => {
+      cancelled = true
+      if (channel) void db.removeChannel(channel)
+    }
+  }, [db])
 
   const handleAction = async (requestId: string, senderId: string, action: 'accept' | 'ignore') => {
     setProcessingId(requestId)
