@@ -1,3 +1,4 @@
+import type { Metadata, Viewport } from 'next'
 import { createServerSupabaseClient } from '@/lib/db'
 import Sidebar from '@/components/Sidebar'
 import type { Profile } from '@/types/auth'
@@ -16,6 +17,21 @@ import SupportChat from '@/components/SupportChat'
 import { getCachedUserProfile } from '@/utils/auth-server'
 import './prestige.css'
 import './globals.css'
+
+export const metadata: Metadata = {
+  title: 'Espeezy Kanban',
+  description: 'Visual task management and collaboration for students and teams.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-icon.svg',
+    other: [{ rel: 'mask-icon', url: '/icon.svg', color: '#10b981' }],
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#10b981',
+}
 
 export const dynamic = 'force-dynamic'
 

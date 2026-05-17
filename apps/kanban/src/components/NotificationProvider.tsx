@@ -64,7 +64,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       const notification = new window.Notification(title, {
         body: message,
-        icon: '/favicon.ico',
+        icon: '/icon.svg',
         silent: true
       });
       notification.onclick = () => window.focus();
