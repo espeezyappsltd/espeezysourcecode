@@ -335,66 +335,38 @@ export async function createGameSession(payload: Record<string, unknown>) {
 
 /** ── TEAM MANAGEMENT ────────────────────────────────────────────── */
 
+/** @deprecated Use createWorkspaceTeam server action from @/app/onboarding/actions */
 export async function createTeam(name: string, description: string, ownerId: string) {
   const db = createBrowserSupabaseClient()
-  
-  // 1. Create Team
-  const { data: team, error: teamError } = await db
-    .from('teams')
-    .insert({ name, description })
-    .select()
+
+  const { data: group, error: groupError } = await db
+    .from('groups')
+    .insert({ name, description, owner_id: ownerId })
+    .select('id')
     .single()
-  
-  if (teamError) throw teamError
 
-  // 2. Add Creator as Owner
-  const { error: memberError } = await db
-    .from('team_members')
-    .insert({
-      team_id: team.id,
-      user_id: ownerId,
-      role: 'owner'
-    })
-  
-  if (memberError) throw memberError
+  if (groupError) throw groupError
+  if (!group?.id) throw new Error('Failed to create team')
 
-  // 3. Update Profile with group_id (compatibility)
-  await updateProfileById(ownerId, { group_id: team.id })
-
-  return team
+  await updateProfileById(ownerId, { group_id: group.id, role: 'admin' })
+  return group
 }
 
-export async function joinTeam(teamId: string, userId: string, role: string = 'member') {
-  const db = createBrowserSupabaseClient()
-
-  // 1. Check if user is educator
-  const profile = await fetchProfileById(userId)
-  const finalRole = profile?.is_educator ? 'viewer' : role
-
-  // 2. Join Team
-  const { error: memberError } = await db
-    .from('team_members')
-    .insert({
-      team_id: teamId,
-      user_id: userId,
-      role: finalRole
-    })
-  
-  if (memberError) throw memberError
-
-  // 3. Update Profile
+/** @deprecated Use joinWorkspaceTeam server action from @/app/onboarding/actions */
+export async function joinTeam(teamId: string, userId: string) {
   await updateProfileById(userId, { group_id: teamId })
-
   return { success: true }
 }
 
 export async function fetchUserTeams(userId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db
-    .from('team_members')
-    .select('team_id, role, teams(*)')
-    .eq('user_id', userId)
-  
+  const { data: profile, error } = await db
+    .from('profiles')
+    .select('group_id, role, groups(*)')
+    .eq('id', userId)
+    .maybeSingle()
+
   if (error) throw error
-  return data
+  if (!profile?.group_id) return []
+  return [{ team_id: profile.group_id, role: profile.role, teams: profile.groups }]
 }

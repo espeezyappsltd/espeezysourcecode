@@ -2,11 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createTeam, joinTeam } from '@/services/dashboard'
-import { Profile } from '@/types/auth'
+import { createWorkspaceTeam, joinWorkspaceTeam } from '@/app/onboarding/actions'
 import { Users, Plus, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
 
-export default function WelcomeOnboarding({ profile }: { profile: Profile }) {
+export default function WelcomeOnboarding() {
   const router = useRouter()
   const [view, setView] = useState<'welcome' | 'create' | 'join'>('welcome')
   const [loading, setLoading] = useState(false)
@@ -24,7 +23,11 @@ export default function WelcomeOnboarding({ profile }: { profile: Profile }) {
     setLoading(true)
     setError(null)
     try {
-      await createTeam(teamName, teamDesc, profile.id)
+      const result = await createWorkspaceTeam(teamName, teamDesc)
+      if (result.error) {
+        setError(result.error)
+        return
+      }
       router.refresh()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create team')
@@ -38,7 +41,11 @@ export default function WelcomeOnboarding({ profile }: { profile: Profile }) {
     setLoading(true)
     setError(null)
     try {
-      await joinTeam(teamId, profile.id)
+      const result = await joinWorkspaceTeam(teamId)
+      if (result.error) {
+        setError(result.error)
+        return
+      }
       router.refresh()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to join team. Check the Team ID.')

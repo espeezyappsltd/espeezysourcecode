@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const profile: Profile | null = await getUserProfile(user.uid)
 
   if (!profile?.group_id) {
-    return <WelcomeOnboarding profile={profile as Profile} />
+    return <WelcomeOnboarding />
   }
 
   return <DashboardHome groupId={profile.group_id} />
