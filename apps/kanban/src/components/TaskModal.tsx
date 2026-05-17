@@ -206,20 +206,31 @@ export default function TaskModal({
 
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data?.error || 'Failed to save task via workflow.')
-      }
-
-      // If the workflow is still running, give Supabase a brief window before fetching.
-      if (data?.status && ['running', 'pending'].includes(data.status)) {
-        await new Promise(resolve => setTimeout(resolve, 500))
+        throw new Error(data?.error || 'Failed to save task.')
       }
 
       await onRefresh()
       await onTaskSaved?.()
       onClose()
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unknown error'
-      setError(`Failed to save task: ${message}`)
+      try {
+        if (isEditMode && task?.id) {
+          const { error: updateError } = await db.from('tasks').update(payloadTask).eq('id', task.id)
+          if (updateError) throw updateError
+        } else {
+          const { error: insertError } = await db.from('tasks').insert(payloadTask)
+          if (insertError) throw insertError
+        }
+        await onRefresh()
+        await onTaskSaved?.()
+        onClose()
+        return
+      } catch (fallbackErr: unknown) {
+        const primary = err instanceof Error ? err.message : String(err)
+        const secondary =
+          fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)
+        setError(`Failed to save task: ${secondary || primary}`)
+      }
     } finally {
       setLoading(false)
     }

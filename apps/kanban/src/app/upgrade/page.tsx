@@ -1,6 +1,7 @@
 'use client'
 
 import PricingSection from '@/components/PricingSection'
+import PlansUsagePanel from '@/components/PlansUsagePanel'
 import { Sparkles } from 'lucide-react'
 
 export default function UpgradePage() {
@@ -18,6 +19,11 @@ export default function UpgradePage() {
           <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.8)', fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.4 }}>
             I am building Espeezy to solve real operational problems for student teams. Your upgrade directly funds infrastructure and new feature development.
           </p>
+        </div>
+
+        <div>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fff', marginBottom: '0.75rem' }}>Your plan &amp; usage</h2>
+          <PlansUsagePanel />
         </div>
 
         <PricingSection showTitle={false} />

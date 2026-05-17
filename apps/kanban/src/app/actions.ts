@@ -105,8 +105,8 @@ export async function handleTaskStatusUpdate(taskId: string, newStatus: string, 
     // but we can call the workflow function directly or via the API.
     // However, the best way is to trigger the same workflow logic.
     
-    const { taskWorkflow } = await import('@/workflows/taskWorkflow')
-    await taskWorkflow(payload)
+    const { runTaskWorkflow } = await import('@/lib/tasks/task-service')
+    await runTaskWorkflow(payload)
 
     revalidatePath('/', 'layout')
     return { success: true }
