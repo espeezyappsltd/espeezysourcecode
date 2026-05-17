@@ -1,12 +1,3 @@
-export type PreregisterPayload = {
-  email: string
-  source: string
-  password?: string
-  fullName?: string
-  institution?: string
-  role?: string
-}
-
 type PreregisterResponse = {
   count?: number
   error?: string
@@ -49,26 +40,4 @@ export async function fetchPreregisterCount() {
 
   const data = await readPreregisterResponse(response)
   return typeof data.count === 'number' ? data.count : null
-}
-
-export async function submitPreregister(payload: PreregisterPayload) {
-  const response = await fetch(PREREGISTER_API_PATH, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-
-  const data = await readPreregisterResponse(response)
-
-  let latestCount: number | null = typeof data.count === 'number' ? data.count : null
-
-  if (response.ok && latestCount === null) {
-    latestCount = await fetchPreregisterCount()
-  }
-
-  return {
-    ok: response.ok,
-    count: latestCount,
-    error: data.error,
-  }
 }

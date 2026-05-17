@@ -446,7 +446,6 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
   useEffect(() => {
     let active = true
-    let channel: ReturnType<typeof supabase.channel> | null = null
 
     const loadMessages = async () => {
       const { data, error } = await supabase
@@ -492,7 +491,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
     loadMessages()
 
-    const channel = supabase
+    const messagesChannel = supabase
       .channel(`team-messages:${groupId}`)
       .on(
         'postgres_changes',
@@ -505,7 +504,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
     return () => {
       active = false
-      supabase.removeChannel(channel)
+      supabase.removeChannel(messagesChannel)
     }
   }, [groupId])
 
@@ -530,7 +529,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
     loadMembers()
 
-    channel = supabase
+    const membersChannel = supabase
       .channel(`team-members:${groupId}`)
       .on(
         'postgres_changes',
@@ -541,7 +540,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
 
     return () => {
       active = false
-      if (channel) supabase.removeChannel(channel)
+      supabase.removeChannel(membersChannel)
     }
   }, [isOpen, groupId])
 

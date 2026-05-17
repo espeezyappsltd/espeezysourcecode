@@ -1,27 +1,27 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import '@/features/home/kanban-home.css'
 import PreregFooter from '@/components/PreregFooter'
-import dynamic from 'next/dynamic'
-const HelpTray = dynamic(() => import('../components/HelpTray'), { ssr: false })
+import { AccessibilityProvider } from '@/features/home/AccessibilityProvider'
+import { AccessibilityToolbar } from '@/features/home/AccessibilityToolbar'
+import { UserGuide } from '@/features/home/UserGuide'
 
 export const metadata: Metadata = {
-  title: 'Espeezy Kanban Workspace',
-  description: 'Espeezy-branded visual task management for students and teams.',
+  title: 'Espeezy Kanban — Dashboard Home',
+  description: 'Welcome to your Kanban workspace. Boards, teams, accessibility tools, and the full user guide.',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
     apple: '/apple-icon.svg',
-    other: [
-      { rel: 'mask-icon', url: '/icon.svg', color: '#10b981' },
-    ],
+    other: [{ rel: 'mask-icon', url: '/icon.svg', color: '#10b981' }],
   },
-  keywords: ['kanban', 'task management', 'collaboration', 'projects', 'students'],
+  keywords: ['kanban', 'dashboard', 'task management', 'collaboration', 'students', 'accessibility'],
   authors: [{ name: 'Espeezy' }],
   creator: 'Espeezy',
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Espeezy Kanban Workspace',
-    description: 'Espeezy-branded visual task management for academic teams.',
+    title: 'Espeezy Kanban — Dashboard Home',
+    description: 'Your academic Kanban command center with full accessibility and user guide.',
     url: 'https://kanban.espeezy.com',
     siteName: 'Espeezy Kanban',
     type: 'website',
@@ -29,14 +29,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Espeezy Kanban',
+    title: 'Espeezy Kanban Home',
     description: 'Visual task management for students and teams.',
     creator: '@espeezy',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0a0a0a',
+  themeColor: '#0f172a',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -46,8 +46,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        {children}
-        <HelpTray />
+        <AccessibilityProvider>
+          {children}
+          <AccessibilityToolbar />
+          <UserGuide />
+        </AccessibilityProvider>
         <PreregFooter />
       </body>
     </html>
