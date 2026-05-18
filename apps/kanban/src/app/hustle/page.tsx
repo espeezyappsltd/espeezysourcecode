@@ -14,7 +14,12 @@ import {
   ArrowRight,
   User,
   Clock,
+  Coins,
 } from 'lucide-react'
+import { formatCredits, formatGbpApprox } from '@/lib/credits'
+import { resolveTaskPayoutCredits } from '@/lib/hustle/credits'
+import { PostHustleModal } from '@/components/hustle/PostHustleModal'
+import { HustleTaskModal } from '@/components/hustle/HustleTaskModal'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
 import { seedDemoContent } from '@/lib/dev/seed-demo'
@@ -51,6 +56,9 @@ function HustlePage() {
     refresh,
   } = useHustle()
 
+  const [postOpen, setPostOpen] = useState(false)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
@@ -80,9 +88,13 @@ function HustlePage() {
               Hustle <span style={{ color: 'var(--brand)' }}>Board</span>
             </h1>
             <p className="body-copy" style={{ fontSize: '0.9rem', margin: '0.25rem 0 0' }}>
-              Campus gigs with verified payouts · search by skill, category, or keyword
+              Campus gigs paid in Espeezy credits · escrow-backed trades
             </p>
           </motion.div>
+          <button type="button" className="btn btn-primary hustle-post-btn" onClick={() => setPostOpen(true)}>
+            <Plus size={18} aria-hidden />
+            Post gig
+          </button>
         </motion.div>
       </header>
 
@@ -151,7 +163,12 @@ function HustlePage() {
         ) : (
           <div className="hustle-list">
             {items.map((item) => (
-              <HustleCard key={item.id} item={item} />
+              <HustleCard
+                key={item.id}
+                item={item}
+                isHustleTask={tab === 'marketplace' || tab === 'mine'}
+                onOpen={setSelectedTaskId}
+              />
             ))}
 
             {nextCursor && (
@@ -177,6 +194,17 @@ function HustlePage() {
           </div>
         )}
       </main>
+
+      {postOpen && (
+        <PostHustleModal onClose={() => setPostOpen(false)} onCreated={() => void refresh()} />
+      )}
+      {selectedTaskId && (
+        <HustleTaskModal
+          taskId={selectedTaskId}
+          onClose={() => setSelectedTaskId(null)}
+          onUpdated={() => void refresh()}
+        />
+      )}
     </div>
   )
 }
@@ -200,13 +228,42 @@ function TabButton({
   )
 }
 
-const HustleCard = memo(function HustleCard({ item }: { item: HustleItem }) {
+const HustleCard = memo(function HustleCard({
+  item,
+  isHustleTask,
+  onOpen,
+}: {
+  item: HustleItem
+  isHustleTask: boolean
+  onOpen: (id: string) => void
+}) {
   const posterId = item.poster?.id ?? item.poster_id
   const posterName = item.poster?.full_name ?? 'Scholar'
   const timeLabel = formatTimeAgo(item.created_at)
 
+  const creditValue = isHustleTask
+    ? resolveTaskPayoutCredits({ payout_credits: item.payout_credits, payout_cents: item.payout_cents })
+    : 0
+  const escrowOk = (item.escrow_credits ?? 0) >= creditValue && creditValue > 0
+
   return (
-    <article className="hustle-card" tabIndex={0} role="article" aria-label={item.title}>
+    <article
+      className={`hustle-card${isHustleTask ? '' : ' hustle-card--listing'}`}
+      tabIndex={isHustleTask ? 0 : undefined}
+      role={isHustleTask ? 'button' : 'article'}
+      aria-label={item.title}
+      onClick={isHustleTask ? () => onOpen(item.id) : undefined}
+      onKeyDown={
+        isHustleTask
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onOpen(item.id)
+              }
+            }
+          : undefined
+      }
+    >
       <div className="hustle-card-body">
         {posterId && (
           <RemoteAvatar
@@ -267,16 +324,30 @@ const HustleCard = memo(function HustleCard({ item }: { item: HustleItem }) {
       </div>
 
       <div className="hustle-card-payout">
-        <div className="hustle-card-amount">
-          {item.payout_cents != null
-            ? `$${(item.payout_cents / 100).toFixed(2)}`
-            : item.price != null
-              ? `${Math.floor(item.price)} cr`
-              : '—'}
-        </div>
-        <div className="hustle-card-payout-label">
-          {item.payout_cents != null ? 'Payout' : item.price != null ? 'Credits' : 'Private'}
-        </div>
+        {isHustleTask && creditValue > 0 ? (
+          <>
+            <div className="hustle-card-amount hustle-card-amount--credits">
+              <Coins size={16} aria-hidden />
+              {formatCredits(creditValue)}
+            </div>
+            <div className="hustle-card-payout-label">{formatGbpApprox(creditValue)}</div>
+            {escrowOk ? (
+              <span className="hustle-card-escrow-badge">Escrow</span>
+            ) : (
+              <span className="hustle-card-escrow-badge hustle-card-escrow-badge--pending">Unfunded</span>
+            )}
+          </>
+        ) : item.price != null ? (
+          <>
+            <div className="hustle-card-amount">{Math.floor(item.price)} cr</div>
+            <div className="hustle-card-payout-label">Marketplace</div>
+          </>
+        ) : (
+          <>
+            <div className="hustle-card-amount">—</div>
+            <div className="hustle-card-payout-label">—</div>
+          </>
+        )}
       </div>
 
       <ArrowRight size={18} style={{ opacity: 0.25, flexShrink: 0 }} aria-hidden />

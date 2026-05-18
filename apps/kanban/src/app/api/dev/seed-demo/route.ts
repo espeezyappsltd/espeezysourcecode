@@ -172,12 +172,15 @@ export async function POST(req: Request) {
     for (let i = 0; i < DEMO_HUSTLE.length; i++) {
       const poster = profiles[i % profiles.length]
       const task = DEMO_HUSTLE[i]
+      const payoutCredits = Math.min(100, Math.max(1, Math.round(task.payout_cents / 50)))
       const { error } = await db.from('hustle_tasks').insert({
         poster_id: poster.id,
         title: task.title,
         description: task.description,
         category: task.category,
+        payout_credits: payoutCredits,
         payout_cents: task.payout_cents,
+        escrow_credits: i % 2 === 0 ? payoutCredits : 0,
         status: 'open',
         connection_only: false,
         created_at: new Date(Date.now() - i * 7200000).toISOString(),

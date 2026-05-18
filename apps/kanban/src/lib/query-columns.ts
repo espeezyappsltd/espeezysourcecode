@@ -14,7 +14,7 @@ export const Q = {
     recentAdmin: 'id, full_name, email, subscription_plan, created_at, role, avatar_url',
   },
   hustleTask:
-    'id, poster_id, assignee_id, title, description, category, payout_cents, status, deadline, connection_only, created_at, updated_at',
+    'id, poster_id, assignee_id, title, description, category, payout_cents, payout_credits, escrow_credits, status, deadline, connection_only, created_at, updated_at',
   marketplace: {
     asset:
       'id, title, description, category, asset_url, preview_url, tags, price, is_featured, user_id, created_at, updated_at',

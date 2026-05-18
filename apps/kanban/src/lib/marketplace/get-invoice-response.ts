@@ -40,12 +40,27 @@ export async function buildMarketplaceInvoiceResponse(userId: string, purchaseId
       ? String((purchase.metadata as { meetup_zone?: string }).meetup_zone ?? '')
       : null
 
+  const platformFeeCredits =
+    typeof purchase.platform_fee_credits === 'number'
+      ? purchase.platform_fee_credits
+      : typeof meta.platform_fee_credits === 'number'
+        ? meta.platform_fee_credits
+        : 0
+  const sellerNetCredits =
+    typeof purchase.seller_net_credits === 'number'
+      ? purchase.seller_net_credits
+      : typeof meta.seller_net_credits === 'number'
+        ? meta.seller_net_credits
+        : Math.max(0, purchase.credits_amount - platformFeeCredits)
+
   const html = buildMarketplaceInvoiceHtml({
     invoiceNumber: purchase.invoice_number,
     purchaseId: purchase.id,
     listingTitle: purchase.listing_title,
     listingCategory: purchase.listing_category,
     creditsAmount: purchase.credits_amount,
+    platformFeeCredits,
+    sellerNetCredits,
     createdAt: purchase.created_at,
     meetupZone,
     printUrl,

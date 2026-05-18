@@ -127,8 +127,11 @@ export default function FeedPage() {
       setLoadError(null)
       const incoming = (data.posts ?? []) as Post[]
       setPosts((prev) => (isMore ? [...prev, ...incoming] : incoming))
-      setCursor(data.nextCursor)
+      setCursor(data.nextCursor ?? null)
       setHasMore(Boolean(data.nextCursor))
+      if (data.warning && incoming.length === 0) {
+        setLoadError(data.warning)
+      }
     } catch {
       setLoadError('Could not load feed.')
     } finally {
@@ -427,14 +430,15 @@ function FeedAvatar({
   size: number
   ring?: boolean
 }) {
-  const src = profile
-    ? avatarUrlForProfile({
-        id: profile.id,
-        full_name: profile.full_name,
-        username: profile.username,
-        avatar_url: profile.avatar_url,
-      })
-    : ''
+  const src =
+    profile?.id
+      ? avatarUrlForProfile({
+          id: profile.id,
+          full_name: profile.full_name,
+          username: profile.username,
+          avatar_url: profile.avatar_url,
+        })
+      : ''
 
   return (
     <RemoteAvatar

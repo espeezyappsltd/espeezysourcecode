@@ -11,7 +11,9 @@ export type HustleItem = {
   title: string
   description?: string
   category: string
+  payout_credits?: number
   payout_cents?: number
+  escrow_credits?: number
   price?: number
   status?: string
   created_at: string
@@ -20,6 +22,10 @@ export type HustleItem = {
     full_name: string
     avatar_url?: string | null
     username?: string | null
+  } | null
+  assignee?: {
+    id?: string
+    full_name: string | null
   } | null
 }
 

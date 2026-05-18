@@ -24,8 +24,8 @@ function formatBytes(bytes: number) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
 
-function tierLabel(tier: string) {
-  const t = tier.toLowerCase()
+function tierLabel(tier: string | null | undefined) {
+  const t = (tier ?? 'free').toLowerCase()
   if (t === 'premium' || t === 'lifetime') return 'Premium'
   if (t === 'pro') return 'Pro'
   if (t === 'admin') return 'Admin'

@@ -8,6 +8,8 @@ export type MarketplacePurchaseRow = {
   buyer_id: string
   seller_id: string
   credits_amount: number
+  platform_fee_credits?: number
+  seller_net_credits?: number
   invoice_number: string
   listing_title: string
   listing_category: string | null
@@ -85,6 +87,22 @@ function readMetaString(meta: Record<string, unknown> | null, key: string): stri
   return typeof v === 'string' && v.length > 0 ? v : null
 }
 
+function readSellerNetFromPurchase(purchase: MarketplacePurchaseRow): number {
+  if (typeof purchase.seller_net_credits === 'number' && purchase.seller_net_credits >= 0) {
+    return purchase.seller_net_credits
+  }
+  const meta = purchase.metadata
+  const snap = meta?.seller_net_credits
+  if (typeof snap === 'number' && snap >= 0) return snap
+  const fee =
+    typeof purchase.platform_fee_credits === 'number'
+      ? purchase.platform_fee_credits
+      : typeof meta?.platform_fee_credits === 'number'
+        ? meta.platform_fee_credits
+        : 0
+  return Math.max(0, purchase.credits_amount - fee)
+}
+
 function readAssetCreditFromPurchase(
   purchase: MarketplacePurchaseRow,
   assetByListing: Map<string, PersonalAssetRow>,
@@ -141,7 +159,7 @@ export async function getTradingMetricsForUser(userId: string): Promise<TradingM
     db
       .from('marketplace_purchases')
       .select(
-        'id, listing_id, buyer_id, seller_id, credits_amount, invoice_number, listing_title, listing_category, metadata, created_at',
+        'id, listing_id, buyer_id, seller_id, credits_amount, platform_fee_credits, seller_net_credits, invoice_number, listing_title, listing_category, metadata, created_at',
       )
       .eq('buyer_id', userId)
       .order('created_at', { ascending: false })
@@ -149,7 +167,7 @@ export async function getTradingMetricsForUser(userId: string): Promise<TradingM
     db
       .from('marketplace_purchases')
       .select(
-        'id, listing_id, buyer_id, seller_id, credits_amount, invoice_number, listing_title, listing_category, metadata, created_at',
+        'id, listing_id, buyer_id, seller_id, credits_amount, platform_fee_credits, seller_net_credits, invoice_number, listing_title, listing_category, metadata, created_at',
       )
       .eq('seller_id', userId)
       .order('created_at', { ascending: false })
@@ -219,8 +237,8 @@ export async function getTradingMetricsForUser(userId: string): Promise<TradingM
       kind: 'sale' as const,
       title: row.listing_title,
       subtitle: row.invoice_number,
-      credits: row.credits_amount,
-      gbpApprox: creditsToGbpEquivalent(readAssetCreditFromPurchase(row, assetByListing)),
+      credits: readSellerNetFromPurchase(row),
+      gbpApprox: creditsToGbpEquivalent(readSellerNetFromPurchase(row)),
       createdAt: row.created_at,
       invoiceUrl: `/marketplace/invoice/${row.id}`,
       direction: 'in' as const,

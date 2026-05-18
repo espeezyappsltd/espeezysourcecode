@@ -6,6 +6,8 @@ export type MarketplacePurchaseResult = {
   purchaseId: string
   invoiceNumber: string
   creditsAmount: number
+  platformFeeCredits: number
+  sellerNetCredits: number
   buyerCredits: number
   sellerCredits: number
   sellerId: string
@@ -91,11 +93,16 @@ export async function completeMarketplaceCreditPurchase(
     purchase_id: string
     invoice_number: string
     credits_amount: number
+    platform_fee_credits?: number
+    seller_net_credits?: number
     buyer_credits: number
     seller_credits: number
     seller_id: string
     listing_title: string
   }
+
+  const platformFeeCredits = result.platform_fee_credits ?? 0
+  const sellerNetCredits = result.seller_net_credits ?? result.credits_amount - platformFeeCredits
 
   const purchaseId = result.purchase_id
   const sellerId = result.seller_id
@@ -123,6 +130,8 @@ export async function completeMarketplaceCreditPurchase(
     .update({
       metadata: {
         ...baseMeta,
+        platform_fee_credits: platformFeeCredits,
+        seller_net_credits: sellerNetCredits,
         buyer_credits_after: result.buyer_credits,
         seller_credits_after: result.seller_credits,
       },
@@ -146,7 +155,10 @@ export async function completeMarketplaceCreditPurchase(
       user_id: sellerId,
       type: 'marketplace_sale',
       title: 'Item sold',
-      message: `"${result.listing_title}" sold for ${creditLabel}. Balance: ${result.seller_credits} credits.`,
+      message:
+        platformFeeCredits > 0
+          ? `"${result.listing_title}" sold for ${creditLabel} (${sellerNetCredits} cr after ${platformFeeCredits} cr platform fee). Balance: ${result.seller_credits} credits.`
+          : `"${result.listing_title}" sold for ${creditLabel}. Balance: ${result.seller_credits} credits.`,
       link: invoicePath,
       metadata: {
         purchase_id: purchaseId,
@@ -197,6 +209,8 @@ export async function completeMarketplaceCreditPurchase(
         invoiceNumber: result.invoice_number,
         listingTitle: result.listing_title,
         creditsAmount: result.credits_amount,
+        platformFeeCredits,
+        sellerNetCredits,
         creditsAfter: result.seller_credits,
         counterpartyName: buyer?.full_name ?? 'Buyer',
         printUrl,
@@ -211,6 +225,8 @@ export async function completeMarketplaceCreditPurchase(
     purchaseId,
     invoiceNumber: result.invoice_number,
     creditsAmount: result.credits_amount,
+    platformFeeCredits,
+    sellerNetCredits,
     buyerCredits: result.buyer_credits,
     sellerCredits: result.seller_credits,
     sellerId,

@@ -154,6 +154,110 @@
   text-transform: uppercase;
 }
 
+.hustle-card-amount--credits {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hustle-card-escrow-badge {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.6rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.hustle-card-escrow-badge--pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.hustle-post-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hustle-modal-credits {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(var(--brand-rgb), 0.08);
+  border: 1px solid rgba(var(--brand-rgb), 0.2);
+}
+
+.hustle-modal-credits__value {
+  font-size: 1.35rem;
+  font-weight: 950;
+  color: var(--brand-3);
+  letter-spacing: -0.03em;
+}
+
+.hustle-modal-credits__sub {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.hustle-modal-escrow {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #f59e0b;
+}
+
+.hustle-modal-escrow--ok {
+  color: #10b981;
+}
+
+.hustle-applicants {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hustle-applicant-row {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-sub);
+}
+
+.hustle-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.hustle-card--listing {
+  cursor: default;
+}
+
+.hustle-card--listing:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
+}
+
 .hustle-skeleton {
   height: 96px;
   border-radius: 18px;

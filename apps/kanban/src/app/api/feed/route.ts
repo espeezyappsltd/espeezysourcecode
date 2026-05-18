@@ -36,6 +36,18 @@ export async function GET(req: NextRequest) {
 
     const { data: postRows, error: postsError } = await query
     if (postsError) {
+      const missingTable =
+        postsError.message.includes('posts') &&
+        (postsError.message.includes('does not exist') ||
+          postsError.code === '42P01' ||
+          postsError.code === 'PGRST205')
+      if (missingTable) {
+        return NextResponse.json({
+          posts: [],
+          nextCursor: null,
+          warning: 'Feed tables are not installed. Run the academic_feed migration on Supabase.',
+        })
+      }
       return NextResponse.json({ error: postsError.message }, { status: 500 })
     }
 

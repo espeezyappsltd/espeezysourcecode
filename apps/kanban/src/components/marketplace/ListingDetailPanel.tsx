@@ -19,6 +19,7 @@ import {
 import { Listing } from '@/types/marketplace'
 import { useNotifications } from '@/components/NotificationProvider'
 import { formatCredits, creditsToGbpEquivalent } from '@/lib/credits'
+import { breakdownPlatformFee } from '@/lib/platform/fees'
 import { runMarketplaceCreditCheckout } from '@/lib/marketplace/run-marketplace-checkout'
 import { isListingAvailable } from '@/lib/marketplace/trending'
 import { PLATFORM_CONTACT_RULES, avatarUrlForProfile } from '@/lib/platform/contact-rules'
@@ -46,6 +47,7 @@ export function ListingDetailPanel({
   const [assetCreditValue, setAssetCreditValue] = useState<number | null>(null)
 
   const priceCredits = Math.max(0, Math.floor(listing.price ?? 0))
+  const feeBreakdown = breakdownPlatformFee(priceCredits)
   const isFree = priceCredits === 0
   const isOwn = currentUserId === listing.owner_id
   const available = isListingAvailable(listing)
@@ -329,6 +331,13 @@ export function ListingDetailPanel({
             {!isOwn && (
               <p style={{ margin: '0 0 0.75rem', fontSize: '0.7rem', color: 'var(--text-sub)', lineHeight: 1.5 }}>
                 {PLATFORM_CONTACT_RULES[0]} Messages are logged; keep deals on-campus and respectful.
+              </p>
+            )}
+
+            {!isFree && feeBreakdown.platformFeeCredits > 0 && (
+              <p style={{ margin: '0 0 0.75rem', fontSize: '0.72rem', color: 'var(--text-sub)' }}>
+                Includes {feeBreakdown.platformFeeCredits} cr platform fee (2%) · seller receives{' '}
+                {formatCredits(feeBreakdown.netCredits)}
               </p>
             )}
 

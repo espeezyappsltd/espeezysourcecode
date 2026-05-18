@@ -32,12 +32,18 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
 
   useEffect(() => {
     const fetchSeats = async () => {
-      const { count } = await db
+      const { count, error } = await db
         .from('user_subscriptions')
         .select('*', { count: 'exact', head: true })
         .eq('plan_id', 'lifetime')
-      
-      setLifetimeSeatsUsed(count ?? 12)
+
+      if (error) {
+        // Table may not exist until migration is applied — avoid noisy 404 in console
+        setLifetimeSeatsUsed(0)
+        return
+      }
+
+      setLifetimeSeatsUsed(count ?? 0)
     }
     fetchSeats()
   }, [db])

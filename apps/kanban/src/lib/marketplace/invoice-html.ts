@@ -13,6 +13,8 @@ export type MarketplaceInvoiceData = {
   listingTitle: string
   listingCategory?: string | null
   creditsAmount: number
+  platformFeeCredits?: number
+  sellerNetCredits?: number
   createdAt: string
   meetupZone?: string | null
   buyer: MarketplaceInvoiceParty
@@ -77,7 +79,15 @@ export function buildMarketplaceInvoiceHtml(data: MarketplaceInvoiceData): strin
       </div>
       <table>
         <thead><tr><th>Description</th><th>Amount</th></tr></thead>
-        <tbody><tr><td>Marketplace purchase</td><td class="total">${escapeHtml(formatCredits(data.creditsAmount))}</td></tr></tbody>
+        <tbody>
+          <tr><td>Marketplace purchase (gross)</td><td>${escapeHtml(formatCredits(data.creditsAmount))}</td></tr>
+          ${
+            (data.platformFeeCredits ?? 0) > 0
+              ? `<tr><td>Platform fee (2%)</td><td>−${escapeHtml(formatCredits(data.platformFeeCredits!))}</td></tr>
+                 <tr><td><strong>Seller net</strong></td><td class="total">${escapeHtml(formatCredits(data.sellerNetCredits ?? data.creditsAmount - (data.platformFeeCredits ?? 0)))}</td></tr>`
+              : `<tr><td colspan="2" class="total">${escapeHtml(formatCredits(data.creditsAmount))}</td></tr>`
+          }
+        </tbody>
       </table>
       <div class="parties">
         <div class="party">

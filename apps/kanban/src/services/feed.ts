@@ -2,9 +2,15 @@ import { Post, Comment, PostReactionType } from '@/types/feed'
 
 export async function fetchFeedPosts(cursor?: string) {
   const url = `/api/feed?filter=public${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
-  const res = await fetch(url)
+  const res = await fetch(url, { credentials: 'include' })
+  const data = (await res.json().catch(() => ({}))) as {
+    posts?: Post[]
+    nextCursor?: string | null
+    error?: string
+    warning?: string
+  }
   if (!res.ok) return null
-  return res.json() as Promise<{ posts: Post[]; nextCursor: string | null }>
+  return { posts: data.posts ?? [], nextCursor: data.nextCursor ?? null, warning: data.warning }
 }
 
 export async function createFeedPost(payload: { content: string; visibility: 'public' | 'connections' }) {

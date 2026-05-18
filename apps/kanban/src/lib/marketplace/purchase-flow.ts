@@ -6,6 +6,7 @@ import {
   creditsToGbpEquivalent,
   readCreditValueFromMetadata,
 } from '@/lib/credits'
+import { breakdownPlatformFee } from '@/lib/platform/fees'
 import { getTradingMetricsForUser } from '@/lib/marketplace/trading-metrics'
 import { getUserCredits, completeMarketplaceCreditPurchase } from '@/lib/marketplace/checkout-service'
 import { createCheckoutSession } from '@/services/stripe'
@@ -15,6 +16,8 @@ export type ListingCheckoutContext = {
   listingId: string
   title: string
   priceCredits: number
+  platformFeeCredits: number
+  sellerNetCredits: number
   assetCreditValue: number
   creditTierLabel: string
   sellerId: string
@@ -29,6 +32,8 @@ export type MarketplaceCheckoutResult = {
   purchaseId: string
   invoiceNumber: string
   creditsAmount: number
+  platformFeeCredits: number
+  sellerNetCredits: number
   assetCreditValue: number
   buyerCredits: number
   sellerCredits: number
@@ -82,12 +87,15 @@ export async function getListingCheckoutContext(listingId: string): Promise<List
   if (error || !listing) return null
 
   const priceCredits = clampCreditValue(listing.price ?? 0)
+  const feeBreakdown = breakdownPlatformFee(priceCredits)
   const assetCreditValue = await resolveAssetCreditValue(listing.id, listing.owner_id, priceCredits)
 
   return {
     listingId: listing.id,
     title: listing.title,
     priceCredits,
+    platformFeeCredits: feeBreakdown.platformFeeCredits,
+    sellerNetCredits: feeBreakdown.netCredits,
     assetCreditValue,
     creditTierLabel: creditTierLabel(assetCreditValue),
     sellerId: listing.owner_id,

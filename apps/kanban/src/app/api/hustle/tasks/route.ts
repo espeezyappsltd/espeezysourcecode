@@ -5,8 +5,10 @@ import {
   buildHustleSearchOr,
   HUSTLE_CATEGORIES,
   hustleTaskInputSchema,
-  validateHustleTaskRow,
+  normalizeHustlePayoutInput,
 } from '@/lib/hustle/task-validation'
+import { enrichHustleTasks } from '@/lib/hustle/task-enrich'
+import { fundHustleEscrow } from '@/lib/hustle/trade-service'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,26 +60,7 @@ export async function GET(req: NextRequest) {
     const { data: rows, error: tasksError } = await query
     if (tasksError) throw tasksError
 
-    const validatedRows = (rows ?? [])
-      .map((row) => validateHustleTaskRow(row))
-      .filter((row): row is NonNullable<typeof row> => row !== null)
-
-    const profileIds = Array.from(
-      new Set(validatedRows.flatMap((row) => [row.poster_id, row.assignee_id]).filter(Boolean)),
-    )
-    const { data: profiles, error: profilesError } =
-      profileIds.length > 0
-        ? await adminDb.from('profiles').select(Q.profile.card).in('id', profileIds)
-        : { data: [], error: null }
-
-    if (profilesError) throw profilesError
-
-    const profileMap = new Map((profiles ?? []).map((profile) => [profile.id as string, profile]))
-    const tasks = validatedRows.map((data) => ({
-      ...data,
-      poster: profileMap.get(data.poster_id) ?? null,
-      assignee: data.assignee_id ? profileMap.get(data.assignee_id) ?? null : null,
-    }))
+    const tasks = await enrichHustleTasks(adminDb, rows ?? [])
 
     const hasMore = tasks.length > limit
     const finalTasks = hasMore ? tasks.slice(0, limit) : tasks
@@ -122,9 +105,11 @@ export async function POST(req: NextRequest) {
       title: body.title,
       description: body.description,
       category: body.category,
-      payout_cents: typeof body.payout_cents === 'number' ? Math.round(body.payout_cents) : Number(body.payout_cents),
+      payout_credits: body.payout_credits,
+      payout_cents: body.payout_cents,
       deadline: body.deadline ?? null,
       connection_only: Boolean(body.connection_only),
+      fund_now: Boolean(body.fund_now),
     })
 
     if (!parsed.success) {
@@ -135,6 +120,7 @@ export async function POST(req: NextRequest) {
     }
 
     const input = parsed.data
+    const payout = normalizeHustlePayoutInput(input)
 
     const { data: task, error: insertError } = await adminDb
       .from('hustle_tasks')
@@ -143,7 +129,9 @@ export async function POST(req: NextRequest) {
         title: input.title,
         description: input.description,
         category: input.category,
-        payout_cents: input.payout_cents,
+        payout_credits: payout.payout_credits,
+        payout_cents: payout.payout_cents,
+        escrow_credits: 0,
         deadline: input.deadline ? new Date(input.deadline).toISOString() : null,
         connection_only: input.connection_only ?? false,
         status: 'open',
@@ -155,8 +143,20 @@ export async function POST(req: NextRequest) {
       throw insertError ?? new Error('Task creation failed')
     }
 
-    const validated = validateHustleTaskRow(task)
-    return NextResponse.json({ task: validated ?? task }, { status: 201 })
+    let posterCredits: number | undefined
+    if (input.fund_now) {
+      try {
+        const funded = await fundHustleEscrow(task.id, uid)
+        posterCredits = funded.poster_credits
+      } catch (fundErr: unknown) {
+        const msg = fundErr instanceof Error ? fundErr.message : 'Could not fund escrow'
+        return NextResponse.json({ error: msg, taskId: task.id }, { status: 402 })
+      }
+    }
+
+    const { data: fresh } = await adminDb.from('hustle_tasks').select(Q.hustleTask).eq('id', task.id).single()
+    const [enriched] = await enrichHustleTasks(adminDb, [fresh ?? task])
+    return NextResponse.json({ task: enriched, posterCredits }, { status: 201 })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'unknown error'
     console.error('Task creation error:', message)
