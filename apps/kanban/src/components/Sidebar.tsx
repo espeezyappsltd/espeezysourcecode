@@ -358,7 +358,7 @@ export default function Sidebar({ user }: SidebarProps) {
                 boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)',
               }}
             >
-              <Image src="/brand-logo-black-gold.png" width={38} height={38} alt="Logo" priority style={{ objectFit: 'cover' }} />
+              <Image src="/brand_logo2.svg" width={38} height={38} alt="Logo" priority style={{ objectFit: 'contain' }} />
             </div>
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>

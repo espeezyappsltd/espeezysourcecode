@@ -22,12 +22,16 @@ export function filterVisibleTasks(tasks: Task[], profileId: string): Task[] {
   })
 }
 
-export function upsertTaskList(prev: Task[], incoming: Task): Task[] {
+export function upsertById<T extends { id: string }>(prev: T[], incoming: T): T[] {
   const index = prev.findIndex((t) => t.id === incoming.id)
   if (index === -1) return [...prev, incoming]
   const next = prev.slice()
   next[index] = incoming
   return next
+}
+
+export function upsertTaskList(prev: Task[], incoming: Task): Task[] {
+  return upsertById(prev, incoming)
 }
 
 export function removeTaskFromList(prev: Task[], taskId: string): Task[] {

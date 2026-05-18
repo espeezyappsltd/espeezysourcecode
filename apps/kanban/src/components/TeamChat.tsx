@@ -498,7 +498,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
               if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('New Team Message', {
                   body: incoming.content || 'Sent an attachment',
-                  icon: '/brand-logo-black-gold.png'
+                  icon: '/brand_logo2.svg'
                 })
               }
             }
