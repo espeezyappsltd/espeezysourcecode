@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { formatCredits, formatGbpApprox } from '@/lib/credits'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { marketplaceWithdrawCopy } from '@/lib/platform/transaction-confirm-copy'
 
 /** @deprecated Prefer TradingMetricsDashboard on /assets — uses asset value × times sold cap. */
 export function StripeWithdraw({ balanceCents: _balanceCents }: { balanceCents: number }) {
+  const { confirmTransaction } = useTransactionConfirm()
   const [available, setAvailable] = useState<number | null>(null)
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
@@ -32,6 +35,12 @@ export function StripeWithdraw({ balanceCents: _balanceCents }: { balanceCents: 
       }
       if (available !== null && creditsAmount > available) {
         setError(`Max withdrawable from sales: ${formatCredits(available)}`)
+        return
+      }
+
+      const ok = await confirmTransaction(marketplaceWithdrawCopy(creditsAmount, 'stripe'))
+      if (!ok) {
+        setLoading(false)
         return
       }
 

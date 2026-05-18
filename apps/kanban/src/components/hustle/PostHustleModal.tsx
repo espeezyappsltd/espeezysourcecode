@@ -7,6 +7,8 @@ import { MAX_ASSET_CREDIT_VALUE, formatCreditCapHint } from '@/lib/credits'
 import { formatPlatformFeeHint } from '@/lib/platform/fees'
 import { createHustleTask } from '@/services/hustle'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { hustlePostCopy } from '@/lib/platform/transaction-confirm-copy'
 
 type Props = {
   onClose: () => void
@@ -15,6 +17,7 @@ type Props = {
 
 export function PostHustleModal({ onClose, onCreated }: Props) {
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<HustleCategory>('coding')
@@ -32,6 +35,11 @@ export function PostHustleModal({ onClose, onCreated }: Props) {
       addToast('Invalid payout', formatCreditCapHint(), 'error')
       return
     }
+
+    const ok = await confirmTransaction(
+      hustlePostCopy(title.trim(), credits, fundNow),
+    )
+    if (!ok) return
 
     setSubmitting(true)
     try {

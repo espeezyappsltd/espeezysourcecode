@@ -6,6 +6,8 @@ import { Shield, Sparkles, CheckCircle2, ArrowRight, Loader2, Key, Zap, Crown, R
 import { createClient } from '@/lib/supabase/client'
 import TransientError from '@/components/TransientError'
 import { buildStripePaymentLink, type PlanKey } from '@/lib/stripe-payment-links'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { subscriptionCheckoutCopy } from '@/lib/platform/transaction-confirm-copy'
 
 interface PricingSectionProps {
   showTitle?: boolean
@@ -13,6 +15,7 @@ interface PricingSectionProps {
 }
 
 export default function PricingSection({ showTitle = true, isLanding = false }: PricingSectionProps) {
+  const { confirmTransaction } = useTransactionConfirm()
   const db = useRef(createClient()).current
   const [error, setError] = useState<string | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
@@ -71,11 +74,13 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
 
     try {
       if (!currentUser) {
-        // Redirect to preregister/login
         const returnUrl = `/checkout?plan=${plan}${discountActive ? `&coupon=${coupon}` : ''}`
         window.location.href = `/preregister?redirect=${encodeURIComponent(returnUrl)}`
         return
       }
+
+      const ok = await confirmTransaction(subscriptionCheckoutCopy(plan))
+      if (!ok) return
 
       window.location.href = buildStripePaymentLink(plan, {
         client_reference_id: currentUser.id,

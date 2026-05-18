@@ -8,6 +8,8 @@ import { Listing, MarketplaceCategory } from '@/types/marketplace'
 import { computeMarketplaceTrending, isListingAvailable } from '@/lib/marketplace/trending'
 import { formatCredits } from '@/lib/credits'
 import { runMarketplaceCreditCheckout } from '@/lib/marketplace/run-marketplace-checkout'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { marketplacePurchaseCopy } from '@/lib/platform/transaction-confirm-copy'
 import { useNotifications } from '@/components/NotificationProvider'
 
 interface MarketplaceTrendingRailProps {
@@ -28,6 +30,7 @@ export function MarketplaceTrendingRail({
   onFilterCategory,
 }: MarketplaceTrendingRailProps) {
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
   const [busyId, setBusyId] = useState<string | null>(null)
 
   const { trendingItems, trendingSellers, trendingCategories } = useMemo(
@@ -46,9 +49,12 @@ export function MarketplaceTrendingRail({
       return
     }
 
+    const price = Math.max(0, Math.floor(listing.price ?? 0))
+    const ok = await confirmTransaction(marketplacePurchaseCopy(listing.title, price))
+    if (!ok) return
+
     setBusyId(listing.id)
     try {
-      const price = Math.max(0, Math.floor(listing.price ?? 0))
       const result = await runMarketplaceCreditCheckout(listing.id, addToast)
       if (!result) return
       onPurchaseComplete({ buyerCredits: result.buyerCredits })

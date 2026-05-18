@@ -17,6 +17,9 @@ interface ConfirmationState {
   onConfirm: () => void
   onCancel?: () => void
   type: 'success' | 'info' | 'warning'
+  confirmLabel?: string
+  cancelLabel?: string
+  destructive?: boolean
 }
 
 interface GlobalLoadingContextType {
@@ -179,11 +182,27 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
           }}>
             <div style={{ 
               width: '64px', height: '64px', borderRadius: '22px', margin: '0 auto 1.5rem',
-              background: confirm.type === 'success' ? 'rgba(30, 142, 62, 0.1)' : 'rgba(var(--brand-rgb), 0.1)',
-              color: confirm.type === 'success' ? 'var(--success)' : 'var(--brand)',
+              background:
+                confirm.type === 'success'
+                  ? 'rgba(30, 142, 62, 0.1)'
+                  : confirm.type === 'warning'
+                    ? 'rgba(245, 158, 11, 0.12)'
+                    : 'rgba(var(--brand-rgb), 0.1)',
+              color:
+                confirm.type === 'success'
+                  ? 'var(--success)'
+                  : confirm.type === 'warning'
+                    ? '#f59e0b'
+                    : 'var(--brand)',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-              {confirm.type === 'success' ? <Check size={32} /> : <Info size={32} />}
+              {confirm.type === 'success' ? (
+                <Check size={32} />
+              ) : confirm.type === 'warning' ? (
+                <AlertTriangle size={32} />
+              ) : (
+                <Info size={32} />
+              )}
             </div>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '0.75rem', letterSpacing: '-0.03em' }}>{confirm.title}</h3>
             <p style={{ color: 'var(--text-sub)', marginBottom: '2rem', lineHeight: 1.5, fontWeight: 600 }}>{confirm.message}</p>
@@ -192,12 +211,18 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
                 <button 
                   onClick={() => { setConfirm(prev => ({ ...prev, isOpen: false })); confirm.onCancel?.(); }}
                   className="btn btn-secondary" style={{ flex: 1 }}
-                >Cancel</button>
+                >{confirm.cancelLabel ?? 'Cancel'}</button>
               )}
               <button 
                 onClick={() => { setConfirm(prev => ({ ...prev, isOpen: false })); confirm.onConfirm(); }}
-                className="btn btn-primary" style={{ flex: 1 }}
-              >OK</button>
+                className={confirm.destructive ? 'btn btn-secondary' : 'btn btn-primary'}
+                style={{
+                  flex: 1,
+                  ...(confirm.destructive
+                    ? { background: 'var(--error)', color: '#fff', borderColor: 'var(--error)' }
+                    : {}),
+                }}
+              >{confirm.confirmLabel ?? 'OK'}</button>
             </div>
           </div>
         </div>

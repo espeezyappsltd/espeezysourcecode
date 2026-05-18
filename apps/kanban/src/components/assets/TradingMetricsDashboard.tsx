@@ -21,6 +21,8 @@ import {
 import type { TradingMetrics } from '@/lib/marketplace/trading-metrics'
 import { formatCredits, formatGbpApprox } from '@/lib/credits'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { marketplaceWithdrawCopy } from '@/lib/platform/transaction-confirm-copy'
 import { PayPalPayoutLink } from '@/components/assets/PayPalPayoutLink'
 
 function formatGbp(centsOrPounds: number, fromCents = false) {
@@ -30,6 +32,7 @@ function formatGbp(centsOrPounds: number, fromCents = false) {
 
 export function TradingMetricsDashboard() {
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
   const searchParams = useSearchParams()
   const [metrics, setMetrics] = useState<TradingMetrics | null>(null)
   const [loading, setLoading] = useState(true)
@@ -98,6 +101,9 @@ export function TradingMetricsDashboard() {
       addToast('Invalid amount', 'Enter credits to withdraw.', 'error')
       return
     }
+
+    const ok = await confirmTransaction(marketplaceWithdrawCopy(amount, payoutMethod))
+    if (!ok) return
 
     setWithdrawing(true)
     try {

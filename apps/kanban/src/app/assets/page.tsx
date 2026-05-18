@@ -29,6 +29,8 @@ import { joinFolderPath, normalizeFolderPath } from '@/lib/assets/folders'
 import { formatStorageBytes, STORAGE_QUOTAS_BYTES } from '@/lib/storage-quotas'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { marketplaceListFromAssetCopy } from '@/lib/platform/transaction-confirm-copy'
 import ModalOverlay from '@/components/ModalOverlay'
 import { TradingMetricsDashboard } from '@/components/assets/TradingMetricsDashboard'
 
@@ -386,6 +388,7 @@ function AssetCard({
   onCreditUpdated: (creditValue: number) => void
 }) {
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
   const [editingCredit, setEditingCredit] = useState(false)
   const [creditInput, setCreditInput] = useState(String(asset.credit_value ?? 0))
   const [savingCredit, setSavingCredit] = useState(false)
@@ -393,6 +396,11 @@ function AssetCard({
   const Icon = asset.asset_type === 'file' ? File : asset.asset_type === 'link' ? LinkIcon : ShoppingBag
 
   const listOnMarketplace = async () => {
+    const ok = await confirmTransaction(
+      marketplaceListFromAssetCopy(asset.title, asset.credit_value ?? 0),
+    )
+    if (!ok) return
+
     setListing(true)
     try {
       const res = await fetch('/api/marketplace/list-from-asset', {

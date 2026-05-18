@@ -10,6 +10,8 @@ import { breakdownPlatformFee } from '@/lib/platform/fees'
 import { formatHustleCategory } from '@/lib/hustle/task-validation'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { hustleTradeCopy } from '@/lib/platform/transaction-confirm-copy'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
 
@@ -22,6 +24,7 @@ type Props = {
 export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
   const { profile } = useProfile()
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
   const [task, setTask] = useState<HustleTaskWithProfiles | null>(null)
   const [applications, setApplications] = useState<HustleApplication[]>([])
   const [loading, setLoading] = useState(true)
@@ -49,6 +52,22 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
   useEffect(() => {
     void load()
   }, [load])
+
+  const runWithConfirm = async (
+    action: Parameters<typeof hustleTrade>[1],
+    extra?: { applicant_id?: string; message?: string; applicantName?: string },
+  ) => {
+    if (!task) return
+    const credits = task.payout_credits ?? task.escrow_credits ?? 0
+    const copy = hustleTradeCopy(action, {
+      taskTitle: task.title,
+      credits: action === 'approve' || action === 'cancel' ? task.escrow_credits || credits : credits,
+      applicantName: extra?.applicantName,
+    })
+    const ok = await confirmTransaction(copy)
+    if (!ok) return
+    await run(action, extra)
+  }
 
   const run = async (
     action: Parameters<typeof hustleTrade>[1],
@@ -144,7 +163,7 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
                 className="btn btn-primary"
                 style={{ width: '100%', marginTop: '0.5rem' }}
                 disabled={busy !== null}
-                onClick={() => void run('apply', { message: applyMessage })}
+                onClick={() => void runWithConfirm('apply', { message: applyMessage })}
               >
                 {busy === 'apply' ? <Loader2 size={16} className="animate-spin" /> : null}
                 Apply for this gig
@@ -182,7 +201,12 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
                         type="button"
                         className="btn btn-secondary btn-sm"
                         disabled={busy !== null}
-                        onClick={() => void run('accept', { applicant_id: app.applicant_id })}
+                        onClick={() =>
+                          void runWithConfirm('accept', {
+                            applicant_id: app.applicant_id,
+                            applicantName: app.applicant?.full_name ?? undefined,
+                          })
+                        }
                       >
                         Accept
                       </button>
@@ -204,12 +228,12 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
               </button>
             )}
             {isAssignee && task.status === 'assigned' && (
-              <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void run('start')}>
+              <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void runWithConfirm('start')}>
                 Start work
               </button>
             )}
             {isAssignee && (task.status === 'in_progress' || task.status === 'assigned') && (
-              <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void run('submit')}>
+              <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void runWithConfirm('submit')}>
                 Submit for review
               </button>
             )}
@@ -221,13 +245,13 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
                     {payoutFee.platformFeeCredits} cr platform fee (2%)
                   </p>
                 )}
-                <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void run('approve')}>
+                <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void runWithConfirm('approve')}>
                   Approve & release escrow
                 </button>
               </div>
             )}
             {isPoster && task.status !== 'paid' && task.status !== 'cancelled' && (
-              <button type="button" className="btn btn-ghost" disabled={busy !== null} onClick={() => void run('cancel')}>
+              <button type="button" className="btn btn-ghost" disabled={busy !== null} onClick={() => void runWithConfirm('cancel')}>
                 Cancel task
               </button>
             )}

@@ -20,6 +20,8 @@ import { Listing } from '@/types/marketplace'
 import { useNotifications } from '@/components/NotificationProvider'
 import { formatCredits, creditsToGbpEquivalent } from '@/lib/credits'
 import { breakdownPlatformFee } from '@/lib/platform/fees'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { marketplacePurchaseCopy } from '@/lib/platform/transaction-confirm-copy'
 import { runMarketplaceCreditCheckout } from '@/lib/marketplace/run-marketplace-checkout'
 import { isListingAvailable } from '@/lib/marketplace/trending'
 import { PLATFORM_CONTACT_RULES, avatarUrlForProfile } from '@/lib/platform/contact-rules'
@@ -42,6 +44,7 @@ export function ListingDetailPanel({
 }: ListingDetailPanelProps) {
   const router = useRouter()
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
   const [checkingOut, setCheckingOut] = useState(false)
   const [saving, setSaving] = useState(false)
   const [assetCreditValue, setAssetCreditValue] = useState<number | null>(null)
@@ -82,6 +85,9 @@ export function ListingDetailPanel({
       addToast('Unavailable', 'This item has already been sold.', 'warning')
       return
     }
+
+    const ok = await confirmTransaction(marketplacePurchaseCopy(listing.title, priceCredits))
+    if (!ok) return
 
     setCheckingOut(true)
     try {

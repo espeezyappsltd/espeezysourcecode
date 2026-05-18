@@ -11,6 +11,8 @@ import { Profile } from '@/types/auth'
 import { Achievement, Group } from '@/types/database'
 import { buildStripePaymentLink } from '@/lib/stripe-payment-links'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { subscriptionCheckoutCopy } from '@/lib/platform/transaction-confirm-copy'
 import { useProfile } from '@/context/ProfileContext'
 import { deleteAccount, createStripePortalSession } from '@/services/account'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
@@ -49,6 +51,7 @@ export function useSettingsPage() {
   const [uploadingBg, setUploadingBg] = useState(false)
 
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
@@ -277,23 +280,17 @@ export function useSettingsPage() {
 
   const handleCheckout = async (plan: 'pro' | 'premium') => {
     setError(null)
-    setSwitching(true)
 
     if (!profile?.id) {
       setError('Identity context missing. Please refresh and try again.')
-      setSwitching(false)
       return
     }
 
-    if (plan === 'pro') {
-      window.location.href = buildStripePaymentLink('pro', { client_reference_id: profile.id })
-      return
-    }
+    const ok = await confirmTransaction(subscriptionCheckoutCopy(plan))
+    if (!ok) return
 
-    if (plan === 'premium') {
-      window.location.href = buildStripePaymentLink('premium', { client_reference_id: profile.id })
-      return
-    }
+    setSwitching(true)
+    window.location.href = buildStripePaymentLink(plan, { client_reference_id: profile.id })
   }
 
   const handleRequestOtp = async () => {

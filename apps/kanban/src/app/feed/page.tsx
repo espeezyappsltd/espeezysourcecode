@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { feedPostCopy } from '@/lib/platform/transaction-confirm-copy'
 import type { Profile } from '@/types/database'
 import type { PostReactionType } from '@/types/feed'
 import {
@@ -85,6 +87,7 @@ function timeAgo(date: string): string {
 export default function FeedPage() {
   const { profile } = useProfile()
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
   const router = useRouter()
 
   const [composerText, setComposerText] = useState('')
@@ -164,6 +167,9 @@ export default function FeedPage() {
 
   const submitPost = async () => {
     if (!composerText.trim() || posting || !profile) return
+    const ok = await confirmTransaction(feedPostCopy(composerVisibility))
+    if (!ok) return
+
     setPosting(true)
     const result = await createFeedPost({
       content: composerText.trim(),

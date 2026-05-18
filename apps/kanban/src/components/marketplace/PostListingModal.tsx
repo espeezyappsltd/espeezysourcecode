@@ -3,6 +3,8 @@
 import React, { useState } from 'react'
 import { Camera, AlertTriangle, Loader2 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
+import { marketplaceListingPublishCopy } from '@/lib/platform/transaction-confirm-copy'
 import { ListingCondition } from '@/types/marketplace'
 import { MAX_ASSET_CREDIT_VALUE, formatCreditCapHint } from '@/lib/credits'
 
@@ -26,6 +28,7 @@ export function PostListingModal({ onClose, onSuccess }: PostListingModalProps) 
   const [uploading, setUploading] = useState(false)
   const [agreed, setAgreed] = useState(false)
   const { addToast } = useNotifications()
+  const { confirmTransaction } = useTransactionConfirm()
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -38,6 +41,10 @@ export function PostListingModal({ onClose, onSuccess }: PostListingModalProps) 
       addToast('Policy required', 'Confirm the marketplace policy to publish.', 'warning')
       return
     }
+    const priceCredits = Math.max(0, parseInt(price, 10) || 0)
+    const ok = await confirmTransaction(marketplaceListingPublishCopy(title.trim(), priceCredits))
+    if (!ok) return
+
     setUploading(true)
     try {
       const formData = new FormData()
