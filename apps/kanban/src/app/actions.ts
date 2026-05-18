@@ -1,6 +1,8 @@
 'use server'
 
 import { getAdminDb } from '@/lib/supabase/admin'
+import { normalizeTaskStatus } from '@/lib/kanban/board-utils'
+import { isPersistedTaskId } from '@/lib/tasks/task-ids'
 import { revalidatePath } from 'next/cache'
 
 export async function distributeTaskScore(taskId: string, assignees: string[]) {
@@ -81,12 +83,15 @@ export async function updateUserGameStats(userId: string, xpEarned: number, won:
 }
 export async function handleTaskStatusUpdate(taskId: string, newStatus: string, groupId: string, userId: string) {
   try {
+    if (!isPersistedTaskId(taskId)) {
+      throw new Error('Task is still saving — try again in a moment.')
+    }
+
     const adminDb = getAdminDb()
-    
-    // Fetch current task to ensure we have all fields for the workflow
+
     const { data: task, error: fetchError } = await adminDb
       .from('tasks')
-      .select('*')
+      .select('id, title, description, status, category, assignees, group_id, due_date')
       .eq('id', taskId)
       .single()
 
@@ -96,9 +101,10 @@ export async function handleTaskStatusUpdate(taskId: string, newStatus: string, 
       action: 'update' as const,
       task: {
         ...task,
-        status: newStatus as 'todo' | 'in_progress' | 'done',
+        status: normalizeTaskStatus(newStatus),
+        group_id: task.group_id ?? groupId,
       },
-      userId
+      userId,
     }
 
     // Since we are in a server action, we can't easily use the 'start' helper if it depends on a specific environment,

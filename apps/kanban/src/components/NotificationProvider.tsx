@@ -37,13 +37,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [toasts, setToasts] = useState<Toast[]>([])
   const baselineLoadedRef = useRef(false)
 
-  const addToast = (title: string, message: string, type: string = 'info') => {
+  const addToast = useCallback((title: string, message: string, type: string = 'info') => {
     const id = Math.random().toString(36).substr(2, 9)
     setToasts(prev => [...prev, { id, title, message, type }])
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id))
     }, 5000)
-  }
+  }, [])
 
   const fetchNotifications = useCallback(async () => {
     if (!userId) return

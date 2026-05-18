@@ -8,6 +8,7 @@ import {
 } from '@/lib/credits'
 import { isFolderMarker, normalizeFolderPath } from '@/lib/assets/folders'
 import { getStorageQuotaBytes, resolveStoragePlan } from '@/lib/storage-quotas'
+import { friendlySupabaseError } from '@/utils/supabase-errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,11 +27,15 @@ async function readProfileStorage(
   adminDb: ReturnType<typeof getAdminDb>,
   userId: string,
 ) {
-  const { data: profileRow } = await adminDb
+  const { data: profileRow, error: profileError } = await adminDb
     .from('profiles')
-    .select('storage_used, subscription_plan, tier')
+    .select('storage_used, subscription_plan')
     .eq('id', userId)
     .single()
+
+  if (profileError) {
+    throw new Error(friendlySupabaseError(profileError.message, 'Failed to load storage profile'))
+  }
 
   const tier = resolveStoragePlan(profileRow)
   return {
@@ -101,7 +106,9 @@ export async function GET(req: NextRequest) {
 
     const { data: rows, error } = await query
 
-    if (error) throw error
+    if (error) {
+      throw new Error(friendlySupabaseError(error.message, 'Failed to load assets'))
+    }
 
     const hasMore = (rows?.length ?? 0) > limit
     const assets = (hasMore ? rows?.slice(0, limit) : rows)?.map(enrichAsset) ?? []

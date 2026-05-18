@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import {
   File,
@@ -10,6 +10,7 @@ import {
   Trash2,
   ExternalLink,
   Loader2,
+  AlertCircle,
   HardDrive,
   Coins,
   Pencil,
@@ -49,8 +50,11 @@ interface Asset {
 
 export default function PersonalAssetsPage() {
   const { addToast } = useNotifications()
+  const addToastRef = useRef(addToast)
+  addToastRef.current = addToast
   const [assets, setAssets] = useState<Asset[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'file' | 'link' | 'marketplace_ref'>('all')
   const [currentFolder, setCurrentFolder] = useState('/')
   const [showUploadModal, setShowUploadModal] = useState(false)
@@ -62,24 +66,36 @@ export default function PersonalAssetsPage() {
 
   const fetchAssets = useCallback(async () => {
     setLoading(true)
+    setLoadError(null)
     try {
       const res = await fetch('/api/assets?all=1', { credentials: 'include' })
+      const data = (await res.json().catch(() => ({}))) as {
+        assets?: Asset[]
+        totalCreditValue?: number
+        storageUsed?: number
+        storageQuota?: number
+        tier?: string
+        error?: string
+      }
       if (res.ok) {
-        const data = await res.json()
         setAssets(data.assets || [])
         setTotalCreditValue(data.totalCreditValue ?? 0)
         setStorageUsed(data.storageUsed ?? 0)
         setStorageQuota(data.storageQuota ?? STORAGE_QUOTAS_BYTES.free)
         setTierLabel(data.tier ?? 'free')
       } else {
-        addToast('Error', 'Failed to load assets', 'error')
+        const message = data.error || 'Failed to load assets'
+        setLoadError(message)
+        addToastRef.current('Error', message, 'error')
       }
     } catch {
-      addToast('Error', 'Failed to load assets', 'error')
+      const message = 'Failed to load assets'
+      setLoadError(message)
+      addToastRef.current('Error', message, 'error')
     } finally {
       setLoading(false)
     }
-  }, [addToast])
+  }, [])
 
   useEffect(() => {
     void fetchAssets()
@@ -261,10 +277,21 @@ export default function PersonalAssetsPage() {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '5rem' }}>
-          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} />
+      {loadError && !loading ? (
+        <div className="assets-empty">
+          <AlertCircle size={40} style={{ margin: '0 auto 1rem', color: '#ef4444' }} />
+          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>Could not load arsenal</h3>
+          <p style={{ margin: '0 0 1.25rem', color: 'var(--text-sub)', fontWeight: 600, maxWidth: '32rem', marginLeft: 'auto', marginRight: 'auto' }}>
+            {loadError}
+          </p>
+          <button type="button" className="btn btn-primary" onClick={() => void fetchAssets()}>
+            Try again
+          </button>
         </div>
+      ) : loading ? (
+        <motion.div style={{ textAlign: 'center', padding: '5rem' }}>
+          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} />
+        </motion.div>
       ) : (
         <>
           {childFolders.length > 0 && (

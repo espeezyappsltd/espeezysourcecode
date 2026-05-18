@@ -12,6 +12,7 @@ import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/clie
 import { celebrateOnboardingComplete } from '@/lib/onboarding/celebrate'
 import type { OnboardingCompletionResult } from '@/lib/onboarding/onboarding-service'
 import { getOnboardingTourAction } from '@/lib/onboarding/dashboard-tasks'
+import { isPersistedTaskId } from '@/lib/tasks/task-ids'
 
 export type UseTaskModalReturn = {
   isEditMode: boolean
@@ -69,7 +70,7 @@ export function useTaskModal({
   const router = useRouter()
 
   const onlineUsers = onlineUserIds ?? new Set<string>()
-  const isEditMode = !!task
+  const isEditMode = isPersistedTaskId(task?.id)
 
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
@@ -137,7 +138,11 @@ export function useTaskModal({
   }, [db, groupId])
 
   useEffect(() => {
-    if (!isEditMode || !task) return
+    if (!isEditMode || !task || !isPersistedTaskId(task.id)) {
+      setArtifacts([])
+      setEvidenceLoading(false)
+      return
+    }
 
     let active = true
     const loadArtifacts = async () => {
@@ -207,10 +212,12 @@ export function useTaskModal({
       return
     }
 
+    const persistedId = isPersistedTaskId(task?.id) ? task.id : undefined
+
     const payload = {
-      action: isEditMode ? 'update' : 'create',
+      action: isEditMode && persistedId ? 'update' : 'create',
       task: {
-        id: task?.id,
+        ...(persistedId ? { id: persistedId } : {}),
         ...payloadTask,
       },
     }
@@ -219,13 +226,16 @@ export function useTaskModal({
       ...(task ?? {
         id: `optimistic-${Date.now()}`,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        score_awarded: false,
+        is_coding_task: false,
       }),
       ...payloadTask,
       group_id: groupId,
     } as Task
 
-    onTaskPatched?.(optimisticTask)
+    if (persistedId) {
+      onTaskPatched?.(optimisticTask)
+    }
 
     try {
       const response = await fetch('/api/task/workflow', {
@@ -316,7 +326,7 @@ export function useTaskModal({
   }
 
   const handleDelete = async () => {
-    if (!task) return
+    if (!task || !isPersistedTaskId(task.id)) return
     if (!confirm('Are you absolutely sure you want to permanently delete this task?')) return
 
     setLoading(true)
@@ -345,7 +355,7 @@ export function useTaskModal({
 
     setAssignees(newAssignees)
 
-    if (isEditMode && task) {
+    if (isEditMode && task && isPersistedTaskId(task.id)) {
       setLoading(true)
       const patched = { ...task, assignees: newAssignees }
       onTaskPatched?.(patched)
@@ -362,7 +372,7 @@ export function useTaskModal({
   }
 
   const handleUploadEvidence = async () => {
-    if (!newUrl || !task) return
+    if (!newUrl || !task || !isPersistedTaskId(task.id)) return
     setUploading(true)
     setError(null)
 
@@ -395,7 +405,7 @@ export function useTaskModal({
   const handlePhysicalUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target.files?.[0]
-      if (!file || !task || !currentUser) return
+      if (!file || !task || !isPersistedTaskId(task.id) || !currentUser) return
       setUploading(true)
       setError(null)
 

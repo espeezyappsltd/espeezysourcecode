@@ -10,6 +10,11 @@ export function formatSupabaseError(err: unknown, fallback = 'Something went wro
   return fallback
 }
 
+export function isMissingColumnError(message: string | undefined): boolean {
+  const lower = (message ?? '').toLowerCase()
+  return lower.includes('column') && (lower.includes('does not exist') || lower.includes('schema cache'))
+}
+
 /** Map raw Supabase/PostgREST errors to user-safe messages (never expose key material). */
 export function friendlySupabaseError(message: string | undefined, fallback: string): string {
   const msg = message ?? ''

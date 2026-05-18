@@ -172,7 +172,12 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
     if (!groupId || !profile.id) return
     let cancelled = false
 
-    fetch('/api/onboarding/ensure', { method: 'POST', credentials: 'include' })
+    fetch('/api/onboarding/ensure', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId }),
+    })
       .then(async (res) => {
         if (!res.ok || cancelled) return
         const body = (await res.json()) as { seeded?: number }

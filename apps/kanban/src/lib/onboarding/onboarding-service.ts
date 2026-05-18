@@ -1,4 +1,6 @@
 import { getAdminDb } from '@/lib/supabase/admin'
+import { Q } from '@/lib/query-columns'
+import { isMissingColumnError } from '@/utils/supabase-errors'
 import {
   ONBOARDING_CREDIT_REWARD,
   ONBOARDING_MARKER_PREFIX,
@@ -87,7 +89,6 @@ export async function ensureOnboardingTasksForUser(
       assignees: [userId],
       group_id: groupId,
       due_date: null,
-      created_by: userId,
     })
 
     if (!error) seeded += 1
@@ -124,7 +125,7 @@ async function getUserOnboardingTasks(userId: string, groupId: string) {
   const db = getAdminDb()
   const { data } = await db
     .from('tasks')
-    .select('id, title, description, status, assignees, group_id, created_at, updated_at')
+    .select(Q.task)
     .eq('group_id', groupId)
     .contains('assignees', [userId])
 

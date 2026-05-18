@@ -42,16 +42,27 @@ function KanbanTaskCardComponent({ task, membersById, onOpen }: KanbanTaskCardPr
     [task.description],
   )
 
+  const openTask = () => onOpen(task)
+
+  const handleCardKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      openTask()
+    }
+  }
+
   return (
     <li>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         className={`kanban-card${isDone ? ' kanban-card--done' : ''}`}
         style={{ '--kanban-accent': accent } as React.CSSProperties}
         data-testid={`kanban-task-${task.id}`}
         data-status={task.status}
         aria-label={`${task.title}. ${task.status}. ${task.category}.${task.description ? ` ${task.description}` : ''}`}
-        onClick={() => onOpen(task)}
+        onClick={openTask}
+        onKeyDown={handleCardKeyDown}
       >
         <span className="kanban-card__accent" aria-hidden="true" />
         <div className="kanban-card__meta">
@@ -87,7 +98,7 @@ function KanbanTaskCardComponent({ task, membersById, onOpen }: KanbanTaskCardPr
             </time>
           ) : null}
         </div>
-      </button>
+      </div>
     </li>
   )
 }

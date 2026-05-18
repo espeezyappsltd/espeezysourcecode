@@ -1,7 +1,11 @@
 import { getAdminDb } from '@/lib/supabase/admin'
 import { afterOnboardingTaskUpdate } from '@/lib/onboarding/onboarding-service'
+import { Q } from '@/lib/query-columns'
+import { isPersistedTaskId } from '@/lib/tasks/task-ids'
 import type { TaskCategory, TaskStatus } from '@/types/database'
 import { taskSchema } from '@/utils/validation'
+
+const TASK_ROW_SELECT = `${Q.task}, score_awarded` as const
 
 export type TaskPayload = {
   id?: string
@@ -96,7 +100,7 @@ async function insertTask(task: TaskPayload) {
   const { data, error } = await db
     .from('tasks')
     .insert({ ...task })
-    .select('id, title, status, group_id, assignees, description, due_date, category, created_at, updated_at')
+    .select(TASK_ROW_SELECT)
     .single()
 
   if (error || !data) {
@@ -125,8 +129,27 @@ async function updateTaskRow(task: TaskPayload) {
   if (error) throw new Error(error.message)
 }
 
+async function runOnboardingHook(
+  taskId: string,
+  userId: string,
+  groupId: string,
+  status: string,
+) {
+  try {
+    return await afterOnboardingTaskUpdate(taskId, userId, groupId, status)
+  } catch (err) {
+    console.warn('[task-service] onboarding hook skipped:', err instanceof Error ? err.message : err)
+    return null
+  }
+}
+
 export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
-  const parsed = taskSchema.safeParse(payload.task)
+  const taskInput = { ...payload.task }
+  if (taskInput.id && !isPersistedTaskId(taskInput.id)) {
+    delete taskInput.id
+  }
+
+  const parsed = taskSchema.safeParse(taskInput)
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Invalid task payload')
   }
@@ -140,7 +163,7 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
     if (task.status === 'Done') {
       await checkAndDistributeScore(created.id, task.assignees)
     }
-    const onboarding = await afterOnboardingTaskUpdate(
+    const onboarding = await runOnboardingHook(
       created.id,
       payload.userId,
       task.group_id,
@@ -149,7 +172,7 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
     return { taskId: created.id, task: created.task, onboarding }
   }
 
-  if (!task.id) {
+  if (!task.id || !isPersistedTaskId(task.id)) {
     throw new Error('Task ID is required for updates.')
   }
 
@@ -161,12 +184,15 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
     await checkAndDistributeScore(task.id, task.assignees)
   }
 
-  const onboarding = await afterOnboardingTaskUpdate(
-    task.id!,
+  const onboarding = await runOnboardingHook(
+    task.id,
     payload.userId,
     task.group_id,
     task.status,
   )
 
-  return { taskId: task.id, onboarding }
+  const db = getAdminDb()
+  const { data: saved } = await db.from('tasks').select(TASK_ROW_SELECT).eq('id', task.id).single()
+
+  return { taskId: task.id, task: saved ?? { ...task, id: task.id }, onboarding }
 }

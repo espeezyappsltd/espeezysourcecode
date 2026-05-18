@@ -44,6 +44,8 @@ export function normalizeTaskRow(task: Task): Task {
     ...task,
     status: normalizeTaskStatus(task.status),
     assignees: normalizeAssignees(task.assignees),
+    score_awarded: task.score_awarded ?? false,
+    is_coding_task: task.is_coding_task ?? false,
   }
 }
 
