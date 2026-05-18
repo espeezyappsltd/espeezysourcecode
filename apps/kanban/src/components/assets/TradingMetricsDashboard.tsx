@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Activity,
@@ -20,6 +21,7 @@ import {
 import type { TradingMetrics } from '@/lib/marketplace/trading-metrics'
 import { formatCredits, formatGbpApprox } from '@/lib/credits'
 import { useNotifications } from '@/components/NotificationProvider'
+import { PayPalPayoutLink } from '@/components/assets/PayPalPayoutLink'
 
 function formatGbp(centsOrPounds: number, fromCents = false) {
   const pounds = fromCents ? centsOrPounds / 100 : centsOrPounds
@@ -28,11 +30,13 @@ function formatGbp(centsOrPounds: number, fromCents = false) {
 
 export function TradingMetricsDashboard() {
   const { addToast } = useNotifications()
+  const searchParams = useSearchParams()
   const [metrics, setMetrics] = useState<TradingMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [withdrawCredits, setWithdrawCredits] = useState('')
   const [withdrawing, setWithdrawing] = useState(false)
+  const [payoutMethod, setPayoutMethod] = useState<'stripe' | 'paypal'>('stripe')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -53,6 +57,36 @@ export function TradingMetricsDashboard() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    if (metrics?.payoutAccounts.preferredPayoutMethod) {
+      setPayoutMethod(metrics.payoutAccounts.preferredPayoutMethod)
+    }
+  }, [metrics?.payoutAccounts.preferredPayoutMethod])
+
+  useEffect(() => {
+    const paypal = searchParams?.get('paypal')
+    const message = searchParams?.get('message')
+    if (paypal === 'linked') {
+      addToast('PayPal linked', 'You can withdraw to your PayPal account.', 'success')
+    } else if (paypal === 'error' && message) {
+      addToast('PayPal linking failed', decodeURIComponent(message), 'error')
+    }
+  }, [searchParams, addToast])
+
+  const setPreferredPayout = async (method: 'stripe' | 'paypal') => {
+    setPayoutMethod(method)
+    try {
+      await fetch('/api/paypal/connect', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preferredPayoutMethod: method }),
+      })
+    } catch {
+      /* preference is best-effort */
+    }
+  }
+
   const maxBar = useMemo(() => {
     if (!metrics?.assetPerformance.length) return 1
     return Math.max(...metrics.assetPerformance.map((a) => a.withdrawableCredits), 1)
@@ -71,11 +105,18 @@ export function TradingMetricsDashboard() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creditsAmount: amount }),
+        body: JSON.stringify({ creditsAmount: amount, payoutMethod }),
       })
-      const data = (await res.json()) as { error?: string; success?: boolean }
+      const data = (await res.json()) as { error?: string; success?: boolean; payoutMethod?: string }
       if (!res.ok) throw new Error(data.error ?? 'Withdrawal failed')
-      addToast('Withdrawal sent', 'Cash is on the way to your linked bank account.', 'success')
+      const viaPayPal = data.payoutMethod === 'paypal' || payoutMethod === 'paypal'
+      addToast(
+        'Withdrawal sent',
+        viaPayPal
+          ? 'Funds are being sent to your linked PayPal account.'
+          : 'Cash is on the way to your linked bank account.',
+        'success',
+      )
       setWithdrawCredits('')
       await load()
     } catch (e) {
@@ -173,6 +214,53 @@ export function TradingMetricsDashboard() {
             Max today: <strong>{formatCredits(metrics.availableWithdrawCredits)}</strong>{' '}
             <span className="trading-metrics__muted">({formatGbpApprox(metrics.availableWithdrawCredits)})</span>
           </p>
+
+          <div className="trading-metrics__payout-methods">
+            <span className="trading-metrics__payout-methods-label">Send to</span>
+            <label className="trading-metrics__payout-option">
+              <input
+                type="radio"
+                name="payoutMethod"
+                checked={payoutMethod === 'stripe'}
+                onChange={() => void setPreferredPayout('stripe')}
+              />
+              Bank (Stripe)
+            </label>
+            <label className="trading-metrics__payout-option">
+              <input
+                type="radio"
+                name="payoutMethod"
+                checked={payoutMethod === 'paypal'}
+                onChange={() => void setPreferredPayout('paypal')}
+              />
+              PayPal
+            </label>
+          </div>
+
+          <div className="trading-metrics__payout-accounts">
+            <div className="trading-metrics__payout-rail">
+              <div className="trading-metrics__payout-rail-head">
+                <span className="trading-metrics__payout-label">Bank (Stripe)</span>
+                {metrics.payoutAccounts.stripeConnected ? (
+                  <span className="trading-metrics__payout-badge trading-metrics__payout-badge--ok">
+                    Connected
+                  </span>
+                ) : (
+                  <span className="trading-metrics__payout-badge">Not connected</span>
+                )}
+              </div>
+              {!metrics.payoutAccounts.stripeConnected && (
+                <Link href="/marketplace" className="trading-metrics__payout-link">
+                  Connect Stripe on Marketplace
+                </Link>
+              )}
+            </div>
+            <PayPalPayoutLink
+              payoutAccounts={metrics.payoutAccounts}
+              onLinked={() => void load()}
+            />
+          </div>
+
           <motion.div className="trading-metrics__withdraw-form">
             <input
               type="number"
@@ -194,8 +282,7 @@ export function TradingMetricsDashboard() {
             </button>
           </motion.div>
           <p className="trading-metrics__fine">
-            Minimum £1.00. Requires Stripe Connect —{' '}
-            <Link href="/marketplace">set up payouts on Marketplace</Link>.
+            Minimum £1.00. Link Stripe (bank) or PayPal above, then choose how to receive cash.
           </p>
         </div>
 

@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 import { getTradingMetricsForUser, creditsToWithdrawCents } from '@/lib/marketplace/trading-metrics'
+import {
+  executePayPalPayout,
+  executeStripePayout,
+  loadPayoutProfile,
+  resolvePayoutMethod,
+  type PayoutMethod,
+} from '@/lib/marketplace/withdraw-payout'
+import { isPayPalConfigured } from '@/lib/paypal/config'
 import { validateCreditValue } from '@/lib/credits'
-import { getStripeClient } from '@/utils/stripe'
 import { friendlySupabaseError } from '@/utils/supabase-errors'
 
 export const dynamic = 'force-dynamic'
@@ -12,15 +19,17 @@ const MIN_WITHDRAW_CENTS = 100
 
 /**
  * POST /api/assets/withdraw
- * Withdraw cash for marketplace earnings only: sum(asset credit value × times sold) minus prior withdrawals.
- * Body: { creditsAmount: number }
+ * Body: { creditsAmount: number, payoutMethod?: 'stripe' | 'paypal' }
  */
 export async function POST(req: Request) {
   try {
     const user = await getRequestUser(req)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const body = (await req.json().catch(() => ({}))) as { creditsAmount?: unknown }
+    const body = (await req.json().catch(() => ({}))) as {
+      creditsAmount?: unknown
+      payoutMethod?: unknown
+    }
     const creditCheck = validateCreditValue(body.creditsAmount, { required: true })
     if (!creditCheck.ok) {
       return NextResponse.json({ error: creditCheck.message }, { status: 422 })
@@ -45,8 +54,6 @@ export async function POST(req: Request) {
         {
           error: `You can withdraw up to ${metrics.availableWithdrawCredits} credits from marketplace sales (asset value × times sold, minus prior withdrawals).`,
           availableWithdrawCredits: metrics.availableWithdrawCredits,
-          totalWithdrawableCredits: metrics.totalWithdrawableCredits,
-          totalWithdrawnCredits: metrics.totalWithdrawnCredits,
         },
         { status: 400 },
       )
@@ -62,41 +69,46 @@ export async function POST(req: Request) {
       )
     }
 
-    const db = getAdminDb()
-    const { data: profile } = await db
-      .from('profiles')
-      .select('stripe_account_id, espeezy_credits')
-      .eq('id', user.id)
-      .single()
+    const profile = await loadPayoutProfile(user.id)
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found.' }, { status: 404 })
+    }
 
-    if (!profile?.stripe_account_id) {
+    const method: PayoutMethod = resolvePayoutMethod(
+      profile,
+      typeof body.payoutMethod === 'string' ? body.payoutMethod : null,
+    )
+
+    if (method === 'paypal' && !isPayPalConfigured()) {
       return NextResponse.json(
-        {
-          error: 'Connect Stripe on the marketplace page before withdrawing cash.',
-          connectUrl: '/marketplace',
-        },
-        { status: 400 },
+        { error: 'PayPal payouts are not configured. Use Stripe or contact support.' },
+        { status: 503 },
       )
     }
 
-    let stripe: import('stripe').default
-    try {
-      stripe = getStripeClient()
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Stripe is not configured'
-      return NextResponse.json({ error: msg }, { status: 500 })
-    }
+    const db = getAdminDb()
+    let stripeTransferId: string | null = null
+    let paypalBatchId: string | null = null
+    let paypalItemId: string | null = null
 
-    const transfer = await stripe.transfers.create({
-      amount: amountCents,
-      currency: 'gbp',
-      destination: profile.stripe_account_id,
-      metadata: {
-        user_id: user.id,
-        credits_withdrawn: String(creditsAmount),
-        source: 'marketplace_asset_sales',
-      },
-    })
+    if (method === 'stripe') {
+      const { externalId } = await executeStripePayout({
+        userId: user.id,
+        profile,
+        amountCents,
+        creditsAmount,
+      })
+      stripeTransferId = externalId
+    } else {
+      const payout = await executePayPalPayout({
+        userId: user.id,
+        profile,
+        amountCents,
+        creditsAmount,
+      })
+      paypalBatchId = payout.batchId
+      paypalItemId = payout.itemId
+    }
 
     const newCredits = Math.max(0, (profile.espeezy_credits ?? 0) - creditsAmount)
     const { error: profileErr } = await db
@@ -115,19 +127,24 @@ export async function POST(req: Request) {
       user_id: user.id,
       credits_amount: creditsAmount,
       amount_cents: amountCents,
-      stripe_transfer_id: transfer.id,
+      stripe_transfer_id: stripeTransferId,
+      payout_method: method,
+      paypal_payout_batch_id: paypalBatchId,
+      paypal_payout_item_id: paypalItemId,
       status: 'completed',
     })
 
     if (withdrawErr) {
-      console.error('[assets/withdraw] ledger insert failed after transfer:', withdrawErr.message)
+      console.error('[assets/withdraw] ledger insert failed after payout:', withdrawErr.message)
     }
 
     const updated = await getTradingMetricsForUser(user.id)
 
     return NextResponse.json({
       success: true,
-      transferId: transfer.id,
+      payoutMethod: method,
+      transferId: stripeTransferId,
+      paypalBatchId,
       creditsWithdrawn: creditsAmount,
       amountCents,
       metrics: {

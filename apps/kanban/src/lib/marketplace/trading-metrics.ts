@@ -1,5 +1,6 @@
 import { getAdminDb } from '@/lib/supabase/admin'
 import { readCreditValueFromMetadata, creditsToGbpEquivalent, clampCreditValue } from '@/lib/credits'
+import { isPayPalConfigured } from '@/lib/paypal/config'
 
 export type MarketplacePurchaseRow = {
   id: string
@@ -19,8 +20,18 @@ export type MarketplaceWithdrawalRow = {
   credits_amount: number
   amount_cents: number
   stripe_transfer_id: string | null
+  payout_method?: string | null
+  paypal_payout_batch_id?: string | null
   status: string
   created_at: string
+}
+
+export type PayoutAccounts = {
+  stripeConnected: boolean
+  paypalLinked: boolean
+  paypalEmail: string | null
+  preferredPayoutMethod: 'stripe' | 'paypal'
+  paypalPayoutsConfigured: boolean
 }
 
 export type AssetPerformanceRow = {
@@ -59,6 +70,7 @@ export type TradingMetrics = {
   purchases: MarketplacePurchaseRow[]
   sales: MarketplacePurchaseRow[]
   withdrawals: MarketplaceWithdrawalRow[]
+  payoutAccounts: PayoutAccounts
 }
 
 type PersonalAssetRow = {
@@ -119,7 +131,13 @@ export async function getTradingMetricsForUser(userId: string): Promise<TradingM
   const db = getAdminDb()
 
   const [profileRes, purchasesRes, salesRes, withdrawalsRes, assetsRes] = await Promise.all([
-    db.from('profiles').select('espeezy_credits, stripe_account_id').eq('id', userId).maybeSingle(),
+    db
+      .from('profiles')
+      .select(
+        'espeezy_credits, stripe_account_id, paypal_email, paypal_account_status, preferred_payout_method',
+      )
+      .eq('id', userId)
+      .maybeSingle(),
     db
       .from('marketplace_purchases')
       .select(
@@ -138,7 +156,9 @@ export async function getTradingMetricsForUser(userId: string): Promise<TradingM
       .limit(100),
     db
       .from('marketplace_withdrawals')
-      .select('id, credits_amount, amount_cents, stripe_transfer_id, status, created_at')
+      .select(
+        'id, credits_amount, amount_cents, stripe_transfer_id, payout_method, paypal_payout_batch_id, status, created_at',
+      )
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(50),
@@ -220,13 +240,34 @@ export async function getTradingMetricsForUser(userId: string): Promise<TradingM
       id: row.id,
       kind: 'withdrawal' as const,
       title: 'Cash withdrawal',
-      subtitle: row.stripe_transfer_id ? `Transfer ${row.stripe_transfer_id.slice(0, 12)}…` : 'Bank transfer',
+      subtitle:
+        row.payout_method === 'paypal'
+          ? row.paypal_payout_batch_id
+            ? `PayPal ${row.paypal_payout_batch_id.slice(0, 12)}…`
+            : 'PayPal payout'
+          : row.stripe_transfer_id
+            ? `Stripe ${row.stripe_transfer_id.slice(0, 12)}…`
+            : 'Bank transfer',
       credits: row.credits_amount,
       gbpApprox: row.amount_cents / 100,
       createdAt: row.created_at,
       direction: 'out' as const,
     })),
   ].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+
+  const profile = profileRes.data as {
+    espeezy_credits?: number
+    stripe_account_id?: string | null
+    paypal_email?: string | null
+    paypal_account_status?: string | null
+    preferred_payout_method?: string | null
+  } | null
+
+  const paypalLinked =
+    profile?.paypal_account_status === 'linked' && Boolean(profile?.paypal_email)
+  const preferredRaw = profile?.preferred_payout_method
+  const preferredPayoutMethod: 'stripe' | 'paypal' =
+    preferredRaw === 'paypal' ? 'paypal' : 'stripe'
 
   return {
     creditsBalance,
@@ -245,6 +286,13 @@ export async function getTradingMetricsForUser(userId: string): Promise<TradingM
     purchases,
     sales,
     withdrawals,
+    payoutAccounts: {
+      stripeConnected: Boolean(profile?.stripe_account_id),
+      paypalLinked,
+      paypalEmail: paypalLinked ? (profile?.paypal_email ?? null) : null,
+      preferredPayoutMethod,
+      paypalPayoutsConfigured: isPayPalConfigured(),
+    },
   }
 }
 

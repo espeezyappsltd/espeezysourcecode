@@ -42,13 +42,52 @@ export async function POST(req: Request) {
       await handleP2PTransferWebhook(session)
       return NextResponse.json({ ok: true, handled: 'p2p_transfer' }, { status: 200 })
     }
-    
+
+    if (session.metadata?.type === 'credit_topup') {
+      await handleCreditTopUpWebhook(session)
+      return NextResponse.json({ ok: true, handled: 'credit_topup' }, { status: 200 })
+    }
+
     // Standard subscription/payment
     await handleSubscriptionWebhook(session)
     return NextResponse.json({ ok: true, handled: 'subscription' }, { status: 200 })
   }
 
   return NextResponse.json({ ok: true, handled: 'ignored' }, { status: 200 })
+}
+
+async function handleCreditTopUpWebhook(session: Stripe.Checkout.Session) {
+  const userId = session.metadata?.user_id
+  const rawCredits = session.metadata?.credits_amount
+  const credits = rawCredits ? parseInt(rawCredits, 10) : 0
+  if (!userId || !Number.isFinite(credits) || credits <= 0) return
+
+  if (session.payment_status !== 'paid') return
+
+  try {
+    const adminDb = getAdminDb()
+    if (!adminDb) return
+
+    const { data: profile } = await adminDb
+      .from('profiles')
+      .select('espeezy_credits')
+      .eq('id', userId)
+      .maybeSingle()
+
+    const next = (profile?.espeezy_credits ?? 0) + credits
+    await adminDb.from('profiles').update({ espeezy_credits: next }).eq('id', userId)
+
+    await adminDb.from('notifications').insert({
+      user_id: userId,
+      type: 'credit_topup',
+      title: 'Credits added',
+      message: `+${credits} Espeezy credits are now in your account.`,
+      link: '/marketplace',
+      metadata: { credits_added: credits, balance_after: next },
+    })
+  } catch (err: unknown) {
+    console.error('[webhook] credit_topup error:', err instanceof Error ? err.message : err)
+  }
 }
 
 async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {

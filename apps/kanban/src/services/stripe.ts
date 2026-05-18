@@ -54,12 +54,16 @@ export async function createCheckoutSession({
   price,
   type,
   metadata = {},
+  successUrl,
+  cancelUrl,
 }: {
   userId: string
   email: string | undefined
   price: number
   type: 'subscription' | 'purchase'
   metadata?: Record<string, string>
+  successUrl?: string
+  cancelUrl?: string
 }) {
   const stripe = getStripeClient()
   const isSubscription = type === 'subscription'
@@ -93,8 +97,8 @@ export async function createCheckoutSession({
       type,
       ...metadata,
     },
-    success_url: `${SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: CANCEL_URL,
+    success_url: successUrl ?? `${SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: cancelUrl ?? CANCEL_URL,
   })
 
   return session

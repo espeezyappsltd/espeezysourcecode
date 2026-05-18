@@ -7,6 +7,7 @@ import { Flame, TrendingUp, Tag, User, Loader2, Zap } from 'lucide-react'
 import { Listing, MarketplaceCategory } from '@/types/marketplace'
 import { computeMarketplaceTrending, isListingAvailable } from '@/lib/marketplace/trending'
 import { formatCredits } from '@/lib/credits'
+import { runMarketplaceCreditCheckout } from '@/lib/marketplace/run-marketplace-checkout'
 import { useNotifications } from '@/components/NotificationProvider'
 
 interface MarketplaceTrendingRailProps {
@@ -45,36 +46,13 @@ export function MarketplaceTrendingRail({
       return
     }
 
-    const price = Math.max(0, Math.floor(listing.price ?? 0))
-    if (price > 0 && userCredits !== null && userCredits < price) {
-      addToast('Need more credits', `Requires ${formatCredits(price)}.`, 'warning')
-      onSelectListing(listing)
-      return
-    }
-
     setBusyId(listing.id)
     try {
-      const res = await fetch('/api/marketplace/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ listingId: listing.id }),
-      })
-      const data = (await res.json()) as {
-        error?: string
-        message?: string
-        buyerCredits?: number
-        invoiceUrl?: string
-      }
-      if (!res.ok) {
-        addToast('Checkout failed', data.message ?? data.error ?? 'Try again.', 'error')
-        return
-      }
-      if (typeof data.buyerCredits === 'number') {
-        onPurchaseComplete({ buyerCredits: data.buyerCredits })
-      }
+      const price = Math.max(0, Math.floor(listing.price ?? 0))
+      const result = await runMarketplaceCreditCheckout(listing.id, addToast)
+      if (!result) return
+      onPurchaseComplete({ buyerCredits: result.buyerCredits })
       addToast('Done', price === 0 ? 'Item claimed.' : `Purchased for ${formatCredits(price)}.`, 'success')
-      if (data.invoiceUrl) window.open(data.invoiceUrl, '_blank', 'noopener')
     } catch {
       addToast('Error', 'Checkout could not complete.', 'error')
     } finally {

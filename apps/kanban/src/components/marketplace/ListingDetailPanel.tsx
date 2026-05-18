@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -19,6 +19,7 @@ import {
 import { Listing } from '@/types/marketplace'
 import { useNotifications } from '@/components/NotificationProvider'
 import { formatCredits, creditsToGbpEquivalent } from '@/lib/credits'
+import { runMarketplaceCreditCheckout } from '@/lib/marketplace/run-marketplace-checkout'
 import { isListingAvailable } from '@/lib/marketplace/trending'
 import { PLATFORM_CONTACT_RULES, avatarUrlForProfile } from '@/lib/platform/contact-rules'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
@@ -42,12 +43,33 @@ export function ListingDetailPanel({
   const { addToast } = useNotifications()
   const [checkingOut, setCheckingOut] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [assetCreditValue, setAssetCreditValue] = useState<number | null>(null)
 
   const priceCredits = Math.max(0, Math.floor(listing.price ?? 0))
   const isFree = priceCredits === 0
   const isOwn = currentUserId === listing.owner_id
   const available = isListingAvailable(listing)
   const canAfford = userCredits === null || userCredits >= priceCredits
+
+  useEffect(() => {
+    let cancelled = false
+    void fetch('/api/marketplace/purchase/preflight', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ listingId: listing.id }),
+    })
+      .then((r) => r.json())
+      .then((d: { assetCreditValue?: number }) => {
+        if (!cancelled && typeof d.assetCreditValue === 'number') {
+          setAssetCreditValue(d.assetCreditValue)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [listing.id])
 
   const handleCheckout = async () => {
     if (isOwn) {
@@ -58,45 +80,21 @@ export function ListingDetailPanel({
       addToast('Unavailable', 'This item has already been sold.', 'warning')
       return
     }
-    if (!isFree && !canAfford) {
-      addToast('Insufficient credits', `You need ${formatCredits(priceCredits)}. Open Settings → Billing or earn credits by selling.`, 'warning')
-      return
-    }
 
     setCheckingOut(true)
     try {
-      const res = await fetch('/api/marketplace/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ listingId: listing.id }),
-      })
-      const data = (await res.json()) as {
-        error?: string
-        message?: string
-        buyerCredits?: number
-        purchaseId?: string
-        invoiceUrl?: string
-      }
-
-      if (!res.ok) {
-        addToast('Checkout failed', data.message ?? data.error ?? 'Try again.', 'error')
-        return
-      }
+      const result = await runMarketplaceCreditCheckout(listing.id, addToast)
+      if (!result) return
 
       addToast(
         'Purchase confirmed',
-        isFree ? 'Item claimed. Check your notifications for the invoice.' : `Paid ${formatCredits(priceCredits)}. Invoice sent.`,
+        isFree
+          ? 'Item claimed. Your invoice is open in a new tab.'
+          : `Paid ${formatCredits(priceCredits)}. Seller withdrawable balance updated.`,
         'success',
       )
 
-      if (typeof data.buyerCredits === 'number' && data.purchaseId) {
-        onPurchaseComplete({ buyerCredits: data.buyerCredits, purchaseId: data.purchaseId })
-      }
-
-      if (data.invoiceUrl) {
-        window.open(data.invoiceUrl, '_blank', 'noopener')
-      }
+      onPurchaseComplete({ buyerCredits: result.buyerCredits, purchaseId: result.purchaseId })
       onClose()
     } catch {
       addToast('Network error', 'Could not complete checkout.', 'error')
@@ -254,9 +252,15 @@ export function ListingDetailPanel({
               )}
             </div>
 
+            {assetCreditValue !== null && !isFree && (
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 800 }}>
+                Arsenal asset value: {formatCredits(assetCreditValue)} — seller withdrawable on sale
+              </p>
+            )}
             {userCredits !== null && (
               <p style={{ margin: 0, fontSize: '0.85rem', color: canAfford ? 'var(--text-sub)' : '#f87171', fontWeight: 700 }}>
-                Your balance: {userCredits} credits
+                Your balance: {formatCredits(userCredits)}
+                {!canAfford && priceCredits > 0 ? ` · need ${formatCredits(priceCredits - userCredits)} more` : ''}
               </p>
             )}
 

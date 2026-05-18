@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getRequestUser } from '@/lib/supabase/admin'
-import { completeMarketplaceCreditPurchase } from '@/lib/marketplace/checkout-service'
+import { executeMarketplaceCreditCheckout } from '@/lib/marketplace/purchase-flow'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,17 +23,32 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await completeMarketplaceCreditPurchase(user.id, listingId)
+    const result = await executeMarketplaceCreditCheckout(user.id, listingId)
     return NextResponse.json({
       ok: true,
       ...result,
       invoiceUrl: `/marketplace/invoice/${result.purchaseId}`,
     })
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Checkout failed'
-    const status = message.includes('Insufficient') || message.includes('sold') || message.includes('own')
-      ? 400
-      : 500
+    const e = err as Error & { code?: string; preflight?: Record<string, unknown> }
+    const message = e.message ?? 'Checkout failed'
+
+    if (e.code === 'INSUFFICIENT_CREDITS' && e.preflight) {
+      return NextResponse.json(
+        {
+          error: message,
+          message,
+          code: 'INSUFFICIENT_CREDITS',
+          ...e.preflight,
+        },
+        { status: 402 },
+      )
+    }
+
+    const status =
+      message.includes('Insufficient') || message.includes('sold') || message.includes('own') || message.includes('not found')
+        ? 400
+        : 500
     return NextResponse.json({ error: message, message }, { status })
   }
 }
