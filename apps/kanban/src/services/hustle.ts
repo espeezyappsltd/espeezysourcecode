@@ -24,6 +24,7 @@ export async function fetchHustleTask(taskId: string) {
   const data = (await res.json()) as {
     task?: HustleTaskWithProfiles
     applications?: HustleApplication[]
+    my_application?: HustleApplication | null
     error?: string
   }
   if (!res.ok) throw new Error(data.error ?? 'Failed to load task')
@@ -89,6 +90,7 @@ export async function hustleTrade(
   const data = (await res.json()) as {
     success?: boolean
     task?: HustleTaskWithProfiles
+    application?: HustleApplication
     posterCredits?: number
     workerCredits?: number
     error?: string

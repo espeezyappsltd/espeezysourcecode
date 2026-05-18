@@ -46,8 +46,17 @@ export async function GET(req: NextRequest, ctx: RouteCtx) {
 
     const applicantMap = new Map((applicants ?? []).map((p) => [p.id as string, p]))
 
+    const myApplication =
+      (applications ?? []).find((a) => a.applicant_id === user.id) ?? null
+
     return NextResponse.json({
       task,
+      my_application: myApplication
+        ? {
+            ...myApplication,
+            applicant: applicantMap.get(myApplication.applicant_id) ?? null,
+          }
+        : null,
       applications: (applications ?? []).map((a) => ({
         ...a,
         applicant: applicantMap.get(a.applicant_id) ?? null,

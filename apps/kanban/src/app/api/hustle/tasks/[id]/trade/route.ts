@@ -7,6 +7,7 @@ import {
   refundHustleEscrow,
   releaseHustlePayment,
 } from '@/lib/hustle/trade-service'
+import { validateTradeAction } from '@/lib/hustle/lifecycle'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,8 +53,15 @@ export async function POST(req: NextRequest, ctx: RouteCtx) {
     if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 })
 
     const uid = user.id
+
+    const lifecycleError = validateTradeAction(action, task, uid)
+    if (lifecycleError) {
+      return NextResponse.json({ error: lifecycleError }, { status: 400 })
+    }
+
     let posterCredits: number | undefined
     let workerCredits: number | undefined
+    let application: Record<string, unknown> | undefined
 
     switch (action) {
       case 'fund': {
@@ -66,27 +74,38 @@ export async function POST(req: NextRequest, ctx: RouteCtx) {
       }
 
       case 'apply': {
-        if (task.poster_id === uid) {
-          return NextResponse.json({ error: 'You cannot apply to your own task.' }, { status: 400 })
+        const { data: existingApp } = await adminDb
+          .from('hustle_task_applications')
+          .select('id, status')
+          .eq('task_id', taskId)
+          .eq('applicant_id', uid)
+          .maybeSingle()
+
+        if (existingApp && existingApp.status !== 'rejected') {
+          return NextResponse.json({ error: 'You already applied to this gig.' }, { status: 400 })
         }
-        if (task.status !== 'open') {
-          return NextResponse.json({ error: 'This task is no longer open.' }, { status: 400 })
-        }
-        const { error: appErr } = await adminDb.from('hustle_task_applications').upsert(
-          {
-            task_id: taskId,
-            applicant_id: uid,
-            message: typeof body.message === 'string' ? body.message.trim().slice(0, 500) : null,
-            status: 'pending',
-          },
-          { onConflict: 'task_id,applicant_id' },
-        )
+
+        const { data: insertedApp, error: appErr } = await adminDb
+          .from('hustle_task_applications')
+          .upsert(
+            {
+              task_id: taskId,
+              applicant_id: uid,
+              message: typeof body.message === 'string' ? body.message.trim().slice(0, 500) : null,
+              status: 'pending',
+            },
+            { onConflict: 'task_id,applicant_id' },
+          )
+          .select('id, task_id, applicant_id, message, status, created_at')
+          .single()
+
         if (appErr) {
           if (appErr.message.includes('hustle_task_applications')) {
             return NextResponse.json({ error: 'Applications are not available yet — run migrations.' }, { status: 503 })
           }
           throw appErr
         }
+        application = insertedApp ?? undefined
         break
       }
 
@@ -194,6 +213,7 @@ export async function POST(req: NextRequest, ctx: RouteCtx) {
       success: true,
       action,
       task: updated,
+      application,
       posterCredits,
       workerCredits,
     })

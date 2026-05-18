@@ -9,6 +9,7 @@ import {
 } from '@/lib/hustle/task-validation'
 import { enrichHustleTasks } from '@/lib/hustle/task-enrich'
 import { fundHustleEscrow } from '@/lib/hustle/trade-service'
+import { fetchMyGigTasks, fetchPostedTasks } from '@/lib/hustle/my-gigs'
 import {
   accountPostingBlockedMessage,
   isAccountPostingBlocked,
@@ -32,6 +33,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status') ?? 'open'
     const mine = searchParams.get('mine') === '1'
+    const applied = searchParams.get('applied') === '1' || searchParams.get('gigs') === '1'
     const category = searchParams.get('category')
     const queryStr = searchParams.get('q')?.trim() ?? ''
     const cursor = searchParams.get('cursor')
@@ -40,17 +42,40 @@ export async function GET(req: NextRequest) {
       PAGE_SIZE_MAX,
     )
 
+    if (applied) {
+      const { tasks, nextCursor } = await fetchMyGigTasks(adminDb, uid, {
+        cursor,
+        limit,
+        category: category ?? 'all',
+        q: queryStr,
+      })
+      return NextResponse.json({
+        tasks,
+        nextCursor,
+        categories: HUSTLE_CATEGORIES,
+      })
+    }
+
+    if (mine) {
+      const { tasks, nextCursor } = await fetchPostedTasks(adminDb, uid, {
+        category: category ?? 'all',
+        q: queryStr,
+        cursor,
+        limit,
+      })
+      return NextResponse.json({
+        tasks,
+        nextCursor,
+        categories: HUSTLE_CATEGORIES,
+      })
+    }
+
     let query = adminDb
       .from('hustle_tasks')
       .select(Q.hustleTask)
+      .eq('status', status)
       .order('created_at', { ascending: false })
       .limit(limit + 1)
-
-    if (mine) {
-      query = query.eq('poster_id', uid)
-    } else {
-      query = query.eq('status', status)
-    }
 
     if (category && category !== 'all' && HUSTLE_CATEGORIES.includes(category as (typeof HUSTLE_CATEGORIES)[number])) {
       query = query.eq('category', category)

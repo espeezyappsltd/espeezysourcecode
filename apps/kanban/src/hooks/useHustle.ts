@@ -1,9 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import type { HustleCategory } from '@/lib/hustle/task-validation'
+import {
+  type GigsFilter,
+  matchesGigsFilter,
+  sortGigsByPriority,
+} from '@/lib/hustle/gig-ux'
 
-export type HustleTab = 'marketplace' | 'mine' | 'sales' | 'inventory'
+export type HustleTab = 'marketplace' | 'gigs' | 'posted' | 'sales' | 'inventory'
 
 export type HustleItem = {
   id: string
@@ -17,6 +22,7 @@ export type HustleItem = {
   price?: number
   status?: string
   created_at: string
+  updated_at?: string
   poster?: {
     id?: string
     full_name: string
@@ -27,6 +33,10 @@ export type HustleItem = {
     id?: string
     full_name: string | null
   } | null
+  my_role?: 'applicant' | 'assignee'
+  application_status?: string | null
+  application_message?: string | null
+  application_created_at?: string | null
 }
 
 const CACHE_PREFIX = 'gf_hustle_cache_v1'
@@ -57,6 +67,18 @@ function writeCache(key: string, items: HustleItem[]) {
   }
 }
 
+function clearTabCache(tab: HustleTab) {
+  try {
+    const prefix = `${CACHE_PREFIX}:${tab}:`
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i)
+      if (k?.startsWith(prefix)) sessionStorage.removeItem(k)
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export function useHustle() {
   const [tab, setTab] = useState<HustleTab>('marketplace')
   const [search, setSearch] = useState('')
@@ -65,6 +87,8 @@ export function useHustle() {
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [gigsFilter, setGigsFilter] = useState<GigsFilter>('all')
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   const abortRef = useRef<AbortController | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -105,7 +129,10 @@ export function useHustle() {
           case 'marketplace':
             endpoint = `/api/hustle/tasks?status=open&${params}`
             break
-          case 'mine':
+          case 'gigs':
+            endpoint = `/api/hustle/tasks?applied=1&${params}`
+            break
+          case 'posted':
             endpoint = `/api/hustle/tasks?mine=1&${params}`
             break
           case 'sales':
@@ -121,8 +148,14 @@ export function useHustle() {
           signal: controller.signal,
         })
 
-        if (!res.ok) return
+        if (!res.ok) {
+          const errBody = (await res.json().catch(() => ({}))) as { error?: string }
+          setFetchError(errBody.error ?? 'Could not load listings')
+          if (!isMore) setItems([])
+          return
+        }
 
+        setFetchError(null)
         const data = await res.json()
         const newItems: HustleItem[] =
           data.tasks ??
@@ -184,18 +217,53 @@ export function useHustle() {
     void fetchItems({ tab, q: search, cat: category })
   }, [fetchItems, tab, search, category])
 
+  const invalidateGigsCache = useCallback(() => {
+    clearTabCache('gigs')
+  }, [])
+
+  const setTabAndReset = useCallback((next: HustleTab) => {
+    setTab(next)
+    setGigsFilter('all')
+    setFetchError(null)
+  }, [])
+
+  const displayItems = useMemo(() => {
+    if (tab === 'gigs') {
+      const filtered = items.filter((i) => matchesGigsFilter(i, gigsFilter, 'worker'))
+      return sortGigsByPriority(filtered, 'worker')
+    }
+    if (tab === 'posted') {
+      const filtered = items.filter((i) => matchesGigsFilter(i, gigsFilter, 'poster'))
+      return sortGigsByPriority(filtered, 'poster')
+    }
+    return items
+  }, [items, tab, gigsFilter])
+
+  const refreshHard = useCallback(() => {
+    clearTabCache(tab)
+    void fetchItems({ tab, q: search, cat: category })
+  }, [fetchItems, tab, search, category])
+
   return {
     tab,
-    setTab,
+    setTab: setTabAndReset,
     search,
     setSearch,
     category,
     setCategory,
     items,
+    displayItems,
     loading,
     loadingMore,
     nextCursor,
     loadMore,
     refresh,
+    refreshHard,
+    invalidateGigsCache,
+    gigsFilter,
+    setGigsFilter,
+    fetchError,
   }
 }
+
+export type { GigsFilter }

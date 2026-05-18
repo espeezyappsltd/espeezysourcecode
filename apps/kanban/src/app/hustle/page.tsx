@@ -15,6 +15,10 @@ import {
   User,
   Clock,
   Coins,
+  RotateCcw,
+  X,
+  Zap,
+  AlertCircle,
 } from 'lucide-react'
 import { formatCredits, formatGbpApprox } from '@/lib/credits'
 import { resolveTaskPayoutCredits } from '@/lib/hustle/credits'
@@ -28,6 +32,12 @@ import {
   HUSTLE_CATEGORIES,
   type HustleCategory,
 } from '@/lib/hustle/task-validation'
+import { APPLICATION_STATUS_LABELS } from '@/lib/hustle/lifecycle'
+import {
+  getPosterGigNextAction,
+  getWorkerGigNextAction,
+  hustleSearchPlaceholder,
+} from '@/lib/hustle/gig-ux'
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
   open: { label: 'Open', color: '#10B981' },
@@ -49,11 +59,17 @@ function HustlePage() {
     category,
     setCategory,
     items,
+    displayItems,
     loading,
     loadingMore,
     nextCursor,
     loadMore,
     refresh,
+    refreshHard,
+    invalidateGigsCache,
+    gigsFilter,
+    setGigsFilter,
+    fetchError,
   } = useHustle()
 
   const [postOpen, setPostOpen] = useState(false)
@@ -70,7 +86,17 @@ function HustlePage() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const showCategoryFilters = tab === 'marketplace' || tab === 'mine'
+  useEffect(() => {
+    document.getElementById('hustle-main')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [tab])
+
+  const showCategoryFilters = tab === 'marketplace' || tab === 'gigs' || tab === 'posted'
+  const showStatusFilters = tab === 'gigs' || tab === 'posted'
+  const isHustleTaskTab = tab === 'marketplace' || tab === 'gigs' || tab === 'posted'
+  const listItems = showStatusFilters ? displayItems : items
+  const isFilteredEmpty = listItems.length === 0 && items.length > 0
+  const resultLabel =
+    listItems.length === 1 ? '1 gig' : `${listItems.length} gigs`
 
   return (
     <div className="hustle-shell page-shell">
@@ -83,14 +109,14 @@ function HustlePage() {
           <div style={{ padding: '0.75rem', background: 'var(--brand)', borderRadius: '12px', color: 'white' }}>
             <Briefcase size={28} />
           </div>
-          <motion.div>
+          <div>
             <h1 className="title-display" style={{ color: 'var(--text-main)', margin: 0 }}>
               Hustle <span style={{ color: 'var(--brand)' }}>Board</span>
             </h1>
             <p className="body-copy" style={{ fontSize: '0.9rem', margin: '0.25rem 0 0' }}>
               Campus gigs paid in Espeezy credits · escrow-backed trades
             </p>
-          </motion.div>
+          </div>
           <button type="button" className="btn btn-primary hustle-post-btn" onClick={() => setPostOpen(true)}>
             <Plus size={18} aria-hidden />
             Post gig
@@ -114,19 +140,55 @@ function HustlePage() {
             <input
               id="hustle-search"
               type="search"
-              placeholder="Smart search: title, description, category… (Ctrl+F)"
+              placeholder={hustleSearchPlaceholder(tab)}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search hustle tasks"
             />
+            {search ? (
+              <button
+                type="button"
+                className="hustle-search-clear"
+                aria-label="Clear search"
+                onClick={() => setSearch('')}
+              >
+                <X size={16} />
+              </button>
+            ) : null}
           </div>
+          <button
+            type="button"
+            className="hustle-tab-btn"
+            style={{ flexShrink: 0 }}
+            aria-label="Refresh list"
+            title="Refresh"
+            onClick={() => refreshHard()}
+            disabled={loading}
+          >
+            <RotateCcw size={16} className={loading ? 'animate-spin' : undefined} />
+          </button>
           <nav className="hustle-tab-nav" aria-label="Hustle sections">
             <TabButton active={tab === 'marketplace'} onClick={() => setTab('marketplace')} icon={<ShoppingBag size={16} />} label="Browse" />
-            <TabButton active={tab === 'mine'} onClick={() => setTab('mine')} icon={<ListChecks size={16} />} label="Mine" />
+            <TabButton active={tab === 'gigs'} onClick={() => setTab('gigs')} icon={<ListChecks size={16} />} label="My gigs" />
+            <TabButton active={tab === 'posted'} onClick={() => setTab('posted')} icon={<Briefcase size={16} />} label="Posted" />
             <TabButton active={tab === 'sales'} onClick={() => setTab('sales')} icon={<Package size={16} />} label="Sales" />
             <TabButton active={tab === 'inventory'} onClick={() => setTab('inventory')} icon={<User size={16} />} label="Assets" />
           </nav>
         </div>
+
+        {showStatusFilters && (
+          <div className="hustle-status-filters" role="tablist" aria-label="Filter by status">
+            <StatusFilterChip active={gigsFilter === 'all'} label="All" onClick={() => setGigsFilter('all')} />
+            <StatusFilterChip
+              active={gigsFilter === 'action'}
+              label="Needs action"
+              variant="action"
+              onClick={() => setGigsFilter('action')}
+            />
+            <StatusFilterChip active={gigsFilter === 'pending'} label="Waiting" onClick={() => setGigsFilter('pending')} />
+            <StatusFilterChip active={gigsFilter === 'done'} label="Done" onClick={() => setGigsFilter('done')} />
+          </div>
+        )}
 
         {showCategoryFilters && (
           <div className="hustle-categories" role="tablist" aria-label="Filter by category">
@@ -149,9 +211,39 @@ function HustlePage() {
             ))}
           </div>
         )}
+
+        {!loading && items.length > 0 && isHustleTaskTab && (
+          <div className="hustle-toolbar-meta">
+            <span aria-live="polite">{resultLabel}</span>
+            {(search || category !== 'all' || gigsFilter !== 'all') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('')
+                  setCategory('all')
+                  setGigsFilter('all')
+                }}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <main aria-busy={loading} id="hustle-main">
+        {fetchError && (
+          <div className="hustle-error-banner" role="alert">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertCircle size={18} />
+              {fetchError}
+            </span>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => refreshHard()}>
+              Retry
+            </button>
+          </div>
+        )}
+
         {loading && items.length === 0 ? (
           <div style={{ display: 'grid', gap: '0.75rem' }}>
             {[0, 1, 2, 4].map((i) => (
@@ -159,14 +251,23 @@ function HustlePage() {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <EmptyState tab={tab} onSeed={() => refresh()} />
+          <EmptyState
+            tab={tab}
+            onSeed={() => refresh()}
+            onBrowse={() => setTab('marketplace')}
+            onPost={() => setPostOpen(true)}
+          />
+        ) : isFilteredEmpty ? (
+          <FilteredEmptyState onClear={() => setGigsFilter('all')} />
         ) : (
           <div className="hustle-list">
-            {items.map((item) => (
+            {listItems.map((item) => (
               <HustleCard
                 key={item.id}
                 item={item}
-                isHustleTask={tab === 'marketplace' || tab === 'mine'}
+                isHustleTask={isHustleTaskTab}
+                showApplicationMeta={tab === 'gigs'}
+                gigPerspective={tab === 'posted' ? 'poster' : tab === 'gigs' ? 'worker' : undefined}
                 onOpen={setSelectedTaskId}
               />
             ))}
@@ -203,6 +304,8 @@ function HustlePage() {
           taskId={selectedTaskId}
           onClose={() => setSelectedTaskId(null)}
           onUpdated={() => void refresh()}
+          onViewMyGigs={() => setTab('gigs')}
+          onGigsListChanged={invalidateGigsCache}
         />
       )}
     </div>
@@ -228,13 +331,65 @@ function TabButton({
   )
 }
 
+function StatusFilterChip({
+  active,
+  label,
+  onClick,
+  variant,
+}: {
+  active: boolean
+  label: string
+  onClick: () => void
+  variant?: 'action'
+}) {
+  return (
+    <button
+      type="button"
+      className={`hustle-status-chip${active ? ' active' : ''}${variant === 'action' ? ' hustle-status-chip--action' : ''}`}
+      onClick={onClick}
+      aria-pressed={active}
+    >
+      {variant === 'action' ? <Zap size={12} aria-hidden /> : null}
+      {label}
+    </button>
+  )
+}
+
+function FilteredEmptyState({ onClear }: { onClear: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      style={{
+        textAlign: 'center',
+        padding: '3rem 2rem',
+        background: 'var(--bg-sub)',
+        borderRadius: '20px',
+        border: '1px dashed var(--border)',
+      }}
+    >
+      <h3 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>No gigs match these filters</h3>
+      <p className="body-copy" style={{ marginBottom: '1rem' }}>
+        Try a different status filter or clear your search.
+      </p>
+      <button type="button" className="btn btn-secondary" onClick={onClear}>
+        Show all gigs
+      </button>
+    </motion.div>
+  )
+}
+
 const HustleCard = memo(function HustleCard({
   item,
   isHustleTask,
+  showApplicationMeta,
+  gigPerspective,
   onOpen,
 }: {
   item: HustleItem
   isHustleTask: boolean
+  showApplicationMeta?: boolean
+  gigPerspective?: 'worker' | 'poster'
   onOpen: (id: string) => void
 }) {
   const posterId = item.poster?.id ?? item.poster_id
@@ -246,9 +401,17 @@ const HustleCard = memo(function HustleCard({
     : 0
   const escrowOk = (item.escrow_credits ?? 0) >= creditValue && creditValue > 0
 
+  const nextAction =
+    gigPerspective === 'worker'
+      ? getWorkerGigNextAction(item)
+      : gigPerspective === 'poster'
+        ? getPosterGigNextAction(item)
+        : null
+  const needsAction = nextAction?.tone === 'action'
+
   return (
     <article
-      className={`hustle-card${isHustleTask ? '' : ' hustle-card--listing'}`}
+      className={`hustle-card${isHustleTask ? '' : ' hustle-card--listing'}${needsAction ? ' hustle-card--needs-action' : ''}`}
       tabIndex={isHustleTask ? 0 : undefined}
       role={isHustleTask ? 'button' : 'article'}
       aria-label={item.title}
@@ -313,6 +476,34 @@ const HustleCard = memo(function HustleCard({
                 {STATUS_META[item.status].label}
               </span>
             )}
+            {showApplicationMeta && item.application_status && (
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 900,
+                  color: 'var(--brand)',
+                  background: 'rgba(var(--brand-rgb), 0.12)',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                }}
+              >
+                {APPLICATION_STATUS_LABELS[item.application_status] ?? item.application_status}
+              </span>
+            )}
+            {showApplicationMeta && item.my_role === 'assignee' && (
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 900,
+                  color: '#3B82F6',
+                  background: '#3B82F618',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                }}
+              >
+                Hired
+              </span>
+            )}
             <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               <Clock size={12} />
               {timeLabel}
@@ -320,6 +511,24 @@ const HustleCard = memo(function HustleCard({
           </div>
           <h3 className="hustle-card-title">{item.title}</h3>
           <p className="hustle-card-desc">{item.description || 'No description provided.'}</p>
+          {showApplicationMeta && item.application_message ? (
+            <p
+              style={{
+                margin: '0.35rem 0 0',
+                fontSize: '0.75rem',
+                color: 'var(--text-sub)',
+                fontStyle: 'italic',
+              }}
+            >
+              Your note: {item.application_message}
+            </p>
+          ) : null}
+          {nextAction ? (
+            <p className={`hustle-card-next-action hustle-card-next-action--${nextAction.tone}`}>
+              {nextAction.tone === 'action' ? <Zap size={13} aria-hidden /> : null}
+              {nextAction.label}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -366,7 +575,17 @@ function formatTimeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString()
 }
 
-function EmptyState({ tab, onSeed }: { tab: HustleTab; onSeed?: () => void }) {
+function EmptyState({
+  tab,
+  onSeed,
+  onBrowse,
+  onPost,
+}: {
+  tab: HustleTab
+  onSeed?: () => void
+  onBrowse?: () => void
+  onPost?: () => void
+}) {
   const [seeding, setSeeding] = useState(false)
 
   const handleSeed = async () => {
@@ -392,25 +611,54 @@ function EmptyState({ tab, onSeed }: { tab: HustleTab; onSeed?: () => void }) {
         {tab === 'marketplace' ? <ShoppingBag size={64} /> : tab === 'inventory' ? <Package size={64} /> : <ListChecks size={64} />}
       </div>
       <h3 style={{ fontWeight: 900, fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-        {tab === 'marketplace' ? 'No open tasks yet' : 'No results found'}
+        {tab === 'marketplace'
+          ? 'No open tasks yet'
+          : tab === 'gigs'
+            ? 'No gigs yet'
+            : tab === 'posted'
+              ? 'Nothing posted yet'
+              : 'No results found'}
       </h3>
-      <p className="body-copy" style={{ marginBottom: tab === 'marketplace' ? '1rem' : 0 }}>
+      <p
+        className="body-copy"
+        style={{
+          marginBottom: tab === 'marketplace' || tab === 'gigs' || tab === 'posted' ? '1rem' : 0,
+        }}
+      >
         {tab === 'marketplace'
           ? 'Post a gig or load sample tasks — only quality-checked listings appear here.'
-          : 'Try another category or search term.'}
+          : tab === 'gigs'
+            ? 'Apply to gigs on Browse — they appear here with status, escrow, and next steps.'
+            : tab === 'posted'
+              ? 'Post a gig to hire scholars and manage escrow from here.'
+              : 'Try another category or search term.'}
       </p>
-      {tab === 'marketplace' && onSeed && (
-        <button
-          type="button"
-          className="btn btn-secondary"
-          disabled={seeding}
-          onClick={() => void handleSeed()}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-        >
-          {seeding ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-          Load sample tasks
-        </button>
-      )}
+      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        {tab === 'gigs' && onBrowse && (
+          <button type="button" className="btn btn-primary" onClick={onBrowse}>
+            <ShoppingBag size={16} aria-hidden />
+            Browse gigs
+          </button>
+        )}
+        {tab === 'posted' && onPost && (
+          <button type="button" className="btn btn-primary" onClick={onPost}>
+            <Plus size={16} aria-hidden />
+            Post a gig
+          </button>
+        )}
+        {tab === 'marketplace' && onSeed && (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={seeding}
+            onClick={() => void handleSeed()}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            {seeding ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            Load sample tasks
+          </button>
+        )}
+      </div>
     </motion.div>
   )
 }

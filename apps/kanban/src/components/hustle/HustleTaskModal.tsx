@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Loader2, Coins, X, Shield } from 'lucide-react'
+import { Loader2, Coins, X, Shield, Calendar } from 'lucide-react'
 import type { HustleTaskWithProfiles } from '@/lib/hustle/task-enrich'
 import type { HustleApplication } from '@/services/hustle'
 import { fetchHustleTask, hustleTrade } from '@/services/hustle'
@@ -12,24 +12,42 @@ import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
 import { hustleTradeCopy } from '@/lib/platform/transaction-confirm-copy'
+import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { APPLICATION_STATUS_LABELS } from '@/lib/hustle/lifecycle'
+import { getPosterGigNextAction, getWorkerGigNextAction } from '@/lib/hustle/gig-ux'
+import { HustleLifecycleBar } from '@/components/hustle/HustleLifecycleBar'
+import { HustleNextActionBanner } from '@/components/hustle/HustleNextActionBanner'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
+
+const SUCCESS_MESSAGES: Partial<Record<Parameters<typeof hustleTrade>[1], string>> = {
+  fund: 'Escrow funded — credits are secured until the gig completes.',
+  accept: 'Worker hired. They can start when escrow is ready.',
+  start: 'You started work on this gig.',
+  submit: 'Submitted for review. The poster can approve and release payment.',
+  approve: 'Payment released to the worker.',
+  cancel: 'Gig cancelled. Escrow refunded when applicable.',
+}
 
 type Props = {
   taskId: string
   onClose: () => void
   onUpdated: () => void
+  onViewMyGigs?: () => void
+  onGigsListChanged?: () => void
 }
 
-export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
+export function HustleTaskModal({ taskId, onClose, onUpdated, onViewMyGigs, onGigsListChanged }: Props) {
   const { profile } = useProfile()
   const { addToast } = useNotifications()
   const { confirmTransaction } = useTransactionConfirm()
+  const { showConfirmation } = useSmartLoading()
   const [task, setTask] = useState<HustleTaskWithProfiles | null>(null)
   const [applications, setApplications] = useState<HustleApplication[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
   const [applyMessage, setApplyMessage] = useState('')
+  const [myApplication, setMyApplication] = useState<HustleApplication | null>(null)
 
   const uid = profile?.id
   const isPoster = Boolean(uid && task?.poster_id === uid)
@@ -41,6 +59,7 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
       const data = await fetchHustleTask(taskId)
       setTask(data.task ?? null)
       setApplications(data.applications ?? [])
+      setMyApplication(data.my_application ?? null)
     } catch (e) {
       addToast('Load failed', e instanceof Error ? e.message : 'Could not load task', 'error')
       onClose()
@@ -52,6 +71,14 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !busy) onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose, busy])
 
   const runWithConfirm = async (
     action: Parameters<typeof hustleTrade>[1],
@@ -77,7 +104,34 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
     try {
       const result = await hustleTrade(taskId, action, extra)
       if (result.task) setTask(result.task)
-      addToast('Success', `Completed: ${action}`, 'success')
+      if (result.application) setMyApplication(result.application)
+
+      if (action === 'apply' && result.task) {
+        showConfirmation({
+          title: 'Application sent',
+          message: `You're on the list for "${result.task.title}". Track escrow, status, and next steps in My gigs.`,
+          type: 'success',
+          confirmLabel: 'View my gigs',
+          cancelLabel: 'Close',
+          onConfirm: () => {
+            onGigsListChanged?.()
+            onViewMyGigs?.()
+            onClose()
+          },
+          onCancel: () => {
+            onGigsListChanged?.()
+            onUpdated()
+          },
+        })
+        return
+      }
+
+      addToast(
+        'Done',
+        SUCCESS_MESSAGES[action] ?? `Completed: ${action}`,
+        'success',
+      )
+      onGigsListChanged?.()
       onUpdated()
       await load()
     } catch (e) {
@@ -100,6 +154,32 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
   const funded = (task.escrow_credits ?? 0) >= task.payout_credits
   const credits = task.payout_credits
   const payoutFee = breakdownPlatformFee(credits)
+
+  const gigItem = {
+    title: task.title,
+    description: task.description,
+    category: task.category,
+    status: task.status,
+    created_at: task.created_at,
+    updated_at: task.updated_at,
+    payout_credits: task.payout_credits,
+    escrow_credits: task.escrow_credits,
+    my_role: isAssignee ? ('assignee' as const) : myApplication ? ('applicant' as const) : undefined,
+    application_status: myApplication?.status ?? (isAssignee ? 'accepted' : null),
+  }
+  const nextAction = isPoster
+    ? getPosterGigNextAction(gigItem)
+    : !isPoster && uid
+      ? getWorkerGigNextAction(gigItem)
+      : null
+
+  const deadlineLabel =
+    task.deadline &&
+    new Date(task.deadline).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
 
   return (
     <div className="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="hustle-task-title">
@@ -128,7 +208,14 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
                 {task.title}
               </h2>
               <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>
-                {formatHustleCategory(task.category)} · {task.status}
+                {formatHustleCategory(task.category)} · {task.status.replace('_', ' ')}
+                {deadlineLabel ? (
+                  <>
+                    {' '}
+                    · <Calendar size={11} style={{ display: 'inline', verticalAlign: '-2px' }} />{' '}
+                    Due {deadlineLabel}
+                  </>
+                ) : null}
               </p>
             </div>
           </div>
@@ -144,12 +231,38 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
             </span>
           </div>
         </div>
-        <div className="app-modal-panel__scroll" style={{ padding: '1rem 1.5rem' }}>
+        <div className="app-modal-panel__scroll" style={{ padding: '1rem 1.5rem 0' }}>
+          <HustleLifecycleBar status={task.status} compact />
+          {nextAction ? <HustleNextActionBanner action={nextAction} /> : null}
           <p style={{ margin: '0 0 1rem', lineHeight: 1.6, fontSize: '0.9rem', color: 'var(--text-sub)' }}>
             {task.description}
           </p>
 
-          {!isPoster && task.status === 'open' && uid && (
+          {myApplication && !isPoster && (
+            <div
+              style={{
+                marginBottom: '1rem',
+                padding: '0.75rem',
+                borderRadius: '10px',
+                background: 'rgba(var(--brand-rgb), 0.08)',
+                border: '1px solid rgba(var(--brand-rgb), 0.2)',
+              }}
+            >
+              <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 800, color: 'var(--brand)' }}>
+                {APPLICATION_STATUS_LABELS[myApplication.status] ?? myApplication.status}
+              </p>
+              {myApplication.message ? (
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--text-sub)' }}>
+                  Your note: {myApplication.message}
+                </p>
+              ) : null}
+            </div>
+          )}
+
+          {!isPoster &&
+            task.status === 'open' &&
+            uid &&
+            (!myApplication || myApplication.status === 'rejected') && (
             <div style={{ marginBottom: '1rem' }}>
               <textarea
                 className="form-input"
@@ -216,13 +329,13 @@ export function HustleTaskModal({ taskId, onClose, onUpdated }: Props) {
             </div>
           )}
 
-          <div className="hustle-modal-actions">
+          <div className="hustle-modal-footer hustle-modal-actions">
             {isPoster && !funded && task.status === 'open' && (
               <button
                 type="button"
                 className="btn btn-secondary"
                 disabled={busy !== null}
-                onClick={() => void run('fund')}
+                onClick={() => void runWithConfirm('fund')}
               >
                 Fund escrow
               </button>
