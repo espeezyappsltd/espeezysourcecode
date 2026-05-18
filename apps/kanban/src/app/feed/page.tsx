@@ -17,6 +17,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
+import { useNotifications } from '@/components/NotificationProvider'
 import type { Profile } from '@/types/database'
 import type { PostReactionType } from '@/types/feed'
 import {
@@ -83,6 +84,7 @@ function timeAgo(date: string): string {
 
 export default function FeedPage() {
   const { profile } = useProfile()
+  const { addToast } = useNotifications()
   const router = useRouter()
 
   const [composerText, setComposerText] = useState('')
@@ -163,13 +165,16 @@ export default function FeedPage() {
   const submitPost = async () => {
     if (!composerText.trim() || posting || !profile) return
     setPosting(true)
-    const { ok } = await createFeedPost({
+    const result = await createFeedPost({
       content: composerText.trim(),
       visibility: composerVisibility,
     })
-    if (ok) {
+    if (result.ok) {
       setComposerText('')
+      addToast('Posted', 'Your update is live on the feed.', 'success')
       await loadPosts()
+    } else {
+      addToast('Could not post', result.error ?? 'Try again in a moment.', 'error')
     }
     setPosting(false)
   }

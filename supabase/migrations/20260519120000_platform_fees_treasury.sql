@@ -45,12 +45,15 @@ ALTER TABLE public.platform_treasury ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.platform_fee_ledger ENABLE ROW LEVEL SECURITY;
 
 -- Service role only (no client reads/writes)
+DROP POLICY IF EXISTS platform_fee_settings_service ON public.platform_fee_settings;
 CREATE POLICY platform_fee_settings_service ON public.platform_fee_settings
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS platform_treasury_service ON public.platform_treasury;
 CREATE POLICY platform_treasury_service ON public.platform_treasury
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS platform_fee_ledger_service ON public.platform_fee_ledger;
 CREATE POLICY platform_fee_ledger_service ON public.platform_fee_ledger
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
@@ -262,13 +265,142 @@ BEGIN
 END;
 $$;
 
--- Hustle release: worker receives net; fee → treasury
-ALTER TABLE public.hustle_task_ledger
-  DROP CONSTRAINT IF EXISTS hustle_task_ledger_kind_check;
+-- Hustle prerequisites (run before ledger alter if 20260519110000 was skipped)
+CREATE TABLE IF NOT EXISTS public.hustle_tasks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  poster_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  assignee_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  title text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  category text NOT NULL DEFAULT 'other',
+  payout_cents integer NOT NULL DEFAULT 0,
+  payout_credits integer NOT NULL DEFAULT 0 CHECK (payout_credits >= 0 AND payout_credits <= 100),
+  escrow_credits integer NOT NULL DEFAULT 0 CHECK (escrow_credits >= 0),
+  status text NOT NULL DEFAULT 'open',
+  deadline timestamptz,
+  connection_only boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 
-ALTER TABLE public.hustle_task_ledger
-  ADD CONSTRAINT hustle_task_ledger_kind_check
-  CHECK (kind IN ('escrow_in', 'release', 'refund', 'platform_fee'));
+ALTER TABLE public.hustle_tasks
+  ADD COLUMN IF NOT EXISTS payout_credits integer NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS escrow_credits integer NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS public.hustle_task_applications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id uuid NOT NULL REFERENCES public.hustle_tasks(id) ON DELETE CASCADE,
+  applicant_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  message text,
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (task_id, applicant_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.hustle_task_ledger (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id uuid NOT NULL REFERENCES public.hustle_tasks(id) ON DELETE CASCADE,
+  from_user_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  to_user_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  credits_amount integer NOT NULL CHECK (credits_amount > 0),
+  kind text NOT NULL CHECK (kind IN ('escrow_in', 'release', 'refund', 'platform_fee')),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS hustle_task_applications_task_idx
+  ON public.hustle_task_applications (task_id, status);
+
+CREATE INDEX IF NOT EXISTS hustle_task_ledger_task_idx
+  ON public.hustle_task_ledger (task_id, created_at DESC);
+
+-- Expand kind check when ledger already existed from an older migration
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'hustle_task_ledger'
+  ) THEN
+    ALTER TABLE public.hustle_task_ledger DROP CONSTRAINT IF EXISTS hustle_task_ledger_kind_check;
+    ALTER TABLE public.hustle_task_ledger
+      ADD CONSTRAINT hustle_task_ledger_kind_check
+      CHECK (kind IN ('escrow_in', 'release', 'refund', 'platform_fee'));
+  END IF;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Hustle escrow RPCs (no-op replace if already present from 20260519110000)
+CREATE OR REPLACE FUNCTION public.hustle_task_fund_escrow(p_task_id uuid, p_poster_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_task public.hustle_tasks%ROWTYPE;
+  v_amount integer;
+  v_balance integer;
+BEGIN
+  SELECT * INTO v_task FROM public.hustle_tasks WHERE id = p_task_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'task_not_found'; END IF;
+  IF v_task.poster_id <> p_poster_id THEN RAISE EXCEPTION 'not_poster'; END IF;
+  IF v_task.status NOT IN ('open', 'assigned') THEN RAISE EXCEPTION 'invalid_status'; END IF;
+
+  v_amount := GREATEST(v_task.payout_credits, 0);
+  IF v_amount <= 0 THEN RAISE EXCEPTION 'invalid_amount'; END IF;
+  IF v_task.escrow_credits >= v_amount THEN RAISE EXCEPTION 'already_funded'; END IF;
+
+  SELECT espeezy_credits INTO v_balance FROM public.profiles WHERE id = p_poster_id FOR UPDATE;
+  IF COALESCE(v_balance, 0) < v_amount THEN RAISE EXCEPTION 'insufficient_credits'; END IF;
+
+  UPDATE public.profiles SET espeezy_credits = espeezy_credits - v_amount WHERE id = p_poster_id;
+  UPDATE public.hustle_tasks SET escrow_credits = v_amount, updated_at = now() WHERE id = p_task_id;
+
+  INSERT INTO public.hustle_task_ledger (task_id, from_user_id, credits_amount, kind)
+  VALUES (p_task_id, p_poster_id, v_amount, 'escrow_in');
+
+  RETURN jsonb_build_object(
+    'escrow_credits', v_amount,
+    'poster_credits', (SELECT espeezy_credits FROM public.profiles WHERE id = p_poster_id)
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.hustle_task_refund_escrow(p_task_id uuid, p_poster_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_task public.hustle_tasks%ROWTYPE;
+  v_amount integer;
+BEGIN
+  SELECT * INTO v_task FROM public.hustle_tasks WHERE id = p_task_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'task_not_found'; END IF;
+  IF v_task.poster_id <> p_poster_id THEN RAISE EXCEPTION 'not_poster'; END IF;
+
+  v_amount := v_task.escrow_credits;
+  IF v_amount <= 0 THEN
+    UPDATE public.hustle_tasks SET status = 'cancelled', updated_at = now() WHERE id = p_task_id;
+    RETURN jsonb_build_object('status', 'cancelled', 'refunded', 0);
+  END IF;
+
+  UPDATE public.profiles SET espeezy_credits = espeezy_credits + v_amount WHERE id = p_poster_id;
+  UPDATE public.hustle_tasks SET status = 'cancelled', escrow_credits = 0, updated_at = now() WHERE id = p_task_id;
+
+  INSERT INTO public.hustle_task_ledger (task_id, from_user_id, to_user_id, credits_amount, kind)
+  VALUES (p_task_id, NULL, p_poster_id, v_amount, 'refund');
+
+  RETURN jsonb_build_object(
+    'status', 'cancelled',
+    'refunded', v_amount,
+    'poster_credits', (SELECT espeezy_credits FROM public.profiles WHERE id = p_poster_id)
+  );
+END;
+$$;
+
+-- Hustle release: worker receives net; fee → treasury
 
 CREATE OR REPLACE FUNCTION public.hustle_task_release_payment(p_task_id uuid, p_poster_id uuid)
 RETURNS jsonb
@@ -334,5 +466,9 @@ GRANT EXECUTE ON FUNCTION public.credit_platform_treasury(integer, text, uuid, i
 REVOKE ALL ON FUNCTION public.marketplace_credit_purchase(uuid, uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.marketplace_credit_purchase(uuid, uuid) TO service_role;
 
+REVOKE ALL ON FUNCTION public.hustle_task_fund_escrow(uuid, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.hustle_task_refund_escrow(uuid, uuid) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.hustle_task_release_payment(uuid, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.hustle_task_fund_escrow(uuid, uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.hustle_task_refund_escrow(uuid, uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.hustle_task_release_payment(uuid, uuid) TO service_role;

@@ -17,9 +17,11 @@ export async function createFeedPost(payload: { content: string; visibility: 'pu
   const res = await fetch('/api/feed', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(payload),
   })
-  return { ok: res.ok }
+  const data = (await res.json().catch(() => ({}))) as { error?: string; post?: unknown }
+  return { ok: res.ok, error: data.error, post: data.post }
 }
 
 export async function reactToFeedPost(postId: string, reaction: PostReactionType) {

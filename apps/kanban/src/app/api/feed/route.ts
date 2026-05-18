@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
+import {
+  accountPostingBlockedMessage,
+  isAccountPostingBlocked,
+} from '@/lib/platform/account-status'
 export const dynamic = 'force-dynamic'
 
 
@@ -121,8 +125,11 @@ export async function POST(req: NextRequest) {
     if (profileError) {
       return NextResponse.json({ error: profileError.message }, { status: 500 })
     }
-    if (profile?.account_status !== 'active' && profile?.account_status !== undefined) {
-      return NextResponse.json({ error: 'Your account has been suspended. Contact support.' }, { status: 403 })
+    if (isAccountPostingBlocked(profile?.account_status)) {
+      return NextResponse.json(
+        { error: accountPostingBlockedMessage(profile?.account_status) },
+        { status: 403 },
+      )
     }
 
     const parsedBody = createPostSchema.safeParse(await req.json())

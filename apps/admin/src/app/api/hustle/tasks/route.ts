@@ -95,8 +95,14 @@ export async function POST(req: NextRequest) {
       throw profileError
     }
 
-    if (profile?.account_status !== 'active' && profile?.account_status !== undefined) {
-      return NextResponse.json({ error: 'Account suspended' }, { status: 403 })
+    const { isAccountPostingBlocked, accountPostingBlockedMessage } = await import(
+      '@/lib/platform/account-status'
+    )
+    if (isAccountPostingBlocked(profile?.account_status)) {
+      return NextResponse.json(
+        { error: accountPostingBlockedMessage(profile?.account_status) },
+        { status: 403 },
+      )
     }
 
     const { title, description, category, payout_cents, deadline, connection_only } = await req.json()

@@ -9,6 +9,10 @@ import {
 } from '@/lib/hustle/task-validation'
 import { enrichHustleTasks } from '@/lib/hustle/task-enrich'
 import { fundHustleEscrow } from '@/lib/hustle/trade-service'
+import {
+  accountPostingBlockedMessage,
+  isAccountPostingBlocked,
+} from '@/lib/platform/account-status'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,8 +100,11 @@ export async function POST(req: NextRequest) {
 
     if (profileError) throw profileError
 
-    if (profile?.account_status !== 'active' && profile?.account_status !== undefined) {
-      return NextResponse.json({ error: 'Account suspended' }, { status: 403 })
+    if (isAccountPostingBlocked(profile?.account_status)) {
+      return NextResponse.json(
+        { error: accountPostingBlockedMessage(profile?.account_status) },
+        { status: 403 },
+      )
     }
 
     const body = await req.json()
