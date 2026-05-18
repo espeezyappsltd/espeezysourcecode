@@ -461,7 +461,13 @@ export default function Sidebar({ user }: SidebarProps) {
               isLocked={PREMIUM_LINKS.has(link.name) && !isPremiumMember}
               label={link.name}
               icon={link.icon}
-              onClick={() => handleNavigation(link.path)}
+              onClick={() => {
+                if (PREMIUM_LINKS.has(link.name) && !isPremiumMember) {
+                  pushRoute('/upgrade')
+                  return
+                }
+                handleNavigation(link.path)
+              }}
             />
           ))}
         </nav>

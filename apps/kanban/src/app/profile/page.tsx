@@ -9,7 +9,7 @@ import { fetchArtifactsByUser, fetchCommitsByUser, updateProfileById } from '@/s
 import type { Artifact, Commit } from '@/types/database'
 
 export default function ProfilePage() {
-   const { profile, loading, refreshProfile } = useProfile()
+   const { profile, loading, refreshProfile, setProfile } = useProfile()
    const [isEditingBio, setIsEditingBio] = useState(false)
    const [bioText, setBioText] = useState('')
    const [isSaving, setIsSaving] = useState(false)
@@ -62,6 +62,7 @@ export default function ProfilePage() {
       
       try {
             await updateProfileById(profile.id, { biography: bioText })
+        setProfile((prev) => (prev ? { ...prev, biography: bioText } : prev))
         await refreshProfile()
         setIsEditingBio(false)
          } catch (err) {

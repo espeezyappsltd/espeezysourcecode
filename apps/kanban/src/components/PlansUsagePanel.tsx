@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Activity, HardDrive, Layers, ListTodo, Sparkles } from 'lucide-react'
+import { friendlySupabaseError } from '@/utils/supabase-errors'
 
 type UsageStats = {
   tier: string
@@ -44,7 +45,10 @@ export default function PlansUsagePanel() {
         if (active) setStats(data)
       })
       .catch((err) => {
-        if (active) setError(err instanceof Error ? err.message : 'Failed to load usage')
+        if (active) {
+          const raw = err instanceof Error ? err.message : 'Failed to load usage'
+          setError(friendlySupabaseError(raw, 'Failed to load usage'))
+        }
       })
     return () => {
       active = false
@@ -53,9 +57,22 @@ export default function PlansUsagePanel() {
 
   if (error) {
     return (
-      <p style={{ color: '#f87171', fontSize: '0.9rem', margin: 0 }} role="alert">
-        {error}
-      </p>
+      <div
+        role="alert"
+        style={{
+          padding: '1rem 1.25rem',
+          borderRadius: '12px',
+          border: '1px solid rgba(248, 113, 113, 0.35)',
+          background: 'rgba(248, 113, 113, 0.08)',
+        }}
+      >
+        <p style={{ color: '#fca5a5', fontSize: '0.9rem', margin: '0 0 0.75rem', lineHeight: 1.5 }}>{error}</p>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.8rem', margin: 0 }}>
+          If you are the site owner, confirm on Vercel:{' '}
+          <code style={{ fontSize: '0.75rem' }}>NEXT_PUBLIC_SUPABASE_URL</code>,{' '}
+          <code style={{ fontSize: '0.75rem' }}>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, and that the kanban app is linked to the correct Supabase project.
+        </p>
+      </div>
     )
   }
 

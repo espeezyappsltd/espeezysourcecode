@@ -3,7 +3,7 @@
 export const Q = {
   profile: {
     layout:
-      'id, full_name, avatar_url, username, role, group_id, subscription_plan, theme_config, custom_bg_url, email',
+      'id, full_name, avatar_url, username, role, group_id, subscription_plan, subscription_status, theme_config, custom_bg_url, email, biography, tagline, total_score, badges_count, course_name, school_id, country_code, created_at, storage_used, rank, enrollment_year, completion_year',
     card: 'id, full_name, avatar_url, username, role',
     list: 'id, full_name, avatar_url, username, role, subscription_plan, created_at',
     webhook: 'id, username, full_name, total_score, email, espeezy_email',

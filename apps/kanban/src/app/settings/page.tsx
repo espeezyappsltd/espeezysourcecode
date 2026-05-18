@@ -219,11 +219,28 @@ export default function SettingsPage() {
         country_code: countryCode
       })
 
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              full_name: fullName,
+              course_name: courseName,
+              enrollment_year: enrollmentYear ? Number(enrollmentYear) : null,
+              completion_year: completionYear ? Number(completionYear) : null,
+              rank,
+              tagline,
+              biography,
+              stack,
+              country_code: countryCode,
+            }
+          : prev,
+      )
+
       // Verifiable Logging
       if (profile.id) {
         logActivity(profile.id, profile.group_id || '', 'setting_updated', 'Updated profile and school info')
       }
-      refreshProfile()
+      await refreshProfile()
       addToast('Profile Synchronized', 'Your academic journey and identity details have been successfully updated.', 'success')
     } catch (err: unknown) {
       setError(`Identity Sync Error: ${err instanceof Error ? err.message : 'Verification failed'}`)

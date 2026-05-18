@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
 import { 
   BarChart3, Users, FileCheck, AlertCircle, Download, Printer,
   ChevronRight, TrendingUp, ShieldCheck, Zap, Clock, UserCircle, CheckCircle2, Circle, Timer, Search
@@ -25,6 +25,10 @@ import {
   fetchProfileById,
   getAuthUser,
 } from '@/services/dashboard'
+import { useProfile } from '@/context/ProfileContext'
+import { hasFeature } from '@/utils/feature-gate'
+import PremiumFeatureGate from '@/components/PremiumFeatureGate'
+import { friendlySupabaseError } from '@/utils/supabase-errors'
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Implementation': '#38bdf8',
@@ -48,7 +52,9 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const { id: groupId } = use(params)
   const [loading, setLoading] = useState(true)
   const { addToast } = useNotifications()
+  const { profile: contextProfile, loading: profileLoading } = useProfile()
   const [currentUser, setCurrentUser] = useState<Profile | null>(null)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [isMember, setIsMember] = useState(false)
   const [group, setGroup] = useState<Group | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
@@ -57,15 +63,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
   const [mounted, setMounted] = useState(false)
   const { onlineUsers } = usePresence()
+  const canViewStats = hasFeature(contextProfile, 'PROJECT_STATS')
 
-  useEffect(() => { 
-    setMounted(true)
-    fetchData() 
-  }, [groupId])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
-    
+    setFetchError(null)
+
     const authUser = await getAuthUser()
     if (!authUser) {
       setLoading(false)
@@ -86,7 +89,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       setIsMember(memberCheck)
 
       setGroup(groupData as Group)
-      
+
       if (memberCheck) {
         setTasks(groupTasks as Task[])
         setMembers(groupMembers as ProfileDB[])
@@ -96,11 +99,29 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       }
     } catch (err: unknown) {
       console.error('Analytics Fetch Error:', err)
-      addToast('Sync Error', 'Failed to retrieve project intelligence.', 'error')
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? friendlySupabaseError(String((err as { message: unknown }).message), 'Failed to retrieve project intelligence.')
+          : 'Failed to retrieve project intelligence.'
+      setFetchError(message)
+      addToast('Sync Error', message, 'error')
     } finally {
       setLoading(false)
     }
-  }
+  }, [groupId, addToast])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (profileLoading) return
+    if (!canViewStats) {
+      setLoading(false)
+      return
+    }
+    void fetchData()
+  }, [profileLoading, canViewStats, fetchData])
 
   const [hasSentRequest, setHasSentRequest] = useState(false)
 
@@ -189,6 +210,21 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!profileLoading && !canViewStats) {
+    return <PremiumFeatureGate feature="PROJECT_STATS" />
+  }
+
+  if (fetchError && !loading && !group) {
+    return (
+      <div style={{ maxWidth: '560px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
+        <p style={{ color: 'var(--error)', fontWeight: 700, marginBottom: '1rem' }}>{fetchError}</p>
+        <button type="button" className="btn btn-primary" onClick={() => void fetchData()}>
+          Try again
+        </button>
+      </div>
+    )
   }
 
   if (loading) return (

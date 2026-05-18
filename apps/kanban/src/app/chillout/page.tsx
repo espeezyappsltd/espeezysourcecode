@@ -1,6 +1,9 @@
 'use client'
 
 import { AnimatePresence } from 'framer-motion'
+import { useProfile } from '@/context/ProfileContext'
+import { hasFeature } from '@/utils/feature-gate'
+import PremiumFeatureGate from '@/components/PremiumFeatureGate'
 import { useChilloutHub } from './hooks/useChilloutHub'
 import { ChilloutStatsHud } from './components/ChilloutStatsHud'
 import { ChilloutHeader } from './components/ChilloutHeader'
@@ -12,7 +15,12 @@ import { ChilloutInviteStep } from './components/ChilloutInviteStep'
 import { ChilloutPageStyles } from './components/ChilloutPageStyles'
 
 export default function ChillOutHub() {
+  const { profile, loading: profileLoading } = useProfile()
   const hub = useChilloutHub()
+
+  if (!profileLoading && !hasFeature(profile, 'BREAK_ROOM')) {
+    return <PremiumFeatureGate feature="BREAK_ROOM" />
+  }
 
   return (
     <div
