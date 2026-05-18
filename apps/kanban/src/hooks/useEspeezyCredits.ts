@@ -32,6 +32,12 @@ export function useEspeezyCredits() {
   }, [db, refresh])
 
   useEffect(() => {
+    const onRefresh = () => void refresh()
+    window.addEventListener('espeezy-credits-refresh', onRefresh)
+    return () => window.removeEventListener('espeezy-credits-refresh', onRefresh)
+  }, [refresh])
+
+  useEffect(() => {
     if (!userId) return
 
     const channel = db

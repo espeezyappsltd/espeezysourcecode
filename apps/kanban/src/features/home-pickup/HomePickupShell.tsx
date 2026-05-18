@@ -2,6 +2,9 @@
 
 import { useCallback, useState } from 'react'
 import DashboardHome from '@/components/DashboardHome'
+import { useNotifications } from '@/components/NotificationProvider'
+import { useProfile } from '@/context/ProfileContext'
+import { DashboardMetricsProvider } from '@/context/DashboardMetricsContext'
 import { HomePickupDashboard } from './HomePickupDashboard'
 import { useHomePickupGate } from './useHomePickupGate'
 import './home-pickup.css'
@@ -11,6 +14,8 @@ type Props = {
 }
 
 export function HomePickupShell({ groupId }: Props) {
+  const { profile } = useProfile()
+  const { addToast } = useNotifications()
   const [workspaceReady, setWorkspaceReady] = useState(false)
   const [exiting, setExiting] = useState(false)
   const { isLanding, canEnter, enterWorkspace } = useHomePickupGate(workspaceReady)
@@ -22,10 +27,9 @@ export function HomePickupShell({ groupId }: Props) {
   }, [enterWorkspace, isLanding])
 
   return (
-    <>
+    <DashboardMetricsProvider groupId={groupId} profile={profile} addToast={addToast}>
       {isLanding && (
         <HomePickupDashboard
-          groupId={groupId}
           workspaceReady={workspaceReady}
           canEnter={canEnter}
           exiting={exiting}
@@ -35,6 +39,6 @@ export function HomePickupShell({ groupId }: Props) {
       <div className={isLanding ? 'home-pickup-preload' : undefined} aria-hidden={isLanding}>
         <DashboardHome groupId={groupId} onWorkspaceReady={() => setWorkspaceReady(true)} />
       </div>
-    </>
+    </DashboardMetricsProvider>
   )
 }

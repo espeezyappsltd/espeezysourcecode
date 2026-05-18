@@ -27,6 +27,7 @@ import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 import { deleteAccount, createStripePortalSession } from '@/services/account'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
+import { canAccessPaletteTier } from '@/utils/feature-gate'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import {
   createUserFeedback,
@@ -1246,11 +1247,9 @@ export default function SettingsPage() {
               if (tier === 'lifetime' && profile?.subscription_plan !== 'lifetime') return null; // Only show lifetime tier to lifetime users, or handle differently
               
               const tierThemes = PALETTES.filter(p => (p.tier || 'free') === tier);
-              const isLocked = tier !== 'free' && 
-                               profile?.subscription_plan !== 'premium' && 
-                               profile?.subscription_plan !== 'lifetime' && 
-                               (tier !== 'pro' || profile?.subscription_plan !== 'pro');
-              const canAccess = !isLocked;
+              const paletteTier = tier === 'lifetime' ? 'premium' : tier;
+              const canAccess = canAccessPaletteTier(profile, paletteTier as 'free' | 'pro' | 'premium');
+              const isLocked = !canAccess;
 
               return (
                 <div key={tier} style={{ marginBottom: '3.5rem' }}>

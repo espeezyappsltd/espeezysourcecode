@@ -4,6 +4,13 @@ const monorepoRoot = path.join(process.cwd(), '../../')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: '/fund', destination: '/pricing', permanent: true },
+      { source: '/fund/:path*', destination: '/pricing', permanent: true },
+      { source: '/donation/:path*', destination: '/pricing', permanent: true },
+    ]
+  },
   // Deployed to Vercel — server mode (no static export)
   images: {
     qualities: [20, 40, 50, 60, 75],

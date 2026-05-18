@@ -121,6 +121,15 @@ const GUIDES: Record<string, PageGuideConfig> = {
       { title: 'Details', body: 'Program, year, and bio appear on your profile card.' },
     ],
   },
+  '/jukebox': {
+    id: 'jukebox',
+    pageTitle: 'Espeezy Jukebox',
+    summary: 'Pro feature: share what you are listening to with your cohort.',
+    steps: [
+      { title: 'Unlock', body: 'Upgrade to Pro or Premium from Plans to enable Jukebox.' },
+      { title: 'Presence', body: 'When connected, your track can appear on your profile presence.' },
+    ],
+  },
 }
 
 export function getGuideForPath(pathname: string | null): PageGuideConfig | null {

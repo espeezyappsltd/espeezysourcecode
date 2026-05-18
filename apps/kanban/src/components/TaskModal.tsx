@@ -11,6 +11,10 @@ import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } fr
 import { logActivity } from '@/utils/logging'
 import { taskSchema } from '@/utils/validation'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
+import { celebrateOnboardingComplete } from '@/lib/onboarding/celebrate'
+import type { OnboardingCompletionResult } from '@/lib/onboarding/onboarding-service'
+import { getOnboardingTourAction, isOnboardingDescription } from '@/lib/onboarding/dashboard-tasks'
+import OnboardingTourButton from '@/components/onboarding/OnboardingTourButton'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
@@ -30,6 +34,7 @@ export default function TaskModal({
   groupId, 
   onClose,
   onRefresh,
+  onTaskPatched,
   onTaskSaved,
   initialDueDate,
   initialStatus,
@@ -195,6 +200,18 @@ export default function TaskModal({
       }
     }
 
+    const optimisticTask: Task = {
+      ...(task ?? {
+        id: `optimistic-${Date.now()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }),
+      ...payloadTask,
+      group_id: groupId,
+    } as Task
+
+    onTaskPatched?.(optimisticTask)
+
     try {
       const response = await fetch('/api/task/workflow', {
         method: 'POST',
@@ -204,13 +221,22 @@ export default function TaskModal({
         body: JSON.stringify(payload)
       })
 
-      const data = await response.json() as { error?: string; task?: Task }
+      const data = (await response.json()) as {
+        error?: string
+        task?: Task
+        onboarding?: OnboardingCompletionResult | null
+      }
       if (!response.ok) {
         throw new Error(data?.error || 'Failed to save task.')
       }
 
-      await onRefresh()
-      await onTaskSaved?.()
+      if (data.onboarding?.rewardGranted) {
+        celebrateOnboardingComplete(data.onboarding)
+      }
+
+      const saved = (data.task ?? optimisticTask) as Task
+      onTaskPatched?.(saved)
+      await onTaskSaved?.(saved)
       onClose()
     } catch (err: unknown) {
       try {
@@ -221,8 +247,8 @@ export default function TaskModal({
           const { error: insertError } = await db.from('tasks').insert(payloadTask)
           if (insertError) throw insertError
         }
-        await onRefresh()
-        await onTaskSaved?.()
+        onTaskPatched?.(optimisticTask)
+        await onTaskSaved?.(optimisticTask)
         onClose()
         return
       } catch (fallbackErr: unknown) {
@@ -316,6 +342,8 @@ export default function TaskModal({
 
     if (isEditMode && task) {
        setLoading(true)
+       const patched = { ...task, assignees: newAssignees }
+       onTaskPatched?.(patched)
        try {
          const { error } = await db
            .from('tasks')
@@ -323,8 +351,6 @@ export default function TaskModal({
            .eq('id', task.id)
 
          if (error) throw error
-
-         onRefresh()
        } catch (err) {
          setError(`Failed to update assignment: ${err instanceof Error ? err.message : err}`)
          setAssignees(task.assignees || [])
@@ -433,6 +459,11 @@ export default function TaskModal({
     }
   }
 
+  const onboardingTour = useMemo(
+    () => getOnboardingTourAction(description),
+    [description],
+  )
+
   const handleEndorse = async (artifactId: string, currentCount: number) => {
     try {
       const { error } = await db
@@ -521,6 +552,31 @@ export default function TaskModal({
 
         <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, minHeight: 0 }}>
           {error && <div className="error-message" style={{ marginBottom: '1.5rem' }}>{error}</div>}
+
+          {isOnboardingDescription(description) && (
+            <div
+              className="onboarding-tour-banner"
+              style={{
+                marginBottom: '1.25rem',
+                padding: '1rem 1.1rem',
+                borderRadius: '14px',
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1px solid rgba(16, 185, 129, 0.22)',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.75rem',
+              }}
+            >
+              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-sub)', flex: '1 1 200px' }}>
+                Espeezy feature tour — open the page, try it, then set status to Done.
+              </p>
+              {onboardingTour ? (
+                <OnboardingTourButton action={onboardingTour} variant="modal" onNavigate={onClose} />
+              ) : null}
+            </div>
+          )}
 
           {/* Form Fields */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1rem' }}>

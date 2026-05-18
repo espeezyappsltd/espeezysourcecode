@@ -173,7 +173,8 @@ export type TaskModalProps = {
   groupId: string
   onClose: () => void
   onRefresh: () => Promise<void> | void
-  onTaskSaved?: () => Promise<void> | void
+  onTaskPatched?: (task: import('./database').Task) => void
+  onTaskSaved?: (task?: import('./database').Task) => Promise<void> | void
   initialDueDate?: string
   initialStatus?: import('./database').TaskStatus
   onlineUserIds?: Set<string>

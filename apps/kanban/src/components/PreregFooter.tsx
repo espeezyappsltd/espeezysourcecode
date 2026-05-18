@@ -4,7 +4,6 @@ const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
   { href: '/checkout', label: 'Pricing' },
-  { href: '/fund', label: 'Support Us' },
   { href: '/contact', label: 'Contact' },
 ]
 
@@ -37,7 +36,6 @@ const LEGAL_LINKS = [
   { href: '/terms', label: 'Terms of Service' },
   { href: '/privacy', label: 'Privacy Policy' },
   { href: 'https://espeezy.com/docs/refund-policy', label: 'Refund Policy' },
-  { href: '/fund', label: 'Donate' },
 ]
 
 export default function PreregFooter() {

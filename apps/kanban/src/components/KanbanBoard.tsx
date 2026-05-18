@@ -11,24 +11,18 @@ import { AlertCircle, RefreshCw, Plus } from 'lucide-react'
 import { fetchGroupMembers } from '@/services/dashboard'
 import { db } from '@/lib/db-client'
 import { Q } from '@/lib/query-columns'
+import {
+  filterVisibleTasks,
+  groupTasksByStatus,
+  KANBAN_COLUMNS,
+  removeTaskFromList,
+  stabilizeTasksByColumn,
+  upsertTaskList,
+} from '@/lib/kanban/board-utils'
 import '@/styles/kanban-tiles.css'
 
-const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
-
+const KANBAN_HELP_BANNER_KEY = 'espeezy_kanban_help_banner_dismissed'
 const TASK_SELECT = `${Q.task}, category`
-
-function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, Task[]> {
-  const map: Record<TaskStatus, Task[]> = {
-    'To Do': [],
-    'In Progress': [],
-    'In Review': [],
-    Done: [],
-  }
-  for (const t of tasks) {
-    if (map[t.status]) map[t.status].push(t)
-  }
-  return map
-}
 
 export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardReady }: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -38,11 +32,13 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
+  const [helpBannerDismissed, setHelpBannerDismissed] = useState<boolean | null>(null)
   const [activeColumn, setActiveColumn] = useState<TaskStatus | undefined>()
   const isOnline = useConnectivity()
 
   const lastSignalRef = useRef(newTaskSignal)
   const boardReadySent = useRef(false)
+  const columnsRef = useRef<Record<TaskStatus, Task[]> | null>(null)
 
   const membersById = useMemo(() => {
     const m = new Map<string, Profile>()
@@ -50,7 +46,27 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
     return m
   }, [groupMembers])
 
-  const tasksByColumn = useMemo(() => groupTasksByStatus(tasks), [tasks])
+  const onlineUserIds = useMemo(
+    () => new Set(groupMembers.map((m) => m.id)),
+    [groupMembers],
+  )
+
+  const visibleTasks = useMemo(
+    () => filterVisibleTasks(tasks, profile.id),
+    [tasks, profile.id],
+  )
+
+  const tasksByColumn = useMemo(() => {
+    const grouped = groupTasksByStatus(visibleTasks)
+    const stable = stabilizeTasksByColumn(columnsRef.current, grouped)
+    columnsRef.current = stable
+    return stable
+  }, [visibleTasks])
+
+  const patchTask = useCallback((task: Task) => {
+    setTasks((prev) => upsertTaskList(prev, task))
+    setSelectedTask((prev) => (prev?.id === task.id ? task : prev))
+  }, [])
 
   const openModal = useCallback((task: Task | null, column?: TaskStatus) => {
     setSelectedTask(task)
@@ -84,18 +100,15 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setTasks((prev) => [...prev, payload.new as Task])
+            setTasks((prev) => upsertTaskList(prev, payload.new as Task))
           } else if (payload.eventType === 'UPDATE') {
-            setTasks((prev) => prev.map((t) => (t.id === payload.new.id ? (payload.new as Task) : t)))
+            setTasks((prev) => upsertTaskList(prev, payload.new as Task))
           } else if (payload.eventType === 'DELETE' && payload.old) {
             const oldId = (payload.old as { id: string }).id
-            setTasks((prev) => prev.filter((t) => t.id !== oldId))
+            setTasks((prev) => removeTaskFromList(prev, oldId))
           }
         },
       )
-      .on('presence', { event: 'sync' }, () => {
-        window.dispatchEvent(new CustomEvent('presence-sync', { detail: channel.presenceState() }))
-      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           setLoading(false)
@@ -110,7 +123,10 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
       .select(TASK_SELECT)
       .eq('group_id', groupId)
       .then(({ data }) => {
-        if (data) setTasks(data as unknown as Task[])
+        if (data) {
+          columnsRef.current = null
+          setTasks(data as unknown as Task[])
+        }
         setLoading(false)
         if (!boardReadySent.current) {
           boardReadySent.current = true
@@ -121,7 +137,15 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
     return () => {
       db.removeChannel(channel)
     }
-  }, [groupId, profile.id])
+  }, [groupId, profile.id, onBoardReady])
+
+  useEffect(() => {
+    try {
+      setHelpBannerDismissed(localStorage.getItem(KANBAN_HELP_BANNER_KEY) === '1')
+    } catch {
+      setHelpBannerDismissed(false)
+    }
+  }, [])
 
   useEffect(() => {
     const handler = () => setIsOnboardingOpen(true)
@@ -131,8 +155,45 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
 
   const refreshTasks = useCallback(async () => {
     const { data } = await db.from('tasks').select(TASK_SELECT).eq('group_id', groupId)
-    if (data) setTasks(data as unknown as Task[])
+    if (data) {
+      columnsRef.current = null
+      setTasks(data as unknown as Task[])
+    }
   }, [groupId])
+
+  useEffect(() => {
+    if (!groupId || !profile.id) return
+    let cancelled = false
+
+    fetch('/api/onboarding/ensure', { method: 'POST', credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok || cancelled) return
+        const body = (await res.json()) as { seeded?: number }
+        if ((body.seeded ?? 0) > 0) await refreshTasks()
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [groupId, profile.id, refreshTasks])
+
+  const dismissHelpBanner = useCallback(() => {
+    setHelpBannerDismissed(true)
+    try {
+      localStorage.setItem(KANBAN_HELP_BANNER_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  const handleTaskSaved = useCallback(
+    (saved?: Task) => {
+      if (saved) patchTask(saved)
+      setIsModalOpen(false)
+    },
+    [patchTask],
+  )
 
   if (loading) {
     return (
@@ -174,35 +235,38 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
           Offline — changes sync when reconnected.
         </p>
       )}
-      <button
-        type="button"
-        aria-label="How to use Kanban Board"
-        title="How to use Kanban Board"
-        onClick={() => setIsOnboardingOpen(true)}
-        style={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          zIndex: 20,
-          background: 'rgba(59,130,246,0.09)',
-          border: '1px solid rgba(59,130,246,0.18)',
-          borderRadius: 12,
-          padding: '0.5rem 0.8rem',
-          color: '#2563eb',
-          fontWeight: 900,
-          fontSize: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          cursor: 'pointer',
-        }}
-      >
-        <Plus size={18} aria-hidden="true" style={{ transform: 'rotate(45deg)' }} />
-        <span style={{ fontWeight: 700, fontSize: '0.97rem' }}>How to use Kanban</span>
-      </button>
+      {helpBannerDismissed === false && (
+        <button
+          type="button"
+          aria-label="Dismiss How to use Kanban hint"
+          title="Click to close"
+          onClick={dismissHelpBanner}
+          data-testid="kanban-help-banner"
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 20,
+            background: 'rgba(59,130,246,0.09)',
+            border: '1px solid rgba(59,130,246,0.18)',
+            borderRadius: 12,
+            padding: '0.5rem 0.8rem',
+            color: '#2563eb',
+            fontWeight: 700,
+            fontSize: '0.97rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: 'pointer',
+          }}
+        >
+          <Plus size={18} aria-hidden="true" style={{ transform: 'rotate(45deg)' }} />
+          <span>How to use Kanban</span>
+        </button>
+      )}
 
       <div className="kanban-board-root" role="region" aria-label="Kanban board">
-        {COLUMNS.map((col) => (
+        {KANBAN_COLUMNS.map((col) => (
           <KanbanColumn
             key={col}
             status={col}
@@ -221,11 +285,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
           initialStatus={activeColumn}
           onClose={() => setIsModalOpen(false)}
           onRefresh={refreshTasks}
-          onTaskSaved={async () => {
-            await refreshTasks()
-            setIsModalOpen(false)
-          }}
-          onlineUserIds={new Set(groupMembers.map((m) => m.id))}
+          onTaskPatched={patchTask}
+          onTaskSaved={handleTaskSaved}
+          onlineUserIds={onlineUserIds}
         />
       )}
 

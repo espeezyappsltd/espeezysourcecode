@@ -7,6 +7,13 @@ const sharedDir = path.join(__dirname, '../shared')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: '/fund', destination: '/upgrade', permanent: true },
+      { source: '/fund/:path*', destination: '/upgrade', permanent: true },
+      { source: '/donation/:path*', destination: '/upgrade', permanent: true },
+    ]
+  },
   images: {
     unoptimized: true,
   },

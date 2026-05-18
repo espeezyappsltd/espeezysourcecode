@@ -408,8 +408,8 @@ const docsContent: Record<string, DocEntry> = {
         ],
       },
       {
-        heading: 'Crowdfunding and donations',
-        body: 'Contributions made on the Support Us / fund pages are voluntary donations to platform development. They are non-refundable except where a payment was taken in error (duplicate charge, wrong amount) or where UK law requires otherwise.',
+        heading: 'Subscriptions and upgrades',
+        body: 'Paid plans and upgrades are billed through Stripe at checkout. They are non-refundable except where a payment was taken in error (duplicate charge, wrong amount) or where UK law requires otherwise. See the refund policy for subscription-specific terms.',
       },
       {
         heading: 'Institutional and enterprise billing',

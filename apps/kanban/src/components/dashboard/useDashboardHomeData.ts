@@ -5,7 +5,6 @@ import {
   fetchGroupMembers,
   fetchGroupTasks,
   fetchPendingJoinRequests,
-  fetchPersonalPendingTaskCount,
 } from '@/services/dashboard'
 
 type AddToast = (title: string, description: string, variant: 'success' | 'error' | 'info') => void
@@ -119,20 +118,17 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     void fetchPendingRequests()
   }
 
-  const fetchPersonalTaskCount = useCallback(async () => {
-    if (!profile?.id || !groupId) return
-    try {
-      const pendingCount = await fetchPersonalPendingTaskCount(groupId, profile.id)
-      setPersonalTaskCount(pendingCount)
-    } catch (err) {
-      console.warn('Silent failure on personal task count:', err instanceof Error ? err.message : err)
-    }
-  }, [profile?.id, groupId])
-
-  const fetchProjectProgress = useCallback(async () => {
+  const fetchTaskMetrics = useCallback(async () => {
     if (!groupId) return
     try {
       const tasks = await fetchGroupTasks(groupId)
+
+      if (profile?.id) {
+        const personal = tasks.filter(
+          (t) => Array.isArray(t.assignees) && t.assignees.includes(profile.id) && t.status !== 'Done',
+        ).length
+        setPersonalTaskCount(personal)
+      }
 
       if (tasks.length === 0) {
         setProjectProgress(0)
@@ -141,11 +137,10 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
         return
       }
 
-      type Task = { status: string }
-      const pending = tasks.filter((t: Task) => t.status !== 'Done').length
+      const pending = tasks.filter((t) => t.status !== 'Done').length
       setTotalBacklog(pending)
 
-      const completed = tasks.filter((t: Task) => t.status === 'Done').length
+      const completed = tasks.filter((t) => t.status === 'Done').length
       const progress = Math.round((completed / tasks.length) * 100)
       setProjectProgress(progress)
 
@@ -156,16 +151,23 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
 
       setProgressLabel(label)
 
-      localStorage.setItem(`gf_cache_stats_${groupId}`, JSON.stringify({
-        personal: personalTaskCount,
-        backlog: pending,
-        progress,
-        label,
-      }))
+      localStorage.setItem(
+        `gf_cache_stats_${groupId}`,
+        JSON.stringify({
+          personal: profile?.id
+            ? tasks.filter(
+                (t) => Array.isArray(t.assignees) && t.assignees.includes(profile.id) && t.status !== 'Done',
+              ).length
+            : 0,
+          backlog: pending,
+          progress,
+          label,
+        }),
+      )
     } catch (err) {
-      console.error('Fetch project progress error:', err instanceof Error ? err.message : err)
+      console.error('Fetch task metrics error:', err instanceof Error ? err.message : err)
     }
-  }, [groupId, personalTaskCount])
+  }, [groupId, profile?.id])
 
   useEffect(() => {
     if (!groupId) return
@@ -177,10 +179,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
         fetchPendingRequests(),
       ]
 
-      if (profile?.id) {
-        tasks.push(fetchPersonalTaskCount())
-        tasks.push(fetchProjectProgress())
-      }
+      tasks.push(fetchTaskMetrics())
 
       await Promise.all(tasks)
     }
@@ -200,8 +199,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     fetchGroupDetails,
     fetchMembers,
     fetchPendingRequests,
-    fetchPersonalTaskCount,
-    fetchProjectProgress,
+    fetchTaskMetrics,
   ])
 
   return {

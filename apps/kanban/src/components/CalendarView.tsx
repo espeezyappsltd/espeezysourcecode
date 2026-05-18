@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { db, createBrowserSupabaseClient } from '@/lib/db-client'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { Task, TaskStatus } from '@/types/database'
+import { removeTaskFromList, upsertTaskList } from '@/lib/kanban/board-utils'
 import TaskModal from './TaskModal'
 
 type CalendarTask = Pick<Task, 'id' | 'title' | 'due_date' | 'status' | 'is_coding_task'>
@@ -38,9 +39,16 @@ export default function CalendarView({ groupId, onTaskSaved }: { groupId: string
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
-        () => {
-          void fetchTasks()
-        }
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const row = payload.new as CalendarTask
+            if (!row.due_date) return
+            setTasks((prev) => upsertTaskList(prev, row as unknown as Task))
+          } else if (payload.eventType === 'DELETE' && payload.old) {
+            const id = (payload.old as { id: string }).id
+            setTasks((prev) => removeTaskFromList(prev, id) as CalendarTask[])
+          }
+        },
       )
       .subscribe()
 

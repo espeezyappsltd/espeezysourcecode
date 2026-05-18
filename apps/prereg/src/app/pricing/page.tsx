@@ -89,7 +89,7 @@ export default function PricingPage() {
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pre-Register</Link>
-          <Link href="/fund" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Fund</Link>
+          <Link href="/checkout" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Checkout</Link>
         </div>
       </nav>
 
@@ -169,7 +169,7 @@ export default function PricingPage() {
             <span style={{ fontWeight: 900, fontSize: '0.9rem', color: '#475569' }}>Espeezy</span>
           </Link>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
-            {[['/', 'Home'], ['/fund', 'Fund'], ['/terms', 'Terms'], ['/privacy', 'Privacy']].map(([href, label]) => (
+            {[['/', 'Home'], ['/pricing', 'Pricing'], ['/terms', 'Terms'], ['/privacy', 'Privacy']].map(([href, label]) => (
               <Link key={href} href={href} style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'none', fontWeight: 600 }}>{label}</Link>
             ))}
           </div>

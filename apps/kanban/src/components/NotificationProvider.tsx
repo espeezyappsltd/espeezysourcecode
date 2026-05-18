@@ -172,6 +172,22 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, [fetchNotifications, userId])
 
+  useEffect(() => {
+    const onOnboarding = (event: Event) => {
+      const detail = (event as CustomEvent<{ rewardGranted?: boolean; creditsAdded?: number }>).detail
+      if (!detail?.rewardGranted) return
+      const credits = detail.creditsAdded ?? 20
+      addToast(
+        'Onboarding complete!',
+        `+${credits} Espeezy credits. Your report is in My Assets.`,
+        'success',
+      )
+      void fetchNotifications()
+    }
+    window.addEventListener('espeezy-onboarding-complete', onOnboarding)
+    return () => window.removeEventListener('espeezy-onboarding-complete', onOnboarding)
+  }, [fetchNotifications])
+
   const markAsRead = async (id: string) => {
     if (!userId) return
     const original = notifications.find(n => n.id === id)

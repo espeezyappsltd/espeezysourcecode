@@ -3,9 +3,11 @@ import { Q } from '@/lib/query-columns'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 import {
   buildListingSearchOr,
+  createListingInputSchema,
   MARKETPLACE_CATEGORIES,
   validateListingRow,
 } from '@/lib/marketplace/listing-validation'
+import { validateCreditValue } from '@/lib/credits'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,6 +92,93 @@ export async function GET(req: NextRequest) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'unknown error'
     console.error('Marketplace listings fetch:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+// POST /api/marketplace/listings — upload images + create listing (Espeezy credits only)
+export async function POST(req: NextRequest) {
+  try {
+    const user = await getRequestUser(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const contentType = req.headers.get('content-type') || ''
+    if (!contentType.includes('multipart/form-data')) {
+      return NextResponse.json({ error: 'multipart/form-data required' }, { status: 400 })
+    }
+
+    const formData = await req.formData()
+    const fields = {
+      title: String(formData.get('title') ?? ''),
+      description: String(formData.get('description') ?? ''),
+      price: formData.get('price') ?? '0',
+      category: String(formData.get('category') ?? 'Other'),
+      quantity: formData.get('quantity') ?? '1',
+      condition: String(formData.get('condition') ?? 'Used'),
+      meetup_zone: String(formData.get('meetup_zone') ?? 'Library'),
+      meetup_details: String(formData.get('meetup_details') ?? ''),
+      duration_days: formData.get('duration_days') ?? '14',
+    }
+
+    const parsed = createListingInputSchema.safeParse(fields)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? 'Invalid listing' },
+        { status: 422 },
+      )
+    }
+
+    const creditCheck = validateCreditValue(parsed.data.price)
+    if (!creditCheck.ok) {
+      return NextResponse.json({ error: creditCheck.message }, { status: 422 })
+    }
+
+    const db = getAdminDb()
+    const imageUrls: string[] = []
+    const files = formData.getAll('images').filter((f): f is File => f instanceof File)
+
+    for (const file of files.slice(0, 5)) {
+      const ext = file.name.split('.').pop() || 'jpg'
+      const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`
+      const { error: upErr } = await db.storage.from('marketplace').upload(path, file, {
+        upsert: false,
+        contentType: file.type || 'image/jpeg',
+      })
+      if (!upErr) {
+        const {
+          data: { publicUrl },
+        } = db.storage.from('marketplace').getPublicUrl(path)
+        imageUrls.push(publicUrl)
+      }
+    }
+
+    const price = creditCheck.value
+    const { data: listing, error } = await db
+      .from('marketplace_listings')
+      .insert({
+        owner_id: user.id,
+        title: parsed.data.title,
+        description: parsed.data.description,
+        price,
+        is_free: price === 0,
+        category: parsed.data.category,
+        quantity: parsed.data.quantity,
+        condition: parsed.data.condition,
+        images: imageUrls,
+        meetup_zone: parsed.data.meetup_zone,
+        meetup_details: parsed.data.meetup_details || 'Coordinate via Espeezy after purchase.',
+        duration_days: parsed.data.duration_days,
+        payment_method: 'CREDITS',
+        status: 'AVAILABLE',
+      })
+      .select(LISTING_SELECT)
+      .single()
+
+    if (error) throw error
+
+    return NextResponse.json({ listing: validateListingRow(listing) ?? listing }, { status: 201 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown error'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

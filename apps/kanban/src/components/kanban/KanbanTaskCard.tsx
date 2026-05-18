@@ -2,6 +2,9 @@
 
 import { memo, useMemo } from 'react'
 import type { Task, Profile } from '@/types/database'
+import { assigneesEqual } from '@/lib/kanban/board-utils'
+import { getOnboardingTourAction } from '@/lib/onboarding/dashboard-tasks'
+import OnboardingTourButton from '@/components/onboarding/OnboardingTourButton'
 
 const CATEGORY_ACCENT: Record<string, string> = {
   Implementation: '#38bdf8',
@@ -34,6 +37,11 @@ function KanbanTaskCardComponent({ task, membersById, onOpen }: KanbanTaskCardPr
     })
   }, [task.assignees, membersById])
 
+  const tourAction = useMemo(
+    () => getOnboardingTourAction(task.description),
+    [task.description],
+  )
+
   return (
     <li>
       <button
@@ -51,6 +59,7 @@ function KanbanTaskCardComponent({ task, membersById, onOpen }: KanbanTaskCardPr
         </div>
         <h4 className="kanban-card__title">{task.title}</h4>
         {task.description ? <p className="kanban-card__desc">{task.description}</p> : null}
+        {tourAction ? <OnboardingTourButton action={tourAction} variant="card" /> : null}
         <div className="kanban-card__footer">
           {assigneePreview.length > 0 ? (
             <div className="kanban-card__avatars" aria-label={`Assigned: ${assigneePreview.map((a) => a.name).join(', ')}`}>
@@ -93,7 +102,7 @@ export const KanbanTaskCard = memo(KanbanTaskCardComponent, (prev, next) => {
     a.status === b.status &&
     a.category === b.category &&
     a.due_date === b.due_date &&
-    JSON.stringify(a.assignees) === JSON.stringify(b.assignees) &&
+    assigneesEqual(a.assignees, b.assignees) &&
     prev.membersById === next.membersById &&
     prev.onOpen === next.onOpen
   )

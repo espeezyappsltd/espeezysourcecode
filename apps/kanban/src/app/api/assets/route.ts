@@ -7,17 +7,57 @@ import {
   validateCreditValue,
 } from '@/lib/credits'
 import { isFolderMarker, normalizeFolderPath } from '@/lib/assets/folders'
+import { getStorageQuotaBytes, resolveStoragePlan } from '@/lib/storage-quotas'
 
 export const dynamic = 'force-dynamic'
 
-const QUOTAS = {
-  free: 1024 * 1024 * 1024,
-  pro: 5 * 1024 * 1024 * 1024,
-  premium: 20 * 1024 * 1024 * 1024,
-  admin: 100 * 1024 * 1024 * 1024,
+const BUCKET = 'user-assets'
+
+function sanitizeFilename(name: string): string {
+  return name.replace(/[/\\]/g, '_').slice(0, 180)
 }
 
-function enrichAsset<T extends { metadata?: unknown; asset_url?: string | null }>(row: T) {
+function buildStoragePath(userId: string, folder: string, filename: string): string {
+  const cleanFolder = folder.replace(/^\/+|\/+$/g, '')
+  return `${userId}/${cleanFolder ? `${cleanFolder}/` : ''}${filename}`.replace(/\/+/g, '/')
+}
+
+async function readProfileStorage(
+  adminDb: ReturnType<typeof getAdminDb>,
+  userId: string,
+) {
+  const { data: profileRow } = await adminDb
+    .from('profiles')
+    .select('storage_used, subscription_plan, tier')
+    .eq('id', userId)
+    .single()
+
+  const tier = resolveStoragePlan(profileRow)
+  return {
+    storageUsed: profileRow?.storage_used ?? 0,
+    storageQuota: getStorageQuotaBytes(tier),
+    tier,
+  }
+}
+
+type PersonalAssetRow = {
+  id: string
+  user_id: string
+  title: string
+  description?: string | null
+  asset_type: string
+  asset_url: string
+  preview_url?: string | null
+  category?: string | null
+  metadata?: unknown
+  size_bytes: number
+  folder?: string | null
+  created_at: string
+}
+
+function enrichAsset<T extends { metadata?: unknown; asset_url?: string | null; folder?: string | null }>(
+  row: T,
+) {
   const metadata = row.metadata as Record<string, unknown> | null
   return {
     ...row,
@@ -78,16 +118,7 @@ export async function GET(req: NextRequest) {
         0,
       ) ?? 0
 
-    const { data: profileRow } = await adminDb
-      .from('profiles')
-      .select('storage_used, subscription_plan, tier')
-      .eq('id', user.id)
-      .single()
-
-    const plan = (
-      (profileRow?.subscription_plan ?? profileRow?.tier ?? 'free') as string
-    ).toLowerCase()
-    const storageQuota = QUOTAS[plan as keyof typeof QUOTAS] ?? QUOTAS.free
+    const { storageUsed, storageQuota, tier: plan } = await readProfileStorage(adminDb, user.id)
 
     const folderPaths = new Set<string>()
     for (const row of assets) {
@@ -95,14 +126,14 @@ export async function GET(req: NextRequest) {
       if (row.is_folder && meta?.folder_path) {
         folderPaths.add(normalizeFolderPath(meta.folder_path))
       }
-      if (row.folder) folderPaths.add(normalizeFolderPath(row.folder as string))
+      if (row.folder) folderPaths.add(normalizeFolderPath(row.folder))
     }
 
     return NextResponse.json({
       assets,
       nextCursor,
       totalCreditValue,
-      storageUsed: profileRow?.storage_used ?? 0,
+      storageUsed,
       storageQuota,
       tier: plan,
       folders: Array.from(folderPaths).sort(),
@@ -124,135 +155,138 @@ export async function POST(req: NextRequest) {
     let title: string
     let description: string | null = null
     let asset_type: 'file' | 'link' | 'marketplace_ref' = 'file'
-    let asset_url: string
-    let size_bytes: number = 0
+    let asset_url = ''
+    let size_bytes = 0
     let category: string | null = null
-    let folder: string = '/'
+    let folder = '/'
     let credit_value = 0
     let metadata: Record<string, unknown> | null = null
+    let storagePath: string | null = null
+    let uploadFile: File | null = null
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData()
-      const file = formData.get('file') as File | null
-      title = (formData.get('title') as string) || file?.name || 'Untitled Asset'
-      description = formData.get('description') as string
-      category = formData.get('category') as string
+      uploadFile = formData.get('file') as File | null
+      title = (formData.get('title') as string) || uploadFile?.name || 'Untitled Asset'
+      description = (formData.get('description') as string) || null
+      category = (formData.get('category') as string) || null
       folder = (formData.get('folder') as string) || '/'
-      const creditRaw = formData.get('credit_value')
-      const creditCheck = validateCreditValue(
-        creditRaw === null ? undefined : creditRaw,
-      )
+      const creditCheck = validateCreditValue(formData.get('credit_value') ?? undefined)
       if (!creditCheck.ok) {
         return NextResponse.json({ error: creditCheck.message }, { status: 422 })
       }
       credit_value = creditCheck.value
-
-      if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
-
-      size_bytes = file.size
+      if (!uploadFile) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+      size_bytes = uploadFile.size
       asset_type = 'file'
-
-      const path = `${user.id}/${folder.replace(/^\/+|\/+$/g, '')}/${file.name}`.replace(/\/+/g, '/')
-      const { error: storageError } = await adminDb.storage
-        .from('user-assets')
-        .upload(path, file, { upsert: true, contentType: file.type })
-
-      if (storageError) throw storageError
-
-      const {
-        data: { publicUrl },
-      } = adminDb.storage.from('user-assets').getPublicUrl(path)
-
-      asset_url = publicUrl
     } else {
       const body = await req.json()
       title = body.title
-      description = body.description
-      asset_type = body.asset_type || 'link'
-      asset_url = body.asset_url
-      size_bytes = body.size_bytes || 0
-      category = body.category
+      description = body.description ?? null
+      asset_type = body.asset_type === 'link' ? 'link' : 'file'
+      asset_url = (body.asset_url as string)?.trim() ?? ''
+      size_bytes = 0
+      category = body.category ?? null
       folder = body.folder || '/'
       metadata =
         body.metadata && typeof body.metadata === 'object' ? (body.metadata as Record<string, unknown>) : null
-
       const creditCheck = validateCreditValue(body.credit_value)
       if (!creditCheck.ok) {
         return NextResponse.json({ error: creditCheck.message }, { status: 422 })
       }
       credit_value = creditCheck.value
+      if (asset_type === 'link' && !asset_url) {
+        return NextResponse.json({ error: 'URL is required for links' }, { status: 400 })
+      }
     }
 
-    if (!title || !asset_url) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    if (!title?.trim()) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
     folder = normalizeFolderPath(folder)
 
-    const { data: profile, error: profileError } = await adminDb
-      .from('profiles')
-      .select('tier, subscription_plan, storage_used')
-      .eq('id', user.id)
-      .single()
+    const storageBefore = await readProfileStorage(adminDb, user.id)
+    if (storageBefore.storageUsed + size_bytes > storageBefore.storageQuota) {
+      return NextResponse.json(
+        {
+          error: 'Quota Exceeded',
+          message: `Storage limit reached for ${storageBefore.tier} tier.`,
+          storageUsed: storageBefore.storageUsed,
+          storageQuota: storageBefore.storageQuota,
+        },
+        { status: 403 },
+      )
+    }
 
-    if (profileError) throw profileError
+    if (uploadFile) {
+      const filename = `${Date.now()}-${sanitizeFilename(uploadFile.name)}`
+      storagePath = buildStoragePath(user.id, folder, filename)
+      const { error: storageError } = await adminDb.storage
+        .from(BUCKET)
+        .upload(storagePath, uploadFile, { upsert: false, contentType: uploadFile.type })
 
-    const tier = ((profile.subscription_plan ?? profile.tier ?? 'free') as string).toLowerCase() as keyof typeof QUOTAS
-    const quota = QUOTAS[tier]
+      if (storageError) {
+        return NextResponse.json({ error: storageError.message }, { status: 500 })
+      }
 
-    if (profile.storage_used + size_bytes > quota) {
-      return NextResponse.json({
-        error: 'Quota Exceeded',
-        message: `Your current tier (${tier}) is limited to ${quota / (1024 * 1024 * 1024)}GB.`,
-      }, { status: 403 })
+      const {
+        data: { publicUrl },
+      } = adminDb.storage.from(BUCKET).getPublicUrl(storagePath)
+      asset_url = publicUrl
+    }
+
+    const rowMetadata = mergeMetadataCreditValue(metadata, credit_value)
+    if (storagePath) {
+      rowMetadata.storage_path = storagePath
     }
 
     const { data: asset, error: insertError } = await adminDb
       .from('personal_assets')
       .insert({
         user_id: user.id,
-        title,
+        title: title.trim(),
         description,
         asset_type,
         asset_url,
         size_bytes,
         category,
         folder,
-        metadata: mergeMetadataCreditValue(metadata, credit_value),
+        metadata: rowMetadata,
       })
       .select()
       .single()
 
-    if (insertError) throw insertError
-
-    await adminDb.rpc('increment_storage_used', {
-      user_id: user.id,
-      amount: size_bytes,
-    })
-
-    const { count } = await adminDb
-      .from('personal_assets')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-
-    if (count === 1) {
-      const readmeContent = `Welcome to your Espeezy Storage!\n\nThis is your private node for academic assets.\nHappy building!`
-      const readmePath = `${user.id}/README.txt`
-      await adminDb.storage.from('user-assets').upload(readmePath, readmeContent, { contentType: 'text/plain' })
-
-      await adminDb.from('personal_assets').insert({
-        user_id: user.id,
-        title: 'README.txt',
-        description: 'Storage instructions',
-        asset_type: 'file',
-        asset_url: adminDb.storage.from('user-assets').getPublicUrl(readmePath).data.publicUrl,
-        size_bytes: readmeContent.length,
-        folder: '/',
-        metadata: mergeMetadataCreditValue(null, 0),
-      })
+    if (insertError) {
+      if (storagePath) {
+        await adminDb.storage.from(BUCKET).remove([storagePath])
+      }
+      throw insertError
     }
 
-    return NextResponse.json({ asset: enrichAsset(asset) }, { status: 201 })
+    if (size_bytes > 0) {
+      const { error: rpcError } = await adminDb.rpc('increment_storage_used', {
+        user_id: user.id,
+        amount: size_bytes,
+      })
+      if (rpcError) {
+        await adminDb.from('personal_assets').delete().eq('id', asset.id)
+        if (storagePath) await adminDb.storage.from(BUCKET).remove([storagePath])
+        throw rpcError
+      }
+    }
+
+    const storageAfter = await readProfileStorage(adminDb, user.id)
+
+    return NextResponse.json(
+      {
+        asset: enrichAsset(asset),
+        storageUsed: storageAfter.storageUsed,
+        storageQuota: storageAfter.storageQuota,
+        tier: storageAfter.tier,
+      },
+      { status: 201 },
+    )
   } catch (err: unknown) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
@@ -318,7 +352,7 @@ export async function DELETE(req: NextRequest) {
 
     const { data: asset, error: fetchError } = await adminDb
       .from('personal_assets')
-      .select('size_bytes, asset_url, asset_type, folder, title')
+      .select('size_bytes, asset_url, asset_type, folder, title, metadata')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -326,11 +360,12 @@ export async function DELETE(req: NextRequest) {
     if (fetchError) throw fetchError
 
     if (asset.asset_type === 'file') {
-      const cleanFolder = asset.folder.replace(/^\/+|\/+$/g, '')
-      const storagePath = `${user.id}/${cleanFolder ? cleanFolder + '/' : ''}${asset.title}`.replace(/\/+/g, '/')
+      const meta = asset.metadata as { storage_path?: string } | null
+      const storagePath =
+        meta?.storage_path ??
+        buildStoragePath(user.id, asset.folder ?? '/', asset.title)
 
-      const { error: storageDeleteError } = await adminDb.storage.from('user-assets').remove([storagePath])
-
+      const { error: storageDeleteError } = await adminDb.storage.from(BUCKET).remove([storagePath])
       if (storageDeleteError) console.error('Storage delete error:', storageDeleteError)
     }
 
@@ -342,12 +377,21 @@ export async function DELETE(req: NextRequest) {
 
     if (deleteError) throw deleteError
 
-    await adminDb.rpc('increment_storage_used', {
-      user_id: user.id,
-      amount: -asset.size_bytes,
-    })
+    if (asset.size_bytes > 0) {
+      await adminDb.rpc('increment_storage_used', {
+        user_id: user.id,
+        amount: -asset.size_bytes,
+      })
+    }
 
-    return NextResponse.json({ success: true })
+    const storageAfter = await readProfileStorage(adminDb, user.id)
+
+    return NextResponse.json({
+      success: true,
+      storageUsed: storageAfter.storageUsed,
+      storageQuota: storageAfter.storageQuota,
+      tier: storageAfter.tier,
+    })
   } catch (err: unknown) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }

@@ -44,6 +44,18 @@ export function buildListingSearchOr(query: string): string {
   return `title.ilike.%${q}%,description.ilike.%${q}%,category.ilike.%${q}%`
 }
 
+export const createListingInputSchema = z.object({
+  title: z.string().trim().min(3).max(120),
+  description: z.string().trim().min(10).max(4000),
+  price: z.coerce.number().min(0).max(100),
+  category: z.enum(MARKETPLACE_CATEGORIES),
+  quantity: z.coerce.number().int().min(1).max(99).default(1),
+  condition: z.enum(LISTING_CONDITIONS).default('Used'),
+  meetup_zone: z.string().trim().min(1).max(80).default('Library'),
+  meetup_details: z.string().trim().max(500).optional().default(''),
+  duration_days: z.coerce.number().int().min(1).max(90).default(14),
+})
+
 export function validateListingRow(row: unknown): ValidatedListingRow | null {
   const parsed = listingRowSchema.safeParse(row)
   if (!parsed.success) return null

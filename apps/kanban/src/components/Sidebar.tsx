@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { showToast } from '@/utils/toast';
@@ -12,10 +12,10 @@ import {
   ChevronRight,
   DollarSign,
   HardDrive,
-  Heart,
   LayoutDashboard,
   Lock,
   LogOut,
+  Music,
   Moon,
   Rss,
   Settings,
@@ -59,6 +59,7 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'My Assets', path: '/assets', icon: HardDrive },
   { name: 'Resources', path: '/marketplace', icon: TrendingUp },
   { name: 'Break Room', path: '/chillout', icon: Sparkles },
+  { name: 'Jukebox', path: '/jukebox', icon: Music },
   { name: 'Project Stats', path: '/analytics', icon: BarChart3 },
   { name: 'Plans', path: '/upgrade', icon: Activity },
   { name: 'My Profile', path: '/profile', icon: UserCircle },
@@ -531,24 +532,6 @@ export default function Sidebar({ user }: SidebarProps) {
             {isOpen && <span>Help & Onboarding</span>}
           </button>
         </div>
-
-        {isOpen && (
-          <div style={{ padding: '0 1rem 0.5rem' }}>
-            <Link href="/fund" className="support-link" aria-label="Support the Developers: Even $5 keeps a feature alive" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.625rem 1rem', borderRadius: '12px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', textDecoration: 'none', transition: 'all 0.2s' }}>
-              <Heart size={14} color="var(--brand)" aria-hidden="true" />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-0.01em' }}>Support the Devs</div>
-                <div style={{ fontSize: '0.58rem', color: 'var(--text-sub)', fontWeight: 600 }}>Even $5 keeps a feature alive</div>
-              </div>
-            </Link>
-          </div>
-        ) || (
-          <div style={{ padding: '0 0.75rem 0.5rem', display: 'flex', justifyContent: 'center' }}>
-            <Link href="/fund" title="Support the Devs" style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: 'var(--brand)' }}>
-              <Heart size={16} />
-            </Link>
-          </div>
-        )}
 
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: isOpen ? '0.5rem' : '0', backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent', borderRadius: '12px', border: isOpen ? '1px solid var(--border)' : 'none', justifyContent: isOpen ? 'flex-start' : 'center', cursor: 'pointer', transition: 'all 0.2s ease', minHeight: '40px' }} className="identity-pill" onClick={() => pushRoute('/profile')}>

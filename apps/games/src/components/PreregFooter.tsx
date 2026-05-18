@@ -34,7 +34,7 @@ export default function PreregFooter() {
         <nav aria-label="Footer links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <a href="https://espeezy.com" style={linkStyle}>Home</a>
           <a href="https://espeezy.com/#register" style={linkStyle}>Early Access</a>
-          <a href="https://espeezy.com/fund" style={linkStyle}>Collab</a>
+          <a href="https://espeezy.com/checkout" style={linkStyle}>Pricing</a>
           <a href="https://espeezy.com/privacy" style={linkStyle}>Privacy</a>
           <a href="https://espeezy.com/docs" target="_blank" rel="noopener noreferrer" style={linkStyle}>Docs</a>
           <a href="https://kanban.espeezy.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>Kanban</a>

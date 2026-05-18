@@ -11,10 +11,8 @@ import { PostListingModal } from '@/components/marketplace/PostListingModal'
 import { ListingDetailPanel } from '@/components/marketplace/ListingDetailPanel'
 import { MarketplaceTrendingRail } from '@/components/marketplace/MarketplaceTrendingRail'
 import { OnboardingModal } from '@/components/marketplace/OnboardingModal'
-import { StripeOnboarding } from '@/components/marketplace/StripeOnboarding'
-import { StripeWithdraw } from '@/components/marketplace/StripeWithdraw'
-import { StripeInstructions } from '@/components/marketplace/StripeInstructions'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
+import Link from 'next/link'
 import type { MarketplaceCategory } from '@/types/marketplace'
 
 const CATEGORIES = ['All', 'Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other']
@@ -43,18 +41,9 @@ export default function MarketplacePage() {
 
   const { credits, loading: creditsLoading, refresh: refreshCredits, setCredits } = useEspeezyCredits()
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const [balanceCents, setBalanceCents] = React.useState(0)
-
   useEffect(() => {
     const db = createBrowserSupabaseClient()
     db.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null))
-  }, [])
-
-  React.useEffect(() => {
-    fetch('/api/account')
-      .then((res) => res.json())
-      .then((data) => setBalanceCents(data.balance_cents || 0))
-      .catch(() => setBalanceCents(0))
   }, [])
 
   const handlePurchaseComplete = (payload: { buyerCredits: number }) => {
@@ -65,10 +54,6 @@ export default function MarketplacePage() {
 
   return (
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '6rem', position: 'relative' }}>
-      <StripeInstructions />
-      <StripeOnboarding />
-      <StripeWithdraw balanceCents={balanceCents} />
-
       <AccountWalletPanel compact />
 
       <div
@@ -84,8 +69,11 @@ export default function MarketplacePage() {
         <div>
           <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, letterSpacing: '-0.03em' }}>Campus Marketplace</h1>
           <p style={{ margin: '0.25rem 0 0', color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Buy and sell with Espeezy credits · printable invoices for every party
+            Upload items, pay with Espeezy credits — fast secure checkout linked to your account
           </p>
+          <Link href="/assets" style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--brand)' }}>
+            Manage arsenal assets →
+          </Link>
         </div>
         <div
           style={{

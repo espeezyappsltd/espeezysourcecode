@@ -187,5 +187,14 @@ export async function POST(req: Request) {
   }
   summary.hustleTasksCreated = hustleCreated
 
+  try {
+    const { seedOnboardingForAllUsers } = await import('@/lib/onboarding/onboarding-service')
+    const onboarding = await seedOnboardingForAllUsers()
+    summary.onboardingUsers = onboarding.users
+    summary.onboardingTasksCreated = onboarding.tasksCreated
+  } catch (err) {
+    summary.onboardingError = err instanceof Error ? err.message : 'onboarding seed failed'
+  }
+
   return NextResponse.json({ ok: true, summary })
 }

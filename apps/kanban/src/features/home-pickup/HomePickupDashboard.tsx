@@ -3,14 +3,12 @@
 import Image from 'next/image'
 import { ArrowRight, CheckCircle2, LayoutDashboard, ListTodo, Users } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
-import { useNotifications } from '@/components/NotificationProvider'
-import { useDashboardHomeData } from '@/components/dashboard/useDashboardHomeData'
+import { useDashboardMetrics } from '@/context/DashboardMetricsContext'
 import { getPlanName } from '@/utils/feature-gate'
 import type { Profile } from '@/types/auth'
 import './home-pickup.css'
 
 type Props = {
-  groupId: string
   workspaceReady: boolean
   canEnter: boolean
   exiting: boolean
@@ -38,14 +36,12 @@ function loadPercent(workspaceReady: boolean, canEnter: boolean): number {
 }
 
 export function HomePickupDashboard({
-  groupId,
   workspaceReady,
   canEnter,
   exiting,
   onEnter,
 }: Props) {
   const { profile } = useProfile()
-  const { addToast } = useNotifications()
   const {
     group,
     members,
@@ -54,7 +50,7 @@ export function HomePickupDashboard({
     projectProgress,
     progressLabel,
     pendingRequests,
-  } = useDashboardHomeData(groupId, profile, addToast)
+  } = useDashboardMetrics()
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
   const teamName = group?.name || 'Your team'

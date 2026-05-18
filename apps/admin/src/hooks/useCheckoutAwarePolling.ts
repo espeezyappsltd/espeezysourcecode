@@ -12,7 +12,7 @@ export function useCheckoutAwarePolling(
   {
     intervalMs = 15_000,
     burstDelaysMs = [1500, 4000, 8000, 15_000],
-    markerKey = 'espeezy_donation_completed_at',
+    markerKey = 'espeezy_checkout_completed_at',
     maxMarkerAgeMs = 10 * 60 * 1000,
   }: UseCheckoutAwarePollingOptions = {},
 ) {
@@ -28,7 +28,6 @@ export function useCheckoutAwarePolling(
       && (Date.now() - completedAt) < maxMarkerAgeMs
     const returnedFromCheckout = params.has('session_id')
       || params.has('payment_intent')
-      || params.get('donated') === '1'
       || hasRecentMarker
 
     if (returnedFromCheckout) {
@@ -40,12 +39,6 @@ export function useCheckoutAwarePolling(
         window.sessionStorage.removeItem(markerKey)
       }
 
-      if (params.get('donated') === '1') {
-        params.delete('donated')
-        const nextSearch = params.toString()
-        const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
-        window.history.replaceState(null, '', nextUrl)
-      }
     }
 
     const interval = window.setInterval(refresh, intervalMs)

@@ -72,3 +72,18 @@ export function isPaidUser(profile: Profile | null | undefined): boolean {
   const userTier = (profile.subscription_plan?.toLowerCase() as PlanTier) || 'free'
   return userTier !== 'free'
 }
+
+/** Theme palette tier access (pro themes = ADVANCED_THEMES, premium = premium+ lifetime). */
+export function canAccessPaletteTier(
+  profile: Profile | null | undefined,
+  paletteTier: 'free' | 'pro' | 'premium' | undefined,
+): boolean {
+  const tier = paletteTier ?? 'free'
+  if (tier === 'free') return true
+  if (tier === 'pro') return hasFeature(profile, 'ADVANCED_THEMES')
+  if (tier === 'premium') {
+    const userTier = (profile?.subscription_plan?.toLowerCase() as PlanTier) || 'free'
+    return TIER_HIERARCHY[userTier] >= TIER_HIERARCHY.premium
+  }
+  return false
+}

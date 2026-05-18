@@ -137,7 +137,7 @@ const COMING_FEATURES = [
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
-  { href: '/fund', label: 'Mission' },
+  { href: '/pricing', label: 'Plans' },
   { href: '/docs', label: 'Docs' },
   { href: '/pricing', label: 'Pricing' },
 ]
@@ -412,8 +412,8 @@ export default function PreRegisterPage() {
                     <Link href="/" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', border: '1px solid rgba(15,23,42,0.15)', color: '#64748b', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
                       Back to Home
                     </Link>
-                    <Link href="/fund" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
-                      Support the Mission →
+                    <Link href="/pricing" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
+                      View Plans →
                     </Link>
                   </div>
                 </motion.div>
@@ -558,8 +558,8 @@ export default function PreRegisterPage() {
             <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               Register Now <ArrowRight size={18} />
             </a>
-            <Link href="/fund" style={{ padding: '1rem 2.25rem', borderRadius: '12px', border: '1px solid rgba(15,23,42,0.15)', color: '#475569', fontWeight: 700, fontSize: '1rem', textDecoration: 'none' }}>
-              Speed up Development
+            <Link href="/pricing" style={{ padding: '1rem 2.25rem', borderRadius: '12px', border: '1px solid rgba(15,23,42,0.15)', color: '#475569', fontWeight: 700, fontSize: '1rem', textDecoration: 'none' }}>
+              View Plans
             </Link>
           </div>
         </motion.div>

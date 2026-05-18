@@ -262,14 +262,6 @@ export default function AdminLaunchCenter({
           VIEW PAGE {'>'}
         </a>
 
-        {/* External link: fund page */}
-        <a
-          href="/fund"
-          rel="noreferrer"
-          style={externalLinkStyle}
-        >
-          FUND PAGE {'>'}
-        </a>
       </div>
     </div>
   )

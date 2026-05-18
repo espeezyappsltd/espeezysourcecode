@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import { Plus, CloudOff } from 'lucide-react'
 import type { Task, TaskStatus, Profile } from '@/types/database'
+import { columnTasksEqual } from '@/lib/kanban/board-utils'
 import { KanbanTaskCard } from './KanbanTaskCard'
 
 export type KanbanColumnProps = {
@@ -54,4 +55,12 @@ function KanbanColumnComponent({ status, tasks, membersById, onAddTask, onOpenTa
   )
 }
 
-export const KanbanColumn = memo(KanbanColumnComponent)
+export const KanbanColumn = memo(KanbanColumnComponent, (prev, next) => {
+  return (
+    prev.status === next.status &&
+    columnTasksEqual(prev.tasks, next.tasks) &&
+    prev.membersById === next.membersById &&
+    prev.onAddTask === next.onAddTask &&
+    prev.onOpenTask === next.onOpenTask
+  )
+})

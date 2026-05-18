@@ -59,7 +59,7 @@ export function ListingDetailPanel({
       return
     }
     if (!isFree && !canAfford) {
-      addToast('Insufficient credits', `You need ${formatCredits(priceCredits)}.`, 'warning')
+      addToast('Insufficient credits', `You need ${formatCredits(priceCredits)}. Open Settings → Billing or earn credits by selling.`, 'warning')
       return
     }
 

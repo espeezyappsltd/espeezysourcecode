@@ -250,6 +250,63 @@
   border-radius: 6px;
 }
 
+.kanban-card__tour-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.kanban-card__tour-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.kanban-card__tour-btn--personal {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+}
+
+.kanban-card__tour-btn--personal:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.55);
+}
+
+.onboarding-tour-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s, transform 0.1s;
+}
+
+.onboarding-tour-btn:hover {
+  filter: brightness(1.08);
+}
+
+.onboarding-tour-btn--personal {
+  background: linear-gradient(135deg, #2563eb, #10b981);
+}
+
 .kanban-card__due--overdue {
   color: #fca5a5;
   background: rgba(239, 68, 68, 0.15);
@@ -262,5 +319,13 @@
   }
   .kanban-card:hover {
     transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .kanban-column,
+  .kanban-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }

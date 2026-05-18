@@ -436,8 +436,10 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
     if (palette) {
       // Access Control Enforcement
       const tier = palette.tier || 'free'
-      const isPremium = userPlan === 'premium'
-      const isPro = userPlan === 'pro' || isPremium
+      const plan = (userPlan ?? 'free').toLowerCase()
+      const isLifetime = plan === 'lifetime'
+      const isPremium = plan === 'premium' || isLifetime
+      const isPro = plan === 'pro' || isPremium
 
       if (tier === 'premium' && !isPremium) {
         throw new Error('PREMIUM_LOCKED')

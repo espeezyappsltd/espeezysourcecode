@@ -40,8 +40,6 @@ const PUBLIC_PREFIXES = [
   '/docs',
   '/solutions',
   '/product',
-  '/fund',
-  '/donation',
   '/share',
   '/oauth',
   '/error',
@@ -53,7 +51,6 @@ const PUBLIC_PREFIXES = [
   '/games',
   '/checkout',
   '/upgrade/success',
-  '/fund/thank-you',
 ]
 
 function isPublicRoute(pathname: string): boolean {

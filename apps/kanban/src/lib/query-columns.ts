@@ -18,7 +18,7 @@ export const Q = {
     listing: 'id, title, description, category, price, images, owner_id, status',
   },
   personalAsset:
-    'id, user_id, title, description, asset_type, asset_url, preview_url, category, metadata, size_bytes, created_at',
+    'id, user_id, title, description, asset_type, asset_url, preview_url, category, metadata, size_bytes, folder, created_at',
   agents: {
     list: 'id, name, specialisation, role, status, system_prompt, capabilities, pair_id, tasks_completed, created_at',
     task: 'id, agent_id, title, description, status, priority, result, created_at, updated_at',

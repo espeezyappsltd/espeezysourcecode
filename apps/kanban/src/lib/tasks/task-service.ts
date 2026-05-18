@@ -1,4 +1,5 @@
 import { getAdminDb } from '@/lib/supabase/admin'
+import { afterOnboardingTaskUpdate } from '@/lib/onboarding/onboarding-service'
 import type { TaskCategory, TaskStatus } from '@/types/database'
 import { taskSchema } from '@/utils/validation'
 
@@ -139,7 +140,13 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
     if (task.status === 'Done') {
       await checkAndDistributeScore(created.id, task.assignees)
     }
-    return { taskId: created.id, task: created.task }
+    const onboarding = await afterOnboardingTaskUpdate(
+      created.id,
+      payload.userId,
+      task.group_id,
+      task.status,
+    )
+    return { taskId: created.id, task: created.task, onboarding }
   }
 
   if (!task.id) {
@@ -154,5 +161,12 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
     await checkAndDistributeScore(task.id, task.assignees)
   }
 
-  return { taskId: task.id }
+  const onboarding = await afterOnboardingTaskUpdate(
+    task.id!,
+    payload.userId,
+    task.group_id,
+    task.status,
+  )
+
+  return { taskId: task.id, onboarding }
 }

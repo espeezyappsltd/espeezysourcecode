@@ -7,7 +7,6 @@ const PLATFORM_LINKS = [
   { href: 'https://espeezy.com', label: 'Home' },
   { href: 'https://espeezy.com/#features', label: 'Features' },
   { href: 'https://espeezy.com/checkout', label: 'Pricing' },
-  { href: 'https://espeezy.com/fund', label: 'Support Us' },
   { href: 'https://espeezy.com/contact', label: 'Contact' },
 ]
 
@@ -40,7 +39,6 @@ const LEGAL_LINKS = [
   { href: 'https://espeezy.com/terms', label: 'Terms of Service' },
   { href: 'https://espeezy.com/privacy', label: 'Privacy Policy' },
   { href: 'https://espeezy.com/docs/refund-policy', label: 'Refund Policy' },
-  { href: 'https://espeezy.com/fund', label: 'Donate' },
 ]
 
 import { useCentralLoading } from './CentralLoadingProvider'

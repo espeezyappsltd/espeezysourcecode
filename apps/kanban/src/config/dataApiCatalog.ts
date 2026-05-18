@@ -64,7 +64,7 @@ export const DATA_API_DATASETS: DataApiDataset[] = [
     name: 'Payments',
     table: 'payments',
     filterHint: 'user_id=eq.<user_uuid>&select=id,amount,status,payment_type,invoice_number,created_at&order=created_at.desc',
-    notes: 'Subscription, donation, and payment records.',
+    notes: 'Subscription and payment records.',
   },
   {
     name: 'Rewards Ledger',

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createWorkspaceTeam, joinWorkspaceTeam } from '@/app/onboarding/actions'
-import { Users, Plus, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
+import { Users, Plus, ArrowRight, ShieldCheck, Sparkles, UserCircle } from 'lucide-react'
 
 export default function WelcomeOnboarding() {
   const router = useRouter()
@@ -143,6 +143,29 @@ export default function WelcomeOnboarding() {
                 }}
               >
                 <Users size={20} /> Join Existing Team
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push('/profile')}
+                data-testid="onboarding-personal-profile"
+                style={{
+                  background: 'transparent',
+                  color: '#93c5fd',
+                  padding: '0.9rem 1rem',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(59, 130, 246, 0.35)',
+                  fontWeight: 800,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <UserCircle size={18} aria-hidden />
+                Personal profile first
               </button>
             </div>
             

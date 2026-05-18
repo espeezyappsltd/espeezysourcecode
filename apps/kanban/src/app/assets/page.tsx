@@ -25,6 +25,7 @@ import {
 } from '@/lib/credits'
 import { EN_DASH } from '@/lib/ui-symbols'
 import { joinFolderPath, normalizeFolderPath } from '@/lib/assets/folders'
+import { formatStorageBytes, STORAGE_QUOTAS_BYTES } from '@/lib/storage-quotas'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '@/components/NotificationProvider'
 import ModalOverlay from '@/components/ModalOverlay'
@@ -46,13 +47,6 @@ interface Asset {
   metadata?: { folder_path?: string; is_folder?: boolean }
 }
 
-const QUOTAS = {
-  free: 1024 * 1024 * 1024,
-  pro: 5 * 1024 * 1024 * 1024,
-  premium: 20 * 1024 * 1024 * 1024,
-  admin: 100 * 1024 * 1024 * 1024,
-}
-
 export default function PersonalAssetsPage() {
   const { addToast } = useNotifications()
   const [assets, setAssets] = useState<Asset[]>([])
@@ -63,7 +57,7 @@ export default function PersonalAssetsPage() {
   const [showFolderModal, setShowFolderModal] = useState(false)
   const [totalCreditValue, setTotalCreditValue] = useState(0)
   const [storageUsed, setStorageUsed] = useState(0)
-  const [storageQuota, setStorageQuota] = useState(QUOTAS.free)
+  const [storageQuota, setStorageQuota] = useState(STORAGE_QUOTAS_BYTES.free)
   const [tierLabel, setTierLabel] = useState('free')
 
   const fetchAssets = useCallback(async () => {
@@ -75,7 +69,7 @@ export default function PersonalAssetsPage() {
         setAssets(data.assets || [])
         setTotalCreditValue(data.totalCreditValue ?? 0)
         setStorageUsed(data.storageUsed ?? 0)
-        setStorageQuota(data.storageQuota ?? QUOTAS.free)
+        setStorageQuota(data.storageQuota ?? STORAGE_QUOTAS_BYTES.free)
         setTierLabel(data.tier ?? 'free')
       } else {
         addToast('Error', 'Failed to load assets', 'error')
@@ -96,6 +90,8 @@ export default function PersonalAssetsPage() {
     try {
       const res = await fetch(`/api/assets?id=${id}`, { method: 'DELETE', credentials: 'include' })
       if (res.ok) {
+        const data = await res.json()
+        applyStoragePayload(data)
         await fetchAssets()
         addToast('Deleted', 'Asset removed successfully', 'success')
       } else {
@@ -164,12 +160,13 @@ export default function PersonalAssetsPage() {
     }
   }
 
-  const formatSize = (bytes: number) => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
+  const formatSize = formatStorageBytes
+
+  const applyStoragePayload = (payload?: { storageUsed?: number; storageQuota?: number; tier?: string }) => {
+    if (!payload) return
+    if (typeof payload.storageUsed === 'number') setStorageUsed(payload.storageUsed)
+    if (typeof payload.storageQuota === 'number') setStorageQuota(payload.storageQuota)
+    if (payload.tier) setTierLabel(payload.tier)
   }
 
   const breadcrumbParts = normCurrent === '/' ? [] : normCurrent.split('/').filter(Boolean)
@@ -336,8 +333,9 @@ export default function PersonalAssetsPage() {
         <UploadModal
           currentFolder={normCurrent}
           onClose={() => setShowUploadModal(false)}
-          onSuccess={() => {
+          onSuccess={(storage) => {
             setShowUploadModal(false)
+            applyStoragePayload(storage)
             void fetchAssets()
           }}
         />
@@ -602,7 +600,7 @@ function UploadModal({
 }: {
   currentFolder: string
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (storage?: { storageUsed?: number; storageQuota?: number; tier?: string }) => void
 }) {
   const [form, setForm] = useState({
     title: '',
@@ -649,9 +647,14 @@ function UploadModal({
         })
       }
 
-      if (res.ok) onSuccess()
-      else {
-        const d = await res.json()
+      const d = await res.json()
+      if (res.ok) {
+        onSuccess({
+          storageUsed: d.storageUsed,
+          storageQuota: d.storageQuota,
+          tier: d.tier,
+        })
+      } else {
         setError(d.message || d.error || 'Failed to save asset')
       }
     } catch {

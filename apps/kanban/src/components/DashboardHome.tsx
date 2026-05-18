@@ -9,7 +9,7 @@ import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from './NotificationProvider'
 import { getPlanName, hasFeature } from '@/utils/feature-gate'
-import { useDashboardHomeData } from '@/components/dashboard/useDashboardHomeData'
+import { useDashboardMetrics } from '@/context/DashboardMetricsContext'
 import AccountTiersBanner from '@/components/AccountTiersBanner'
 
 const DASHBOARD_TABS = [
@@ -28,7 +28,6 @@ export default function DashboardHome({
   const { profile } = useProfile()
   const { addToast } = useNotifications()
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
-  const [currentTime, setCurrentTime] = useState(new Date())
   const [mounted, setMounted] = useState(false)
 
   const greeting = useMemo(() => {
@@ -42,8 +41,6 @@ export default function DashboardHome({
   // 1. Sync local time display and set mounted
   useEffect(() => {
     setMounted(true)
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
-    return () => clearInterval(timer)
   }, [])
 
   const {
@@ -51,8 +48,6 @@ export default function DashboardHome({
     group,
     newTaskSignal,
     setNewTaskSignal,
-    syncToken,
-    setSyncToken,
     members,
     pendingRequests,
     showMembers,
@@ -62,11 +57,7 @@ export default function DashboardHome({
     totalBacklog,
     handleAcceptRequest,
     handleDeclineRequest,
-  } = useDashboardHomeData(groupId, profile, addToast)
-
-  const handleCalendarTaskSaved = useCallback(async () => {
-    setSyncToken(prev => prev + 1)
-  }, [])
+  } = useDashboardMetrics()
 
   const renderRoleBadge = (role: string | null) => {
     const r = role?.toUpperCase()
@@ -372,13 +363,12 @@ export default function DashboardHome({
           ? (
             <KanbanBoard
               groupId={groupId}
-              key={`board-${syncToken}`}
               profile={profile}
               newTaskSignal={newTaskSignal}
               onBoardReady={onWorkspaceReady}
             />
           )
-          : <CalendarView groupId={groupId} key={`cal-${syncToken}`} onTaskSaved={handleCalendarTaskSaved} />
+          : <CalendarView groupId={groupId} />
         }
       </div>
 
