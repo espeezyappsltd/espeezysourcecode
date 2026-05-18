@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, Suspense, memo } from 'react'
+import { motion } from 'framer-motion'
+import { useHustle, type HustleItem, type HustleTab } from '@/hooks/useHustle'
 import {
   Briefcase,
   Plus,
@@ -34,95 +35,21 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'Cancelled', color: '#6B7280' },
 }
 
-type TabType = 'marketplace' | 'mine' | 'sales' | 'inventory'
-
-interface HustleItem {
-  id: string
-  poster_id: string
-  title: string
-  description?: string
-  category: string
-  payout_cents?: number
-  price?: number
-  status?: string
-  created_at: string
-  poster?: {
-    id?: string
-    full_name: string
-    avatar_url?: string | null
-    username?: string | null
-  } | null
-}
-
 function HustlePage() {
-  const [tab, setTab] = useState<TabType>('marketplace')
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState<'all' | HustleCategory>('all')
-  const [items, setItems] = useState<HustleItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [nextCursor, setNextCursor] = useState<string | null>(null)
-
-  const fetchItems = useCallback(
-    async (currentTab: TabType, query = '', cat: typeof category = 'all', cursor: string | null = null) => {
-      if (cursor) setLoadingMore(true)
-      else setLoading(true)
-
-      try {
-        let endpoint = ''
-        const params = new URLSearchParams()
-        if (query.trim()) params.set('q', query.trim())
-        if (cat !== 'all') params.set('category', cat)
-        if (cursor) params.set('cursor', cursor)
-
-        switch (currentTab) {
-          case 'marketplace':
-            endpoint = `/api/hustle/tasks?status=open&${params}`
-            break
-          case 'mine':
-            endpoint = `/api/hustle/tasks?mine=1&${params}`
-            break
-          case 'sales':
-            endpoint = `/api/marketplace/listings?mine=1&${params}`
-            break
-          case 'inventory':
-            endpoint = `/api/assets?${params}`
-            break
-        }
-
-        const res = await fetch(endpoint, { credentials: 'include' })
-        if (res.ok) {
-          const data = await res.json()
-          const newItems: HustleItem[] =
-            data.tasks ??
-            data.listings?.map((l: { id: string; title: string; category: string; price?: number; created_at: string; owner_id: string; profiles?: HustleItem['poster'] }) => ({
-              id: l.id,
-              poster_id: l.owner_id,
-              title: l.title,
-              category: l.category,
-              price: l.price,
-              created_at: l.created_at,
-              poster: l.profiles ? { ...l.profiles, id: l.owner_id } : null,
-            })) ??
-            data.assets ??
-            []
-          setItems((prev) => (cursor ? [...prev, ...newItems] : newItems))
-          setNextCursor(data.nextCursor || null)
-        }
-      } catch (err: unknown) {
-        console.error('Hustle fetch error:', err instanceof Error ? err.message : 'unknown error')
-      } finally {
-        setLoading(false)
-        setLoadingMore(false)
-      }
-    },
-    [],
-  )
-
-  useEffect(() => {
-    const timer = setTimeout(() => void fetchItems(tab, search, category), 300)
-    return () => clearTimeout(timer)
-  }, [tab, search, category, fetchItems])
+  const {
+    tab,
+    setTab,
+    search,
+    setSearch,
+    category,
+    setCategory,
+    items,
+    loading,
+    loadingMore,
+    nextCursor,
+    loadMore,
+    refresh,
+  } = useHustle()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -181,16 +108,7 @@ function HustlePage() {
               aria-label="Search hustle tasks"
             />
           </div>
-          <nav
-            style={{
-              display: 'flex',
-              gap: '0.4rem',
-              background: 'var(--bg-sub)',
-              padding: '4px',
-              borderRadius: '14px',
-              border: '1px solid var(--border)',
-            }}
-          >
+          <nav className="hustle-tab-nav" aria-label="Hustle sections">
             <TabButton active={tab === 'marketplace'} onClick={() => setTab('marketplace')} icon={<ShoppingBag size={16} />} label="Browse" />
             <TabButton active={tab === 'mine'} onClick={() => setTab('mine')} icon={<ListChecks size={16} />} label="Mine" />
             <TabButton active={tab === 'sales'} onClick={() => setTab('sales')} icon={<Package size={16} />} label="Sales" />
@@ -229,19 +147,17 @@ function HustlePage() {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <EmptyState tab={tab} onSeed={() => void fetchItems(tab, search, category)} />
+          <EmptyState tab={tab} onSeed={() => refresh()} />
         ) : (
-          <div style={{ display: 'grid', gap: '0.85rem' }}>
-            <AnimatePresence mode="popLayout">
-              {items.map((item, i) => (
-                <HustleCard key={item.id} item={item} index={i} />
-              ))}
-            </AnimatePresence>
+          <div className="hustle-list">
+            {items.map((item) => (
+              <HustleCard key={item.id} item={item} />
+            ))}
 
             {nextCursor && (
               <button
                 type="button"
-                onClick={() => void fetchItems(tab, search, category, nextCursor)}
+                onClick={() => loadMore()}
                 disabled={loadingMore}
                 className="btn btn-secondary"
                 style={{
@@ -277,43 +193,20 @@ function TabButton({
   label: string
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.5rem 1rem',
-        borderRadius: '10px',
-        border: 'none',
-        background: active ? 'var(--brand)' : 'transparent',
-        color: active ? 'white' : 'var(--text-sub)',
-        fontWeight: 800,
-        fontSize: '0.85rem',
-        cursor: 'pointer',
-      }}
-    >
+    <button type="button" className="hustle-tab-btn" onClick={onClick} aria-current={active ? 'page' : undefined}>
       {icon}
-      <span className="hide-mobile">{label}</span>
+      <span>{label}</span>
     </button>
   )
 }
 
-function HustleCard({ item, index }: { item: HustleItem; index: number }) {
+const HustleCard = memo(function HustleCard({ item }: { item: HustleItem }) {
   const posterId = item.poster?.id ?? item.poster_id
   const posterName = item.poster?.full_name ?? 'Scholar'
   const timeLabel = formatTimeAgo(item.created_at)
 
   return (
-    <motion.article
-      className="hustle-card"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.04, 0.35) }}
-      tabIndex={0}
-    >
+    <article className="hustle-card" tabIndex={0} role="article" aria-label={item.title}>
       <div className="hustle-card-body">
         {posterId && (
           <RemoteAvatar
@@ -387,9 +280,9 @@ function HustleCard({ item, index }: { item: HustleItem; index: number }) {
       </div>
 
       <ArrowRight size={18} style={{ opacity: 0.25, flexShrink: 0 }} aria-hidden />
-    </motion.article>
+    </article>
   )
-}
+})
 
 function formatTimeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -402,7 +295,7 @@ function formatTimeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString()
 }
 
-function EmptyState({ tab, onSeed }: { tab: TabType; onSeed?: () => void }) {
+function EmptyState({ tab, onSeed }: { tab: HustleTab; onSeed?: () => void }) {
   const [seeding, setSeeding] = useState(false)
 
   const handleSeed = async () => {

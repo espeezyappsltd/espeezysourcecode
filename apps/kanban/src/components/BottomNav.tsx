@@ -5,13 +5,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
   LayoutDashboard, 
-  Users, 
-  UserCircle, 
-  Settings,
   Bell,
-  TrendingUp,
   Rss,
-  DollarSign
+  DollarSign,
+  ShoppingBag,
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useRouter } from 'next/navigation'
@@ -25,7 +22,7 @@ export default function BottomNav() {
     { name: 'Board', path: '/', icon: LayoutDashboard },
     { name: 'Feed', path: '/feed', icon: Rss },
     { name: 'Hustle', path: '/hustle', icon: DollarSign },
-    { name: 'Network', path: '/network', icon: Users },
+    { name: 'Shop', path: '/marketplace', icon: ShoppingBag },
     { name: 'Inbox', path: '/notifications', icon: Bell },
   ]
 
@@ -52,10 +49,15 @@ export default function BottomNav() {
       alignItems: 'center'
     }}>
       {navLinks.map((link) => {
-        const isActive = pathname === link.path
+        const isActive =
+          pathname === link.path ||
+          (link.path === '/marketplace' && (pathname?.startsWith('/marketplace') ?? false))
         return (
-          <button 
-            key={link.path} 
+          <button
+            key={link.path}
+            type="button"
+            aria-label={link.name}
+            aria-current={isActive ? 'page' : undefined}
             onClick={() => handleNav(link.path, link.name)}
             style={{
               display: 'flex',

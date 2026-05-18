@@ -65,14 +65,14 @@ export function PostListingModal({ onClose, onSuccess }: PostListingModalProps) 
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div role="presentation" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} onClick={onClose} />
-      <div style={{ width: '100%', maxWidth: 520, background: 'var(--surface)', borderRadius: 24, border: '1px solid var(--border)', position: 'relative', zIndex: 1 }}>
+    <div className="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-listing-title">
+      <button type="button" className="app-modal-backdrop" aria-label="Close" onClick={onClose} />
+      <div className="app-modal-panel app-modal-panel--narrow">
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
-          <h2 style={{ margin: 0, fontWeight: 950 }}>List item</h2>
+          <h2 id="post-listing-title" style={{ margin: 0, fontWeight: 950 }}>List item</h2>
           <p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: 'var(--text-sub)' }}>Espeezy credits checkout only · step {step}/2</p>
         </div>
-        <div style={{ padding: '1.25rem 1.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
+        <div className="app-modal-panel__scroll" style={{ padding: '1.25rem 1.5rem', maxHeight: 'min(60vh, 70dvh)' }}>
           {step === 1 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <input className="form-input" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />

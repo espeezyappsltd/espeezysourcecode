@@ -124,66 +124,28 @@ export function ListingDetailPanel({
     }
   }
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    document.body.classList.add('body-lock')
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.classList.remove('body-lock')
+    }
+  }, [onClose])
+
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 12000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'rgba(0,0,0,0.85)',
-          backdropFilter: 'blur(12px)',
-        }}
-        onClick={onClose}
-      />
-      <div
-        className="page-fade"
-        style={{
-          width: '100%',
-          maxWidth: '960px',
-          background: 'var(--surface)',
-          borderRadius: '32px',
-          overflow: 'hidden',
-          position: 'relative',
-          border: '1px solid var(--border)',
-          maxHeight: '92vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            zIndex: 2,
-            background: 'rgba(0,0,0,0.5)',
-            border: 'none',
-            color: 'white',
-            borderRadius: '12px',
-            padding: '0.5rem',
-            cursor: 'pointer',
-          }}
-        >
+    <div className="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="listing-detail-title">
+      <button type="button" className="app-modal-backdrop" aria-label="Close listing details" onClick={onClose} />
+      <div className="app-modal-panel app-modal-panel--wide page-fade">
+        <button type="button" onClick={onClose} aria-label="Close" className="app-modal-close">
           <X size={20} />
         </button>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 1.1fr) 1fr', minHeight: 0 }}>
-          <div style={{ background: 'var(--bg-sub)', position: 'relative', minHeight: '320px' }}>
+        <div className="listing-detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 1.1fr) 1fr', minHeight: 0 }}>
+          <div className="listing-detail-media" style={{ background: 'var(--bg-sub)', position: 'relative', minHeight: '320px' }}>
             {listing.images?.[0] ? (
               <Image src={listing.images[0]} alt={listing.title} fill className="object-cover" />
             ) : (
@@ -203,7 +165,7 @@ export function ListingDetailPanel({
             )}
           </div>
 
-          <div style={{ padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="listing-detail-body app-modal-panel__scroll" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               <span
                 style={{
@@ -370,7 +332,7 @@ export function ListingDetailPanel({
               </p>
             )}
 
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '0.5rem' }}>
+            <div className="listing-detail-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '0.5rem' }}>
               <button
                 type="button"
                 disabled={checkingOut || isOwn || !available}

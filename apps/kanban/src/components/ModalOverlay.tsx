@@ -1,47 +1,69 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useId, useRef } from 'react'
 
 interface ModalOverlayProps {
   children: React.ReactNode
   maxWidth?: string
   onClickOutside?: () => void
+  ariaLabel?: string
 }
 
-export default function ModalOverlay({ children, maxWidth = '720px', onClickOutside }: ModalOverlayProps) {
+export default function ModalOverlay({
+  children,
+  maxWidth = '720px',
+  onClickOutside,
+  ariaLabel = 'Dialog',
+}: ModalOverlayProps) {
+  const titleId = useId()
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.classList.add('body-lock')
+    return () => {
+      document.body.classList.remove('body-lock')
+      document.body.style.overflow = prev
+    }
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClickOutside?.()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClickOutside])
+
+  useEffect(() => {
+    panelRef.current?.focus()
+  }, [])
+
   return (
     <div
+      className="app-modal-overlay"
       role="dialog"
       aria-modal="true"
-      onClick={() => onClickOutside?.()}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 99999,
-        background: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(12px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-        overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch'
-      }}
+      aria-labelledby={titleId}
+      aria-label={ariaLabel}
     >
+      <button
+        type="button"
+        className="app-modal-backdrop"
+        aria-label="Close dialog"
+        onClick={() => onClickOutside?.()}
+        tabIndex={-1}
+      />
       <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="app-modal-panel"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: '100%',
-          maxWidth,
-          maxHeight: 'calc(100vh - 2rem)',
-          overflowY: 'auto',
-          borderRadius: '28px',
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.35)',
-          position: 'relative'
-        }}
+        style={{ maxWidth }}
       >
+        <span id={titleId} className="sr-only">
+          {ariaLabel}
+        </span>
         {children}
       </div>
     </div>

@@ -953,6 +953,123 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-lg);
 }
 
+/* Shared app modals — mobile sheet + safe areas */
+.app-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.app-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-height: min(92dvh, calc(var(--vh-dynamic) - 1rem));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.app-modal-panel--wide {
+  max-width: 960px;
+}
+
+.app-modal-panel--narrow {
+  max-width: 520px;
+}
+
+.app-modal-panel__scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.app-modal-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 3;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .app-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .app-modal-panel {
+    max-height: min(94dvh, calc(var(--vh-dynamic) - env(safe-area-inset-top)));
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+  }
+
+  .app-modal-panel--wide,
+  .app-modal-panel--narrow {
+    max-width: 100%;
+  }
+
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    max-height: calc(100dvh - 1rem);
+    border-radius: 20px 20px 0 0;
+    padding: 1.25rem;
+  }
+
+  .listing-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .listing-detail-media {
+    min-height: 200px !important;
+    max-height: 38vh;
+  }
+
+  .listing-detail-body {
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  .listing-detail-actions {
+    flex-direction: column;
+  }
+
+  .listing-detail-actions .btn {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

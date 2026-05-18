@@ -175,3 +175,111 @@
     background-position: -200% 0;
   }
 }
+
+.hustle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.hustle-tab-nav {
+  display: flex;
+  gap: 0.35rem;
+  background: var(--bg-sub);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.hustle-tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.hustle-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-sub);
+  font-weight: 800;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.hustle-tab-btn[aria-current='page'] {
+  background: var(--brand);
+  color: #000;
+}
+
+@media (max-width: 768px) {
+  .hustle-shell {
+    padding-bottom: 0.5rem;
+  }
+
+  .hustle-toolbar {
+    top: calc(var(--h-nav) + 0.25rem);
+    padding: 0.55rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .hustle-search-wrap {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .hustle-search-wrap input {
+    font-size: 16px;
+    padding: 0.65rem 0.85rem 0.65rem 2.5rem;
+  }
+
+  .hustle-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hustle-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding: 0.85rem;
+    border-radius: 14px;
+  }
+
+  .hustle-card-body {
+    gap: 0.65rem;
+  }
+
+  .hustle-card-payout {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    text-align: left;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .hustle-card-amount {
+    font-size: 1.1rem;
+  }
+
+  .hustle-card-desc {
+    -webkit-line-clamp: 1;
+  }
+
+  .hustle-skeleton {
+    height: 88px;
+  }
+
+  .hustle-cat-chip {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.68rem;
+  }
+}

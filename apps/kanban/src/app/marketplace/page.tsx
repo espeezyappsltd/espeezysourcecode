@@ -7,6 +7,7 @@ import { useMarketplace } from '@/hooks/useMarketplace'
 import { useEspeezyCredits } from '@/hooks/useEspeezyCredits'
 import { ListingCard } from '@/components/marketplace/ListingCard'
 import { MarketplaceSidebar } from '@/components/marketplace/MarketplaceSidebar'
+import { MarketplaceCategoryChips } from '@/components/marketplace/MarketplaceCategoryChips'
 import { PostListingModal } from '@/components/marketplace/PostListingModal'
 import { ListingDetailPanel } from '@/components/marketplace/ListingDetailPanel'
 import { MarketplaceTrendingRail } from '@/components/marketplace/MarketplaceTrendingRail'
@@ -14,6 +15,7 @@ import { OnboardingModal } from '@/components/marketplace/OnboardingModal'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import Link from 'next/link'
 import type { MarketplaceCategory } from '@/types/marketplace'
+import './marketplace.css'
 
 const CATEGORIES = ['All', 'Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other']
 
@@ -41,6 +43,7 @@ export default function MarketplacePage() {
 
   const { credits, loading: creditsLoading, refresh: refreshCredits, setCredits } = useEspeezyCredits()
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
   useEffect(() => {
     const db = createBrowserSupabaseClient()
     db.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null))
@@ -52,58 +55,63 @@ export default function MarketplacePage() {
     void fetchListings()
   }
 
+  const catList = categories.length ? categories : CATEGORIES
+  const showSkeleton = loading && filteredListings.length === 0
+
   return (
-    <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '6rem', position: 'relative' }}>
+    <div className="marketplace-page page-fade">
       <AccountWalletPanel compact />
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          padding: '0 0.25rem',
-        }}
-      >
+      <header className="marketplace-page__header">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, letterSpacing: '-0.03em' }}>Campus Marketplace</h1>
-          <p style={{ margin: '0.25rem 0 0', color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Upload items, pay with Espeezy credits — fast secure checkout linked to your account
+          <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 950, letterSpacing: '-0.03em' }}>
+            Campus Marketplace
+          </h1>
+          <p style={{ margin: '0.2rem 0 0', color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 600 }}>
+            Pay with Espeezy credits · fast campus checkout
           </p>
-          <Link href="/assets" style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--brand)' }}>
-            Manage arsenal assets →
+          <Link href="/assets" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)' }}>
+            Arsenal assets →
           </Link>
         </div>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.65rem 1rem',
+            gap: '0.45rem',
+            padding: '0.5rem 0.75rem',
             background: 'var(--surface)',
             border: '1px solid var(--border)',
-            borderRadius: '16px',
+            borderRadius: '12px',
           }}
+          aria-label="Your credit balance"
         >
-          <Coins size={20} style={{ color: 'var(--brand)' }} />
+          <Coins size={18} style={{ color: 'var(--brand)' }} aria-hidden />
           <div>
-            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Your credits</div>
-            <div style={{ fontWeight: 950, fontSize: '1.1rem', color: 'var(--brand)' }}>
+            <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>
+              Credits
+            </div>
+            <div style={{ fontWeight: 950, fontSize: '1rem', color: 'var(--brand)' }}>
               {creditsLoading ? '…' : credits ?? '—'}
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+      <MarketplaceCategoryChips
+        categories={catList}
+        activeCategory={activeCategory}
+        onSelect={(cat) => setActiveCategory(cat as MarketplaceCategory)}
+      />
+
+      <div className="marketplace-page__layout">
         <MarketplaceSidebar
-          categories={categories.length ? categories : CATEGORIES}
+          categories={catList}
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
         />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="marketplace-page__main">
           <MarketplaceTrendingRail
             listings={listings}
             userCredits={credits}
@@ -113,63 +121,50 @@ export default function MarketplacePage() {
             onFilterCategory={(cat) => setActiveCategory(cat as MarketplaceCategory | 'All')}
           />
 
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <Search style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} size={20} />
+          <div className="marketplace-page__toolbar">
+            <div className="marketplace-page__search">
+              <Search
+                style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }}
+                size={18}
+                aria-hidden
+              />
               <input
-                type="text"
-                placeholder="Filter by title, content, or seller..."
+                type="search"
+                placeholder="Search listings…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '1rem 1.25rem 1rem 3.5rem',
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '20px',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  boxShadow: 'var(--shadow-md)',
-                  outline: 'none',
-                }}
+                aria-label="Search marketplace listings"
               />
             </div>
-            <button
-              onClick={() => setIsPosting(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '1rem 1.5rem',
-                background: 'var(--brand)',
-                color: 'black',
-                borderRadius: '20px',
-                border: 'none',
-                fontWeight: 950,
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-lg)',
-              }}
-              className="hover-card"
-            >
-              <Plus size={20} />
-              <span className="hide-mobile">POST ITEM</span>
+            <button type="button" className="marketplace-page__post-btn" onClick={() => setIsPosting(true)} aria-label="Post new listing">
+              <Plus size={20} aria-hidden />
+              <span className="hide-mobile">Post</span>
             </button>
           </div>
 
-          {loading ? (
-            <div style={{ padding: '5rem', textAlign: 'center' }}>
-              <Loader2 size={40} className="animate-spin text-brand" style={{ margin: '0 auto' }} />
-              <p style={{ marginTop: '1.5rem', fontWeight: 800, color: 'var(--text-sub)' }}>Synchronizing Marketplace Flux...</p>
+          {showSkeleton ? (
+            <div className="marketplace-page__skeleton-grid" aria-busy="true" aria-label="Loading listings">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="marketplace-skeleton-card" />
+              ))}
             </div>
           ) : filteredListings.length === 0 ? (
-            <div style={{ padding: '8rem 2rem', textAlign: 'center', background: 'var(--surface)', borderRadius: '24px', border: '1px dashed var(--border)' }}>
-              <ShoppingBag size={48} style={{ margin: '0 auto', opacity: 0.2, marginBottom: '1.5rem' }} />
-              <h3 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>No Listings Found</h3>
-              <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem' }}>Divergent results. Try adjusting your clearance filters.</p>
+            <div
+              style={{
+                padding: '3rem 1.25rem',
+                textAlign: 'center',
+                background: 'var(--surface)',
+                borderRadius: '16px',
+                border: '1px dashed var(--border)',
+              }}
+            >
+              <ShoppingBag size={40} style={{ margin: '0 auto', opacity: 0.2, marginBottom: '1rem' }} aria-hidden />
+              <h3 style={{ fontWeight: 900, marginBottom: '0.35rem' }}>No listings found</h3>
+              <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem' }}>Try another category or search term.</p>
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              <div className="marketplace-page__grid" role="list">
                 {filteredListings.map((item) => (
                   <ListingCard key={item.id} item={item} onClick={setSelectedListing} />
                 ))}
@@ -182,16 +177,17 @@ export default function MarketplacePage() {
                   onClick={() => loadMore()}
                   style={{
                     width: '100%',
-                    marginTop: '1rem',
-                    padding: '1rem',
+                    marginTop: '0.5rem',
+                    padding: '0.85rem',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.5rem',
+                    minHeight: 48,
                   }}
                 >
-                  {loadingMore ? <Loader2 size={18} className="animate-spin" /> : null}
-                  Load more listings
+                  {loadingMore ? <Loader2 size={18} className="animate-spin" aria-hidden /> : null}
+                  Load more
                 </button>
               )}
             </>
@@ -220,22 +216,6 @@ export default function MarketplacePage() {
           onPurchaseComplete={({ buyerCredits }) => handlePurchaseComplete({ buyerCredits })}
         />
       )}
-
-      <style jsx global>{`
-        @keyframes page-fade {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .page-fade {
-          animation: page-fade 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-      `}</style>
     </div>
   )
 }
