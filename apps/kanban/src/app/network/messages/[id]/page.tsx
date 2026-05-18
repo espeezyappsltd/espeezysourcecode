@@ -28,7 +28,7 @@ export default function PeerMessagesPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const peerId = (params?.id ?? '') as string
-  const listingId = searchParams.get('listing')
+  const listingId = searchParams?.get('listing') ?? null
 
   const db = useMemo(() => createBrowserSupabaseClient(), [])
   const [messages, setMessages] = useState<PeerMessage[]>([])

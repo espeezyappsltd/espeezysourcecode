@@ -57,6 +57,7 @@ export default function DashboardHome({
     totalBacklog,
     handleAcceptRequest,
     handleDeclineRequest,
+    setSyncToken,
   } = useDashboardMetrics()
 
   const renderRoleBadge = (role: string | null) => {

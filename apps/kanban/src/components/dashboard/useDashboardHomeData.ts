@@ -123,9 +123,10 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     try {
       const tasks = await fetchGroupTasks(groupId)
 
-      if (profile?.id) {
+      const profileId = profile?.id
+      if (profileId) {
         const personal = tasks.filter(
-          (t) => Array.isArray(t.assignees) && t.assignees.includes(profile.id) && t.status !== 'Done',
+          (t) => Array.isArray(t.assignees) && t.assignees.includes(profileId) && t.status !== 'Done',
         ).length
         setPersonalTaskCount(personal)
       }
@@ -154,9 +155,9 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
       localStorage.setItem(
         `gf_cache_stats_${groupId}`,
         JSON.stringify({
-          personal: profile?.id
+          personal: profileId
             ? tasks.filter(
-                (t) => Array.isArray(t.assignees) && t.assignees.includes(profile.id) && t.status !== 'Done',
+                (t) => Array.isArray(t.assignees) && t.assignees.includes(profileId) && t.status !== 'Done',
               ).length
             : 0,
           backlog: pending,

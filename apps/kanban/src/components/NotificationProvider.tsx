@@ -49,25 +49,27 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (!userId) return
 
     try {
-      let result = await db
+      const full = await db
         .from('notifications')
         .select(NOTIFICATION_SELECT_FULL)
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(20)
 
-      if (result.error && isMissingColumnError(result.error.message)) {
-        result = await db
+      if (full.error && isMissingColumnError(full.error.message)) {
+        const base = await db
           .from('notifications')
           .select(NOTIFICATION_SELECT_BASE)
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(20)
+        if (base.error) throw base.error
+        setNotifications((base.data ?? []) as Notification[])
+      } else {
+        if (full.error) throw full.error
+        setNotifications((full.data ?? []) as Notification[])
       }
 
-      if (result.error) throw result.error
-
-      setNotifications((result.data ?? []) as Notification[])
       baselineLoadedRef.current = true
     } catch (err: unknown) {
       console.error('Error fetching notifications:', getErrorMessage(err))
