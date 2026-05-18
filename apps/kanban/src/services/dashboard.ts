@@ -1,4 +1,5 @@
 import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { Q } from '@/lib/query-columns'
 import type { Group, Profile, Task, Artifact, Commit, ActivityLogRow } from '@/types/database'
 import type { Profile as AuthProfile } from '@/types/auth'
 
@@ -31,7 +32,7 @@ export async function fetchProfileById(userId: string): Promise<AuthProfile | nu
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('profiles')
-    .select('id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen, storage_used, country_code, theme_config, custom_bg_url, protect_avatar, is_phone_verified')
+    .select(Q.profile.detail)
     .eq('id', userId)
     .maybeSingle()
   if (error) throw error

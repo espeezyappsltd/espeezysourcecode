@@ -4,6 +4,9 @@ export const Q = {
   profile: {
     layout:
       'id, full_name, avatar_url, username, role, group_id, subscription_plan, subscription_status, theme_config, custom_bg_url, email, biography, tagline, total_score, badges_count, course_name, school_id, country_code, created_at, storage_used, rank, enrollment_year, completion_year',
+    /** Full profile row for settings / dashboard services (omit columns not in all DB envs). */
+    detail:
+      'id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen, storage_used, country_code, theme_config, custom_bg_url',
     card: 'id, full_name, avatar_url, username, role',
     list: 'id, full_name, avatar_url, username, role, subscription_plan, created_at',
     webhook: 'id, username, full_name, total_score, email, espeezy_email',
@@ -33,7 +36,7 @@ export const Q = {
   p2pTransfer:
     'id, sender_id, recipient_id, amount_cents, fee_cents, net_cents, status, stripe_payment_intent_id, message, note, created_at, completed_at',
   group: 'id, name, module_code, description, status, created_at',
-  task: 'id, title, status, group_id, assignees, description, due_date, created_at, updated_at, priority',
+  task: 'id, title, description, status, category, assignees, group_id, is_coding_task, due_date, created_at',
   artifact: 'id, file_url, group_id, task_id, uploaded_by, endorsements_count, created_at',
   commit: 'id, hash, message, author_id, author_email, task_id, lines_added, lines_deleted, created_at',
   activityLog: 'id, group_id, user_id, action, details, created_at',

@@ -8,13 +8,14 @@ import TaskModal from './TaskModal'
 import KanbanOnboardingModal from './KanbanOnboardingModal'
 import { KanbanColumn } from './kanban/KanbanColumn'
 import { AlertCircle, RefreshCw, Plus } from 'lucide-react'
-import { fetchGroupMembers } from '@/services/dashboard'
+import { fetchGroupMembers, fetchGroupTasks } from '@/services/dashboard'
 import { db } from '@/lib/db-client'
-import { Q } from '@/lib/query-columns'
+import { formatSupabaseError } from '@/utils/supabase-errors'
 import {
   filterVisibleTasks,
   groupTasksByStatus,
   KANBAN_COLUMNS,
+  normalizeTaskRow,
   removeTaskFromList,
   stabilizeTasksByColumn,
   upsertTaskList,
@@ -22,8 +23,6 @@ import {
 import '@/styles/kanban-tiles.css'
 
 const KANBAN_HELP_BANNER_KEY = 'espeezy_kanban_help_banner_dismissed'
-const TASK_SELECT = `${Q.task}, category`
-
 export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardReady }: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
@@ -84,9 +83,37 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
     lastSignalRef.current = newTaskSignal
   }, [newTaskSignal, openModal])
 
+  const loadTasks = useCallback(async () => {
+    try {
+      const data = await fetchGroupTasks(groupId)
+      columnsRef.current = null
+      setTasks(data.map(normalizeTaskRow))
+      setError(null)
+    } catch (err) {
+      const message = formatSupabaseError(err, 'Failed to load tasks for this board.')
+      console.error('Kanban load tasks:', message, err)
+      setError(message)
+    }
+  }, [groupId])
+
   useEffect(() => {
+    let cancelled = false
     setLoading(true)
-    fetchGroupMembers(groupId).then(setGroupMembers).catch(console.error)
+    setError(null)
+
+    void fetchGroupMembers(groupId)
+      .then(setGroupMembers)
+      .catch((err) => console.error('Kanban members:', formatSupabaseError(err)))
+
+    void (async () => {
+      await loadTasks()
+      if (cancelled) return
+      setLoading(false)
+      if (!boardReadySent.current) {
+        boardReadySent.current = true
+        onBoardReady?.()
+      }
+    })()
 
     const channel = db
       .channel(`kanban-tasks-${groupId}`)
@@ -99,10 +126,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
           filter: `group_id=eq.${groupId}`,
         },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setTasks((prev) => upsertTaskList(prev, payload.new as Task))
-          } else if (payload.eventType === 'UPDATE') {
-            setTasks((prev) => upsertTaskList(prev, payload.new as Task))
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const row = normalizeTaskRow(payload.new as Task)
+            setTasks((prev) => upsertTaskList(prev, row))
           } else if (payload.eventType === 'DELETE' && payload.old) {
             const oldId = (payload.old as { id: string }).id
             setTasks((prev) => removeTaskFromList(prev, oldId))
@@ -111,7 +137,6 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
       )
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          setLoading(false)
           await channel.track({
             user_id: profile.id,
             online_at: new Date().toISOString(),
@@ -119,25 +144,11 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
         }
       })
 
-    db.from('tasks')
-      .select(TASK_SELECT)
-      .eq('group_id', groupId)
-      .then(({ data }) => {
-        if (data) {
-          columnsRef.current = null
-          setTasks(data as unknown as Task[])
-        }
-        setLoading(false)
-        if (!boardReadySent.current) {
-          boardReadySent.current = true
-          onBoardReady?.()
-        }
-      })
-
     return () => {
+      cancelled = true
       db.removeChannel(channel)
     }
-  }, [groupId, profile.id, onBoardReady])
+  }, [groupId, loadTasks, onBoardReady, profile.id])
 
   useEffect(() => {
     try {
@@ -154,12 +165,8 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
   }, [])
 
   const refreshTasks = useCallback(async () => {
-    const { data } = await db.from('tasks').select(TASK_SELECT).eq('group_id', groupId)
-    if (data) {
-      columnsRef.current = null
-      setTasks(data as unknown as Task[])
-    }
-  }, [groupId])
+    await loadTasks()
+  }, [loadTasks])
 
   useEffect(() => {
     if (!groupId || !profile.id) return
@@ -211,7 +218,10 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
         {error}
         <button
           type="button"
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            setLoading(true)
+            void loadTasks().finally(() => setLoading(false))
+          }}
           style={{
             marginLeft: 16,
             background: '#10b981',
