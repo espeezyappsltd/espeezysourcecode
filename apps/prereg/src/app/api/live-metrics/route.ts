@@ -11,12 +11,6 @@ type LiveMetrics = {
   registered_count: number
   preregistration_count: number
   auth_user_count: number
-  donation_total_cents: number
-  donation_count: number
-  donation_supporters_count: number
-  donation_click_count: number
-  donation_click_user_count: number
-  donation_conversion_rate_pct: number
   lifetime_seats_used: number
   lifetime_seats_remaining: number
   last_updated_at: string
@@ -27,12 +21,6 @@ const ZERO_METRICS: LiveMetrics = {
   registered_count: 0,
   preregistration_count: 0,
   auth_user_count: 0,
-  donation_total_cents: 0,
-  donation_count: 0,
-  donation_supporters_count: 0,
-  donation_click_count: 0,
-  donation_click_user_count: 0,
-  donation_conversion_rate_pct: 0,
   lifetime_seats_used: 0,
   lifetime_seats_remaining: 100,
   last_updated_at: new Date(0).toISOString(),
@@ -73,19 +61,6 @@ async function fetchCount(
     if (!range) return 0
     const total = Number(range.split('/')[1] ?? '0')
     return Number.isFinite(total) ? total : 0
-  } catch {
-    return null
-  }
-}
-
-async function _removedDonationHelpers() {
-  let total = 0
-    for (const row of rows as Array<Record<string, unknown>>) {
-      const cents = row.amount_cents
-      if (typeof cents === 'number' && Number.isFinite(cents)) total += cents
-    }
-
-    return { total_cents: total, count: rows.length }
   } catch {
     return null
   }
@@ -132,12 +107,6 @@ async function fetchFromSupabase(): Promise<LiveMetrics | null> {
     registered_count: preregCount,
     preregistration_count: preregCount,
     auth_user_count: preregCount,
-    donation_total_cents: 0,
-    donation_count: 0,
-    donation_supporters_count: 0,
-    donation_click_count: 0,
-    donation_click_user_count: 0,
-    donation_conversion_rate_pct: 0,
     lifetime_seats_used: lifetimeUsed,
     lifetime_seats_remaining: Math.max(0, 100 - lifetimeUsed),
     last_updated_at: new Date().toISOString(),
@@ -171,12 +140,6 @@ async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
       registered_count: registered,
       preregistration_count: registered,
       auth_user_count: 0,
-      donation_total_cents: 0,
-      donation_count: 0,
-      donation_supporters_count: 0,
-      donation_click_count: 0,
-      donation_click_user_count: 0,
-      donation_conversion_rate_pct: 0,
       lifetime_seats_used: lifetimeUsed,
       lifetime_seats_remaining: Math.max(0, 100 - lifetimeUsed),
       last_updated_at: new Date().toISOString(),

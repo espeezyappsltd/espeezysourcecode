@@ -408,8 +408,8 @@ const docsContent: Record<string, DocEntry> = {
         ],
       },
       {
-        heading: 'Subscriptions and upgrades',
-        body: 'Paid plans and upgrades are billed through Stripe at checkout. They are non-refundable except where a payment was taken in error (duplicate charge, wrong amount) or where UK law requires otherwise. See the refund policy for subscription-specific terms.',
+        heading: 'Lifetime and founding access',
+        body: 'Premium Lifetime and other one-time checkout offers are final once access is granted to your account, except where UK law requires otherwise or where we confirm a duplicate charge or billing error. Contact support within 14 days if you believe a lifetime purchase was taken in error.',
       },
       {
         heading: 'Institutional and enterprise billing',
