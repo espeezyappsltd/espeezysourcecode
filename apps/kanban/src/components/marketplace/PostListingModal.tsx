@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { 
   Camera, 
-  DollarSign, 
+  Coins, 
   AlertTriangle, 
   Loader2,
   Plus
@@ -200,9 +200,9 @@ export function PostListingModal({ onClose, onSuccess }: PostListingModalProps) 
             <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Price ($)</label>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Price (credits, max 100)</label>
                     <div style={{ position: 'relative' }}>
-                       <DollarSign size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+                       <Coins size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
                        <input 
                          type="number" 
                          value={price}

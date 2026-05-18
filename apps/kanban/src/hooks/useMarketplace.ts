@@ -1,85 +1,78 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
-import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Listing, MarketplaceCategory } from '@/types/marketplace'
-import { Profile } from '@/types/database'
+import { MARKETPLACE_CATEGORIES } from '@/lib/marketplace/listing-validation'
 
 export function useMarketplace() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<MarketplaceCategory>('All')
   const [isPosting, setIsPosting] = useState(false)
   const [showWalkthrough, setShowWalkthrough] = useState(false)
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
-  const db = useMemo(() => createBrowserSupabaseClient(), [])
-  
-  const { withLoading } = useSmartLoading()
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(false)
+
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { addToast } = useNotifications()
 
-  const fetchListings = useCallback(async () => {
-    setLoading(true)
-    
-    try {
-      // Fetch marketplace_listings from Supabase
-      const { data: listingsData, error: listingsError } = await db
-        .from('marketplace_listings')
-        .select('*')
-        .order('created_at', { ascending: false })
-      
-      if (listingsError) {
-        console.error('Fetch error:', listingsError.message)
-        setListings([])
-        return
-      }
+  const fetchListings = useCallback(
+    async (opts?: { cursor?: string | null; append?: boolean; q?: string; category?: string }) => {
+      const isMore = Boolean(opts?.append && opts?.cursor)
+      if (isMore) setLoadingMore(true)
+      else setLoading(true)
 
-      if (!listingsData || listingsData.length === 0) {
-        setListings([])
-        localStorage.setItem('gf_marketplace_cache', JSON.stringify([]))
-        return
-      }
+      try {
+        const q = opts?.q ?? searchQuery
+        const category = opts?.category ?? activeCategory
+        const params = new URLSearchParams()
+        if (q.trim()) params.set('q', q.trim())
+        if (category && category !== 'All') params.set('category', category)
+        params.set('status', 'AVAILABLE')
+        params.set('limit', '24')
+        if (opts?.cursor) params.set('cursor', opts.cursor)
 
-      // Extract unique owner IDs
-      const ownerIds = Array.from(new Set(listingsData.map(l => l.owner_id).filter(Boolean)))
-
-      if (ownerIds.length > 0) {
-        // Fetch profiles for owner enrichment
-        const { data: profilesData, error: profilesError } = await db
-          .from('profiles')
-          .select('*')
-          .in('id', ownerIds)
-        
-        if (profilesError) {
-          console.error('Profile fetch error:', profilesError)
-          setListings(listingsData as Listing[])
-        } else {
-          const profileMap = (profilesData || []).reduce((acc: Record<string, Profile>, p) => {
-            acc[p.id] = p as Profile
-            return acc
-          }, {})
-
-          const merged = listingsData.map(l => ({
-            ...l,
-            profiles: profileMap[l.owner_id]
-          })) as Listing[]
-
-          setListings(merged)
-          localStorage.setItem('gf_marketplace_cache', JSON.stringify(merged))
+        const res = await fetch(`/api/marketplace/listings?${params.toString()}`, {
+          credentials: 'include',
+        })
+        const data = (await res.json()) as {
+          listings?: Listing[]
+          nextCursor?: string | null
+          error?: string
         }
-      } else {
-        setListings(listingsData as Listing[])
-        localStorage.setItem('gf_marketplace_cache', JSON.stringify(listingsData))
+
+        if (!res.ok) {
+          addToast('Marketplace', data.error ?? 'Could not load listings.', 'error')
+          if (!isMore) setListings([])
+          return
+        }
+
+        const incoming = data.listings ?? []
+        setListings((prev) => (isMore ? [...prev, ...incoming] : incoming))
+        setNextCursor(data.nextCursor ?? null)
+        setHasMore(Boolean(data.nextCursor))
+
+        if (!isMore) {
+          try {
+            localStorage.setItem('gf_marketplace_cache', JSON.stringify(incoming.slice(0, 24)))
+          } catch {
+            /* ignore quota */
+          }
+        }
+      } catch {
+        addToast('Marketplace', 'Network error loading listings.', 'error')
+        if (!isMore) setListings([])
+      } finally {
+        setLoading(false)
+        setLoadingMore(false)
       }
-    } catch (err: unknown) {
-      console.error('Fetch error:', err instanceof Error ? err.message : 'unknown error')
-      setListings([])
-    } finally {
-      setLoading(false)
-    }
-  }, [db])
+    },
+    [activeCategory, searchQuery, addToast],
+  )
 
   useEffect(() => {
     const hasSeen = localStorage.getItem('gf_marketplace_onboarding')
@@ -91,40 +84,57 @@ export function useMarketplace() {
     const cached = localStorage.getItem('gf_marketplace_cache')
     if (cached) {
       try {
-        setListings(JSON.parse(cached))
-        setLoading(false)
-      } catch (e) {
-        console.error("Marketplace cache corrupted", e)
+        const parsed = JSON.parse(cached) as Listing[]
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setListings(parsed)
+          setLoading(false)
+        }
+      } catch {
+        /* corrupted cache */
       }
     }
+  }, [])
 
-    void fetchListings()
-  }, [fetchListings])
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+    searchDebounceRef.current = setTimeout(() => {
+      void fetchListings({ q: searchQuery, category: activeCategory })
+    }, 300)
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+    }
+  }, [searchQuery, activeCategory, fetchListings])
 
-  const filteredListings = useMemo(() => {
-    const query = searchQuery.toLowerCase()
-    return listings.filter(l => {
-      const matchesSearch = l.title.toLowerCase().includes(query) ||
-                          l.description?.toLowerCase().includes(query)
-      const matchesCategory = activeCategory === 'All' || l.category === activeCategory
-      return matchesSearch && matchesCategory
-    })
-  }, [listings, searchQuery, activeCategory])
+  const loadMore = useCallback(() => {
+    if (!nextCursor || loadingMore) return
+    void fetchListings({ cursor: nextCursor, append: true, q: searchQuery, category: activeCategory })
+  }, [nextCursor, loadingMore, fetchListings, searchQuery, activeCategory])
+
+  const filteredListings = useMemo(() => listings, [listings])
+
+  const categories = useMemo(
+    () => ['All', ...MARKETPLACE_CATEGORIES] as MarketplaceCategory[],
+    [],
+  )
 
   return {
     listings,
     filteredListings,
     loading,
+    loadingMore,
+    hasMore,
+    loadMore,
     searchQuery,
     setSearchQuery,
     activeCategory,
     setActiveCategory,
+    categories,
     isPosting,
     setIsPosting,
     showWalkthrough,
     setShowWalkthrough,
     selectedListing,
     setSelectedListing,
-    fetchListings
+    fetchListings,
   }
 }

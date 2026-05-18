@@ -253,6 +253,54 @@ export async function sendP2PTransactionEmail(opts: {
   })
 }
 
+/** Printable marketplace invoice for buyer or seller */
+export async function sendMarketplaceInvoiceEmail(opts: {
+  to: string
+  role: 'buyer' | 'seller'
+  invoiceNumber: string
+  listingTitle: string
+  creditsAmount: number
+  creditsAfter: number
+  counterpartyName: string
+  printUrl: string
+}): Promise<void> {
+  const creditsLabel = `${opts.creditsAmount} credit${opts.creditsAmount === 1 ? '' : 's'}`
+  const subject =
+    opts.role === 'buyer'
+      ? `Receipt: ${opts.listingTitle} (${creditsLabel})`
+      : `Sale confirmed: ${opts.listingTitle} (${creditsLabel})`
+
+  const intro =
+    opts.role === 'buyer'
+      ? `Your purchase of <strong>${escapeHtml(opts.listingTitle)}</strong> is confirmed. You paid <strong>${escapeHtml(creditsLabel)}</strong> to <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
+      : `You received <strong>${escapeHtml(creditsLabel)}</strong> for <strong>${escapeHtml(opts.listingTitle)}</strong> from <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
+
+  await sendEmail({
+    to: opts.to,
+    subject,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
+        <div style="background:linear-gradient(135deg,#10b981,#059669);padding:24px;border-radius:12px 12px 0 0;color:#fff">
+          <h1 style="margin:0;font-size:22px">Espeezy Marketplace Invoice</h1>
+          <p style="margin:8px 0 0;opacity:0.9;font-size:14px">${escapeHtml(opts.invoiceNumber)}</p>
+        </div>
+        <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+          <p style="color:#334155;line-height:1.6">${intro}</p>
+          <p style="color:#334155">Your balance after this transaction: <strong>${opts.creditsAfter} credits</strong>.</p>
+          <a href="${opts.printUrl}" style="display:inline-block;margin:16px 0;background:#10b981;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:700">View &amp; print invoice</a>
+        </div>
+      </div>
+    `,
+    text: [
+      `Espeezy Marketplace Invoice ${opts.invoiceNumber}`,
+      opts.role === 'buyer' ? `Purchase: ${opts.listingTitle}` : `Sale: ${opts.listingTitle}`,
+      `Amount: ${creditsLabel}`,
+      `Balance after: ${opts.creditsAfter} credits`,
+      `Print: ${opts.printUrl}`,
+    ].join('\n'),
+  })
+}
+
 // ─── Util ───────────────────────────────────────────────────────────────────
 
 function escapeHtml(s: string): string {

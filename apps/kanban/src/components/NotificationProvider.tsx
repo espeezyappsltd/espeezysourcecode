@@ -7,6 +7,23 @@ import { Notification, NotificationContextType, Toast } from '@/types/ui'
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
+const NOTIFICATION_SELECT_FULL =
+  'id, type, title, message, read, created_at, metadata, link' as const
+const NOTIFICATION_SELECT_BASE = 'id, type, title, message, read, created_at' as const
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message
+  if (err && typeof err === 'object' && 'message' in err) {
+    return String((err as { message: unknown }).message)
+  }
+  return 'unknown error'
+}
+
+function isMissingColumnError(message: string): boolean {
+  const lower = message.toLowerCase()
+  return lower.includes('column') && (lower.includes('link') || lower.includes('metadata'))
+}
+
 export const useNotifications = () => {
   const context = useContext(NotificationContext)
   if (!context) throw new Error('useNotifications must be used within NotificationProvider')
@@ -32,19 +49,28 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (!userId) return
 
     try {
-      const { data, error } = await db
+      let result = await db
         .from('notifications')
-        .select('id, type, title, message, read, created_at, metadata')
+        .select(NOTIFICATION_SELECT_FULL)
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(20)
 
-      if (error) throw error
+      if (result.error && isMissingColumnError(result.error.message)) {
+        result = await db
+          .from('notifications')
+          .select(NOTIFICATION_SELECT_BASE)
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(20)
+      }
 
-      setNotifications((data ?? []) as Notification[])
+      if (result.error) throw result.error
+
+      setNotifications((result.data ?? []) as Notification[])
       baselineLoadedRef.current = true
     } catch (err: unknown) {
-      console.error('Error fetching notifications:', err instanceof Error ? err.message : 'unknown error')
+      console.error('Error fetching notifications:', getErrorMessage(err))
     }
   }, [db, userId])
 
@@ -162,7 +188,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       if (error) throw error
     } catch (err: unknown) {
-      console.error('Persistence error (markAsRead):', err instanceof Error ? err.message : 'unknown error')
+      console.error('Persistence error (markAsRead):', getErrorMessage(err))
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n))
       addToast('Check connection', 'We couldn\'t update that just now.', 'error')
     }
@@ -183,7 +209,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       if (error) throw error
     } catch (err: unknown) {
-      console.error('Persistence error (markAllAsRead):', err instanceof Error ? err.message : 'unknown error')
+      console.error('Persistence error (markAllAsRead):', getErrorMessage(err))
       setNotifications(original)
       addToast('Check connection', 'We couldn\'t clear your notifications.', 'error')
     }

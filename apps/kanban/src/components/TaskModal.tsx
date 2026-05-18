@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { TaskModalProps } from '@/types/ui'
 import { Profile } from '@/types/auth'
-import { TaskStatus, Artifact, TaskCategory } from '@/types/database'
+import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { CategoryTabs } from '@shared/CategoryTabs'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { logActivity } from '@/utils/logging'
@@ -204,7 +204,7 @@ export default function TaskModal({
         body: JSON.stringify(payload)
       })
 
-      const data = await response.json()
+      const data = await response.json() as { error?: string; task?: Task }
       if (!response.ok) {
         throw new Error(data?.error || 'Failed to save task.')
       }
@@ -554,7 +554,7 @@ export default function TaskModal({
                     opacity: aiLoading || !title.trim() ? 0.7 : 1
                   }}
                 >
-                  {aiLoading ? 'Generatingâ€¦' : 'AI Assist'}
+                  {aiLoading ? 'Generating\u2026' : 'AI Assist'}
                 </button>
               </div>
               <textarea 

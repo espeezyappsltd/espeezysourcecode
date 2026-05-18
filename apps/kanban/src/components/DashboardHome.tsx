@@ -10,6 +10,7 @@ import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from './NotificationProvider'
 import { getPlanName, hasFeature } from '@/utils/feature-gate'
 import { useDashboardHomeData } from '@/components/dashboard/useDashboardHomeData'
+import AccountTiersBanner from '@/components/AccountTiersBanner'
 
 const DASHBOARD_TABS = [
   { id: 'board', label: 'Task Board', icon: <LayoutDashboard size={18} /> },
@@ -93,17 +94,7 @@ export default function DashboardHome({
   return (
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-md)', width: '100%', maxWidth: '1400px', margin: '0 auto', paddingBottom: '4rem' }}>
 
-      {/* RBAC/Tier Info */}
-      <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: 12, padding: '1.25rem 1.5rem', color: '#6ee7b7', fontWeight: 600, fontSize: '1.05rem', marginBottom: '1.5rem' }}>
-        <span style={{ color: '#10b981', fontWeight: 800 }}>Account Tiers & Access</span><br />
-        <ul style={{ margin: '0.5em 0 0 1.2em', padding: 0, color: '#6ee7b7', fontSize: '0.98em' }}>
-          <li>Log in with a personal email for <strong>Free Tier</strong> access.</li>
-          <li>Upgrade to <strong>Premium</strong> by verifying your school or institutional email.</li>
-          <li>Roles: <strong>Personal</strong> (free), <strong>Student</strong> (premium), <strong>Educator</strong>, <strong>Admin</strong>.</li>
-          <li>Premium features unlock automatically when your email is verified as belonging to a recognized institution.</li>
-        </ul>
-        <span style={{ color: '#10b981', fontWeight: 700 }}>You control your workspace, your data, and your team.</span>
-      </div>
+      <AccountTiersBanner />
 
       {/* ── CONTROL PANEL HEADER ─────────────────────────────────────────── */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>

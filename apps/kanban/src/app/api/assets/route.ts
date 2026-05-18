@@ -6,6 +6,7 @@ import {
   readCreditValueFromMetadata,
   validateCreditValue,
 } from '@/lib/credits'
+import { isFolderMarker, normalizeFolderPath } from '@/lib/assets/folders'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,10 +17,16 @@ const QUOTAS = {
   admin: 100 * 1024 * 1024 * 1024,
 }
 
-function enrichAsset<T extends { metadata?: unknown }>(row: T) {
+function enrichAsset<T extends { metadata?: unknown; asset_url?: string | null }>(row: T) {
+  const metadata = row.metadata as Record<string, unknown> | null
   return {
     ...row,
-    credit_value: readCreditValueFromMetadata(row.metadata as Record<string, unknown> | null),
+    credit_value: readCreditValueFromMetadata(metadata),
+    is_folder: isFolderMarker(row),
+    marketplace_listing_id:
+      metadata && typeof metadata.marketplace_listing_id === 'string'
+        ? metadata.marketplace_listing_id
+        : null,
   }
 }
 
@@ -32,7 +39,10 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const queryStr = searchParams.get('q')
     const cursor = searchParams.get('cursor')
-    const limit = Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 50)
+    const fetchAll = searchParams.get('all') === '1'
+    const limit = fetchAll
+      ? 500
+      : Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 50)
 
     const adminDb = getAdminDb()
     let query = adminDb
@@ -40,7 +50,7 @@ export async function GET(req: NextRequest) {
       .select(Q.personalAsset)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(limit + 1)
+      .limit(fetchAll ? limit : limit + 1)
 
     if (queryStr) {
       query = query.ilike('title', `%${queryStr}%`)
@@ -68,7 +78,35 @@ export async function GET(req: NextRequest) {
         0,
       ) ?? 0
 
-    return NextResponse.json({ assets, nextCursor, totalCreditValue })
+    const { data: profileRow } = await adminDb
+      .from('profiles')
+      .select('storage_used, subscription_plan, tier')
+      .eq('id', user.id)
+      .single()
+
+    const plan = (
+      (profileRow?.subscription_plan ?? profileRow?.tier ?? 'free') as string
+    ).toLowerCase()
+    const storageQuota = QUOTAS[plan as keyof typeof QUOTAS] ?? QUOTAS.free
+
+    const folderPaths = new Set<string>()
+    for (const row of assets) {
+      const meta = row.metadata as { folder_path?: string } | null
+      if (row.is_folder && meta?.folder_path) {
+        folderPaths.add(normalizeFolderPath(meta.folder_path))
+      }
+      if (row.folder) folderPaths.add(normalizeFolderPath(row.folder as string))
+    }
+
+    return NextResponse.json({
+      assets,
+      nextCursor,
+      totalCreditValue,
+      storageUsed: profileRow?.storage_used ?? 0,
+      storageQuota,
+      tier: plan,
+      folders: Array.from(folderPaths).sort(),
+    })
   } catch (err: unknown) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
@@ -149,15 +187,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    folder = normalizeFolderPath(folder)
+
     const { data: profile, error: profileError } = await adminDb
       .from('profiles')
-      .select('tier, storage_used')
+      .select('tier, subscription_plan, storage_used')
       .eq('id', user.id)
       .single()
 
     if (profileError) throw profileError
 
-    const tier = (profile.tier as keyof typeof QUOTAS) || 'free'
+    const tier = ((profile.subscription_plan ?? profile.tier ?? 'free') as string).toLowerCase() as keyof typeof QUOTAS
     const quota = QUOTAS[tier]
 
     if (profile.storage_used + size_bytes > quota) {

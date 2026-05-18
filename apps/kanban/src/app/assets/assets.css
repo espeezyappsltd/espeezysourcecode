@@ -1,0 +1,141 @@
+.assets-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.assets-hero h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  color: var(--text-main);
+}
+
+.assets-hero h1 span {
+  color: var(--brand);
+}
+
+.assets-hero p {
+  margin: 0.5rem 0 0;
+  color: var(--text-sub);
+  font-weight: 600;
+  font-size: 0.92rem;
+  max-width: 36rem;
+  line-height: 1.5;
+}
+
+.assets-value-card {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.15rem;
+  background: rgba(var(--brand-rgb), 0.08);
+  border: 1px solid rgba(var(--brand-rgb), 0.22);
+  border-radius: 14px;
+}
+
+.assets-storage-card {
+  width: 100%;
+  max-width: 320px;
+  background: var(--surface);
+  padding: 1.25rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.assets-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.assets-breadcrumb button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-sub);
+  padding: 0.2rem 0.35rem;
+  border-radius: 6px;
+}
+
+.assets-breadcrumb button:hover {
+  color: var(--text-main);
+  background: var(--bg-sub);
+}
+
+.assets-breadcrumb button.active {
+  color: var(--text-main);
+  font-weight: 900;
+}
+
+.assets-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.assets-filter-tabs {
+  display: flex;
+  background: var(--bg-sub);
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.assets-filter-tabs button {
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-sub);
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.assets-filter-tabs button.active {
+  background: var(--brand);
+  color: #000;
+}
+
+.assets-folder-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.assets-folder-tile:hover {
+  border-color: var(--brand);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.assets-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--surface);
+  border-radius: 24px;
+  border: 2px dashed var(--border);
+}
+
+.assets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}

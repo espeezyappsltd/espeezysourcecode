@@ -1,0 +1,135 @@
+.feed-shell {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 4rem;
+}
+
+.feed-hero {
+  text-align: center;
+  margin-bottom: 1.75rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.feed-hero h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 950;
+  letter-spacing: -0.05em;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(120deg, var(--brand), #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.feed-hero p {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  font-weight: 600;
+  max-width: 420px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.feed-stories {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 1rem;
+  margin-bottom: 1rem;
+  scrollbar-width: none;
+}
+
+.feed-stories::-webkit-scrollbar {
+  display: none;
+}
+
+.feed-story {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 68px;
+  cursor: default;
+}
+
+.feed-story-ring {
+  padding: 2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), #3b82f6);
+}
+
+.feed-story-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--text-sub);
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.feed-composer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-md);
+}
+
+.feed-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.feed-card:hover {
+  border-color: rgba(var(--brand-rgb), 0.35);
+}
+
+.feed-empty {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  border-radius: 24px;
+  border: 1px dashed var(--border);
+  background: var(--bg-sub);
+}
+
+.feed-skeleton {
+  border-radius: 20px;
+  height: 140px;
+  margin-bottom: 1rem;
+  background: linear-gradient(
+    90deg,
+    var(--bg-sub) 0%,
+    rgba(var(--brand-rgb), 0.08) 50%,
+    var(--bg-sub) 100%
+  );
+  background-size: 200% 100%;
+  animation: feed-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes feed-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes feed-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.feed-spin {
+  animation: feed-spin 0.9s linear infinite;
+}

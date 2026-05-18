@@ -221,7 +221,10 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
           initialStatus={activeColumn}
           onClose={() => setIsModalOpen(false)}
           onRefresh={refreshTasks}
-          onTaskSaved={() => setIsModalOpen(false)}
+          onTaskSaved={async () => {
+            await refreshTasks()
+            setIsModalOpen(false)
+          }}
           onlineUserIds={new Set(groupMembers.map((m) => m.id))}
         />
       )}

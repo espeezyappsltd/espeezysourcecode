@@ -13,6 +13,7 @@ import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import SupportChat from '@/components/SupportChat'
+import { PageGuideHost } from '@/components/guide/PageGuideHost'
 import { getCachedLayoutSession } from '@/utils/auth-server'
 import './prestige.css'
 import './globals.css'
@@ -89,6 +90,7 @@ function DashboardShell({
           <Sidebar user={user} />
           <main className="main-content">
             <ConnectionAlertTray />
+            <PageGuideHost />
             <PageTransitionWrapper>{children}</PageTransitionWrapper>
           </main>
           <GlobalAnnouncement />

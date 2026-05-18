@@ -1,16 +1,24 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import {
-  Heart, Flame, HandMetal, Lightbulb, PartyPopper, ThumbsUp,
-  MessageCircle, Send, Image as ImageIcon, X, ChevronDown, Loader2,
-  Globe, Users, Lock, MoreHorizontal, Trash2, Pencil, Sparkles
+  Heart,
+  Flame,
+  HandMetal,
+  Lightbulb,
+  PartyPopper,
+  ThumbsUp,
+  Send,
+  Globe,
+  Users,
+  Loader2,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react'
-import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { useProfile } from '@/context/ProfileContext'
 import type { Profile } from '@/types/database'
+import type { PostReactionType } from '@/types/feed'
 import {
   fetchFeedPosts,
   createFeedPost,
@@ -19,16 +27,18 @@ import {
   createFeedComment,
 } from '@/services/feed'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
+import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
+import { seedDemoContent } from '@/lib/dev/seed-demo'
 
-type Reaction = 'like' | 'love' | 'fire' | 'clap' | 'insightful' | 'celebrate'
+type Reaction = PostReactionType
 
-const REACTION_META: Record<Reaction, { emoji: string; label: string; Icon: typeof Heart }> = {
-  like:        { emoji: '??', label: 'Like',       Icon: ThumbsUp },
-  love:        { emoji: '??', label: 'Love',       Icon: Heart },
-  fire:        { emoji: '??', label: 'Fire',       Icon: Flame },
-  clap:        { emoji: '??', label: 'Clap',       Icon: HandMetal },
-  insightful:  { emoji: '??', label: 'Insightful', Icon: Lightbulb },
-  celebrate:   { emoji: '??', label: 'Celebrate',  Icon: PartyPopper },
+const REACTION_META: Record<Reaction, { emoji: string; label: string }> = {
+  like: { emoji: '👍', label: 'Like' },
+  love: { emoji: '❤️', label: 'Love' },
+  fire: { emoji: '🔥', label: 'Fire' },
+  clap: { emoji: '👏', label: 'Clap' },
+  insightful: { emoji: '💡', label: 'Insightful' },
+  celebrate: { emoji: '🎉', label: 'Celebrate' },
 }
 
 interface Post {
@@ -43,194 +53,293 @@ interface Post {
   reactions: { reaction: Reaction; user_id: string }[]
   comments: { count: number }[]
 }
-interface PostAuthor { id: string; full_name?: string | null; avatar_url?: string | null; username?: string | null; }
+
+interface PostAuthor {
+  id: string
+  full_name?: string | null
+  avatar_url?: string | null
+  username?: string | null
+  role?: string | null
+}
 
 interface Comment {
   id: string
   content: string
   created_at: string
-  parent_id?: string
   author: Partial<Profile> | null
 }
 
+function timeAgo(date: string): string {
+  const diff = Date.now() - new Date(date).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d`
+  return new Date(date).toLocaleDateString()
+}
+
 export default function FeedPage() {
-  const { profile } = useProfile();
-  const router = useRouter();
+  const { profile } = useProfile()
+  const router = useRouter()
 
-  // Composer state
-  const [composerText, setComposerText] = useState<string>('');
-  const [composerVisibility, setComposerVisibility] = useState<'public' | 'private'>('public');
-  const [posting, setPosting] = useState<boolean>(false);
+  const [composerText, setComposerText] = useState('')
+  const [composerVisibility, setComposerVisibility] = useState<'public' | 'connections'>('public')
+  const [posting, setPosting] = useState(false)
 
-  // Feed state
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [posts, setPosts] = useState<Post[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [cursor, setCursor] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
-  // Comments state
-  const [expandedComments, setExpandedComments] = useState<Record<string, Comment[]>>({});
-  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
-  const [commentText, setCommentText] = useState<Record<string, string>>({});
-  const [submittingComment, setSubmittingComment] = useState<Record<string, boolean>>({});
+  const [expandedComments, setExpandedComments] = useState<Record<string, Comment[]>>({})
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({})
+  const [commentText, setCommentText] = useState<Record<string, string>>({})
+  const [submittingComment, setSubmittingComment] = useState<Record<string, boolean>>({})
+  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null)
+  const [seeding, setSeeding] = useState(false)
 
-  // Reaction picker state
-  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
-  // Infinite scroll sentinel
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const runDemoSeed = async () => {
+    setSeeding(true)
+    const result = await seedDemoContent()
+    setSeeding(false)
+    if (result.ok) await loadPosts()
+    else setLoadError(result.error ?? 'Seed failed.')
+  }
 
-  // Handler: submit post
-  const submitPost = useCallback(() => {
-    if (!composerText.trim() || posting) return;
-    setPosting(true);
-    // TODO: Implement post creation logic
-    setTimeout(() => {
-      setPosting(false);
-      setComposerText('');
-    }, 1000);
-  }, [composerText, posting]);
+  const loadPosts = useCallback(async (nextCursor?: string | null) => {
+    const isMore = Boolean(nextCursor)
+    if (isMore) setLoadingMore(true)
+    else setLoading(true)
 
-  // Handler: toggle reaction
-  const toggleReaction = useCallback((postId: string, reaction: Reaction) => {
-    // TODO: Implement reaction logic
-  }, []);
+    try {
+      const data = await fetchFeedPosts(nextCursor ?? undefined)
+      if (!data) {
+        setLoadError('Could not load feed.')
+        return
+      }
+      setLoadError(null)
+      const incoming = (data.posts ?? []) as Post[]
+      setPosts((prev) => (isMore ? [...prev, ...incoming] : incoming))
+      setCursor(data.nextCursor)
+      setHasMore(Boolean(data.nextCursor))
+    } catch {
+      setLoadError('Could not load feed.')
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
+  }, [])
 
-  // Handler: user reaction
-  const userReaction = useCallback((reactions: { reaction: Reaction; user_id: string }[]): Reaction | undefined => {
-    // TODO: Implement user reaction lookup
-    return undefined;
-  }, []);
+  useEffect(() => {
+    void loadPosts()
+  }, [loadPosts])
 
-  // Handler: group reactions
-  const groupReactions = useCallback((reactions: { reaction: Reaction; user_id: string }[]): [Reaction, number][] => {
-    // TODO: Implement grouping logic
-    return [];
-  }, []);
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el || !hasMore) return
 
-  // Handler: load comments
-  const loadComments = useCallback((postId: string) => {
-    // TODO: Implement comment loading
-  }, []);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasMore && !loadingMore && cursor) {
+          void loadPosts(cursor)
+        }
+      },
+      { rootMargin: '200px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [cursor, hasMore, loadingMore, loadPosts])
 
-  // Handler: submit comment
-  const submitComment = useCallback((postId: string) => {
-    // TODO: Implement comment submission
-  }, []);
+  const submitPost = async () => {
+    if (!composerText.trim() || posting || !profile) return
+    setPosting(true)
+    const { ok } = await createFeedPost({
+      content: composerText.trim(),
+      visibility: composerVisibility,
+    })
+    if (ok) {
+      setComposerText('')
+      await loadPosts()
+    }
+    setPosting(false)
+  }
 
-  // Handler: time ago
-  const timeAgo = useCallback((date: string) => {
-    // TODO: Implement time ago formatting
-    return '';
-  }, []);
+  const toggleReaction = async (postId: string, reaction: Reaction) => {
+    if (!profile?.id) return
+    setShowReactionPicker(null)
+    await reactToFeedPost(postId, reaction)
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id !== postId) return p
+        const existing = p.reactions.find((r) => r.user_id === profile.id)
+        let reactions = [...p.reactions]
+        if (existing?.reaction === reaction) {
+          reactions = reactions.filter((r) => r.user_id !== profile.id)
+        } else {
+          reactions = reactions.filter((r) => r.user_id !== profile.id)
+          reactions.push({ reaction, user_id: profile.id })
+        }
+        return { ...p, reactions }
+      }),
+    )
+  }
 
-  // Handler: VisibilityToggle stub
-  const VisibilityToggle = ({ value, onChange }: { value: 'public' | 'private'; onChange: (v: 'public' | 'private') => void }) => (
-    <button type="button" onClick={() => onChange(value === 'public' ? 'private' : 'public')} style={{ padding: '0.3rem 0.8rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-sub)', color: 'var(--text-main)', fontWeight: 700, fontSize: '0.8rem' }}>
-      {value === 'public' ? '🌍 Public' : '🔒 Private'}
-    </button>
-  );
+  const getUserReaction = (reactions: { reaction: Reaction; user_id: string }[]) =>
+    profile?.id ? reactions.find((r) => r.user_id === profile.id)?.reaction : undefined
 
-  // Handler: Avatar stub
-  const Avatar = ({ profile, size }: { profile: PostAuthor | null | undefined; size: number }) => (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-      {profile?.avatar_url ? (
-        <Image src={profile.avatar_url} alt={profile.full_name || 'User'} width={size} height={size} />
-      ) : (
-        <span style={{ fontSize: size * 0.5, color: '#888' }}>{profile?.full_name?.[0] || '?'}</span>
-      )}
-    </div>
-  );
+  const groupReactions = (reactions: { reaction: Reaction; user_id: string }[]): [Reaction, number][] => {
+    const map = new Map<Reaction, number>()
+    for (const r of reactions) {
+      map.set(r.reaction, (map.get(r.reaction) ?? 0) + 1)
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1])
+  }
 
-  // Handler: ActionButton stub
-  const ActionButton = ({ onClick, active, label, ariaLabel, ariaExpanded }: { onClick: () => void; active?: boolean; label: string; ariaLabel?: string; ariaExpanded?: boolean }) => (
-    <button onClick={onClick} aria-label={ariaLabel} aria-expanded={ariaExpanded} style={{ background: active ? '#10B981' : 'rgba(255,255,255,0.04)', color: active ? '#000' : '#fff', border: 'none', borderRadius: '8px', padding: '0.4rem 1rem', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', marginRight: '0.5rem' }}>{label}</button>
-  );
+  const loadComments = async (postId: string) => {
+    if (expandedComments[postId]) {
+      setExpandedComments((prev) => {
+        const next = { ...prev }
+        delete next[postId]
+        return next
+      })
+      return
+    }
+    setLoadingComments((prev) => ({ ...prev, [postId]: true }))
+    const data = await fetchFeedComments(postId)
+    setExpandedComments((prev) => ({ ...prev, [postId]: data?.comments ?? [] }))
+    setLoadingComments((prev) => ({ ...prev, [postId]: false }))
+  }
+
+  const submitComment = async (postId: string) => {
+    const text = (commentText[postId] ?? '').trim()
+    if (!text) return
+    setSubmittingComment((prev) => ({ ...prev, [postId]: true }))
+    const result = await createFeedComment(postId, text)
+    if (result?.comment) {
+      setExpandedComments((prev) => ({
+        ...prev,
+        [postId]: [...(prev[postId] ?? []), result.comment as Comment],
+      }))
+      setCommentText((prev) => ({ ...prev, [postId]: '' }))
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, comments: [{ count: (p.comments?.[0]?.count ?? 0) + 1 }] }
+            : p,
+        ),
+      )
+    }
+    setSubmittingComment((prev) => ({ ...prev, [postId]: false }))
+  }
+
+  const storyAuthors = posts
+    .map((p) => p.author)
+    .filter((a): a is PostAuthor => Boolean(a?.id))
+    .filter((a, i, arr) => arr.findIndex((x) => x.id === a.id) === i)
+    .slice(0, 8)
 
   return (
-  
-    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '1.5rem 1rem' }}>
-      
-      {/* IG-like Public Header */}
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem', marginTop: '1rem' }}>
-        <h1 style={{ fontSize: '2.2rem', fontWeight: 950, letterSpacing: '-0.05em', marginBottom: '0.5rem', background: 'linear-gradient(to right, #10B981, #3B82F6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          Academic Journeys
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', fontWeight: 600, maxWidth: '400px', margin: '0 auto' }}>
-          Real-time signals from students building the future. Share your milestones.
-        </p>
-      </div>
+    <div className="feed-shell">
+      <header className="feed-hero">
+        <h1>Academic Journeys</h1>
+        <p>Real-time signals from students building the future. Share milestones, wins, and campus life.</p>
+      </header>
 
       {!profile && (
-        <div style={{ 
-          background: 'rgba(16, 185, 129, 0.05)', 
-          border: '1px solid rgba(16, 185, 129, 0.15)', 
-          borderRadius: '20px', 
-          padding: '2rem', 
-          textAlign: 'center', 
-          marginBottom: '2rem',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <Sparkles size={32} color="#10B981" style={{ marginBottom: '1rem' }} />
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '0.5rem', color: '#F3F4F6' }}>Join the Journey</h2>
-          <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>Sign in to share your academic milestones and connect with other builders.</p>
-          <button 
-            onClick={() => router.push('/login')}
-            style={{ 
-              padding: '0.75rem 1.75rem', 
-              background: '#10B981', 
-              border: 'none', 
-              borderRadius: '12px', 
-              color: '#000', 
-              fontWeight: 800, 
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
-            }}
-          >
-            Get Started
+        <div className="feed-empty" style={{ marginBottom: '1.5rem' }}>
+          <Sparkles size={32} color="var(--brand)" style={{ marginBottom: '0.75rem' }} />
+          <h2 style={{ fontWeight: 900, marginBottom: '0.35rem' }}>Join the journey</h2>
+          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+            Sign in to post and react with your cohort.
+          </p>
+          <button type="button" className="btn btn-primary" onClick={() => router.push('/login')}>
+            Get started
           </button>
         </div>
       )}
 
-      {/* Composer (Only for logged in) */}
+      {storyAuthors.length > 0 && (
+        <div className="feed-stories" aria-label="Active scholars">
+          {storyAuthors.map((author) => (
+            <div key={author.id} className="feed-story">
+              <div className="feed-story-ring">
+                <FeedAvatar profile={author} size={52} />
+              </div>
+              <span className="feed-story-label">{author.full_name?.split(' ')[0] ?? 'Peer'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {profile && (
-        <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
+        <div className="feed-composer">
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <Avatar profile={profile as unknown as PostAuthor} size={38} />
+            <FeedAvatar profile={profile as PostAuthor} size={42} ring />
             <div style={{ flex: 1 }}>
-              <label htmlFor="feed-composer" className="sr-only">What's on your mind?</label>
+              <label htmlFor="feed-composer" className="sr-only">
+                What&apos;s on your mind?
+              </label>
               <textarea
                 id="feed-composer"
                 value={composerText}
-                onChange={e => setComposerText(e.target.value)}
-                placeholder="What's on your mind?"
-                rows={composerText.length > 80 ? 4 : 2}
-                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitPost() }}
+                onChange={(e) => setComposerText(e.target.value)}
+                placeholder="Share a milestone, project update, or campus tip…"
+                rows={composerText.length > 100 ? 4 : 2}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) void submitPost()
+                }}
                 style={{
-                  width: '100%', background: 'transparent', border: 'none', outline: 'none',
-                  color: '#F3F4F6', fontSize: '0.95rem', lineHeight: 1.6, resize: 'none',
-                  fontFamily: 'inherit', boxSizing: 'border-box',
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  color: 'var(--text-main)',
+                  fontSize: '0.95rem',
+                  lineHeight: 1.6,
+                  resize: 'none',
+                  fontFamily: 'inherit',
                 }}
               />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <VisibilityToggle value={composerVisibility} onChange={setComposerVisibility} />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <span style={{ fontSize: '0.72rem', color: composerText.length > 1900 ? '#EF4444' : 'rgba(255,255,255,0.2)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginTop: '0.75rem',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem',
+                }}
+              >
+                <VisibilityToggle value={composerVisibility} onChange={setComposerVisibility} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      color: composerText.length > 1900 ? '#ef4444' : 'var(--text-sub)',
+                    }}
+                  >
                     {composerText.length}/2000
                   </span>
                   <button
-                    onClick={submitPost}
+                    type="button"
+                    onClick={() => void submitPost()}
                     disabled={!composerText.trim() || posting}
+                    className="btn btn-primary"
                     style={{
-                      padding: '0.45rem 1.1rem', background: '#10B981', border: 'none', borderRadius: '8px',
-                      color: '#000', fontWeight: 800, fontSize: '0.8rem', cursor: (!composerText.trim() || posting) ? 'not-allowed' : 'pointer',
-                      opacity: (!composerText.trim() || posting) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '0.35rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      opacity: !composerText.trim() || posting ? 0.5 : 1,
                     }}
                   >
-                    {posting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                    {posting ? <Loader2 size={14} className="feed-spin" /> : <Send size={14} />}
                     Post
                   </button>
                 </div>
@@ -240,94 +349,189 @@ export default function FeedPage() {
         </div>
       )}
 
-      {/* Feed */}
-      {loading && (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.3)' }}>
-          <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }} />
+      {loadError && (
+        <div className="feed-empty">
+          <p style={{ color: 'var(--text-sub)', marginBottom: '0.75rem' }}>{loadError}</p>
+          <button type="button" className="btn btn-secondary" onClick={() => void loadPosts()}>
+            <RefreshCw size={14} style={{ marginRight: 6 }} />
+            Retry
+          </button>
         </div>
       )}
 
-      {!loading && posts.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
-          <Globe size={40} style={{ marginBottom: '1rem', opacity: 0.3 }} />
-          <p style={{ fontWeight: 600 }}>No posts yet. Be the first!</p>
+      {loading &&
+        posts.length === 0 &&
+        [0, 1, 2].map((i) => <div key={i} className="feed-skeleton" />)}
+
+      {!loading && posts.length === 0 && !loadError && (
+        <div className="feed-empty">
+          <Globe size={40} style={{ marginBottom: '0.75rem', opacity: 0.35, color: 'var(--brand)' }} />
+          <p style={{ fontWeight: 800, marginBottom: '0.35rem' }}>No journeys yet</p>
+          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+            Be the first to share a milestone — or load sample journeys to preview the feed.
+          </p>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={seeding}
+            onClick={() => void runDemoSeed()}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            {seeding ? <Loader2 size={14} className="feed-spin" /> : <Sparkles size={14} />}
+            Load sample journeys
+          </button>
         </div>
       )}
 
-      {posts.map(post => (
+      {posts.map((post) => (
         <PostCard
           key={post.id}
           post={post}
           currentUserId={profile?.id ?? ''}
           onReaction={toggleReaction}
-          userReaction={userReaction(post.reactions)}
+          userReaction={getUserReaction(post.reactions)}
           reactionCounts={groupReactions(post.reactions)}
           totalReactions={post.reactions.length}
           commentCount={post.comments?.[0]?.count ?? 0}
           comments={expandedComments[post.id]}
           loadingComments={loadingComments[post.id]}
-          onToggleComments={() => loadComments(post.id)}
+          onToggleComments={() => void loadComments(post.id)}
           commentText={commentText[post.id] ?? ''}
-          onCommentTextChange={t => setCommentText(prev => ({ ...prev, [post.id]: t }))}
-          onSubmitComment={() => submitComment(post.id)}
+          onCommentTextChange={(t) => setCommentText((prev) => ({ ...prev, [post.id]: t }))}
+          onSubmitComment={() => void submitComment(post.id)}
           submittingComment={submittingComment[post.id]}
           showReactionPicker={showReactionPicker === post.id}
-          onToggleReactionPicker={() => setShowReactionPicker(p => p === post.id ? null : post.id)}
+          onToggleReactionPicker={() =>
+            setShowReactionPicker((p) => (p === post.id ? null : post.id))
+          }
           timeAgo={timeAgo(post.created_at)}
         />
       ))}
 
-      {/* Infinite scroll sentinel */}
-      <div ref={sentinelRef} style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {loadingMore && <Loader2 size={18} style={{ animation: 'spin 1s linear infinite', color: 'rgba(255,255,255,0.3)' }} />}
-        {!hasMore && posts.length > 0 && <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>You&apos;ve seen it all</span>}
+      <div ref={sentinelRef} style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {loadingMore && <Loader2 size={20} className="feed-spin" style={{ color: 'var(--brand)' }} />}
+        {!hasMore && posts.length > 0 && (
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>You&apos;re all caught up</span>
+        )}
       </div>
     </div>
   )
 }
 
-// ─── PostCard ────────────────────────────────────────────────────────────────
-
-function PostCard({
-  post, currentUserId, onReaction, userReaction, reactionCounts, totalReactions,
-  commentCount, comments, loadingComments, onToggleComments,
-  commentText, onCommentTextChange, onSubmitComment, submittingComment,
-  showReactionPicker, onToggleReactionPicker, timeAgo
+function FeedAvatar({
+  profile,
+  size,
+  ring,
 }: {
-  post: Post; currentUserId: string
-  onReaction: (id: string, r: Reaction) => void
-  userReaction?: Reaction; reactionCounts: [Reaction, number][]
-  totalReactions: number; commentCount: number
-  comments?: Comment[]; loadingComments?: boolean
-  onToggleComments: () => void; commentText: string
-  onCommentTextChange: (t: string) => void
-  onSubmitComment: () => void; submittingComment?: boolean
-  showReactionPicker: boolean; onToggleReactionPicker: () => void
-  timeAgo: string
+  profile?: PostAuthor | null
+  size: number
+  ring?: boolean
 }) {
-
-  const isOwn = post.author?.id === currentUserId;
+  const src = profile
+    ? avatarUrlForProfile({
+        id: profile.id,
+        full_name: profile.full_name,
+        username: profile.username,
+        avatar_url: profile.avatar_url,
+      })
+    : ''
 
   return (
-    <div style={{
-      background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px',
-      marginBottom: '1rem', overflow: 'hidden',
-    }}>
-      {/* Header */}
-      <div style={{ padding: '1rem 1.25rem 0.75rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-        {post.author && <Avatar profile={post.author as PostAuthor} size={40} />}
-        <div style={{ flex: 1 }}>
+    <RemoteAvatar
+      src={src}
+      alt={`${profile?.full_name ?? 'User'} avatar`}
+      size={size}
+      style={{
+        background: 'var(--bg-sub)',
+        border: ring ? '2px solid var(--surface)' : undefined,
+        flexShrink: 0,
+      }}
+      fallback={
+        <span style={{ color: 'var(--brand)', fontWeight: 900, fontSize: size * 0.38 }}>
+          {profile?.full_name?.[0]?.toUpperCase() ?? '?'}
+        </span>
+      }
+    />
+  )
+}
+
+function PostCard({
+  post,
+  currentUserId,
+  onReaction,
+  userReaction,
+  reactionCounts,
+  totalReactions,
+  commentCount,
+  comments,
+  loadingComments,
+  onToggleComments,
+  commentText,
+  onCommentTextChange,
+  onSubmitComment,
+  submittingComment,
+  showReactionPicker,
+  onToggleReactionPicker,
+  timeAgo: timeLabel,
+}: {
+  post: Post
+  currentUserId: string
+  onReaction: (id: string, r: Reaction) => void
+  userReaction?: Reaction
+  reactionCounts: [Reaction, number][]
+  totalReactions: number
+  commentCount: number
+  comments?: Comment[]
+  loadingComments?: boolean
+  onToggleComments: () => void
+  commentText: string
+  onCommentTextChange: (t: string) => void
+  onSubmitComment: () => void
+  submittingComment?: boolean
+  showReactionPicker: boolean
+  onToggleReactionPicker: () => void
+  timeAgo: string
+}) {
+  return (
+    <article className="feed-card">
+      <div style={{ padding: '1rem 1.15rem 0.65rem', display: 'flex', gap: '0.75rem' }}>
+        <FeedAvatar profile={post.author as PostAuthor} size={44} />
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#F3F4F6' }}>{post.author?.full_name}</span>
+            <span style={{ fontWeight: 900, fontSize: '0.92rem', color: 'var(--text-main)' }}>
+              {post.author?.full_name ?? 'Scholar'}
+            </span>
             {post.author?.role === 'admin' && (
-              <span style={{ background: '#10B98130', color: '#10B981', fontSize: '0.6rem', fontWeight: 900, padding: '1px 6px', borderRadius: '4px', letterSpacing: '0.08em' }}>ADMIN</span>
+              <span
+                style={{
+                  background: 'rgba(var(--brand-rgb), 0.15)',
+                  color: 'var(--brand)',
+                  fontSize: '0.6rem',
+                  fontWeight: 900,
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                }}
+              >
+                ADMIN
+              </span>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '2px' }}>
-            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>{timeAgo}</span>
-            {post.visibility === 'public' ? <Globe size={11} color="rgba(255,255,255,0.2)" /> : <Users size={11} color="rgba(255,255,255,0.2)" />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: 2 }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>{timeLabel}</span>
+            {post.visibility === 'public' ? (
+              <Globe size={11} aria-hidden />
+            ) : (
+              <Users size={11} aria-hidden />
+            )}
             {post.post_type !== 'general' && (
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#10B981', opacity: 0.7 }}>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  color: 'var(--brand)',
+                }}
+              >
                 {post.post_type}
               </span>
             )}
@@ -335,174 +539,211 @@ function PostCard({
         </div>
       </div>
 
-      {/* Content */}
-      <div style={{ padding: '0 1.25rem 1rem' }}>
-        <p style={{ margin: 0, lineHeight: 1.65, color: '#E5E7EB', fontSize: '0.93rem', whiteSpace: 'pre-wrap' }}>{post.content}</p>
+      <div style={{ padding: '0 1.15rem 1rem' }}>
+        <p
+          style={{
+            margin: 0,
+            lineHeight: 1.65,
+            color: 'var(--text-main)',
+            fontSize: '0.93rem',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {post.content}
+        </p>
       </div>
 
-      {/* Media */}
-      {post.media_urls?.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: post.media_urls.length > 1 ? '1fr 1fr' : '1fr', gap: '2px' }}>
-          {post.media_urls.slice(0, 4).map((url, i) => (
-            <div key={i} style={{ position: 'relative', paddingTop: '56.25%', overflow: 'hidden', background: '#000' }}>
-              <img src={url} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Reaction counts row */}
       {totalReactions > 0 && (
-        <div style={{ padding: '0.5rem 1.25rem 0', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <div style={{ display: 'flex', gap: '2px' }} aria-hidden="true">
-            {reactionCounts.slice(0, 3).map(([r]) => (
-              <span key={r} style={{ fontSize: '0.8rem' }}>{REACTION_META[r].emoji}</span>
-            ))}
-          </div>
-          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }} aria-label={`${totalReactions} reactions`}>{totalReactions.toLocaleString()}</span>
+        <div style={{ padding: '0 0.35rem 0.5rem 1.15rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {reactionCounts.slice(0, 3).map(([r]) => (
+            <span key={r} style={{ fontSize: '0.85rem' }}>
+              {REACTION_META[r].emoji}
+            </span>
+          ))}
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>{totalReactions}</span>
         </div>
       )}
 
-      {/* Action bar */}
-      <div style={{ padding: '0.5rem 0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '0.25rem', position: 'relative' }}>
-        {/* Reaction button + picker */}
+      <div
+        style={{
+          padding: '0.35rem 0.75rem 0.65rem',
+          borderTop: '1px solid var(--border)',
+          display: 'flex',
+          gap: '0.25rem',
+          position: 'relative',
+        }}
+      >
         <div style={{ position: 'relative' }}>
           <ActionButton
             onClick={onToggleReactionPicker}
             active={!!userReaction}
-            label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : '👍 React'}
-            ariaLabel="Open reaction picker"
-            ariaExpanded={showReactionPicker}
+            label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : 'React'}
           />
           {showReactionPicker && (
-            <div 
+            <div
               role="group"
-              aria-label="Reaction picker"
+              aria-label="Reactions"
               style={{
-                position: 'absolute', bottom: '110%', left: 0,
-                background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px', padding: '0.5rem', display: 'flex', gap: '0.25rem',
-                zIndex: 100, boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                position: 'absolute',
+                bottom: '110%',
+                left: 0,
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
+                padding: '0.4rem',
+                display: 'flex',
+                gap: 4,
+                zIndex: 50,
+                boxShadow: 'var(--shadow-lg)',
               }}
             >
-              {(Object.entries(REACTION_META) as [Reaction, typeof REACTION_META[Reaction]][]).map(([key, meta]) => (
+              {(Object.keys(REACTION_META) as Reaction[]).map((key) => (
                 <button
                   key={key}
+                  type="button"
+                  title={REACTION_META[key].label}
                   onClick={() => onReaction(post.id, key)}
-                  title={meta.label}
-                  aria-label={meta.label}
                   style={{
-                    background: userReaction === key ? 'rgba(16,185,129,0.2)' : 'transparent',
-                    border: 'none', cursor: 'pointer', fontSize: '1.3rem', padding: '0.3rem',
-                    borderRadius: '8px', transition: 'transform 0.15s',
+                    background: userReaction === key ? 'rgba(var(--brand-rgb), 0.15)' : 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.25rem',
+                    padding: '0.25rem',
+                    borderRadius: 8,
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.35)')}
-                  onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  <span aria-hidden="true">{meta.emoji}</span>
+                  {REACTION_META[key].emoji}
                 </button>
               ))}
             </div>
           )}
         </div>
-
         <ActionButton
           onClick={onToggleComments}
-          label={`💬 ${commentCount > 0 ? commentCount : ''} Comment${commentCount !== 1 ? 's' : ''}`}
-          ariaLabel={`${commentCount} comments. Click to expand.`}
-          ariaExpanded={!!comments || loadingComments}
+          label={`Comment${commentCount > 0 ? ` · ${commentCount}` : ''}`}
         />
       </div>
 
-      {/* Comments section */}
       {(comments || loadingComments) && (
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1rem 1.25rem' }}>
-          {loadingComments && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>Loading…</div>}
-          {comments?.map(c => (
-            <div key={c.id} style={{ display: 'flex', gap: '0.6rem', marginBottom: '0.75rem' }}>
-              <Avatar profile={c.author as PostAuthor} size={28} />
-              <div style={{ flex: 1 }}>
-                <div style={{ background: '#0d0d0d', borderRadius: '10px', padding: '0.5rem 0.75rem' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.8rem', color: '#E5E7EB' }}>{c.author?.full_name ?? 'Unknown'}</span>
-                  <p style={{ margin: '0.2rem 0 0', fontSize: '0.83rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>{c.content}</p>
-                </div>
+        <div style={{ borderTop: '1px solid var(--border)', padding: '0.85rem 1.15rem' }}>
+          {loadingComments && (
+            <p style={{ textAlign: 'center', color: 'var(--text-sub)', fontSize: '0.8rem' }}>Loading…</p>
+          )}
+          {comments?.map((c) => (
+            <div key={c.id} style={{ display: 'flex', gap: '0.55rem', marginBottom: '0.65rem' }}>
+              <FeedAvatar profile={c.author as PostAuthor} size={28} />
+              <div
+                style={{
+                  flex: 1,
+                  background: 'var(--bg-sub)',
+                  borderRadius: 12,
+                  padding: '0.45rem 0.7rem',
+                }}
+              >
+                <span style={{ fontWeight: 800, fontSize: '0.78rem' }}>{c.author?.full_name ?? 'Peer'}</span>
+                <p style={{ margin: '0.15rem 0 0', fontSize: '0.83rem', color: 'var(--text-sub)' }}>{c.content}</p>
               </div>
             </div>
           ))}
-          {/* Comment input */}
-          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginTop: '0.5rem' }}>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: '#0d0d0d', borderRadius: '20px', padding: '0.4rem 0.75rem', gap: '0.5rem' }}>
-              <label htmlFor={`comment-${post.id}`} className="sr-only">Write a comment</label>
-              <input
-                id={`comment-${post.id}`}
-                value={commentText}
-                onChange={e => onCommentTextChange(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSubmitComment() }}}
-                placeholder="Write a comment…"
-                maxLength={500}
-                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#E5E7EB', fontSize: '0.83rem', fontFamily: 'inherit' }}
-              />
-              <button
-                onClick={onSubmitComment}
-                disabled={!commentText.trim() || submittingComment}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: commentText.trim() ? '#10B981' : 'rgba(255,255,255,0.2)', padding: 0 }}
-              >
-                {submittingComment ? <Loader2 size={14} /> : <Send size={14} />}
-              </button>
-            </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.35rem' }}>
+            <input
+              value={commentText}
+              onChange={(e) => onCommentTextChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  onSubmitComment()
+                }
+              }}
+              placeholder="Write a comment…"
+              maxLength={500}
+              style={{
+                flex: 1,
+                padding: '0.5rem 0.75rem',
+                borderRadius: 20,
+                border: '1px solid var(--border)',
+                background: 'var(--bg-sub)',
+                color: 'var(--text-main)',
+                fontSize: '0.83rem',
+                outline: 'none',
+              }}
+            />
+            <button
+              type="button"
+              onClick={onSubmitComment}
+              disabled={!commentText.trim() || submittingComment}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: commentText.trim() ? 'var(--brand)' : 'var(--text-sub)',
+                cursor: 'pointer',
+              }}
+            >
+              {submittingComment ? <Loader2 size={16} className="feed-spin" /> : <Send size={16} />}
+            </button>
           </div>
         </div>
       )}
-    </div>
+    </article>
   )
 }
 
-function Avatar({ profile, size = 36 }: { profile?: PostAuthor | null; size?: number }) {
+function ActionButton({
+  onClick,
+  label,
+  active,
+}: {
+  onClick: () => void
+  label: string
+  active?: boolean
+}) {
   return (
-    <RemoteAvatar
-      src={profile?.avatar_url}
-      alt={`${profile?.full_name ?? 'User'} avatar`}
-      size={size}
-      fallback={<span style={{ color: '#10B981', fontWeight: 800 }}>{profile?.full_name?.[0]?.toUpperCase() ?? '?'}</span>}
-      style={{ background: '#222', flexShrink: 0, fontSize: size * 0.4 }}
-    />
-  )
-}
-
-function ActionButton({ onClick, label, active, ariaLabel, ariaExpanded }: { onClick: () => void; label: string; active?: boolean; ariaLabel?: string; ariaExpanded?: boolean }) {
-  return (
-    <button 
-      onClick={onClick} 
-      aria-label={ariaLabel}
-      aria-expanded={ariaExpanded}
+    <button
+      type="button"
+      onClick={onClick}
       style={{
-        background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem 0.75rem',
-        borderRadius: '8px', color: active ? '#10B981' : 'rgba(255,255,255,0.5)',
-        fontWeight: 700, fontSize: '0.78rem', transition: 'background 0.15s',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: '0.4rem 0.65rem',
+        borderRadius: 8,
+        color: active ? 'var(--brand)' : 'var(--text-sub)',
+        fontWeight: 800,
+        fontSize: '0.78rem',
       }}
-      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
     >
       {label}
     </button>
   )
 }
 
-function VisibilityToggle({ value, onChange }: { value: 'public' | 'connections'; onChange: (v: 'public' | 'connections') => void }) {
+function VisibilityToggle({
+  value,
+  onChange,
+}: {
+  value: 'public' | 'connections'
+  onChange: (v: 'public' | 'connections') => void
+}) {
   return (
     <button
+      type="button"
       onClick={() => onChange(value === 'public' ? 'connections' : 'public')}
-      aria-label={`Current visibility: ${value}. Click to toggle.`}
       style={{
-        display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255,255,255,0.06)',
-        border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.3rem 0.6rem',
-        color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.35rem',
+        background: 'var(--bg-sub)',
+        border: '1px solid var(--border)',
+        borderRadius: 8,
+        padding: '0.35rem 0.65rem',
+        color: 'var(--text-sub)',
+        fontSize: '0.72rem',
+        fontWeight: 800,
+        cursor: 'pointer',
       }}
     >
-      {value === 'public' ? <Globe size={11} aria-hidden="true" /> : <Users size={11} aria-hidden="true" />}
+      {value === 'public' ? <Globe size={12} /> : <Users size={12} />}
       {value === 'public' ? 'Public' : 'Connections'}
     </button>
   )
 }
-
-

@@ -1137,3 +1137,89 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.15);
 }
+
+/* Per-page contextual guides */
+.page-guide {
+  margin: 0 0 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.page-guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  background: rgba(var(--brand-rgb), 0.06);
+  border-bottom: 1px solid var(--border);
+}
+
+.page-guide-body {
+  padding: 0.85rem 1rem 1rem;
+}
+
+.page-guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.page-guide-action-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.45rem 0.65rem;
+  background: var(--bg-sub);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.page-guide-icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.page-guide-icon-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-sub);
+}
+
+.page-guide-dismiss {
+  margin-top: 0.85rem;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.page-guide-fab {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.25rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}

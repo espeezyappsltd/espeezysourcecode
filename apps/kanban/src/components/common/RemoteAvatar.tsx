@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
-import Image from 'next/image'
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 
 type RemoteAvatarProps = {
   src?: string | null
@@ -14,15 +13,42 @@ type RemoteAvatarProps = {
 }
 
 function isSupportedRemoteSource(value: string) {
-  return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('blob:') || value.startsWith('data:') || value.startsWith('/')
+  return (
+    value.startsWith('http://') ||
+    value.startsWith('https://') ||
+    value.startsWith('blob:') ||
+    value.startsWith('data:') ||
+    value.startsWith('/')
+  )
 }
 
-export default function RemoteAvatar({ src, alt, size, fallback, style, imgStyle, className }: RemoteAvatarProps) {
+/** Prefer ui-avatars for known-bad or empty URLs from legacy rows */
+function isLikelyBrokenAvatarUrl(url: string) {
+  if (!url.trim()) return true
+  if (url.includes('undefined') || url.includes('null')) return true
+  return false
+}
+
+export default function RemoteAvatar({
+  src,
+  alt,
+  size,
+  fallback,
+  style,
+  imgStyle,
+  className,
+}: RemoteAvatarProps) {
   const normalized = useMemo(() => {
     const clean = (src ?? '').trim()
-    return clean && isSupportedRemoteSource(clean) ? clean : ''
+    if (!clean || !isSupportedRemoteSource(clean) || isLikelyBrokenAvatarUrl(clean)) return ''
+    return clean
   }, [src])
+
   const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [normalized])
 
   const showImage = Boolean(normalized) && !failed
 
@@ -37,11 +63,13 @@ export default function RemoteAvatar({ src, alt, size, fallback, style, imgStyle
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        flexShrink: 0,
         ...style,
       }}
     >
       {showImage ? (
-        <Image
+        // Native img avoids Next/Image remote-config errors for ui-avatars & CDN URLs
+        <img
           src={normalized}
           alt={alt}
           width={size}
@@ -50,7 +78,13 @@ export default function RemoteAvatar({ src, alt, size, fallback, style, imgStyle
           decoding="async"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          style={{ width: '100%', height: 'auto', aspectRatio: '1/1', objectFit: 'cover', ...imgStyle }}
+          style={{
+            width: size,
+            height: size,
+            objectFit: 'cover',
+            display: 'block',
+            ...imgStyle,
+          }}
         />
       ) : (
         fallback

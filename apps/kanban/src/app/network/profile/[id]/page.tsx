@@ -210,7 +210,7 @@ export default function StudentProfilePage() {
                  key={item.id}
                  onClick={() => {
                    if (item.disabled) return;
-                   if (item.id === 'chat') router.push(`/network/chat/${studentId}`);
+                   if (item.id === 'chat') router.push(`/network/messages/${studentId}`);
                    else setActiveTab(item.id as 'info' | 'accomplishments');
                  }}
                  style={{ 

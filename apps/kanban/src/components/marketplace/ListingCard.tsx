@@ -2,8 +2,11 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Plus, MapPin } from 'lucide-react'
+import { Plus, MapPin, Coins } from 'lucide-react'
+import { formatCredits } from '@/lib/credits'
 import { Listing } from '@/types/marketplace'
+import RemoteAvatar from '@/components/common/RemoteAvatar'
+import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
 
 interface ListingCardProps {
   item: Listing
@@ -61,7 +64,14 @@ export function ListingCard({ item, onClick }: ListingCardProps) {
           fontSize: '1rem',
           boxShadow: '0 8px 20px rgba(var(--brand-rgb), 0.4)'
         }}>
-          {item.price === 0 ? 'FREE' : `£${item.price}`}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            {item.price === 0 ? 'FREE' : (
+              <>
+                <Coins size={14} />
+                {formatCredits(Math.floor(item.price))}
+              </>
+            )}
+          </span>
         </div>
       </div>
       
@@ -78,13 +88,26 @@ export function ListingCard({ item, onClick }: ListingCardProps) {
         
         {/* Seller Information */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--brand)', overflow: 'hidden', border: '2px solid var(--bg-main)' }}>
-            {item.profiles?.avatar_url ? (
-              <Image src={item.profiles.avatar_url} width={32} height={32} alt="Seller" />
-            ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.6rem' }}>{item.profiles?.full_name?.charAt(0) || '?'}</div>
-            )}
-          </div>
+          <RemoteAvatar
+            src={
+              item.owner_id
+                ? avatarUrlForProfile({
+                    id: item.owner_id,
+                    full_name: item.profiles?.full_name,
+                    username: item.profiles?.username ?? null,
+                    avatar_url: item.profiles?.avatar_url,
+                  })
+                : ''
+            }
+            alt={item.profiles?.full_name ?? 'Seller'}
+            size={32}
+            style={{ border: '2px solid var(--bg-main)', background: 'var(--brand)' }}
+            fallback={
+              <span style={{ color: 'white', fontWeight: 900, fontSize: '0.6rem' }}>
+                {item.profiles?.full_name?.charAt(0) || '?'}
+              </span>
+            }
+          />
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <div style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{item.profiles?.full_name || 'Anonymous Specialist'}</div>
             <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase' }}>{item.profiles?.role || 'Contributor'}</div>

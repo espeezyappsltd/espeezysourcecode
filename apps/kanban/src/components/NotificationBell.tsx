@@ -146,7 +146,15 @@ export default function NotificationBell() {
               notifications.map((notif: Notification) => (
                 <div 
                   key={notif.id} 
-                  onClick={() => markAsRead(notif.id)}
+                  onClick={() => {
+                    markAsRead(notif.id)
+                    if (
+                      notif.link &&
+                      (notif.type === 'marketplace_purchase' || notif.type === 'marketplace_sale')
+                    ) {
+                      window.location.href = notif.link
+                    }
+                  }}
                   style={{ 
                     padding: '1rem', 
                     borderBottom: '1px solid var(--bg-main)', 

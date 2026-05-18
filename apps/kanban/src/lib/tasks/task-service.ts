@@ -92,13 +92,17 @@ async function checkAndDistributeScore(taskId: string, assignees: string[]) {
 
 async function insertTask(task: TaskPayload) {
   const db = getAdminDb()
-  const { data, error } = await db.from('tasks').insert({ ...task }).select('id').single()
+  const { data, error } = await db
+    .from('tasks')
+    .insert({ ...task })
+    .select('id, title, status, group_id, assignees, description, due_date, category, created_at, updated_at')
+    .single()
 
   if (error || !data) {
     throw new Error(error?.message ?? 'Task insert failed')
   }
 
-  return { id: data.id as string }
+  return { id: data.id as string, task: data }
 }
 
 async function updateTaskRow(task: TaskPayload) {
@@ -135,7 +139,7 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
     if (task.status === 'Done') {
       await checkAndDistributeScore(created.id, task.assignees)
     }
-    return { taskId: created.id }
+    return { taskId: created.id, task: created.task }
   }
 
   if (!task.id) {

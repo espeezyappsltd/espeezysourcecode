@@ -26,6 +26,7 @@ import { buildStripePaymentLink } from '@/lib/stripe-payment-links'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 import { deleteAccount, createStripePortalSession } from '@/services/account'
+import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import {
   createUserFeedback,
@@ -654,6 +655,11 @@ export default function SettingsPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <div style={{ marginTop: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1rem' }}>Marketplace wallet</h3>
+              <AccountWalletPanel />
             </div>
 
             {!profile.subscription_plan && (

@@ -16,9 +16,11 @@ export interface Listing {
   condition: 'New' | 'Like New' | 'Used' | 'Refurbished'
   created_at: string
   profiles?: {
+    id?: string
     full_name: string
     avatar_url: string
     role: string
+    username?: string | null
   }
 }
 

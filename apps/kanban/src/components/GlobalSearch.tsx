@@ -7,6 +7,7 @@ import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useRouter } from 'next/navigation'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { getFlagComponent } from '@/utils/geo'
+import { MIDDLE_DOT, searchShortcutLabel } from '@/lib/ui-symbols'
 
 interface SearchResult {
   id: string
@@ -171,14 +172,14 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
           marginBottom: '1rem',
           minHeight: '44px'
         }}
-        title="Search workspace (âŒ˜K)"
+        title={`Search workspace (${searchShortcutLabel()})`}
         className="search-trigger"
       >
         <Search size={18} />
         {!collapsed && (
           <>
             <span style={{ fontSize: '0.85rem', flex: 1, textAlign: 'left' }}>Search workspace...</span>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '6px' }}>âŒ˜K</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '6px' }}>{searchShortcutLabel()}</span>
           </>
         )}
       </button>
@@ -217,7 +218,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
                <Search size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
                <p style={{ margin: 0 }}>Find students, tasks, or teams across the network.</p>
                <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-                  <div className="search-pill">âŒ˜K to search</div>
+                  <div className="search-pill">{searchShortcutLabel()} to search</div>
                   <div className="search-pill">ESC to close</div>
                </div>
             </div>
@@ -251,7 +252,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
                    <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{r.title}</div>
                       <div style={{ color: 'var(--text-sub)', fontSize: '0.8rem', textTransform: 'capitalize' }}>
-                        {r.type === 'profile' ? 'Teammate' : r.type === 'group' ? 'Group' : 'Task'} â€¢ {r.subtitle}
+                        {r.type === 'profile' ? 'Teammate' : r.type === 'group' ? 'Group' : 'Task'} {MIDDLE_DOT} {r.subtitle}
                       </div>
                    </div>
                    <ArrowRight size={16} color="var(--text-sub)" className="search-arrow" />

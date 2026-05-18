@@ -45,6 +45,7 @@ export type Profile = {
   push_notifications?: boolean;
   marketing_emails?: boolean;
   account_status?: 'active' | 'suspended' | 'pending';
+  espeezy_credits?: number;
 };
 
 export type TaskStatus = 'To Do' | 'In Progress' | 'In Review' | 'Done';

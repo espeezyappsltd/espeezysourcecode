@@ -50,7 +50,12 @@ export function formatCredits(credits: number): string {
 }
 
 export function formatCreditCapHint(): string {
-  return `Max ${MAX_ASSET_CREDIT_VALUE} credits (2× Pro month)`
+  return `Max ${MAX_ASSET_CREDIT_VALUE} credits (2\u00d7 Pro month)`
+}
+
+/** Display-only GBP equivalent, e.g. "≈ £4.99" */
+export function formatGbpApprox(credits: number): string {
+  return `\u2248 \u00a3${creditsToGbpEquivalent(credits).toFixed(2)}`
 }
 
 type MetadataLike = Record<string, unknown> | null | undefined
