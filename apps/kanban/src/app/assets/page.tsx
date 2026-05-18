@@ -30,6 +30,7 @@ import { formatStorageBytes, STORAGE_QUOTAS_BYTES } from '@/lib/storage-quotas'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '@/components/NotificationProvider'
 import ModalOverlay from '@/components/ModalOverlay'
+import { TradingMetricsDashboard } from '@/components/assets/TradingMetricsDashboard'
 
 interface Asset {
   id: string
@@ -240,6 +241,8 @@ export default function PersonalAssetsPage() {
           </p>
         </div>
       </header>
+
+      <TradingMetricsDashboard />
 
       <nav className="assets-breadcrumb" aria-label="Folder path">
         <button type="button" className={normCurrent === '/' ? 'active' : ''} onClick={() => setCurrentFolder('/')}>

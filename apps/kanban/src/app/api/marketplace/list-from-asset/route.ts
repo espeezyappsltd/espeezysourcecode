@@ -80,6 +80,11 @@ export async function POST(req: Request) {
       ? { ...(asset.metadata as Record<string, unknown>) }
       : {}
 
+  const priorListingIds = Array.isArray(meta.listing_ids)
+    ? (meta.listing_ids as unknown[]).filter((id): id is string => typeof id === 'string')
+    : []
+  const listingIds = [...new Set([...priorListingIds, listing.id])]
+
   await db
     .from('personal_assets')
     .update({
@@ -87,6 +92,7 @@ export async function POST(req: Request) {
       metadata: {
         ...meta,
         marketplace_listing_id: listing.id,
+        listing_ids: listingIds,
         listed_at: new Date().toISOString(),
       },
     })
