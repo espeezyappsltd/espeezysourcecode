@@ -1,4 +1,4 @@
-﻿import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { Q } from '@/lib/query-columns'
 import type { Group, Profile, Task } from '@/types/database'
 
