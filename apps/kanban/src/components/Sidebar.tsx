@@ -193,6 +193,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const isProfileLoaded = Boolean(profile)
   const onlineCount = onlineUsers?.size ?? 0
+  const onlineLabel = onlineCount === 1 ? '1 ONLINE' : `${onlineCount} ONLINE`
   const isDark = currentPalette.name !== 'Google Light'
   const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
   const showUpgradeCard = profile?.subscription_plan === 'free' || !profile?.subscription_plan
@@ -416,7 +417,7 @@ export default function Sidebar({ user }: SidebarProps) {
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }}>
                 <PresenceDot isOnline={isProfileLoaded} />
-                <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '0.05em' }}>{onlineCount} ACTIVE</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '0.05em' }} data-testid="sidebar-online-count">{onlineLabel}</span>
               </div>
               <div style={{ flex: 1 }} />
               <div className="hide-mobile" style={{ marginRight: '0.25rem', flexShrink: 0 }}>

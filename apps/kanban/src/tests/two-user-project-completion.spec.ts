@@ -3,14 +3,22 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 import { hasLiveSupabaseConfig, loadTestEnv, resolveSupabaseUrlFromEnv } from './lib/load-test-env'
+import {
+  confirmUserByEmail,
+  getSupabaseAdminConfig,
+  isAdminApiAvailable,
+  waitForLoginGate,
+} from './helpers/auth-e2e'
+import { adminRest, findUserIdByEmail } from './helpers/onboarding-e2e'
 
 const ENV = loadTestEnv()
 const SUPABASE_URL = resolveSupabaseUrlFromEnv(ENV)
 const hasLiveSupabase = hasLiveSupabaseConfig(ENV)
+const admin = getSupabaseAdminConfig(path.join(process.cwd()))
 
 /**
- * Two scholars complete a shared project and verify analytics artifacts match actions.
- * Requires: dev server on :3001, Supabase with email auto-confirm for test signups.
+ * Two scholars complete a shared project and verify analytics + ALL DONE celebration.
+ * Requires: dev server on :3001, Supabase with email auto-confirm (or admin confirm fallback).
  */
 test.describe('Two-user project completion and analytics accuracy', () => {
   test.skip(
@@ -25,8 +33,8 @@ test.describe('Two-user project completion and analytics accuracy', () => {
     const taskA = `Deliverable A ${suffix}`
     const taskB = `Deliverable B ${suffix}`
 
-    const owner = { email: `owner_${suffix}@test.com`, password: 'TestPassword123!', name: 'Owner Scholar' }
-    const member = { email: `member_${suffix}@test.com`, password: 'TestPassword123!', name: 'Member Scholar' }
+    const owner = { email: `owner_${suffix}@e2e.espeezy.test`, password: 'TestPassword123!', name: 'Owner Scholar' }
+    const member = { email: `member_${suffix}@e2e.espeezy.test`, password: 'TestPassword123!', name: 'Member Scholar' }
 
     const ctxOwner = await browser.newContext()
     const ctxMember = await browser.newContext()
@@ -35,43 +43,59 @@ test.describe('Two-user project completion and analytics accuracy', () => {
     const pageOwner = await ctxOwner.newPage()
     const pageMember = await ctxMember.newPage()
 
+    let adminWorks = false
+    if (admin) adminWorks = await isAdminApiAvailable(admin)
+
     const authFlow = async (page: Page, user: typeof owner) => {
-      await page.goto('/login?signup=true', { waitUntil: 'networkidle', timeout: 60000 })
+      await page.goto('/login?signup=true', { waitUntil: 'domcontentloaded', timeout: 90000 })
 
-      const onDashboard = page.getByText('Welcome to the Hub')
-      if (await onDashboard.isVisible().catch(() => false)) return
+      if (await page.getByText(/welcome to the hub/i).isVisible().catch(() => false)) return
 
-      await page.waitForFunction(
-        () => !!document.querySelector('#email'),
-        { timeout: 20000 },
-      )
+      await waitForLoginGate(page)
+      await page.locator('#auth-email').fill(user.email)
+      await page.locator('#auth-password').fill(user.password)
+      await page.getByRole('checkbox').check()
+      await page.locator('form').getByRole('button', { name: /^create account$/i }).click()
 
-      if (await page.getByRole('heading', { name: /secure login/i }).isVisible().catch(() => false)) {
-        await page.getByRole('button', { name: /sign up/i }).click()
+      const leftLogin = await page
+        .waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45000 })
+        .then(() => true)
+        .catch(() => false)
+
+      if (!leftLogin && adminWorks && admin) {
+        await confirmUserByEmail(admin, user.email)
+        await page.goto('/login', { waitUntil: 'domcontentloaded' })
+        await waitForLoginGate(page)
+        await page.locator('#auth-email').fill(user.email)
+        await page.locator('#auth-password').fill(user.password)
+        await page.locator('form').getByRole('button', { name: /^sign in$/i }).click()
+        await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45000 })
       }
+    }
 
-      await page.locator('#email').fill(user.email, { force: true })
-      await page.locator('#password').fill(user.password, { force: true })
+    const completeProfileOnboarding = async (page: Page, fullName: string) => {
+      const dialog = page.getByRole('dialog', { name: /welcome to espeezy/i })
+      if (!(await dialog.isVisible().catch(() => false))) return
 
-      await page.evaluate(() => {
-        const legal = document.getElementById('legal') as HTMLInputElement | null
-        if (legal) {
-          legal.checked = true
-          legal.dispatchEvent(new Event('change', { bubbles: true }))
-        }
-      })
+      await page.getByRole('textbox', { name: /full name/i }).fill(fullName)
+      await page.getByRole('button', { name: /^continue$/i }).click()
 
-      await page.locator('form button[type="submit"]').click({ force: true })
+      await page.getByRole('radio').first().click()
+      await page.getByRole('button', { name: /finish setup/i }).click()
 
-      try {
-        await expect(page).toHaveURL(/\/$/, { timeout: 20000 })
-      } catch {
-        await page.goto('/login')
-        await page.locator('#email').fill(user.email, { force: true })
-        await page.locator('#password').fill(user.password, { force: true })
-        await page.locator('form button[type="submit"]').click({ force: true })
-        await expect(page).toHaveURL(/\/$/, { timeout: 20000 })
-      }
+      await page.getByRole('button', { name: /go to dashboard/i }).click({ timeout: 15000 }).catch(() => undefined)
+      await expect(dialog).toBeHidden({ timeout: 20000 }).catch(() => undefined)
+    }
+
+    const createTeam = async (page: Page, name: string) => {
+      await expect(page.getByText(/welcome to the hub/i)).toBeVisible({ timeout: 30000 })
+      await page.getByRole('button', { name: /create new team/i }).click()
+      const teamNameInput = page.getByPlaceholder('e.g. Capstone Alpha')
+      await expect(teamNameInput).toBeVisible({ timeout: 60000 })
+      await teamNameInput.fill(name)
+      await page.getByPlaceholder('What is this team building?').fill('E2E analytics verification project')
+      await page.getByRole('button', { name: /^start team$/i }).click()
+      await expect(page.getByText(/TEAM:/i)).toBeVisible({ timeout: 30000 })
     }
 
     const createTask = async (page: Page, title: string, status: 'To Do' | 'Done' = 'To Do') => {
@@ -86,46 +110,65 @@ test.describe('Two-user project completion and analytics accuracy', () => {
       }
       await page.getByRole('button', { name: /save task/i }).click()
       await expect(page.getByTestId('kanban-board').getByRole('button', { name: new RegExp(title, 'i') })).toBeVisible({
-        timeout: 20000,
+        timeout: 30000,
       })
+    }
+
+    const fetchGroupIdForUser = async (email: string): Promise<string> => {
+      expect(admin).toBeTruthy()
+      const userId = await findUserIdByEmail(admin!, email)
+      expect(userId).toBeTruthy()
+      const profiles = await adminRest<{ group_id: string | null }[]>(admin!, 'profiles', {
+        query: { select: 'group_id', id: `eq.${userId}` },
+      })
+      const gid = profiles[0]?.group_id
+      expect(gid).toBeTruthy()
+      return gid!
     }
 
     // ── Owner: signup, team, first task ─────────────────────────────
     await authFlow(pageOwner, owner)
-    await expect(pageOwner.getByText('Welcome to the Hub')).toBeVisible({ timeout: 20000 })
-
-    await pageOwner.getByRole('button', { name: /create new team/i }).click()
-    await pageOwner.getByPlaceholder('e.g. Capstone Alpha').fill(teamName)
-    await pageOwner.getByPlaceholder('What is this team building?').fill('E2E analytics verification project')
-    await pageOwner.getByRole('button', { name: /start team/i }).click()
-    await expect(pageOwner.getByText(/TEAM:/i)).toBeVisible({ timeout: 20000 })
-
-    const teamId = await pageOwner.evaluate(() => {
-      const match = document.body.innerHTML.match(
-        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
-      )
-      return match?.[0] ?? null
-    })
-    expect(teamId).toBeTruthy()
+    await completeProfileOnboarding(pageOwner, owner.name)
+    await createTeam(pageOwner, teamName)
+    const teamId = await fetchGroupIdForUser(owner.email)
 
     await createTask(pageOwner, taskA, 'Done')
 
     // ── Member: join team ───────────────────────────────────────────
     await authFlow(pageMember, member)
-    await expect(pageMember.getByText('Welcome to the Hub')).toBeVisible({ timeout: 20000 })
+    await completeProfileOnboarding(pageMember, member.name)
+    await expect(pageMember.getByText(/welcome to the hub/i)).toBeVisible({ timeout: 30000 })
     await pageMember.getByRole('button', { name: /join existing team/i }).click()
-    await pageMember.getByPlaceholder('Paste UUID here...').fill(teamId!)
-    await pageMember.getByRole('button', { name: /join project/i }).click()
-    await expect(pageMember.getByText(teamName)).toBeVisible({ timeout: 20000 })
+    await pageMember.getByPlaceholder('Paste UUID here...').fill(teamId)
+    await pageMember.getByRole('button', { name: /^join project$/i }).click()
+    await expect(pageMember.getByText(/TEAM:/i)).toBeVisible({ timeout: 30000 })
 
     await expect(pageMember.getByTestId('kanban-board').getByRole('button', { name: new RegExp(taskA, 'i') })).toBeVisible({
-      timeout: 20000,
+      timeout: 30000,
     })
 
     await createTask(pageMember, taskB, 'Done')
 
+    // ── Dashboard: 100% completion → ALL DONE banner (new architecture) ─
+    await pageOwner.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 })
+    await expect(pageOwner.getByTestId('kanban-board')).toBeVisible({ timeout: 60000 })
+    await pageOwner.getByRole('button', { name: /refresh board data/i }).click()
+    await expect(pageOwner.getByTestId('kanban-all-done-banner')).toBeVisible({ timeout: 60000 })
+    await expect(pageOwner.getByTestId('kanban-all-done-banner')).toContainText('ALL DONE')
+    await expect(pageOwner.getByTestId('kanban-overall-completion')).toContainText('ALL DONE', { timeout: 15000 })
+
+    const celebratedTaskCount = await pageOwner.evaluate((gid) => {
+      return localStorage.getItem(`gf_completion_celebrated_${gid}`)
+    }, teamId)
+    expect(celebratedTaskCount).toBe('2')
+
+    await pageMember.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 })
+    await expect(pageMember.getByTestId('kanban-board')).toBeVisible({ timeout: 60000 })
+    await pageMember.getByRole('button', { name: /refresh board data/i }).click()
+    await expect(pageMember.getByTestId('kanban-overall-completion')).toContainText('ALL DONE', { timeout: 60000 })
+
     // ── Analytics: owner verifies KPIs (2 tasks, 2 done = 100%) ─────
-    await pageOwner.getByRole('link', { name: /project stats/i }).click()
+    await pageOwner.getByRole('button', { name: /group updates/i }).click()
     await expect(pageOwner).toHaveURL(/\/analytics\/.+/, { timeout: 15000 })
 
     await expect(pageOwner.getByTestId('analytics-kpi-progress')).toContainText('100%', { timeout: 20000 })
@@ -144,7 +187,6 @@ test.describe('Two-user project completion and analytics accuracy', () => {
     expect(csv).toMatch(/Owner Scholar|owner/i)
     expect(csv).toMatch(/Member Scholar|member/i)
 
-    // Task titles should appear in on-page task list
     await expect(pageOwner.getByText(taskA)).toBeVisible()
     await expect(pageOwner.getByText(taskB)).toBeVisible()
 

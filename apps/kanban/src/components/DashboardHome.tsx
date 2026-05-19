@@ -10,6 +10,8 @@ import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from './NotificationProvider'
 import { getPlanName, hasFeature } from '@/utils/feature-gate'
 import { useDashboardMetrics } from '@/context/DashboardMetricsContext'
+import { usePresence } from '@/components/PresenceProvider'
+import { countTeamMembersOnline } from '@/lib/presence/team-presence'
 import AccountTiersBanner from '@/components/AccountTiersBanner'
 
 const DASHBOARD_TABS = [
@@ -141,7 +143,9 @@ export default function DashboardHome({
             >
               <Users size={16} aria-hidden="true" />
               Team Roster
-              <span style={{
+              <span
+                data-testid="team-roster-online-count"
+                style={{
                 background: showMembers ? 'white' : 'var(--brand)',
                 color: showMembers ? 'var(--brand)' : 'white',
                 padding: '2px 8px',
@@ -150,8 +154,8 @@ export default function DashboardHome({
                 marginLeft: '0.4rem',
                 fontWeight: 950
               }}>
-                {members.length || 0} / {group?.capacity || 5}
-                {pendingRequests.length > 0 && ` (+${pendingRequests.length} PENDING)`}
+                {teamOnlineCount} online · {members.length || 0} total
+                {pendingRequests.length > 0 && ` (+${pendingRequests.length} pending)`}
               </span>
             </button>
           </div>
@@ -173,12 +177,13 @@ export default function DashboardHome({
             }}>
 
               {/* Active Members */}
-              <h2 style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Active Members</h2>
+              <h2 style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>
+                Team members · {teamOnlineCount} online now
+              </h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                 {members.map(m => {
                   const isSelf = m.id === profile?.id
-                  const lastSeenDate = m.last_seen ? new Date(m.last_seen) : null
-                  const isOnline = lastSeenDate && (new Date().getTime() - lastSeenDate.getTime() < 120000)
+                  const isOnline = onlineUsers.has(m.id)
 
                   return (
                     <div key={m.id} style={{

@@ -4,6 +4,8 @@ import Image from 'next/image'
 import { ArrowRight, CheckCircle2, LayoutDashboard, ListTodo, Users } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { useDashboardMetrics } from '@/context/DashboardMetricsContext'
+import { usePresence } from '@/components/PresenceProvider'
+import { countTeamMembersOnline } from '@/lib/presence/team-presence'
 import { getPlanName } from '@/utils/feature-gate'
 import type { Profile } from '@/types/auth'
 import './home-pickup.css'
@@ -51,6 +53,8 @@ export function HomePickupDashboard({
     progressLabel,
     pendingRequests,
   } = useDashboardMetrics()
+  const { onlineUsers } = usePresence()
+  const teamOnlineCount = countTeamMembersOnline(members.map((m) => m.id), onlineUsers)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
   const teamName = group?.name || 'Your team'
@@ -143,8 +147,10 @@ export function HomePickupDashboard({
             <Users size={12} style={{ verticalAlign: '-2px', marginRight: 4 }} aria-hidden />
             Roster
           </p>
-          <p className="home-pickup-card-value">{members.length || '—'}</p>
-          <p className="home-pickup-card-hint">Active teammates</p>
+          <p className="home-pickup-card-value" data-testid="pickup-roster-online-count">
+            {teamOnlineCount} online
+          </p>
+          <p className="home-pickup-card-hint">{members.length || 0} on the team</p>
         </article>
       </div>
 

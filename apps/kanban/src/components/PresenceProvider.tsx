@@ -5,6 +5,7 @@ import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/clie
 import { PresenceContextType, LayoutUser } from '@/types/ui'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
+import { PRESENCE_ONLINE_WINDOW_MS } from '@/lib/presence/team-presence'
 
 const PresenceContext = createContext<PresenceContextType>({
   onlineUsers: new Set(),
@@ -67,6 +68,12 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
       const nextTyping = new Set<string>()
 
       rows.forEach((row) => {
+        if (groupId) {
+          if (row.group_id !== groupId) return
+        } else if (row.user_id !== userId) {
+          return
+        }
+
         nextOnline.add(row.user_id)
         if (row.is_typing) {
           nextTyping.add(row.user_id)
@@ -74,7 +81,6 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
 
         if (
           row.user_id !== userId &&
-          row.group_id &&
           groupId &&
           row.group_id === groupId &&
           !previousOnlineRef.current.has(row.user_id)
@@ -88,6 +94,10 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         }
       })
 
+      if (userId) {
+        nextOnline.add(userId)
+      }
+
       previousOnlineRef.current = nextOnline
 
       startTransition(() => {
@@ -97,12 +107,20 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
     }
 
     const fetchPresence = async () => {
-      const staleCutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString()
-      const { data, error } = await db
+      const staleCutoff = new Date(Date.now() - PRESENCE_ONLINE_WINDOW_MS).toISOString()
+      let query = db
         .from('presence')
         .select('user_id, is_typing, group_id')
         .eq('is_online', true)
         .gte('last_seen', staleCutoff)
+
+      if (groupId) {
+        query = query.eq('group_id', groupId)
+      } else if (userId) {
+        query = query.eq('user_id', userId)
+      }
+
+      const { data, error } = await query
 
       if (!active) return
       if (error) {
@@ -147,12 +165,24 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         .eq('user_id', userId)
     }, 30000)
 
-    const channel = db
-      .channel('presence-feed')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'presence' }, () => {
-        fetchPresence()
+    const channelName = groupId ? `presence-feed-${groupId}` : `presence-feed-${userId}`
+    const channel = db.channel(channelName)
+
+    if (groupId) {
+      channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'presence', filter: `group_id=eq.${groupId}` },
+        () => {
+          void fetchPresence()
+        },
+      )
+    } else {
+      channel.on('postgres_changes', { event: '*', schema: 'public', table: 'presence' }, () => {
+        void fetchPresence()
       })
-      .subscribe()
+    }
+
+    channel.subscribe()
 
     return () => {
       active = false
