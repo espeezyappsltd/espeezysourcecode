@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
 import ActivityLogView from '@/components/ActivityLogView'
+import { AnalyticsPrintReport } from '@/components/analytics/AnalyticsPrintReport'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Group, Task, Profile as ProfileDB, Artifact, ActivityLogRow } from '@/types/database'
 import { Profile } from '@/types/auth'
@@ -23,8 +24,13 @@ import {
   fetchGroupMembersByScore,
   fetchGroupTasks,
   fetchProfileById,
+  fetchTeamMarketplaceTransactions,
   getAuthUser,
+  type MarketplaceTxRow,
 } from '@/services/dashboard'
+import { buildIntelligenceReportCsv } from '@/lib/analytics/intelligence-report'
+import { downloadTextFile } from '@/lib/activity/activity-export'
+import '../analytics-print.css'
 import { useProfile } from '@/context/ProfileContext'
 import { hasFeature } from '@/utils/feature-gate'
 import PremiumFeatureGate from '@/components/PremiumFeatureGate'
@@ -63,6 +69,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const [taskSearch, setTaskSearch] = useState('')
   const [members, setMembers] = useState<ProfileDB[]>([])
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
+  const [activityLogs, setActivityLogs] = useState<ActivityLogRow[]>([])
+  const [marketplaceTx, setMarketplaceTx] = useState<MarketplaceTxRow[]>([])
   const [mounted, setMounted] = useState(false)
   const { onlineUsers } = usePresence()
   const canViewStats = hasFeature(contextProfile, 'PROJECT_STATS')
@@ -93,11 +101,20 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       setGroup(groupData as Group)
 
       if (memberCheck) {
+        const membersList = groupMembers as ProfileDB[]
+        const [logs, mktTx] = await Promise.all([
+          fetchActivityLogByGroup(groupId),
+          fetchTeamMarketplaceTransactions(membersList),
+        ])
         setTasks(groupTasks as Task[])
-        setMembers(groupMembers as ProfileDB[])
+        setMembers(membersList)
         setArtifacts(groupArtifacts)
+        setActivityLogs(logs)
+        setMarketplaceTx(mktTx)
       } else {
         setMembers(groupMembers as ProfileDB[])
+        setActivityLogs([])
+        setMarketplaceTx([])
       }
     } catch (err: unknown) {
       console.error('Analytics Fetch Error:', err)
@@ -184,52 +201,65 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     .map(cat => ({ name: cat.replace(' ', '\n'), fullName: cat, count: tasks.filter(t => t.category === cat).length, color: CATEGORY_COLORS[cat] }))
     .filter(d => d.count > 0)
 
-  const memberBarData = members.map(m => ({
+  const memberBarData = members.map((m) => ({
     name: (m.full_name || 'Unknown').split(' ')[0],
     completed: calculateMemberEffort(m.id),
-    assigned: tasks.filter(t => t.assignees?.includes(m.id)).length,
+    assigned: tasks.filter((t) => t.assignees?.includes(m.id)).length,
+    totalScore: m.total_score ?? 0,
   }))
 
-  // --- EXPORT ---
-  // --- EXPORT ---
+  const reportKpis = {
+    completionRate,
+    doneTasks,
+    totalTasks: tasks.length,
+    inProgressTasks,
+    todoTasks,
+    overdueTasks,
+    riskLevel,
+    evidenceDensity,
+    memberCount: members.length,
+    teamCapacity: group?.capacity || 5,
+    totalGroupEffort,
+  }
+
+  const handlePrint = () => {
+    document.body.classList.add('print-analytics')
+    window.print()
+    window.addEventListener(
+      'afterprint',
+      () => document.body.classList.remove('print-analytics'),
+      { once: true },
+    )
+  }
+
   const exportToCSV = async () => {
     setExporting(true)
     try {
-      const logs = await fetchActivityLogByGroup(groupId)
-      const headers = ['Type', 'User', 'Description', 'Timestamp', 'Impact Score']
-      const rows = logs.map((l: ActivityLogRow) => [
-        l.action_type || l.action,
-        l.user_name || 'System',
-        l.description || l.message || '',
-        l.created_at,
-        l.impact_score ?? 0,
-      ])
+      const logs =
+        activityLogs.length > 0 ? activityLogs : await fetchActivityLogByGroup(groupId)
+      const mkt =
+        marketplaceTx.length > 0
+          ? marketplaceTx
+          : await fetchTeamMarketplaceTransactions(members)
 
-      rows.push([])
-      rows.push(['MEMBER SUMMARY'])
-      rows.push(['Name', 'Completed Tasks', 'Assigned Tasks', 'Total Score'])
-      members.forEach((m) => {
-        rows.push([
-          m.full_name || 'Anonymous',
-          calculateMemberEffort(m.id),
-          tasks.filter((t) => t.assignees?.includes(m.id)).length,
-          m.total_score || 0,
-        ])
+      const csv = buildIntelligenceReportCsv({
+        group,
+        kpis: reportKpis,
+        statusPie: statusPieData,
+        categoryBar: categoryBarData,
+        memberBar: memberBarData,
+        tasks,
+        members,
+        activityLogs: logs,
+        marketplaceTx: mkt,
       })
 
-      const csvContent = [headers, ...rows]
-        .map((e) => e.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(','))
-        .join('\n')
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `Espeezy_Intelligence_${group?.module_code || 'Report'}_${new Date().toISOString().split('T')[0]}.csv`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-      addToast('Report ready', 'Intelligence CSV downloaded.', 'success')
+      const stamp = new Date().toISOString().split('T')[0]
+      downloadTextFile(
+        csv,
+        `Espeezy_Intelligence_${group?.module_code || 'Report'}_${stamp}.csv`,
+      )
+      addToast('Report ready', 'Full intelligence CSV with chart data downloaded.', 'success')
     } catch (err) {
       console.error('Export error:', err)
       addToast('Export failed', 'Could not build the intelligence report. Try again.', 'error')
@@ -305,10 +335,10 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div className="page-fade page-shell page-shell--wide">
+    <div className="page-fade page-shell page-shell--wide analytics-print-root">
 
       {/* Header */}
-      <header className="page-header">
+      <header className="page-header analytics-screen-only print-hide">
         <div className="page-header__main">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--brand)', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
             <BarChart3 size={14} /><span>Analytics Summary</span>
@@ -320,33 +350,33 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           <button type="button" onClick={() => void exportToCSV()} disabled={exporting} className="btn btn-ghost btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
             <Download size={14} /> {exporting ? 'Exporting…' : 'CSV'}
           </button>
-          <button onClick={() => window.print()} className="btn btn-primary btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+          <button type="button" onClick={handlePrint} className="btn btn-primary btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
             <Printer size={14} /> Print
           </button>
         </div>
       </header>
 
-      {/* Printable Executive Summary */}
-      <section className="print-only" data-testid="analytics-executive-report" style={{ display: 'none', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Executive Project Intelligence Report</h2>
-        <p style={{ fontSize: '0.9rem', color: '#333' }}>
-          This report provides a snapshot of team collaboration and project progress for <strong>{group?.name}</strong> ({group?.module_code}).
-          Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}.
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-          <div>
-            <h3 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase' }}>Project Health</h3>
-            <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{completionRate}% Complete • {riskLevel} Risk • {overdueTasks} Overdue</p>
-          </div>
-          <div>
-            <h3 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase' }}>Team Contribution</h3>
-            <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{members.length} Active Scholars • {totalGroupEffort} Tasks Resolved</p>
-          </div>
-        </div>
-      </section>
+      <AnalyticsPrintReport
+        group={group}
+        completionRate={completionRate}
+        doneTasks={doneTasks}
+        tasks={tasks}
+        inProgressTasks={inProgressTasks}
+        todoTasks={todoTasks}
+        overdueTasks={overdueTasks}
+        riskLevel={riskLevel}
+        evidenceDensity={evidenceDensity}
+        members={members}
+        totalGroupEffort={totalGroupEffort}
+        statusPieData={statusPieData}
+        categoryBarData={categoryBarData}
+        memberBarData={memberBarData}
+        marketplaceTx={marketplaceTx}
+        activityLogs={activityLogs}
+      />
 
       {/* KPI Row */}
-      <div className="kpi-grid" style={{ 
+      <div className="kpi-grid analytics-screen-only" style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
         gap: 'var(--gap-sm)', 
@@ -371,7 +401,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </div>
 
       {/* Charts Row */}
-      <div className="charts-grid" style={{ 
+      <div className="charts-grid analytics-screen-only" style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
         gap: 'var(--gap-sm)', 
@@ -446,7 +476,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </div>
 
       {/* Progress Bar  -  overall */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
+      <div className="analytics-screen-only" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>Project Pulse</span>
           <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--brand)' }}>{completionRate}%</span>
@@ -457,7 +487,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </div>
 
       {/* Main Two-Column */}
-      <div className="analytics-details-grid" style={{ 
+      <div className="analytics-details-grid analytics-screen-only" style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
         gap: 'var(--gap-sm)' 
@@ -524,7 +554,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
           <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
             <h3 style={{ fontSize: '0.95rem', fontWeight: 900, marginBottom: '1rem' }}>Activity Stream</h3>
-            <ActivityLogView groupId={groupId} limit={10} />
+            <ActivityLogView groupId={groupId} scope="group" limit={25} showExport />
           </div>
         </section>
 
@@ -617,19 +647,6 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           .charts-grid, .analytics-details-grid {
             --gap-sm: 1rem;
           }
-        }
-        @media print {
-          @page { margin: 1cm; }
-          button, .print-hide, .btn, .panel-tool, header .btn-inline { display: none !important; }
-          .print-only { display: block !important; }
-          body { background: white !important; color: black !important; padding: 0 !important; }
-          .page-fade { animation: none !important; transform: none !important; }
-          .kpi-grid { gap: 0.5rem !important; }
-          .kpi-card-print { border: 1px solid #eee !important; box-shadow: none !important; }
-          .charts-grid { display: block !important; }
-          .charts-grid > div { margin-bottom: 2rem !important; page-break-inside: avoid !important; border: 1px solid #eee !important; }
-          aside, nav, .sidebar-container, .mobile-header { display: none !important; }
-          .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

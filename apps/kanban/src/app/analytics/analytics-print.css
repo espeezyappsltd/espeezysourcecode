@@ -1,0 +1,77 @@
+/* Global print rules — body class toggled from Project Stats print button */
+@media print {
+  @page {
+    margin: 1.2cm;
+    size: A4 portrait;
+  }
+
+  body.print-analytics {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  body.print-analytics .sidebar-container,
+  body.print-analytics .sidebar-backdrop,
+  body.print-analytics .mobile-header,
+  body.print-analytics .bottom-nav-bar,
+  body.print-analytics .global-announcement,
+  body.print-analytics .support-chat-root,
+  body.print-analytics .connection-alert-tray {
+    display: none !important;
+  }
+
+  body.print-analytics .dashboard-layout {
+    display: block !important;
+  }
+
+  body.print-analytics .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  body.print-analytics .analytics-print-root {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body.print-analytics .analytics-screen-only,
+  body.print-analytics .print-hide,
+  body.print-analytics button,
+  body.print-analytics .recharts-wrapper {
+    display: none !important;
+  }
+
+  body.print-analytics .analytics-print-only {
+    display: block !important;
+  }
+
+  body.print-analytics .analytics-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    margin-bottom: 1rem;
+    page-break-inside: avoid;
+  }
+
+  body.print-analytics .analytics-print-table th,
+  body.print-analytics .analytics-print-table td {
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    text-align: left;
+  }
+
+  body.print-analytics .analytics-print-table th {
+    background: #f3f4f6;
+    font-weight: 700;
+  }
+
+  body.print-analytics .analytics-print-section {
+    margin-bottom: 1.25rem;
+    page-break-inside: avoid;
+  }
+}

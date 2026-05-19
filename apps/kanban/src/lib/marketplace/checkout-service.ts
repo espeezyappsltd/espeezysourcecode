@@ -175,20 +175,36 @@ export async function completeMarketplaceCreditPurchase(
     },
   ])
 
-  await db.from('activity_logs').insert({
-    user_id: buyerId,
-    group_id: null,
-    app_scope: 'kanban',
-    action: 'marketplace_purchase',
-    resource_type: 'marketplace_listing',
-    resource_id: listingId,
-    details: {
-      message: `Purchased "${result.listing_title}" for ${creditLabel}`,
-      purchase_id: purchaseId,
-      seller_id: sellerId,
+  await db.from('activity_logs').insert([
+    {
+      user_id: buyerId,
+      group_id: null,
+      app_scope: 'kanban',
+      action: 'marketplace_purchase',
+      resource_type: 'marketplace_listing',
+      resource_id: listingId,
+      details: {
+        message: `Purchased "${result.listing_title}" for ${creditLabel}`,
+        purchase_id: purchaseId,
+        seller_id: sellerId,
+      },
+      status: 'success',
     },
-    status: 'success',
-  })
+    {
+      user_id: sellerId,
+      group_id: null,
+      app_scope: 'kanban',
+      action: 'marketplace_sale',
+      resource_type: 'marketplace_listing',
+      resource_id: listingId,
+      details: {
+        message: `Sold "${result.listing_title}" for ${creditLabel}`,
+        purchase_id: purchaseId,
+        buyer_id: buyerId,
+      },
+      status: 'success',
+    },
+  ])
 
   const buyerEmail = buyer?.email ?? buyer?.espeezy_email
   const sellerEmail = seller?.email ?? seller?.espeezy_email

@@ -28,9 +28,15 @@ export function SettingsActivityPanel({ vm }: { vm: SettingsPageViewModel }) {
     <div className="auth-card" style={{ maxWidth: '100%' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Activity Log</h2>
       <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>
-        A complete history of your account actions and project updates.
+        Marketplace purchases, credit transactions, team updates, and all account activity — downloadable anytime.
       </p>
-      <ActivityLogView userId={profile.id} />
+      <ActivityLogView
+        userId={profile.id}
+        groupId={profile.group_id ?? undefined}
+        scope="combined"
+        limit={200}
+        showExport
+      />
     </div>
   )
 }

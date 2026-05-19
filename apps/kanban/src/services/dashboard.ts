@@ -245,15 +245,125 @@ export function mapActivityLogRow(row: ActivityLogDbRow): ActivityLogRow {
   }
 }
 
-export async function fetchActivityLogByGroup(groupId: string): Promise<ActivityLogRow[]> {
+const ACTIVITY_LOG_SELECT =
+  'id, user_id, group_id, action, details, created_at, status, profiles(full_name, avatar_url)'
+
+export async function fetchActivityLogByGroup(
+  groupId: string,
+  rowLimit = 500,
+): Promise<ActivityLogRow[]> {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('activity_logs')
-    .select('id, user_id, group_id, action, details, created_at, profiles(full_name)')
+    .select(ACTIVITY_LOG_SELECT)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
+    .limit(rowLimit)
   if (error) throw error
   return ((data ?? []) as unknown as ActivityLogDbRow[]).map(mapActivityLogRow)
+}
+
+/** Personal + team activity (marketplace, credits, tasks, etc.) */
+export async function fetchActivityFeed(opts: {
+  userId?: string
+  groupId?: string | null
+  limit?: number
+}): Promise<ActivityLogRow[]> {
+  const db = createBrowserSupabaseClient()
+  const limit = opts.limit ?? 200
+  let query = db
+    .from('activity_logs')
+    .select(ACTIVITY_LOG_SELECT)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (opts.userId && opts.groupId) {
+    query = query.or(`user_id.eq.${opts.userId},group_id.eq.${opts.groupId}`)
+  } else if (opts.userId) {
+    query = query.eq('user_id', opts.userId)
+  } else if (opts.groupId) {
+    query = query.eq('group_id', opts.groupId)
+  } else {
+    return []
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return ((data ?? []) as unknown as ActivityLogDbRow[]).map(mapActivityLogRow)
+}
+
+export type MarketplaceTxRow = {
+  date: string
+  role: 'buyer' | 'seller'
+  listingTitle: string
+  credits: number
+  userName: string
+  status: string
+}
+
+export async function fetchTeamMarketplaceTransactions(
+  members: Pick<Profile, 'id' | 'full_name'>[],
+): Promise<MarketplaceTxRow[]> {
+  const db = createBrowserSupabaseClient()
+  const ids = members.map((m) => m.id).filter(Boolean)
+  if (ids.length === 0) return []
+
+  const nameById = Object.fromEntries(
+    members.map((m) => [m.id, m.full_name ?? 'Unknown']),
+  ) as Record<string, string>
+
+  const select =
+    'id, listing_title, credits_amount, created_at, buyer_id, seller_id, status'
+
+  const [asBuyer, asSeller] = await Promise.all([
+    db
+      .from('marketplace_purchases')
+      .select(select)
+      .in('buyer_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(150),
+    db
+      .from('marketplace_purchases')
+      .select(select)
+      .in('seller_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(150),
+  ])
+
+  const seen = new Set<string>()
+  const rows: MarketplaceTxRow[] = []
+
+  const push = (
+    p: {
+      id: string
+      listing_title: string
+      credits_amount: number
+      created_at: string
+      buyer_id: string
+      seller_id: string
+      status?: string | null
+    },
+    role: 'buyer' | 'seller',
+  ) => {
+    if (seen.has(p.id)) return
+    seen.add(p.id)
+    const userId = role === 'buyer' ? p.buyer_id : p.seller_id
+    rows.push({
+      date: p.created_at,
+      role,
+      listingTitle: p.listing_title,
+      credits: p.credits_amount,
+      userName: nameById[userId] ?? 'Unknown',
+      status: p.status ?? 'completed',
+    })
+  }
+
+  ;(asBuyer.data ?? []).forEach((p) => push(p, 'buyer'))
+  ;(asSeller.data ?? []).forEach((p) => push(p, 'seller'))
+
+  return rows.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )
 }
 
 export async function fetchGlobalOnlineUserIds(): Promise<string[]> {
