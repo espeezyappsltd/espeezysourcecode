@@ -241,7 +241,7 @@ export default function PreRegisterPage() {
                     <span style={{ color: 'var(--brand)' }}>No credit card required.</span>
                   </h2>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                    Register your interest today and get priority access, exclusive early features, and founding member recognition.
+                    Register for priority access and early features—backed by our 12-person platform team running Espeezy&apos;s backend.
                   </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
@@ -396,7 +396,7 @@ export default function PreRegisterPage() {
           style={{ maxWidth: '720px', margin: '0 auto' }}>
           <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, marginBottom: '1.5rem' }}>
             Be part of the<br />
-            <span style={{ color: 'var(--brand)' }}>founding generation.</span>
+            <span style={{ color: 'var(--brand)' }}>campus launch cohort.</span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
             5 million pre-registrations. One mission. Free, equitable, and powerful education infrastructure  -  for every student on the planet.

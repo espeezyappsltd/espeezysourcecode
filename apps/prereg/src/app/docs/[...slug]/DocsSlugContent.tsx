@@ -408,8 +408,8 @@ const docsContent: Record<string, DocEntry> = {
         ],
       },
       {
-        heading: 'Lifetime and founding access',
-        body: 'Premium Lifetime and other one-time checkout offers are final once access is granted to your account, except where UK law requires otherwise or where we confirm a duplicate charge or billing error. Contact support within 14 days if you believe a lifetime purchase was taken in error.',
+        heading: 'Lifetime Scholar access',
+        body: 'Lifetime Scholar and other one-time checkout offers are final once access is granted to your account, except where UK law requires otherwise or where we confirm a duplicate charge or billing error. Billing is managed by the Espeezy platform team (12 operators on backend, payments, and support). Contact support within 14 days if you believe a lifetime purchase was taken in error.',
       },
       {
         heading: 'Institutional and enterprise billing',

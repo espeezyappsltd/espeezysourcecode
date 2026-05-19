@@ -549,7 +549,7 @@ export default function PreRegisterPage() {
       <section style={{ padding: 'clamp(5rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)', background: 'linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(6,182,212,0.04) 50%, rgba(16,185,129,0.04) 100%)' }}>
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ maxWidth: '720px', margin: '0 auto' }}>
           <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, marginBottom: '1.5rem' }}>
-            Be part of the<br /><span style={{ color: 'var(--brand)' }}>founding generation.</span>
+            Join the<br /><span style={{ color: 'var(--brand)' }}>campus launch cohort.</span>
           </h2>
           <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
             One mission: Document real work in group projects with an academic record you can show graders, recruiters, and hiring teams. Join students building proof of what each person contributed.

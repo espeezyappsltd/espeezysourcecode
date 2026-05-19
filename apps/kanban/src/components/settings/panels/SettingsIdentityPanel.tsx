@@ -112,7 +112,7 @@ export function SettingsIdentityPanel({ vm }: { vm: SettingsPageViewModel }) {
               }}
             >
               <Sparkles size={12} />
-              {profile.subscription_plan === 'lifetime' ? 'FOUNDER ACCESS' : profile.subscription_plan === 'premium' ? 'ELITE SCHOLAR' : 'PRO MEMBER'}
+              {profile.subscription_plan === 'lifetime' ? 'LIFETIME SCHOLAR' : profile.subscription_plan === 'premium' ? 'ELITE SCHOLAR' : 'PRO MEMBER'}
             </div>
           )}
 

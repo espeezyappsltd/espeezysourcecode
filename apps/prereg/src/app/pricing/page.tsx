@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState, useCallback } from 'react'
 import { PLAN_PAYMENT_LINKS } from '@/lib/stripe-payment-links'
+import { PREREG_LIFETIME_FEATURES, LIFETIME_PLAN_DESCRIPTION, LIFETIME_PLAN_NAME, PLATFORM_OPERATIONS_TAGLINE } from '@shared/platform-brand'
 import { fetchLiveMetrics } from '@/services/launch'
 
 const STRIPE_SUPPORT_PRODUCTS = [
@@ -39,13 +40,13 @@ const STRIPE_SUPPORT_PRODUCTS = [
     features: ['Everything in Pro', 'Advanced AI access', '20GB storage included'],
   },
   {
-    name: 'Premium Lifetime Access',
+    name: LIFETIME_PLAN_NAME,
     price: 'GBP 149.00 one-time',
     tag: 'First 100 Only - Limited',
     href: PLAN_PAYMENT_LINKS.lifetime,
     cta: 'Claim Lifetime',
-    description: 'Reserved for the first 100 early supporters only. One payment, permanent Premium access - no recurring billing, ever.',
-    features: ['Everything in Premium', 'Founder badge', 'Legacy pricing protection'],
+    description: LIFETIME_PLAN_DESCRIPTION,
+    features: [...PREREG_LIFETIME_FEATURES],
   },
 ] as const
 
@@ -107,13 +108,16 @@ export default function PricingPage() {
             academic goals.
           </span>
         </motion.h1>
-        <p style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto 3rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65, fontWeight: 500 }}>
+        <p style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto 1rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65, fontWeight: 500 }}>
           From free collaboration tools to advanced AI-powered insights, we have a plan for every student and team.
+        </p>
+        <p style={{ color: '#94a3b8', maxWidth: '620px', margin: '0 auto 3rem', fontSize: '0.85rem', lineHeight: 1.55, fontWeight: 600 }}>
+          {PLATFORM_OPERATIONS_TAGLINE}
         </p>
 
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', textAlign: 'left' }}>
           {STRIPE_SUPPORT_PRODUCTS.map((product) => {
-            const isLifetime = product.name === 'Premium Lifetime Access'
+            const isLifetime = product.name === LIFETIME_PLAN_NAME
             const soldOut = isLifetime && lifetimeSoldOut
             const lifetimeBadge = isLifetime && lifetimeSeatsLeft !== null
               ? (soldOut ? `Sold out (${LIFETIME_LIMIT}/${LIFETIME_LIMIT})` : `${lifetimeSeatsLeft} spots left`)

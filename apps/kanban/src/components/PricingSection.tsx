@@ -8,6 +8,16 @@ import TransientError from '@/components/TransientError'
 import { buildStripePaymentLink, type PlanKey } from '@/lib/stripe-payment-links'
 import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
 import { subscriptionCheckoutCopy } from '@/lib/platform/transaction-confirm-copy'
+import {
+  CHECKOUT_TEAM_NOTE,
+  LIFETIME_CTA_AVAILABLE,
+  LIFETIME_CTA_SOLD_OUT,
+  LIFETIME_FEATURES,
+  LIFETIME_PLAN_DESCRIPTION,
+  LIFETIME_PLAN_NAME,
+  LIFETIME_SCARCITY_LABEL,
+  PRICING_INTRO,
+} from '@/lib/platform/brand-copy'
 
 interface PricingSectionProps {
   showTitle?: boolean
@@ -122,7 +132,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             fontWeight: 500,
             lineHeight: 1.5
           }}>
-            Espeezy is built for students, by students. We keep our costs low so you can have world-class collaboration infrastructure without breaking the bank.
+            {PRICING_INTRO}
           </p>
         </div>
       )}
@@ -447,8 +457,8 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                 <Crown size={28} />
               </div>
               <div style={{ textAlign: 'right' }}>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Founder</h2>
-                <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>One-time Clearance</p>
+                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>{LIFETIME_PLAN_NAME}</h2>
+                <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>One-time · limited seats</p>
               </div>
             </div>
 
@@ -458,17 +468,10 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/once</span>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 700 }}>
-                The ultimate clearance level. Reserved for the first 100 early supporters. No monthly fees. All future protocol updates, beta features, and elite branding markers included forever.
+                {LIFETIME_PLAN_DESCRIPTION}
               </p>
               <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                {[
-                  'Permanent Protocol Authorization',
-                  'Beta Feature Review Lab Access',
-                  'Institutional "Founder" Marker',
-                  'Unlimited encrypted cloud storage',
-                  'All future Pro features included',
-                  'Lifetime support mandate'
-                ].map((f, i) => (
+                {LIFETIME_FEATURES.map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,1)', fontWeight: 800 }}>
                     <CheckCircle2 size={16} style={{ color: '#6366f1', flexShrink: 0, marginTop: '3px' }} />
                     {f}
@@ -494,7 +497,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             onClick={() => lifetimeSeatsUsed !== null && lifetimeSeatsUsed < 100 && handleCheckout('lifetime')}
             disabled={loadingPlan !== null || (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100)}
           >
-            {loadingPlan === 'lifetime' ? 'AUTHORIZING...' : (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'OFFER EXPIRED (Sold Out)' : 'Claim Founding Spot'}
+            {loadingPlan === 'lifetime' ? 'AUTHORIZING...' : (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? LIFETIME_CTA_SOLD_OUT : LIFETIME_CTA_AVAILABLE}
           </button>
 
           {/* SCARCITY INDICATOR */}
@@ -502,7 +505,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             <div style={{ marginTop: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>
                 <span style={{ color: lifetimeSeatsUsed >= 90 ? '#ef4444' : 'var(--brand)' }}>
-                  {lifetimeSeatsUsed >= 100 ? 'Sold Out' : `Only ${100 - lifetimeSeatsUsed} Spots Left`}
+                  {LIFETIME_SCARCITY_LABEL(Math.max(0, 100 - lifetimeSeatsUsed))}
                 </span>
                 <span style={{ color: 'rgba(255,255,255,0.4)' }}>{lifetimeSeatsUsed}/100</span>
               </div>
@@ -540,7 +543,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
         justifyContent: isLanding ? 'center' : 'flex-start'
       }}>
         <ArrowRight size={18} style={{ color: 'var(--brand)' }} />
-        <span>Secure checkout powered by Stripe. Student verification may be required for specific discounts.</span>
+        <span>{CHECKOUT_TEAM_NOTE} Student verification may be required for specific discounts.</span>
       </div>
 
       <style jsx>{`

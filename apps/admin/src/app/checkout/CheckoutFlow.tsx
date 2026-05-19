@@ -9,6 +9,12 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
+import {
+  CHECKOUT_TEAM_NOTE,
+  LIFETIME_FEATURES,
+  LIFETIME_PLAN_DESCRIPTION,
+  LIFETIME_PLAN_NAME,
+} from '@shared/platform-brand'
 
 // ─── Plan definitions ──────────────────────────────────────────────────────────
 const PLANS = {
@@ -46,20 +52,13 @@ const PLANS = {
     description: 'For team leads and students who need every edge available.',
   },
   lifetime: {
-    name: 'Lifetime Founding Scholar',
+    name: LIFETIME_PLAN_NAME,
     price: '$149',
     period: 'one-time',
-    badge: 'Limited  -  100 seats',
+    badge: 'Limited · 100 seats',
     color: '#f59e0b',
-    features: [
-      'Everything in Premium, forever',
-      'Founding Scholar badge',
-      'All future features included',
-      'Direct roadmap input',
-      'Blockchain-anchored certificate',
-      'Priority institutional onboarding',
-    ],
-    description: 'Secure your seat before the community grows. No renewal, ever.',
+    features: [...LIFETIME_FEATURES],
+    description: LIFETIME_PLAN_DESCRIPTION,
   },
 }
 
@@ -230,11 +229,13 @@ export default function CheckoutFlow() {
               </button>
             </div>
 
-            {/* Social proof */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1.5rem', color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem', fontWeight: 600 }}>
+            <p style={{ textAlign: 'center', marginTop: '1.25rem', color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem', lineHeight: 1.55, fontWeight: 600, maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
+              {CHECKOUT_TEAM_NOTE}
+            </p>
+            <motion.div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem', fontWeight: 600 }}>
               <Users size={13} />
-              <span>Join thousands of students already on Espeezy</span>
-            </div>
+              <span>Trusted by student teams on campuses worldwide</span>
+            </motion.div>
           </motion.div>
         ) : (
           <motion.div

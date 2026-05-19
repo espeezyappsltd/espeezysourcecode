@@ -11,6 +11,12 @@ import Link from 'next/link'
 import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 import { fetchLiveMetrics } from '@/services/launch'
 import { createStripeCheckout } from '@/services/checkout'
+import {
+  CHECKOUT_TEAM_NOTE,
+  LIFETIME_PLAN_DESCRIPTION,
+  LIFETIME_PLAN_NAME,
+  PREREG_LIFETIME_FEATURES,
+} from '@shared/platform-brand'
 
 const PLANS = {
   pro: {
@@ -49,20 +55,13 @@ const PLANS = {
     description: 'For team leads and high-intensity collaborators running larger, higher-stakes academic workflows.',
   },
   lifetime: {
-    name: 'Premium Lifetime Access',
+    name: LIFETIME_PLAN_NAME,
     price: 'GBP 149.00',
     period: 'one-time',
-    badge: 'First 100 Only - Limited Forever',
+    badge: 'First 100 lifetime seats',
     hasTrial: false,
-    features: [
-      'Everything in Premium, forever',
-      'Founding supporter badge',
-      'All future protocol updates included',
-      'Beta feature access as they ship',
-      'Permanent legacy pricing protection',
-      'Early supporter identity inside the product',
-    ],
-    description: 'Reserved exclusively for the first 100 early supporters. One payment, permanent Premium access - no recurring billing, ever.',
+    features: [...PREREG_LIFETIME_FEATURES],
+    description: LIFETIME_PLAN_DESCRIPTION,
   },
 } as const
 
@@ -257,8 +256,8 @@ function CheckoutFlow() {
                 }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>
                   {isLifetimeSoldOut
-                    ? `All ${LIFETIME_LIMIT} founding spots have been claimed`
-                    : `${lifetimeSeatsLeft} of ${LIFETIME_LIMIT} founding spots remaining`}
+                    ? `All ${LIFETIME_LIMIT} lifetime seats have been claimed`
+                    : `${lifetimeSeatsLeft} of ${LIFETIME_LIMIT} lifetime seats remaining`}
                 </span>
                 <span style={{
                   fontSize: '0.68rem',
@@ -363,7 +362,7 @@ function CheckoutFlow() {
                   whileTap={{ scale: 0.97 }}
                   style={{ width: '100%', padding: '1.1rem', background: isLifetimeSoldOut ? '#94a3b8' : BRAND, border: 'none', borderRadius: '14px', color: 'white', fontSize: '0.95rem', fontWeight: 800, cursor: isLifetimeSoldOut ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', boxShadow: isLifetimeSoldOut ? 'none' : `0 8px 24px rgba(99,102,241,0.3)`, letterSpacing: '-0.01em' }}>
                   <CreditCard size={18} />
-                  {isLifetimeSoldOut ? 'Founding Spots Sold Out' : plan.hasTrial ? 'Start your 14-day free trial' : 'Continue to secure payment'}
+                  {isLifetimeSoldOut ? 'Lifetime seats sold out' : plan.hasTrial ? 'Start your 14-day free trial' : 'Continue to secure payment'}
                   <motion.span animate={{ x: hovered ? 4 : 0 }} transition={{ duration: 0.15 }}>
                     <ArrowRight size={16} />
                   </motion.span>
@@ -398,10 +397,13 @@ function CheckoutFlow() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1.5rem', color: 'rgba(15,23,42,0.3)', fontSize: '0.75rem', fontWeight: 600 }}>
+            <p style={{ textAlign: 'center', marginTop: '1.25rem', color: 'rgba(15,23,42,0.45)', fontSize: '0.72rem', lineHeight: 1.55, fontWeight: 600, maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
+              {CHECKOUT_TEAM_NOTE}
+            </p>
+            <motion.div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', color: 'rgba(15,23,42,0.3)', fontSize: '0.75rem', fontWeight: 600 }}>
               <Users size={13} />
               <span>{isProPlan ? 'Most students should start with Pro' : 'Upgrade when your workflow needs more depth'}</span>
-            </div>
+            </motion.div>
           </motion.div>
         ) : (
           <motion.div key="processing" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', zIndex: 10 }}>

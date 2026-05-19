@@ -32,14 +32,11 @@ test.describe('Institutional Guards & Secret Gateway', () => {
     }
   });
 
-  test('Landing Page Tiered Features visibility', async ({ page }) => {
-    await page.goto('/');
-    
-    // Verify "Bank-Level Safety Matrix" is showcased
-    await expect(page.locator('text=Bank-Level Safety Matrix')).toBeVisible();
-    
-    // Verify "Founder Lifetime Access" in FAQ
-    await expect(page.locator('text=Founder Lifetime Access')).toBeVisible();
+  test('Upgrade page pricing and platform team copy', async ({ page }) => {
+    await page.goto('/upgrade');
+
+    await expect(page.locator('text=Lifetime Scholar')).toBeVisible();
+    await expect(page.locator('text=12-member platform team')).toBeVisible();
   });
 
   test('Admin Dashboard Health Check visualization', async ({ page }) => {

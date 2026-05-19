@@ -3,6 +3,7 @@
 import { ArrowUpRight, CreditCard, Shield, Sparkles } from 'lucide-react'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import type { SettingsPageViewModel } from '../settings-types'
+import { BILLING_PANEL_SUBTITLE } from '@/lib/platform/brand-copy'
 
 export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
   const { profile, handleManageSubscription, loadingPortal, handleCheckout, switching } = vm
@@ -11,7 +12,7 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
   return (
     <div className="auth-card" style={{ maxWidth: '100%' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Subscription & Billing</h2>
-      <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Manage your project support plan and billing details.</p>
+      <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>{BILLING_PANEL_SUBTITLE}</p>
 
       <div
         style={{

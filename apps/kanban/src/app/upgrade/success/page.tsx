@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { FileText, ArrowRight, Sparkles, PartyPopper, Star, Users, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
+import { CHECKOUT_SUCCESS_TEAM_NOTE } from '@/lib/platform/brand-copy'
 
 const PERKS = [
   { icon: <Star size={15} />, label: 'Verified Scholar badge added to your profile' },
@@ -103,7 +104,7 @@ function SuccessContent() {
             <span style={{ color: '#10b981' }}>Scholar Community.</span>
           </h1>
           <p style={{ margin: '0 0 2rem', color: 'rgba(255,255,255,0.5)', fontSize: '1rem', fontWeight: 500, lineHeight: 1.6 }}>
-            Your upgrade is confirmed and your account has been instantly upgraded. Time to do great work.
+            {CHECKOUT_SUCCESS_TEAM_NOTE}
           </p>
         </motion.div>
 

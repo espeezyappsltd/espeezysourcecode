@@ -2,6 +2,7 @@
 
 import PricingSection from '@/components/PricingSection'
 import PlansUsagePanel from '@/components/PlansUsagePanel'
+import { PLATFORM_OPERATIONS_TAGLINE, UPGRADE_HERO_BODY } from '@/lib/platform/brand-copy'
 import { Sparkles } from 'lucide-react'
 
 export default function UpgradePage() {
@@ -14,10 +15,14 @@ export default function UpgradePage() {
             <Sparkles size={18} /> THE MISSION IS GROWING
           </div>
           <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', lineHeight: 1, fontWeight: 950, letterSpacing: '-0.04em', color: 'white', margin: 0 }}>
-            Support this project to <span style={{ color: 'var(--brand)' }}>reach more schools</span>
+            Support the platform to{' '}
+            <span style={{ color: 'var(--brand)' }}>reach more schools</span>
           </h1>
-          <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.8)', fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.4 }}>
-            I am building Espeezy to solve real operational problems for student teams. Your upgrade directly funds infrastructure and new feature development.
+          <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', fontWeight: 700, lineHeight: 1.5, margin: 0 }}>
+            {PLATFORM_OPERATIONS_TAGLINE}
+          </p>
+          <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.8)', fontSize: '1.15rem', fontWeight: 600, lineHeight: 1.5, margin: 0 }}>
+            {UPGRADE_HERO_BODY}
           </p>
         </div>
 
