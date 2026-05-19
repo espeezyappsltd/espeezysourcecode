@@ -53,6 +53,38 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
   if (user && pathname === '/login' && !isEmbed) {
+    const bypassEmails = (process.env.AUTH_TIER_BYPASS_EMAILS ?? '')
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean)
+    const emailBypass = Boolean(user.email && bypassEmails.includes(user.email.toLowerCase()))
+
+    let tier: Awaited<ReturnType<typeof resolveGamesTier>>['tier'] = 'free'
+    let tierSource: Awaited<ReturnType<typeof resolveGamesTier>>['source'] = 'database'
+
+    if (!emailBypass) {
+      const resolved = await resolveGamesTier(user, request, supabase)
+      tier = resolved.tier
+      tierSource = resolved.source
+      if (tierSource !== 'jwt') {
+        attachTierCacheCookie(supabaseResponse, tier)
+      }
+    }
+
+    if (!emailBypass && !hasGamesAccess(tier)) {
+      if (request.nextUrl.searchParams.get('upgrade') !== '1') {
+        const upgradeUrl = request.nextUrl.clone()
+        upgradeUrl.pathname = '/login'
+        upgradeUrl.searchParams.set('upgrade', '1')
+        const redirect = NextResponse.redirect(upgradeUrl)
+        if (tierSource !== 'jwt') {
+          attachTierCacheCookie(redirect, tier)
+        }
+        return redirect
+      }
+      return supabaseResponse
+    }
+
     const next = sanitizeNextPath(request.nextUrl.searchParams.get('next'))
     const dest = request.nextUrl.clone()
     dest.pathname = next

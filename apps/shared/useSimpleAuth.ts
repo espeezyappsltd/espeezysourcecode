@@ -14,7 +14,13 @@ export type SimpleAuthResult = {
 export function useSimpleAuth(
   supabase: SupabaseClient | null,
   redirectPath: string,
-  options?: { recoveryRedirectTo?: string },
+  options?: {
+    recoveryRedirectTo?: string
+    /** When true, keep the login form visible even if a session already exists. */
+    skipSessionRedirect?: boolean
+    /** Return false to stay on login (e.g. tier upgrade gate). */
+    canProceedAfterAuth?: () => Promise<boolean>
+  },
 ) {
   const router = useRouter()
   const [ready, setReady] = useState(false)
@@ -25,11 +31,15 @@ export function useSimpleAuth(
   const pathRef = useRef(sanitizeNextPath(redirectPath))
   pathRef.current = sanitizeNextPath(redirectPath)
 
-  const goAfterAuth = useCallback(() => {
+  const goAfterAuth = useCallback(async () => {
+    if (options?.canProceedAfterAuth) {
+      const allowed = await options.canProceedAfterAuth()
+      if (!allowed) return
+    }
     const path = pathRef.current
     router.replace(path)
     router.refresh()
-  }, [router])
+  }, [router, options])
 
   useEffect(() => {
     if (!supabase || checkedRef.current) {
@@ -48,8 +58,8 @@ export function useSimpleAuth(
     void supabase.auth.getSession().then(({ data: { session } }) => {
       if (cancelled) return
       window.clearTimeout(timer)
-      if (session) {
-        goAfterAuth()
+      if (session && !options?.skipSessionRedirect) {
+        void goAfterAuth()
         return
       }
       finish()
@@ -59,7 +69,7 @@ export function useSimpleAuth(
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [supabase, goAfterAuth])
+  }, [supabase, goAfterAuth, options?.skipSessionRedirect])
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<SimpleAuthResult> => {

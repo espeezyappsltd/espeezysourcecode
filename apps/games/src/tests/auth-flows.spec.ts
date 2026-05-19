@@ -27,4 +27,11 @@ test.describe('Games auth flows', () => {
     await page.waitForURL(/\/login/, { timeout: 15_000 })
     expect(page.url()).toContain('/login')
   })
+
+  test('upgrade gate does not redirect-loop on login', async ({ page }) => {
+    await page.goto('/login?upgrade=1')
+    await page.waitForLoadState('networkidle')
+    expect(page.url()).toMatch(/\/login\?.*upgrade=1/)
+    await expect(page.getByText(/upgrade required/i)).toBeVisible({ timeout: 10_000 })
+  })
 })
