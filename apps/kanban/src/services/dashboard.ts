@@ -1,6 +1,7 @@
 import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { PRESENCE_ONLINE_WINDOW_MS } from '@/lib/presence/team-presence'
 import { Q } from '@/lib/query-columns'
-import type { Group, Profile, Task, Artifact, Commit, ActivityLogRow } from '@/types/database'
+import type { Group, Profile, Task, Artifact, Commit, ActivityLog, ActivityLogRow } from '@/types/database'
 import type { Profile as AuthProfile } from '@/types/auth'
 
 export type JoinRequestWithProfile = {
@@ -216,15 +217,55 @@ export async function fetchCommitsByUser(userId: string, rowLimit = 3): Promise<
   return (data ?? []) as Commit[]
 }
 
+type ActivityLogDbRow = ActivityLog & {
+  profiles?: { full_name: string | null } | null
+}
+
+function formatActivityLogDescription(details: Record<string, unknown> | null | undefined, action: string): string {
+  if (!details) return action
+  if (typeof details.message === 'string' && details.message.trim()) return details.message
+  if (typeof details.description === 'string' && details.description.trim()) return details.description
+  try {
+    const compact = JSON.stringify(details)
+    return compact.length > 200 ? `${compact.slice(0, 197)}…` : compact
+  } catch {
+    return action
+  }
+}
+
+export function mapActivityLogRow(row: ActivityLogDbRow): ActivityLogRow {
+  const details = (row.details ?? {}) as Record<string, unknown>
+  return {
+    ...row,
+    action_type: row.action,
+    user_name: row.profiles?.full_name ?? 'System',
+    description: formatActivityLogDescription(details, row.action),
+    message: typeof details.message === 'string' ? details.message : undefined,
+    impact_score: typeof details.impact_score === 'number' ? details.impact_score : 0,
+  }
+}
+
 export async function fetchActivityLogByGroup(groupId: string): Promise<ActivityLogRow[]> {
   const db = createBrowserSupabaseClient()
   const { data, error } = await db
     .from('activity_logs')
-    .select('id, user_id, group_id, action, details, created_at')
+    .select('id, user_id, group_id, action, details, created_at, profiles(full_name)')
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []) as ActivityLogRow[]
+  return ((data ?? []) as unknown as ActivityLogDbRow[]).map(mapActivityLogRow)
+}
+
+export async function fetchGlobalOnlineUserIds(): Promise<string[]> {
+  const db = createBrowserSupabaseClient()
+  const staleCutoff = new Date(Date.now() - PRESENCE_ONLINE_WINDOW_MS).toISOString()
+  const { data, error } = await db
+    .from('presence')
+    .select('user_id')
+    .eq('is_online', true)
+    .gte('last_seen', staleCutoff)
+  if (error) throw error
+  return Array.from(new Set((data ?? []).map((r) => r.user_id as string).filter(Boolean)))
 }
 
 export async function fetchNotificationSettings(userId: string): Promise<DashboardNotificationSettings> {

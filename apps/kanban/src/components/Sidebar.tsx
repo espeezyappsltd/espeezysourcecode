@@ -185,13 +185,13 @@ export default function Sidebar({ user }: SidebarProps) {
   const { isOnline: isConnected, isSlow } = useConnectivity()
   const { profile } = useProfile()
   const { currentPalette, setPalette } = useTheme()
-  const { onlineUsers } = usePresence()
+  const { globalOnlineCount } = usePresence()
   const smartLoading = useSmartLoading()
   const withLoading = smartLoading?.withLoading
   const showConfirmation = smartLoading?.showConfirmation
 
   const isProfileLoaded = Boolean(profile)
-  const onlineCount = onlineUsers?.size ?? 0
+  const onlineCount = globalOnlineCount
   const onlineLabel = onlineCount === 1 ? '1 ONLINE' : `${onlineCount} ONLINE`
   const isDark = currentPalette.name !== 'Google Light'
   const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')

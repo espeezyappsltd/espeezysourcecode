@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Eye, Shield, User, UserMinus } from 'lucide-react'
 import type { SettingsPageViewModel } from '../settings-types'
+import { canKickTarget, canManageTeamSettings } from '@/lib/team/rbac'
 
 export function SettingsTeamPanel({ vm }: { vm: SettingsPageViewModel }) {
   const { profile, teamMembers, isEncrypted, updatingGroup, handleToggleEncryption, handleKickUser } = vm
@@ -22,7 +23,7 @@ export function SettingsTeamPanel({ vm }: { vm: SettingsPageViewModel }) {
           <button
             type="button"
             onClick={handleToggleEncryption}
-            disabled={updatingGroup}
+            disabled={updatingGroup || !canManageTeamSettings(profile?.role)}
             style={{
               background: 'var(--surface)',
               border: '1px solid var(--border)',
@@ -67,7 +68,7 @@ export function SettingsTeamPanel({ vm }: { vm: SettingsPageViewModel }) {
               </div>
             </div>
 
-            {member.id !== profile?.id && member.role !== 'admin' && (
+            {member.id !== profile?.id && canKickTarget(profile?.role, member.role) && (
               <button
                 type="button"
                 onClick={() => handleKickUser(member.id)}

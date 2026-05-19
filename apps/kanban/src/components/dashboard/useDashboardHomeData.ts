@@ -12,6 +12,7 @@ import {
   shouldCelebrateCompletion,
 } from '@/lib/kanban/completion-celebration'
 import { CONTRIBUTION_SCORES_UPDATED } from '@/lib/kanban/contribution-events'
+import { canManageJoinRequests } from '@/lib/team/rbac'
 
 type AddToast = (title: string, description: string, variant: 'success' | 'error' | 'info') => void
 
@@ -93,7 +94,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
   }, [groupId])
 
   const fetchPendingRequests = useCallback(async () => {
-    if (!groupId || profile?.role !== 'admin') return
+    if (!groupId || !canManageJoinRequests(profile?.role)) return
     try {
       const data = await fetchPendingJoinRequests(groupId)
       setPendingRequests(data.map((request) => ({ ...request, profiles: request.profiles ?? undefined })))

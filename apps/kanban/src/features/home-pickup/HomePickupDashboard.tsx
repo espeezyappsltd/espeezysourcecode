@@ -6,6 +6,7 @@ import { useProfile } from '@/context/ProfileContext'
 import { useDashboardMetrics } from '@/context/DashboardMetricsContext'
 import { usePresence } from '@/components/PresenceProvider'
 import { countTeamMembersOnline } from '@/lib/presence/team-presence'
+import { canManageJoinRequests } from '@/lib/team/rbac'
 import { getPlanName } from '@/utils/feature-gate'
 import type { Profile } from '@/types/auth'
 import './home-pickup.css'
@@ -53,7 +54,7 @@ export function HomePickupDashboard({
     progressLabel,
     pendingRequests,
   } = useDashboardMetrics()
-  const { onlineUsers } = usePresence()
+  const { onlineUsers, globalOnlineCount } = usePresence()
   const teamOnlineCount = countTeamMembersOnline(members.map((m) => m.id), onlineUsers)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
@@ -73,7 +74,7 @@ export function HomePickupDashboard({
   if (projectProgress > 0) {
     resumeItems.push(`Team progress is at ${projectProgress}% — ${progressLabel.toLowerCase()}.`)
   }
-  if (pendingRequests.length > 0 && profile?.role === 'admin') {
+  if (pendingRequests.length > 0 && canManageJoinRequests(profile?.role)) {
     resumeItems.push(`${pendingRequests.length} teammate${pendingRequests.length === 1 ? '' : 's'} waiting to join.`)
   }
   if (resumeItems.length === 0) {
@@ -148,7 +149,7 @@ export function HomePickupDashboard({
             Roster
           </p>
           <p className="home-pickup-card-value" data-testid="pickup-roster-online-count">
-            {teamOnlineCount} online
+            {globalOnlineCount} on Espeezy · {teamOnlineCount} on team
           </p>
           <p className="home-pickup-card-hint">{members.length || 0} on the team</p>
         </article>

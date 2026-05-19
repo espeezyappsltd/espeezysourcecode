@@ -9,6 +9,7 @@ import {
   archiveMemberTasksForGroup,
   restoreMemberTasksOnGroupBoard,
 } from '@/lib/team/membership-transfer.server'
+import { canKickTarget, canManageJoinRequests } from '@/lib/team/rbac'
 
 export async function createGroup(formData: FormData) {
   const uid = await getUid()
@@ -145,8 +146,8 @@ export async function kickUser(userId: string) {
       throw adminProfileError
     }
 
-    if (!adminProfile || adminProfile.role !== 'admin') {
-      return { error: 'Unauthorized: Only admins can manage team members' }
+    if (!adminProfile?.group_id || !canManageJoinRequests(adminProfile.role)) {
+      return { error: 'Only team leads can remove members.' }
     }
 
     const { data: targetProfile, error: targetProfileError } = await adminDb
@@ -163,8 +164,8 @@ export async function kickUser(userId: string) {
       return { error: 'Target user not found in your team' }
     }
 
-    if (targetProfile.role === 'admin') {
-      return { error: 'Cannot kick another administrator' }
+    if (!canKickTarget(adminProfile.role, targetProfile.role)) {
+      return { error: 'You cannot remove this member.' }
     }
 
     const leavingGroupId = targetProfile.group_id
@@ -312,12 +313,8 @@ async function assertTeamAdmin(adminDb: ReturnType<typeof getAdminDb>, uid: stri
     .eq('id', uid)
     .single()
 
-  const role = adminProfile?.role?.toLowerCase()
-  const isAdmin =
-    adminProfile?.group_id === groupId && (role === 'admin' || role === 'team_leader')
-
-  if (!isAdmin) {
-    return { ok: false as const, error: 'Only team leaders can manage join requests.' }
+  if (!adminProfile?.group_id || adminProfile.group_id !== groupId || !canManageJoinRequests(adminProfile.role)) {
+    return { ok: false as const, error: 'Only team leads can manage join requests.' }
   }
   return { ok: true as const }
 }

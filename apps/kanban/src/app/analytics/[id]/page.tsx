@@ -52,6 +52,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: groupId } = use(params)
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const { addToast } = useNotifications()
   const { profile: contextProfile, loading: profileLoading } = useProfile()
   const [currentUser, setCurrentUser] = useState<Profile | null>(null)
@@ -192,39 +193,48 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   // --- EXPORT ---
   // --- EXPORT ---
   const exportToCSV = async () => {
-    setLoading(true)
+    setExporting(true)
     try {
       const logs = await fetchActivityLogByGroup(groupId)
       const headers = ['Type', 'User', 'Description', 'Timestamp', 'Impact Score']
-      const rows = logs.map((l: ActivityLogRow) => {
-        return [l.action_type || l.action, l.user_name || 'System', l.description || l.message, l.created_at, l.impact_score || 0]
-      })
-      
-      // Add member summary to CSV
+      const rows = logs.map((l: ActivityLogRow) => [
+        l.action_type || l.action,
+        l.user_name || 'System',
+        l.description || l.message || '',
+        l.created_at,
+        l.impact_score ?? 0,
+      ])
+
       rows.push([])
       rows.push(['MEMBER SUMMARY'])
       rows.push(['Name', 'Completed Tasks', 'Assigned Tasks', 'Total Score'])
-      members.forEach(m => {
+      members.forEach((m) => {
         rows.push([
           m.full_name || 'Anonymous',
           calculateMemberEffort(m.id),
-          tasks.filter(t => t.assignees?.includes(m.id)).length,
-          m.total_score || 0
+          tasks.filter((t) => t.assignees?.includes(m.id)).length,
+          m.total_score || 0,
         ])
       })
 
-      const csvContent = [headers, ...rows].map(e => e.map((c) => `"${String(c ?? '')}"`).join(',')).join('\n')
+      const csvContent = [headers, ...rows]
+        .map((e) => e.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(','))
+        .join('\n')
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
-      link.setAttribute('href', url)
-      link.setAttribute('download', `Espeezy_Intelligence_${group?.module_code || 'Report'}_${new Date().toISOString().split('T')[0]}.csv`)
-      document.body.appendChild(link); link.click(); document.body.removeChild(link)
+      link.href = url
+      link.download = `Espeezy_Intelligence_${group?.module_code || 'Report'}_${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      addToast('Report ready', 'Intelligence CSV downloaded.', 'success')
     } catch (err) {
       console.error('Export error:', err)
-      addToast('System Error', 'Failed to generate intelligence report.', 'error')
+      addToast('Export failed', 'Could not build the intelligence report. Try again.', 'error')
     } finally {
-      setLoading(false)
+      setExporting(false)
     }
   }
 
@@ -307,8 +317,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           <p className="page-header__desc">{group?.module_code} • Live project tracking</p>
         </div>
         <div className="page-header__actions" style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={exportToCSV} className="btn btn-ghost btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-            <Download size={14} /> CSV
+          <button type="button" onClick={() => void exportToCSV()} disabled={exporting} className="btn btn-ghost btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+            <Download size={14} /> {exporting ? 'Exporting…' : 'CSV'}
           </button>
           <button onClick={() => window.print()} className="btn btn-primary btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
             <Printer size={14} /> Print

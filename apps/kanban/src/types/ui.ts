@@ -145,8 +145,12 @@ export type PresenceState = {
 }
 
 export type PresenceContextType = {
+  /** All Espeezy users online right now (campus-wide). */
   onlineUsers: Set<string>
+  /** Users typing in your team channel (when you have a group). */
   typingUsers: Set<string>
+  /** Same as onlineUsers.size — explicit for UI copy. */
+  globalOnlineCount: number
   setTypingStatus: (isTyping: boolean) => Promise<void>
 }
 

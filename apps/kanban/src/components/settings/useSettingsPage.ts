@@ -27,6 +27,7 @@ import {
   updateProfileById,
 } from '@/services/dashboard'
 import { formatSupabaseError, friendlySupabaseError } from '@/utils/supabase-errors'
+import { canManageTeamSettings } from '@/lib/team/rbac'
 
 export function useSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabName>('identity')
@@ -359,6 +360,10 @@ export function useSettingsPage() {
 
   const handleToggleEncryption = async () => {
     if (!profile?.group_id) return
+    if (!canManageTeamSettings(profile.role)) {
+      addToast('Team settings', 'Only the team admin can change visibility.', 'error')
+      return
+    }
     setUpdatingGroup(true)
     const nextValue = !isEncrypted
 

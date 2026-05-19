@@ -12,6 +12,7 @@ import { getPlanName, hasFeature } from '@/utils/feature-gate'
 import { useDashboardMetrics } from '@/context/DashboardMetricsContext'
 import { usePresence } from '@/components/PresenceProvider'
 import { countTeamMembersOnline } from '@/lib/presence/team-presence'
+import { canManageJoinRequests } from '@/lib/team/rbac'
 import AccountTiersBanner from '@/components/AccountTiersBanner'
 
 const DASHBOARD_TABS = [
@@ -64,7 +65,7 @@ export default function DashboardHome({
     setSyncToken,
   } = useDashboardMetrics()
 
-  const { onlineUsers } = usePresence()
+  const { onlineUsers, globalOnlineCount } = usePresence()
   const teamOnlineCount = useMemo(
     () => countTeamMembersOnline(members.map((m) => m.id), onlineUsers),
     [members, onlineUsers],
@@ -128,6 +129,28 @@ export default function DashboardHome({
               </button>
             </div>
 
+            <div
+              style={{
+                padding: '0.4rem 0.8rem',
+                background: 'rgba(16, 185, 129, 0.08)',
+                borderRadius: '10px',
+                border: '1px solid rgba(16, 185, 129, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                fontSize: '0.75rem',
+                fontWeight: 900,
+                color: 'var(--text-main)',
+              }}
+              data-testid="dashboard-global-online"
+            >
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 8px var(--success)' }} />
+              {globalOnlineCount} online on Espeezy
+              <span style={{ color: 'var(--text-sub)', fontWeight: 700 }}>
+                · {teamOnlineCount} on your team
+              </span>
+            </div>
+
             <button
               onClick={() => setShowMembers(!showMembers)}
               className={`btn ${showMembers ? 'btn-primary' : 'btn-secondary'}`}
@@ -161,7 +184,7 @@ export default function DashboardHome({
                 fontWeight: 950
               }}>
                 {teamOnlineCount} online · {members.length || 0} total
-                {pendingRequests.length > 0 && ` (+${pendingRequests.length} pending)`}
+                {canManageJoinRequests(profile?.role) && pendingRequests.length > 0 && ` (+${pendingRequests.length} pending)`}
               </span>
             </button>
           </div>
@@ -227,7 +250,7 @@ export default function DashboardHome({
               </div>
 
               {/* Pending Requests Section */}
-              {pendingRequests.length > 0 && (
+              {canManageJoinRequests(profile?.role) && pendingRequests.length > 0 && (
                 <>
                   <div style={{ height: '1px', background: 'var(--border)', margin: '0.5rem 0' }} />
                   <h2 style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Incoming Requests ({pendingRequests.length})</h2>
