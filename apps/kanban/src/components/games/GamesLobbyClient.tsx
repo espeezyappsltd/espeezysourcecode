@@ -5,7 +5,7 @@ import AccountTiersBanner from '@/components/AccountTiersBanner'
 
 export default function GamesLobbyClient() {
   return (
-    <section style={{ display: 'grid', gap: '1rem', padding: '1.25rem' }}>
+    <section className="page-fade page-shell page-stack" style={{ paddingTop: '1.25rem' }}>
       <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900 }}>Games Lobby</h1>
       <p style={{ margin: 0, color: 'var(--text-sub)' }}>
         Games are currently in lightweight local mode for refactor stability.

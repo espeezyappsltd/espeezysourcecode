@@ -318,7 +318,7 @@ export default function FeedPage() {
     .slice(0, 8)
 
   return (
-    <div className="feed-shell">
+    <div className="feed-shell page-fade">
       <header className="feed-hero">
         <h1>Academic Journeys</h1>
         <p>Real-time signals from students building the future. Share milestones, wins, and campus life.</p>

@@ -3,21 +3,11 @@
  * Use these instead of one-off max-width / border-radius / inline surface styles.
  */
 
-/* ── Layout tokens (also set in globals :root) ───────────────── */
-:root {
-  --content-max: 1200px;
-  --content-narrow: 720px;
-  --panel-p: clamp(1rem, 2.5vw, 1.35rem);
-  --panel-gap: clamp(0.75rem, 2vw, 1.25rem);
-}
-
 /* ── Page shell — constrains width inside dashboard main-content ─ */
 .page-shell,
 .assets-page,
-.feed-shell,
-.feed-manage-shell,
-.hustle-shell,
-.marketplace-page {
+.marketplace-page,
+.credits-account-page {
   box-sizing: border-box;
   width: 100%;
   max-width: min(var(--content-max), 100%);
@@ -27,22 +17,32 @@
   min-width: 0;
 }
 
+.page-shell--narrow,
 .feed-shell,
-.feed-manage-shell {
-  max-width: min(var(--content-narrow), 100%);
-}
-
+.feed-manage-shell,
 .hustle-shell {
   max-width: min(var(--content-narrow), 100%);
 }
 
-/* Narrow content pages */
-.page-shell--narrow {
-  max-width: min(var(--content-narrow), 100%);
+.page-shell--wide {
+  max-width: min(var(--content-wide), 100%);
 }
 
-.page-shell--wide {
-  max-width: min(1400px, 100%);
+.page-shell--full {
+  max-width: 100%;
+}
+
+.page-shell--standalone {
+  padding-block: clamp(3rem, 8vw, 6rem) 2rem;
+  padding-inline: max(var(--p-safe), clamp(0.75rem, 3vw, 1.5rem));
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  width: 100%;
+  min-width: 0;
 }
 
 /* ── Panel (sections, settings blocks, metrics blocks) ───────── */
@@ -221,14 +221,23 @@
 /* ── Mobile: prevent horizontal bleed & rigid side panels ────── */
 @media (max-width: 768px) {
   .page-shell,
+  .page-shell--narrow,
+  .page-shell--wide,
+  .page-shell--full,
   .assets-page,
   .feed-shell,
   .feed-manage-shell,
   .hustle-shell,
-  .marketplace-page {
+  .marketplace-page,
+  .credits-account-page {
     max-width: 100%;
     padding-inline: 0;
     padding-bottom: 1rem;
+  }
+
+  .page-shell--standalone {
+    padding-inline: 0;
+    padding-block: 1.5rem 1rem;
   }
 
   .ui-hero-row__aside,

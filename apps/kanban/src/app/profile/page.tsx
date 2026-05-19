@@ -99,7 +99,7 @@ export default function ProfilePage() {
    }
 
    return (
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--p-safe) 4rem', animation: 'fadeIn 0.5s ease-out' }}>
+      <div className="page-fade page-shell" style={{ paddingBottom: '4rem' }}>
 
          {/* Identity Hub Header */}
           <div className={`profile-header-card ${profile?.subscription_plan === 'premium' ? 'glow-premium' : profile?.subscription_plan === 'pro' ? 'glow-pro' : ''}`} style={{ 

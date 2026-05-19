@@ -39,7 +39,7 @@ function InvoiceListPage() {
   const fmtCurrency = (cents: number, curr?: string) => (cents / 100).toLocaleString('en-GB', { style: 'currency', currency: curr || 'GBP' });
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1rem' }}>
+    <div className="page-shell" style={{ paddingTop: '2rem' }}>
       <div style={{ marginBottom: '2.5rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em', margin: '0 0 0.5rem' }}>Billing & Invoices</h1>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>Review your payment history and download institutional receipts.</p>

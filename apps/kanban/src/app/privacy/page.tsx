@@ -48,7 +48,7 @@ const SECTIONS = [
 export default function PrivacyPage() {
   return (
     <main style={{ minHeight: '100vh', background: '#0a0a0a', color: 'white' }}>
-      <div style={{ maxWidth: '880px', margin: '0 auto', padding: '5rem 1.5rem 4rem', lineHeight: 1.7 }}>
+      <div className="page-shell page-shell--standalone" style={{ lineHeight: 1.7 }}>
         <Link href="/" style={{ display: 'inline-block', marginBottom: '2.5rem', color: '#10b981', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
           &larr; Back to Home
         </Link>

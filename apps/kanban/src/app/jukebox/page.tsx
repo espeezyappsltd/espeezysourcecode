@@ -18,7 +18,8 @@ export default function JukeboxPage() {
 
   if (!unlocked) {
     return (
-      <div style={{ maxWidth: 520, margin: '3rem auto', padding: '2rem', textAlign: 'center', background: 'var(--surface)', borderRadius: 24, border: '1px solid var(--border)' }}>
+      <div className="page-fade page-shell page-shell--narrow" style={{ paddingTop: '3rem', textAlign: 'center' }}>
+        <div style={{ padding: '2rem', background: 'var(--surface)', borderRadius: 24, border: '1px solid var(--border)' }}>
         <Lock size={40} style={{ margin: '0 auto 1rem', color: 'var(--text-sub)' }} />
         <h1 style={{ margin: '0 0 0.5rem', fontWeight: 950 }}>Espeezy Jukebox</h1>
         <p style={{ color: 'var(--text-sub)', fontWeight: 600, lineHeight: 1.5 }}>
@@ -27,12 +28,13 @@ export default function JukeboxPage() {
         <a href="https://espeezy.com/pricing" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ display: 'inline-flex', marginTop: '1.25rem', gap: 8, textDecoration: 'none' }}>
           View plans on espeezy.com
         </a>
+        </div>
       </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '1.5rem 1rem 4rem' }}>
+    <div className="page-fade page-shell page-shell--narrow" style={{ paddingTop: '1.5rem', paddingBottom: '4rem' }}>
       <h1 style={{ margin: 0, fontWeight: 950, display: 'flex', alignItems: 'center', gap: 10 }}>
         <Music color="var(--brand)" /> Espeezy Jukebox
       </h1>

@@ -145,7 +145,7 @@ export default function StudentProfilePage() {
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 var(--p-safe) 5rem', animation: 'fadeIn 0.5s ease-out' }}>
+    <div className="page-fade page-shell" style={{ paddingBottom: '5rem' }}>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', marginTop: '1rem' }}>
         <button 

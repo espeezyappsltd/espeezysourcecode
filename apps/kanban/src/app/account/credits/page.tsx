@@ -44,7 +44,7 @@ function CreditsAccountContent() {
   }, [fund, sessionId])
 
   return (
-    <div className="credits-account-page page-fade">
+    <div className="credits-account-page page-fade page-shell page-shell--narrow">
       <Link href="/settings" className="credits-account-page__back">
         <ArrowLeft size={16} aria-hidden />
         Settings

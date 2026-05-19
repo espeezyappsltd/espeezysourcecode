@@ -23,10 +23,7 @@ export default function ChillOutHub() {
   }
 
   return (
-    <div
-      className="page-fade"
-      style={{ display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '4rem' }}
-    >
+    <div className="page-fade page-shell page-shell--wide page-stack" style={{ gap: '2rem', paddingBottom: '4rem' }}>
       <ChilloutStatsHud userStats={hub.userStats} />
       <ChilloutHeader />
 

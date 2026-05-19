@@ -43,7 +43,7 @@ export default function ContactPage() {
       <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(16,185,129,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.02) 1px, transparent 1px)', backgroundSize: '64px 64px', pointerEvents: 'none' }} />
       <div style={{ position: 'fixed', top: '-10%', right: '-5%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)', filter: 'blur(100px)', pointerEvents: 'none' }} />
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '6rem 1.5rem', position: 'relative', zIndex: 1 }}>
+      <div className="page-shell page-shell--narrow page-shell--standalone" style={{ position: 'relative', zIndex: 1 }}>
         <Link 
           href="/" 
           style={{ 

@@ -19,7 +19,7 @@ export default function IntelligencePage() {
         <span style={{ fontWeight: 700 }}>Project Intelligence</span>
       </nav>
 
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 2rem' }}>
+      <main className="page-shell page-shell--standalone">
         <section style={{ marginBottom: '10rem' }}>
           <div style={{ color: '#10b981', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '2rem' }}>Core Infrastructure</div>
           <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '2.5rem' }}>

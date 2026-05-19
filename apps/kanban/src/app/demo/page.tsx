@@ -47,7 +47,7 @@ export default function DemoPage() {
         <Link href="/login" style={{ color: 'white', textDecoration: 'underline', marginLeft: '1rem' }}>Join for real</Link>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem var(--p-safe)', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="page-shell page-stack" style={{ paddingTop: '2rem' }}>
         
         {/* Header Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

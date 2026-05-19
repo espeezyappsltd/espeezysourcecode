@@ -27,7 +27,7 @@ export default async function UserGamesPage({ params }: { params: Promise<{ user
   const totalPrize = (sessions ?? []).reduce((a: number, s) => a + (s.prize_cents_won ?? 0), 0)
 
   return (
-    <main style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1rem 4rem' }}>
+    <main className="page-shell page-shell--standalone" style={{ paddingBottom: '4rem' }}>
       <h1 style={{ margin: 0, fontSize: 'clamp(1.5rem,4vw,2.2rem)', letterSpacing: '-0.03em' }}>@{profile.username} - Games Stats</h1>
       <p style={{ color: 'var(--text-sub)' }}>{profile.full_name}</p>
 

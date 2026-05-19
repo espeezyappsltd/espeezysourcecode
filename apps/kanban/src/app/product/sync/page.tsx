@@ -18,7 +18,7 @@ export default function SyncPage() {
         <span style={{ fontWeight: 700 }}>Real-time Synchronicity</span>
       </nav>
 
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 2rem' }}>
+      <main className="page-shell page-shell--standalone">
         <section style={{ marginBottom: '10rem', textAlign: 'center' }}>
           <div style={{ color: '#10b981', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '2rem' }}>Global Networking</div>
           <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '2.5rem' }}>

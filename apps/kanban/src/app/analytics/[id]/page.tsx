@@ -295,7 +295,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 var(--p-safe)', animation: 'fadeIn 0.5s ease-out' }}>
+    <div className="page-fade page-shell page-shell--wide">
 
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>

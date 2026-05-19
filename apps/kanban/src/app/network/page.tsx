@@ -93,7 +93,7 @@ export default function NetworkPage() {
   }
 
   return (
-    <div className="page-fade" style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '6rem' }}>
+    <div className="page-fade page-shell" style={{ paddingBottom: '6rem' }}>
       
       {/* ── NETWORK HUD ────────────────────────────────────────────────── */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '2rem' }}>

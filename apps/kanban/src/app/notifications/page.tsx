@@ -94,7 +94,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="page-fade" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 var(--p-safe) 4rem' }}>
+    <div className="page-fade page-shell" style={{ paddingBottom: '4rem' }}>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

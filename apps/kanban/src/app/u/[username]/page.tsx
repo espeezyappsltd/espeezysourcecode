@@ -26,7 +26,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
   const totalPrizeCents = (gameSessions ?? []).reduce((acc: number, s) => acc + (s.prize_cents_won ?? 0), 0)
 
   return (
-    <div style={{ maxWidth: '680px', margin: '0 auto', padding: '3rem 1rem' }}>
+    <div className="page-shell page-shell--narrow page-shell--standalone">
       <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '2rem', textAlign: 'center' }}>
         {profile.avatar_url ? (
           <img src={profile.avatar_url} alt="" style={{ width: 88, height: 88, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 1rem', display: 'block', border: '3px solid #10B981' }} />

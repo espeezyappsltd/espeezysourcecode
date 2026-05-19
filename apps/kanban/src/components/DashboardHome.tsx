@@ -94,7 +94,7 @@ export default function DashboardHome({
   }
 
   return (
-    <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-md)', width: '100%', maxWidth: '1400px', margin: '0 auto', paddingBottom: '4rem' }}>
+    <div className="page-fade page-shell page-shell--wide page-stack" style={{ paddingBottom: '4rem' }}>
 
       <AccountTiersBanner />
 

@@ -81,7 +81,7 @@ function InvoiceDetailPage() {
   const fmtCurrency = (cents?: number) => ((cents ?? 0) / 100).toLocaleString('en-GB', { style: 'currency', currency: invoice?.currency || 'GBP' });
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
+    <div className="page-shell" style={{ paddingTop: '2rem' }}>
       <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontWeight: 700, fontSize: '0.9rem' }}>
         <ArrowLeft size={16} /> Back
       </button>
