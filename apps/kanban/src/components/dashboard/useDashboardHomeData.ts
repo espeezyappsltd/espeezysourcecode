@@ -11,6 +11,7 @@ import {
   markCelebratedForTaskCount,
   shouldCelebrateCompletion,
 } from '@/lib/kanban/completion-celebration'
+import { CONTRIBUTION_SCORES_UPDATED } from '@/lib/kanban/contribution-events'
 
 type AddToast = (title: string, description: string, variant: 'success' | 'error' | 'info') => void
 
@@ -202,9 +203,19 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
       void fetchTaskMetrics()
     }
 
+    const onScoresUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ groupId?: string }>).detail
+      if (detail?.groupId && detail.groupId !== groupId) return
+      void fetchMembers()
+    }
+
     window.addEventListener('espeezy-kanban-metrics-refresh', onMetricsRefresh)
-    return () => window.removeEventListener('espeezy-kanban-metrics-refresh', onMetricsRefresh)
-  }, [groupId, fetchTaskMetrics])
+    window.addEventListener(CONTRIBUTION_SCORES_UPDATED, onScoresUpdated)
+    return () => {
+      window.removeEventListener('espeezy-kanban-metrics-refresh', onMetricsRefresh)
+      window.removeEventListener(CONTRIBUTION_SCORES_UPDATED, onScoresUpdated)
+    }
+  }, [groupId, fetchTaskMetrics, fetchMembers])
 
   useEffect(() => {
     if (!groupId) return

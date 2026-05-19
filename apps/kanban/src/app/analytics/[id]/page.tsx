@@ -29,6 +29,7 @@ import { useProfile } from '@/context/ProfileContext'
 import { hasFeature } from '@/utils/feature-gate'
 import PremiumFeatureGate from '@/components/PremiumFeatureGate'
 import { friendlySupabaseError } from '@/utils/supabase-errors'
+import { CONTRIBUTION_SCORES_UPDATED } from '@/lib/kanban/contribution-events'
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Implementation': '#38bdf8',
@@ -122,6 +123,17 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     }
     void fetchData()
   }, [profileLoading, canViewStats, fetchData])
+
+  useEffect(() => {
+    if (!canViewStats) return
+    const onScoresUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ groupId?: string }>).detail
+      if (detail?.groupId && detail.groupId !== groupId) return
+      void fetchData()
+    }
+    window.addEventListener(CONTRIBUTION_SCORES_UPDATED, onScoresUpdated)
+    return () => window.removeEventListener(CONTRIBUTION_SCORES_UPDATED, onScoresUpdated)
+  }, [groupId, canViewStats, fetchData])
 
   const [hasSentRequest, setHasSentRequest] = useState(false)
 

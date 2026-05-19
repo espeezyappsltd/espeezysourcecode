@@ -13,6 +13,7 @@ import { celebrateOnboardingComplete } from '@/lib/onboarding/celebrate'
 import type { OnboardingCompletionResult } from '@/lib/onboarding/onboarding-service'
 import { getOnboardingTourAction } from '@/lib/onboarding/dashboard-tasks'
 import { isPersistedTaskId } from '@/lib/tasks/task-ids'
+import { dispatchContributionScoresUpdated } from '@/lib/kanban/contribution-events'
 
 export type UseTaskModalReturn = {
   isEditMode: boolean
@@ -250,6 +251,7 @@ export function useTaskModal({
         error?: string
         task?: Task
         onboarding?: OnboardingCompletionResult | null
+        scoreAward?: { awarded: boolean; recipients: string[] } | null
       }
       if (!response.ok) {
         throw new Error(data?.error || 'Failed to save task.')
@@ -262,6 +264,9 @@ export function useTaskModal({
       const saved = (data.task ?? optimisticTask) as Task
       onTaskPatched?.(saved)
       await onTaskSaved?.(saved)
+      if (data.scoreAward?.awarded || saved.status === 'Done') {
+        dispatchContributionScoresUpdated(groupId, data.scoreAward?.recipients)
+      }
       onClose()
     } catch (err: unknown) {
       try {
@@ -271,6 +276,16 @@ export function useTaskModal({
         } else {
           const { error: insertError } = await db.from('tasks').insert(payloadTask)
           if (insertError) throw insertError
+        }
+        if (payloadTask.status === 'Done' && task?.id) {
+          const {
+            data: { user },
+          } = await db.auth.getUser()
+          if (user) {
+            const { distributeTaskScore } = await import('@/app/actions')
+            await distributeTaskScore(task.id, assignees, user.id)
+            dispatchContributionScoresUpdated(groupId)
+          }
         }
         onTaskPatched?.(optimisticTask)
         await onTaskSaved?.(optimisticTask)

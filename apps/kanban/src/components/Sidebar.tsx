@@ -129,7 +129,7 @@ function SidebarNavButton({
   return (
     <button
       onClick={onClick}
-      className={`nav-bubble ${isActive ? 'active-project' : ''}`}
+      className={`nav-bubble sidebar-nav-btn ${isActive ? 'active-project' : ''}`}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -396,17 +396,17 @@ export default function Sidebar({ user }: SidebarProps) {
         style={{
           width: isOpen ? '280px' : '84px',
           maxWidth: '85vw',
-          height: 'var(--vh-dynamic)',
           backgroundColor: 'var(--bg-sub)',
           borderRight: '1px solid var(--border)',
           display: 'flex',
           flexDirection: 'column',
+          minHeight: 0,
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: isMobile ? 5100 : 4600,
           boxShadow: isOpen && isMobile ? '20px 0 50px rgba(0,0,0,0.2)' : 'none',
         }}
       >
-        <div style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
+        <div className="sidebar-top" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)', flexShrink: 0 }}>
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
               <button
@@ -449,11 +449,11 @@ export default function Sidebar({ user }: SidebarProps) {
           </button>
         </div>
 
-        <div style={{ padding: isOpen ? '0.75rem 0.6rem 0' : '0.75rem 0.5rem 0' }}>
+        <div className="sidebar-search" style={{ padding: isOpen ? '0.5rem 0.6rem 0' : '0.75rem 0.5rem 0', flexShrink: 0 }}>
           <GlobalSearch collapsed={!isOpen} />
         </div>
 
-        <nav style={{ flex: 1, padding: '0.75rem 0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <nav className="sidebar-nav-scroll" aria-label="Main navigation" style={{ flex: 1, minHeight: 0, padding: '0.35rem 0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {navLinks.map((link) => (
             <SidebarNavButton
               key={link.name}
@@ -473,9 +473,10 @@ export default function Sidebar({ user }: SidebarProps) {
           ))}
         </nav>
 
+        <div className="sidebar-bottom">
         {isOpen && showUpgradeCard && (
-          <div style={{ padding: '0 1rem 1rem' }}>
-            <div className="glass-card-prestige" style={{ padding: '1.25rem', borderRadius: '20px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => pushRoute('/upgrade')}>
+          <div className="sidebar-upgrade-card" style={{ padding: '0 0.75rem 0.35rem' }}>
+            <div className="glass-card-prestige" style={{ padding: '1rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => pushRoute('/upgrade')}>
               <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={16} className="shimmer-gold" />
@@ -487,7 +488,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
         )}
 
-        <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.1)' }}>
+        <div className="sidebar-status-panel" style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.1)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: isConnected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isConnected ? 'var(--brand)' : 'var(--error)' }}>
               {isConnected ? <ShieldCheck size={18} /> : <WifiOff size={18} />}
@@ -566,11 +567,28 @@ export default function Sidebar({ user }: SidebarProps) {
             </button>
           </div>
         </div>
+        </div>
       </aside>
 
       <style jsx>{`
         .sidebar-container {
           backdrop-filter: blur(20px);
+          height: var(--vh-dynamic);
+        }
+
+        .sidebar-nav-scroll {
+          overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+          scrollbar-width: thin;
+          scrollbar-color: var(--border) transparent;
+        }
+
+        .sidebar-bottom {
+          flex-shrink: 0;
+          display: flex;
+          flex-direction: column;
         }
 
         .nav-bubble {
@@ -629,18 +647,56 @@ export default function Sidebar({ user }: SidebarProps) {
             left: 0 !important;
             top: 0 !important;
             bottom: 0 !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
             z-index: 5100 !important;
             background: var(--surface) !important;
             box-shadow: 30px 0 60px rgba(0,0,0,0.5) !important;
             transform: translateX(-100%);
             transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            width: 85vw !important;
-            max-width: 320px !important;
+            width: min(85vw, 300px) !important;
+            max-width: 300px !important;
             border-right: 1px solid rgba(255,255,255,0.05) !important;
+            padding-bottom: env(safe-area-inset-bottom, 0);
           }
 
           .sidebar-container.open {
             transform: translateX(0) !important;
+          }
+
+          .sidebar-top {
+            padding: 0.55rem 0.75rem !important;
+            min-height: 52px !important;
+          }
+
+          .sidebar-search {
+            padding: 0.35rem 0.5rem 0 !important;
+          }
+
+          .sidebar-nav-scroll {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+          }
+
+          .sidebar-nav-scroll :global(.sidebar-nav-btn) {
+            padding: 0.4rem 0.85rem !important;
+            font-size: 0.8rem !important;
+            margin-right: 0.65rem !important;
+          }
+
+          .sidebar-upgrade-card,
+          .sidebar-status-panel {
+            display: none !important;
+          }
+
+          .sidebar-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 0);
+          }
+
+          .sidebar-bottom > div:last-child {
+            padding: 0.65rem 0.85rem !important;
+            gap: 0.5rem !important;
           }
         }
 

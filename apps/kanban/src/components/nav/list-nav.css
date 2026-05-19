@@ -112,6 +112,35 @@
   min-height: 0;
 }
 
+@media (max-width: 768px) {
+  .page-list-toolbar {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .page-list-toolbar .cat-nav-dropdown {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .page-list-toolbar .cat-nav-dropdown__trigger {
+    width: 100%;
+    min-height: 40px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .hustle-toolbar .cat-nav-dropdown {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .hustle-toolbar .cat-nav-dropdown__trigger {
+    width: 100%;
+  }
+}
+
 .listing-card--linked {
   position: relative;
 }

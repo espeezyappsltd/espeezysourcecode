@@ -172,6 +172,21 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
     if (!groupId || !profile.id) return
     let cancelled = false
 
+    const syncContributionScores = async () => {
+      const res = await fetch('/api/contribution/backfill', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groupId }),
+      })
+      if (!res.ok || cancelled) return
+      const body = (await res.json()) as { tasksProcessed?: number; usersAwarded?: number }
+      if ((body.tasksProcessed ?? 0) > 0) {
+        const { dispatchContributionScoresUpdated } = await import('@/lib/kanban/contribution-events')
+        dispatchContributionScoresUpdated(groupId)
+      }
+    }
+
     fetch('/api/onboarding/ensure', {
       method: 'POST',
       credentials: 'include',
@@ -184,6 +199,8 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
         if ((body.seeded ?? 0) > 0) await refreshTasks()
       })
       .catch(() => {})
+
+    void syncContributionScores()
 
     return () => {
       cancelled = true

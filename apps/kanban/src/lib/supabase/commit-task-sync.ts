@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/supabase/admin'
+import { awardTaskCompletionScore } from '@/lib/tasks/contribution-score'
 
 type CommitPayload = {
   id: string
@@ -43,7 +44,7 @@ export async function processTaskCommitWebhook(rawBody: string, signature: strin
       const taskId = match[0]
       const { data: task, error: taskError } = await adminDb
         .from('tasks')
-        .select('id, is_coding_task, assignees')
+        .select('id, is_coding_task, assignees, score_awarded')
         .eq('id', taskId)
         .single()
 
@@ -75,27 +76,7 @@ export async function processTaskCommitWebhook(rawBody: string, signature: strin
       }
 
       const assignees = Array.isArray(task.assignees) ? task.assignees.filter(Boolean) : []
-      if (assignees.length === 0) {
-        continue
-      }
-
-      const { data: profiles, error: profilesError } = await adminDb
-        .from('profiles')
-        .select('id, total_score')
-        .in('id', assignees)
-      if (profilesError) {
-        throw profilesError
-      }
-
-      for (const profile of profiles ?? []) {
-        const { error: profileUpdateError } = await adminDb
-          .from('profiles')
-          .update({ total_score: (profile.total_score ?? 0) + impactScore })
-          .eq('id', profile.id)
-        if (profileUpdateError) {
-          throw profileUpdateError
-        }
-      }
+      await awardTaskCompletionScore(taskId, assignees, '')
     }
 
     return new NextResponse('Webhook processed successfully', { status: 200 })

@@ -1,6 +1,7 @@
 import { getAdminDb } from '@/lib/supabase/admin'
 import { afterOnboardingTaskUpdate } from '@/lib/onboarding/onboarding-service'
 import { Q } from '@/lib/query-columns'
+import { awardTaskCompletionScore, type ScoreAwardResult } from '@/lib/tasks/contribution-score'
 import { isPersistedTaskId } from '@/lib/tasks/task-ids'
 import type { TaskCategory, TaskStatus } from '@/types/database'
 import { taskSchema } from '@/utils/validation'
@@ -71,28 +72,13 @@ async function notifyAssignees(
   }
 }
 
-async function checkAndDistributeScore(taskId: string, assignees: string[]) {
-  const db = getAdminDb()
-
-  const { data: task, error: fetchError } = await db
-    .from('tasks')
-    .select('score_awarded')
-    .eq('id', taskId)
-    .single()
-
-  if (fetchError || !task || task.score_awarded) return
-
-  for (const userId of assignees) {
-    const { data: profile } = await db.from('profiles').select('total_score').eq('id', userId).single()
-    if (profile) {
-      await db
-        .from('profiles')
-        .update({ total_score: (profile.total_score || 0) + 15 })
-        .eq('id', userId)
-    }
-  }
-
-  await db.from('tasks').update({ score_awarded: true }).eq('id', taskId)
+async function checkAndDistributeScore(
+  taskId: string,
+  assignees: string[],
+  completedByUserId: string,
+): Promise<ScoreAwardResult | null> {
+  const result = await awardTaskCompletionScore(taskId, assignees, completedByUserId)
+  return result.awarded ? result : null
 }
 
 async function insertTask(task: TaskPayload) {
@@ -160,8 +146,9 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
     const created = await insertTask(task)
     await logActivity(payload.userId, task.group_id, 'task_created', `Created task: ${task.title}`)
     await notifyAssignees(task.assignees, task.title, created.id, payload.userId)
+    let scoreAward: ScoreAwardResult | null = null
     if (task.status === 'Done') {
-      await checkAndDistributeScore(created.id, task.assignees)
+      scoreAward = await checkAndDistributeScore(created.id, task.assignees, payload.userId)
     }
     const onboarding = await runOnboardingHook(
       created.id,
@@ -169,7 +156,7 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
       task.group_id,
       task.status,
     )
-    return { taskId: created.id, task: created.task, onboarding }
+    return { taskId: created.id, task: created.task, onboarding, scoreAward }
   }
 
   if (!task.id || !isPersistedTaskId(task.id)) {
@@ -180,8 +167,9 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
   await logActivity(payload.userId, task.group_id, 'task_updated', `Updated task: ${task.title}`)
   await notifyAssignees(task.assignees, task.title, task.id, payload.userId)
 
+  let scoreAward: ScoreAwardResult | null = null
   if (task.status === 'Done') {
-    await checkAndDistributeScore(task.id, task.assignees)
+    scoreAward = await checkAndDistributeScore(task.id, task.assignees, payload.userId)
   }
 
   const onboarding = await runOnboardingHook(
@@ -194,5 +182,5 @@ export async function runTaskWorkflow(payload: TaskWorkflowPayload) {
   const db = getAdminDb()
   const { data: saved } = await db.from('tasks').select(TASK_ROW_SELECT).eq('id', task.id).single()
 
-  return { taskId: task.id, task: saved ?? { ...task, id: task.id }, onboarding }
+  return { taskId: task.id, task: saved ?? { ...task, id: task.id }, onboarding, scoreAward }
 }
