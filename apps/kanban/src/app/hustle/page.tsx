@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect, Suspense, memo } from 'react'
+import { useState, useEffect, Suspense, memo, useMemo, useCallback } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useHustle, type HustleItem, type HustleTab } from '@/hooks/useHustle'
 import {
@@ -38,6 +40,10 @@ import {
   getWorkerGigNextAction,
   hustleSearchPlaceholder,
 } from '@/lib/hustle/gig-ux'
+import { CategoryNavDropdown } from '@/components/nav/CategoryNavDropdown'
+import { ListPagination } from '@/components/nav/ListPagination'
+import { hustleCategoryUrl, hustleItemUrl, hustleListUrl, hustleTabUrl } from '@/lib/nav/category-url'
+import '@/components/nav/list-nav.css'
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
   open: { label: 'Open', color: '#10B981' },
@@ -50,7 +56,11 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'Cancelled', color: '#6B7280' },
 }
 
+const HUSTLE_TABS = ['marketplace', 'gigs', 'posted', 'sales', 'inventory'] as const
+
 function HustlePage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const {
     tab,
     setTab,
@@ -75,6 +85,34 @@ function HustlePage() {
   const [postOpen, setPostOpen] = useState(false)
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
 
+  const replaceHustleUrl = useCallback(
+    (mutate: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams?.toString() ?? '')
+      mutate(params)
+      const q = params.toString()
+      router.replace(q ? `/hustle?${q}` : '/hustle', { scroll: false })
+    },
+    [router, searchParams],
+  )
+
+  useEffect(() => {
+    if (!searchParams) return
+    const urlTab = searchParams.get('tab')
+    if (urlTab && (HUSTLE_TABS as readonly string[]).includes(urlTab)) {
+      setTab(urlTab as (typeof HUSTLE_TABS)[number])
+    }
+    const urlCat = searchParams.get('category')
+    if (urlCat && (HUSTLE_CATEGORIES as readonly string[]).includes(urlCat as HustleCategory)) {
+      setCategory(urlCat as HustleCategory)
+    } else if (!urlCat) {
+      setCategory('all')
+    }
+    const urlQ = searchParams.get('q')
+    if (urlQ != null) setSearch(urlQ)
+    const urlTask = searchParams.get('task')
+    setSelectedTaskId(urlTask)
+  }, [searchParams, setTab, setCategory, setSearch])
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
@@ -98,8 +136,25 @@ function HustlePage() {
   const resultLabel =
     listItems.length === 1 ? '1 gig' : `${listItems.length} gigs`
 
+  const categoryNavItems = useMemo(
+    () =>
+      HUSTLE_CATEGORIES.map((cat) => ({
+        id: cat,
+        label: formatHustleCategory(cat),
+        href: hustleCategoryUrl(cat, tab),
+      })),
+    [tab],
+  )
+
+  const closeTask = () => {
+    setSelectedTaskId(null)
+    replaceHustleUrl((params) => {
+      params.delete('task')
+    })
+  }
+
   return (
-    <div className="hustle-shell page-shell">
+    <div className="hustle-shell page-shell list-page--compact">
       <header style={{ marginBottom: '2rem' }}>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -168,11 +223,11 @@ function HustlePage() {
             <RotateCcw size={16} className={loading ? 'animate-spin' : undefined} />
           </button>
           <nav className="hustle-tab-nav" aria-label="Hustle sections">
-            <TabButton active={tab === 'marketplace'} onClick={() => setTab('marketplace')} icon={<ShoppingBag size={16} />} label="Browse" />
-            <TabButton active={tab === 'gigs'} onClick={() => setTab('gigs')} icon={<ListChecks size={16} />} label="My gigs" />
-            <TabButton active={tab === 'posted'} onClick={() => setTab('posted')} icon={<Briefcase size={16} />} label="Posted" />
-            <TabButton active={tab === 'sales'} onClick={() => setTab('sales')} icon={<Package size={16} />} label="Sales" />
-            <TabButton active={tab === 'inventory'} onClick={() => setTab('inventory')} icon={<User size={16} />} label="Assets" />
+            <HustleTabLink active={tab === 'marketplace'} href={hustleTabUrl('marketplace')} icon={<ShoppingBag size={16} />} label="Browse" />
+            <HustleTabLink active={tab === 'gigs'} href={hustleTabUrl('gigs')} icon={<ListChecks size={16} />} label="My gigs" />
+            <HustleTabLink active={tab === 'posted'} href={hustleTabUrl('posted')} icon={<Briefcase size={16} />} label="Posted" />
+            <HustleTabLink active={tab === 'sales'} href={hustleTabUrl('sales')} icon={<Package size={16} />} label="Sales" />
+            <HustleTabLink active={tab === 'inventory'} href={hustleTabUrl('inventory')} icon={<User size={16} />} label="Assets" />
           </nav>
         </div>
 
@@ -191,25 +246,12 @@ function HustlePage() {
         )}
 
         {showCategoryFilters && (
-          <div className="hustle-categories" role="tablist" aria-label="Filter by category">
-            <button
-              type="button"
-              className={`hustle-cat-chip${category === 'all' ? ' active' : ''}`}
-              onClick={() => setCategory('all')}
-            >
-              All
-            </button>
-            {HUSTLE_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                className={`hustle-cat-chip${category === cat ? ' active' : ''}`}
-                onClick={() => setCategory(cat)}
-              >
-                {formatHustleCategory(cat)}
-              </button>
-            ))}
-          </div>
+          <CategoryNavDropdown
+            items={categoryNavItems}
+            activeId={category}
+            allHref={hustleListUrl({ tab })}
+            allLabel="All categories"
+          />
         )}
 
         {!loading && items.length > 0 && isHustleTaskTab && (
@@ -219,9 +261,8 @@ function HustlePage() {
               <button
                 type="button"
                 onClick={() => {
-                  setSearch('')
-                  setCategory('all')
                   setGigsFilter('all')
+                  router.push(hustleListUrl({ tab }))
                 }}
               >
                 Clear filters
@@ -265,33 +306,21 @@ function HustlePage() {
               <HustleCard
                 key={item.id}
                 item={item}
+                tab={tab}
+                category={category}
                 isHustleTask={isHustleTaskTab}
                 showApplicationMeta={tab === 'gigs'}
                 gigPerspective={tab === 'posted' ? 'poster' : tab === 'gigs' ? 'worker' : undefined}
-                onOpen={setSelectedTaskId}
               />
             ))}
 
-            {nextCursor && (
-              <button
-                type="button"
-                onClick={() => loadMore()}
-                disabled={loadingMore}
-                className="btn btn-secondary"
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  marginTop: '0.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                {loadingMore ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-                Load more
-              </button>
-            )}
+            <ListPagination
+              loadedCount={listItems.length}
+              hasMore={Boolean(nextCursor)}
+              loadingMore={loadingMore}
+              onLoadMore={loadMore}
+              itemLabel="gigs"
+            />
           </div>
         )}
       </main>
@@ -302,9 +331,9 @@ function HustlePage() {
       {selectedTaskId && (
         <HustleTaskModal
           taskId={selectedTaskId}
-          onClose={() => setSelectedTaskId(null)}
+          onClose={closeTask}
           onUpdated={() => void refresh()}
-          onViewMyGigs={() => setTab('gigs')}
+          onViewMyGigs={() => router.push(hustleTabUrl('gigs'))}
           onGigsListChanged={invalidateGigsCache}
         />
       )}
@@ -312,22 +341,22 @@ function HustlePage() {
   )
 }
 
-function TabButton({
+function HustleTabLink({
   active,
-  onClick,
+  href,
   icon,
   label,
 }: {
   active: boolean
-  onClick: () => void
+  href: string
   icon: React.ReactNode
   label: string
 }) {
   return (
-    <button type="button" className="hustle-tab-btn" onClick={onClick} aria-current={active ? 'page' : undefined}>
+    <Link href={href} className="hustle-tab-link" prefetch aria-current={active ? 'page' : undefined}>
       {icon}
       <span>{label}</span>
-    </button>
+    </Link>
   )
 }
 
@@ -381,16 +410,18 @@ function FilteredEmptyState({ onClear }: { onClear: () => void }) {
 
 const HustleCard = memo(function HustleCard({
   item,
+  tab,
+  category,
   isHustleTask,
   showApplicationMeta,
   gigPerspective,
-  onOpen,
 }: {
   item: HustleItem
+  tab: HustleTab
+  category: 'all' | HustleCategory
   isHustleTask: boolean
   showApplicationMeta?: boolean
   gigPerspective?: 'worker' | 'poster'
-  onOpen: (id: string) => void
 }) {
   const posterId = item.poster?.id ?? item.poster_id
   const posterName = item.poster?.full_name ?? 'Scholar'
@@ -408,25 +439,19 @@ const HustleCard = memo(function HustleCard({
         ? getPosterGigNextAction(item)
         : null
   const needsAction = nextAction?.tone === 'action'
+  const taskHref = hustleItemUrl(item.id, {
+    tab,
+    category: category === 'all' ? null : category,
+  })
+  const catHref = hustleCategoryUrl(item.category, tab)
 
   return (
     <article
-      className={`hustle-card${isHustleTask ? '' : ' hustle-card--listing'}${needsAction ? ' hustle-card--needs-action' : ''}`}
-      tabIndex={isHustleTask ? 0 : undefined}
-      role={isHustleTask ? 'button' : 'article'}
-      aria-label={item.title}
-      onClick={isHustleTask ? () => onOpen(item.id) : undefined}
-      onKeyDown={
-        isHustleTask
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onOpen(item.id)
-              }
-            }
-          : undefined
-      }
+      className={`hustle-card${isHustleTask ? ' hustle-card--linked' : ' hustle-card--listing'}${needsAction ? ' hustle-card--needs-action' : ''}`}
     >
+      {isHustleTask ? (
+        <Link href={taskHref} className="hustle-card__overlay-link" prefetch aria-label={item.title} />
+      ) : null}
       <div className="hustle-card-body">
         {posterId && (
           <RemoteAvatar
@@ -448,20 +473,9 @@ const HustleCard = memo(function HustleCard({
         )}
         <div className="hustle-card-meta">
           <div className="hustle-card-tags">
-            <span
-              style={{
-                fontSize: '0.65rem',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: 'var(--brand)',
-                background: 'rgba(var(--brand-rgb), 0.1)',
-                padding: '2px 8px',
-                borderRadius: '6px',
-              }}
-            >
+            <Link href={catHref} className="hustle-card__cat-link" prefetch>
               {formatHustleCategory(item.category)}
-            </span>
+            </Link>
             {item.status && STATUS_META[item.status] && (
               <span
                 style={{

@@ -57,15 +57,20 @@ export function validateMarketplaceContact(input: {
   }
 
   if (input.listingId) {
-    if (!input.listingOwnerId || input.listingOwnerId !== input.recipientId) {
+    const sellerId = input.listingOwnerId
+    const buyerMessagingSeller = sellerId === input.recipientId
+    const sellerMessagingBuyer = sellerId === input.senderId
+
+    if (!sellerId || (!buyerMessagingSeller && !sellerMessagingBuyer)) {
       return {
         ok: false,
         code: 'listing_mismatch',
         message: 'This listing is not owned by that seller.',
       }
     }
+
     const st = (input.listingStatus ?? 'AVAILABLE').toUpperCase()
-    if (st === 'SOLD') {
+    if (st === 'SOLD' && buyerMessagingSeller) {
       return {
         ok: false,
         code: 'sold',

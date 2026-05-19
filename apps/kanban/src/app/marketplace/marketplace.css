@@ -1,3 +1,7 @@
+.listing-card--linked {
+  position: relative;
+}
+
 .listing-card {
   border-radius: 16px;
   overflow: hidden;
@@ -146,9 +150,19 @@
 }
 
 .marketplace-page__layout {
-  display: flex;
-  gap: 1.25rem;
-  align-items: flex-start;
+  display: block;
+}
+
+.marketplace-page--compact .marketplace-page__header {
+  margin-bottom: 0.35rem;
+}
+
+.marketplace-page--compact .marketplace-page__header h1 {
+  font-size: 1.15rem !important;
+}
+
+.marketplace-page--compact .marketplace-trending-rail {
+  display: none;
 }
 
 .marketplace-page__main {
@@ -317,4 +331,188 @@
     grid-template-columns: 1fr 1fr;
     gap: 0.45rem;
   }
+}
+
+.marketplace-page__inquiry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-main);
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+  position: relative;
+  min-height: 44px;
+}
+
+.marketplace-inquiry-pill {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-inquiries-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mp-inquiries-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.mp-inquiries-panel {
+  position: relative;
+  width: min(420px, 100vw);
+  height: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.15);
+}
+
+.mp-inquiries-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mp-inquiries-icon-btn {
+  border: none;
+  background: var(--bg-sub);
+  border-radius: 10px;
+  padding: 0.45rem;
+  cursor: pointer;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+}
+
+.mp-inquiries-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.mp-inquiry-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mp-inquiry-row:hover {
+  background: var(--bg-sub);
+}
+
+.mp-inquiry-row--unread {
+  background: rgba(var(--brand-rgb), 0.06);
+}
+
+.mp-inquiry-badge {
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-inquiries-thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.mp-inquiry-bubble {
+  max-width: 88%;
+  align-self: flex-start;
+  padding: 0.65rem 0.9rem;
+  border-radius: 16px 16px 16px 4px;
+  background: var(--bg-sub);
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.mp-inquiry-bubble--mine {
+  align-self: flex-end;
+  border-radius: 16px 16px 4px 16px;
+  background: var(--brand);
+  border: none;
+  color: #000;
+}
+
+.mp-inquiry-bubble__time {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+  opacity: 0.65;
+}
+
+.mp-inquiries-compose {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.mp-inquiries-compose input {
+  flex: 1;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-sub);
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.mp-inquiries-compose button {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #000;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 }

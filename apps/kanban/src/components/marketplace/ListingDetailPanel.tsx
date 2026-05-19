@@ -33,6 +33,7 @@ interface ListingDetailPanelProps {
   currentUserId?: string | null
   onClose: () => void
   onPurchaseComplete: (payload: { buyerCredits: number; purchaseId: string }) => void
+  onOpenInquiry?: (peerId: string, listingId: string) => void
 }
 
 export function ListingDetailPanel({
@@ -41,6 +42,7 @@ export function ListingDetailPanel({
   currentUserId,
   onClose,
   onPurchaseComplete,
+  onOpenInquiry,
 }: ListingDetailPanelProps) {
   const router = useRouter()
   const { addToast } = useNotifications()
@@ -309,9 +311,13 @@ export function ListingDetailPanel({
                 {!isOwn && (
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
+                      if (onOpenInquiry) {
+                        onOpenInquiry(listing.owner_id, listing.id)
+                        return
+                      }
                       router.push(`/network/messages/${listing.owner_id}?listing=${listing.id}`)
-                    }
+                    }}
                     title="Message seller per Espeezy platform rules"
                     style={{
                       display: 'inline-flex',

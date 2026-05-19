@@ -69,7 +69,7 @@ export function MarketplaceTrendingRail({
   if (trendingItems.length === 0) return null
 
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <section className="marketplace-trending-rail" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Flame size={22} style={{ color: 'var(--brand)' }} />
         <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 950, letterSpacing: '-0.02em' }}>Trending now</h2>

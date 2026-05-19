@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     type: 'peer_message',
     title: 'New message',
     message: `${senderLabel}: ${message.slice(0, 120)}${message.length > 120 ? '…' : ''}`,
-    link: `/network/messages/${user.id}${body.listingId ? `?listing=${body.listingId}` : ''}`,
+    link: `/marketplace?inquiry=${encodeURIComponent(recipientId)}${body.listingId ? `&listing=${body.listingId}` : ''}`,
     metadata: { sender_id: user.id, listing_id: body.listingId ?? null },
   })
 
