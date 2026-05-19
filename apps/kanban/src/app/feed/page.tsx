@@ -15,6 +15,9 @@ import {
   Loader2,
   Sparkles,
   RefreshCw,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
@@ -25,10 +28,13 @@ import type { PostReactionType } from '@/types/feed'
 import {
   fetchFeedPosts,
   createFeedPost,
+  deleteFeedPost,
+  updateFeedPost,
   reactToFeedPost,
   fetchFeedComments,
   createFeedComment,
 } from '@/services/feed'
+import Link from 'next/link'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
 import { seedDemoContent } from '@/lib/dev/seed-demo'
@@ -46,6 +52,7 @@ const REACTION_META: Record<Reaction, { emoji: string; label: string }> = {
 
 interface Post {
   id: string
+  author_id?: string
   content: string
   media_urls: string[]
   post_type: string
@@ -231,6 +238,57 @@ export default function FeedPage() {
     setLoadingComments((prev) => ({ ...prev, [postId]: false }))
   }
 
+  const [editingPostId, setEditingPostId] = useState<string | null>(null)
+  const [editDraft, setEditDraft] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+  const [postMenuId, setPostMenuId] = useState<string | null>(null)
+
+  const startInlineEdit = (post: Post) => {
+    setPostMenuId(null)
+    setEditingPostId(post.id)
+    setEditDraft(post.content)
+  }
+
+  const cancelInlineEdit = () => {
+    setEditingPostId(null)
+    setEditDraft('')
+  }
+
+  const saveInlineEdit = async (postId: string) => {
+    const text = editDraft.trim()
+    if (!text || savingEdit) return
+    setSavingEdit(true)
+    const result = await updateFeedPost(postId, { content: text })
+    setSavingEdit(false)
+    if (result.ok) {
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId ? { ...p, content: text, edited_at: new Date().toISOString() } : p,
+        ),
+      )
+      cancelInlineEdit()
+      addToast('Updated', 'Your post was saved.', 'success')
+    } else {
+      addToast('Could not save', result.error ?? 'Try again.', 'error')
+    }
+  }
+
+  const removePost = async (postId: string) => {
+    setPostMenuId(null)
+    if (!window.confirm('Delete this post?')) return
+    setDeletingPostId(postId)
+    const result = await deleteFeedPost(postId)
+    setDeletingPostId(null)
+    if (result.ok) {
+      setPosts((prev) => prev.filter((p) => p.id !== postId))
+      if (editingPostId === postId) cancelInlineEdit()
+      addToast('Deleted', 'Post removed from the feed.', 'success')
+    } else {
+      addToast('Could not delete', result.error ?? 'Try again.', 'error')
+    }
+  }
+
   const submitComment = async (postId: string) => {
     const text = (commentText[postId] ?? '').trim()
     if (!text) return
@@ -264,6 +322,11 @@ export default function FeedPage() {
       <header className="feed-hero">
         <h1>Academic Journeys</h1>
         <p>Real-time signals from students building the future. Share milestones, wins, and campus life.</p>
+        {profile && (
+          <Link href="/feed/manage" className="feed-manage-link">
+            Manage your posts
+          </Link>
+        )}
       </header>
 
       {!profile && (
@@ -401,7 +464,18 @@ export default function FeedPage() {
         <PostCard
           key={post.id}
           post={post}
-          currentUserId={profile?.id ?? ''}
+          isAuthor={Boolean(profile?.id && (post.author_id === profile.id || post.author?.id === profile.id))}
+          isEditing={editingPostId === post.id}
+          editDraft={editDraft}
+          onEditDraftChange={setEditDraft}
+          onStartEdit={() => startInlineEdit(post)}
+          onCancelEdit={cancelInlineEdit}
+          onSaveEdit={() => void saveInlineEdit(post.id)}
+          savingEdit={savingEdit}
+          onDelete={() => void removePost(post.id)}
+          deleting={deletingPostId === post.id}
+          showMenu={postMenuId === post.id}
+          onToggleMenu={() => setPostMenuId((id) => (id === post.id ? null : post.id))}
           onReaction={toggleReaction}
           userReaction={getUserReaction(post.reactions)}
           reactionCounts={groupReactions(post.reactions)}
@@ -472,7 +546,18 @@ function FeedAvatar({
 
 function PostCard({
   post,
-  currentUserId,
+  isAuthor,
+  isEditing,
+  editDraft,
+  onEditDraftChange,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  savingEdit,
+  onDelete,
+  deleting,
+  showMenu,
+  onToggleMenu,
   onReaction,
   userReaction,
   reactionCounts,
@@ -490,7 +575,18 @@ function PostCard({
   timeAgo: timeLabel,
 }: {
   post: Post
-  currentUserId: string
+  isAuthor: boolean
+  isEditing: boolean
+  editDraft: string
+  onEditDraftChange: (t: string) => void
+  onStartEdit: () => void
+  onCancelEdit: () => void
+  onSaveEdit: () => void
+  savingEdit: boolean
+  onDelete: () => void
+  deleting: boolean
+  showMenu: boolean
+  onToggleMenu: () => void
   onReaction: (id: string, r: Reaction) => void
   userReaction?: Reaction
   reactionCounts: [Reaction, number][]
@@ -509,7 +605,7 @@ function PostCard({
 }) {
   return (
     <article className="feed-card">
-      <div style={{ padding: '1rem 1.15rem 0.65rem', display: 'flex', gap: '0.75rem' }}>
+      <div style={{ padding: '1rem 1.15rem 0.65rem', display: 'flex', gap: '0.75rem', position: 'relative' }}>
         <FeedAvatar profile={post.author as PostAuthor} size={44} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -550,11 +646,66 @@ function PostCard({
                 {post.post_type}
               </span>
             )}
+            {post.edited_at && (
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}> · edited</span>
+            )}
           </div>
         </div>
+        {isAuthor && !isEditing && (
+          <div className="feed-card-menu-wrap">
+            <button
+              type="button"
+              className="feed-card-menu-btn"
+              aria-expanded={showMenu}
+              aria-label="Post options"
+              onClick={onToggleMenu}
+            >
+              <MoreHorizontal size={18} />
+            </button>
+            {showMenu && (
+              <div className="feed-card-menu" role="menu">
+                <button type="button" role="menuitem" onClick={onStartEdit}>
+                  <Pencil size={14} /> Edit
+                </button>
+                <Link href="/feed/manage" role="menuitem" className="feed-card-menu-link" onClick={onToggleMenu}>
+                  Manage all posts
+                </Link>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="feed-card-menu-danger"
+                  disabled={deleting}
+                  onClick={onDelete}
+                >
+                  <Trash2 size={14} /> {deleting ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div style={{ padding: '0 1.15rem 1rem' }}>
+        {isEditing ? (
+          <>
+            <textarea
+              value={editDraft}
+              onChange={(e) => onEditDraftChange(e.target.value)}
+              rows={4}
+              maxLength={2000}
+              className="feed-manage-textarea"
+              style={{ width: '100%', marginBottom: '0.5rem' }}
+            />
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="button" className="btn btn-primary" disabled={!editDraft.trim() || savingEdit} onClick={onSaveEdit}>
+                {savingEdit ? <Loader2 size={14} className="feed-spin" /> : 'Save'}
+              </button>
+              <button type="button" className="btn btn-ghost" onClick={onCancelEdit}>
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
         <p
           style={{
             margin: 0,
@@ -566,6 +717,7 @@ function PostCard({
         >
           {post.content}
         </p>
+        )}
       </div>
 
       {totalReactions > 0 && (

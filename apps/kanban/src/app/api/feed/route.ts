@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 import { getAdminDb, getRequestUser } from '@/lib/supabase/admin'
 import {
   accountPostingBlockedMessage,
   isAccountPostingBlocked,
 } from '@/lib/platform/account-status'
+import { feedPostBodySchema } from '@/lib/feed/post-schema'
+
 export const dynamic = 'force-dynamic'
 
-
 const PAGE_SIZE = 20
-const createPostSchema = z.object({
-  content: z.string().trim().min(1).max(2000),
-  media_urls: z.array(z.string()).optional(),
-  post_type: z.string().optional(),
-  visibility: z.enum(['public', 'connections']).optional(),
-  group_id: z.string().uuid().nullable().optional(),
-})
 
 export async function GET(req: NextRequest) {
   try {
@@ -30,9 +23,17 @@ export async function GET(req: NextRequest) {
       .from('posts')
       .select('id, author_id, content, media_urls, post_type, visibility, created_at, edited_at, group_id')
       .eq('is_deleted', false)
-      .eq('visibility', filter === 'connections' ? 'connections' : 'public')
       .order('created_at', { ascending: false })
       .limit(PAGE_SIZE)
+
+    if (filter === 'mine') {
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      query = query.eq('author_id', user.id)
+    } else {
+      query = query.eq('visibility', filter === 'connections' ? 'connections' : 'public')
+    }
 
     if (cursor) {
       query = query.lt('created_at', cursor)
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const parsedBody = createPostSchema.safeParse(await req.json())
+    const parsedBody = feedPostBodySchema.safeParse(await req.json())
     if (!parsedBody.success) {
       return NextResponse.json({ error: parsedBody.error.flatten() }, { status: 422 })
     }
