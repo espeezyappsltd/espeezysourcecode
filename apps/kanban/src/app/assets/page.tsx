@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import {
-  File,
-  Link as LinkIcon,
-  ShoppingBag,
-  Plus,
-  Trash2,
+import { 
+  File, 
+  Link as LinkIcon, 
+  ShoppingBag, 
+  Plus, 
+  Trash2, 
   ExternalLink,
   Loader2,
   AlertCircle,
@@ -67,7 +67,7 @@ export default function PersonalAssetsPage() {
   const [storageUsed, setStorageUsed] = useState(0)
   const [storageQuota, setStorageQuota] = useState(STORAGE_QUOTAS_BYTES.free)
   const [tierLabel, setTierLabel] = useState('free')
-
+  
   const fetchAssets = useCallback(async () => {
     setLoading(true)
     setLoadError(null)
@@ -156,7 +156,7 @@ export default function PersonalAssetsPage() {
     const matchesFolder = normalizeFolderPath(a.folder) === normCurrent
     return matchesFilter && matchesFolder
   })
-
+  
   const percentUsed = storageQuota > 0 ? Math.min(100, (storageUsed / storageQuota) * 100) : 0
 
   const createFolder = async (name: string) => {
@@ -229,11 +229,11 @@ export default function PersonalAssetsPage() {
             </span>
           </div>
           <div style={{ height: '8px', background: 'var(--bg-sub)', borderRadius: '100px', overflow: 'hidden' }}>
-            <motion.div
+            <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${percentUsed}%` }}
               transition={{ duration: 0.5 }}
-              style={{ height: '100%', background: 'var(--brand)', borderRadius: '100px' }}
+              style={{ height: '100%', background: 'var(--brand)', borderRadius: '100px' }} 
             />
           </div>
           <div style={{ marginTop: '0.75rem', fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -259,7 +259,7 @@ export default function PersonalAssetsPage() {
               <ChevronRight size={14} style={{ opacity: 0.35 }} />
               <button type="button" className={isLast ? 'active' : ''} onClick={() => setCurrentFolder(path)}>
                 {segment}
-              </button>
+            </button>
             </span>
           )
         })}
@@ -335,9 +335,9 @@ export default function PersonalAssetsPage() {
                   <Plus size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                   Add asset
                 </button>
-              </div>
-            </div>
-          ) : (
+        </div>
+        </div>
+      ) : (
             <div className="assets-grid">
               <AnimatePresence mode="popLayout">
                 {filteredAssets.map((asset) => (
@@ -351,9 +351,9 @@ export default function PersonalAssetsPage() {
                       setTotalCreditValue((prev) => prev - (asset.credit_value ?? 0) + credit_value)
                     }}
                   />
-                ))}
-              </AnimatePresence>
-            </div>
+            ))}
+          </AnimatePresence>
+        </div>
           )}
         </>
       )}
@@ -363,9 +363,9 @@ export default function PersonalAssetsPage() {
       )}
 
       {showUploadModal && (
-        <UploadModal
+        <UploadModal 
           currentFolder={normCurrent}
-          onClose={() => setShowUploadModal(false)}
+          onClose={() => setShowUploadModal(false)} 
           onSuccess={(storage) => {
             setShowUploadModal(false)
             applyStoragePayload(storage)
@@ -446,7 +446,7 @@ function AssetCard({
       setSavingCredit(false)
     }
   }
-
+  
   return (
     <motion.div
       layout
@@ -469,7 +469,7 @@ function AssetCard({
         ) : (
           <Icon size={36} style={{ opacity: 0.2, color: 'var(--text-sub)' }} />
         )}
-        <button
+          <button 
           type="button"
           onClick={(e) => {
             e.stopPropagation()
@@ -487,11 +487,11 @@ function AssetCard({
             cursor: 'pointer',
           }}
           title="Delete asset"
-        >
-          <Trash2 size={16} />
-        </button>
+          >
+            <Trash2 size={16} />
+          </button>
       </div>
-
+      
       <div style={{ padding: '1.15rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.35rem' }}>
           <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: 'var(--text-main)' }}>{asset.title}</h3>
@@ -499,7 +499,7 @@ function AssetCard({
             {asset.asset_type === 'marketplace_ref' ? 'listed' : asset.asset_type}
           </span>
         </div>
-
+        
         <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-sub)', lineHeight: 1.45, minHeight: '2.2rem' }}>
           {asset.description || 'No description provided.'}
         </p>
@@ -589,14 +589,14 @@ function AssetCard({
         <div style={{ marginTop: '1rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.68rem', color: 'var(--text-sub)', fontWeight: 700 }}>{new Date(asset.created_at).toLocaleDateString()}</span>
           {asset.asset_url && !asset.asset_url.startsWith('espeezy://') && (
-            <a
-              href={asset.asset_url}
-              target="_blank"
-              rel="noopener noreferrer"
+          <a 
+            href={asset.asset_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', fontWeight: 900, color: 'var(--brand)', textDecoration: 'none' }}
-            >
+          >
               Open <ExternalLink size={12} />
-            </a>
+          </a>
           )}
         </div>
       </div>
@@ -662,10 +662,10 @@ function UploadModal({
   const handleSubmit = async () => {
     if (!form.title && !file) return setError('Title or file is required')
     if (form.asset_type === 'link' && !form.asset_url) return setError('URL is required for links')
-
+    
     setLoading(true)
     setError('')
-
+    
     try {
       let res: Response
 
@@ -692,7 +692,7 @@ function UploadModal({
         })
       }
 
-      const d = await res.json()
+        const d = await res.json()
       if (res.ok) {
         onSuccess({
           storageUsed: d.storageUsed,
@@ -738,8 +738,8 @@ function UploadModal({
 
           {form.asset_type === 'file' ? (
             <FormField label="Upload file">
-              <input
-                type="file"
+              <input 
+                type="file" 
                 className="form-input--file"
                 onChange={(e) => {
                   const f = e.target.files?.[0]
@@ -766,7 +766,7 @@ function UploadModal({
           </FormField>
 
           <FormField label="Asset value (credits)" hint={`${formatCreditCapHint()} · 50 credits ≈ 1 month Pro`}>
-            <input
+            <input 
               type="number"
               min={0}
               max={MAX_ASSET_CREDIT_VALUE}

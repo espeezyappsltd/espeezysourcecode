@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { User } from '@supabase/supabase-js'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { PersistentCache } from '@/utils/cache'
@@ -17,6 +18,7 @@ type ProfileContextType = {
 export const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
 
 const BACKGROUND_REFRESH_MS = 2500
+const REALTIME_POLL_FALLBACK_MS = 30_000
 
 export function ProfileProvider({
   children,
@@ -40,7 +42,7 @@ export function ProfileProvider({
     return !PersistentCache.get<Profile>(`profile_${initialUserId}`)
   })
   const [user, setUser] = useState<User | null>(null)
-  const realtimeStarted = useRef(false)
+  const realtimeWarnedRef = useRef(false)
 
   const refreshProfile = useCallback(async () => {
     const currentUserId = user?.id || initialUserId
@@ -129,9 +131,13 @@ export function ProfileProvider({
       setLoading(true)
     }
 
+    realtimeWarnedRef.current = false
+
     let active = true
     let refreshTimer: ReturnType<typeof setTimeout> | undefined
     let realtimeTimer: ReturnType<typeof setTimeout> | undefined
+    let pollInterval: ReturnType<typeof setInterval> | undefined
+    let channel: RealtimeChannel | null = null
 
     const finishLoad = (data: Profile | null) => {
       if (!active) return
@@ -158,6 +164,20 @@ export function ProfileProvider({
       finishLoad((data as Profile | null) ?? null)
     }
 
+    const startPollingFallback = () => {
+      if (pollInterval) return
+      pollInterval = setInterval(() => {
+        if (active) void loadProfile()
+      }, REALTIME_POLL_FALLBACK_MS)
+    }
+
+    const teardownRealtime = () => {
+      if (channel) {
+        void supabase.removeChannel(channel)
+        channel = null
+      }
+    }
+
     if (hasSeed) {
       refreshTimer = setTimeout(() => {
         void loadProfile()
@@ -167,42 +187,54 @@ export function ProfileProvider({
     }
 
     realtimeTimer = setTimeout(() => {
-      if (!active || realtimeStarted.current) return
-      realtimeStarted.current = true
+      if (!active) return
 
-      const channel = supabase
+      channel = supabase
         .channel(`profile:${currentUserId}`)
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'UPDATE',
             schema: 'public',
             table: 'profiles',
             filter: `id=eq.${currentUserId}`,
           },
           (payload) => {
-            const next = (payload.new ?? null) as Profile | null
+            const next = payload.new as Profile | null
+            if (!next?.id) return
             setProfile(next)
-            if (next) {
-              PersistentCache.set(`profile_${currentUserId}`, next, 3600000)
-            }
+            PersistentCache.set(`profile_${currentUserId}`, next, 3600000)
           },
         )
-        .subscribe((status) => {
-          if (status === 'CHANNEL_ERROR') {
-            console.error('Profile realtime channel error')
+        .subscribe((status, err) => {
+          if (!active) return
+          if (status === 'SUBSCRIBED') {
+            if (pollInterval) {
+              clearInterval(pollInterval)
+              pollInterval = undefined
+            }
+            return
+          }
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            teardownRealtime()
+            startPollingFallback()
+            if (!realtimeWarnedRef.current) {
+              realtimeWarnedRef.current = true
+              console.warn(
+                'Profile realtime unavailable; using periodic refresh.',
+                err?.message ?? status,
+              )
+            }
           }
         })
-
-      return () => {
-        supabase.removeChannel(channel)
-      }
     }, hasSeed ? BACKGROUND_REFRESH_MS : 0)
 
     return () => {
       active = false
       if (refreshTimer) clearTimeout(refreshTimer)
       if (realtimeTimer) clearTimeout(realtimeTimer)
+      if (pollInterval) clearInterval(pollInterval)
+      teardownRealtime()
     }
   }, [initialProfile, initialUserId, profile?.id, seededFromServer, supabase, user])
 

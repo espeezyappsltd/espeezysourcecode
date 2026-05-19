@@ -17,6 +17,7 @@ import { PageGuideHost } from '@/components/guide/PageGuideHost'
 import { getCachedLayoutSession } from '@/utils/auth-server'
 import './prestige.css'
 import './globals.css'
+import './mobile-shell.css'
 import './forms-a11y.css'
 
 export const metadata: Metadata = {

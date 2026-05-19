@@ -1,7 +1,26 @@
 .feed-shell {
   max-width: 560px;
   margin: 0 auto;
-  padding: 1.25rem 1rem 4rem;
+  padding: 0.25rem 0 1rem;
+}
+
+@media (max-width: 768px) {
+  .feed-shell {
+    padding: 0.15rem 0 0.5rem;
+  }
+
+  .feed-hero {
+    margin-bottom: 1rem;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .feed-hero h1 {
+    font-size: 1.45rem;
+  }
+
+  .feed-hero p {
+    font-size: 0.8rem;
+  }
 }
 
 .feed-hero {

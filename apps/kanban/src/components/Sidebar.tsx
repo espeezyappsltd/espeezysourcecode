@@ -322,72 +322,33 @@ export default function Sidebar({ user }: SidebarProps) {
     <div style={{ display: 'contents' }}>
       <div className={`sidebar-backdrop ${isOpen ? 'visible' : ''}`} onClick={closeSidebar} />
 
-      <div
-        className="mobile-header"
-        style={{
-          display: 'none',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 'var(--h-nav)',
-          zIndex: 5000,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 0.75rem',
-          background: 'var(--surface)',
-          borderBottom: '2px solid var(--border)',
-          boxShadow: 'var(--shadow-md)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <button
-            onClick={() => setIsOpen(true)}
-            aria-label="Open menu"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-          >
-            <div
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                background: 'var(--brand)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)',
-              }}
-            >
-              <Image src="/brand_logo2.svg" width={38} height={38} alt="Logo" priority style={{ objectFit: 'contain' }} />
+      <header className="mobile-header hide-desktop" aria-label="App navigation">
+        <div className="mobile-header__brand">
+          <button type="button" className="mobile-header__menu-btn" onClick={() => setIsOpen(true)} aria-label="Open menu">
+            <div className="mobile-header__logo">
+              <Image src="/brand_logo2.svg" width={36} height={36} alt="" priority style={{ objectFit: 'contain' }} />
             </div>
           </button>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.1rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
+          <div className="mobile-header__title-block">
+            <span className="mobile-header__wordmark">
               <BrandWordmark />
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
+            <div className="mobile-header__status">
               <PresenceDot isOnline={isProfileLoaded} />
-              <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {onlineCount} ACTIVE MEMBERS
-              </span>
+              <span data-testid="mobile-header-online-count">{onlineLabel}</span>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ transform: 'scale(0.85)' }}>
+        <div className="mobile-header__actions">
+          <div className="mobile-header__notif">
             <NotificationBell />
           </div>
-          <button
-            onClick={() => pushRoute('/profile')}
-            aria-label="Open profile"
-            style={{ width: '32px', height: '32px', borderRadius: '10px', border: '2px solid var(--brand)', overflow: 'hidden', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
-          >
-            <ProfileAvatar avatarUrl={profile?.avatar_url} fallback={<UserCircle size={20} color="var(--text-sub)" />} size={32} alt="Avatar" />
+          <button type="button" className="mobile-header__avatar-btn" onClick={() => pushRoute('/profile')} aria-label="Open profile">
+            <ProfileAvatar avatarUrl={profile?.avatar_url} fallback={<UserCircle size={18} color="var(--text-sub)" />} size={34} alt="" />
           </button>
         </div>
-      </div>
+      </header>
 
       <aside
         className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}
@@ -634,12 +595,6 @@ export default function Sidebar({ user }: SidebarProps) {
             pointer-events: auto;
             opacity: 1;
             visibility: visible;
-          }
-
-          .mobile-header {
-            display: flex !important;
-            background: rgba(var(--surface-rgb), 0.8) !important;
-            backdrop-filter: blur(20px);
           }
 
           .sidebar-container {

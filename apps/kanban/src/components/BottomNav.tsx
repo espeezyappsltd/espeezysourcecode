@@ -1,17 +1,9 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { 
-  LayoutDashboard, 
-  Bell,
-  Rss,
-  DollarSign,
-  ShoppingBag,
-} from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { LayoutDashboard, Bell, Rss, DollarSign, ShoppingBag } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
-import { useRouter } from 'next/navigation'
 
 export default function BottomNav() {
   const pathname = usePathname()
@@ -26,110 +18,51 @@ export default function BottomNav() {
     { name: 'Inbox', path: '/notifications', icon: Bell },
   ]
 
-  const handleNav = (path: string, name: string) => {
-    if (pathname === path) return;
-    router.push(path);
+  const handleNav = (path: string) => {
+    if (pathname === path) return
+    router.push(path)
   }
 
   return (
-    <nav className="mobile-bottom-nav glass" style={{
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 'var(--h-mobile-bottom)',
-      backgroundColor: 'rgba(var(--bg-sub-rgb), 0.8)',
-      backdropFilter: 'blur(20px)',
-      borderTop: '1px solid var(--border)',
-      zIndex: 4000,
-      padding: '0 1rem',
-      paddingBottom: 'env(safe-area-inset-bottom)',
-      display: 'flex',
-      justifyContent: 'space-around',
-      alignItems: 'center'
-    }}>
+    <nav className="mobile-bottom-nav hide-desktop" aria-label="Primary">
       {navLinks.map((link) => {
         const isActive =
           pathname === link.path ||
           (link.path === '/marketplace' && (pathname?.startsWith('/marketplace') ?? false))
+
         return (
           <button
             key={link.path}
             type="button"
             aria-label={link.name}
             aria-current={isActive ? 'page' : undefined}
-            onClick={() => handleNav(link.path, link.name)}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: isActive ? 'var(--brand)' : 'var(--text-sub)',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              padding: '0.5rem',
-              flex: 1,
-              outline: 'none'
-            }}
+            onClick={() => handleNav(link.path)}
+            className={`mobile-bottom-nav__item${isActive ? ' mobile-bottom-nav__item--active' : ''}`}
           >
-            <div style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transform: isActive ? 'scale(1.1) translateY(-2px)' : 'none',
-              transition: 'transform 0.3s ease'
-            }}>
-              <link.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              {link.name === 'Inbox' && unreadCount > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '-10px',
-                  minWidth: '18px',
-                  height: '18px',
-                  padding: '0 4px',
-                  borderRadius: '10px',
-                  background: 'var(--brand)',
-                  color: 'white',
-                  fontSize: '0.65rem',
-                  fontWeight: 900,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px solid var(--surface)',
-                  boxShadow: '0 0 10px rgba(var(--brand-rgb), 0.5)'
-                }}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </div>
-              )}
-              {isActive && link.name !== 'Inbox' && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-4px',
-                  right: '-4px',
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  background: 'var(--brand)',
-                  boxShadow: '0 0 8px var(--brand)'
-                }} />
-              )}
-            </div>
-            <span style={{ 
-              fontSize: '0.65rem', 
-              fontWeight: isActive ? 800 : 500,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em'
-            }}>
-              {link.name}
+            <span className="mobile-bottom-nav__icon-wrap">
+              <link.icon size={22} strokeWidth={isActive ? 2.5 : 2} aria-hidden />
+              {link.name === 'Inbox' && unreadCount > 0 ? (
+                <span className="mobile-bottom-nav__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              ) : null}
+              {isActive && link.name !== 'Inbox' ? (
+                <span
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    top: -2,
+                    right: -2,
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: 'var(--brand)',
+                  }}
+                />
+              ) : null}
             </span>
+            <span className="mobile-bottom-nav__label">{link.name}</span>
           </button>
         )
       })}
-
     </nav>
   )
 }
