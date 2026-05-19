@@ -58,7 +58,7 @@ const GUIDES: Record<string, PageGuideConfig> = {
     pageTitle: 'Personal Arsenal',
     summary: 'Store files, organize folders, set credit values, and list on the marketplace.',
     steps: [
-      { title: 'Virtual folders', body: 'Create folders, navigate with breadcrumbs, and upload into the current folder.' },
+      { title: 'Virtual folders', body: 'Getting Started, Coursework, MARKETPLACE BUYS (auto-filled on purchase), and Downloads are created for you.' },
       { title: 'Credit value', body: 'Set 0–100 credits per asset; totals show GBP equivalent for planning.' },
       { title: 'List for sale', body: 'One click pushes an asset to Campus Marketplace using its credit value as price.' },
       { title: 'Storage', body: 'Usage follows your plan tier (Free 1 GB, Pro 5 GB, Premium 20 GB).' },

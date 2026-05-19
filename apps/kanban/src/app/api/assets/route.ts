@@ -8,6 +8,7 @@ import {
 } from '@/lib/credits'
 import { isFolderMarker, normalizeFolderPath } from '@/lib/assets/folders'
 import { getStorageQuotaBytes, resolveStoragePlan } from '@/lib/storage-quotas'
+import { ensureUserWorkspaceSeed } from '@/lib/assets/workspace-seed'
 import { friendlySupabaseError } from '@/utils/supabase-errors'
 
 export const dynamic = 'force-dynamic'
@@ -90,6 +91,10 @@ export async function GET(req: NextRequest) {
       : Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 50)
 
     const adminDb = getAdminDb()
+    void ensureUserWorkspaceSeed(user.id).catch((err) => {
+      console.error('[assets] workspace seed', err)
+    })
+
     let query = adminDb
       .from('personal_assets')
       .select(Q.personalAsset)

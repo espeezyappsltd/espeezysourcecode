@@ -1,5 +1,6 @@
 'use server'
 
+import { ensureUserWorkspaceSeed } from '@/lib/assets/workspace-seed'
 import { createClient as createServerSupabaseClient } from '@/lib/supabase/server'
 import { getUid } from '@/utils/auth-server'
 import { revalidatePath } from 'next/cache'
@@ -44,6 +45,10 @@ async function ensureProfileRow(uid: string) {
   })
 
   if (error) throw error
+
+  await ensureUserWorkspaceSeed(uid).catch((err) => {
+    console.error('[onboarding] workspace seed', err)
+  })
 }
 
 export async function createWorkspaceTeam(name: string, description: string) {

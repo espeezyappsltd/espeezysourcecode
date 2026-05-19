@@ -1,3 +1,4 @@
+import { addMarketplacePurchaseToArsenal } from '@/lib/assets/workspace-seed'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { formatCredits } from '@/lib/credits'
 import { sendMarketplaceInvoiceEmail } from '@/services/email'
@@ -46,31 +47,37 @@ async function loadPartyProfiles(buyerId: string, sellerId: string) {
   return { buyer, seller }
 }
 
-async function grantBuyerInventory(buyerId: string, listingId: string) {
+async function grantBuyerInventory(
+  buyerId: string,
+  listingId: string,
+  purchaseId: string,
+  invoiceNumber?: string,
+) {
   const db = getAdminDb()
   const { data: listing } = await db
     .from('marketplace_listings')
-    .select('id, title, description, category, price, images, owner_id')
+    .select(
+      'id, title, description, category, price, images, owner_id, listing_type, delivery_kind, digital_url, digital_content',
+    )
     .eq('id', listingId)
     .maybeSingle()
 
   if (!listing) return
 
-  await db.from('personal_assets').insert({
-    user_id: buyerId,
+  await addMarketplacePurchaseToArsenal(buyerId, {
+    listingId: listing.id,
+    purchaseId,
+    invoiceNumber,
     title: listing.title,
     description: listing.description,
-    asset_type: 'marketplace_ref',
-    asset_url: `/marketplace?purchase=${listingId}`,
-    preview_url: listing.images?.[0] ?? null,
     category: listing.category,
-    metadata: {
-      listing_id: listing.id,
-      price: listing.price,
-      owner_id: listing.owner_id,
-      purchased: true,
-    },
-    size_bytes: 0,
+    price: listing.price,
+    images: listing.images,
+    ownerId: listing.owner_id,
+    listingType: listing.listing_type,
+    deliveryKind: listing.delivery_kind,
+    digitalUrl: listing.digital_url,
+    digitalContent: listing.digital_content,
   })
 }
 
@@ -219,7 +226,7 @@ export async function completeMarketplaceCreditPurchase(
   }
 
   await Promise.allSettled(emailJobs)
-  await grantBuyerInventory(buyerId, listingId).catch(() => undefined)
+  await grantBuyerInventory(buyerId, listingId, purchaseId, result.invoice_number).catch(() => undefined)
 
   return {
     purchaseId,
