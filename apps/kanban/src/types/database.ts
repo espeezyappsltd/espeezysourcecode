@@ -73,6 +73,7 @@ export type Task = {
   due_date: string | null;
   created_at: string;
   score_awarded: boolean;
+  board_visible?: boolean;
   artifacts?: Artifact[];
 };
 

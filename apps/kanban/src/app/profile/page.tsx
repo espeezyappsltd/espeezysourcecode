@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { User, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, Fingerprint, Edit2, Check, X, Zap, Handshake, CheckCircle2, Globe, Target } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { getFlagComponent } from '@/utils/geo'
-import { fetchArtifactsByUser, fetchCommitsByUser, updateProfileById } from '@/services/dashboard'
+import { fetchArtifactsByUser, fetchCommitsByUser, fetchMemberTasksForProfile, updateProfileById } from '@/services/dashboard'
 import type { Artifact, Commit } from '@/types/database'
 
 export default function ProfilePage() {
@@ -14,15 +14,27 @@ export default function ProfilePage() {
    const [bioText, setBioText] = useState('')
    const [isSaving, setIsSaving] = useState(false)
    const [achievements, setAchievements] = useState<Array<{ type: 'artifact' | 'commit'; title?: string; content?: string; created_at: string }>>([])
+   const [profileTasks, setProfileTasks] = useState<
+      Array<{ id: string; title: string; status: string; board_visible?: boolean }>
+   >([])
 
     useEffect(() => {
        async function fetchAchievements() {
           if (!profile?.id) return
           try {
-             const [artifacts, commits] = await Promise.all([
+             const [artifacts, commits, tasks] = await Promise.all([
                 fetchArtifactsByUser(profile.id, 3),
                 fetchCommitsByUser(profile.id, 3),
+                fetchMemberTasksForProfile(profile.id, 20).catch(() => []),
              ])
+             setProfileTasks(
+               tasks.map((t) => ({
+                 id: t.id,
+                 title: t.title,
+                 status: t.status,
+                 board_visible: t.board_visible,
+               })),
+             )
              const combined = [
                 ...artifacts.map((d: Artifact) => ({ type: 'artifact' as const, title: d.task_id, content: d.file_url, created_at: d.created_at })),
                 ...commits.map((d: Commit) => ({ type: 'commit' as const, title: d.message, content: d.hash, created_at: d.created_at })),
@@ -230,6 +242,23 @@ export default function ProfilePage() {
                       {profile?.badges_count || 0} Badges
                     </div>
                  </div>
+
+                 {profileTasks.some((t) => t.board_visible === false) && (
+                   <div style={{ marginBottom: '1.25rem', padding: '1rem', borderRadius: '14px', border: '1px dashed var(--border)', background: 'var(--bg-sub)' }}>
+                     <div style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                       Archived team tasks (off board)
+                     </div>
+                     <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                       {profileTasks
+                         .filter((t) => t.board_visible === false)
+                         .map((t) => (
+                           <li key={t.id} style={{ marginBottom: '0.25rem' }}>
+                             {t.title} · {t.status}
+                           </li>
+                         ))}
+                     </ul>
+                   </div>
+                 )}
 
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {achievements.length > 0 ? achievements.map((ach, idx) => (

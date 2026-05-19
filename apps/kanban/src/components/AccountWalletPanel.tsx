@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Coins, Loader2, Receipt, ShoppingBag, TrendingUp, RefreshCw } from 'lucide-react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { formatCredits } from '@/lib/credits'
+import { FundCreditAccountButton } from '@/components/credits/FundCreditAccountButton'
 
 type PurchaseRow = {
   id: string
@@ -110,47 +111,53 @@ export function AccountWalletPanel({ compact = false }: { compact?: boolean }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Coins size={28} style={{ color: 'var(--brand)' }} />
+          <Coins size={28} style={{ color: 'var(--brand)' }} aria-hidden />
           <div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Espeezy credits</div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>
+              Personal credit account
+            </div>
             <div style={{ fontSize: compact ? '1.5rem' : '2rem', fontWeight: 950, color: 'var(--brand)' }}>{credits}</div>
+            {!compact && (
+              <Link href="/account/credits" style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--brand)' }}>
+                View account →
+              </Link>
+            )}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => void loadWallet()}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.5rem 0.85rem',
-            borderRadius: '10px',
-            border: '1px solid var(--border)',
-            background: 'var(--surface)',
-            color: 'var(--text-main)',
-            fontWeight: 800,
-            fontSize: '0.8rem',
-            cursor: 'pointer',
-          }}
-        >
-          <RefreshCw size={14} /> Refresh
-        </button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+          <FundCreditAccountButton
+            returnPath="/account/credits"
+            label="Fund cred acc now"
+            variant={compact ? 'primary' : 'primary'}
+          />
+          <button
+            type="button"
+            onClick={() => void loadWallet()}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.5rem 0.85rem',
+              borderRadius: '10px',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              color: 'var(--text-main)',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              minHeight: 44,
+            }}
+            aria-label="Refresh credit balance"
+          >
+            <RefreshCw size={14} aria-hidden /> Refresh
+          </button>
+        </div>
       </div>
 
       {!compact && (
         <>
-          <TransactionSection
-            title="Purchases"
-            icon={<ShoppingBag size={18} />}
-            rows={wallet?.purchases ?? []}
-            role="buyer"
-          />
-          <TransactionSection
-            title="Sales"
-            icon={<TrendingUp size={18} />}
-            rows={wallet?.sales ?? []}
-            role="seller"
-          />
+          <TransactionSection title="Purchases" icon={<ShoppingBag size={18} />} rows={wallet?.purchases ?? []} role="buyer" />
+          <TransactionSection title="Sales" icon={<TrendingUp size={18} />} rows={wallet?.sales ?? []} role="seller" />
         </>
       )}
     </div>
@@ -219,7 +226,7 @@ function TransactionSection({
                     textDecoration: 'none',
                   }}
                 >
-                  <Receipt size={14} /> Invoice
+                  <Receipt size={14} aria-hidden /> Invoice
                 </Link>
               </div>
             </div>

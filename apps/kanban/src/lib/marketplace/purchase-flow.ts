@@ -3,14 +3,12 @@ import {
   CREDITS_PER_PRO_MONTH,
   MAX_ASSET_CREDIT_VALUE,
   clampCreditValue,
-  creditsToGbpEquivalent,
   readCreditValueFromMetadata,
 } from '@/lib/credits'
 import { breakdownPlatformFee } from '@/lib/platform/fees'
 import { getTradingMetricsForUser } from '@/lib/marketplace/trading-metrics'
 import { getUserCredits, completeMarketplaceCreditPurchase } from '@/lib/marketplace/checkout-service'
-import { createCheckoutSession } from '@/services/stripe'
-import { getAppUrl } from '@/utils/stripe'
+import { createCreditFundCheckout, creditsToFundGbp } from '@/lib/credits/fund-stripe'
 
 export type ListingCheckoutContext = {
   listingId: string
@@ -135,27 +133,33 @@ export async function getBuyerCheckoutPreflight(
         .eq('id', buyerId)
         .maybeSingle()
 
-      const appUrl = appUrlFallback()
-      const session = await createCheckoutSession({
+      const fundGbp = creditsToFundGbp(topUpPackCredits)
+      const fund = await createCreditFundCheckout({
         userId: buyerId,
         email: profile?.email ?? undefined,
-        price: creditsToGbpEquivalent(topUpPackCredits),
-        type: 'purchase',
-        metadata: {
-          type: 'credit_topup',
-          credits_amount: String(topUpPackCredits),
-          product_name: `Espeezy credits — ${creditTierLabel(topUpPackCredits)}`,
-          description: `Top up to buy "${ctx.title}" (${creditTierLabel(ctx.assetCreditValue)} listing)`,
-          listing_id: listingId,
-          pending_listing_id: listingId,
-        },
-        successUrl: `${appUrl}/marketplace?topup=success&listingId=${listingId}`,
-        cancelUrl: `${appUrl}/marketplace?listing=${listingId}`,
+        amountGbp: fundGbp,
+        returnPath: `/marketplace?item=${listingId}`,
+        listingId,
+        contextLabel: `Top up to buy "${ctx.title}"`,
       })
-      topUpPaymentUrl = session.url ?? null
+      topUpPackCredits = fund.creditsAmount
+      topUpPaymentUrl = fund.checkoutUrl
+
+      await getAdminDb().from('credit_fund_checkouts').upsert(
+        {
+          user_id: buyerId,
+          stripe_session_id: fund.sessionId,
+          amount_gbp: fund.amountGbp,
+          credits_amount: fund.creditsAmount,
+          status: 'pending',
+          return_path: `/marketplace?item=${listingId}`,
+          listing_id: listingId,
+        },
+        { onConflict: 'stripe_session_id' },
+      )
     } catch (err) {
       console.warn('[purchase-flow] credit top-up session failed:', err)
-      topUpPaymentUrl = `${appUrlFallback()}/upgrade`
+      topUpPaymentUrl = `${appUrlFallback()}/account/credits`
     }
   }
 

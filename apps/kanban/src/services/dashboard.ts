@@ -93,9 +93,38 @@ export async function fetchProfilesByIds(ids: string[]) {
   return (data ?? []) as Profile[]
 }
 
+const TASK_BOARD_SELECT =
+  'id, title, description, status, category, assignees, group_id, is_coding_task, due_date, created_at, board_visible'
+
 export async function fetchGroupTasks(groupId: string) {
   const db = createBrowserSupabaseClient()
-  const { data, error } = await db.from('tasks').select('id, title, description, status, category, assignees, group_id, is_coding_task, due_date, created_at').eq('group_id', groupId)
+  const withVisibility = await db
+    .from('tasks')
+    .select(TASK_BOARD_SELECT)
+    .eq('group_id', groupId)
+    .or('board_visible.is.null,board_visible.eq.true')
+
+  if (!withVisibility.error) {
+    return (withVisibility.data ?? []) as Task[]
+  }
+
+  const fallback = await db
+    .from('tasks')
+    .select('id, title, description, status, category, assignees, group_id, is_coding_task, due_date, created_at')
+    .eq('group_id', groupId)
+  if (fallback.error) throw fallback.error
+  return (fallback.data ?? []) as Task[]
+}
+
+/** Tasks assigned to a user across teams (includes archived / off-board). */
+export async function fetchMemberTasksForProfile(userId: string, limit = 50) {
+  const db = createBrowserSupabaseClient()
+  const { data, error } = await db
+    .from('tasks')
+    .select('id, title, status, group_id, assignees, board_visible, created_at, due_date')
+    .contains('assignees', [userId])
+    .order('updated_at', { ascending: false })
+    .limit(limit)
   if (error) throw error
   return (data ?? []) as Task[]
 }

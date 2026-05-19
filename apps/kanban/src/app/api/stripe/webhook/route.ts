@@ -4,6 +4,7 @@ import { Q } from '@/lib/query-columns'
 // import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { sendP2PTransactionEmail } from '@/services/email'
+import { applyCreditTopupFromStripeSession } from '@/lib/credits/apply-credit-topup'
 import { getStripeClient, getStripeWebhookSecret } from '@/utils/stripe'
 
 export const dynamic = 'force-dynamic'
@@ -57,33 +58,25 @@ export async function POST(req: Request) {
 }
 
 async function handleCreditTopUpWebhook(session: Stripe.Checkout.Session) {
+  if (session.payment_status !== 'paid') return
+
   const userId = session.metadata?.user_id
   const rawCredits = session.metadata?.credits_amount
   const credits = rawCredits ? parseInt(rawCredits, 10) : 0
-  if (!userId || !Number.isFinite(credits) || credits <= 0) return
+  const rawGbp = session.metadata?.amount_gbp
+  const amountGbp = rawGbp ? parseFloat(rawGbp) : (session.amount_total ?? 0) / 100
+  const listingId = session.metadata?.listing_id ?? session.metadata?.pending_listing_id ?? null
 
-  if (session.payment_status !== 'paid') return
+  if (!userId || !Number.isFinite(credits) || credits <= 0 || !session.id) return
 
   try {
-    const adminDb = getAdminDb()
-    if (!adminDb) return
-
-    const { data: profile } = await adminDb
-      .from('profiles')
-      .select('espeezy_credits')
-      .eq('id', userId)
-      .maybeSingle()
-
-    const next = (profile?.espeezy_credits ?? 0) + credits
-    await adminDb.from('profiles').update({ espeezy_credits: next }).eq('id', userId)
-
-    await adminDb.from('notifications').insert({
-      user_id: userId,
-      type: 'credit_topup',
-      title: 'Credits added',
-      message: `+${credits} Espeezy credits are now in your account.`,
-      link: '/marketplace',
-      metadata: { credits_added: credits, balance_after: next },
+    await applyCreditTopupFromStripeSession({
+      userId,
+      stripeSessionId: session.id,
+      creditsAmount: credits,
+      amountGbp,
+      listingId,
+      returnPath: null,
     })
   } catch (err: unknown) {
     console.error('[webhook] credit_topup error:', err instanceof Error ? err.message : err)

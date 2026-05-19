@@ -131,9 +131,13 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     setLoading(true)
     try {
       const { sendJoinRequest } = await import('@/app/join/actions')
-      await sendJoinRequest(groupId, currentUser.full_name || 'A student')
+      const res = await sendJoinRequest(groupId, currentUser.full_name || 'A student')
+      if (!res.success) {
+        addToast('System Error', res.error, 'error')
+        return
+      }
       setHasSentRequest(true)
-      addToast('Sync Success', 'Protocol access request has been transmitted to team leader.', 'success')
+      addToast('Sync Success', 'Your join request and team chat message were sent.', 'success')
     } catch (err: unknown) {
       addToast('System Error', 'Failed to transmit access request: ' + (err instanceof Error ? err.message : String(err)), 'error')
     } finally {

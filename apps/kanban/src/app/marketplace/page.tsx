@@ -108,6 +108,28 @@ function MarketplacePageInner() {
   }, [searchParams])
 
   useEffect(() => {
+    if (!searchParams || searchParams.get('fund') !== 'success') return
+    const sessionId = searchParams.get('session_id')
+    if (!sessionId) return
+
+    let attempts = 0
+    const poll = async () => {
+      const res = await fetch(`/api/credits/fund/status?session_id=${encodeURIComponent(sessionId)}`, {
+        credentials: 'include',
+      })
+      const data = (await res.json()) as { status?: string; balance?: number }
+      if (data.status === 'completed' && typeof data.balance === 'number') {
+        setCredits(data.balance)
+        void refreshCredits()
+        return
+      }
+      attempts += 1
+      if (attempts < 12) setTimeout(poll, 2000)
+    }
+    void poll()
+  }, [searchParams, refreshCredits, setCredits])
+
+  useEffect(() => {
     if (!currentUserId) return
     void fetch('/api/marketplace/inquiries', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
@@ -188,9 +210,14 @@ function MarketplacePageInner() {
           <p style={{ margin: '0.2rem 0 0', color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 600 }}>
             Pay with Espeezy credits · fast campus checkout
           </p>
-          <Link href="/assets" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)' }}>
-            Arsenal assets →
-          </Link>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
+            <Link href="/assets" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)' }}>
+              Arsenal assets →
+            </Link>
+            <Link href="/account/credits" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)' }}>
+              Credit account →
+            </Link>
+          </div>
         </div>
         <div
           style={{

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Group, Profile } from '@/types/database'
 import {
   fetchGroupById,
@@ -6,6 +6,11 @@ import {
   fetchGroupTasks,
   fetchPendingJoinRequests,
 } from '@/services/dashboard'
+import {
+  celebrateAllTasksComplete,
+  markCelebratedForTaskCount,
+  shouldCelebrateCompletion,
+} from '@/lib/kanban/completion-celebration'
 
 type AddToast = (title: string, description: string, variant: 'success' | 'error' | 'info') => void
 
@@ -38,6 +43,9 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
   const [projectProgress, setProjectProgress] = useState(0)
   const [progressLabel, setProgressLabel] = useState('Starting up')
   const [totalBacklog, setTotalBacklog] = useState(0)
+  const [totalTaskCount, setTotalTaskCount] = useState(0)
+  const [allDone, setAllDone] = useState(false)
+  const lastCelebrationKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!groupId) return
@@ -131,10 +139,14 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
         setPersonalTaskCount(personal)
       }
 
-      if (tasks.length === 0) {
+      const taskTotal = tasks.length
+      setTotalTaskCount(taskTotal)
+
+      if (taskTotal === 0) {
         setProjectProgress(0)
         setProgressLabel('Empty Backlog')
         setTotalBacklog(0)
+        setAllDone(false)
         return
       }
 
@@ -142,15 +154,26 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
       setTotalBacklog(pending)
 
       const completed = tasks.filter((t) => t.status === 'Done').length
-      const progress = Math.round((completed / tasks.length) * 100)
+      const progress = Math.round((completed / taskTotal) * 100)
       setProjectProgress(progress)
+      setAllDone(progress >= 100)
 
       let label = 'Almost finished'
-      if (progress <= 30) label = 'Just starting'
+      if (progress >= 100) label = 'All tasks complete'
+      else if (progress <= 30) label = 'Just starting'
       else if (progress <= 50) label = 'Making progress'
       else if (progress <= 80) label = 'Smoothing things out'
 
       setProgressLabel(label)
+
+      if (shouldCelebrateCompletion(groupId, taskTotal, progress)) {
+        const celebrationKey = `${groupId}:${taskTotal}`
+        if (lastCelebrationKeyRef.current !== celebrationKey) {
+          lastCelebrationKeyRef.current = celebrationKey
+          celebrateAllTasksComplete()
+          markCelebratedForTaskCount(groupId, taskTotal)
+        }
+      }
 
       localStorage.setItem(
         `gf_cache_stats_${groupId}`,
@@ -169,6 +192,19 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
       console.error('Fetch task metrics error:', err instanceof Error ? err.message : err)
     }
   }, [groupId, profile?.id])
+
+  useEffect(() => {
+    if (!groupId) return
+
+    const onMetricsRefresh = (event: Event) => {
+      const detail = (event as CustomEvent<{ groupId?: string }>).detail
+      if (detail?.groupId && detail.groupId !== groupId) return
+      void fetchTaskMetrics()
+    }
+
+    window.addEventListener('espeezy-kanban-metrics-refresh', onMetricsRefresh)
+    return () => window.removeEventListener('espeezy-kanban-metrics-refresh', onMetricsRefresh)
+  }, [groupId, fetchTaskMetrics])
 
   useEffect(() => {
     if (!groupId) return
@@ -201,6 +237,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     fetchMembers,
     fetchPendingRequests,
     fetchTaskMetrics,
+    syncToken,
   ])
 
   return {
@@ -217,6 +254,8 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     projectProgress,
     progressLabel,
     totalBacklog,
+    totalTaskCount,
+    allDone,
     handleAcceptRequest,
     handleDeclineRequest,
   }

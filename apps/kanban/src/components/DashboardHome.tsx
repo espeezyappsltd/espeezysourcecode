@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
-import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle } from 'lucide-react'
+import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle, PartyPopper } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from './NotificationProvider'
 import { getPlanName, hasFeature } from '@/utils/feature-gate'
@@ -55,6 +55,8 @@ export default function DashboardHome({
     projectProgress,
     progressLabel,
     totalBacklog,
+    totalTaskCount,
+    allDone,
     handleAcceptRequest,
     handleDeclineRequest,
     setSyncToken,
@@ -268,15 +270,39 @@ export default function DashboardHome({
         </div>
       </header>
 
+      {allDone && totalTaskCount > 0 && (
+        <div
+          className="kanban-all-done-banner"
+          role="status"
+          data-testid="kanban-all-done-banner"
+          aria-live="polite"
+        >
+          <PartyPopper size={22} aria-hidden />
+          <span className="kanban-all-done-banner__title">ALL DONE</span>
+          <span className="kanban-all-done-banner__sub">Every team task is complete — great work.</span>
+        </div>
+      )}
+
       {/* ── METRICS MODULES ────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         {[
           { icon: <Activity size={20} />, label: 'Your Goals', value: personalTaskCount, sub: 'Tasks for you to do', color: 'var(--brand)' },
           { icon: <Users size={20} />, label: 'Team Progress', value: totalBacklog, sub: 'Tasks left for the team', color: 'var(--success)' },
-          { icon: <TrendingUp size={20} />, label: 'Overall Completion', value: `${projectProgress}%`, sub: progressLabel, color: '#f59e0b' },
-          { icon: <Zap size={20} />, label: 'Check Status', value: '100%', sub: 'Safe and secure', color: 'var(--accent)' }
+          {
+            icon: <TrendingUp size={20} />,
+            label: 'Overall Completion',
+            value: allDone && totalTaskCount > 0 ? 'ALL DONE' : `${projectProgress}%`,
+            sub: allDone && totalTaskCount > 0 ? 'Every task finished' : progressLabel,
+            color: allDone ? '#22c55e' : '#f59e0b',
+            testId: 'kanban-overall-completion',
+          },
+          { icon: <Zap size={20} />, label: 'Check Status', value: '100%', sub: 'Safe and secure', color: 'var(--accent)' },
         ].map((stat, i) => (
-          <div key={i} className="control-card control-card-entrance" style={{
+          <div
+            key={i}
+            data-testid={'testId' in stat ? stat.testId : undefined}
+            className={`control-card control-card-entrance${allDone && i === 2 ? ' control-card--all-done' : ''}`}
+            style={{
             padding: '1rem',
             background: 'var(--surface)',
             border: '1px solid var(--border)',
@@ -293,7 +319,7 @@ export default function DashboardHome({
               {stat.icon}
               <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-sub)' }}>{stat.label}</span>
             </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 950, color: 'var(--text-main)', lineHeight: 0.9 }}>{stat.value}</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 950, color: stat.color, lineHeight: 0.9 }}>{stat.value}</div>
             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '0.4rem' }}>{stat.sub}</div>
           </div>
         ))}
@@ -415,6 +441,37 @@ export default function DashboardHome({
       )}
 
       <style jsx>{`
+        .kanban-all-done-banner {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 0.65rem 1rem;
+          padding: 1rem 1.25rem;
+          border-radius: 16px;
+          border: 1px solid rgba(34, 197, 94, 0.45);
+          background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(var(--brand-rgb), 0.06));
+          color: var(--text-main);
+          animation: allDonePop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .kanban-all-done-banner__title {
+          font-size: 1.35rem;
+          font-weight: 950;
+          letter-spacing: 0.12em;
+          color: #16a34a;
+        }
+        .kanban-all-done-banner__sub {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: var(--text-sub);
+        }
+        :global(.control-card--all-done) {
+          border-color: rgba(34, 197, 94, 0.35) !important;
+          box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.12), var(--shadow-sm) !important;
+        }
+        @keyframes allDonePop {
+          from { opacity: 0; transform: translateY(8px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
         @keyframes shimmer-sweep {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }

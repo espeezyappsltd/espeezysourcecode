@@ -37,11 +37,12 @@ export async function runMarketplaceCreditCheckout(
 
   if (!pre.canAfford && pre.priceCredits > 0) {
     if (pre.topUpPaymentUrl) {
-      window.open(pre.topUpPaymentUrl, '_blank', 'noopener')
+      window.location.href = pre.topUpPaymentUrl
+      return null
     }
     addToast(
       'Top up required',
-      `This listing is ${pre.paymentLinkLabel ?? formatCredits(pre.assetCreditValue)}. You need ${formatCredits(pre.shortfall)} more credits — opened the ${pre.topUpPackCredits ?? 50}-credit payment link.`,
+      `You need ${formatCredits(pre.shortfall)} more credits. Use Fund cred acc now on the listing.`,
       'warning',
     )
     return null
@@ -70,8 +71,7 @@ export async function runMarketplaceCreditCheckout(
 
   if (!res.ok) {
     if (res.status === 402 && data.topUpPaymentUrl) {
-      window.open(data.topUpPaymentUrl, '_blank', 'noopener')
-      addToast('Top up required', data.message ?? data.error ?? 'Add credits to continue.', 'warning')
+      window.location.href = data.topUpPaymentUrl
       return null
     }
     addToast('Checkout failed', data.message ?? data.error ?? 'Try again.', 'error')

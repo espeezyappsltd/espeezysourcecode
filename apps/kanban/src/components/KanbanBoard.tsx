@@ -207,6 +207,16 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
     [patchTask],
   )
 
+  useEffect(() => {
+    if (!groupId || loading) return
+    const timer = window.setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent('espeezy-kanban-metrics-refresh', { detail: { groupId } }),
+      )
+    }, 250)
+    return () => window.clearTimeout(timer)
+  }, [tasks, groupId, loading])
+
   if (loading) {
     return (
       <div role="status" aria-busy="true" style={{ padding: '2rem', textAlign: 'center' }}>

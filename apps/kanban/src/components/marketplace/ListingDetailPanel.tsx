@@ -26,6 +26,7 @@ import { runMarketplaceCreditCheckout } from '@/lib/marketplace/run-marketplace-
 import { isListingAvailable } from '@/lib/marketplace/trending'
 import { PLATFORM_CONTACT_RULES, avatarUrlForProfile } from '@/lib/platform/contact-rules'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
+import { FundCreditAccountButton } from '@/components/credits/FundCreditAccountButton'
 
 interface ListingDetailPanelProps {
   listing: Listing
@@ -351,6 +352,19 @@ export function ListingDetailPanel({
                 Includes {feeBreakdown.platformFeeCredits} cr platform fee (1 per 50 cr) · seller receives{' '}
                 {formatCredits(feeBreakdown.netCredits)}
               </p>
+            )}
+
+            {!canAfford && !isFree && priceCredits > 0 && userCredits !== null && !isOwn && (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <FundCreditAccountButton
+                  creditsNeeded={Math.max(1, priceCredits - userCredits)}
+                  returnPath={`/marketplace?item=${listing.id}`}
+                  listingId={listing.id}
+                  contextLabel={`Fund account to buy "${listing.title}"`}
+                  label="Fund cred acc now"
+                  oneClick
+                />
+              </div>
             )}
 
             <div className="listing-detail-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '0.5rem' }}>

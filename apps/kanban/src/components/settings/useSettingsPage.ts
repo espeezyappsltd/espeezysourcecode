@@ -21,7 +21,6 @@ import {
   fetchGroupById,
   fetchGroupMembers,
   fetchGroupsOrderedByName,
-  fetchMessagesForUser,
   fetchProfileById,
   getAuthUser,
   updateGroupById,
@@ -119,13 +118,14 @@ export function useSettingsPage() {
     }
   }, [])
 
-  const fetchJoinRequests = useCallback(async (userId: string) => {
-    const messages = await fetchMessagesForUser(userId)
-    const requests = messages
-      .filter((m) => m.content?.includes('[JOIN REQUEST]'))
-      .map((m) => m.group_id)
-
-    setSentRequests(Array.from(new Set(requests as string[])))
+  const fetchJoinRequests = useCallback(async () => {
+    try {
+      const { fetchSentJoinRequestGroupIds } = await import('@/app/join/actions')
+      const ids = await fetchSentJoinRequestGroupIds()
+      setSentRequests(ids)
+    } catch {
+      setSentRequests([])
+    }
   }, [])
 
   const fetchTeam = useCallback(async (groupId: string) => {
@@ -178,7 +178,7 @@ export function useSettingsPage() {
         }
 
         try {
-          await fetchJoinRequests(user.id)
+          await fetchJoinRequests()
         } catch (err) {
           console.warn('Fetch join requests:', formatSupabaseError(err))
         }
@@ -417,7 +417,30 @@ export function useSettingsPage() {
     setError(null)
 
     try {
-      await updateProfileById(profile.id, { group_id: newGroupId, role: 'collaborator' })
+      const previousGroupId = profile.group_id ?? null
+      if (previousGroupId && previousGroupId !== newGroupId) {
+        const { archiveMemberTasksForGroup, restoreMemberTasksOnGroupBoard } = await import(
+          '@/lib/team/membership-transfer'
+        )
+        await archiveMemberTasksForGroup(profile.id, previousGroupId)
+        if (newGroupId) {
+          const archived = (profile as Profile & { archived_group_id?: string | null }).archived_group_id
+          if (archived === newGroupId) {
+            await restoreMemberTasksOnGroupBoard(profile.id, newGroupId)
+          }
+        }
+      }
+
+      await updateProfileById(profile.id, {
+        group_id: newGroupId,
+        role: 'collaborator',
+        archived_group_id:
+          newGroupId && previousGroupId && previousGroupId !== newGroupId
+            ? previousGroupId
+            : newGroupId
+              ? null
+              : previousGroupId,
+      } as Record<string, unknown>)
       await fetchUserData()
       refreshProfile()
       addToast('Team Switched', 'You have been successfully re-assigned to the new project group.', 'success')

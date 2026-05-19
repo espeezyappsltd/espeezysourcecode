@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { CheckCircle2, Eye, Search, X } from 'lucide-react'
 import { Profile } from '@/types/auth'
 import type { SettingsPageViewModel } from '../settings-types'
@@ -20,6 +21,8 @@ export function SettingsWorkspacePanel({ vm }: { vm: SettingsPageViewModel }) {
     setError,
     getErrorMessage,
   } = vm
+
+  const [joinMessageByGroup, setJoinMessageByGroup] = useState<Record<string, string>>({})
 
   return (
     <div className="auth-card" style={{ maxWidth: '100%' }}>
@@ -111,7 +114,15 @@ export function SettingsWorkspacePanel({ vm }: { vm: SettingsPageViewModel }) {
               setPendingRequests((prev) => [...prev, group.id])
               try {
                 const { sendJoinRequest } = await import('@/app/join/actions')
-                await sendJoinRequest(group.id, fullName || 'A student')
+                const res = await sendJoinRequest(
+                  group.id,
+                  fullName || 'A student',
+                  joinMessageByGroup[group.id] ?? null,
+                )
+                if (!res.success) {
+                  setError(`Request failed: ${res.error}`)
+                  return
+                }
                 setSentRequests((prev) => [...new Set([...prev, group.id])])
               } catch (err: unknown) {
                 setError(`Request failed: ${getErrorMessage(err, 'unknown request error')}`)
@@ -129,15 +140,16 @@ export function SettingsWorkspacePanel({ vm }: { vm: SettingsPageViewModel }) {
                   border: '1px solid var(--border)',
                   borderRadius: 'var(--radius)',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  flexDirection: 'column',
+                  gap: '0.65rem',
                 }}
               >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                   <button
                     type="button"
                     onClick={handleQuickRequest}
@@ -160,6 +172,28 @@ export function SettingsWorkspacePanel({ vm }: { vm: SettingsPageViewModel }) {
                     <Eye size={18} />
                   </button>
                 </div>
+                </div>
+                {!isSent && (
+                  <textarea
+                    placeholder="One message to team chat (optional)…"
+                    value={joinMessageByGroup[group.id] ?? ''}
+                    onChange={(e) =>
+                      setJoinMessageByGroup((prev) => ({ ...prev, [group.id]: e.target.value.slice(0, 500) }))
+                    }
+                    disabled={isPending}
+                    rows={2}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.65rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
+                      color: 'var(--text-main)',
+                      fontSize: '0.8rem',
+                      resize: 'vertical',
+                    }}
+                  />
+                )}
               </div>
             )
           })}
