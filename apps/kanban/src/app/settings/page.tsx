@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, Settings } from 'lucide-react'
+import { PageHeader } from '@/components/layout/PageHeader'
 import TransientError from '@/components/TransientError'
 import SettingsLoading from '@/components/settings/SettingsLoading'
 import { SettingsTabNav } from '@/components/settings/SettingsTabNav'
@@ -18,14 +19,7 @@ export default function SettingsPage() {
 
   return (
     <div className="page-fade page-shell page-shell--narrow">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-        <div style={{ padding: '8px', background: 'var(--brand)', borderRadius: '12px' }}>
-          <Settings size={28} color="white" />
-        </div>
-        <h1 className="fluid-h1" style={{ margin: 0, fontWeight: 900 }}>
-          Settings
-        </h1>
-      </div>
+      <PageHeader title="Settings" icon={Settings} />
 
       {error && <TransientError message={error} />}
 

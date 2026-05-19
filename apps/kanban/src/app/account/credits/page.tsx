@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Coins, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import { FundCreditAccountButton } from '@/components/credits/FundCreditAccountButton'
 import { MIN_CREDIT_FUND_GBP } from '@/lib/credits/fund-stripe-shared'
@@ -50,15 +51,12 @@ function CreditsAccountContent() {
         Settings
       </Link>
 
-      <header className="credits-account-page__header">
-        <div className="credits-account-page__icon" aria-hidden>
-          <Coins size={28} />
-        </div>
-        <div>
-          <h1>Your credit account</h1>
-          <p>Personal Espeezy credits for marketplace, hustle gigs, and campus trades.</p>
-        </div>
-      </header>
+      <PageHeader
+        className="credits-account-page__header"
+        title="Your credit account"
+        icon={Coins}
+        description="Personal Espeezy credits for marketplace, hustle gigs, and campus trades."
+      />
 
       {fund === 'success' && (
         <div className={`credits-account-banner${polling ? ' credits-account-banner--pending' : ''}`} role="status">

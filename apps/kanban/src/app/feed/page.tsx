@@ -319,9 +319,11 @@ export default function FeedPage() {
 
   return (
     <div className="feed-shell page-fade">
-      <header className="feed-hero">
-        <h1>Academic Journeys</h1>
-        <p>Real-time signals from students building the future. Share milestones, wins, and campus life.</p>
+      <header className="feed-hero page-header page-header--center">
+        <div className="page-header__main">
+          <h1 className="page-header__title">Academic Journeys</h1>
+          <p className="page-header__desc">Real-time signals from students building the future. Share milestones, wins, and campus life.</p>
+        </div>
         {profile && (
           <Link href="/feed/manage" className="feed-manage-link">
             Manage your posts

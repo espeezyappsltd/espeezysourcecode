@@ -96,12 +96,10 @@ export default function NetworkPage() {
     <div className="page-fade page-shell" style={{ paddingBottom: '6rem' }}>
       
       {/* ── NETWORK HUD ────────────────────────────────────────────────── */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '2rem' }}>
-        <div>
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 950, letterSpacing: '-0.06em', margin: 0, lineHeight: 0.9 }}>
-            Peer Network
-          </h1>
-          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1.5rem' }}>
+      <header className="page-header">
+        <div className="page-header__main">
+          <h1 className="page-header__title">Peer Network</h1>
+          <div className="page-header__meta" style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem' }}>
              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>Global Community</span>
                 <span style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--brand)' }}>{globalCount.toLocaleString()} <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Peers</span></span>
@@ -113,7 +111,7 @@ export default function NetworkPage() {
           </div>
         </div>
 
-        <div style={{ width: '100%', maxWidth: '400px', position: 'relative' }}>
+        <div className="page-header__aside" style={{ width: '100%', maxWidth: '400px', position: 'relative' }}>
           <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
           <input 
             type="text" 

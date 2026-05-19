@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useNotifications } from '@/components/NotificationProvider'
 import type { Notification } from '@/types/ui'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Bell, UserPlus, Check, X, Shield, Clock, Inbox, Mail, MessageSquare } from 'lucide-react'
 import { DateTime } from '@/utils/dateTime'
 import {
@@ -96,14 +97,7 @@ export default function NotificationsPage() {
   return (
     <div className="page-fade page-shell" style={{ paddingBottom: '4rem' }}>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '8px', background: 'var(--brand)', borderRadius: '10px', boxShadow: '0 4px 8px rgba(var(--brand-rgb), 0.15)' }}>
-            <Bell size={20} color="white" />
-          </div>
-          <h1 className="fluid-h1" style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>Inbox</h1>
-        </div>
-      </div>
+      <PageHeader title="Inbox" icon={Bell} />
 
       {/* Tab Switcher */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>

@@ -143,7 +143,7 @@ export default function PeerMessagesPage() {
 
   return (
     <div className="page-fade page-shell page-shell--narrow" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 120px)' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+      <header className="page-header page-header--bar">
         <button type="button" onClick={() => router.back()} style={{ background: 'var(--bg-sub)', border: 'none', borderRadius: '12px', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-main)' }}>
           <ChevronLeft size={20} />
         </button>

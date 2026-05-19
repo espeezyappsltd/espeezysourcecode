@@ -1,6 +1,7 @@
 'use client'
 
 import { Music, Lock, Loader2 } from 'lucide-react'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { useProfile } from '@/context/ProfileContext'
 import { hasFeature } from '@/utils/feature-gate'
 
@@ -21,7 +22,7 @@ export default function JukeboxPage() {
       <div className="page-fade page-shell page-shell--narrow" style={{ paddingTop: '3rem', textAlign: 'center' }}>
         <div style={{ padding: '2rem', background: 'var(--surface)', borderRadius: 24, border: '1px solid var(--border)' }}>
         <Lock size={40} style={{ margin: '0 auto 1rem', color: 'var(--text-sub)' }} />
-        <h1 style={{ margin: '0 0 0.5rem', fontWeight: 950 }}>Espeezy Jukebox</h1>
+        <h1 className="page-header__title" style={{ margin: '0 0 0.5rem' }}>Espeezy Jukebox</h1>
         <p style={{ color: 'var(--text-sub)', fontWeight: 600, lineHeight: 1.5 }}>
           Share what you are listening to with your cohort. Jukebox is included on Pro and Premium plans.
         </p>
@@ -35,12 +36,11 @@ export default function JukeboxPage() {
 
   return (
     <div className="page-fade page-shell page-shell--narrow" style={{ paddingTop: '1.5rem', paddingBottom: '4rem' }}>
-      <h1 style={{ margin: 0, fontWeight: 950, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <Music color="var(--brand)" /> Espeezy Jukebox
-      </h1>
-      <p style={{ color: 'var(--text-sub)', fontWeight: 600, marginTop: '0.5rem' }}>
-        Campus listening lounge — connect your music and show now playing on your profile.
-      </p>
+      <PageHeader
+        title="Espeezy Jukebox"
+        icon={Music}
+        description="Campus listening lounge — connect your music and show now playing on your profile."
+      />
       <div
         style={{
           marginTop: '2rem',

@@ -193,12 +193,12 @@ export default function PersonalAssetsPage() {
 
   return (
     <motion.div className="assets-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <header className="assets-hero ui-hero-row">
-        <div className="ui-hero-row__main">
-          <h1>
-            Personal <span>Arsenal</span>
+      <header className="assets-hero ui-hero-row page-header">
+        <div className="ui-hero-row__main page-header__main">
+          <h1 className="page-header__title">
+            Personal <span className="page-header__title-accent">Arsenal</span>
           </h1>
-          <p>
+          <p className="page-header__desc">
             Academic assets with Espeezy credit values for marketplace listings and cash conversion.{' '}
             {formatCreditCapHint()}.
           </p>

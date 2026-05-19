@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense, memo, useMemo, useCallback } from 'react
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { useHustle, type HustleItem, type HustleTab } from '@/hooks/useHustle'
 import {
   Briefcase,
@@ -170,29 +171,18 @@ function HustlePage() {
 
   return (
     <div className="hustle-shell page-shell list-page--compact">
-      <header style={{ marginBottom: '2rem' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
-        >
-          <div style={{ padding: '0.75rem', background: 'var(--brand)', borderRadius: '12px', color: 'white' }}>
-            <Briefcase size={28} />
-          </div>
-          <div>
-            <h1 className="title-display" style={{ color: 'var(--text-main)', margin: 0 }}>
-              Hustle <span style={{ color: 'var(--brand)' }}>Board</span>
-            </h1>
-            <p className="body-copy" style={{ fontSize: '0.9rem', margin: '0.25rem 0 0' }}>
-              Campus gigs paid in Espeezy credits · escrow-backed trades
-            </p>
-          </div>
+      <PageHeader
+        title="Hustle"
+        titleAccent="Board"
+        icon={Briefcase}
+        description="Campus gigs paid in Espeezy credits · escrow-backed trades"
+        actions={
           <button type="button" className="btn btn-primary hustle-post-btn" onClick={() => setPostOpen(true)}>
             <Plus size={18} aria-hidden />
             Post gig
           </button>
-        </motion.div>
-      </header>
+        }
+      />
 
       <div className="hustle-toolbar ui-panel">
         <div className="hustle-search-row">

@@ -202,14 +202,10 @@ function MarketplacePageInner() {
     <div className="marketplace-page marketplace-page--compact page-fade list-page--compact">
       <AccountWalletPanel compact />
 
-      <header className="marketplace-page__header page-list-header">
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 950, letterSpacing: '-0.03em' }}>
-            Campus Marketplace
-          </h1>
-          <p style={{ margin: '0.2rem 0 0', color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 600 }}>
-            Pay with Espeezy credits · fast campus checkout
-          </p>
+      <header className="marketplace-page__header page-list-header page-header page-header--compact">
+        <div className="page-header__main">
+          <h1 className="page-header__title">Campus Marketplace</h1>
+          <p className="page-header__desc">Pay with Espeezy credits · fast campus checkout</p>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
             <Link href="/assets" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)' }}>
               Arsenal assets →
@@ -220,6 +216,7 @@ function MarketplacePageInner() {
           </div>
         </div>
         <div
+          className="page-header__aside"
           style={{
             display: 'flex',
             alignItems: 'center',

@@ -52,7 +52,7 @@ export default function PrivacyPage() {
         <Link href="/" style={{ display: 'inline-block', marginBottom: '2.5rem', color: '#10b981', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
           &larr; Back to Home
         </Link>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>Privacy Policy</h1>
+        <h1 className="page-header__title" style={{ marginBottom: '0.75rem' }}>Privacy Policy</h1>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', marginBottom: '3rem' }}>Last updated: April 21, 2026</p>
 
         <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '2.5rem' }}>

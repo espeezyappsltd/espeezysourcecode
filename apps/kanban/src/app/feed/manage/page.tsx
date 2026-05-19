@@ -182,11 +182,13 @@ export default function FeedManagePage() {
   if (!profile) {
     return (
       <div className="feed-manage-shell">
-        <header className="feed-manage-header">
-          <Link href="/feed" className="feed-manage-back">
-            <ArrowLeft size={18} /> Feed
-          </Link>
-          <h1>My public posts</h1>
+        <header className="feed-manage-header page-header">
+          <div className="page-header__main">
+            <Link href="/feed" className="feed-manage-back">
+              <ArrowLeft size={18} /> Feed
+            </Link>
+            <h1 className="page-header__title">My public posts</h1>
+          </div>
         </header>
         <div className="feed-empty">
           <h2 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>Sign in required</h2>
@@ -203,12 +205,14 @@ export default function FeedManagePage() {
 
   return (
     <div className="feed-manage-shell">
-      <header className="feed-manage-header">
-        <Link href="/feed" className="feed-manage-back">
-          <ArrowLeft size={18} /> Feed
-        </Link>
-        <h1>My public posts</h1>
-        <p>Create, edit, and delete posts that appear on the academic feed.</p>
+      <header className="feed-manage-header page-header">
+        <div className="page-header__main">
+          <Link href="/feed" className="feed-manage-back">
+            <ArrowLeft size={18} /> Feed
+          </Link>
+          <h1 className="page-header__title">My public posts</h1>
+          <p className="page-header__desc">Create, edit, and delete posts that appear on the academic feed.</p>
+        </div>
       </header>
 
       <div className="feed-manage-toolbar">

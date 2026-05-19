@@ -298,17 +298,15 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     <div className="page-fade page-shell page-shell--wide">
 
       {/* Header */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
+      <header className="page-header">
+        <div className="page-header__main">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--brand)', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
             <BarChart3 size={14} /><span>Analytics Summary</span>
           </div>
-          <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{group?.name || 'Project'}</h1>
-          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500 }}>
-            {group?.module_code} • Live project tracking
-          </p>
+          <h1 className="page-header__title">{group?.name || 'Project'}</h1>
+          <p className="page-header__desc">{group?.module_code} • Live project tracking</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="page-header__actions" style={{ display: 'flex', gap: '0.5rem' }}>
           <button onClick={exportToCSV} className="btn btn-ghost btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
             <Download size={14} /> CSV
           </button>

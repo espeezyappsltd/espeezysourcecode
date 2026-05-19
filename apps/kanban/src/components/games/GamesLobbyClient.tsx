@@ -2,14 +2,18 @@
 
 import Link from 'next/link'
 import AccountTiersBanner from '@/components/AccountTiersBanner'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { Gamepad2 } from 'lucide-react'
 
 export default function GamesLobbyClient() {
   return (
     <section className="page-fade page-shell page-stack" style={{ paddingTop: '1.25rem' }}>
-      <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900 }}>Games Lobby</h1>
-      <p style={{ margin: 0, color: 'var(--text-sub)' }}>
-        Games are currently in lightweight local mode for refactor stability.
-      </p>
+      <PageHeader
+        variant="compact"
+        title="Games Lobby"
+        icon={Gamepad2}
+        description="Games are currently in lightweight local mode for refactor stability."
+      />
       <AccountTiersBanner style={{ marginBottom: '1rem' }} />
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
         <Link href="/games/puzzles" className="btn btn-primary">Open Puzzles</Link>

@@ -99,10 +99,10 @@ export default function DashboardHome({
       <AccountTiersBanner />
 
       {/* ── CONTROL PANEL HEADER ─────────────────────────────────────────── */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '300px' }}>
+      <header className="page-header">
+        <div className="page-header__main" style={{ flex: 1, minWidth: '300px' }}>
 
-          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', margin: 0, lineHeight: 1.1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h1 className="page-header__title" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
             {profile?.subscription_plan === 'premium' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>{getPlanName('premium').toUpperCase()}</span>}
             {profile?.subscription_plan === 'pro' && <span className="locked-badge locked-badge-pro glow-pro" style={{ margin: 0, fontSize: '0.7rem' }}>{getPlanName('pro').toUpperCase()}</span>}
