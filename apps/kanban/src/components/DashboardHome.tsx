@@ -64,6 +64,12 @@ export default function DashboardHome({
     setSyncToken,
   } = useDashboardMetrics()
 
+  const { onlineUsers } = usePresence()
+  const teamOnlineCount = useMemo(
+    () => countTeamMembersOnline(members.map((m) => m.id), onlineUsers),
+    [members, onlineUsers],
+  )
+
   const renderRoleBadge = (role: string | null) => {
     const r = role?.toUpperCase()
     if (r === 'TEAM_LEADER' || r === 'ADMIN') return <span style={{ fontSize: '0.6rem', padding: '1px 6px', borderRadius: '4px', background: 'var(--brand)', color: 'white', fontWeight: 900, marginLeft: '4px' }}>{r.replace('_', ' ')}</span>
