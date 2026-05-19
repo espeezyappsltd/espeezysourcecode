@@ -17,8 +17,13 @@ export type ResolveTierResult = {
   source: 'jwt' | 'cookie' | 'database'
 }
 
+function isPaidGamesTier(tier: GamesTier): boolean {
+  return tier === 'pro' || tier === 'premium'
+}
+
 /**
- * Resolve games access tier: JWT app_metadata first, then httpOnly cookie, then one DB read.
+ * Resolve games access tier. Trusts JWT/cookie only when paid — stale "free" cache
+ * still checks profiles.subscription_plan (Kanban billing source of truth).
  */
 export async function resolveGamesTier(
   user: User,
@@ -26,12 +31,12 @@ export async function resolveGamesTier(
   supabase: SupabaseClient,
 ): Promise<ResolveTierResult> {
   const jwtTier = getTierFromJwt(user)
-  if (jwtTier) {
+  if (jwtTier && isPaidGamesTier(jwtTier)) {
     return { tier: jwtTier, source: 'jwt' }
   }
 
   const cookieTier = getTierFromCookie(request.cookies.get(GAMES_TIER_COOKIE)?.value)
-  if (cookieTier) {
+  if (cookieTier && isPaidGamesTier(cookieTier)) {
     return { tier: cookieTier, source: 'cookie' }
   }
 

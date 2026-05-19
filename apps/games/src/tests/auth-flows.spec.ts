@@ -32,6 +32,6 @@ test.describe('Games auth flows', () => {
     await page.goto('/login?upgrade=1')
     await page.waitForLoadState('networkidle')
     expect(page.url()).toMatch(/\/login\?.*upgrade=1/)
-    await expect(page.getByText(/upgrade required/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(/pro account required/i)).toBeVisible({ timeout: 10_000 })
   })
 })

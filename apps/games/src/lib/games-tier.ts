@@ -10,8 +10,19 @@ export type GamesTier = 'free' | 'pro' | 'premium'
 const PAID_TIERS = new Set<GamesTier>(['pro', 'premium'])
 
 export function normalizeGamesTier(value: unknown): GamesTier {
-  if (value === 'pro' || value === 'premium') return value
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : ''
+  if (raw === 'premium' || raw === 'lifetime') return 'premium'
+  if (raw === 'pro') return 'pro'
   return 'free'
+}
+
+/** Paid tier from profile row (tier column and/or subscription_plan). */
+export function tierFromProfileRow(profile: {
+  tier?: string | null
+  subscription_plan?: string | null
+} | null): GamesTier {
+  if (!profile) return 'free'
+  return normalizeGamesTier(profile.tier ?? profile.subscription_plan)
 }
 
 export function hasGamesAccess(tier: GamesTier): boolean {
@@ -50,11 +61,13 @@ export async function fetchProfileTier(
 ): Promise<GamesTier> {
   const { data: profile } = await supabase
     .from('profiles')
-    .select('tier')
+    .select('tier, subscription_plan')
     .eq('id', userId)
     .maybeSingle()
 
-  return normalizeGamesTier((profile as { tier?: string } | null)?.tier)
+  return tierFromProfileRow(
+    profile as { tier?: string | null; subscription_plan?: string | null } | null,
+  )
 }
 
 export async function syncTierToJwt(userId: string, tier: GamesTier): Promise<void> {

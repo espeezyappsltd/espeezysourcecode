@@ -59,8 +59,8 @@ export default function LoginClient() {
       }}
       role="status"
     >
-      <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Upgrade required</strong>
-      Espeezy Games is included with Pro and Premium. Upgrade your plan on Kanban to play.
+      <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Pro account required</strong>
+      Espeezy Games needs a Pro or Premium plan on your Espeezy account. Free accounts cannot play here.
       <a
         href={`${ESPEEZY_APP_ORIGINS.kanban}/settings?tab=billing`}
         style={{
