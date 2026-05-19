@@ -417,30 +417,12 @@ export function useSettingsPage() {
     setError(null)
 
     try {
-      const previousGroupId = profile.group_id ?? null
-      if (previousGroupId && previousGroupId !== newGroupId) {
-        const { archiveMemberTasksForGroup, restoreMemberTasksOnGroupBoard } = await import(
-          '@/lib/team/membership-transfer'
-        )
-        await archiveMemberTasksForGroup(profile.id, previousGroupId)
-        if (newGroupId) {
-          const archived = (profile as Profile & { archived_group_id?: string | null }).archived_group_id
-          if (archived === newGroupId) {
-            await restoreMemberTasksOnGroupBoard(profile.id, newGroupId)
-          }
-        }
+      const { switchTeamGroup } = await import('@/app/join/actions')
+      const res = await switchTeamGroup(newGroupId)
+      if (res.error) {
+        setError(`Sync failed: ${res.error}`)
+        return
       }
-
-      await updateProfileById(profile.id, {
-        group_id: newGroupId,
-        role: 'collaborator',
-        archived_group_id:
-          newGroupId && previousGroupId && previousGroupId !== newGroupId
-            ? previousGroupId
-            : newGroupId
-              ? null
-              : previousGroupId,
-      } as Record<string, unknown>)
       await fetchUserData()
       refreshProfile()
       addToast('Team Switched', 'You have been successfully re-assigned to the new project group.', 'success')

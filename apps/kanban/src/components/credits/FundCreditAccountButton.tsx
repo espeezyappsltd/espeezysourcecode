@@ -7,7 +7,7 @@ import {
   MIN_CREDIT_FUND_GBP,
   creditsToFundGbp,
   gbpToCredits,
-} from '@/lib/credits/fund-stripe'
+} from '@/lib/credits/fund-stripe-shared'
 import { formatCredits, formatGbpApprox } from '@/lib/credits'
 
 type Props = {

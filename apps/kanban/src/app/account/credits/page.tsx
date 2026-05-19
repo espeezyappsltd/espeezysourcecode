@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Coins, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import { FundCreditAccountButton } from '@/components/credits/FundCreditAccountButton'
-import { MIN_CREDIT_FUND_GBP } from '@/lib/credits/fund-stripe'
+import { MIN_CREDIT_FUND_GBP } from '@/lib/credits/fund-stripe-shared'
 import './credits-account.css'
 
 function CreditsAccountContent() {

@@ -4,11 +4,11 @@ import { getAdminDb } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { getUid } from '@/utils/auth-server'
+import { formatJoinRequestChatContent } from '@/lib/team/membership-transfer'
 import {
   archiveMemberTasksForGroup,
-  formatJoinRequestChatContent,
   restoreMemberTasksOnGroupBoard,
-} from '@/lib/team/membership-transfer'
+} from '@/lib/team/membership-transfer.server'
 
 export async function createGroup(formData: FormData) {
   const uid = await getUid()
@@ -423,6 +423,53 @@ export async function declineJoinRequest(requestId: string) {
     if (error) throw error
 
     revalidatePath('/')
+    return { success: true }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'unknown error' }
+  }
+}
+
+export async function switchTeamGroup(newGroupId: string | null): Promise<{ success?: boolean; error?: string }> {
+  const uid = await getUid()
+  if (!uid) return { error: 'Not authenticated' }
+
+  try {
+    const adminDb = getAdminDb()
+    const { data: profile, error: profileError } = await adminDb
+      .from('profiles')
+      .select('group_id, archived_group_id')
+      .eq('id', uid)
+      .single()
+
+    if (profileError || !profile) return { error: 'Profile not found' }
+
+    const previousGroupId = profile.group_id as string | null
+
+    if (previousGroupId && previousGroupId !== newGroupId) {
+      await archiveMemberTasksForGroup(uid, previousGroupId)
+      if (newGroupId && profile.archived_group_id === newGroupId) {
+        await restoreMemberTasksOnGroupBoard(uid, newGroupId)
+      }
+    }
+
+    const { error: updateError } = await adminDb
+      .from('profiles')
+      .update({
+        group_id: newGroupId,
+        role: 'collaborator',
+        archived_group_id:
+          newGroupId && previousGroupId && previousGroupId !== newGroupId
+            ? previousGroupId
+            : newGroupId
+              ? null
+              : previousGroupId,
+      })
+      .eq('id', uid)
+
+    if (updateError) throw updateError
+
+    revalidatePath('/', 'layout')
+    revalidatePath('/settings')
     return { success: true }
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : 'unknown error' }
