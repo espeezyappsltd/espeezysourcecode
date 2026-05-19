@@ -193,8 +193,8 @@ export default function PersonalAssetsPage() {
 
   return (
     <motion.div className="assets-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <header className="assets-hero" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem', marginBottom: '2rem' }}>
-        <div>
+      <header className="assets-hero ui-hero-row">
+        <div className="ui-hero-row__main">
           <h1>
             Personal <span>Arsenal</span>
           </h1>
@@ -202,7 +202,7 @@ export default function PersonalAssetsPage() {
             Academic assets with Espeezy credit values for marketplace listings and cash conversion.{' '}
             {formatCreditCapHint()}.
           </p>
-          <div className="assets-value-card">
+          <div className="assets-value-card ui-panel ui-panel--accent ui-panel--compact">
             <Coins size={20} color="var(--brand)" />
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -218,7 +218,7 @@ export default function PersonalAssetsPage() {
           </div>
         </div>
 
-        <div className="assets-storage-card">
+        <div className="assets-storage-card ui-panel ui-hero-row__aside ui-hero-row__aside--fixed">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontWeight: 800, fontSize: '0.85rem' }}>
               <HardDrive size={16} color="var(--brand)" />
@@ -266,7 +266,7 @@ export default function PersonalAssetsPage() {
       </nav>
 
       <div className="assets-toolbar">
-        <div className="assets-filter-tabs">
+        <div className="assets-filter-tabs ui-panel ui-panel--inset ui-panel--compact">
           {(['all', 'file', 'link', 'marketplace_ref'] as const).map((f) => (
             <button key={f} type="button" className={filter === f ? 'active' : ''} onClick={() => setFilter(f)}>
               {f === 'marketplace_ref' ? 'Inventory' : f}
@@ -284,7 +284,7 @@ export default function PersonalAssetsPage() {
       </div>
 
       {loadError && !loading ? (
-        <div className="assets-empty">
+        <div className="assets-empty ui-panel ui-panel--dashed">
           <AlertCircle size={40} style={{ margin: '0 auto 1rem', color: '#ef4444' }} />
           <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>Could not load arsenal</h3>
           <p style={{ margin: '0 0 1.25rem', color: 'var(--text-sub)', fontWeight: 600, maxWidth: '32rem', marginLeft: 'auto', marginRight: 'auto' }}>
@@ -306,7 +306,7 @@ export default function PersonalAssetsPage() {
                 <button
                   key={path}
                   type="button"
-                  className="assets-folder-tile"
+                  className="assets-folder-tile ui-panel ui-panel--compact"
                   onClick={() => setCurrentFolder(path)}
                 >
                   <Folder size={28} color="var(--brand)" />
@@ -320,7 +320,7 @@ export default function PersonalAssetsPage() {
           )}
 
           {filteredAssets.length === 0 && childFolders.length === 0 ? (
-            <div className="assets-empty">
+            <div className="assets-empty ui-panel ui-panel--dashed">
               <File size={48} style={{ margin: '0 auto 1rem', opacity: 0.15, color: 'var(--text-sub)' }} />
               <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>No assets in this folder</h3>
               <p style={{ margin: '0 0 1.25rem', color: 'var(--text-sub)', fontWeight: 600, maxWidth: '28rem', marginLeft: 'auto', marginRight: 'auto' }}>
@@ -453,17 +453,9 @@ function AssetCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      style={{
-        background: 'var(--surface)',
-        borderRadius: '20px',
-        border: '1px solid var(--border)',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      className="hover-card"
+      className="ui-card hover-card"
     >
-      <div style={{ height: '140px', background: 'var(--bg-sub)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="ui-card__media">
         {asset.preview_url ? (
           <img src={asset.preview_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
@@ -492,7 +484,7 @@ function AssetCard({
           </button>
       </div>
       
-      <div style={{ padding: '1.15rem' }}>
+      <div className="ui-card__body">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.35rem' }}>
           <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: 'var(--text-main)' }}>{asset.title}</h3>
           <span style={{ fontSize: '0.58rem', fontWeight: 950, background: 'var(--bg-sub)', padding: '2px 7px', borderRadius: 6, color: 'var(--brand)', textTransform: 'uppercase', flexShrink: 0 }}>

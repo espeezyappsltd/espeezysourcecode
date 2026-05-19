@@ -1,8 +1,4 @@
-.assets-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 4rem;
-}
+/* Shell sizing: ui-panels.css (.assets-page) */
 
 .assets-hero h1 {
   margin: 0;
@@ -30,20 +26,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1.15rem;
-  background: rgba(var(--brand-rgb), 0.08);
-  border: 1px solid rgba(var(--brand-rgb), 0.22);
-  border-radius: 14px;
-}
-
-.assets-storage-card {
-  width: 100%;
-  max-width: 320px;
-  background: var(--surface);
-  padding: 1.25rem;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  width: fit-content;
+  max-width: 100%;
 }
 
 .assets-breadcrumb {
@@ -86,10 +70,9 @@
 
 .assets-filter-tabs {
   display: flex;
-  background: var(--bg-sub);
   padding: 4px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
+  width: fit-content;
+  max-width: 100%;
 }
 
 .assets-filter-tabs button {
@@ -110,44 +93,26 @@
 }
 
 .assets-folder-tile {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 1.25rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.assets-folder-tile:hover {
-  border-color: var(--brand);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  text-align: left;
+  width: 100%;
 }
 
 .assets-empty {
   text-align: center;
-  padding: 4rem 2rem;
-  background: var(--surface);
-  border-radius: 24px;
-  border: 2px dashed var(--border);
+  padding: clamp(2rem, 6vw, 4rem) var(--panel-p);
 }
 
 .assets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.25rem;
+  /* grid rules: ui-panels.css */
 }
 
 /* —— Marketplace trading desk —— */
 .trading-metrics {
   margin-bottom: 2.5rem;
-  padding: 1.5rem;
-  border-radius: 24px;
-  border: 1px solid var(--border);
-  background: linear-gradient(165deg, rgba(var(--brand-rgb), 0.06) 0%, var(--surface) 45%);
-  box-shadow: var(--shadow-sm);
 }
 
 .trading-metrics--error {
@@ -197,21 +162,15 @@
 
 .trading-metrics__kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
   gap: 0.85rem;
   margin-bottom: 1.5rem;
-}
-
-.trading-metrics__kpi {
-  padding: 1rem 1.1rem;
-  border-radius: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  width: 100%;
+  min-width: 0;
 }
 
 .trading-metrics__kpi--accent {
-  border-color: rgba(var(--brand-rgb), 0.45);
-  background: rgba(var(--brand-rgb), 0.1);
+  /* accent via .ui-panel--accent */
 }
 
 .trading-metrics__kpi-icon {
@@ -242,23 +201,11 @@
 }
 
 .trading-metrics__grid {
-  display: grid;
-  grid-template-columns: minmax(260px, 340px) 1fr;
-  gap: 1.25rem;
   margin-bottom: 1.25rem;
 }
 
-@media (max-width: 900px) {
-  .trading-metrics__grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .trading-metrics__panel {
-  padding: 1.25rem;
-  border-radius: 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  /* extends .ui-panel via classList in component */
 }
 
 .trading-metrics__panel h3 {

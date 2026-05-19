@@ -142,6 +142,10 @@ button, .btn, input, textarea, select {
   --p-safe: 1rem;
   --section-p: 2rem;
   --card-p: 1.25rem;
+  --content-max: 1200px;
+  --content-narrow: 720px;
+  --panel-p: clamp(1rem, 2.5vw, 1.35rem);
+  --panel-gap: clamp(0.75rem, 2vw, 1.25rem);
   --gap-md: 0.75rem;
   --gap-lg: 1rem;
   --vh-dynamic: 100dvh;
@@ -495,15 +499,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 1rem;
 }
 
-.auth-card {
-  background-color: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: clamp(1rem, 5vw, 2.5rem);
-  width: 100%;
-  max-width: 420px;
-  border: 1px solid var(--border);
-}
+/* Panel chrome defined in ui-panels.css; auth login keeps narrow cap there */
 
 .auth-title {
   font-size: 1.5rem;

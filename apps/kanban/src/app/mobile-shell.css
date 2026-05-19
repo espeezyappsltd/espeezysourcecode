@@ -227,10 +227,24 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
   }
 
+  .page-shell,
+  .assets-page,
   .feed-shell,
+  .feed-manage-shell,
   .hustle-shell,
   .marketplace-page {
     max-width: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ui-panel,
+  .ui-card,
+  .auth-card,
+  .trading-metrics,
+  .assets-storage-card {
+    max-width: 100%;
+    min-width: 0;
   }
 }
 

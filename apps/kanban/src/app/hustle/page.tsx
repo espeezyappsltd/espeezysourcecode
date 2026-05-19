@@ -194,7 +194,7 @@ function HustlePage() {
         </motion.div>
       </header>
 
-      <div className="hustle-toolbar">
+      <div className="hustle-toolbar ui-panel">
         <div className="hustle-search-row">
           <SearchField
             id="hustle-search"
@@ -447,7 +447,7 @@ const HustleCard = memo(function HustleCard({
 
   return (
     <article
-      className={`hustle-card${isHustleTask ? ' hustle-card--linked' : ' hustle-card--listing'}${needsAction ? ' hustle-card--needs-action' : ''}`}
+      className={`hustle-card ui-panel ui-panel--inset${isHustleTask ? ' hustle-card--linked' : ' hustle-card--listing'}${needsAction ? ' hustle-card--needs-action' : ''}`}
     >
       {isHustleTask ? (
         <Link href={taskHref} className="hustle-card__overlay-link" prefetch aria-label={item.title} />

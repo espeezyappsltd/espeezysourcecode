@@ -135,7 +135,7 @@ export function TradingMetricsDashboard() {
 
   if (loading && !metrics) {
     return (
-      <section className="trading-metrics" aria-label="Marketplace trading metrics">
+      <section className="trading-metrics ui-panel ui-panel--gradient" aria-label="Marketplace trading metrics">
         <motion.div style={{ textAlign: 'center', padding: '3rem' }}>
           <Loader2 size={36} className="animate-spin" style={{ margin: '0 auto', color: 'var(--brand)' }} />
         </motion.div>
@@ -145,7 +145,7 @@ export function TradingMetricsDashboard() {
 
   if (error && !metrics) {
     return (
-      <section className="trading-metrics trading-metrics--error">
+      <section className="trading-metrics trading-metrics--error ui-panel ui-panel--dashed">
         <p>{error}</p>
         <button type="button" className="btn btn-primary" onClick={() => void load()}>
           Retry
@@ -157,7 +157,7 @@ export function TradingMetricsDashboard() {
   if (!metrics) return null
 
   return (
-    <section className="trading-metrics" aria-label="Marketplace trading metrics">
+    <section className="trading-metrics ui-panel ui-panel--gradient" aria-label="Marketplace trading metrics">
       <div className="trading-metrics__header">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <h2 className="trading-metrics__title">
@@ -214,8 +214,8 @@ export function TradingMetricsDashboard() {
         />
       </div>
 
-      <div className="trading-metrics__grid">
-        <div className="trading-metrics__panel trading-metrics__panel--withdraw">
+      <div className="trading-metrics__grid ui-panel-split">
+        <div className="trading-metrics__panel trading-metrics__panel--withdraw ui-panel">
           <h3>Cash withdrawal</h3>
           <p>
             Max today: <strong>{formatCredits(metrics.availableWithdrawCredits)}</strong>{' '}
@@ -294,7 +294,7 @@ export function TradingMetricsDashboard() {
           </p>
         </div>
 
-        <div className="trading-metrics__panel">
+        <div className="trading-metrics__panel ui-panel">
           <h3>Performance by asset</h3>
           {metrics.assetPerformance.length === 0 ? (
             <p className="trading-metrics__empty">List arsenal assets on the marketplace to track sales here.</p>
@@ -329,7 +329,7 @@ export function TradingMetricsDashboard() {
         </div>
       </div>
 
-      <div className="trading-metrics__panel trading-metrics__panel--activity">
+      <div className="trading-metrics__panel trading-metrics__panel--activity ui-panel">
         <h3>
           <Activity size={18} /> Activity feed
         </h3>
@@ -381,7 +381,9 @@ function KpiCard({
   accent?: boolean
 }) {
   return (
-    <motion.div className={`trading-metrics__kpi${accent ? ' trading-metrics__kpi--accent' : ''}`}>
+    <motion.div
+      className={`trading-metrics__kpi ui-panel ui-panel--compact${accent ? ' trading-metrics__kpi--accent ui-panel--accent' : ''}`}
+    >
       <div className="trading-metrics__kpi-icon">{icon}</div>
       <div className="trading-metrics__kpi-label">{label}</div>
       <div className="trading-metrics__kpi-value">{value}</div>

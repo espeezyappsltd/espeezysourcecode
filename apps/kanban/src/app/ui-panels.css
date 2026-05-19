@@ -1,0 +1,250 @@
+/**
+ * Standardized page shells, panels, and cards.
+ * Use these instead of one-off max-width / border-radius / inline surface styles.
+ */
+
+/* ── Layout tokens (also set in globals :root) ───────────────── */
+:root {
+  --content-max: 1200px;
+  --content-narrow: 720px;
+  --panel-p: clamp(1rem, 2.5vw, 1.35rem);
+  --panel-gap: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+/* ── Page shell — constrains width inside dashboard main-content ─ */
+.page-shell,
+.assets-page,
+.feed-shell,
+.feed-manage-shell,
+.hustle-shell,
+.marketplace-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: min(var(--content-max), 100%);
+  margin-inline: auto;
+  padding-inline: clamp(0.5rem, 2.5vw, 1rem);
+  padding-block: 0 2rem;
+  min-width: 0;
+}
+
+.feed-shell,
+.feed-manage-shell {
+  max-width: min(var(--content-narrow), 100%);
+}
+
+.hustle-shell {
+  max-width: min(var(--content-narrow), 100%);
+}
+
+/* Narrow content pages */
+.page-shell--narrow {
+  max-width: min(var(--content-narrow), 100%);
+}
+
+.page-shell--wide {
+  max-width: min(1400px, 100%);
+}
+
+/* ── Panel (sections, settings blocks, metrics blocks) ───────── */
+.ui-panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--panel-p);
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-panel--inset {
+  background: var(--bg-sub);
+  box-shadow: none;
+}
+
+.ui-panel--accent {
+  background: rgba(var(--brand-rgb), 0.08);
+  border-color: rgba(var(--brand-rgb), 0.22);
+  box-shadow: none;
+}
+
+.ui-panel--dashed {
+  background: var(--surface);
+  border-style: dashed;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+.ui-panel--compact {
+  padding: clamp(0.75rem, 2vw, 1rem);
+  border-radius: var(--radius);
+}
+
+.ui-panel--flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ui-panel--gradient {
+  background: linear-gradient(165deg, rgba(var(--brand-rgb), 0.06) 0%, var(--surface) 45%);
+}
+
+/* Settings / auth cards inherit panel chrome */
+.auth-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--panel-p);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-container .auth-card {
+  max-width: 420px;
+}
+
+/* ── Hero row (title + side panel) ───────────────────────────── */
+.ui-hero-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--panel-gap);
+  margin-bottom: clamp(1.25rem, 4vw, 2rem);
+  min-width: 0;
+}
+
+.ui-hero-row__main {
+  flex: 1 1 16rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ui-hero-row__aside {
+  flex: 1 1 16rem;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+@media (min-width: 769px) {
+  .ui-hero-row__aside--fixed {
+    flex: 0 1 320px;
+    max-width: 320px;
+  }
+}
+
+/* ── Card (grid tiles: assets, marketplace, feed) ────────────── */
+.ui-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ui-card:hover,
+.hover-card:hover {
+  border-color: rgba(var(--brand-rgb), 0.45);
+  box-shadow: var(--shadow-md);
+}
+
+.ui-card__media {
+  height: 140px;
+  background: var(--bg-sub);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ui-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ui-card__body {
+  padding: var(--panel-p);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Grids ───────────────────────────────────────────────────── */
+.ui-panel-grid,
+.assets-grid,
+.marketplace-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--panel-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.ui-panel-grid--tiles {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+}
+
+.ui-panel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--panel-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.ui-panel-split {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: var(--panel-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .ui-panel-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Mobile: prevent horizontal bleed & rigid side panels ────── */
+@media (max-width: 768px) {
+  .page-shell,
+  .assets-page,
+  .feed-shell,
+  .feed-manage-shell,
+  .hustle-shell,
+  .marketplace-page {
+    max-width: 100%;
+    padding-inline: 0;
+    padding-bottom: 1rem;
+  }
+
+  .ui-hero-row__aside,
+  .ui-hero-row__aside--fixed {
+    flex: 1 1 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .ui-panel-grid,
+  .assets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trading-metrics {
+    padding: var(--panel-p);
+    border-radius: var(--radius-lg);
+  }
+}

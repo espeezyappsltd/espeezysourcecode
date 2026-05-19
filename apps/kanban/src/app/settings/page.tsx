@@ -17,7 +17,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="page-fade" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 var(--p-safe)' }}>
+    <div className="page-fade page-shell page-shell--narrow">
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
         <div style={{ padding: '8px', background: 'var(--brand)', borderRadius: '12px' }}>
           <Settings size={28} color="white" />

@@ -3,14 +3,7 @@
 }
 
 .listing-card {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  display: flex;
-  flex-direction: column;
   cursor: pointer;
-  transition: border-color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
 

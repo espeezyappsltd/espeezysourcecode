@@ -330,7 +330,7 @@ export default function FeedPage() {
       </header>
 
       {!profile && (
-        <div className="feed-empty" style={{ marginBottom: '1.5rem' }}>
+        <div className="feed-empty ui-panel ui-panel--dashed" style={{ marginBottom: '1.5rem' }}>
           <Sparkles size={32} color="var(--brand)" style={{ marginBottom: '0.75rem' }} />
           <h2 style={{ fontWeight: 900, marginBottom: '0.35rem' }}>Join the journey</h2>
           <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '1rem' }}>
@@ -356,7 +356,7 @@ export default function FeedPage() {
       )}
 
       {profile && (
-        <div className="feed-composer">
+        <div className="feed-composer ui-panel">
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
             <FeedAvatar profile={profile as PostAuthor} size={42} ring />
             <div style={{ flex: 1 }}>
@@ -427,7 +427,7 @@ export default function FeedPage() {
       )}
 
       {loadError && (
-        <div className="feed-empty">
+        <div className="feed-empty ui-panel ui-panel--dashed">
           <p style={{ color: 'var(--text-sub)', marginBottom: '0.75rem' }}>{loadError}</p>
           <button type="button" className="btn btn-secondary" onClick={() => void loadPosts()}>
             <RefreshCw size={14} style={{ marginRight: 6 }} />
@@ -441,7 +441,7 @@ export default function FeedPage() {
         [0, 1, 2].map((i) => <div key={i} className="feed-skeleton" />)}
 
       {!loading && posts.length === 0 && !loadError && (
-        <div className="feed-empty">
+        <div className="feed-empty ui-panel ui-panel--dashed">
           <Globe size={40} style={{ marginBottom: '0.75rem', opacity: 0.35, color: 'var(--brand)' }} />
           <p style={{ fontWeight: 800, marginBottom: '0.35rem' }}>No journeys yet</p>
           <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '1rem' }}>
@@ -604,7 +604,7 @@ function PostCard({
   timeAgo: string
 }) {
   return (
-    <article className="feed-card">
+    <article className="feed-card ui-panel ui-panel--flush">
       <div style={{ padding: '1rem 1.15rem 0.65rem', display: 'flex', gap: '0.75rem', position: 'relative' }}>
         <FeedAvatar profile={post.author as PostAuthor} size={44} />
         <div style={{ flex: 1, minWidth: 0 }}>

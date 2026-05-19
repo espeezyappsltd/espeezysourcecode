@@ -23,7 +23,7 @@ export const ListingCard = memo(function ListingCard({ item, href, activeCategor
   const categoryHref = marketplaceCategoryUrl(item.category ?? 'Other', { q: navCtx.q })
 
   return (
-    <article className="listing-card listing-card--dense listing-card--linked">
+    <article className="listing-card listing-card--dense listing-card--linked ui-card">
       <Link
         href={itemHref}
         className="listing-card__overlay-link"
