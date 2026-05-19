@@ -11,7 +11,7 @@ import {
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
-  { href: '/checkout', label: 'Pricing' },
+  { href: 'https://espeezy.com/pricing', label: 'Pricing', external: true },
   { href: '/contact', label: 'Contact' },
 ]
 

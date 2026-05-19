@@ -25,6 +25,7 @@ const PLAN_CONFIG: Record<z.infer<typeof checkoutSchema>['plan'], { priceEnvKey:
 
 /**
  * POST /api/stripe/checkout
+ * Backend session creation (called from espeezy.com marketing checkout, not Kanban UI).
  * - Authenticated: requires Bearer token for logged-in users
  * - Public: accepts email for pre-registration signups
  */

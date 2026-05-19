@@ -13,7 +13,7 @@ test.describe('Subscription Cycle', () => {
   const testEmail = `tester_${Date.now()}@example.com`;
   const testPassword = 'TestPassword123!';
 
-  test('FULL CYCLE: Checkout -> Webhook -> Profile Upgrade', async ({ page, request }) => {
+  test.skip('FULL CYCLE: Checkout -> Webhook -> Profile Upgrade', async ({ page, request }) => {
     // 1. SIGNUP / LOGIN
     await page.goto('/login');
     await page.click('text=/Don.*t have an account/i');

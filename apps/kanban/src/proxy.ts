@@ -50,6 +50,7 @@ const PUBLIC_PREFIXES = [
   '/certificate',
   '/games',
   '/checkout',
+  '/upgrade',
   '/upgrade/success',
 ]
 

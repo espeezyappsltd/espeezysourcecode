@@ -64,7 +64,7 @@ export default function LoginClient() {
       Espeezy Games needs a Pro or Premium plan on your Espeezy account. Free accounts cannot play here.
       <span style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem', color: '#78716c' }}>{GAMES_UPGRADE_GATE_NOTE}</span>
       <a
-        href={`${ESPEEZY_APP_ORIGINS.kanban}/settings?tab=billing`}
+        href={`${ESPEEZY_APP_ORIGINS.prereg}/pricing`}
         style={{
           display: 'inline-block',
           marginTop: '0.65rem',

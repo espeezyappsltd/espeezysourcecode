@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { marketingPricingUrl } from '@/lib/marketing-urls'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -6,5 +7,5 @@ type PageProps = {
 
 export default async function LegacyDonationIdPage({ params }: PageProps) {
   await params
-  redirect('/upgrade')
+  redirect(marketingPricingUrl())
 }

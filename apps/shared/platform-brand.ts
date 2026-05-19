@@ -45,7 +45,7 @@ export const LIFETIME_SCARCITY_LABEL = (left: number) =>
 export const STRIPE_LIFETIME_LABEL = 'Lifetime Scholar — GBP 149 (one-time)'
 
 export const BILLING_PANEL_SUBTITLE =
-  'Manage your subscription and Espeezy credit wallet. Billing is handled by our platform team via Stripe.'
+  'View your current plan and usage here. Subscribe or change tiers on espeezy.com—billing is handled by our platform team via Stripe.'
 
 export const CHECKOUT_SUCCESS_TEAM_NOTE =
   'Thank you for supporting campus collaboration. Our platform team has activated your plan—reach support@espeezy.com if anything looks off.'

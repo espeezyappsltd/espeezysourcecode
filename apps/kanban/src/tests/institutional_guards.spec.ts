@@ -32,11 +32,9 @@ test.describe('Institutional Guards & Secret Gateway', () => {
     }
   });
 
-  test('Upgrade page pricing and platform team copy', async ({ page }) => {
+  test('Legacy /upgrade redirects to marketing pricing', async ({ page }) => {
     await page.goto('/upgrade');
-
-    await expect(page.locator('text=Lifetime Scholar')).toBeVisible();
-    await expect(page.locator('text=12-member platform team')).toBeVisible();
+    await expect(page).toHaveURL(/espeezy\.com\/pricing/);
   });
 
   test('Admin Dashboard Health Check visualization', async ({ page }) => {

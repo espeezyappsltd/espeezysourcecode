@@ -6,7 +6,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  Activity,
   BarChart3,
   ChevronLeft,
   ChevronRight,
@@ -39,6 +38,7 @@ import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
+import { marketingPricingUrl } from '@/lib/marketing-urls'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
 const THEME_SEQUENCE = ['Google Light', 'Deep Oceanic', 'Cyberpunk'] as const
@@ -61,7 +61,6 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Break Room', path: '/chillout', icon: Sparkles },
   { name: 'Jukebox', path: '/jukebox', icon: Music },
   { name: 'Project Stats', path: '/analytics', icon: BarChart3 },
-  { name: 'Plans', path: '/upgrade', icon: Activity },
   { name: 'My Profile', path: '/profile', icon: UserCircle },
   { name: 'Settings', path: '/settings', icon: Settings },
 ]
@@ -425,7 +424,7 @@ export default function Sidebar({ user }: SidebarProps) {
               icon={link.icon}
               onClick={() => {
                 if (PREMIUM_LINKS.has(link.name) && !isPremiumMember) {
-                  pushRoute('/upgrade')
+                  window.location.href = marketingPricingUrl()
                   return
                 }
                 handleNavigation(link.path)
@@ -437,7 +436,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <div className="sidebar-bottom">
         {isOpen && showUpgradeCard && (
           <div className="sidebar-upgrade-card" style={{ padding: '0 0.75rem 0.35rem' }}>
-            <div className="glass-card-prestige" style={{ padding: '1rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => pushRoute('/upgrade')}>
+            <div className="glass-card-prestige" style={{ padding: '1rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => { window.location.href = marketingPricingUrl() }}>
               <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={16} className="shimmer-gold" />

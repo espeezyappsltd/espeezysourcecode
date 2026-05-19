@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { Music, Lock, Loader2 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { hasFeature } from '@/utils/feature-gate'
@@ -25,9 +24,9 @@ export default function JukeboxPage() {
         <p style={{ color: 'var(--text-sub)', fontWeight: 600, lineHeight: 1.5 }}>
           Share what you are listening to with your cohort. Jukebox is included on Pro and Premium plans.
         </p>
-        <Link href="/upgrade" className="btn btn-primary" style={{ display: 'inline-flex', marginTop: '1.25rem', gap: 8 }}>
-          Upgrade to Pro
-        </Link>
+        <a href="https://espeezy.com/pricing" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ display: 'inline-flex', marginTop: '1.25rem', gap: 8, textDecoration: 'none' }}>
+          View plans on espeezy.com
+        </a>
       </div>
     )
   }

@@ -9,7 +9,7 @@ import { logActivity } from '@/utils/logging'
 import { TabName } from '@/types/ui'
 import { Profile } from '@/types/auth'
 import { Achievement, Group } from '@/types/database'
-import { buildStripePaymentLink } from '@/lib/stripe-payment-links'
+import { marketingCheckoutUrl } from '@/lib/marketing-urls'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
 import { subscriptionCheckoutCopy } from '@/lib/platform/transaction-confirm-copy'
@@ -290,7 +290,7 @@ export function useSettingsPage() {
     if (!ok) return
 
     setSwitching(true)
-    window.location.href = buildStripePaymentLink(plan, { client_reference_id: profile.id })
+    window.location.href = marketingCheckoutUrl(plan)
   }
 
   const handleRequestOtp = async () => {

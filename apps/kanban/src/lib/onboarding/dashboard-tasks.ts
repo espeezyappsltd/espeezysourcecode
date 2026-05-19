@@ -88,10 +88,10 @@ export const ONBOARDING_TASK_TEMPLATES: OnboardingTaskTemplate[] = [
   {
     key: 'plans',
     title: 'Tour: Plans & Espeezy credits',
-    description: `${ONBOARDING_MARKER_PREFIX}plans] Open Plans to see Pro/Premium benefits, then mark Done.`,
+    description: `${ONBOARDING_MARKER_PREFIX}plans] Open Billing in Settings to see your plan and usage, then mark Done.`,
     category: 'Research',
-    path: '/upgrade',
-    tourButtonLabel: 'Plans',
+    path: '/settings?tab=billing',
+    tourButtonLabel: 'Billing',
   },
 ]
 

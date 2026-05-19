@@ -1,16 +1,18 @@
-'use client'
+import { redirect } from 'next/navigation'
+import { getPlanKey } from '@/lib/stripe-payment-links'
+import { marketingCheckoutUrl, type MarketingPlanKey } from '@/lib/marketing-urls'
 
-import { Suspense } from 'react'
-import CheckoutFlow from './CheckoutFlow'
+type PageProps = {
+  searchParams: Promise<{ plan?: string; coupon?: string }>
+}
 
-export default function CheckoutPage() {
-  return (
-    <Suspense fallback={
-      <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '48px', height: '48px', border: '3px solid rgba(16,185,129,0.2)', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      </div>
-    }>
-      <CheckoutFlow />
-    </Suspense>
+/** Checkout UI is on the marketing site — forward plan (and coupon) query params. */
+export default async function CheckoutPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const plan = getPlanKey(params.plan) as MarketingPlanKey
+  redirect(
+    marketingCheckoutUrl(plan, {
+      coupon: params.coupon,
+    }),
   )
 }
