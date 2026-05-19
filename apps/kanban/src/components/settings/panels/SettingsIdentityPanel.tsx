@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Calendar, Globe, Lock, Phone, Shield, Sparkles, User } from 'lucide-react'
 import { detectCountry, getFlagComponent } from '@/utils/geo'
 import type { SettingsPageViewModel } from '../settings-types'
+import { FormField } from '@/components/forms/FormField'
 
 export function SettingsIdentityPanel({ vm }: { vm: SettingsPageViewModel }) {
   const {
@@ -36,6 +37,9 @@ export function SettingsIdentityPanel({ vm }: { vm: SettingsPageViewModel }) {
     saving,
     handleUpdateProfile,
   } = vm
+
+  const CountryFlagIcon = getFlagComponent(countryCode)
+  const countryFlagIcon = CountryFlagIcon ? <CountryFlagIcon /> : <Globe size={18} />
 
   return (
     <div className="auth-card" style={{ maxWidth: '100%' }}>
@@ -170,100 +174,72 @@ export function SettingsIdentityPanel({ vm }: { vm: SettingsPageViewModel }) {
 
       <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-md)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--gap-md)' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Full Name</label>
-            <input type="text" className="form-input" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Degree/Course</label>
-            <input
-              type="text"
-              className="form-input"
-              value={courseName}
-              onChange={(e) => setCourseName(e.target.value)}
-              placeholder="e.g. Computer Science"
-            />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Achievement Rank</label>
-            <input type="text" className="form-input" value={rank} onChange={(e) => setRank(e.target.value)} placeholder="e.g. Senior" />
-          </div>
+          <FormField label="Full Name">
+            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" />
+          </FormField>
+          <FormField label="Degree/Course">
+            <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Computer Science" />
+          </FormField>
+          <FormField label="Achievement Rank">
+            <input type="text" value={rank} onChange={(e) => setRank(e.target.value)} placeholder="e.g. Senior" />
+          </FormField>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--gap-md)' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Phone Number (International)</label>
-            <div style={{ position: 'relative' }}>
-              <Phone size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
-              <input
-                type="tel"
-                className="form-input"
-                value={phoneNumber}
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value)
-                  const detected = detectCountry(e.target.value)
-                  if (detected) setCountryCode(detected)
-                }}
-                placeholder="+1 555 000 0000"
-                style={{ paddingLeft: '3rem' }}
-              />
-            </div>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Country Flag</label>
-            <div style={{ position: 'relative' }}>
-              <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '16px' }}>
-                {(() => {
-                  const Flag = getFlagComponent(countryCode)
-                  return Flag ? <Flag /> : <Globe size={18} color="var(--text-sub)" />
-                })()}
-              </div>
-              <input
-                type="text"
-                className="form-input"
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value.toUpperCase().substring(0, 2))}
-                placeholder="US, GB, KE..."
-                style={{ paddingLeft: '3rem' }}
-              />
-            </div>
-          </div>
+          <FormField label="Phone Number (International)" icon={<Phone size={16} />}>
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => {
+                setPhoneNumber(e.target.value)
+                const detected = detectCountry(e.target.value)
+                if (detected) setCountryCode(detected)
+              }}
+              placeholder="+1 555 000 0000"
+            />
+          </FormField>
+          <FormField label="Country Flag" icon={countryFlagIcon}>
+            <input
+              type="text"
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value.toUpperCase().substring(0, 2))}
+              placeholder="US, GB, KE..."
+            />
+          </FormField>
         </div>
 
         <div style={{ display: 'grid', gap: '1.25rem', marginTop: '1rem' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Tagline / Preferred Title</label>
-            <input type="text" className="form-input" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g. Research Lead, PhD Candidate" />
-            <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>This appears on your profile and public scholar card.</p>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Professional Biography</label>
+          <FormField label="Tagline / Preferred Title" hint="This appears on your profile and public scholar card.">
+            <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g. Research Lead, PhD Candidate" />
+          </FormField>
+          <FormField
+            label="Professional Biography"
+            hint="Share your research interests, achievements, and strengths."
+            afterControl={
+              <div style={{ marginTop: '0.5rem' }}>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    color: biography.trim().split(/\s+/).filter(Boolean).length > 500 ? 'var(--error)' : 'var(--text-sub)',
+                  }}
+                >
+                  {biography.trim() ? biography.trim().split(/\s+/).filter(Boolean).length : 0} of 500 words
+                </span>
+              </div>
+            }
+          >
             <textarea
-              className="form-input"
               value={biography}
               onChange={(e) => setBiography(e.target.value)}
               rows={6}
               placeholder="Write up to 500 words about your research focus, experience, and goals."
               style={{ resize: 'vertical', minHeight: '140px' }}
             />
-            <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  color: biography.trim().split(/\s+/).filter(Boolean).length > 500 ? 'var(--error)' : 'var(--text-sub)',
-                }}
-              >
-                {biography.trim() ? biography.trim().split(/\s+/).filter(Boolean).length : 0} of 500 words
-              </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>Share your research interests, achievements, and strengths.</span>
-            </div>
-          </div>
+          </FormField>
 
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Technical Arsenal (Stack)</label>
-            <input type="text" className="form-input" value={stack} onChange={(e) => setStack(e.target.value)} placeholder="e.g. React, Next.js, FastAPI, PostgreSQL" />
-            <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>List your primary tools, languages, and frameworks.</p>
-          </div>
+          <FormField label="Technical Arsenal (Stack)" hint="List your primary tools, languages, and frameworks.">
+            <input type="text" value={stack} onChange={(e) => setStack(e.target.value)} placeholder="e.g. React, Next.js, FastAPI, PostgreSQL" />
+          </FormField>
         </div>
 
         <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
@@ -272,19 +248,16 @@ export function SettingsIdentityPanel({ vm }: { vm: SettingsPageViewModel }) {
             My School
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.25rem' }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Enrollment</label>
-              <input type="number" className="form-input" value={enrollmentYear} onChange={(e) => setEnrollmentYear(parseInt(e.target.value) || new Date().getFullYear())} />
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Completion</label>
+            <FormField label="Enrollment">
+              <input type="number" value={enrollmentYear} onChange={(e) => setEnrollmentYear(parseInt(e.target.value) || new Date().getFullYear())} />
+            </FormField>
+            <FormField label="Completion">
               <input
                 type="number"
-                className="form-input"
                 value={completionYear}
-                onChange={(e) => setCompletionYear(parseInt(e.target.value) || (new Date().getFullYear() + 3))}
+                onChange={(e) => setCompletionYear(parseInt(e.target.value) || new Date().getFullYear() + 3)}
               />
-            </div>
+            </FormField>
           </div>
         </div>
 

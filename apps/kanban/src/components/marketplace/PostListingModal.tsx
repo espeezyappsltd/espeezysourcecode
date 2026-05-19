@@ -1,12 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Camera, AlertTriangle, Loader2 } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
 import { marketplaceListingPublishCopy } from '@/lib/platform/transaction-confirm-copy'
 import { ListingCondition } from '@/types/marketplace'
 import { MAX_ASSET_CREDIT_VALUE, formatCreditCapHint } from '@/lib/credits'
+import { FormCheck, FormField } from '@/components/forms/FormField'
 
 interface PostListingModalProps {
   onClose: () => void
@@ -73,61 +74,115 @@ export function PostListingModal({ onClose, onSuccess }: PostListingModalProps) 
 
   return (
     <div className="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-listing-title">
-      <button type="button" className="app-modal-backdrop" aria-label="Close" onClick={onClose} />
+      <button type="button" className="app-modal-backdrop" aria-label="Close post listing dialog" onClick={onClose} />
       <div className="app-modal-panel app-modal-panel--narrow">
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
-          <h2 id="post-listing-title" style={{ margin: 0, fontWeight: 950 }}>List item</h2>
-          <p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: 'var(--text-sub)' }}>Espeezy credits checkout only · step {step}/2</p>
+          <h2 id="post-listing-title" style={{ margin: 0, fontWeight: 950 }}>
+            List item
+          </h2>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: 'var(--text-sub)' }}>
+            Espeezy credits checkout only · step {step}/2
+          </p>
         </div>
         <div className="app-modal-panel__scroll" style={{ padding: '1.25rem 1.5rem', maxHeight: 'min(60vh, 70dvh)' }}>
           {step === 1 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <input className="form-input" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-              <textarea className="form-input" placeholder="Description (min 10 chars)" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+              <FormField label="Listing title" required>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  autoComplete="off"
+                  maxLength={120}
+                />
+              </FormField>
+              <FormField label="Description" required hint="At least 10 characters">
+                <textarea
+                  rows={3}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  maxLength={2000}
+                />
+              </FormField>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <select className="form-input" value={category} onChange={(e) => setCategory(e.target.value)}>
-                  {['Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other'].map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-                <select className="form-input" value={condition} onChange={(e) => setCondition(e.target.value as ListingCondition)}>
-                  <option>New</option>
-                  <option>Like New</option>
-                  <option>Used</option>
-                  <option>Refurbished</option>
-                </select>
+                <FormField label="Category" required>
+                  <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                    {['Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other'].map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+                <FormField label="Condition" required>
+                  <select value={condition} onChange={(e) => setCondition(e.target.value as ListingCondition)}>
+                    <option value="New">New</option>
+                    <option value="Like New">Like New</option>
+                    <option value="Used">Used</option>
+                    <option value="Refurbished">Refurbished</option>
+                  </select>
+                </FormField>
               </div>
-              <input className="form-input" type="number" min={0} max={MAX_ASSET_CREDIT_VALUE} placeholder="Price in credits" value={price} onChange={(e) => setPrice(e.target.value)} />
-              <p style={{ margin: 0, fontSize: '0.68rem', color: 'var(--text-sub)' }}>{formatCreditCapHint()}</p>
-              <select className="form-input" value={meetupZone} onChange={(e) => setMeetupZone(e.target.value)}>
-                <option>Library</option>
-                <option>Student Union</option>
-                <option>Science Hub</option>
-                <option>Cafeteria</option>
-              </select>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '0.75rem', border: '2px dashed var(--border)', borderRadius: 12 }}>
-                <Camera size={18} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Add photos ({images.length}/5)</span>
-                <input type="file" hidden multiple accept="image/*" onChange={handleImageChange} />
-              </label>
+              <FormField label="Price in credits" required hint={formatCreditCapHint()}>
+                <input
+                  type="number"
+                  min={0}
+                  max={MAX_ASSET_CREDIT_VALUE}
+                  inputMode="numeric"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Meetup zone" required>
+                <select value={meetupZone} onChange={(e) => setMeetupZone(e.target.value)}>
+                  <option value="Library">Library</option>
+                  <option value="Student Union">Student Union</option>
+                  <option value="Science Hub">Science Hub</option>
+                  <option value="Cafeteria">Cafeteria</option>
+                </select>
+              </FormField>
+              <FormField label="Listing photos" hint={`${images.length} of 5 selected. JPEG or PNG.`}>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  onChange={handleImageChange}
+                  className="form-input form-input--file"
+                />
+              </FormField>
             </div>
           ) : (
             <div style={{ textAlign: 'center' }}>
-              <AlertTriangle style={{ margin: '0 auto 0.5rem' }} />
-              <label style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
-                <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
-                <span style={{ fontWeight: 700 }}>I agree to marketplace policy</span>
-              </label>
+              <AlertTriangle style={{ margin: '0 auto 0.5rem' }} aria-hidden />
+              <FormCheck
+                id="mp-policy-agree"
+                label="I agree to the marketplace policy"
+                checked={agreed}
+                onChange={setAgreed}
+                required
+              />
             </div>
           )}
         </div>
-        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}>
-          <button type="button" className="btn btn-secondary" onClick={() => (step > 1 ? setStep(1) : onClose())}>{step === 1 ? 'Cancel' : 'Back'}</button>
+        <div
+          style={{
+            padding: '1rem 1.5rem',
+            borderTop: '1px solid var(--border)',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <button type="button" className="btn btn-secondary" onClick={() => (step > 1 ? setStep(1) : onClose())}>
+            {step === 1 ? 'Cancel' : 'Back'}
+          </button>
           {step === 1 ? (
-            <button type="button" className="btn btn-primary" onClick={() => setStep(2)}>Continue</button>
+            <button type="button" className="btn btn-primary" onClick={() => setStep(2)}>
+              Continue
+            </button>
           ) : (
             <button type="button" className="btn btn-primary" disabled={uploading} onClick={() => void handlePost()}>
-              {uploading ? <Loader2 size={16} className="animate-spin" /> : 'Publish'}
+              {uploading ? <Loader2 size={16} className="animate-spin" aria-hidden /> : null}
+              Publish
             </button>
           )}
         </div>

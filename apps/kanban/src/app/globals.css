@@ -536,9 +536,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-input:focus {
-  outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb, 16, 185, 129), 0.15);
+}
+
+@media (forced-colors: active) {
+  .form-input:focus-visible,
+  .form-check__input:focus-visible {
+    outline: 2px solid CanvasText;
+  }
 }
 
 /* ============================================================

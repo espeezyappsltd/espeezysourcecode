@@ -14,11 +14,13 @@ interface ListingCardProps {
   item: Listing
   href?: string
   activeCategory?: string | null
+  searchQuery?: string | null
 }
 
-export const ListingCard = memo(function ListingCard({ item, href, activeCategory }: ListingCardProps) {
-  const itemHref = href ?? marketplaceItemUrl(item.id, activeCategory ?? item.category)
-  const categoryHref = marketplaceCategoryUrl(item.category ?? 'Other')
+export const ListingCard = memo(function ListingCard({ item, href, activeCategory, searchQuery }: ListingCardProps) {
+  const navCtx = { category: activeCategory ?? item.category ?? null, q: searchQuery?.trim() || null }
+  const itemHref = href ?? marketplaceItemUrl(item.id, navCtx)
+  const categoryHref = marketplaceCategoryUrl(item.category ?? 'Other', { q: navCtx.q })
 
   return (
     <article className="listing-card listing-card--dense listing-card--linked">

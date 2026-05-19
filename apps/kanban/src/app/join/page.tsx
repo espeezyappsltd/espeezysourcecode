@@ -25,6 +25,7 @@ function SubmitButton({ label, secondary = false }: { label: string, secondary?:
 
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { FormField } from '@/components/forms/FormField'
 
 
 function JoinGroupContent() {
@@ -48,22 +49,18 @@ function JoinGroupContent() {
                  Start a new workspace for your academic module or project.
               </p>
              <form action={createGroup}>
-                 <div className="form-group">
-                    <label className="form-label" htmlFor="name" style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>Workspace Name:</label>
-                   <input className="form-input" id="name" name="name" type="text" placeholder="e.g. Apollo Project" required style={{ borderRadius: '12px' }} />
-                </div>
-                <div className="form-group">
-                   <label className="form-label" htmlFor="module_code">Module Code (e.g. CS50):</label>
-                   <input className="form-input" id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
-                </div>
-                <div className="form-group">
-                   <label className="form-label" htmlFor="create_join_password">Access Password:</label>
-                   <input className="form-input" id="create_join_password" name="join_password" type="password" placeholder="Set a workspace password" required style={{ borderRadius: '12px' }} />
-                </div>
-                <div className="form-group">
-                   <label className="form-label" htmlFor="capacity" style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>Max Capacity:</label>
-                   <input className="form-input" id="capacity" name="capacity" type="number" min="2" max="100" defaultValue="5" required style={{ borderRadius: '12px' }} />
-                </div>
+                <FormField label="Workspace Name:" required>
+                  <input id="name" name="name" type="text" placeholder="e.g. Apollo Project" required style={{ borderRadius: '12px' }} />
+                </FormField>
+                <FormField label="Module Code (e.g. CS50):" required>
+                  <input id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
+                </FormField>
+                <FormField label="Access Password:" required>
+                  <input id="create_join_password" name="join_password" type="password" placeholder="Set a workspace password" required style={{ borderRadius: '12px' }} />
+                </FormField>
+                <FormField label="Max Capacity:" required>
+                  <input id="capacity" name="capacity" type="number" min={2} max={100} defaultValue={5} required style={{ borderRadius: '12px' }} />
+                </FormField>
                  <SubmitButton label="Create Workspace" />
              </form>
           </div>
@@ -78,14 +75,12 @@ function JoinGroupContent() {
                  Connect to an existing project team using the module code and password provided by your team lead.
               </p>
              <form action={joinGroup}>
-                <div className="form-group">
-                   <label className="form-label" htmlFor="create_module_code">Module Code:</label>
-                   <input className="form-input" id="create_module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
-                </div>
-                <div className="form-group">
-                   <label className="form-label" htmlFor="join_password">Join Password:</label>
-                   <input className="form-input" id="join_password" name="join_password" type="password" placeholder="Enter group password" required style={{ borderRadius: '12px' }} />
-                </div>
+                <FormField label="Module Code:" required>
+                  <input id="create_module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
+                </FormField>
+                <FormField label="Join Password:" required>
+                  <input id="join_password" name="join_password" type="password" placeholder="Enter group password" required style={{ borderRadius: '12px' }} />
+                </FormField>
                  <SubmitButton label="Join Team" secondary />
              </form>
           </div>

@@ -6,6 +6,7 @@ import { CategoryTabs } from '@shared/CategoryTabs'
 import type { TaskCategory, TaskStatus } from '@/types/database'
 import type { UseTaskModalReturn } from './useTaskModal'
 import { CATEGORIES, COLUMNS } from './constants'
+import { FormField } from '@/components/forms/FormField'
 
 export type TaskModalFormProps = Pick<
   UseTaskModalReturn,
@@ -53,26 +54,22 @@ export function TaskModalForm({
 }: TaskModalFormProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1rem' }}>
-      <div className="form-group" style={{ marginBottom: 0 }}>
-        <label className="form-label" htmlFor="task-title">
-          Task Name
-        </label>
+      <FormField label="Task name" required>
         <input
-          id="task-title"
-          className="form-input"
+          type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="What needs to be done?"
           autoFocus
           style={{ fontSize: '1rem' }}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group" style={{ marginBottom: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <label className="form-label" htmlFor="task-desc" style={{ marginBottom: 0 }}>
-            Description
-          </label>
+      <FormField
+        label="Description"
+        hint="Use AI Assist to generate a polished description from the task title."
+        error={aiError ?? undefined}
+        labelAction={
           <button
             type="button"
             onClick={handleAIGenerate}
@@ -87,67 +84,48 @@ export function TaskModalForm({
               opacity: aiLoading || !title.trim() ? 0.7 : 1,
             }}
           >
-            {aiLoading ? 'Generating\u2026' : 'AI Assist'}
+            {aiLoading ? 'Generating…' : 'AI Assist'}
           </button>
-        </div>
+        }
+      >
         <textarea
-          id="task-desc"
-          className="form-input"
           value={description || ''}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Add more details about this task..."
           rows={3}
           style={{ resize: 'vertical', fontSize: '0.95rem' }}
         />
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: '1rem',
-            marginTop: '0.5rem',
-            flexWrap: 'wrap',
-          }}
-        >
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-sub)' }}>
-            Use AI Assist to generate a polished description from the task title.
-          </span>
-          {aiError && <span style={{ color: 'var(--error)', fontSize: '0.8rem' }}>{aiError}</span>}
-        </div>
-      </div>
+      </FormField>
 
       <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
-        <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
-          <label className="form-label" htmlFor="task-status">
-            Status
-          </label>
-          <select id="task-status" className="form-input" value={status} onChange={(e) => setStatus(e.target.value as TaskStatus)}>
-            {COLUMNS.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+        <div style={{ flex: '1 1 150px' }}>
+          <FormField label="Status">
+            <select value={status} onChange={(e) => setStatus(e.target.value as TaskStatus)}>
+              {COLUMNS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </FormField>
         </div>
 
         <div className="form-group" style={{ flex: '1 1 100%', marginBottom: 0 }}>
-          <label className="form-label" htmlFor="task-category">
+          <span className="form-label" id="task-category-label">
             Category
-          </label>
+          </span>
           <CategoryTabs categories={CATEGORIES} selected={category} onSelect={(cat) => setCategory(cat as TaskCategory)} />
         </div>
 
-        <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
-          <label className="form-label" htmlFor="task-date" style={{ color: 'var(--error)' }}>
-            Due Date
-          </label>
-          <input
-            id="task-date"
-            type="date"
-            className="form-input"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            style={{ borderColor: dueDate ? 'var(--border)' : 'var(--error)' }}
-          />
+        <div style={{ flex: '1 1 150px' }}>
+          <FormField label="Due date" required>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              style={{ borderColor: dueDate ? 'var(--border)' : 'var(--error)' }}
+            />
+          </FormField>
         </div>
       </div>
 
@@ -162,28 +140,19 @@ export function TaskModalForm({
             gap: '0.5rem',
           }}
         >
-          <label className="form-label" style={{ margin: 0 }}>
+          <span className="form-label" style={{ margin: 0 }}>
             Assignments
-          </label>
-          <div style={{ position: 'relative', width: '100%', maxWidth: '220px' }}>
-            <label htmlFor="member-search" className="sr-only">
-              Search collaborators
-            </label>
-            <input
-              id="member-search"
-              type="text"
-              placeholder="Search collaborators..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                fontSize: '0.75rem',
-                padding: '0.4rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-main)',
-              }}
-            />
+          </span>
+          <div style={{ width: '100%', maxWidth: 220 }}>
+            <FormField label="Search collaborators" hideLabel>
+              <input
+                type="search"
+                placeholder="Search collaborators..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.75rem', borderRadius: '8px' }}
+              />
+            </FormField>
           </div>
         </div>
 
@@ -252,6 +221,8 @@ export function TaskModalForm({
                       {member.avatar_url ? (
                         <Image
                           src={member.avatar_url}
+                          width={24}
+                          height={24}
                           style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
                           alt={member.full_name || 'Member'}
                         />
@@ -317,7 +288,7 @@ export function TaskModalForm({
                           justifyContent: 'center',
                         }}
                       >
-                        <Check size={10} />
+                        <Check size={10} aria-hidden />
                       </div>
                     )}
                   </div>

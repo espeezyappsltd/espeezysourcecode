@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Loader2, Link2, Unlink } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import type { PayoutAccounts } from '@/lib/marketplace/trading-metrics'
+import { FormField } from '@/components/forms/FormField'
 
 type PayPalStatus = {
   linked: boolean
@@ -112,13 +113,9 @@ export function PayPalPayoutLink({ payoutAccounts, onLinked }: Props) {
         <p className="trading-metrics__payout-email">{displayEmail}</p>
       ) : (
         <div className="trading-metrics__paypal-form">
-          <input
-            type="email"
-            className="form-input"
-            placeholder="PayPal email"
-            value={emailInput}
-            onChange={(e) => setEmailInput(e.target.value)}
-          />
+          <FormField label="PayPal email" hideLabel>
+            <input type="email" placeholder="PayPal email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} />
+          </FormField>
           <button
             type="button"
             className="btn btn-secondary btn-sm"

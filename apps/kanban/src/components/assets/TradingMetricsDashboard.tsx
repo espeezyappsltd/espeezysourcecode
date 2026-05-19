@@ -24,6 +24,7 @@ import { useNotifications } from '@/components/NotificationProvider'
 import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
 import { marketplaceWithdrawCopy } from '@/lib/platform/transaction-confirm-copy'
 import { PayPalPayoutLink } from '@/components/assets/PayPalPayoutLink'
+import { FormField } from '@/components/forms/FormField'
 
 function formatGbp(centsOrPounds: number, fromCents = false) {
   const pounds = fromCents ? centsOrPounds / 100 : centsOrPounds
@@ -267,16 +268,17 @@ export function TradingMetricsDashboard() {
             />
           </div>
 
-          <motion.div className="trading-metrics__withdraw-form">
-            <input
-              type="number"
-              min={1}
-              max={metrics.availableWithdrawCredits}
-              className="form-input"
-              placeholder="Credits to convert"
-              value={withdrawCredits}
-              onChange={(e) => setWithdrawCredits(e.target.value)}
-            />
+          <div className="trading-metrics__withdraw-form">
+            <FormField label="Credits to convert" hideLabel>
+              <input
+                type="number"
+                min={1}
+                max={metrics.availableWithdrawCredits}
+                placeholder="Credits to convert"
+                value={withdrawCredits}
+                onChange={(e) => setWithdrawCredits(e.target.value)}
+              />
+            </FormField>
             <button
               type="button"
               className="btn btn-primary"
@@ -286,7 +288,7 @@ export function TradingMetricsDashboard() {
               {withdrawing ? <Loader2 size={16} className="animate-spin" /> : <Banknote size={16} />}
               Withdraw
             </button>
-          </motion.div>
+          </div>
           <p className="trading-metrics__fine">
             Minimum £1.00. Link Stripe (bank) or PayPal above, then choose how to receive cash.
           </p>

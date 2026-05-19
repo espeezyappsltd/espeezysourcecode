@@ -6,6 +6,7 @@ import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ShieldCheck, Lock } from 'lucide-react'
 import TransientError from '@/components/TransientError'
+import { FormField } from '@/components/forms/FormField'
 
 function ResetPasswordContent() {
   const router = useRouter()
@@ -181,32 +182,28 @@ function ResetPasswordContent() {
           </div>
         ) : (
           <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="form-group">
-              <label className="form-label">New Password</label>
-              <input 
-                type="password" 
-                className="form-input" 
-                required 
-                value={password} 
-                onChange={e => setPassword(e.target.value)}
+            <FormField label="New Password" required>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 style={{ borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white' }}
                 disabled={loading}
               />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Confirm Password</label>
-              <input 
-                type="password" 
-                className="form-input" 
-                required 
-                value={confirmPassword} 
-                onChange={e => setConfirmPassword(e.target.value)}
+            </FormField>
+            <FormField label="Confirm Password" required>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 style={{ borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white' }}
                 disabled={loading}
               />
-            </div>
+            </FormField>
             <button className="btn btn-primary" type="submit" disabled={loading || !sessionReady} style={{ height: '3.5rem', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem' }}>
               {loading ? 'Updating Credentials...' : 'Update Password'}
             </button>

@@ -6,6 +6,7 @@ import { ChevronLeft, Loader2, MessageSquare, Send, X } from 'lucide-react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
 import type { MarketplaceInquiryThread } from '@/lib/marketplace/inquiries'
+import { FormField } from '@/components/forms/FormField'
 
 type PeerMessage = {
   id: string
@@ -168,7 +169,7 @@ export function MarketplaceInquiriesPanel({
   if (!open) return null
 
   return (
-    <div className="mp-inquiries-overlay" role="dialog" aria-modal="true" aria-label="Marketplace inquiries">
+    <div className="mp-inquiries-overlay" role="dialog" aria-modal="true" aria-labelledby="mp-inquiries-title">
       <button type="button" className="mp-inquiries-backdrop" aria-label="Close" onClick={onClose} />
       <div className="mp-inquiries-panel">
         <header className="mp-inquiries-header">
@@ -185,7 +186,7 @@ export function MarketplaceInquiriesPanel({
             <MessageSquare size={20} style={{ color: 'var(--brand)' }} aria-hidden />
           )}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 950 }}>
+            <h2 id="mp-inquiries-title" style={{ margin: 0, fontSize: '1rem', fontWeight: 950 }}>
               {selected ? activeThread?.peerName ?? 'Inquiry' : 'Marketplace inquiries'}
             </h2>
             {selected && activeThread?.listingTitle ? (
@@ -297,21 +298,29 @@ export function MarketplaceInquiriesPanel({
               <div ref={bottomRef} />
             </div>
             <footer className="mp-inquiries-compose">
-              <input
-                type="text"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && void sendReply()}
-                placeholder="Reply to this inquiry…"
-                aria-label="Reply message"
-              />
+              <FormField label="Reply message" hideLabel className="mp-inquiries-compose__field">
+                <textarea
+                  rows={2}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      void sendReply()
+                    }
+                  }}
+                  placeholder="Reply to this inquiry…"
+                  maxLength={2000}
+                />
+              </FormField>
               <button
                 type="button"
+                className="mp-inquiries-compose__send"
                 disabled={sending || !draft.trim()}
                 onClick={() => void sendReply()}
                 aria-label="Send reply"
               >
-                {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                {sending ? <Loader2 size={18} className="animate-spin" aria-hidden /> : <Send size={18} aria-hidden />}
               </button>
             </footer>
           </>

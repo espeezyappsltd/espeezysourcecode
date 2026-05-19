@@ -15,9 +15,15 @@ import { OnboardingModal } from '@/components/marketplace/OnboardingModal'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import { CategoryNavDropdown } from '@/components/nav/CategoryNavDropdown'
 import { ListPagination } from '@/components/nav/ListPagination'
+import { SearchField } from '@/components/forms/SearchField'
 import Link from 'next/link'
 import type { MarketplaceCategory } from '@/types/marketplace'
-import { marketplaceCategoryUrl, marketplaceListUrl } from '@/lib/nav/category-url'
+import {
+  marketplaceCategoryUrl,
+  marketplaceListUrl,
+  marketplaceNavContext,
+} from '@/lib/nav/category-url'
+import { useDebouncedListSearch } from '@/lib/nav/use-debounced-list-search'
 import './marketplace.css'
 import '@/components/nav/list-nav.css'
 
@@ -59,14 +65,25 @@ function MarketplacePageInner() {
     db.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null))
   }, [])
 
+  const { draft: searchDraft, setDraft: setSearchDraft, clear: clearSearch } = useDebouncedListSearch({
+      searchParams,
+      router,
+      pathname: '/marketplace',
+      committedQuery: searchQuery,
+      setCommittedQuery: setSearchQuery,
+    })
+
+  const navCtx = useMemo(
+    () => marketplaceNavContext(activeCategory, searchQuery),
+    [activeCategory, searchQuery],
+  )
+
   useEffect(() => {
     if (!searchParams) return
     const urlCat = searchParams.get('category')
-    const urlQ = searchParams.get('q')
     if (urlCat) setActiveCategory(urlCat as MarketplaceCategory)
     else setActiveCategory('All')
-    if (urlQ != null) setSearchQuery(urlQ)
-  }, [searchParams, setActiveCategory, setSearchQuery])
+  }, [searchParams, setActiveCategory])
 
   useEffect(() => {
     if (!searchParams) return
@@ -154,9 +171,9 @@ function MarketplacePageInner() {
         .map((cat) => ({
           id: cat,
           label: cat,
-          href: marketplaceCategoryUrl(cat),
+          href: marketplaceCategoryUrl(cat, { q: navCtx.q }),
         })),
-    [catList],
+    [catList, navCtx.q],
   )
 
   return (
@@ -208,37 +225,28 @@ function MarketplacePageInner() {
             onSelectListing={setSelectedListing}
             onPurchaseComplete={handlePurchaseComplete}
             onFilterCategory={(cat) => {
-              router.push(marketplaceCategoryUrl(cat === 'All' ? 'All' : cat))
+              router.push(
+                marketplaceCategoryUrl(cat === 'All' ? 'All' : cat, { q: navCtx.q }),
+              )
             }}
           />
 
           <div className="marketplace-page__toolbar page-list-toolbar">
-            <div className="marketplace-page__search">
-              <Search
-                style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }}
-                size={18}
-                aria-hidden
-              />
-              <input
-                type="search"
-                placeholder="Search listings…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    replaceMarketplaceUrl((params) => {
-                      if (searchQuery.trim()) params.set('q', searchQuery.trim())
-                      else params.delete('q')
-                    })
-                  }
-                }}
-                aria-label="Search marketplace listings"
-              />
-            </div>
+            <SearchField
+              id="marketplace-search"
+              className="marketplace-page__search"
+              label="Search marketplace listings"
+              placeholder="Search listings…"
+              value={searchDraft}
+              onChange={setSearchDraft}
+              onClear={clearSearch}
+              leadingIcon={<Search size={18} />}
+              inputClassName="form-input marketplace-page__search-input"
+            />
             <CategoryNavDropdown
               items={categoryNavItems}
               activeId={activeCategoryId}
-              allHref={marketplaceListUrl()}
+              allHref={marketplaceListUrl({ q: navCtx.q })}
               allLabel="All categories"
             />
             <button
@@ -287,6 +295,7 @@ function MarketplacePageInner() {
                     key={item.id}
                     item={item}
                     activeCategory={activeCategory === 'All' ? null : activeCategory}
+                    searchQuery={searchQuery}
                   />
                 ))}
               </div>

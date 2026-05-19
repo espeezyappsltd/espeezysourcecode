@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 
 export type CategoryNavItem = {
@@ -28,8 +29,15 @@ export function CategoryNavDropdown({
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const listId = useId()
+  const router = useRouter()
 
   const activeLabel = items.find((i) => i.id === activeId)?.label ?? allLabel
+
+  useEffect(() => {
+    if (!open) return
+    router.prefetch(allHref)
+    for (const item of items) router.prefetch(item.href)
+  }, [open, allHref, items, router])
 
   useEffect(() => {
     if (!open) return
@@ -55,6 +63,7 @@ export function CategoryNavDropdown({
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls={listId}
+        aria-label={`Categories, current: ${activeLabel}`}
         onClick={() => setOpen((v) => !v)}
       >
         <span className="cat-nav-dropdown__label">Categories</span>

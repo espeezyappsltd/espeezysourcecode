@@ -4,6 +4,7 @@ import { CheckCircle2 } from 'lucide-react'
 import { createUserFeedback } from '@/services/dashboard'
 import { logActivity } from '@/utils/logging'
 import type { SettingsPageViewModel } from '../settings-types'
+import { FormField } from '@/components/forms/FormField'
 
 export function SettingsSupportPanel({ vm }: { vm: SettingsPageViewModel }) {
   const {
@@ -68,31 +69,23 @@ export function SettingsSupportPanel({ vm }: { vm: SettingsPageViewModel }) {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="form-group">
-            <label className="form-label">Category</label>
-            <select
-              className="form-input"
-              value={feedbackCategory}
-              onChange={(e) => setFeedbackCategory(e.target.value)}
-              style={{ background: 'var(--bg-sub)' }}
-            >
+          <FormField label="Category">
+            <select value={feedbackCategory} onChange={(e) => setFeedbackCategory(e.target.value)} style={{ background: 'var(--bg-sub)' }}>
               <option>Suggestion</option>
               <option>Bug Report</option>
               <option>General Comment</option>
               <option>Other</option>
             </select>
-          </div>
+          </FormField>
 
-          <div className="form-group">
-            <label className="form-label">Message</label>
+          <FormField label="Message">
             <textarea
-              className="form-input"
               style={{ minHeight: '150px', background: 'var(--bg-sub)', resize: 'vertical' }}
               placeholder="What's on your mind?"
               value={feedbackMessage}
               onChange={(e) => setFeedbackMessage(e.target.value)}
             />
-          </div>
+          </FormField>
 
           <button
             type="button"

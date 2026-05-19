@@ -18,7 +18,6 @@ import {
   Clock,
   Coins,
   RotateCcw,
-  X,
   Zap,
   AlertCircle,
 } from 'lucide-react'
@@ -42,7 +41,15 @@ import {
 } from '@/lib/hustle/gig-ux'
 import { CategoryNavDropdown } from '@/components/nav/CategoryNavDropdown'
 import { ListPagination } from '@/components/nav/ListPagination'
-import { hustleCategoryUrl, hustleItemUrl, hustleListUrl, hustleTabUrl } from '@/lib/nav/category-url'
+import { SearchField } from '@/components/forms/SearchField'
+import {
+  hustleCategoryUrl,
+  hustleItemUrl,
+  hustleListUrl,
+  hustleNavContext,
+  hustleTabUrl,
+} from '@/lib/nav/category-url'
+import { useDebouncedListSearch } from '@/lib/nav/use-debounced-list-search'
 import '@/components/nav/list-nav.css'
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
@@ -95,6 +102,16 @@ function HustlePage() {
     [router, searchParams],
   )
 
+  const { draft: searchDraft, setDraft: setSearchDraft, clear: clearSearch } = useDebouncedListSearch({
+      searchParams,
+      router,
+      pathname: '/hustle',
+      committedQuery: search,
+      setCommittedQuery: setSearch,
+    })
+
+  const navCtx = useMemo(() => hustleNavContext(tab, category, search), [tab, category, search])
+
   useEffect(() => {
     if (!searchParams) return
     const urlTab = searchParams.get('tab')
@@ -107,11 +124,9 @@ function HustlePage() {
     } else if (!urlCat) {
       setCategory('all')
     }
-    const urlQ = searchParams.get('q')
-    if (urlQ != null) setSearch(urlQ)
     const urlTask = searchParams.get('task')
     setSelectedTaskId(urlTask)
-  }, [searchParams, setTab, setCategory, setSearch])
+  }, [searchParams, setTab, setCategory])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -141,9 +156,9 @@ function HustlePage() {
       HUSTLE_CATEGORIES.map((cat) => ({
         id: cat,
         label: formatHustleCategory(cat),
-        href: hustleCategoryUrl(cat, tab),
+        href: hustleCategoryUrl(cat, tab, { q: navCtx.q }),
       })),
-    [tab],
+    [tab, navCtx.q],
   )
 
   const closeTask = () => {
@@ -181,36 +196,17 @@ function HustlePage() {
 
       <div className="hustle-toolbar">
         <div className="hustle-search-row">
-          <div className="hustle-search-wrap">
-            <Search
-              size={18}
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                opacity: 0.4,
-              }}
-            />
-            <input
-              id="hustle-search"
-              type="search"
-              placeholder={hustleSearchPlaceholder(tab)}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search hustle tasks"
-            />
-            {search ? (
-              <button
-                type="button"
-                className="hustle-search-clear"
-                aria-label="Clear search"
-                onClick={() => setSearch('')}
-              >
-                <X size={16} />
-              </button>
-            ) : null}
-          </div>
+          <SearchField
+            id="hustle-search"
+            className="hustle-search-wrap"
+            label={hustleSearchPlaceholder(tab)}
+            placeholder={hustleSearchPlaceholder(tab)}
+            value={searchDraft}
+            onChange={setSearchDraft}
+            onClear={clearSearch}
+            leadingIcon={<Search size={18} style={{ opacity: 0.4 }} />}
+            inputClassName="form-input hustle-search-input"
+          />
           <button
             type="button"
             className="hustle-tab-btn"
@@ -223,11 +219,11 @@ function HustlePage() {
             <RotateCcw size={16} className={loading ? 'animate-spin' : undefined} />
           </button>
           <nav className="hustle-tab-nav" aria-label="Hustle sections">
-            <HustleTabLink active={tab === 'marketplace'} href={hustleTabUrl('marketplace')} icon={<ShoppingBag size={16} />} label="Browse" />
-            <HustleTabLink active={tab === 'gigs'} href={hustleTabUrl('gigs')} icon={<ListChecks size={16} />} label="My gigs" />
-            <HustleTabLink active={tab === 'posted'} href={hustleTabUrl('posted')} icon={<Briefcase size={16} />} label="Posted" />
-            <HustleTabLink active={tab === 'sales'} href={hustleTabUrl('sales')} icon={<Package size={16} />} label="Sales" />
-            <HustleTabLink active={tab === 'inventory'} href={hustleTabUrl('inventory')} icon={<User size={16} />} label="Assets" />
+            <HustleTabLink active={tab === 'marketplace'} href={hustleTabUrl('marketplace', navCtx)} icon={<ShoppingBag size={16} />} label="Browse" />
+            <HustleTabLink active={tab === 'gigs'} href={hustleTabUrl('gigs', navCtx)} icon={<ListChecks size={16} />} label="My gigs" />
+            <HustleTabLink active={tab === 'posted'} href={hustleTabUrl('posted', navCtx)} icon={<Briefcase size={16} />} label="Posted" />
+            <HustleTabLink active={tab === 'sales'} href={hustleTabUrl('sales', navCtx)} icon={<Package size={16} />} label="Sales" />
+            <HustleTabLink active={tab === 'inventory'} href={hustleTabUrl('inventory', navCtx)} icon={<User size={16} />} label="Assets" />
           </nav>
         </div>
 
@@ -249,7 +245,7 @@ function HustlePage() {
           <CategoryNavDropdown
             items={categoryNavItems}
             activeId={category}
-            allHref={hustleListUrl({ tab })}
+            allHref={hustleListUrl({ tab, q: navCtx.q, category: navCtx.category })}
             allLabel="All categories"
           />
         )}
@@ -308,6 +304,7 @@ function HustlePage() {
                 item={item}
                 tab={tab}
                 category={category}
+                searchQuery={search}
                 isHustleTask={isHustleTaskTab}
                 showApplicationMeta={tab === 'gigs'}
                 gigPerspective={tab === 'posted' ? 'poster' : tab === 'gigs' ? 'worker' : undefined}
@@ -412,6 +409,7 @@ const HustleCard = memo(function HustleCard({
   item,
   tab,
   category,
+  searchQuery,
   isHustleTask,
   showApplicationMeta,
   gigPerspective,
@@ -419,6 +417,7 @@ const HustleCard = memo(function HustleCard({
   item: HustleItem
   tab: HustleTab
   category: 'all' | HustleCategory
+  searchQuery?: string
   isHustleTask: boolean
   showApplicationMeta?: boolean
   gigPerspective?: 'worker' | 'poster'
@@ -439,11 +438,12 @@ const HustleCard = memo(function HustleCard({
         ? getPosterGigNextAction(item)
         : null
   const needsAction = nextAction?.tone === 'action'
-  const taskHref = hustleItemUrl(item.id, {
-    tab,
+  const linkCtx = {
     category: category === 'all' ? null : category,
-  })
-  const catHref = hustleCategoryUrl(item.category, tab)
+    q: searchQuery?.trim() || null,
+  }
+  const taskHref = hustleItemUrl(item.id, { tab, ...linkCtx })
+  const catHref = hustleCategoryUrl(item.category, tab, { q: linkCtx.q })
 
   return (
     <article

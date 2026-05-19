@@ -2,6 +2,7 @@
 
 import { Activity as PulseIcon, CheckCircle2, Lock, Phone, Shield, ShieldAlert } from 'lucide-react'
 import type { SettingsPageViewModel } from '../settings-types'
+import { FormField } from '@/components/forms/FormField'
 
 export function SettingsIdentityHubPanel({ vm }: { vm: SettingsPageViewModel }) {
   const {
@@ -188,14 +189,15 @@ export function SettingsIdentityHubPanel({ vm }: { vm: SettingsPageViewModel }) 
           <div style={{ flex: 1 }}>
             {!isPhoneVerified && otpStep === 'idle' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <input
-                  type="tel"
-                  className="form-input"
-                  placeholder="+1 555 000 0000"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  style={{ fontSize: '0.85rem' }}
-                />
+                <FormField label="Phone number" hideLabel icon={<Phone size={16} />}>
+                  <input
+                    type="tel"
+                    placeholder="+1 555 000 0000"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    style={{ fontSize: '0.85rem' }}
+                  />
+                </FormField>
                 <button type="button" onClick={handleRequestOtp} className="btn btn-sm btn-primary" style={{ width: '100%' }}>
                   Send Code
                 </button>
@@ -204,15 +206,16 @@ export function SettingsIdentityHubPanel({ vm }: { vm: SettingsPageViewModel }) 
 
             {!isPhoneVerified && (otpStep === 'sent' || otpStep === 'verifying') && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Code"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  maxLength={6}
-                  style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1rem', fontWeight: 900 }}
-                />
+                <FormField label="Verification code" hideLabel>
+                  <input
+                    type="text"
+                    placeholder="Code"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    maxLength={6}
+                    style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1rem', fontWeight: 900 }}
+                  />
+                </FormField>
                 <div style={{ display: 'flex', gap: '0.4rem' }}>
                   <button type="button" onClick={() => setOtpStep('idle')} className="btn btn-sm btn-secondary" style={{ flex: 1 }}>
                     Back

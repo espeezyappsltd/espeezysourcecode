@@ -33,6 +33,7 @@ import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
 import { marketplaceListFromAssetCopy } from '@/lib/platform/transaction-confirm-copy'
 import ModalOverlay from '@/components/ModalOverlay'
 import { TradingMetricsDashboard } from '@/components/assets/TradingMetricsDashboard'
+import { FormField } from '@/components/forms/FormField'
 
 interface Asset {
   id: string
@@ -522,15 +523,18 @@ function AssetCard({
           </div>
           {editingCredit ? (
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <input
-                type="number"
-                min={0}
-                max={MAX_ASSET_CREDIT_VALUE}
-                value={creditInput}
-                onChange={(e) => setCreditInput(e.target.value)}
-                className="form-input"
-                style={{ flex: 1, padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
-              />
+              <div style={{ flex: 1 }}>
+                <FormField label="Asset value" hideLabel>
+                  <input
+                    type="number"
+                    min={0}
+                    max={MAX_ASSET_CREDIT_VALUE}
+                    value={creditInput}
+                    onChange={(e) => setCreditInput(e.target.value)}
+                    style={{ padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+                  />
+                </FormField>
+              </div>
               <button type="button" className="btn btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} disabled={savingCredit} onClick={() => void saveCreditValue()}>
                 {savingCredit ? '\u2026' : 'Save'}
               </button>
@@ -609,15 +613,18 @@ function FolderModal({ onClose, onCreate }: { onClose: () => void; onCreate: (na
         <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--text-sub)' }}>
           Organize uploads in a virtual folder. Names cannot include slashes.
         </p>
-        <input
-          type="text"
-          className="form-input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Lecture notes"
-          style={{ width: '100%', marginBottom: '1rem' }}
-          onKeyDown={(e) => e.key === 'Enter' && onCreate(name)}
-        />
+        <div style={{ marginBottom: '1rem' }}>
+          <FormField label="Folder name">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Lecture notes"
+              style={{ width: '100%' }}
+              onKeyDown={(e) => e.key === 'Enter' && onCreate(name)}
+            />
+          </FormField>
+        </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onClose}>
             Cancel
@@ -730,10 +737,10 @@ function UploadModal({
           </div>
 
           {form.asset_type === 'file' ? (
-            <div>
-              <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Upload file</label>
+            <FormField label="Upload file">
               <input
                 type="file"
+                className="form-input--file"
                 onChange={(e) => {
                   const f = e.target.files?.[0]
                   if (f) {
@@ -743,38 +750,30 @@ function UploadModal({
                 }}
                 style={{ width: '100%' }}
               />
-            </div>
+            </FormField>
           ) : (
-            <div>
-              <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Link URL</label>
-              <input type="url" className="form-input" value={form.asset_url} onChange={(e) => setForm((f) => ({ ...f, asset_url: e.target.value }))} placeholder="https://..." />
-            </div>
+            <FormField label="Link URL">
+              <input type="url" value={form.asset_url} onChange={(e) => setForm((f) => ({ ...f, asset_url: e.target.value }))} placeholder="https://..." />
+            </FormField>
           )}
 
-          <div>
-            <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Title</label>
-            <input type="text" className="form-input" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="e.g. Design System V1" />
-          </div>
+          <FormField label="Title">
+            <input type="text" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="e.g. Design System V1" />
+          </FormField>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Description (optional)</label>
-            <textarea className="form-input" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Brief summary..." style={{ minHeight: 72, resize: 'none' }} />
-          </div>
+          <FormField label="Description (optional)">
+            <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Brief summary..." style={{ minHeight: 72, resize: 'none' }} />
+          </FormField>
 
-          <motion.div>
-            <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-sub)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Asset value (credits)</label>
+          <FormField label="Asset value (credits)" hint={`${formatCreditCapHint()} · 50 credits ≈ 1 month Pro`}>
             <input
               type="number"
               min={0}
               max={MAX_ASSET_CREDIT_VALUE}
-              className="form-input"
               value={form.credit_value}
               onChange={(e) => setForm((f) => ({ ...f, credit_value: e.target.value }))}
             />
-            <p style={{ margin: '0.5rem 0 0', fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 600 }}>
-              {formatCreditCapHint()} · 50 credits ≈ 1 month Pro
-            </p>
-          </motion.div>
+          </FormField>
         </div>
 
         <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>

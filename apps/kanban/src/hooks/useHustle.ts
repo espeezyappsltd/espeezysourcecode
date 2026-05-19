@@ -40,7 +40,7 @@ export type HustleItem = {
 }
 
 const CACHE_PREFIX = 'gf_hustle_cache_v1'
-const DEBOUNCE_MS = 280
+const DEBOUNCE_MS = 220
 
 function cacheKey(tab: HustleTab, q: string, cat: string) {
   return `${CACHE_PREFIX}:${tab}:${cat}:${q.trim().toLowerCase()}`
@@ -92,6 +92,7 @@ export function useHustle() {
 
   const abortRef = useRef<AbortController | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastFetchKeyRef = useRef('')
 
   const fetchItems = useCallback(
     async (opts?: { cursor?: string | null; tab?: HustleTab; q?: string; cat?: typeof category }) => {
@@ -199,8 +200,11 @@ export function useHustle() {
   )
 
   useEffect(() => {
+    const fetchKey = `${tab}:${category}:${search.trim().toLowerCase()}`
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
+      if (fetchKey === lastFetchKeyRef.current) return
+      lastFetchKeyRef.current = fetchKey
       void fetchItems({ tab, q: search, cat: category })
     }, DEBOUNCE_MS)
     return () => {
@@ -241,6 +245,7 @@ export function useHustle() {
 
   const refreshHard = useCallback(() => {
     clearTabCache(tab)
+    lastFetchKeyRef.current = ''
     void fetchItems({ tab, q: search, cat: category })
   }, [fetchItems, tab, search, category])
 

@@ -172,7 +172,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
           marginBottom: '1rem',
           minHeight: '44px'
         }}
-        title={`Search workspace (${searchShortcutLabel()})`}
+        aria-label={`Search workspace, keyboard shortcut ${searchShortcutLabel()}`}
         className="search-trigger"
       >
         <Search size={18} />
@@ -199,20 +199,29 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
       >
         {/* Input Header */}
         <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {loading ? <Loader2 size={24} className="spin" color="var(--brand)" /> : <Search size={24} color="var(--brand)" />}
-          <input 
+          {loading ? <Loader2 size={24} className="spin" color="var(--brand)" aria-hidden /> : <Search size={24} color="var(--brand)" aria-hidden />}
+          <label htmlFor="global-search-input" className="sr-only">
+            Search students, tasks, or teams
+          </label>
+          <input
+            id="global-search-input"
             ref={inputRef}
-            type="text" 
-            placeholder="Search students, tasks, or teams..." 
+            type="search"
+            role="searchbox"
+            placeholder="Search students, tasks, or teams..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600, outline: 'none' }}
+            autoComplete="off"
+            spellCheck={false}
+            aria-controls="global-search-results"
+            aria-expanded={results.length > 0}
+            style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600, outline: 'none', minHeight: 44 }}
           />
-          <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer' }}><X size={20} /></button>
+          <button type="button" onClick={() => setIsOpen(false)} aria-label="Close search" style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', minWidth: 44, minHeight: 44 }}><X size={20} aria-hidden /></button>
         </div>
 
         {/* Results Area */}
-        <div style={{ maxHeight: '60vh', overflowY: 'auto', padding: '0.75rem' }}>
+        <div id="global-search-results" role="region" aria-label="Search results" style={{ maxHeight: '60vh', overflowY: 'auto', padding: '0.75rem' }}>
           {query.length < 2 ? (
             <div style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-sub)' }}>
                <Search size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />

@@ -6,6 +6,7 @@ import SettingsLoading from '@/components/settings/SettingsLoading'
 import { SettingsTabNav } from '@/components/settings/SettingsTabNav'
 import { SettingsTabPanels } from '@/components/settings/SettingsTabPanels'
 import { useSettingsPage } from '@/components/settings/useSettingsPage'
+import { FormField } from '@/components/forms/FormField'
 
 export default function SettingsPage() {
   const vm = useSettingsPage()
@@ -42,14 +43,15 @@ export default function SettingsPage() {
             <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.6 }}>
               This will <strong>permanently delete</strong> your Espeezy account and all associated data. This action cannot be undone.
             </p>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Type DELETE to confirm"
-              value={deleteConfirmation}
-              onChange={(e) => setDeleteConfirmation(e.target.value)}
-              style={{ border: '2px solid var(--error)', textAlign: 'center', fontWeight: 'bold' }}
-            />
+            <FormField label="Confirmation" hint="Type DELETE to confirm">
+              <input
+                type="text"
+                placeholder="Type DELETE to confirm"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                style={{ border: '2px solid var(--error)', textAlign: 'center', fontWeight: 'bold' }}
+              />
+            </FormField>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
               <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>
                 Cancel

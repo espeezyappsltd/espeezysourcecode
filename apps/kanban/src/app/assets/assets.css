@@ -283,9 +283,13 @@
   flex-wrap: wrap;
 }
 
-.trading-metrics__withdraw-form .form-input {
+.trading-metrics__withdraw-form .form-group {
   flex: 1;
   min-width: 120px;
+}
+
+.trading-metrics__withdraw-form .form-input {
+  width: 100%;
 }
 
 .trading-metrics__fine {
@@ -388,9 +392,13 @@
   gap: 0.5rem;
 }
 
-.trading-metrics__paypal-form .form-input {
+.trading-metrics__paypal-form .form-group {
   flex: 1;
   min-width: 140px;
+}
+
+.trading-metrics__paypal-form .form-input {
+  width: 100%;
 }
 
 .trading-metrics__paypal-actions {

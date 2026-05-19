@@ -19,6 +19,7 @@ import { HustleLifecycleBar } from '@/components/hustle/HustleLifecycleBar'
 import { HustleNextActionBanner } from '@/components/hustle/HustleNextActionBanner'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { avatarUrlForProfile } from '@/lib/platform/contact-rules'
+import { FormField } from '@/components/forms/FormField'
 
 const SUCCESS_MESSAGES: Partial<Record<Parameters<typeof hustleTrade>[1], string>> = {
   fund: 'Escrow funded — credits are secured until the gig completes.',
@@ -264,13 +265,14 @@ export function HustleTaskModal({ taskId, onClose, onUpdated, onViewMyGigs, onGi
             uid &&
             (!myApplication || myApplication.status === 'rejected') && (
             <div style={{ marginBottom: '1rem' }}>
-              <textarea
-                className="form-input"
-                rows={2}
-                placeholder="Optional message to poster…"
-                value={applyMessage}
-                onChange={(e) => setApplyMessage(e.target.value)}
-              />
+              <FormField label="Message to poster" hint="Optional — introduce yourself or ask a question">
+                <textarea
+                  rows={2}
+                  value={applyMessage}
+                  onChange={(e) => setApplyMessage(e.target.value)}
+                  maxLength={500}
+                />
+              </FormField>
               <button
                 type="button"
                 className="btn btn-primary"

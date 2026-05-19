@@ -15,6 +15,7 @@ import confetti from 'canvas-confetti'
 import { OnboardingModalProps } from '@/types/ui'
 import { useProfile } from '@/context/ProfileContext'
 import { CyclingNamePlaceholder, isMockDisplayName } from '@/components/onboarding/CyclingNamePlaceholder'
+import { FormField } from '@/components/forms/FormField'
 
 const PRESET_AVATARS = [
   { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar1&backgroundColor=1a73e8', label: 'Blue geometric' },
@@ -47,8 +48,6 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
 
   const titleId = useId()
   const descId = useId()
-  const nameLabelId = useId()
-  const nameHintId = useId()
   const nameInputId = useId()
   const nameDecorId = useId()
   const statusId = useId()
@@ -252,40 +251,49 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
               Let&apos;s set up your profile. What name should we show in the dashboard?
             </p>
 
-            <div className="form-group">
-              <label id={nameLabelId} className="form-label" htmlFor={nameInputId} style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                Your full name
-              </label>
-              <p id={nameHintId} style={{ fontSize: '0.85rem', color: 'var(--text-sub)', margin: '0.35rem 0 0.75rem' }}>
-                Enter your first and last name as you would like peers to see it.
-              </p>
-              <div style={{ position: 'relative' }}>
-                {!fullName && !nameFieldFocused && <CyclingNamePlaceholder id={nameDecorId} />}
-                <input
-                  id={nameInputId}
-                  type="text"
-                  className="form-input"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  onFocus={() => setNameFieldFocused(true)}
-                  onBlur={() => setNameFieldFocused(false)}
-                  placeholder=""
-                  autoComplete="name"
-                  required
-                  aria-required="true"
-                  aria-labelledby={nameLabelId}
-                  aria-describedby={nameHintId}
-                  style={{
-                    fontSize: '1.25rem',
-                    padding: '1rem',
-                    position: 'relative',
-                    zIndex: 1,
-                    background: 'transparent',
-                    minHeight: '44px',
-                  }}
-                />
-              </div>
-            </div>
+            <FormField
+              label="Your full name"
+              hint="Enter your first and last name as you would like peers to see it."
+              required
+              className="onboarding-name-field"
+              afterControl={
+                !fullName && !nameFieldFocused ? (
+                  <div
+                    aria-hidden
+                    style={{
+                      position: 'relative',
+                      marginTop: '-3.25rem',
+                      height: '3.25rem',
+                      marginBottom: '-3.25rem',
+                      pointerEvents: 'none',
+                      zIndex: 2,
+                    }}
+                  >
+                    <CyclingNamePlaceholder id={nameDecorId} />
+                  </div>
+                ) : null
+              }
+            >
+              <input
+                id={nameInputId}
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                onFocus={() => setNameFieldFocused(true)}
+                onBlur={() => setNameFieldFocused(false)}
+                placeholder=""
+                autoComplete="name"
+                required
+                style={{
+                  fontSize: '1.25rem',
+                  padding: '1rem',
+                  position: 'relative',
+                  zIndex: 1,
+                  background: 'transparent',
+                  minHeight: '44px',
+                }}
+              />
+            </FormField>
 
             <button
               type="button"

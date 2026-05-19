@@ -6,6 +6,7 @@ import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare }
 
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { FormField } from '@/components/forms/FormField'
 
 type ChatHistoryMessage = {
   id: string
@@ -242,18 +243,21 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
             <Paperclip size={20} style={{ cursor: 'pointer' }} />
             <Smile size={20} style={{ cursor: 'pointer' }} />
           </div>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="Type a message..."
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              updateMyState({ status: e.target.value.length > 0 ? 'typing' : 'online' });
-            }}
-            onKeyDown={handleKeyDown}
-            style={{ flex: 1, height: '3rem', borderRadius: '16px', paddingLeft: '1rem', border: '1px solid var(--border)', background: 'var(--surface)' }}
-          />
+          <div style={{ flex: 1 }}>
+            <FormField label="Message" hideLabel>
+              <input
+                type="text"
+                placeholder="Type a message..."
+                value={text}
+                onChange={(e) => {
+                  setText(e.target.value)
+                  updateMyState({ status: e.target.value.length > 0 ? 'typing' : 'online' })
+                }}
+                onKeyDown={handleKeyDown}
+                style={{ height: '3rem', borderRadius: '16px', paddingLeft: '1rem', border: '1px solid var(--border)', background: 'var(--surface)' }}
+              />
+            </FormField>
+          </div>
           <button
             onClick={handleSend}
             style={{

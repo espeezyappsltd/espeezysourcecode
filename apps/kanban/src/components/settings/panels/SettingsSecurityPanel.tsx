@@ -6,6 +6,7 @@ import { Achievement } from '@/types/database'
 import { logActivity } from '@/utils/logging'
 import { updateProfileById } from '@/services/dashboard'
 import type { SettingsPageViewModel } from '../settings-types'
+import { FormField } from '@/components/forms/FormField'
 
 export function SettingsSecurityPanel({ vm }: { vm: SettingsPageViewModel }) {
   const {
@@ -209,10 +210,9 @@ export function SettingsSecurityPanel({ vm }: { vm: SettingsPageViewModel }) {
                   <Settings size={14} color="var(--brand)" />
                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Add Custom</span>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <FormField label="Custom tool name" hideLabel>
                   <input
                     type="text"
-                    className="form-input"
                     placeholder="e.g. Docker"
                     value={customToolInput}
                     onChange={(e) => setCustomToolInput(e.target.value)}
@@ -230,7 +230,7 @@ export function SettingsSecurityPanel({ vm }: { vm: SettingsPageViewModel }) {
                     }}
                     style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}
                   />
-                </div>
+                </FormField>
               </div>
 
               {pendingAchievements !== null && (

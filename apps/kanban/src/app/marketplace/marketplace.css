@@ -187,7 +187,7 @@
 
 .marketplace-page__search input {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  padding: 0.75rem 2.25rem 0.75rem 2.75rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -490,23 +490,31 @@
 
 .mp-inquiries-compose {
   display: flex;
+  align-items: flex-end;
   gap: 0.5rem;
   padding: 0.75rem 1rem 1rem;
   border-top: 1px solid var(--border);
 }
 
-.mp-inquiries-compose input {
+.mp-inquiries-compose__field {
   flex: 1;
-  padding: 0.75rem 0.9rem;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg-sub);
-  color: var(--text-main);
-  font-size: 0.9rem;
+  min-width: 0;
+  margin: 0 !important;
 }
 
-.mp-inquiries-compose button {
+.mp-inquiries-compose__field textarea.form-input {
+  min-height: 44px;
+  max-height: 120px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  resize: none;
+}
+
+.mp-inquiries-compose__send {
+  flex-shrink: 0;
   padding: 0.75rem 1rem;
+  min-width: 44px;
+  min-height: 44px;
   border: none;
   border-radius: 12px;
   background: var(--brand);
@@ -515,4 +523,24 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.mp-inquiries-compose__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.marketplace-page__search-input {
+  padding: 0.75rem 2.25rem 0.75rem 2.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.marketplace-page__search-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.12);
 }

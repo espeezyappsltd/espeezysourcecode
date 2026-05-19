@@ -6,7 +6,7 @@ import { Listing, MarketplaceCategory } from '@/types/marketplace'
 import { MARKETPLACE_CATEGORIES } from '@/lib/marketplace/listing-validation'
 
 const CACHE_PREFIX = 'gf_marketplace_cache_v2'
-const DEBOUNCE_MS = 280
+const DEBOUNCE_MS = 220
 const PAGE_LIMIT = 32
 
 function cacheKey(q: string, category: string) {
@@ -47,6 +47,7 @@ export function useMarketplace() {
   const [hasMore, setHasMore] = useState(false)
 
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastFetchKeyRef = useRef('')
   const abortRef = useRef<AbortController | null>(null)
   const { addToast } = useNotifications()
 
@@ -132,8 +133,11 @@ export function useMarketplace() {
   }, [])
 
   useEffect(() => {
+    const fetchKey = `${activeCategory}:${searchQuery.trim().toLowerCase()}`
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
     searchDebounceRef.current = setTimeout(() => {
+      if (fetchKey === lastFetchKeyRef.current) return
+      lastFetchKeyRef.current = fetchKey
       void fetchListings({ q: searchQuery, category: activeCategory })
     }, DEBOUNCE_MS)
     return () => {

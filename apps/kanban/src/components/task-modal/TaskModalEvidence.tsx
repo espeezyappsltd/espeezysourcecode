@@ -2,6 +2,7 @@
 
 import { ExternalLink, FileUp, Link as LinkIcon, ThumbsUp, Trash2 } from 'lucide-react'
 import type { UseTaskModalReturn } from './useTaskModal'
+import { FormField } from '@/components/forms/FormField'
 
 export type TaskModalEvidenceProps = Pick<
   UseTaskModalReturn,
@@ -36,45 +37,53 @@ export function TaskModalEvidence({
   return (
     <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-        <LinkIcon size={16} color="var(--brand)" />
+        <LinkIcon size={16} color="var(--brand)" aria-hidden />
         <h3 style={{ fontSize: '1rem', margin: 0, fontWeight: 700 }}>Evidence & Links</h3>
       </div>
       <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem', marginBottom: '1.25rem' }}>
         Add verifiable work links or architectural proof.
       </p>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-        <input
-          type="url"
-          className="form-input"
-          placeholder="Figma / Docs / GitHub URL"
-          value={newUrl}
-          onChange={(e) => setNewUrl(e.target.value)}
-          style={{ flex: '1 1 200px' }}
-        />
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+          <FormField label="Evidence URL" hint="Figma, Docs, GitHub, or other proof link">
+            <input type="url" placeholder="https://..." value={newUrl} onChange={(e) => setNewUrl(e.target.value)} />
+          </FormField>
+        </div>
         <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto' }}>
           <button
+            type="button"
             className="btn btn-primary btn-sm"
             onClick={handleUploadEvidence}
             disabled={uploading || !newUrl}
-            style={{ flex: 1 }}
+            style={{ flex: 1, minHeight: 44 }}
           >
             {uploading ? 'Adding...' : 'Attach'}
           </button>
-
           <div style={{ position: 'relative', flex: 1 }}>
-            <button
+            <label
+              htmlFor="task-evidence-file"
               className="btn btn-ghost btn-sm"
-              disabled={uploading}
-              style={{ width: '100%', borderColor: 'var(--brand)', color: 'var(--brand)' }}
+              style={{
+                width: '100%',
+                borderColor: 'var(--brand)',
+                color: 'var(--brand)',
+                minHeight: 44,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                cursor: uploading ? 'not-allowed' : 'pointer',
+              }}
             >
-              <FileUp size={14} /> Upload
-            </button>
+              <FileUp size={14} aria-hidden /> Upload file
+            </label>
             <input
+              id="task-evidence-file"
               type="file"
               onChange={handlePhysicalUpload}
               disabled={uploading}
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+              className="sr-only"
             />
           </div>
         </div>
@@ -124,27 +133,31 @@ export function TaskModalEvidence({
                     rel="noopener noreferrer"
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600 }}
                   >
-                    <ExternalLink size={12} />
+                    <ExternalLink size={12} aria-hidden />
                     View Attachment
                   </a>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <button
+                    type="button"
                     className="btn btn-secondary btn-sm"
                     onClick={() => handleEndorse(artifact.id, artifact.endorsements_count)}
                     style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}
+                    aria-label={`Endorse, ${artifact.endorsements_count} endorsements`}
                   >
-                    <ThumbsUp size={12} />
+                    <ThumbsUp size={12} aria-hidden />
                     {artifact.endorsements_count}
                   </button>
 
                   {isOwner && (
                     <button
+                      type="button"
                       onClick={() => handleDeleteArtifact(artifact.id)}
-                      style={{ background: 'none', border: 'none', color: 'var(--error)', padding: '4px', cursor: 'pointer' }}
+                      aria-label="Delete attachment"
+                      style={{ background: 'none', border: 'none', color: 'var(--error)', padding: '4px', cursor: 'pointer', minWidth: 44, minHeight: 44 }}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={14} aria-hidden />
                     </button>
                   )}
                 </div>

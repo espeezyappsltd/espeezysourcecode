@@ -31,16 +31,17 @@
   min-width: 240px;
 }
 
+.hustle-search-input,
 .hustle-search-wrap input {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  padding: 0.75rem 2.25rem 0.75rem 2.75rem;
   background: var(--bg-sub);
   border: 1px solid var(--border);
   border-radius: 14px;
   font-size: 0.9rem;
-  outline: none;
 }
 
+.hustle-search-input:focus,
 .hustle-search-wrap input:focus {
   border-color: var(--brand);
   box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.12);
