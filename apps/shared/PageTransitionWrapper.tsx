@@ -15,7 +15,7 @@ export default function PageTransitionWrapper({ children }: { children: React.Re
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.3 }}
-        style={{ minHeight: 0 }}
+        style={{ minHeight: 0, width: '100%' }}
       >
         {children}
       </motion.div>

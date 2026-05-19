@@ -192,7 +192,7 @@ export default function PersonalAssetsPage() {
   const breadcrumbParts = normCurrent === '/' ? [] : normCurrent.split('/').filter(Boolean)
 
   return (
-    <motion.div className="assets-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div className="assets-page page-shell" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <header className="assets-hero ui-hero-row page-header">
         <div className="ui-hero-row__main page-header__main">
           <h1 className="page-header__title">

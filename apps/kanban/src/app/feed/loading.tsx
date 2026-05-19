@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="feed-shell page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1.5rem' }}>
+    <div className="feed-shell page-shell page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1.5rem' }}>
       {[0, 1, 2, 3].map((i) => (
         <div
           key={i}

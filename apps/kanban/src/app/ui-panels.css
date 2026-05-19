@@ -3,25 +3,34 @@
  * Use these instead of one-off max-width / border-radius / inline surface styles.
  */
 
-/* ── Page shell — constrains width inside dashboard main-content ─ */
+/* ── Page shell — centered column, uniform width in main-content ─ */
 .page-shell,
+.page-shell--narrow,
+.page-shell--wide,
+.page-shell--full,
 .assets-page,
 .marketplace-page,
-.credits-account-page {
+.credits-account-page,
+.feed-shell,
+.feed-manage-shell,
+.hustle-shell {
   box-sizing: border-box;
   width: 100%;
   max-width: min(var(--content-max), 100%);
+  margin-left: auto;
+  margin-right: auto;
   margin-inline: auto;
   padding-inline: clamp(0.5rem, 2.5vw, 1rem);
   padding-block: 0 2rem;
   min-width: 0;
 }
 
+/* Narrow modifier keeps the same app width (uniform); use for semantic grouping only */
 .page-shell--narrow,
 .feed-shell,
 .feed-manage-shell,
 .hustle-shell {
-  max-width: min(var(--content-narrow), 100%);
+  max-width: min(var(--content-max), 100%);
 }
 
 .page-shell--wide {
@@ -137,6 +146,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  width: 100%;
 }
 
 .page-header--bar {

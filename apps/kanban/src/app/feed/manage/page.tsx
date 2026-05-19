@@ -171,7 +171,7 @@ export default function FeedManagePage() {
 
   if (profileLoading) {
     return (
-      <div className="feed-manage-shell">
+      <div className="feed-manage-shell page-shell">
         <p className="feed-manage-muted">
           <Loader2 size={18} className="feed-spin" /> Loading…
         </p>
@@ -181,7 +181,7 @@ export default function FeedManagePage() {
 
   if (!profile) {
     return (
-      <div className="feed-manage-shell">
+      <div className="feed-manage-shell page-shell">
         <header className="feed-manage-header page-header">
           <div className="page-header__main">
             <Link href="/feed" className="feed-manage-back">
@@ -204,7 +204,7 @@ export default function FeedManagePage() {
   }
 
   return (
-    <div className="feed-manage-shell">
+    <div className="feed-manage-shell page-shell">
       <header className="feed-manage-header page-header">
         <div className="page-header__main">
           <Link href="/feed" className="feed-manage-back">

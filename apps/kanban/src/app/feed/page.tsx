@@ -318,7 +318,7 @@ export default function FeedPage() {
     .slice(0, 8)
 
   return (
-    <div className="feed-shell page-fade">
+    <div className="feed-shell page-shell page-fade">
       <header className="feed-hero page-header page-header--center">
         <div className="page-header__main">
           <h1 className="page-header__title">Academic Journeys</h1>

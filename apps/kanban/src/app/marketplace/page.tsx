@@ -199,7 +199,7 @@ function MarketplacePageInner() {
   )
 
   return (
-    <div className="marketplace-page marketplace-page--compact page-fade list-page--compact">
+    <div className="marketplace-page page-shell marketplace-page--compact page-fade list-page--compact">
       <AccountWalletPanel compact />
 
       <header className="marketplace-page__header page-list-header page-header page-header--compact">
@@ -377,7 +377,7 @@ export default function MarketplacePage() {
   return (
     <Suspense
       fallback={
-        <div className="marketplace-page page-fade" style={{ padding: '2rem', textAlign: 'center' }}>
+        <div className="marketplace-page page-shell page-fade" style={{ padding: '2rem', textAlign: 'center' }}>
           <Loader2 className="animate-spin" />
         </div>
       }

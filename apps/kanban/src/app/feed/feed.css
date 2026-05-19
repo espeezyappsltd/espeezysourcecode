@@ -2,6 +2,14 @@
   padding: 0.25rem 0 1rem;
 }
 
+.feed-shell .feed-composer,
+.feed-shell .feed-card,
+.feed-shell .feed-empty,
+.feed-shell .feed-stories {
+  width: 100%;
+  max-width: 100%;
+}
+
 @media (max-width: 768px) {
   .feed-shell {
     padding: 0.15rem 0 0.5rem;
@@ -132,8 +140,6 @@
 }
 
 .feed-manage-shell {
-  max-width: 640px;
-  margin: 0 auto;
   padding: 0.25rem 0 2rem;
 }
 

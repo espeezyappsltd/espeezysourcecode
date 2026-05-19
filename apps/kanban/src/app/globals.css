@@ -766,6 +766,12 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-color: var(--border) transparent;
 }
 
+/* Route shells are full-width wrappers; each page-shell centers inside */
+.dashboard-layout .main-content > * {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .main-content.onboarding-shell {
   flex: none;
   width: 100%;
