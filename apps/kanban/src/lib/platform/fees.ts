@@ -1,16 +1,10 @@
 /**
  * Platform fees on credit transactions (marketplace + hustle).
- * Aligned with Stripe P2P: 2% with a minimum fee on qualifying amounts.
+ * 1 credit fee per 50 credits sold (50 → 1, 100 → 2, etc.).
  */
 
-/** Basis points (200 = 2%). */
-export const PLATFORM_FEE_BPS = 200
-
-/** Minimum fee when gross meets minGrossForFee. */
-export const MIN_PLATFORM_FEE_CREDITS = 1
-
-/** No platform fee on 0–1 credit transactions. */
-export const MIN_GROSS_FOR_PLATFORM_FEE = 2
+/** Gross credits per 1 platform fee credit. */
+export const CREDITS_PER_PLATFORM_FEE = 50
 
 export type PlatformFeeBreakdown = {
   grossCredits: number
@@ -21,10 +15,10 @@ export type PlatformFeeBreakdown = {
 /** Mirrors SQL `compute_platform_fee_credits`. */
 export function computePlatformFeeCredits(gross: number): number {
   const g = Math.floor(gross)
-  if (!Number.isFinite(g) || g < MIN_GROSS_FOR_PLATFORM_FEE) return 0
+  if (!Number.isFinite(g) || g <= 0) return 0
 
-  const pctFee = Math.ceil((g * PLATFORM_FEE_BPS) / 10_000)
-  const fee = Math.max(MIN_PLATFORM_FEE_CREDITS, pctFee)
+  const fee = Math.floor(g / CREDITS_PER_PLATFORM_FEE)
+  if (fee <= 0) return 0
   return Math.min(fee, g - 1)
 }
 
@@ -46,7 +40,7 @@ export function breakdownPlatformFee(gross: number): PlatformFeeBreakdown {
 export function formatPlatformFeeHint(gross: number): string {
   const { platformFeeCredits, netCredits } = breakdownPlatformFee(gross)
   if (platformFeeCredits <= 0) {
-    return 'No platform fee on this amount.'
+    return 'No platform fee under 50 credits.'
   }
-  return `2% platform fee (${platformFeeCredits} cr) · recipient gets ${netCredits} cr`
+  return `1 cr platform fee per 50 cr sold (${platformFeeCredits} cr fee) · recipient gets ${netCredits} cr`
 }

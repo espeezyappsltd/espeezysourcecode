@@ -342,7 +342,7 @@ export function ListingDetailPanel({
 
             {!isFree && feeBreakdown.platformFeeCredits > 0 && (
               <p style={{ margin: '0 0 0.75rem', fontSize: '0.72rem', color: 'var(--text-sub)' }}>
-                Includes {feeBreakdown.platformFeeCredits} cr platform fee (2%) · seller receives{' '}
+                Includes {feeBreakdown.platformFeeCredits} cr platform fee (1 per 50 cr) · seller receives{' '}
                 {formatCredits(feeBreakdown.netCredits)}
               </p>
             )}

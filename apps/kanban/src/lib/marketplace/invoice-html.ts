@@ -83,7 +83,7 @@ export function buildMarketplaceInvoiceHtml(data: MarketplaceInvoiceData): strin
           <tr><td>Marketplace purchase (gross)</td><td>${escapeHtml(formatCredits(data.creditsAmount))}</td></tr>
           ${
             (data.platformFeeCredits ?? 0) > 0
-              ? `<tr><td>Platform fee (2%)</td><td>−${escapeHtml(formatCredits(data.platformFeeCredits!))}</td></tr>
+              ? `<tr><td>Platform fee (1 per 50 cr)</td><td>−${escapeHtml(formatCredits(data.platformFeeCredits!))}</td></tr>
                  <tr><td><strong>Seller net</strong></td><td class="total">${escapeHtml(formatCredits(data.sellerNetCredits ?? data.creditsAmount - (data.platformFeeCredits ?? 0)))}</td></tr>`
               : `<tr><td colspan="2" class="total">${escapeHtml(formatCredits(data.creditsAmount))}</td></tr>`
           }

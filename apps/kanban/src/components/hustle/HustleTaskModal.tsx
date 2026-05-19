@@ -355,7 +355,7 @@ export function HustleTaskModal({ taskId, onClose, onUpdated, onViewMyGigs, onGi
                 {payoutFee.platformFeeCredits > 0 && (
                   <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--text-sub)' }}>
                     Worker receives {formatCredits(payoutFee.netCredits)} after{' '}
-                    {payoutFee.platformFeeCredits} cr platform fee (2%)
+                    {payoutFee.platformFeeCredits} cr platform fee (1 per 50 cr)
                   </p>
                 )}
                 <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void runWithConfirm('approve')}>
