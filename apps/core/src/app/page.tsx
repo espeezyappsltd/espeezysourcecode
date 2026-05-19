@@ -1,4 +1,5 @@
 import { DEV_LINK_SECTIONS, LOCAL_APPS } from '@/lib/dev-links'
+import { FOOTER_COPYRIGHT_TAGLINE } from '@/lib/platform/brand-copy'
 import './local-server.css'
 
 type LinkItem = {
@@ -77,7 +78,7 @@ export default function LocalServerPage() {
 
         <footer className="local-server-footer">
           <p>
-            Running on <strong>apps/core</strong> · Part of the Espeezy monorepo · Start/stop from{' '}
+            Running on <strong>apps/core</strong> · Part of the Espeezy monorepo · {FOOTER_COPYRIGHT_TAGLINE} · Start/stop from{' '}
             <a href="http://localhost:3000/dashboard" style={{ color: '#f472b6', fontWeight: 700 }}>
               Dev Hub
             </a>

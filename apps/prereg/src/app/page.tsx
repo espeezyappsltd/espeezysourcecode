@@ -15,6 +15,7 @@ import SharedCountdown from '@/components/SharedCountdown'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
+import { PLATFORM_OPERATIONS_TAGLINE } from '@shared/platform-brand'
 
 function HeroVisual({ registeredCount }: { registeredCount: number }) {
   return (
@@ -330,9 +331,12 @@ export default function PreRegisterPage() {
         </motion.h2>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
-          style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
+          style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 1rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
           {config.brand_name} records who contributed what in group projects, with a clear academic record for grading, job applications, and proving your skills.
         </motion.p>
+        <p style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '0.85rem', lineHeight: 1.55, fontWeight: 600 }}>
+          {PLATFORM_OPERATIONS_TAGLINE}
+        </p>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
 

@@ -58,3 +58,35 @@ export const PREREG_LIFETIME_FEATURES = [
   'Legacy pricing protection',
   'Priority support from the platform team',
 ] as const
+
+/** Site-wide footer and lightweight app footers */
+export const FOOTER_BRAND_BLURB =
+  'Espeezy documents real contribution in group projects. A 12-member platform team runs production backend, billing, and campus rollout—not a solo side project.'
+
+export const FOOTER_TECH_BLURB =
+  'Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle. Payments via Stripe; subscriptions managed by our platform team.'
+
+export const FOOTER_IMPORTANT_INFO = `Support: support@espeezy.com
+Payments via Stripe · Managed by the Espeezy platform team (${PLATFORM_TEAM_SIZE} operators on backend, billing, and support).
+Core student tier stays free.`
+
+export const FOOTER_COPYRIGHT_TAGLINE =
+  'Operated by a 12-member platform team for students everywhere.'
+
+export const FOOTER_BOTTOM_RIGHT =
+  'Free forever for students · No data sold · Team-run roadmap'
+
+export const GAMES_LANDING_CTA_BODY =
+  'Join the campus launch cohort on Espeezy. Our 12-person platform team runs the backend—be first to play when Games launches.'
+
+export const GAMES_UPGRADE_GATE_NOTE =
+  'Plans and billing are managed by the Espeezy platform team via Stripe.'
+
+export const APP_FOOTER_TAGLINE_GAMES =
+  'Espeezy Games · Learn through play · Team-operated platform'
+
+export const APP_FOOTER_TAGLINE_DASHBOARD =
+  'Espeezy Dashboard · Collaboration infrastructure · Team-operated platform'
+
+export const SIDEBAR_UPGRADE_BLURB =
+  'Support the platform team—unlock advanced themes and priority features.'

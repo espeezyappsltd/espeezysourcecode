@@ -1,5 +1,6 @@
 "use client"
 
+import { GAMES_LANDING_CTA_BODY } from '@/lib/platform/brand-copy'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import CategoriesGamesSection from '@/components/CategoriesGamesSection'
 import { useGamesLanding } from '@/hooks/useGamesLanding'
@@ -312,7 +313,7 @@ export default function HomePage() {
           Ready to transform how you learn?
         </h2>
         <p style={{ color: '#64748b', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
-          Join thousands of students already on the Espeezy early-access list and be first to play when Games launches.
+          {GAMES_LANDING_CTA_BODY}
         </p>
         <a
           href="https://espeezy.com"

@@ -1,5 +1,13 @@
 'use client'
 
+import {
+  FOOTER_BOTTOM_RIGHT,
+  FOOTER_BRAND_BLURB,
+  FOOTER_COPYRIGHT_TAGLINE,
+  FOOTER_IMPORTANT_INFO,
+  FOOTER_TECH_BLURB,
+} from '@/lib/platform/brand-copy'
+
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/#features', label: 'Features' },
@@ -89,13 +97,11 @@ export default function PreregFooter() {
           </div>
 
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: '#64748b', marginBottom: '1.5rem', maxWidth: '240px' }}>
-            The collaborative education platform built for equitable collaboration. Every student gets credit
-            for the work they actually do. Free, open, and made for real group projects.
+            {FOOTER_BRAND_BLURB}
           </p>
 
           <p style={{ fontSize: '0.82rem', lineHeight: 1.6, color: '#475569', marginBottom: '1rem', maxWidth: '240px' }}>
-            Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle.
-            Payments via Stripe. Real-time sync across all your devices.
+            {FOOTER_TECH_BLURB}
           </p>
 
           <div
@@ -111,12 +117,8 @@ export default function PreregFooter() {
             <p style={{ margin: 0, fontSize: '0.72rem', color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
               Important Info
             </p>
-            <p style={{ margin: '0.45rem 0 0', fontSize: '0.76rem', lineHeight: 1.5, color: '#94a3b8' }}>
-              Support: support@espeezy.com
-              <br />
-              Payments are processed by Stripe.
-              <br />
-              Core student tier stays free.
+            <p style={{ margin: '0.45rem 0 0', fontSize: '0.76rem', lineHeight: 1.5, color: '#94a3b8', whiteSpace: 'pre-line' }}>
+              {FOOTER_IMPORTANT_INFO}
             </p>
           </div>
 
@@ -259,11 +261,10 @@ export default function PreregFooter() {
         }}
       >
         <p style={{ fontSize: '0.78rem', color: '#334155', margin: 0 }}>
-          &copy; {new Date().getFullYear()} Espeezy. All rights reserved.
-          Built for students, by people who remember how hard group projects can be.
+          &copy; {new Date().getFullYear()} Espeezy. All rights reserved. {FOOTER_COPYRIGHT_TAGLINE}
         </p>
         <p style={{ fontSize: '0.78rem', color: '#1e293b', margin: 0, fontWeight: 600 }}>
-          Free forever for students &middot; No data sold &middot; Open roadmap
+          {FOOTER_BOTTOM_RIGHT}
         </p>
       </div>
     </footer>

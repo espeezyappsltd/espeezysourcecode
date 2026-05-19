@@ -56,7 +56,7 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Resources', path: '/dashboard/marketplace', icon: TrendingUp },
   { name: 'Break Room', path: '/dashboard/chillout', icon: Sparkles },
   { name: 'Project Stats', path: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Plans', path: '/dashboard/upgrade', icon: Activity },
+  { name: 'Plans', path: '/upgrade', icon: Activity },
   { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
   { name: 'Settings', path: '/dashboard/settings', icon: Settings },
 ]
@@ -448,7 +448,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
         {isOpen && showUpgradeCard && (
           <div style={{ padding: '0 1rem 1rem' }}>
-            <div className="glass-card-prestige" style={{ padding: '1.25rem', borderRadius: '20px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => pushRoute('/dashboard/upgrade')}>
+            <div className="glass-card-prestige" style={{ padding: '1.25rem', borderRadius: '20px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => pushRoute('/upgrade')}>
               <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={16} className="shimmer-gold" />

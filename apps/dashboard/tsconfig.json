@@ -30,7 +30,7 @@
         "../../shared/types/*"
       ],
       "@shared/*": [
-        "../prereg/src/*"
+        "../shared/*"
       ]
     }
   },

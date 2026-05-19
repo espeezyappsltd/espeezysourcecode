@@ -1,5 +1,7 @@
 'use client'
 
+import { APP_FOOTER_TAGLINE_DASHBOARD, FOOTER_IMPORTANT_INFO } from '@/lib/platform/brand-copy'
+
 export default function PreregFooter() {
   const linkStyle: React.CSSProperties = {
     color: '#94a3b8',
@@ -22,22 +24,31 @@ export default function PreregFooter() {
           margin: '0 auto',
           padding: '2rem 1.25rem',
           display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1rem 1.5rem',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          flexDirection: 'column',
+          gap: '1rem',
         }}
       >
-        <p style={{ margin: 0, fontSize: '0.9rem' }}>
-          Espeezy Kanban. Accurate collaboration for every team.
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '1rem 1.5rem',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <p style={{ margin: 0, fontSize: '0.9rem' }}>{APP_FOOTER_TAGLINE_DASHBOARD}</p>
+          <nav aria-label="Footer links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <a href="https://espeezy.com" style={linkStyle}>Home</a>
+            <a href="https://espeezy.com/preregister" style={linkStyle}>Early Access</a>
+            <a href="https://espeezy.com/pricing" style={linkStyle}>Pricing</a>
+            <a href="https://espeezy.com/privacy" style={linkStyle}>Privacy</a>
+            <a href="https://games.espeezy.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>Games</a>
+          </nav>
+        </div>
+        <p style={{ margin: 0, fontSize: '0.72rem', lineHeight: 1.55, color: '#64748b', maxWidth: '640px', whiteSpace: 'pre-line' }}>
+          {FOOTER_IMPORTANT_INFO}
         </p>
-        <nav aria-label="Footer links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <a href="https://espeezy.com" style={linkStyle}>Home</a>
-          <a href="https://espeezy.com/preregister" style={linkStyle}>Early Access</a>
-          <a href="https://espeezy.com/checkout" style={linkStyle}>Pricing</a>
-          <a href="https://espeezy.com/privacy" style={linkStyle}>Privacy</a>
-          <a href="https://games.espeezy.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>Games</a>
-        </nav>
       </div>
     </footer>
   )

@@ -42,6 +42,12 @@ const LEGAL_LINKS = [
 ]
 
 import { useCentralLoading } from './CentralLoadingProvider'
+import {
+  FOOTER_BOTTOM_RIGHT,
+  FOOTER_BRAND_BLURB,
+  FOOTER_COPYRIGHT_TAGLINE,
+  FOOTER_TECH_BLURB,
+} from './platform-brand'
 
 function FooterLink({ href, children, external = false }: { href: string; children: React.ReactNode; external?: boolean }) {
   const { startLoading } = useCentralLoading();
@@ -108,12 +114,11 @@ export default function SiteFooter() {
           </div>
 
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: '#64748b', marginBottom: '1.5rem', maxWidth: '240px' }}>
-            Espeezy shows exactly who did what in group work, so you can grade accurately based on real data. Every student gets credit for the work they actually do.
+            {FOOTER_BRAND_BLURB}
           </p>
 
           <p style={{ fontSize: '0.82rem', lineHeight: 1.6, color: '#475569', marginBottom: '1rem', maxWidth: '240px' }}>
-            Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle.
-            Payments via Stripe. Real-time sync across all your devices.
+            {FOOTER_TECH_BLURB}
           </p>
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -199,11 +204,10 @@ export default function SiteFooter() {
         }}
       >
         <p style={{ fontSize: '0.78rem', color: '#334155', margin: 0 }}>
-          &copy; {new Date().getFullYear()} Espeezy. All rights reserved.
-          Built for students, by people who remember how hard group projects can be.
+          &copy; {new Date().getFullYear()} Espeezy. All rights reserved. {FOOTER_COPYRIGHT_TAGLINE}
         </p>
         <p style={{ fontSize: '0.78rem', color: '#1e293b', margin: 0, fontWeight: 600 }}>
-          Free forever for students &middot; No data sold &middot; Open roadmap
+          {FOOTER_BOTTOM_RIGHT}
         </p>
       </div>
     </footer>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { BarChart3, Gamepad2, Lock, Sparkles, Zap } from 'lucide-react'
 import type { Feature } from '@/utils/feature-gate'
+import { PLATFORM_OPERATIONS_TAGLINE } from '@/lib/platform/brand-copy'
 
 const FEATURE_META: Record<
   Feature,
@@ -138,6 +139,9 @@ export default function PremiumFeatureGate({ feature }: { feature: Feature }) {
           <Sparkles size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
           Upgrade Breakroom
         </Link>
+        <p style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.5, margin: 0, maxWidth: '360px' }}>
+          {PLATFORM_OPERATIONS_TAGLINE}
+        </p>
         <Link href="/" style={{ fontSize: '0.85rem', color: 'var(--text-sub)', fontWeight: 700, textDecoration: 'none' }}>
           Back to dashboard
         </Link>

@@ -444,7 +444,7 @@ export default function Sidebar({ user }: SidebarProps) {
                 <span style={{ fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', color: 'var(--text-main)' }}>TEAM SUPPORT</span>
               </div>
               <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.25rem' }}>Upgrade to Pro Member</div>
-              <p style={{ fontSize: '0.65rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.4 }}>Unlock advanced themes and elite student status.</p>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.4 }}>Support the platform team—unlock advanced themes and priority features.</p>
             </div>
           </div>
         )}

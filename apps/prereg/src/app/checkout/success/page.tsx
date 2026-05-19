@@ -3,6 +3,7 @@
 import { useEffect, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { CHECKOUT_SUCCESS_TEAM_NOTE } from '@shared/platform-brand'
 import { CheckCircle2, ArrowRight, Sparkles, Crown, Zap, Star } from 'lucide-react'
 import { getPlanKey } from '@/lib/stripe-payment-links'
 
@@ -227,7 +228,9 @@ function SuccessContent() {
           </Link>
         </div>
 
-        {/* Stripe confirmation note */}
+        <p style={{ margin: '0 0 0.75rem', fontSize: '0.78rem', color: 'rgba(15,23,42,0.45)', fontWeight: 600, lineHeight: 1.55, maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto' }}>
+          {CHECKOUT_SUCCESS_TEAM_NOTE}
+        </p>
         <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(15,23,42,0.3)', fontWeight: 500 }}>
           A receipt has been sent to your email by Stripe. If you have any issues, contact{' '}
           <a href="mailto:support@espeezy.com" style={{ color: tier.accent, textDecoration: 'none', fontWeight: 700 }}>support@espeezy.com</a>.

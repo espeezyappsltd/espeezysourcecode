@@ -8,6 +8,7 @@ import { ESPEEZY_APP_ORIGINS } from '@shared/app-url'
 import { SimpleAuthForm } from '@shared/SimpleAuthForm'
 import { sanitizeNextPath } from '@shared/app-url'
 import { useSimpleAuth } from '@shared/useSimpleAuth'
+import { GAMES_UPGRADE_GATE_NOTE } from '@/lib/platform/brand-copy'
 
 export default function LoginClient() {
   const router = useRouter()
@@ -61,6 +62,7 @@ export default function LoginClient() {
     >
       <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Pro account required</strong>
       Espeezy Games needs a Pro or Premium plan on your Espeezy account. Free accounts cannot play here.
+      <span style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem', color: '#78716c' }}>{GAMES_UPGRADE_GATE_NOTE}</span>
       <a
         href={`${ESPEEZY_APP_ORIGINS.kanban}/settings?tab=billing`}
         style={{
