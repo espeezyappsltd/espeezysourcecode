@@ -251,15 +251,23 @@ const ACTIVITY_LOG_COLUMNS = [
   'id, user_id, group_id, action, details, created_at, status',
 ] as const
 
+type ActivityLogQueryResult = {
+  data: unknown[] | null
+  error: { message?: string } | null
+}
+
 /** PostgREST has no FK from activity_logs → profiles; never use profiles(...) embed. */
 async function selectActivityLogs(
-  build: (db: ReturnType<typeof createBrowserSupabaseClient>, columns: string) => Promise<{ data: unknown[] | null; error: { message?: string } | null }>,
+  run: (
+    db: ReturnType<typeof createBrowserSupabaseClient>,
+    columns: string,
+  ) => PromiseLike<ActivityLogQueryResult>,
 ): Promise<ActivityLog[]> {
   let lastError: { message?: string } | null = null
   const db = createBrowserSupabaseClient()
 
   for (const columns of ACTIVITY_LOG_COLUMNS) {
-    const { data, error } = await build(db, columns)
+    const { data, error } = await run(db, columns)
     if (!error) return (data ?? []) as ActivityLog[]
     lastError = error
     if (!isMissingColumnError(error.message)) break
@@ -309,14 +317,15 @@ export async function fetchActivityLogByGroup(
   rowLimit = 500,
 ): Promise<ActivityLogRow[]> {
   try {
-    const rows = await selectActivityLogs((db, columns) =>
-      db
+    const rows = await selectActivityLogs(async (db, columns) => {
+      const result = await db
         .from('activity_logs')
         .select(columns)
         .eq('group_id', groupId)
         .order('created_at', { ascending: false })
-        .limit(rowLimit),
-    )
+        .limit(rowLimit)
+      return result
+    })
     const enriched = await enrichActivityLogsWithProfiles(rows)
     return enriched.map(mapActivityLogRow)
   } catch (err) {
@@ -335,7 +344,7 @@ export async function fetchActivityFeed(opts: {
   if (!opts.userId && !opts.groupId) return []
 
   try {
-    const rows = await selectActivityLogs((db, columns) => {
+    const rows = await selectActivityLogs(async (db, columns) => {
       let q = db.from('activity_logs').select(columns).order('created_at', { ascending: false }).limit(limit)
       if (opts.userId && opts.groupId) {
         q = q.or(`user_id.eq.${opts.userId},group_id.eq.${opts.groupId}`)
@@ -344,7 +353,7 @@ export async function fetchActivityFeed(opts: {
       } else if (opts.groupId) {
         q = q.eq('group_id', opts.groupId)
       }
-      return q
+      return await q
     })
     const enriched = await enrichActivityLogsWithProfiles(rows)
     return enriched.map(mapActivityLogRow)
