@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
+import { ListingProductImage } from '@/components/marketplace/ListingProductImage'
 import { useRouter } from 'next/navigation'
 import {
   X,
@@ -157,23 +157,14 @@ export function ListingDetailPanel({
 
         <div className="listing-detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 1.1fr) 1fr', minHeight: 0 }}>
           <div className="listing-detail-media" style={{ background: 'var(--bg-sub)', position: 'relative', minHeight: '320px' }}>
-            {listing.images?.[0] ? (
-              <Image src={listing.images[0]} alt={listing.title} fill className="object-cover" />
-            ) : (
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '320px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--text-sub)',
-                }}
-              >
-                <Package size={48} opacity={0.3} />
-              </div>
-            )}
+            <ListingProductImage
+              images={listing.images}
+              alt={listing.title}
+              category={listing.category}
+              className="listing-product-image--fill"
+              aspectRatio="unset"
+              priority
+            />
           </div>
 
           <div className="listing-detail-body app-modal-panel__scroll" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

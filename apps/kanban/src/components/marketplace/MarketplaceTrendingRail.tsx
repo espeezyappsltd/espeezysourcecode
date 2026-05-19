@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { ListingProductImage } from '@/components/marketplace/ListingProductImage'
 import { Flame, TrendingUp, Tag, User, Loader2, Zap } from 'lucide-react'
 import { Listing, MarketplaceCategory } from '@/types/marketplace'
 import { computeMarketplaceTrending, isListingAvailable } from '@/lib/marketplace/trending'
@@ -95,9 +96,13 @@ export function MarketplaceTrendingRail({
               }}
             >
               <div style={{ height: '120px', position: 'relative', background: 'var(--bg-sub)' }}>
-                {item.images?.[0] && (
-                  <Image src={item.images[0]} alt="" fill className="object-cover" />
-                )}
+                <ListingProductImage
+                  images={item.images}
+                  alt={item.title}
+                  category={item.category}
+                  className="listing-product-image--fill"
+                  aspectRatio="unset"
+                />
               </div>
               <div style={{ padding: '0.85rem' }}>
                 <div style={{ fontWeight: 900, fontSize: '0.85rem', marginBottom: '0.35rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

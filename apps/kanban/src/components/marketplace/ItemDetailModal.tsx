@@ -2,8 +2,9 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Plus, MapPin, Clock } from 'lucide-react'
+import { MapPin, Clock } from 'lucide-react'
 import { Listing } from '@/types/marketplace'
+import { ListingProductImage } from '@/components/marketplace/ListingProductImage'
 
 interface ItemDetailModalProps {
   listing: Listing
@@ -31,19 +32,15 @@ export function ItemDetailModal({ listing, onClose }: ItemDetailModalProps) {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1.2fr) 1fr', height: '100%' }}>
           
           {/* Left: Media Area */}
-          <div style={{ background: 'var(--bg-sub)', position: 'relative' }}>
-            {listing.images?.[0] ? (
-              <Image 
-                src={listing.images[0]} 
-                alt={listing.title} 
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)' }}>
-                <Plus size={48} opacity={0.3} />
-              </div>
-            )}
+          <div style={{ background: 'var(--bg-sub)', position: 'relative', minHeight: '360px' }}>
+            <ListingProductImage
+              images={listing.images}
+              alt={listing.title}
+              category={listing.category}
+              className="listing-product-image--fill"
+              aspectRatio="unset"
+              priority
+            />
             <button 
               onClick={onClose}
               style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: 'none', color: 'white', padding: '0.75rem', borderRadius: '16px', cursor: 'pointer', fontWeight: 900 }}

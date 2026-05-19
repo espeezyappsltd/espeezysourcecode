@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="Product placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect x="280" y="170" width="240" height="200" rx="24" fill="none" stroke="#10b981" stroke-width="3" opacity="0.45"/>
+  <path d="M340 290 L400 230 L460 290 L460 340 L340 340 Z" fill="none" stroke="#10b981" stroke-width="3" opacity="0.7"/>
+  <circle cx="400" cy="255" r="18" fill="#10b981" opacity="0.35"/>
+  <text x="400" y="420" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="28" font-weight="700">Espeezy</text>
+  <text x="400" y="455" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="18">Campus marketplace</text>
+</svg>

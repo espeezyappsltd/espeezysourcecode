@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { normalizeListingImages } from '@/lib/marketplace/listing-images'
 
 export const MARKETPLACE_CATEGORIES = [
   'Electronics',
@@ -22,7 +23,7 @@ export const listingRowSchema = z.object({
   price: z.coerce.number().min(0).max(100),
   category: z.enum(MARKETPLACE_CATEGORIES),
   condition: z.enum(LISTING_CONDITIONS).optional(),
-  images: z.array(z.string()).optional(),
+  images: z.preprocess((val) => normalizeListingImages(val), z.array(z.string()).default([])),
   meetup_zone: z.string().optional(),
   meetup_details: z.string().optional(),
   duration_days: z.number().int().positive().optional(),
@@ -71,5 +72,8 @@ export function validateListingRow(row: unknown): ValidatedListingRow | null {
   if (!parsed.success) return null
   const st = parsed.data.status?.toUpperCase()
   if (st === 'REMOVED' || st === 'DELETED') return null
-  return parsed.data
+  return {
+    ...parsed.data,
+    images: normalizeListingImages(parsed.data.images),
+  }
 }

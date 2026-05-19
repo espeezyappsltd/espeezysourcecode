@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Listing, MarketplaceCategory } from '@/types/marketplace'
 import { MARKETPLACE_CATEGORIES } from '@/lib/marketplace/listing-validation'
+import { withNormalizedListingImages } from '@/lib/marketplace/listing-images'
 
 const CACHE_PREFIX = 'gf_marketplace_cache_v2'
 const DEBOUNCE_MS = 220
@@ -20,7 +21,7 @@ function readCache(key: string): Listing[] | null {
     const parsed = JSON.parse(raw) as { listings?: Listing[]; at?: number }
     if (!Array.isArray(parsed.listings)) return null
     if (parsed.at && Date.now() - parsed.at > 10 * 60_000) return null
-    return parsed.listings
+    return parsed.listings.map((row) => withNormalizedListingImages(row))
   } catch {
     return null
   }
@@ -98,7 +99,7 @@ export function useMarketplace() {
           return
         }
 
-        const incoming = data.listings ?? []
+        const incoming = (data.listings ?? []).map((row) => withNormalizedListingImages(row))
         setListings((prev) => (isMore ? [...prev, ...incoming] : incoming))
         setNextCursor(data.nextCursor ?? null)
         setHasMore(Boolean(data.nextCursor))

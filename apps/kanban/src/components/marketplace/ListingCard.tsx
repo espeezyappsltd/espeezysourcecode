@@ -1,9 +1,9 @@
 'use client'
 
 import React, { memo } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Plus, MapPin, Coins } from 'lucide-react'
+import { MapPin, Coins } from 'lucide-react'
+import { ListingProductImage } from '@/components/marketplace/ListingProductImage'
 import { formatCredits } from '@/lib/credits'
 import { Listing } from '@/types/marketplace'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
@@ -31,13 +31,13 @@ export const ListingCard = memo(function ListingCard({ item, href, activeCategor
         aria-label={`${item.title}, ${formatCredits(Math.floor(item.price ?? 0))} credits`}
       />
       <div className="listing-card__media">
-        {item.images?.[0] ? (
-          <Image src={item.images[0]} alt="" fill className="object-cover" loading="lazy" sizes="(max-width: 768px) 50vw, 280px" />
-        ) : (
-          <div className="listing-card__placeholder" aria-hidden>
-            <Plus size={28} opacity={0.3} />
-          </div>
-        )}
+        <ListingProductImage
+          images={item.images}
+          alt={item.title}
+          category={item.category}
+          className="listing-product-image--fill"
+          aspectRatio="unset"
+        />
         <Link href={categoryHref} className="listing-card__category-link" prefetch>
           {item.category || 'Item'}
         </Link>
