@@ -1,4 +1,5 @@
 import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { isMissingColumnError } from '@/utils/supabase-errors'
 import { PRESENCE_ONLINE_WINDOW_MS } from '@/lib/presence/team-presence'
 import { Q } from '@/lib/query-columns'
 import type { Group, Profile, Task, Artifact, Commit, ActivityLog, ActivityLogRow } from '@/types/database'
@@ -245,22 +246,83 @@ export function mapActivityLogRow(row: ActivityLogDbRow): ActivityLogRow {
   }
 }
 
-const ACTIVITY_LOG_SELECT =
-  'id, user_id, group_id, action, details, created_at, status, profiles(full_name, avatar_url)'
+const ACTIVITY_LOG_COLUMNS = [
+  'id, user_id, group_id, action, details, created_at',
+  'id, user_id, group_id, action, details, created_at, status',
+] as const
+
+/** PostgREST has no FK from activity_logs → profiles; never use profiles(...) embed. */
+async function selectActivityLogs(
+  build: (db: ReturnType<typeof createBrowserSupabaseClient>, columns: string) => Promise<{ data: unknown[] | null; error: { message?: string } | null }>,
+): Promise<ActivityLog[]> {
+  let lastError: { message?: string } | null = null
+  const db = createBrowserSupabaseClient()
+
+  for (const columns of ACTIVITY_LOG_COLUMNS) {
+    const { data, error } = await build(db, columns)
+    if (!error) return (data ?? []) as ActivityLog[]
+    lastError = error
+    if (!isMissingColumnError(error.message)) break
+  }
+
+  if (lastError) throw lastError
+  return []
+}
+
+/** PostgREST has no FK from activity_logs → profiles; resolve names in a second query. */
+async function enrichActivityLogsWithProfiles(
+  rows: ActivityLog[],
+): Promise<ActivityLogDbRow[]> {
+  if (rows.length === 0) return []
+
+  const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))] as string[]
+  const profileById: Record<string, { full_name: string | null; avatar_url: string | null }> =
+    {}
+
+  if (userIds.length > 0) {
+    const db = createBrowserSupabaseClient()
+    const { data: profiles, error } = await db
+      .from('profiles')
+      .select('id, full_name, avatar_url')
+      .in('id', userIds)
+
+    if (error) {
+      console.warn('[activity_logs] profile lookup failed:', error.message)
+    } else {
+      for (const p of profiles ?? []) {
+        profileById[p.id as string] = {
+          full_name: (p.full_name as string | null) ?? null,
+          avatar_url: (p.avatar_url as string | null) ?? null,
+        }
+      }
+    }
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    profiles: row.user_id ? (profileById[row.user_id] ?? null) : null,
+  }))
+}
 
 export async function fetchActivityLogByGroup(
   groupId: string,
   rowLimit = 500,
 ): Promise<ActivityLogRow[]> {
-  const db = createBrowserSupabaseClient()
-  const { data, error } = await db
-    .from('activity_logs')
-    .select(ACTIVITY_LOG_SELECT)
-    .eq('group_id', groupId)
-    .order('created_at', { ascending: false })
-    .limit(rowLimit)
-  if (error) throw error
-  return ((data ?? []) as unknown as ActivityLogDbRow[]).map(mapActivityLogRow)
+  try {
+    const rows = await selectActivityLogs((db, columns) =>
+      db
+        .from('activity_logs')
+        .select(columns)
+        .eq('group_id', groupId)
+        .order('created_at', { ascending: false })
+        .limit(rowLimit),
+    )
+    const enriched = await enrichActivityLogsWithProfiles(rows)
+    return enriched.map(mapActivityLogRow)
+  } catch (err) {
+    console.warn('[fetchActivityLogByGroup]', err)
+    return []
+  }
 }
 
 /** Personal + team activity (marketplace, credits, tasks, etc.) */
@@ -269,27 +331,27 @@ export async function fetchActivityFeed(opts: {
   groupId?: string | null
   limit?: number
 }): Promise<ActivityLogRow[]> {
-  const db = createBrowserSupabaseClient()
   const limit = opts.limit ?? 200
-  let query = db
-    .from('activity_logs')
-    .select(ACTIVITY_LOG_SELECT)
-    .order('created_at', { ascending: false })
-    .limit(limit)
+  if (!opts.userId && !opts.groupId) return []
 
-  if (opts.userId && opts.groupId) {
-    query = query.or(`user_id.eq.${opts.userId},group_id.eq.${opts.groupId}`)
-  } else if (opts.userId) {
-    query = query.eq('user_id', opts.userId)
-  } else if (opts.groupId) {
-    query = query.eq('group_id', opts.groupId)
-  } else {
+  try {
+    const rows = await selectActivityLogs((db, columns) => {
+      let q = db.from('activity_logs').select(columns).order('created_at', { ascending: false }).limit(limit)
+      if (opts.userId && opts.groupId) {
+        q = q.or(`user_id.eq.${opts.userId},group_id.eq.${opts.groupId}`)
+      } else if (opts.userId) {
+        q = q.eq('user_id', opts.userId)
+      } else if (opts.groupId) {
+        q = q.eq('group_id', opts.groupId)
+      }
+      return q
+    })
+    const enriched = await enrichActivityLogsWithProfiles(rows)
+    return enriched.map(mapActivityLogRow)
+  } catch (err) {
+    console.warn('[fetchActivityFeed]', err)
     return []
   }
-
-  const { data, error } = await query
-  if (error) throw error
-  return ((data ?? []) as unknown as ActivityLogDbRow[]).map(mapActivityLogRow)
 }
 
 export type MarketplaceTxRow = {

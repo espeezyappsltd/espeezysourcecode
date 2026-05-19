@@ -86,7 +86,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     }
 
     try {
-      const [userProfile, groupData, groupTasks, groupMembers, groupArtifacts] = await Promise.all([
+      const [profileRes, groupRes, tasksRes, membersRes, artifactsRes] = await Promise.allSettled([
         fetchProfileById(authUser.id),
         fetchGroupById(groupId),
         fetchGroupTasks(groupId),
@@ -94,17 +94,44 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         fetchArtifactsByGroup(groupId),
       ])
 
-      setCurrentUser(userProfile as unknown as Profile)
-      const memberCheck = userProfile?.group_id === groupId
-      setIsMember(memberCheck)
+      const rejectReason = [profileRes, groupRes, tasksRes, membersRes, artifactsRes].find(
+        (r): r is PromiseRejectedResult => r.status === 'rejected',
+      )
+      if (groupRes.status === 'rejected') {
+        throw groupRes.reason
+      }
 
+      const userProfile = profileRes.status === 'fulfilled' ? profileRes.value : null
+      const groupData = groupRes.value
+      const groupTasks = tasksRes.status === 'fulfilled' ? tasksRes.value : []
+      const groupMembers =
+        membersRes.status === 'fulfilled' ? (membersRes.value as ProfileDB[]) : []
+      const groupArtifacts = artifactsRes.status === 'fulfilled' ? artifactsRes.value : []
+
+      if (rejectReason && profileRes.status === 'rejected') {
+        console.warn('Analytics profile fetch failed:', rejectReason.reason)
+      }
+      if (tasksRes.status === 'rejected') {
+        console.warn('Analytics tasks fetch failed:', tasksRes.reason)
+      }
+      if (membersRes.status === 'rejected') {
+        console.warn('Analytics members fetch failed:', membersRes.reason)
+      }
+
+      setCurrentUser(userProfile as unknown as Profile)
+      const membersList = groupMembers
+      const memberCheck =
+        membersList.some((m) => m.id === authUser.id) || userProfile?.group_id === groupId
+      setIsMember(memberCheck)
       setGroup(groupData as Group)
 
       if (memberCheck) {
-        const membersList = groupMembers as ProfileDB[]
         const [logs, mktTx] = await Promise.all([
           fetchActivityLogByGroup(groupId),
-          fetchTeamMarketplaceTransactions(membersList),
+          fetchTeamMarketplaceTransactions(membersList).catch((err) => {
+            console.warn('Marketplace tx fetch failed:', err)
+            return []
+          }),
         ])
         setTasks(groupTasks as Task[])
         setMembers(membersList)
@@ -112,7 +139,9 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         setActivityLogs(logs)
         setMarketplaceTx(mktTx)
       } else {
-        setMembers(groupMembers as ProfileDB[])
+        setMembers(membersList)
+        setTasks([])
+        setArtifacts([])
         setActivityLogs([])
         setMarketplaceTx([])
       }

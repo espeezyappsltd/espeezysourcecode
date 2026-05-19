@@ -18,6 +18,13 @@ export function isMissingColumnError(message: string | undefined): boolean {
 /** Map raw Supabase/PostgREST errors to user-safe messages (never expose key material). */
 export function friendlySupabaseError(message: string | undefined, fallback: string): string {
   const msg = message ?? ''
+  if (
+    msg.includes('activity_logs') &&
+    msg.includes('profiles') &&
+    msg.toLowerCase().includes('relationship')
+  ) {
+    return 'Activity history is temporarily unavailable. Charts and team data should still load after a refresh.'
+  }
   if (msg.includes('Invalid API key')) {
     return 'Server configuration issue: Supabase keys on Vercel may be missing or incorrect. Ask an admin to verify NEXT_PUBLIC_SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY for the kanban project.'
   }
