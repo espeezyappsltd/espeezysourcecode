@@ -6,6 +6,7 @@ export const MARKETPLACE_CATEGORIES = [
   'Lab Equipment',
   'Stationery',
   'Hardware',
+  'Tutorials',
   'Other',
 ] as const
 
@@ -28,6 +29,15 @@ export const listingRowSchema = z.object({
   payment_method: z.string().optional(),
   status: z.string(),
   quantity: z.number().int().min(1).optional(),
+  listing_type: z.enum(['physical', 'digital']).optional(),
+  delivery_kind: z.enum(['meetup', 'file', 'link']).optional(),
+  digital_url: z.string().nullable().optional(),
+  digital_content: z.string().nullable().optional(),
+  quantity_available: z.number().int().min(0).nullable().optional(),
+  purchase_count: z.number().int().min(0).optional(),
+  view_count: z.number().int().min(0).optional(),
+  engagement_score: z.number().optional(),
+  is_platform_seed: z.boolean().optional(),
   is_free: z.boolean().optional(),
   created_at: z.string(),
 })
