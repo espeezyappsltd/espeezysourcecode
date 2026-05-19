@@ -7,10 +7,18 @@ import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/clie
 import { PersistentCache } from '@/utils/cache'
 import { Profile } from '@/types/auth'
 import { Q } from '@/lib/query-columns'
+import {
+  mapSupabaseChannelStatus,
+  mergeProfileRealtimePayload,
+  profileRealtimeChannelName,
+  type ProfileRealtimeClientStatus,
+} from '@/lib/profile/realtime'
 
 type ProfileContextType = {
   profile: Profile | null
   loading: boolean
+  /** Live = websocket subscribed; polling = 30s fallback after channel error. */
+  profileRealtimeStatus: ProfileRealtimeClientStatus
   refreshProfile: () => Promise<void>
   setProfile: React.Dispatch<React.SetStateAction<Profile | null>>
 }
@@ -42,7 +50,11 @@ export function ProfileProvider({
     return !PersistentCache.get<Profile>(`profile_${initialUserId}`)
   })
   const [user, setUser] = useState<User | null>(null)
+  const [profileRealtimeStatus, setProfileRealtimeStatus] =
+    useState<ProfileRealtimeClientStatus>('idle')
   const realtimeWarnedRef = useRef(false)
+  const profileRef = useRef(profile)
+  profileRef.current = profile
 
   const refreshProfile = useCallback(async () => {
     const currentUserId = user?.id || initialUserId
@@ -132,6 +144,7 @@ export function ProfileProvider({
     }
 
     realtimeWarnedRef.current = false
+    setProfileRealtimeStatus('idle')
 
     let active = true
     let refreshTimer: ReturnType<typeof setTimeout> | undefined
@@ -189,8 +202,10 @@ export function ProfileProvider({
     realtimeTimer = setTimeout(() => {
       if (!active) return
 
+      setProfileRealtimeStatus('connecting')
+
       channel = supabase
-        .channel(`profile:${currentUserId}`)
+        .channel(profileRealtimeChannelName(currentUserId))
         .on(
           'postgres_changes',
           {
@@ -200,46 +215,73 @@ export function ProfileProvider({
             filter: `id=eq.${currentUserId}`,
           },
           (payload) => {
-            const next = payload.new as Profile | null
-            if (!next?.id) return
-            setProfile(next)
-            PersistentCache.set(`profile_${currentUserId}`, next, 3600000)
+            const prev = profileRef.current
+            const merged = mergeProfileRealtimePayload(
+              prev?.id === currentUserId ? prev : null,
+              (payload.new ?? {}) as Record<string, unknown>,
+            )
+            if (!merged) return
+            setProfile(merged)
+            PersistentCache.set(`profile_${currentUserId}`, merged, 3600000)
           },
         )
         .subscribe((status, err) => {
           if (!active) return
+
+          const mapped = mapSupabaseChannelStatus(status)
+
           if (status === 'SUBSCRIBED') {
+            setProfileRealtimeStatus('live')
             if (pollInterval) {
               clearInterval(pollInterval)
               pollInterval = undefined
             }
+            if (process.env.NODE_ENV === 'development') {
+              console.info('[profile-realtime] subscribed', profileRealtimeChannelName(currentUserId))
+            }
             return
           }
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+
+          if (mapped === 'unavailable') {
+            setProfileRealtimeStatus('polling')
             teardownRealtime()
             startPollingFallback()
             if (!realtimeWarnedRef.current) {
               realtimeWarnedRef.current = true
               console.warn(
-                'Profile realtime unavailable; using periodic refresh.',
+                '[profile-realtime] channel unavailable; using periodic refresh. Check GET /api/health/profile-realtime',
                 err?.message ?? status,
               )
             }
+            return
+          }
+
+          if (mapped === 'connecting') {
+            setProfileRealtimeStatus('connecting')
           }
         })
     }, hasSeed ? BACKGROUND_REFRESH_MS : 0)
 
     return () => {
       active = false
+      setProfileRealtimeStatus('idle')
       if (refreshTimer) clearTimeout(refreshTimer)
       if (realtimeTimer) clearTimeout(realtimeTimer)
       if (pollInterval) clearInterval(pollInterval)
       teardownRealtime()
     }
-  }, [initialProfile, initialUserId, profile?.id, seededFromServer, supabase, user])
+  }, [initialProfile, initialUserId, seededFromServer, supabase, user?.id])
 
   return (
-    <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile: setProfileWithCache }}>
+    <ProfileContext.Provider
+      value={{
+        profile,
+        loading,
+        profileRealtimeStatus,
+        refreshProfile,
+        setProfile: setProfileWithCache,
+      }}
+    >
       {children}
     </ProfileContext.Provider>
   )

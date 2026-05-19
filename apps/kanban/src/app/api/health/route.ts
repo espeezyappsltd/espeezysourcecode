@@ -39,10 +39,27 @@ export async function GET() {
     redisHealthy = true // not configured = local dev, not a failure
   }
 
+  let profileRealtimeHealthy = false
+  let profileRealtimeDetail: Record<string, unknown> | undefined
+  try {
+    const { fetchProfilesRealtimeServerSetup } = await import('@/lib/profile/check-realtime-setup')
+    const { isProfileRealtimeServerReady } = await import('@/lib/profile/realtime')
+    const { setup, migrationRequired, error: rtError } = await fetchProfilesRealtimeServerSetup()
+    profileRealtimeHealthy = isProfileRealtimeServerReady(setup)
+    profileRealtimeDetail = { setup, migrationRequired, error: rtError }
+  } catch {
+    profileRealtimeHealthy = false
+  }
+
   const checks = [
     { name: 'database', healthy: dbHealthy, latencyMs: dbLatencyMs },
     { name: 'redis_ratelimit', healthy: redisHealthy },
     { name: 'auth', healthy: true },
+    {
+      name: 'profile_realtime',
+      healthy: profileRealtimeHealthy,
+      ...(profileRealtimeDetail ? { detail: profileRealtimeDetail } : {}),
+    },
   ]
   const allHealthy = checks.every(c => c.healthy)
 
