@@ -93,8 +93,8 @@ function DashboardShell({
           <Sidebar user={user} />
           <main className="main-content">
             <ConnectionAlertTray />
-            <PageGuideHost />
             <PageTransitionWrapper>{children}</PageTransitionWrapper>
+            <PageGuideHost />
           </main>
           <GlobalAnnouncement />
           <SupportChat />

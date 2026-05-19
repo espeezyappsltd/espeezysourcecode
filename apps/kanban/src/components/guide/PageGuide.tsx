@@ -1,98 +1,168 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { BookOpen, ChevronDown, ChevronUp, X } from 'lucide-react'
-import type { PageGuideConfig } from '@/lib/page-guides'
+import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Sparkles, X } from 'lucide-react'
+import type { PageGuideConfig, PageGuideTheme } from '@/lib/page-guides'
 import { guideStorageKey } from '@/lib/page-guides'
+import './page-guide-sheet.css'
+
+function resolveTheme(guide: PageGuideConfig): PageGuideTheme {
+  if (guide.theme) return guide.theme
+  if (guide.id === 'feed') return 'journeys'
+  if (guide.id === 'marketplace') return 'marketplace'
+  if (guide.id === 'hustle') return 'hustle'
+  return 'default'
+}
 
 export function PageGuide({ guide }: { guide: PageGuideConfig }) {
-  const [dismissed, setDismissed] = useState(true)
-  const [expanded, setExpanded] = useState(true)
+  const [mounted, setMounted] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [showDot, setShowDot] = useState(false)
+  const theme = resolveTheme(guide)
 
   useEffect(() => {
-    const key = guideStorageKey(guide.id)
-    const wasDismissed = typeof window !== 'undefined' && localStorage.getItem(key) === 'true'
-    setDismissed(wasDismissed)
-    setExpanded(!wasDismissed)
+    setMounted(true)
+    const wasDismissed = localStorage.getItem(guideStorageKey(guide.id)) === 'true'
+    setShowDot(!wasDismissed)
+    if (!wasDismissed) {
+      const t = window.setTimeout(() => setOpen(true), 700)
+      return () => window.clearTimeout(t)
+    }
+    return undefined
   }, [guide.id])
 
-  const dismiss = () => {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const dismiss = useCallback(() => {
     localStorage.setItem(guideStorageKey(guide.id), 'true')
-    setDismissed(true)
-    setExpanded(false)
+    setShowDot(false)
+    setOpen(false)
+  }, [guide.id])
+
+  const toggle = () => {
+    setOpen((v) => !v)
+    if (!open) setShowDot(false)
   }
 
-  const reopen = () => {
-    localStorage.removeItem(guideStorageKey(guide.id))
-    setDismissed(false)
-    setExpanded(true)
-  }
+  if (!mounted) return null
 
-  if (dismissed && !expanded) {
-    return (
+  return createPortal(
+    <motion.div className="social-guide-root" aria-hidden={!open && !showDot}>
       <button
         type="button"
-        className="page-guide-fab"
-        onClick={reopen}
-        aria-label={`Show guide for ${guide.pageTitle}`}
+        className={`social-guide-fab${open ? ' social-guide-fab--open' : ''}`}
+        data-theme={theme}
+        onClick={toggle}
+        aria-label={open ? 'Close guide' : `Tips for ${guide.pageTitle}`}
+        aria-expanded={open}
       >
-        <BookOpen size={16} />
-        Guide
+        {showDot && !open && <span className="social-guide-fab__dot" aria-hidden />}
+        {open ? <X size={22} strokeWidth={2.5} /> : <Sparkles size={22} strokeWidth={2.5} />}
       </button>
-    )
-  }
 
-  return (
-    <aside className="page-guide" aria-label={`${guide.pageTitle} guide`}>
-      <div className="page-guide-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <BookOpen size={18} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: '0.85rem', letterSpacing: '-0.02em' }}>{guide.pageTitle} guide</strong>
-        </div>
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          <button
-            type="button"
-            className="page-guide-icon-btn"
-            onClick={() => setExpanded((e) => !e)}
-            aria-expanded={expanded}
-            aria-label={expanded ? 'Collapse guide' : 'Expand guide'}
-          >
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-          <button type="button" className="page-guide-icon-btn" onClick={dismiss} aria-label="Dismiss guide">
-            <X size={16} />
-          </button>
-        </div>
-      </div>
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.button
+              type="button"
+              className="social-guide-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setOpen(false)}
+              aria-label="Close guide"
+            />
+            <motion.div
+              className="social-guide-sheet"
+              data-theme={theme}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={`guide-title-${guide.id}`}
+              initial={{ y: '100%', opacity: 0.6 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            >
+              <div className="social-guide-handle" aria-hidden />
 
-      {expanded && (
-        <div className="page-guide-body">
-          <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-sub)', lineHeight: 1.5 }}>
-            {guide.summary}
-          </p>
-          <ol style={{ margin: 0, paddingLeft: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-            {guide.steps.map((step) => (
-              <li key={step.title} style={{ fontSize: '0.8rem', lineHeight: 1.45 }}>
-                <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{step.title}</span>
-                <span style={{ color: 'var(--text-sub)' }}> — {step.body}</span>
-              </li>
-            ))}
-          </ol>
-          {guide.actions && guide.actions.length > 0 && (
-            <div className="page-guide-actions">
-              {guide.actions.map((a) => (
-                <div key={a.label} className="page-guide-action-chip">
-                  <span style={{ fontWeight: 800, color: 'var(--brand)' }}>{a.label}</span>
-                  <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem' }}>{a.hint}</span>
+              <div className="social-guide-hero">
+                <div className="social-guide-hero__row">
+                  {guide.emoji && (
+                    <span className="social-guide-emoji" aria-hidden>
+                      {guide.emoji}
+                    </span>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h2 id={`guide-title-${guide.id}`} className="social-guide-hero__title">
+                      {guide.pageTitle}
+                    </h2>
+                    <p className="social-guide-hero__summary">{guide.summary}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="social-guide-close print-hide"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-          <button type="button" className="page-guide-dismiss" onClick={dismiss}>
-            Got it — hide guide
-          </button>
-        </div>
-      )}
-    </aside>
+              </div>
+
+              <div className="social-guide-body">
+                <ol className="social-guide-steps">
+                  {guide.steps.map((step, i) => (
+                    <li key={step.title} className="social-guide-step">
+                      <span className="social-guide-step__num" aria-hidden>
+                        {i + 1}
+                      </span>
+                      <div>
+                        <p className="social-guide-step__title">{step.title}</p>
+                        <p className="social-guide-step__body">{step.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {guide.actions && guide.actions.length > 0 && (
+                <div className="social-guide-actions" role="list">
+                  {guide.actions.map((a) => (
+                    <div key={a.label} className="social-guide-action" role="listitem">
+                      <span className="social-guide-action__label">{a.label}</span>
+                      <span className="social-guide-action__hint">{a.hint}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="social-guide-footer">
+                <button type="button" className="social-guide-cta" onClick={dismiss}>
+                  Got it
+                </button>
+                <button type="button" className="social-guide-skip" onClick={dismiss}>
+                  Don&apos;t show tips again
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.div>,
+    document.body,
   )
 }

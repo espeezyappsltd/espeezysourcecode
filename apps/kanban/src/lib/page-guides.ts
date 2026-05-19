@@ -3,12 +3,17 @@ export type PageGuideStep = {
   body: string
 }
 
+export type PageGuideTheme = 'journeys' | 'marketplace' | 'hustle' | 'default'
+
 export type PageGuideConfig = {
   id: string
   pageTitle: string
   summary: string
   steps: PageGuideStep[]
   actions?: { label: string; hint: string }[]
+  /** Visual theme for the floating guide (IG / TikTok style accents) */
+  theme?: PageGuideTheme
+  emoji?: string
 }
 
 const GUIDES: Record<string, PageGuideConfig> = {
@@ -25,16 +30,24 @@ const GUIDES: Record<string, PageGuideConfig> = {
   '/feed': {
     id: 'feed',
     pageTitle: 'Academic Journeys',
+    theme: 'journeys',
+    emoji: '✨',
     summary: 'Share milestones and react to your cohort in real time.',
     steps: [
       { title: 'Compose', body: 'Post updates with public or connections-only visibility.' },
       { title: 'Engage', body: 'React and comment to support peers on their journey.' },
       { title: 'Stories', body: 'Active scholars appear at the top when they have recent posts.' },
     ],
+    actions: [
+      { label: 'Post', hint: 'Share a milestone' },
+      { label: 'React', hint: 'Support your cohort' },
+    ],
   },
   '/hustle': {
     id: 'hustle',
     pageTitle: 'Hustle Board',
+    theme: 'hustle',
+    emoji: '⚡',
     summary: 'Browse campus gigs, post tasks, and track your earnings.',
     steps: [
       { title: 'Browse', body: 'Filter open tasks by category or smart search.' },
@@ -45,13 +58,18 @@ const GUIDES: Record<string, PageGuideConfig> = {
   '/marketplace': {
     id: 'marketplace',
     pageTitle: 'Campus Marketplace',
+    theme: 'marketplace',
+    emoji: '🛍️',
     summary: 'Buy and sell with Espeezy credits; invoices for every party.',
     steps: [
-      { title: 'Search & filter', body: 'Use categories and search — listings load in pages for speed.' },
+      { title: 'Discover', body: 'Browse trending rails, categories, and smart collections.' },
       { title: 'Checkout', body: 'Pay with credits; sellers receive notifications and invoices.' },
-      { title: 'Contact', body: 'Message sellers per platform rules from any listing.' },
+      { title: 'Message', body: 'Contact sellers in-app — keep deals on campus.' },
     ],
-    actions: [{ label: 'Post item', hint: 'List textbooks, gear, and more' }],
+    actions: [
+      { label: 'Sell', hint: 'List an item' },
+      { label: 'Wallet', hint: 'Credits & history' },
+    ],
   },
   '/assets': {
     id: 'assets',
