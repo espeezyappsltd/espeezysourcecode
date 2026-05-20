@@ -5,13 +5,13 @@ import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import PlansUsagePanel from '@/components/PlansUsagePanel'
 import type { SettingsPageViewModel } from '../settings-types'
 import { BILLING_PANEL_SUBTITLE } from '@/lib/platform/brand-copy'
-import { marketingPricingUrl } from '@/lib/marketing-urls'
+import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
 
 export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
   const { profile, handleManageSubscription, loadingPortal } = vm
   if (!profile) return null
 
-  const marketingPricing = marketingPricingUrl()
+  const pricingPath = APP_PRICING_PATH
 
   return (
     <div className="auth-card" style={{ maxWidth: '100%' }}>
@@ -49,7 +49,7 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
           <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem' }}>
             {profile.subscription_plan
               ? `Active since ${new Date(profile.subscription_started_at || '1970-01-01').toLocaleDateString()}`
-              : 'Compare plans and subscribe on espeezy.com.'}
+              : 'Compare plans and subscribe from the pricing page.'}
           </p>
         </div>
 
@@ -67,9 +67,7 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
             </button>
           ) : null}
           <a
-            href={marketingPricing}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={pricingPath}
             className="btn btn-primary"
             style={{
               width: 'auto',

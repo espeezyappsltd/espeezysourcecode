@@ -265,6 +265,25 @@
   margin-top: 0.75rem;
 }
 
+@media (max-width: 768px) {
+  .page-header {
+    align-items: stretch;
+  }
+
+  .page-header__aside,
+  .page-header__actions {
+    width: 100%;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
+
+  .page-header__actions .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
 /* ── Hero row (title + side panel) — layout alias ────────────── */
 .ui-hero-row {
 

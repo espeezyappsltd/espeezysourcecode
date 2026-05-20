@@ -7,15 +7,22 @@ import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
 import { SimpleAuthForm } from '@shared/SimpleAuthForm'
 import { sanitizeNextPath } from '@shared/app-url'
 import { useSimpleAuth } from '@shared/useSimpleAuth'
+import { resolveLoginRedirectPath } from '@/lib/pricing/plan-routes'
 
 function LoginContent() {
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createSupabaseClient(), [])
   const redirectPath = sanitizeNextPath(
-    searchParams?.get('next') ?? searchParams?.get('redirect'),
+    resolveLoginRedirectPath(
+      searchParams?.get('next') ?? searchParams?.get('redirect'),
+      searchParams?.get('plan'),
+    ),
   )
   const recoveryRedirectTo = buildAuthCallbackUrl(resolveClientOrigin(), { recovery: true })
-  const defaultMode = searchParams?.get('signup') === 'true' ? 'signup' : 'signin'
+  const wantsSignup =
+    searchParams?.get('signup') === 'true' ||
+    (searchParams?.get('plan') != null && searchParams.get('plan') !== 'free')
+  const defaultMode = wantsSignup ? 'signup' : 'signin'
 
   const { ready, busy, error, info, signIn, signUp, resetPassword } = useSimpleAuth(
     supabase,

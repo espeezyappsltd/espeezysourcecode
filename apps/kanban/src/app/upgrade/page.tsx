@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
-import { marketingPricingUrl } from '@/lib/marketing-urls'
+import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
 
-/** Subscription marketing lives on espeezy.com — redirect out of the Kanban app. */
 export default function UpgradePage() {
-  redirect(marketingPricingUrl())
+  redirect(APP_PRICING_PATH)
 }

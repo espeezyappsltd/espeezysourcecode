@@ -14,6 +14,7 @@ import { usePresence } from '@/components/PresenceProvider'
 import { countTeamMembersOnline } from '@/lib/presence/team-presence'
 import { canManageJoinRequests } from '@/lib/team/rbac'
 import AccountTiersBanner from '@/components/AccountTiersBanner'
+import './dashboard-home.css'
 
 const DASHBOARD_TABS = [
   { id: 'board', label: 'Task Board', icon: <LayoutDashboard size={18} /> },
@@ -100,8 +101,8 @@ export default function DashboardHome({
       <AccountTiersBanner />
 
       {/* ── CONTROL PANEL HEADER ─────────────────────────────────────────── */}
-      <header className="page-header">
-        <div className="page-header__main" style={{ flex: 1, minWidth: '300px' }}>
+      <header className="page-header dashboard-home-header">
+        <div className="page-header__main">
 
           <h1 className="page-header__title" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
@@ -110,81 +111,53 @@ export default function DashboardHome({
             {profile?.subscription_plan === 'lifetime' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>{getPlanName('lifetime').toUpperCase()}</span>}
           </h1>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.25rem' }}>
-            <div style={{ padding: '0.4rem 0.8rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '10px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: 'var(--shadow-sm)' }}>
-              <Zap size={12} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8 }} />
-              <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <div className="dashboard-home-hud">
+            <div className="dashboard-home-hud__team">
+              <Zap size={12} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8, flexShrink: 0 }} aria-hidden />
+              <span style={{ letterSpacing: '0.04em', textTransform: 'uppercase', minWidth: 0 }}>
                 TEAM: <span style={{ color: 'var(--brand)' }}>{group?.name || 'STARTING UP...'}</span>
               </span>
-              <button 
+              <button
+                type="button"
+                className="dashboard-home-hud__team-id"
                 onClick={() => {
-                  navigator.clipboard.writeText(groupId);
-                  addToast('ID Copied', 'Team ID has been copied to clipboard.', 'success');
+                  navigator.clipboard.writeText(groupId)
+                  addToast('ID Copied', 'Team ID has been copied to clipboard.', 'success')
                 }}
-                style={{ background: 'none', border: 'none', padding: 0, color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                 title="Copy Team ID"
                 id="copy-team-id"
               >
-                <span style={{ fontSize: '0.6rem', marginLeft: '0.5rem', opacity: 0.6 }}>ID: {groupId.slice(0, 8)}...</span>
+                ID: {groupId.slice(0, 8)}…
               </button>
             </div>
 
-            <div
-              style={{
-                padding: '0.4rem 0.8rem',
-                background: 'rgba(16, 185, 129, 0.08)',
-                borderRadius: '10px',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                fontSize: '0.75rem',
-                fontWeight: 900,
-                color: 'var(--text-main)',
-              }}
-              data-testid="dashboard-global-online"
-            >
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 8px var(--success)' }} />
-              {globalOnlineCount} online on Espeezy
-              <span style={{ color: 'var(--text-sub)', fontWeight: 700 }}>
-                · {teamOnlineCount} on your team
+            <div className="dashboard-home-hud__global" data-testid="dashboard-global-online">
+              <span className="dashboard-home-hud__global-dot" aria-hidden />
+              <span>
+                {globalOnlineCount} online on Espeezy
+                <span style={{ color: 'var(--text-sub)', fontWeight: 700 }}>
+                  {' '}
+                  · {teamOnlineCount} on your team
+                </span>
               </span>
             </div>
 
             <button
+              type="button"
               onClick={() => setShowMembers(!showMembers)}
-              className={`btn ${showMembers ? 'btn-primary' : 'btn-secondary'}`}
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: 900,
-                padding: '0.65rem 1.4rem',
-                borderRadius: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.6rem',
-                border: showMembers ? 'none' : '1px solid var(--border)',
-                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                boxShadow: showMembers ? '0 4px 12px rgba(var(--brand-rgb), 0.3)' : 'var(--shadow-sm)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-              aria-label={showMembers ? "Hide Team Roster" : "Show Team Roster"}
+              className={`btn dashboard-home-roster-btn${showMembers ? ' btn-primary dashboard-home-roster-btn--open' : ' btn-secondary'}`}
+              aria-label={showMembers ? 'Hide Team Roster' : 'Show Team Roster'}
+              aria-expanded={showMembers}
             >
-              <Users size={16} aria-hidden="true" />
-              Team Roster
-              <span
-                data-testid="team-roster-online-count"
-                style={{
-                background: showMembers ? 'white' : 'var(--brand)',
-                color: showMembers ? 'var(--brand)' : 'white',
-                padding: '2px 8px',
-                borderRadius: '8px',
-                fontSize: '0.7rem',
-                marginLeft: '0.4rem',
-                fontWeight: 950
-              }}>
+              <span className="dashboard-home-roster-btn__label">
+                <Users size={16} aria-hidden />
+                Team Roster
+              </span>
+              <span className="dashboard-home-roster-btn__meta" data-testid="team-roster-online-count">
                 {teamOnlineCount} online · {members.length || 0} total
-                {canManageJoinRequests(profile?.role) && pendingRequests.length > 0 && ` (+${pendingRequests.length} pending)`}
+                {canManageJoinRequests(profile?.role) && pendingRequests.length > 0
+                  ? ` (+${pendingRequests.length} pending)`
+                  : ''}
               </span>
             </button>
           </div>
@@ -284,20 +257,20 @@ export default function DashboardHome({
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="page-header__actions dashboard-home-header-actions">
           <button
-            onClick={() => setNewTaskSignal(prev => prev + 1)}
+            type="button"
+            onClick={() => setNewTaskSignal((prev) => prev + 1)}
             className="btn btn-primary btn-inline"
             aria-label="Create a new task"
-            style={{ padding: '0.6rem 1rem', borderRadius: '10px', fontWeight: 900 }}
           >
-            <Zap size={16} fill="currentColor" aria-hidden="true" /> New Task
+            <Zap size={16} fill="currentColor" aria-hidden /> New Task
           </button>
           <button
+            type="button"
             onClick={() => router.push(`/analytics/${groupId}`)}
             className="btn btn-secondary btn-inline"
             aria-label="View group updates and progress"
-            style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', fontWeight: 800 }}
           >
             Group Updates
           </button>

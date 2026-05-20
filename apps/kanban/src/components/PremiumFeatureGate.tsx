@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { BarChart3, Gamepad2, Lock, Sparkles, Zap } from 'lucide-react'
 import type { Feature } from '@/utils/feature-gate'
 import { PLATFORM_OPERATIONS_TAGLINE } from '@/lib/platform/brand-copy'
-import { marketingPricingUrl } from '@/lib/marketing-urls'
+import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
 
 const FEATURE_META: Record<
   Feature,
@@ -133,14 +133,12 @@ export default function PremiumFeatureGate({ feature }: { feature: Feature }) {
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
         <a
-          href={marketingPricingUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={APP_PRICING_PATH}
           className="btn btn-primary"
           style={{ padding: '0.9rem 2rem', width: 'auto', fontSize: '1rem', fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
         >
           <Sparkles size={18} style={{ marginRight: '0.5rem' }} />
-          View plans on espeezy.com
+          View plans & upgrade
         </a>
         <p style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.5, margin: 0, maxWidth: '360px' }}>
           {PLATFORM_OPERATIONS_TAGLINE}
