@@ -84,7 +84,7 @@ export function KanbanHomeView({ user, registeredCount, onLogout }: Props) {
             Welcome to your Kanban workspace
           </h1>
           <p className="kanban-home-lead">
-            Your academic command center for boards, deadlines, team accountability, and real-time collaboration —
+            Your academic command center for boards, deadlines, team accountability, and real-time collaboration,
             designed for students and project teams who need clarity, not clutter.
           </p>
           <div className="kanban-home-hero-actions">

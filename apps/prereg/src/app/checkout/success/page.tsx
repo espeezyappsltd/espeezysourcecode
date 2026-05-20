@@ -108,11 +108,11 @@ const TIER_CONTENT = {
     palette: 'premium' as const,
   },
   lifetime: {
-    label:     'Lifetime Scholar — seat claimed',
+    label:     'Lifetime Scholar · seat claimed',
     heading:   'Welcome to the lifetime cohort.',
     subheading:"You've secured permanent Premium access. One payment. No renewal. Ever.",
-    body:      "You're one of the first 100 lifetime members on Espeezy. Our 12-person platform team runs the backend that keeps your workspace online—you get every Premium feature, forever, plus a Lifetime Scholar badge and locked-in pricing. This is a one-time payment with nothing else to pay.",
-    badge:     'Lifetime access — permanently unlocked',
+    body:      "You're one of the first 100 lifetime members on Espeezy. Our 12-person platform team runs the backend that keeps your workspace online. You get every Premium feature, forever, plus a Lifetime Scholar badge and locked-in pricing. This is a one-time payment with nothing else to pay.",
+    badge:     'Lifetime access · permanently unlocked',
     badgeSub:  'Lifetime Scholar · No renewal · Ever',
     nextSteps: [
       'Log in at espeezy.com to activate your account',

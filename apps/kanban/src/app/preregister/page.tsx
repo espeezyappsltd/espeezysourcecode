@@ -149,7 +149,7 @@ export default function PreRegisterPage() {
           style={{ fontSize: 'clamp(1.75rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.08, margin: '0 auto 1.25rem', maxWidth: '920px' }}>
           The Espeezy Analytics Dashboard shows{' '}
           <span style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #34d399 50%, #ffffff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            who did the work—and who didn&apos;t.
+            who did the work and who didn&apos;t.
           </span>
         </motion.h1>
 
@@ -351,7 +351,7 @@ export default function PreRegisterPage() {
                     <span style={{ color: 'var(--brand)' }}>No credit card required.</span>
                   </h2>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                    Register for priority access and early features—backed by our 12-person platform team running Espeezy&apos;s backend.
+                    Register for priority access and early features, backed by our 12-person platform team running Espeezy&apos;s backend.
                   </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>

@@ -51,7 +51,7 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
       {/* Screenshot Layout */}
       <div style={{ position: 'relative', height: 'clamp(300px, 50vw, 500px)', width: '100%', perspective: '1000px' }}>
         
-        {/* Landscape Main — Analytics Dashboard (key hook) */}
+        {/* Landscape Main: Analytics Dashboard (key hook) */}
         <motion.div
           initial={{ opacity: 0, rotateX: 10, y: 40 }}
           animate={{ opacity: 1, rotateX: 0, y: 0 }}
@@ -353,7 +353,7 @@ export default function PreRegisterPage() {
           style={{ fontSize: 'clamp(1.65rem, 4.2vw, 2.75rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.12, maxWidth: '880px', margin: '0 auto 1.25rem' }}>
           The Espeezy Analytics Dashboard shows{' '}
           <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            who did the work—and who didn&apos;t.
+            who did the work and who didn&apos;t.
           </span>
         </motion.h2>
 
@@ -363,7 +363,7 @@ export default function PreRegisterPage() {
         </motion.p>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }}
           style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 1rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
-          {config.brand_name} turns group projects into a fair academic record—contribution proof for grading, portfolios, and job applications.
+          {config.brand_name} turns group projects into a fair academic record, with contribution proof for grading, portfolios, and job applications.
         </motion.p>
         <p style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 1.5rem', fontSize: '0.8rem', lineHeight: 1.55, fontWeight: 600 }}>
           {PLATFORM_OPERATIONS_TAGLINE}

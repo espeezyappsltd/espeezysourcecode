@@ -8,9 +8,9 @@ export const PLATFORM_TEAM_SIZE = 12
 export const PLATFORM_OPERATIONS_TAGLINE =
   'Operated by a 12-member platform team running production backend, billing, and reliability.'
 
-/** Primary marketing hero hook — pair with analytics dashboard screenshot. */
+/** Primary marketing hero hook; pair with analytics dashboard screenshot. */
 export const HERO_ANALYTICS_TAGLINE =
-  'The Espeezy Analytics Dashboard shows who contributed what—contribution scores, task ownership, team balance, and exportable intelligence reports your team cannot dispute.'
+  'The Espeezy Analytics Dashboard shows who contributed what: contribution scores, task ownership, team balance, and exportable intelligence reports your team cannot dispute.'
 
 export const HERO_ANALYTICS_CAPTION = 'Espeezy Analytics Dashboard · live project intelligence'
 
@@ -19,7 +19,7 @@ export const KANBAN_DEMO_LABEL = 'Kanban Demo'
 export const KANBAN_DEMO_PATH = '/demo'
 
 export const PRICING_INTRO =
-  'Espeezy is built for student teams and operated by our platform crew—keeping collaboration infrastructure fast, secure, and affordable at scale.'
+  'Espeezy is built for student teams and operated by our platform crew, keeping collaboration infrastructure fast, secure, and affordable at scale.'
 
 export const UPGRADE_HERO_TITLE = 'Support the platform to reach more schools'
 
@@ -34,7 +34,7 @@ export const LIFETIME_PLAN_NAME = 'Lifetime Scholar'
 export const LIFETIME_PLAN_BADGE = 'Limited lifetime seats'
 
 export const LIFETIME_PLAN_DESCRIPTION =
-  'One-time access for a limited cohort of 100 lifetime seats. No monthly fees—all future Premium features included as we ship them.'
+  'One-time access for a limited cohort of 100 lifetime seats. No monthly fees; all future Premium features included as we ship them.'
 
 export const LIFETIME_FEATURES = [
   'Permanent Premium access',
@@ -52,13 +52,13 @@ export const LIFETIME_CTA_SOLD_OUT = 'Lifetime seats sold out'
 export const LIFETIME_SCARCITY_LABEL = (left: number) =>
   left <= 0 ? 'Sold out' : `Only ${left} lifetime seat${left === 1 ? '' : 's'} left`
 
-export const STRIPE_LIFETIME_LABEL = 'Lifetime Scholar — GBP 149 (one-time)'
+export const STRIPE_LIFETIME_LABEL = 'Lifetime Scholar · GBP 149 (one-time)'
 
 export const BILLING_PANEL_SUBTITLE =
-  'View your current plan and usage here. Subscribe or change tiers on espeezy.com—billing is handled by our platform team via Stripe.'
+  'View your current plan and usage here. Subscribe or change tiers on espeezy.com; billing is handled by our platform team via Stripe.'
 
 export const CHECKOUT_SUCCESS_TEAM_NOTE =
-  'Thank you for supporting campus collaboration. Our platform team has activated your plan—reach support@espeezy.com if anything looks off.'
+  'Thank you for supporting campus collaboration. Our platform team has activated your plan. Reach support@espeezy.com if anything looks off.'
 
 export const PREREG_LIFETIME_FEATURES = [
   'Everything in Premium, forever',
@@ -71,7 +71,7 @@ export const PREREG_LIFETIME_FEATURES = [
 
 /** Site-wide footer and lightweight app footers */
 export const FOOTER_BRAND_BLURB =
-  'Espeezy documents real contribution in group projects. A 12-member platform team runs production backend, billing, and campus rollout—not a solo side project.'
+  'Espeezy documents real contribution in group projects. A 12-member platform team runs production backend, billing, and campus rollout, not a solo side project.'
 
 export const FOOTER_TECH_BLURB =
   'Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle. Payments via Stripe; subscriptions managed by our platform team.'
@@ -87,7 +87,7 @@ export const FOOTER_BOTTOM_RIGHT =
   'Free forever for students · No data sold · Team-run roadmap'
 
 export const GAMES_LANDING_CTA_BODY =
-  'Join the campus launch cohort on Espeezy. Our 12-person platform team runs the backend—be first to play when Games launches.'
+  'Join the campus launch cohort on Espeezy. Our 12-person platform team runs the backend; be first to play when Games launches.'
 
 export const GAMES_UPGRADE_GATE_NOTE =
   'Plans and billing are managed by the Espeezy platform team via Stripe.'
@@ -99,4 +99,4 @@ export const APP_FOOTER_TAGLINE_DASHBOARD =
   'Espeezy Dashboard · Collaboration infrastructure · Team-operated platform'
 
 export const SIDEBAR_UPGRADE_BLURB =
-  'Support the platform team—unlock advanced themes and priority features.'
+  'Support the platform team and unlock advanced themes and priority features.'
