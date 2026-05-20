@@ -14,6 +14,10 @@ export const HERO_ANALYTICS_TAGLINE =
 
 export const HERO_ANALYTICS_CAPTION = 'Espeezy Analytics Dashboard · live project intelligence'
 
+export const KANBAN_DEMO_LABEL = 'Kanban Demo'
+
+export const KANBAN_DEMO_PATH = '/demo'
+
 export const PRICING_INTRO =
   'Espeezy is built for student teams and operated by our platform crew—keeping collaboration infrastructure fast, secure, and affordable at scale.'
 

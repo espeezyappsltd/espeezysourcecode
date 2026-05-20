@@ -8,7 +8,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import {
   ArrowRight, CheckCircle, Users, Globe,
   BookOpen, Cpu, Zap, BarChart2, Mail,
-  GraduationCap, TrendingUp, Heart
+  GraduationCap, TrendingUp, Heart, LayoutDashboard,
 } from 'lucide-react'
 import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
@@ -18,6 +18,8 @@ import { SCREENSHOT_ASSETS } from '@shared/assets'
 import {
   HERO_ANALYTICS_CAPTION,
   HERO_ANALYTICS_TAGLINE,
+  KANBAN_DEMO_LABEL,
+  KANBAN_DEMO_PATH,
   PLATFORM_OPERATIONS_TAGLINE,
 } from '@shared/platform-brand'
 
@@ -198,6 +200,7 @@ export default function PreRegisterPage() {
   }
 
   const kanbanSsoUrl = buildSsoUrl(kanbanBaseUrl, '/dashboard')
+  const kanbanDemoUrl = `${kanbanBaseUrl.replace(/\/$/, '')}${KANBAN_DEMO_PATH}`
   const gamesSsoUrl = buildSsoUrl(gamesBaseUrl, '/')
 
   useEffect(() => {
@@ -362,9 +365,68 @@ export default function PreRegisterPage() {
           style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 1rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
           {config.brand_name} turns group projects into a fair academic record—contribution proof for grading, portfolios, and job applications.
         </motion.p>
-        <p style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 2.5rem', fontSize: '0.8rem', lineHeight: 1.55, fontWeight: 600 }}>
+        <p style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 1.5rem', fontSize: '0.8rem', lineHeight: 1.55, fontWeight: 600 }}>
           {PLATFORM_OPERATIONS_TAGLINE}
         </p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.35 }}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            justifyContent: 'center',
+            alignItems: 'center',
+            margin: '0 auto 2.5rem',
+          }}
+        >
+          <a
+            href={kanbanDemoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.85rem 1.5rem',
+              borderRadius: '12px',
+              border: '2px solid var(--brand)',
+              background: 'rgba(16,185,129,0.08)',
+              color: '#047857',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              textDecoration: 'none',
+              letterSpacing: '-0.01em',
+              boxShadow: '0 8px 24px rgba(16,185,129,0.15)',
+            }}
+          >
+            <LayoutDashboard size={18} aria-hidden />
+            {KANBAN_DEMO_LABEL}
+            <ArrowRight size={16} aria-hidden />
+          </a>
+          <a
+            href="#register"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.85rem 1.5rem',
+              borderRadius: '12px',
+              background: 'var(--brand)',
+              color: 'white',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              textDecoration: 'none',
+              letterSpacing: '-0.01em',
+              boxShadow: '0 8px 24px rgba(99,102,241,0.25)',
+            }}
+          >
+            Join Early Access
+            <ArrowRight size={16} aria-hidden />
+          </a>
+        </motion.div>
 
         {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
 

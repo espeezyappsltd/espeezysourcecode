@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sparkles, ArrowRight, CheckCircle, Users, Globe,
   BookOpen, Cpu, Zap, BarChart2, Mail,
-  GraduationCap, TrendingUp, Heart
+  GraduationCap, TrendingUp, Heart, LayoutDashboard,
 } from 'lucide-react'
 
 import { useLaunchData } from '@/hooks/useLaunchData'
@@ -15,7 +15,12 @@ import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import { submitPreregistration } from '@/services/preregister'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
-import { HERO_ANALYTICS_CAPTION, HERO_ANALYTICS_TAGLINE } from '@shared/platform-brand'
+import {
+  HERO_ANALYTICS_CAPTION,
+  HERO_ANALYTICS_TAGLINE,
+  KANBAN_DEMO_LABEL,
+  KANBAN_DEMO_PATH,
+} from '@shared/platform-brand'
 
 // ─── Coming Features ─────────────────────────────────────────────────────────
 const COMING_FEATURES = [
@@ -154,9 +159,65 @@ export default function PreRegisterPage() {
         </motion.p>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.28 }}
-          style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '680px', margin: '0 auto 2rem', fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)', lineHeight: 1.6, fontWeight: 500 }}>
+          style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '680px', margin: '0 auto 1.5rem', fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)', lineHeight: 1.6, fontWeight: 500 }}>
           {config.launch_message}
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.32 }}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            justifyContent: 'center',
+            alignItems: 'center',
+            margin: '0 auto 2rem',
+          }}
+        >
+          <Link
+            href={KANBAN_DEMO_PATH}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.85rem 1.5rem',
+              borderRadius: '12px',
+              border: '2px solid var(--brand)',
+              background: 'rgba(16,185,129,0.12)',
+              color: '#6ee7b7',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              textDecoration: 'none',
+              letterSpacing: '-0.01em',
+              boxShadow: '0 8px 28px rgba(16,185,129,0.2)',
+            }}
+          >
+            <LayoutDashboard size={18} aria-hidden />
+            {KANBAN_DEMO_LABEL}
+            <ArrowRight size={16} aria-hidden />
+          </Link>
+          <a
+            href="#register"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.85rem 1.5rem',
+              borderRadius: '12px',
+              background: 'var(--brand)',
+              color: '#0a0a0a',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              textDecoration: 'none',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            Join Early Access
+            <ArrowRight size={16} aria-hidden />
+          </a>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}
