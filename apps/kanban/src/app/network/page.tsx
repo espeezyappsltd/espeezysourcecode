@@ -20,6 +20,7 @@ import {
 import { usePresence } from '@/components/PresenceProvider'
 import { Profile } from '@/types/database'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { useMobilePageControls } from '@/components/mobile/MobilePageControlsContext'
 
 export default function NetworkPage() {
   const [teamMembers, setTeamMembers] = useState<Profile[]>([])
@@ -92,6 +93,14 @@ export default function NetworkPage() {
     )
   }
 
+  useMobilePageControls({
+    search: {
+      value: search,
+      onChange: setSearch,
+      placeholder: 'Search scholars by name or course…',
+    },
+  })
+
   return (
     <div className="page-fade page-shell" style={{ paddingBottom: '6rem' }}>
       
@@ -111,7 +120,7 @@ export default function NetworkPage() {
           </div>
         </div>
 
-        <div className="page-header__aside" style={{ width: '100%', maxWidth: '400px', position: 'relative' }}>
+        <div className="page-header__aside page-header__aside--search" style={{ width: '100%', maxWidth: '400px', position: 'relative' }}>
           <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
           <input 
             type="text" 

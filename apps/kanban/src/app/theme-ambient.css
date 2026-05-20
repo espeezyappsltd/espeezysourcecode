@@ -1,0 +1,155 @@
+/**
+ * Pro & Premium ambient backgrounds — layered gradients + static depth shadow (3D illusion).
+ * Applied when no custom user background image is set.
+ */
+
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='pro'],
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium'] {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='pro']::before,
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--ambient-gradient, transparent);
+}
+
+/* Static floor shadow — depth under the dashboard */
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='pro']::after,
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium']::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(42vh, 420px);
+  z-index: 0;
+  pointer-events: none;
+  background: var(
+    --ambient-floor-shadow,
+    radial-gradient(ellipse 90% 80% at 50% 100%, rgba(0, 0, 0, 0.38), transparent 72%)
+  );
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='pro'] .dashboard-layout,
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium'] .dashboard-layout {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='pro'] .main-content,
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium'] .main-content {
+  background: transparent !important;
+}
+
+/* ── Pro tier base ───────────────────────────────────────── */
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='pro'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 90% 55% at 8% -5%, rgba(var(--brand-rgb, 16, 185, 129), 0.22), transparent 58%),
+    radial-gradient(ellipse 70% 45% at 95% 8%, rgba(var(--brand-rgb, 16, 185, 129), 0.12), transparent 55%),
+    linear-gradient(168deg, var(--bg-main) 0%, color-mix(in srgb, var(--bg-main) 88%, var(--brand) 12%) 45%, var(--bg-sub) 100%);
+  --ambient-floor-shadow: radial-gradient(
+    ellipse 95% 75% at 50% 100%,
+    rgba(0, 0, 0, 0.42),
+    transparent 70%
+  );
+}
+
+/* ── Premium tier base (richer, warmer highlights) ─────────── */
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 85% 60% at 12% -8%, rgba(var(--brand-rgb, 212, 175, 55), 0.28), transparent 55%),
+    radial-gradient(ellipse 65% 50% at 88% 12%, rgba(var(--brand-rgb, 212, 175, 55), 0.14), transparent 52%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(var(--brand-rgb, 212, 175, 55), 0.08), transparent 60%),
+    linear-gradient(165deg, var(--bg-main) 0%, color-mix(in srgb, var(--bg-main) 82%, var(--brand) 18%) 40%, var(--bg-sub) 100%);
+  --ambient-floor-shadow: radial-gradient(
+    ellipse 100% 80% at 50% 100%,
+    rgba(0, 0, 0, 0.55),
+    transparent 68%
+  );
+}
+
+/* ── Per-palette refinements ───────────────────────────────── */
+.theme-wrapper:not(.has-custom-bg)[data-palette='Emerald Pro'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 80% 50% at 15% 0%, rgba(16, 185, 129, 0.35), transparent 58%),
+    radial-gradient(ellipse 60% 40% at 100% 20%, rgba(5, 150, 105, 0.2), transparent 50%),
+    linear-gradient(170deg, #031a12 0%, #062016 35%, #041610 100%);
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-palette='Midnight Indigo'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 75% 55% at 20% -10%, rgba(99, 102, 241, 0.35), transparent 55%),
+    radial-gradient(ellipse 55% 40% at 90% 30%, rgba(129, 140, 248, 0.15), transparent 50%),
+    linear-gradient(165deg, #01040f 0%, #020617 40%, #0f172a 100%);
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-palette='Oceanic Pro'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 85% 50% at 10% 0%, rgba(56, 189, 248, 0.25), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 15%, rgba(2, 132, 199, 0.15), transparent 52%),
+    linear-gradient(175deg, #e0f2fe 0%, #f0f9ff 50%, #f8fafc 100%);
+  --ambient-floor-shadow: radial-gradient(
+    ellipse 90% 70% at 50% 100%,
+    rgba(2, 132, 199, 0.12),
+    transparent 70%
+  );
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-palette='Gold Luxury'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 70% 55% at 50% -15%, rgba(212, 175, 55, 0.35), transparent 58%),
+    radial-gradient(ellipse 50% 35% at 0% 80%, rgba(212, 175, 55, 0.08), transparent 50%),
+    linear-gradient(168deg, #000000 0%, #0a0a0a 45%, #141414 100%);
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-palette='Obsidian Gold'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 75% 50% at 50% -5%, rgba(212, 175, 55, 0.32), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 60%, rgba(156, 134, 68, 0.12), transparent 48%),
+    linear-gradient(170deg, #000000 0%, #050505 50%, #0a0a0a 100%);
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-palette='Midnight Platinum'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 80% 55% at 25% -8%, rgba(226, 232, 240, 0.2), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 85% 20%, rgba(100, 116, 139, 0.18), transparent 50%),
+    linear-gradient(165deg, #010409 0%, #020617 45%, #0f172a 100%);
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-palette='Neon Overdrive'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(255, 0, 255, 0.25), transparent 55%),
+    radial-gradient(ellipse 65% 45% at 100% 10%, rgba(0, 247, 255, 0.18), transparent 52%),
+    linear-gradient(170deg, #020204 0%, #050508 100%);
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-palette='Executive Success'] {
+  --ambient-gradient:
+    radial-gradient(ellipse 75% 50% at 15% -5%, rgba(247, 183, 49, 0.22), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 25%, rgba(75, 123, 236, 0.18), transparent 50%),
+    linear-gradient(168deg, #12141f 0%, #1a1c2c 50%, #25274d 100%);
+}
+
+/* Kanban columns float slightly on pro/premium */
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='pro'] .kanban-column,
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium'] .kanban-column {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 12px 32px rgba(0, 0, 0, 0.22),
+    0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+.theme-wrapper:not(.has-custom-bg)[data-theme-tier='premium'] .kanban-column {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 16px 40px rgba(0, 0, 0, 0.28),
+    0 6px 16px rgba(var(--brand-rgb, 212, 175, 55), 0.08) !important;
+}

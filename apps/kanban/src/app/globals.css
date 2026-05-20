@@ -219,9 +219,12 @@ body:has(.dashboard-layout) {
 
 .hide-mobile { display: none !important; }
 
+.hide-mobile-inline { display: none !important; }
+
 .hide-desktop { display: none !important; }
 @media (max-width: 768px) {
   .hide-mobile { display: none !important; }
+  .hide-mobile-inline { display: none !important; }
   .hide-desktop { display: flex !important; }
 }
 @media (min-width: 769px) {

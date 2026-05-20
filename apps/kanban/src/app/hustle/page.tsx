@@ -52,6 +52,7 @@ import {
 } from '@/lib/nav/category-url'
 import { useDebouncedListSearch } from '@/lib/nav/use-debounced-list-search'
 import '@/components/nav/list-nav.css'
+import { useMobilePageControls } from '@/components/mobile/MobilePageControlsContext'
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
   open: { label: 'Open', color: '#10B981' },
@@ -169,6 +170,71 @@ function HustlePage() {
     })
   }
 
+  const mobileFilterContent = useMemo(
+    () => (
+      <>
+        <nav className="hustle-tab-nav" aria-label="Hustle sections">
+          <HustleTabLink active={tab === 'marketplace'} href={hustleTabUrl('marketplace', navCtx)} icon={<ShoppingBag size={16} />} label="Browse" />
+          <HustleTabLink active={tab === 'gigs'} href={hustleTabUrl('gigs', navCtx)} icon={<ListChecks size={16} />} label="My gigs" />
+          <HustleTabLink active={tab === 'posted'} href={hustleTabUrl('posted', navCtx)} icon={<Briefcase size={16} />} label="Posted" />
+          <HustleTabLink active={tab === 'sales'} href={hustleTabUrl('sales', navCtx)} icon={<Package size={16} />} label="Sales" />
+          <HustleTabLink active={tab === 'inventory'} href={hustleTabUrl('inventory', navCtx)} icon={<User size={16} />} label="Assets" />
+        </nav>
+        {showCategoryFilters && (
+          <CategoryNavDropdown
+            items={categoryNavItems}
+            activeId={category}
+            allHref={hustleListUrl({ tab, q: navCtx.q, category: navCtx.category })}
+            allLabel="All categories"
+          />
+        )}
+        {showStatusFilters && (
+          <div className="hustle-status-filters" role="tablist" aria-label="Filter by status">
+            <StatusFilterChip active={gigsFilter === 'all'} label="All" onClick={() => setGigsFilter('all')} />
+            <StatusFilterChip active={gigsFilter === 'action'} label="Needs action" variant="action" onClick={() => setGigsFilter('action')} />
+            <StatusFilterChip active={gigsFilter === 'pending'} label="Waiting" onClick={() => setGigsFilter('pending')} />
+            <StatusFilterChip active={gigsFilter === 'done'} label="Done" onClick={() => setGigsFilter('done')} />
+          </div>
+        )}
+      </>
+    ),
+    [
+      tab,
+      navCtx,
+      showCategoryFilters,
+      categoryNavItems,
+      category,
+      showStatusFilters,
+      gigsFilter,
+      setGigsFilter,
+    ],
+  )
+
+  useMobilePageControls({
+    search: {
+      value: searchDraft,
+      onChange: setSearchDraft,
+      onClear: clearSearch,
+      placeholder: hustleSearchPlaceholder(tab),
+    },
+    filterPanels: [{ id: 'hustle-filters', label: 'Sections & filters', content: mobileFilterContent }],
+    actions: [
+      {
+        id: 'refresh',
+        label: 'Refresh',
+        icon: <RotateCcw size={17} />,
+        onClick: () => void refreshHard(),
+      },
+      {
+        id: 'post',
+        label: 'Post gig',
+        icon: <Plus size={17} />,
+        onClick: () => setPostOpen(true),
+        variant: 'primary',
+      },
+    ],
+  })
+
   return (
     <div className="hustle-shell page-shell list-page--compact">
       <PageHeader
@@ -177,7 +243,7 @@ function HustlePage() {
         icon={Briefcase}
         description="Campus gigs paid in Espeezy credits · escrow-backed trades"
         actions={
-          <button type="button" className="btn btn-primary hustle-post-btn" onClick={() => setPostOpen(true)}>
+          <button type="button" className="btn btn-primary hustle-post-btn hide-mobile-inline" onClick={() => setPostOpen(true)}>
             <Plus size={18} aria-hidden />
             Post gig
           </button>

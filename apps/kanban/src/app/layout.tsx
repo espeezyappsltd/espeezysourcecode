@@ -14,9 +14,11 @@ import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import SupportChat from '@/components/SupportChat'
 import { PageGuideHost } from '@/components/guide/PageGuideHost'
+import { MobilePageControlsProvider } from '@/components/mobile/MobilePageControlsContext'
 import { getCachedLayoutSession } from '@/utils/auth-server'
 import './prestige.css'
 import './globals.css'
+import './theme-ambient.css'
 import './ui-panels.css'
 import './mobile-shell.css'
 import './forms-a11y.css'
@@ -90,8 +92,9 @@ function DashboardShell({
     <div className="dashboard-layout">
       <NotificationProvider>
         <PresenceProvider user={user}>
-          <Sidebar user={user} />
-          <main className="main-content">
+          <MobilePageControlsProvider>
+            <Sidebar user={user} />
+            <main className="main-content">
             <ConnectionAlertTray />
             <PageTransitionWrapper>{children}</PageTransitionWrapper>
             <PageGuideHost />
@@ -99,6 +102,7 @@ function DashboardShell({
           <GlobalAnnouncement />
           <SupportChat />
           <BottomNav />
+          </MobilePageControlsProvider>
         </PresenceProvider>
       </NotificationProvider>
     </div>

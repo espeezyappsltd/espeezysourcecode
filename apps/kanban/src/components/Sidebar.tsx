@@ -35,6 +35,7 @@ import { useTheme } from '@/context/ThemeContext'
 import { SidebarProps } from '@/types/ui'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import GlobalSearch from './GlobalSearch'
+import { MobileHeaderToolbar } from './mobile/MobileHeaderToolbar'
 import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
@@ -338,6 +339,8 @@ export default function Sidebar({ user }: SidebarProps) {
             </div>
           </div>
         </div>
+
+        <MobileHeaderToolbar />
 
         <div className="mobile-header__actions">
           <div className="mobile-header__notif">

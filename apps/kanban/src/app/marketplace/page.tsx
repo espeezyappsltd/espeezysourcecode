@@ -26,6 +26,7 @@ import {
 import { useDebouncedListSearch } from '@/lib/nav/use-debounced-list-search'
 import './marketplace.css'
 import '@/components/nav/list-nav.css'
+import { useMobilePageControls } from '@/components/mobile/MobilePageControlsContext'
 
 const CATEGORIES = ['All', 'Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other']
 
@@ -197,6 +198,45 @@ function MarketplacePageInner() {
         })),
     [catList, navCtx.q],
   )
+
+  useMobilePageControls({
+    search: {
+      value: searchDraft,
+      onChange: setSearchDraft,
+      onClear: clearSearch,
+      placeholder: 'Search listings…',
+    },
+    filterPanels: [
+      {
+        id: 'category',
+        label: activeCategory === 'All' ? 'Category' : activeCategory,
+        content: (
+          <CategoryNavDropdown
+            items={categoryNavItems}
+            activeId={activeCategoryId}
+            allHref={marketplaceListUrl({ q: navCtx.q })}
+            allLabel="All categories"
+          />
+        ),
+      },
+    ],
+    actions: [
+      {
+        id: 'inquiries',
+        label: 'Inquiries',
+        icon: <MessageSquare size={17} />,
+        onClick: () => setInquiriesOpen(true),
+        badge: inquiryUnread,
+      },
+      {
+        id: 'post',
+        label: 'Post listing',
+        icon: <Plus size={17} />,
+        onClick: () => setIsPosting(true),
+        variant: 'primary',
+      },
+    ],
+  })
 
   return (
     <div className="marketplace-page page-shell marketplace-page--compact page-fade list-page--compact">

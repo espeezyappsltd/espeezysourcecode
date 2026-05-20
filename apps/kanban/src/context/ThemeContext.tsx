@@ -489,8 +489,10 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
         }
       `}} />
       
-      <div 
+      <div
         className={`theme-wrapper ${customBg ? 'has-custom-bg' : ''}`}
+        data-palette={currentPalette.name}
+        data-theme-tier={currentPalette.tier ?? 'free'}
         style={customBg ? { 
           backgroundImage: `url(${customBg})`, 
           backgroundSize: 'cover', 
