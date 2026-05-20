@@ -8,7 +8,8 @@ import {
 import { breakdownPlatformFee } from '@/lib/platform/fees'
 import { getTradingMetricsForUser } from '@/lib/marketplace/trading-metrics'
 import { getUserCredits, completeMarketplaceCreditPurchase } from '@/lib/marketplace/checkout-service'
-import { createCreditFundCheckout, creditsToFundGbp } from '@/lib/credits/fund-stripe'
+import { createCreditFundCheckout } from '@/lib/credits/fund-stripe'
+import { pickFundTierForShortfall } from '@/lib/credits/fund-tiers'
 
 export type ListingCheckoutContext = {
   listingId: string
@@ -124,8 +125,11 @@ export async function getBuyerCheckoutPreflight(
   let topUpPackCredits: number | null = null
   let topUpPaymentUrl: string | null = null
 
+  let recommendedFundTier: ReturnType<typeof pickFundTierForShortfall> | null = null
+
   if (!canAfford && ctx.priceCredits > 0) {
-    topUpPackCredits = creditPackForShortfall(shortfall)
+    recommendedFundTier = pickFundTierForShortfall(shortfall)
+    topUpPackCredits = recommendedFundTier.credits
     try {
       const { data: profile } = await getAdminDb()
         .from('profiles')
@@ -133,14 +137,13 @@ export async function getBuyerCheckoutPreflight(
         .eq('id', buyerId)
         .maybeSingle()
 
-      const fundGbp = creditsToFundGbp(topUpPackCredits)
       const fund = await createCreditFundCheckout({
         userId: buyerId,
         email: profile?.email ?? undefined,
-        amountGbp: fundGbp,
+        amountGbp: recommendedFundTier.amountGbp,
         returnPath: `/marketplace?item=${listingId}`,
         listingId,
-        contextLabel: `Top up to buy "${ctx.title}"`,
+        contextLabel: `Top up (${recommendedFundTier.label}) to buy "${ctx.title}"`,
       })
       topUpPackCredits = fund.creditsAmount
       topUpPaymentUrl = fund.checkoutUrl
@@ -170,6 +173,14 @@ export async function getBuyerCheckoutPreflight(
     shortfall,
     topUpPackCredits,
     topUpPaymentUrl,
+    recommendedFundTier: recommendedFundTier
+      ? {
+          id: recommendedFundTier.id,
+          label: recommendedFundTier.label,
+          amountGbp: recommendedFundTier.amountGbp,
+          credits: recommendedFundTier.credits,
+        }
+      : null,
   }
 }
 

@@ -66,6 +66,14 @@ function CreditsAccountContent() {
             <CheckCircle2 size={20} aria-hidden />
           )}
           <span>{statusMsg ?? 'Confirming your payment…'}</span>
+          {sessionId && !polling && (
+            <Link
+              href={`/account/credits/receipt?session_id=${encodeURIComponent(sessionId)}`}
+              style={{ marginLeft: '0.75rem', fontWeight: 800, color: 'var(--brand)', whiteSpace: 'nowrap' }}
+            >
+              View receipt →
+            </Link>
+          )}
         </div>
       )}
 

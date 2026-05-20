@@ -1,7 +1,9 @@
 import { addMarketplacePurchaseToArsenal } from '@/lib/assets/workspace-seed'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { formatCredits } from '@/lib/credits'
-import { sendMarketplaceInvoiceEmail } from '@/services/email'
+import { documentPathForKind } from '@/lib/marketplace/document-types'
+import { resolveProfileDisplayName } from '@/lib/marketplace/profile-display-name'
+import { sendMarketplaceDocumentEmail } from '@/services/email'
 
 export type MarketplacePurchaseResult = {
   purchaseId: string
@@ -37,7 +39,7 @@ async function loadPartyProfiles(buyerId: string, sellerId: string) {
   const db = getAdminDb()
   const { data, error } = await db
     .from('profiles')
-    .select('id, full_name, email, espeezy_email')
+    .select('id, full_name, username, email, espeezy_email')
     .in('id', [buyerId, sellerId])
 
   if (error) throw new Error(error.message)
@@ -106,6 +108,9 @@ export async function completeMarketplaceCreditPurchase(
     seller_credits: number
     seller_id: string
     listing_title: string
+    verify_token?: string
+    buyer_display_name?: string
+    seller_display_name?: string
   }
 
   const platformFeeCredits = result.platform_fee_credits ?? 0
@@ -113,11 +118,19 @@ export async function completeMarketplaceCreditPurchase(
 
   const purchaseId = result.purchase_id
   const sellerId = result.seller_id
+  const verifyToken = result.verify_token ?? null
+  const buyerDisplayName = result.buyer_display_name ?? null
+  const sellerDisplayName = result.seller_display_name ?? null
 
   const { buyer, seller } = await loadPartyProfiles(buyerId, sellerId)
+  const resolvedBuyerName = buyerDisplayName ?? resolveProfileDisplayName(buyer)
+  const resolvedSellerName = sellerDisplayName ?? resolveProfileDisplayName(seller)
+
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://kanban.espeezy.com').replace(/\/$/, '')
-  const invoicePath = `/marketplace/invoice/${purchaseId}`
-  const printUrl = `${appUrl}${invoicePath}`
+  const buyerDocPath = documentPathForKind(purchaseId, 'invoice')
+  const sellerDocPath = documentPathForKind(purchaseId, 'receipt')
+  const buyerPrintUrl = `${appUrl}${buyerDocPath}`
+  const sellerPrintUrl = `${appUrl}${sellerDocPath}`
 
   const creditLabel = formatCredits(result.credits_amount)
 
@@ -141,7 +154,13 @@ export async function completeMarketplaceCreditPurchase(
         seller_net_credits: sellerNetCredits,
         buyer_credits_after: result.buyer_credits,
         seller_credits_after: result.seller_credits,
+        buyer_display_name: resolvedBuyerName,
+        seller_display_name: resolvedSellerName,
+        ...(verifyToken ? { verify_token: verifyToken } : {}),
       },
+      ...(verifyToken ? { verify_token: verifyToken } : {}),
+      buyer_display_name: resolvedBuyerName,
+      seller_display_name: resolvedSellerName,
     })
     .eq('id', purchaseId)
 
@@ -151,11 +170,12 @@ export async function completeMarketplaceCreditPurchase(
       type: 'marketplace_purchase',
       title: 'Purchase confirmed',
       message: `You bought "${result.listing_title}" for ${creditLabel}. Balance: ${result.buyer_credits} credits.`,
-      link: invoicePath,
+      link: buyerDocPath,
       metadata: {
         purchase_id: purchaseId,
         role: 'buyer',
         credits_after: result.buyer_credits,
+        document: 'invoice',
       },
     },
     {
@@ -166,11 +186,12 @@ export async function completeMarketplaceCreditPurchase(
         platformFeeCredits > 0
           ? `"${result.listing_title}" sold for ${creditLabel} (${sellerNetCredits} cr after ${platformFeeCredits} cr platform fee). Balance: ${result.seller_credits} credits.`
           : `"${result.listing_title}" sold for ${creditLabel}. Balance: ${result.seller_credits} credits.`,
-      link: invoicePath,
+      link: sellerDocPath,
       metadata: {
         purchase_id: purchaseId,
         role: 'seller',
         credits_after: result.seller_credits,
+        document: 'receipt',
       },
     },
   ])
@@ -212,31 +233,41 @@ export async function completeMarketplaceCreditPurchase(
   const emailJobs: Promise<void>[] = []
   if (buyerEmail) {
     emailJobs.push(
-      sendMarketplaceInvoiceEmail({
+      sendMarketplaceDocumentEmail({
         to: buyerEmail,
-        role: 'buyer',
+        kind: 'invoice',
         invoiceNumber: result.invoice_number,
         listingTitle: result.listing_title,
         creditsAmount: result.credits_amount,
         creditsAfter: result.buyer_credits,
-        counterpartyName: seller?.full_name ?? 'Seller',
-        printUrl,
+        partyName: resolvedBuyerName,
+        counterpartyName: resolvedSellerName,
+        printUrl: buyerPrintUrl,
+        downloadUrl: `${appUrl}/api/marketplace/documents/${purchaseId}/download?kind=invoice`,
+        verifyUrl: verifyToken
+          ? `${appUrl}/api/marketplace/documents/${purchaseId}/verify?token=${encodeURIComponent(verifyToken)}`
+          : `${appUrl}/api/marketplace/documents/${purchaseId}/verify`,
       }),
     )
   }
   if (sellerEmail) {
     emailJobs.push(
-      sendMarketplaceInvoiceEmail({
+      sendMarketplaceDocumentEmail({
         to: sellerEmail,
-        role: 'seller',
+        kind: 'receipt',
         invoiceNumber: result.invoice_number,
         listingTitle: result.listing_title,
         creditsAmount: result.credits_amount,
         platformFeeCredits,
         sellerNetCredits,
         creditsAfter: result.seller_credits,
-        counterpartyName: buyer?.full_name ?? 'Buyer',
-        printUrl,
+        partyName: resolvedSellerName,
+        counterpartyName: resolvedBuyerName,
+        printUrl: sellerPrintUrl,
+        downloadUrl: `${appUrl}/api/marketplace/documents/${purchaseId}/download?kind=receipt`,
+        verifyUrl: verifyToken
+          ? `${appUrl}/api/marketplace/documents/${purchaseId}/verify?token=${encodeURIComponent(verifyToken)}`
+          : `${appUrl}/api/marketplace/documents/${purchaseId}/verify`,
       }),
     )
   }

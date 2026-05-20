@@ -353,7 +353,7 @@ export function ListingDetailPanel({
                   listingId={listing.id}
                   contextLabel={`Fund account to buy "${listing.title}"`}
                   label="Fund cred acc now"
-                  oneClick
+                  oneClick={false}
                 />
               </div>
             )}

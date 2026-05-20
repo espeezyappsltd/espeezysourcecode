@@ -213,7 +213,7 @@ function TransactionSection({
                   {formatCredits(row.credits_amount)}
                 </span>
                 <Link
-                  href={`/marketplace/invoice/${row.id}`}
+                  href={role === 'buyer' ? `/marketplace/invoice/${row.id}` : `/marketplace/receipt/${row.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -226,7 +226,8 @@ function TransactionSection({
                     textDecoration: 'none',
                   }}
                 >
-                  <Receipt size={14} aria-hidden /> Invoice
+                  <Receipt size={14} aria-hidden />
+                  {role === 'buyer' ? 'Invoice' : 'Receipt'}
                 </Link>
               </div>
             </div>

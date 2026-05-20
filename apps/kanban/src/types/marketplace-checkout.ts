@@ -14,4 +14,10 @@ export type BuyerCheckoutPreflight = {
   topUpPackCredits: number | null
   topUpPaymentUrl: string | null
   paymentLinkLabel?: string
+  recommendedFundTier?: {
+    id: string
+    label: string
+    amountGbp: number
+    credits: number
+  } | null
 }

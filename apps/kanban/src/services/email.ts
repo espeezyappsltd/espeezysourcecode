@@ -253,7 +253,79 @@ export async function sendP2PTransactionEmail(opts: {
   })
 }
 
-/** Printable marketplace invoice for buyer or seller */
+/** Buyer invoice or seller receipt for marketplace purchases. */
+export async function sendMarketplaceDocumentEmail(opts: {
+  to: string
+  kind: 'invoice' | 'receipt'
+  invoiceNumber: string
+  listingTitle: string
+  creditsAmount: number
+  platformFeeCredits?: number
+  sellerNetCredits?: number
+  creditsAfter: number
+  partyName: string
+  counterpartyName: string
+  printUrl: string
+  downloadUrl: string
+  verifyUrl: string
+}): Promise<void> {
+  const creditsLabel = `${opts.creditsAmount} credit${opts.creditsAmount === 1 ? '' : 's'}`
+  const fee = opts.platformFeeCredits ?? 0
+  const net = opts.sellerNetCredits ?? opts.creditsAmount - fee
+  const docLabel = opts.kind === 'invoice' ? 'Purchase Invoice' : 'Sale Receipt'
+  const feeRow =
+    opts.kind === 'receipt' && fee > 0
+      ? `<tr><td style="padding:8px 0;color:#64748b">Platform fee</td><td>${fee} credit${fee === 1 ? '' : 's'}</td></tr>
+         <tr><td style="padding:8px 0;color:#64748b">Net received</td><td><strong>${net} credit${net === 1 ? '' : 's'}</strong></td></tr>`
+      : ''
+  const subject =
+    opts.kind === 'invoice'
+      ? `Invoice: ${opts.listingTitle} (${creditsLabel})`
+      : `Receipt: ${opts.listingTitle} (${net} cr net)`
+
+  const intro =
+    opts.kind === 'invoice'
+      ? `Hi <strong>${escapeHtml(opts.partyName)}</strong>, your purchase of <strong>${escapeHtml(opts.listingTitle)}</strong> is confirmed. You paid <strong>${escapeHtml(creditsLabel)}</strong> to seller <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
+      : fee > 0
+        ? `Hi <strong>${escapeHtml(opts.partyName)}</strong>, you received <strong>${net} credit${net === 1 ? '' : 's'}</strong> for <strong>${escapeHtml(opts.listingTitle)}</strong> (${fee} cr platform fee on ${escapeHtml(creditsLabel)} gross) from buyer <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
+        : `Hi <strong>${escapeHtml(opts.partyName)}</strong>, you received <strong>${escapeHtml(creditsLabel)}</strong> for <strong>${escapeHtml(opts.listingTitle)}</strong> from buyer <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
+
+  await sendEmail({
+    to: opts.to,
+    subject,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
+        <div style="background:linear-gradient(135deg,#10b981,#059669);padding:24px;border-radius:12px 12px 0 0;color:#fff">
+          <h1 style="margin:0;font-size:22px">Espeezy ${escapeHtml(docLabel)}</h1>
+          <p style="margin:8px 0 0;opacity:0.9;font-size:14px">${escapeHtml(opts.invoiceNumber)}</p>
+        </div>
+        <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+          <p style="color:#334155;line-height:1.6">${intro}</p>
+          ${feeRow ? `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">${feeRow}</table>` : ''}
+          <p style="color:#334155">Your balance after this transaction: <strong>${opts.creditsAfter} credits</strong>.</p>
+          <p style="margin:16px 0 0">
+            <a href="${opts.printUrl}" style="display:inline-block;margin-right:8px;background:#10b981;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:700">View document</a>
+            <a href="${opts.downloadUrl}" style="display:inline-block;background:#e2e8f0;color:#0f172a;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:700">Download PDF</a>
+          </p>
+          <p style="margin-top:16px;font-size:12px;color:#64748b">Verify authenticity: <a href="${opts.verifyUrl}">${opts.verifyUrl}</a></p>
+        </div>
+      </div>
+    `,
+    text: [
+      `Espeezy ${docLabel} ${opts.invoiceNumber}`,
+      opts.kind === 'invoice' ? `Buyer: ${opts.partyName}` : `Seller: ${opts.partyName}`,
+      `Counterparty: ${opts.counterpartyName}`,
+      `Item: ${opts.listingTitle}`,
+      `Amount: ${creditsLabel}`,
+      `Balance after: ${opts.creditsAfter} credits`,
+      `View: ${opts.printUrl}`,
+      `PDF: ${opts.downloadUrl}`,
+      `Verify: ${opts.verifyUrl}`,
+    ].join('\n'),
+  })
+}
+
+/** @deprecated Use sendMarketplaceDocumentEmail */
 export async function sendMarketplaceInvoiceEmail(opts: {
   to: string
   role: 'buyer' | 'seller'
@@ -266,50 +338,20 @@ export async function sendMarketplaceInvoiceEmail(opts: {
   counterpartyName: string
   printUrl: string
 }): Promise<void> {
-  const creditsLabel = `${opts.creditsAmount} credit${opts.creditsAmount === 1 ? '' : 's'}`
-  const fee = opts.platformFeeCredits ?? 0
-  const net = opts.sellerNetCredits ?? opts.creditsAmount - fee
-  const feeRow =
-    opts.role === 'seller' && fee > 0
-      ? `<tr><td style="padding:8px 0;color:#64748b">Platform fee</td><td>${fee} credit${fee === 1 ? '' : 's'}</td></tr>
-         <tr><td style="padding:8px 0;color:#64748b">You received</td><td><strong>${net} credit${net === 1 ? '' : 's'}</strong></td></tr>`
-      : ''
-  const subject =
-    opts.role === 'buyer'
-      ? `Receipt: ${opts.listingTitle} (${creditsLabel})`
-      : `Sale confirmed: ${opts.listingTitle} (${net} cr net)`
-
-  const intro =
-    opts.role === 'buyer'
-      ? `Your purchase of <strong>${escapeHtml(opts.listingTitle)}</strong> is confirmed. You paid <strong>${escapeHtml(creditsLabel)}</strong> to <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
-      : fee > 0
-        ? `You received <strong>${net} credit${net === 1 ? '' : 's'}</strong> for <strong>${escapeHtml(opts.listingTitle)}</strong> (${fee} cr platform fee on ${escapeHtml(creditsLabel)} gross) from <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
-        : `You received <strong>${escapeHtml(creditsLabel)}</strong> for <strong>${escapeHtml(opts.listingTitle)}</strong> from <strong>${escapeHtml(opts.counterpartyName)}</strong>.`
-
-  await sendEmail({
+  return sendMarketplaceDocumentEmail({
     to: opts.to,
-    subject,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
-        <div style="background:linear-gradient(135deg,#10b981,#059669);padding:24px;border-radius:12px 12px 0 0;color:#fff">
-          <h1 style="margin:0;font-size:22px">Espeezy Marketplace Invoice</h1>
-          <p style="margin:8px 0 0;opacity:0.9;font-size:14px">${escapeHtml(opts.invoiceNumber)}</p>
-        </div>
-        <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
-          <p style="color:#334155;line-height:1.6">${intro}</p>
-          ${feeRow ? `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">${feeRow}</table>` : ''}
-          <p style="color:#334155">Your balance after this transaction: <strong>${opts.creditsAfter} credits</strong>.</p>
-          <a href="${opts.printUrl}" style="display:inline-block;margin:16px 0;background:#10b981;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:700">View &amp; print invoice</a>
-        </div>
-      </div>
-    `,
-    text: [
-      `Espeezy Marketplace Invoice ${opts.invoiceNumber}`,
-      opts.role === 'buyer' ? `Purchase: ${opts.listingTitle}` : `Sale: ${opts.listingTitle}`,
-      `Amount: ${creditsLabel}`,
-      `Balance after: ${opts.creditsAfter} credits`,
-      `Print: ${opts.printUrl}`,
-    ].join('\n'),
+    kind: opts.role === 'buyer' ? 'invoice' : 'receipt',
+    invoiceNumber: opts.invoiceNumber,
+    listingTitle: opts.listingTitle,
+    creditsAmount: opts.creditsAmount,
+    platformFeeCredits: opts.platformFeeCredits,
+    sellerNetCredits: opts.sellerNetCredits,
+    creditsAfter: opts.creditsAfter,
+    partyName: opts.role === 'buyer' ? 'You' : 'You',
+    counterpartyName: opts.counterpartyName,
+    printUrl: opts.printUrl,
+    downloadUrl: opts.printUrl,
+    verifyUrl: opts.printUrl,
   })
 }
 

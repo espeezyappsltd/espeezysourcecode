@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       ok: true,
       ...result,
       invoiceUrl: `/marketplace/invoice/${result.purchaseId}`,
+      receiptUrl: `/marketplace/receipt/${result.purchaseId}`,
     })
   } catch (err: unknown) {
     const e = err as Error & { code?: string; preflight?: Record<string, unknown> }

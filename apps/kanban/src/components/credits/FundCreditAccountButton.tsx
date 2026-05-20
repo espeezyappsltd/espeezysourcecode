@@ -1,19 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Loader2, Wallet } from 'lucide-react'
+import { DEFAULT_CREDIT_FUND_GBP, gbpToCredits } from '@/lib/credits/fund-stripe-shared'
+import { formatCredits } from '@/lib/credits'
 import {
-  DEFAULT_CREDIT_FUND_GBP,
-  MIN_CREDIT_FUND_GBP,
-  creditsToFundGbp,
-  gbpToCredits,
-} from '@/lib/credits/fund-stripe-shared'
-import { formatCredits, formatGbpApprox } from '@/lib/credits'
+  CREDIT_FUND_TIERS,
+  pickFundTierForShortfall,
+  tierSummary,
+  type CreditFundTier,
+} from '@/lib/credits/fund-tiers'
 
 type Props = {
-  /** Cash to charge (min £2). If omitted, uses default £5 or creditsNeeded conversion. */
   amountGbp?: number
-  /** Target credits — converts to GBP (min £2). */
   creditsNeeded?: number
   returnPath?: string
   listingId?: string
@@ -21,7 +20,7 @@ type Props = {
   label?: string
   className?: string
   variant?: 'primary' | 'secondary' | 'link'
-  /** Skip amount picker — go straight to Stripe */
+  /** When false, show tier picker so users can switch fund tier before checkout. */
   oneClick?: boolean
 }
 
@@ -34,19 +33,25 @@ export function FundCreditAccountButton({
   label = 'Fund cred acc now',
   className = '',
   variant = 'primary',
-  oneClick = true,
+  oneClick = false,
 }: Props) {
   const [loading, setLoading] = useState(false)
-  const [showPicker, setShowPicker] = useState(false)
-  const [customGbp, setCustomGbp] = useState(String(amountGbpProp ?? DEFAULT_CREDIT_FUND_GBP))
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(null)
 
-  const resolvedGbp =
-    amountGbpProp ??
-    (creditsNeeded != null && creditsNeeded > 0 ? creditsToFundGbp(creditsNeeded) : DEFAULT_CREDIT_FUND_GBP)
+  const recommendedTier = useMemo(() => {
+    if (creditsNeeded != null && creditsNeeded > 0) {
+      return pickFundTierForShortfall(creditsNeeded)
+    }
+    if (amountGbpProp != null) {
+      return CREDIT_FUND_TIERS.find((t) => t.amountGbp === amountGbpProp) ?? CREDIT_FUND_TIERS[1]
+    }
+    return CREDIT_FUND_TIERS.find((t) => t.amountGbp === DEFAULT_CREDIT_FUND_GBP) ?? CREDIT_FUND_TIERS[1]
+  }, [amountGbpProp, creditsNeeded])
 
-  const previewCredits = gbpToCredits(resolvedGbp)
+  const activeTier: CreditFundTier =
+    CREDIT_FUND_TIERS.find((t) => t.id === selectedTierId) ?? recommendedTier
 
-  const startCheckout = async (gbp: number) => {
+  const startCheckout = async (tier: CreditFundTier) => {
     setLoading(true)
     try {
       const res = await fetch('/api/credits/fund', {
@@ -54,10 +59,10 @@ export function FundCreditAccountButton({
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          amountGbp: gbp,
+          amountGbp: tier.amountGbp,
           returnPath,
           listingId,
-          contextLabel,
+          contextLabel: contextLabel ?? `Fund ${tier.label} tier`,
         }),
       })
       const data = (await res.json()) as { checkoutUrl?: string; error?: string }
@@ -71,12 +76,12 @@ export function FundCreditAccountButton({
     }
   }
 
-  const handleClick = () => {
-    if (oneClick && !showPicker) {
-      void startCheckout(resolvedGbp)
+  const handlePrimaryClick = () => {
+    if (oneClick) {
+      void startCheckout(activeTier)
       return
     }
-    setShowPicker((v) => !v)
+    void startCheckout(activeTier)
   }
 
   const btnClass =
@@ -88,61 +93,42 @@ export function FundCreditAccountButton({
 
   return (
     <div className="credit-fund-wrap">
+      <div className="credit-fund-tier-switch" role="group" aria-label="Choose fund tier">
+        {CREDIT_FUND_TIERS.map((tier) => {
+          const selected = tier.id === activeTier.id
+          return (
+            <button
+              key={tier.id}
+              type="button"
+              className={`credit-fund-tier${selected ? ' credit-fund-tier--active' : ''}`}
+              disabled={loading}
+              onClick={() => setSelectedTierId(tier.id)}
+              aria-pressed={selected}
+            >
+              <span className="credit-fund-tier__label">{tier.label}</span>
+              <span className="credit-fund-tier__meta">
+                £{tier.amountGbp} · {formatCredits(tier.credits)}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      <p className="credit-fund-picker__hint" style={{ margin: '0.5rem 0 0', fontSize: '0.78rem' }}>
+        {creditsNeeded != null && creditsNeeded > 0
+          ? `Recommended for your shortfall: ${tierSummary(recommendedTier)}`
+          : `Selected: ${tierSummary(activeTier)}`}
+      </p>
       <button
         type="button"
         className={btnClass}
         disabled={loading}
-        onClick={handleClick}
-        aria-label={`${label}, adds about ${formatCredits(previewCredits)}`}
+        onClick={handlePrimaryClick}
+        aria-label={`${label}, ${tierSummary(activeTier)}`}
+        style={{ marginTop: '0.65rem' }}
       >
         {loading ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <Wallet size={16} aria-hidden />}
         {label}
       </button>
-
-      {showPicker && !oneClick ? (
-        <div className="credit-fund-picker">
-          <p className="credit-fund-picker__hint">
-            Min £{MIN_CREDIT_FUND_GBP} · ≈ {formatCredits(gbpToCredits(Number(customGbp) || MIN_CREDIT_FUND_GBP))} (
-            {formatGbpApprox(gbpToCredits(Number(customGbp) || MIN_CREDIT_FUND_GBP))})
-          </p>
-          <div className="credit-fund-picker__row">
-            <label htmlFor="fund-gbp-amount" className="sr-only">
-              Amount in pounds
-            </label>
-            <span className="credit-fund-picker__currency">£</span>
-            <input
-              id="fund-gbp-amount"
-              type="number"
-              min={MIN_CREDIT_FUND_GBP}
-              step={0.5}
-              value={customGbp}
-              onChange={(e) => setCustomGbp(e.target.value)}
-              className="form-input credit-fund-picker__input"
-            />
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              disabled={loading}
-              onClick={() => void startCheckout(Number(customGbp) || MIN_CREDIT_FUND_GBP)}
-            >
-              Pay
-            </button>
-          </div>
-          <div className="credit-fund-picker__presets">
-            {[2, 5, 10, 20].map((amt) => (
-              <button
-                key={amt}
-                type="button"
-                className="btn btn-secondary btn-sm"
-                disabled={loading}
-                onClick={() => void startCheckout(amt)}
-              >
-                £{amt}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
     </div>
   )
 }
