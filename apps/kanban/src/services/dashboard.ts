@@ -247,8 +247,9 @@ export function mapActivityLogRow(row: ActivityLogDbRow): ActivityLogRow {
 }
 
 const ACTIVITY_LOG_COLUMNS = [
-  'id, user_id, group_id, action, details, created_at',
+  'id, user_id, group_id, action, details, created_at, app_scope, resource_type, resource_id, status',
   'id, user_id, group_id, action, details, created_at, status',
+  'id, user_id, group_id, action, details, created_at',
 ] as const
 
 type ActivityLogQueryResult = {
@@ -384,7 +385,7 @@ export async function fetchTeamMarketplaceTransactions(
   ) as Record<string, string>
 
   const select =
-    'id, listing_title, credits_amount, created_at, buyer_id, seller_id, status'
+    'id, listing_title, credits_amount, created_at, buyer_id, seller_id, buyer_display_name, seller_display_name'
 
   const [asBuyer, asSeller] = await Promise.all([
     db
@@ -412,20 +413,26 @@ export async function fetchTeamMarketplaceTransactions(
       created_at: string
       buyer_id: string
       seller_id: string
-      status?: string | null
+      buyer_display_name?: string | null
+      seller_display_name?: string | null
     },
     role: 'buyer' | 'seller',
   ) => {
     if (seen.has(p.id)) return
     seen.add(p.id)
     const userId = role === 'buyer' ? p.buyer_id : p.seller_id
+    const snapshottedName =
+      role === 'buyer' ? p.buyer_display_name : p.seller_display_name
     rows.push({
       date: p.created_at,
       role,
       listingTitle: p.listing_title,
       credits: p.credits_amount,
-      userName: nameById[userId] ?? 'Unknown',
-      status: p.status ?? 'completed',
+      userName:
+        (snapshottedName && String(snapshottedName).trim()) ||
+        nameById[userId] ||
+        'Unknown',
+      status: 'completed',
     })
   }
 

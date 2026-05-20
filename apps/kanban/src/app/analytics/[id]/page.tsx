@@ -244,7 +244,10 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const calculateMemberEffort = (memberId: string) =>
     tasks.filter(t => t.status === 'Done' && t.assignees?.includes(memberId)).length
 
-  const totalGroupEffort = members.reduce((acc, m) => acc + calculateMemberEffort(m.id), 0)
+  const assignmentCompletions = members.reduce(
+    (acc, m) => acc + calculateMemberEffort(m.id),
+    0,
+  )
 
   // --- CHART DATA ---
   const statusPieData = [
@@ -275,7 +278,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     evidenceDensity,
     memberCount: members.length,
     teamCapacity: group?.capacity || 5,
-    totalGroupEffort,
+    uniqueTasksCompleted: doneTasks,
+    assignmentCompletions,
   }
 
   const handlePrint = () => {
@@ -429,7 +433,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         riskLevel={riskLevel}
         evidenceDensity={evidenceDensity}
         members={members}
-        totalGroupEffort={totalGroupEffort}
+        totalGroupEffort={assignmentCompletions}
         statusPieData={statusPieData}
         categoryBarData={categoryBarData}
         memberBarData={memberBarData}

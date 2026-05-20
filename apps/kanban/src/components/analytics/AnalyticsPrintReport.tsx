@@ -67,8 +67,8 @@ export function AnalyticsPrintReport({
             <tr><th>Overdue</th><td>{overdueTasks}</td></tr>
             <tr><th>Risk</th><td>{riskLevel}</td></tr>
             <tr><th>Evidence density</th><td>{evidenceDensity}</td></tr>
-            <tr><th>Team</th><td>{members.length} / {group?.capacity || 5}</td></tr>
-            <tr><th>Tasks resolved (team)</th><td>{totalGroupEffort}</td></tr>
+            <tr><th>Team</th><td>{members.length} of {group?.capacity || 5}</td></tr>
+            <tr><th>Assignment completions</th><td>{totalGroupEffort}</td></tr>
           </tbody>
         </table>
       </div>
