@@ -51,21 +51,7 @@ export function CyclingNamePlaceholder({ id }: { id: string }) {
   const name = CYCLING_NAMES[index]
 
   return (
-    <div
-      id={id}
-      aria-hidden="true"
-      style={{
-        position: 'absolute',
-        left: '1rem',
-        right: '1rem',
-        top: 0,
-        bottom: 0,
-        display: 'flex',
-        alignItems: 'center',
-        pointerEvents: 'none',
-        overflow: 'hidden',
-      }}
-    >
+    <div id={id} aria-hidden="true" className="onboarding-name-placeholder">
       {reduceMotion ? (
         <span
           style={{

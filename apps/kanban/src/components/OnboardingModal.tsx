@@ -16,6 +16,7 @@ import { OnboardingModalProps } from '@/types/ui'
 import { useProfile } from '@/context/ProfileContext'
 import { CyclingNamePlaceholder, isMockDisplayName } from '@/components/onboarding/CyclingNamePlaceholder'
 import { FormField } from '@/components/forms/FormField'
+import '@/app/onboarding-modal.css'
 
 const PRESET_AVATARS = [
   { url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar1&backgroundColor=1a73e8', label: 'Blue geometric' },
@@ -172,6 +173,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
           ref={closeBtnRef}
           type="button"
           onClick={handleDismiss}
+          className="onboarding-close-btn"
           style={{
             position: 'absolute',
             top: '1.5rem',
@@ -180,7 +182,6 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
             border: 'none',
             color: 'var(--text-sub)',
             cursor: 'pointer',
-            padding: '0.5rem',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
@@ -205,6 +206,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
           aria-valuemax={3}
           aria-valuenow={step}
           aria-valuetext={`Step ${step} of 3: ${STEP_LABELS[step - 1]}`}
+          className="onboarding-progress"
           style={{ display: 'flex', gap: '8px', marginBottom: '3rem' }}
         >
           {STEP_LABELS.map((label, i) => {
@@ -244,7 +246,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
             >
               <ShieldCheck size={32} />
             </div>
-            <h1 id={titleId} style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>
+            <h1 id={titleId} className="onboarding-step-title">
               Welcome to Espeezy
             </h1>
             <p id={descId} style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
@@ -256,21 +258,9 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
               hint="Enter your first and last name as you would like peers to see it."
               required
               className="onboarding-name-field"
-              afterControl={
+              controlOverlay={
                 !fullName && !nameFieldFocused ? (
-                  <div
-                    aria-hidden
-                    style={{
-                      position: 'relative',
-                      marginTop: '-3.25rem',
-                      height: '3.25rem',
-                      marginBottom: '-3.25rem',
-                      pointerEvents: 'none',
-                      zIndex: 2,
-                    }}
-                  >
-                    <CyclingNamePlaceholder id={nameDecorId} />
-                  </div>
+                  <CyclingNamePlaceholder id={nameDecorId} />
                 ) : null
               }
             >
@@ -287,9 +277,6 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
                 style={{
                   fontSize: '1.25rem',
                   padding: '1rem',
-                  position: 'relative',
-                  zIndex: 1,
-                  background: 'transparent',
                   minHeight: '44px',
                 }}
               />
@@ -319,7 +306,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
 
         {step === 2 && (
           <div>
-            <h2 id={titleId} style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1.5rem' }}>
+            <h2 id={titleId} className="onboarding-step-title" style={{ marginBottom: '1.5rem' }}>
               Choose an Avatar
             </h2>
             <p id={descId} style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>
@@ -411,7 +398,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
             >
               <Sparkles size={48} />
             </div>
-            <h2 id={titleId} style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>
+            <h2 id={titleId} className="onboarding-step-title">
               All Set!
             </h2>
             <p id={descId} style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>

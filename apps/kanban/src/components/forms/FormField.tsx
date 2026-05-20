@@ -25,6 +25,8 @@ export type FormFieldProps = {
   icon?: ReactNode
   /** Content below the control (e.g. word count) */
   afterControl?: ReactNode
+  /** Decorative overlay inside the control wrap (e.g. animated placeholder). */
+  controlOverlay?: ReactNode
   children: ReactElement<ControlProps>
 }
 
@@ -39,6 +41,7 @@ export function FormField({
   labelAction,
   icon,
   afterControl,
+  controlOverlay,
   children,
 }: FormFieldProps) {
   const autoId = useId().replace(/:/g, '')
@@ -60,7 +63,7 @@ export function FormField({
 
   return (
     <div
-      className={`form-group${error ? ' form-group--invalid' : ''}${icon ? ' form-group--has-icon' : ''}${className ? ` ${className}` : ''}`}
+      className={`form-group${error ? ' form-group--invalid' : ''}${icon ? ' form-group--has-icon' : ''}${controlOverlay ? ' form-group--control-overlay' : ''}${className ? ` ${className}` : ''}`}
       style={{ marginBottom: 0 }}
     >
       {labelAction ? (
@@ -93,13 +96,21 @@ export function FormField({
           ) : null}
         </label>
       )}
-      <div className={icon ? 'form-field-control-wrap' : undefined}>
+      <div
+        className={[
+          icon || controlOverlay ? 'form-field-control-wrap' : undefined,
+          controlOverlay ? 'form-field-control-wrap--overlay' : undefined,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         {icon ? (
           <span className="form-field-icon" aria-hidden>
             {icon}
           </span>
         ) : null}
         {control}
+        {controlOverlay}
       </div>
       {hint ? (
         <p id={hintId} className="form-hint">
