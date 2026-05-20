@@ -57,7 +57,14 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: groupId } = use(params)
-  const [loading, setLoading] = useState(true)
+  const [pageLoading, setPageLoading] = useState(true)
+  const [joinSubmitting, setJoinSubmitting] = useState(false)
+  const [joinPreview, setJoinPreview] = useState<{
+    memberCount: number
+    capacity: number
+    hasPendingRequest: boolean
+  } | null>(null)
+  const [hasSentRequest, setHasSentRequest] = useState(false)
   const [exporting, setExporting] = useState(false)
   const { addToast } = useNotifications()
   const { profile: contextProfile, loading: profileLoading } = useProfile()
@@ -76,12 +83,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const canViewStats = hasFeature(contextProfile, 'PROJECT_STATS')
 
   const fetchData = useCallback(async () => {
-    setLoading(true)
+    setPageLoading(true)
     setFetchError(null)
 
     const authUser = await getAuthUser()
     if (!authUser) {
-      setLoading(false)
+      setPageLoading(false)
       return
     }
 
@@ -102,11 +109,17 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       }
 
       const userProfile = profileRes.status === 'fulfilled' ? profileRes.value : null
-      const groupData = groupRes.value
+      const groupData = groupRes.status === 'fulfilled' ? groupRes.value : null
       const groupTasks = tasksRes.status === 'fulfilled' ? tasksRes.value : []
       const groupMembers =
         membersRes.status === 'fulfilled' ? (membersRes.value as ProfileDB[]) : []
       const groupArtifacts = artifactsRes.status === 'fulfilled' ? artifactsRes.value : []
+
+      if (!groupData) {
+        setFetchError('This team could not be found.')
+        setGroup(null)
+        return
+      }
 
       if (rejectReason && profileRes.status === 'rejected') {
         console.warn('Analytics profile fetch failed:', rejectReason.reason)
@@ -126,6 +139,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       setGroup(groupData as Group)
 
       if (memberCheck) {
+        setJoinPreview(null)
         const [logs, mktTx] = await Promise.all([
           fetchActivityLogByGroup(groupId),
           fetchTeamMarketplaceTransactions(membersList).catch((err) => {
@@ -139,7 +153,11 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         setActivityLogs(logs)
         setMarketplaceTx(mktTx)
       } else {
-        setMembers(membersList)
+        const { fetchTeamJoinPreview } = await import('@/app/join/actions')
+        const preview = await fetchTeamJoinPreview(groupId)
+        setJoinPreview(preview)
+        setHasSentRequest(preview.hasPendingRequest)
+        setMembers([])
         setTasks([])
         setArtifacts([])
         setActivityLogs([])
@@ -154,7 +172,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       setFetchError(message)
       addToast('Sync Error', message, 'error')
     } finally {
-      setLoading(false)
+      setPageLoading(false)
     }
   }, [groupId, addToast])
 
@@ -165,7 +183,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   useEffect(() => {
     if (profileLoading) return
     if (!canViewStats) {
-      setLoading(false)
+      setPageLoading(false)
       return
     }
     void fetchData()
@@ -182,25 +200,34 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     return () => window.removeEventListener(CONTRIBUTION_SCORES_UPDATED, onScoresUpdated)
   }, [groupId, canViewStats, fetchData])
 
-  const [hasSentRequest, setHasSentRequest] = useState(false)
-
   const handleJoinRequest = async () => {
-    if (!currentUser || !group || hasSentRequest) return
-    
-    setLoading(true)
+    if (!currentUser || !group || hasSentRequest || joinSubmitting) return
+
+    setJoinSubmitting(true)
     try {
       const { sendJoinRequest } = await import('@/app/join/actions')
       const res = await sendJoinRequest(groupId, currentUser.full_name || 'A student')
       if (!res.success) {
-        addToast('System Error', res.error, 'error')
+        addToast('Could not send join request', res.error, 'error')
         return
       }
       setHasSentRequest(true)
-      addToast('Sync Success', 'Your join request and team chat message were sent.', 'success')
+      setJoinPreview((prev) => (prev ? { ...prev, hasPendingRequest: true } : prev))
+      addToast(
+        'Request sent',
+        res.chatSkipped
+          ? 'Your team leader was notified. The intro chat message could not be posted yet.'
+          : 'Your join request and team chat message were sent.',
+        'success',
+      )
     } catch (err: unknown) {
-      addToast('System Error', 'Failed to transmit access request: ' + (err instanceof Error ? err.message : String(err)), 'error')
+      addToast(
+        'Could not send join request',
+        err instanceof Error ? err.message : 'Something went wrong. Try again.',
+        'error',
+      )
     } finally {
-      setLoading(false)
+      setJoinSubmitting(false)
     }
   }
 
@@ -301,7 +328,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     return <PremiumFeatureGate feature="PROJECT_STATS" />
   }
 
-  if (fetchError && !loading && !group) {
+  if (fetchError && !pageLoading && !group) {
     return (
       <div style={{ maxWidth: '560px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
         <p style={{ color: 'var(--error)', fontWeight: 700, marginBottom: '1rem' }}>{fetchError}</p>
@@ -312,11 +339,13 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     )
   }
 
-  if (loading) return (
+  if (pageLoading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-sub)' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: '40px', height: '40px', border: '4px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1.5rem' }} />
-        <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Retrieving project intelligence...</p>
+        <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>
+          {isMember ? 'Retrieving project intelligence…' : 'Loading team overview…'}
+        </p>
       </div>
     </div>
   )
@@ -335,7 +364,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
            <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3rem' }}>
               <div style={{ textAlign: 'center' }}>
-                 <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{members.length}</div>
+                 <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{joinPreview?.memberCount ?? members.length}{joinPreview ? ` / ${joinPreview.capacity}` : ''}</div>
                  <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', textTransform: 'uppercase', fontWeight: 700 }}>Team Members</div>
               </div>
               <div style={{ width: '1px', background: 'var(--border)' }} />
@@ -348,11 +377,15 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
               <button 
                 onClick={handleJoinRequest} 
-                disabled={hasSentRequest || loading}
-                className={hasSentRequest ? "btn btn-secondary" : "btn btn-primary"} 
+                disabled={hasSentRequest || joinSubmitting}
+                className={hasSentRequest ? 'btn btn-secondary' : 'btn btn-primary'}
                 style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem', opacity: hasSentRequest ? 0.7 : 1, cursor: hasSentRequest ? 'default' : 'pointer' }}
               >
-                {hasSentRequest ? 'Request sent. Waiting for team leader approval' : 'Request to Join'}
+                {joinSubmitting
+                  ? 'Sending request…'
+                  : hasSentRequest
+                    ? 'Request sent. Waiting for team leader approval'
+                    : 'Request to Join'}
               </button>
               <Link href="/network" className="btn btn-secondary" style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem' }}>
                 Back to Network

@@ -195,8 +195,50 @@ export async function kickUser(userId: string) {
 }
 
 export type SendJoinRequestResult =
-  | { success: true; alreadySent?: boolean }
+  | { success: true; alreadySent?: boolean; chatSkipped?: boolean }
   | { success: false; error: string }
+
+export type TeamJoinPreview = {
+  memberCount: number
+  capacity: number
+  hasPendingRequest: boolean
+}
+
+/** Public team stats for join / analytics preview (service role). */
+export async function fetchTeamJoinPreview(groupId: string): Promise<TeamJoinPreview> {
+  const uid = await getUid()
+  const fallback: TeamJoinPreview = { memberCount: 0, capacity: 5, hasPendingRequest: false }
+
+  if (!uid) return fallback
+
+  try {
+    const adminDb = getAdminDb()
+
+    const [{ count: memberCount }, { data: group }, { data: pending }] = await Promise.all([
+      adminDb
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('group_id', groupId),
+      adminDb.from('groups').select('capacity').eq('id', groupId).maybeSingle(),
+      adminDb
+        .from('group_join_requests')
+        .select('id')
+        .eq('group_id', groupId)
+        .eq('user_id', uid)
+        .eq('status', 'pending')
+        .maybeSingle(),
+    ])
+
+    return {
+      memberCount: memberCount ?? 0,
+      capacity: group?.capacity ?? 5,
+      hasPendingRequest: Boolean(pending),
+    }
+  } catch (err) {
+    console.warn('[fetchTeamJoinPreview]', err)
+    return fallback
+  }
+}
 
 export async function sendJoinRequest(
   groupId: string,
@@ -287,7 +329,13 @@ export async function sendJoinRequest(
       is_deleted: false,
     })
 
-    if (messageError) throw messageError
+    if (messageError) {
+      console.warn('[sendJoinRequest] team chat intro failed:', messageError.message)
+      if (!requestId) throw messageError
+      revalidatePath('/settings')
+      revalidatePath(`/analytics/${groupId}`)
+      return { success: true, chatSkipped: true }
+    }
 
     if (requestId) {
       await adminDb
@@ -300,7 +348,10 @@ export async function sendJoinRequest(
     revalidatePath(`/analytics/${groupId}`)
     return { success: true }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Could not send join request'
+    const raw = err instanceof Error ? err.message : 'Could not send join request'
+    const message = raw.includes('service role')
+      ? 'Join requests are temporarily unavailable. Please try again later or contact support.'
+      : raw
     console.error('[sendJoinRequest]', message, err)
     return { success: false, error: message }
   }
