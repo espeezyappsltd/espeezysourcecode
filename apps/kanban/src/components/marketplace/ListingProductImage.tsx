@@ -29,6 +29,7 @@ export function ListingProductImage({
   className = '',
   aspectRatio = '4 / 3',
   priority = false,
+  sizes = '(max-width: 768px) 48vw, 280px',
 }: ListingProductImageProps) {
   const imageUrl = useMemo(() => {
     if (src) return primaryListingImage([src])
@@ -79,6 +80,7 @@ export function ListingProductImage({
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
           fetchPriority={priority ? 'high' : 'auto'}
+          sizes={sizes}
           onLoad={() => setPhotoLoaded(true)}
           onError={() => setPhotoFailed(true)}
         />

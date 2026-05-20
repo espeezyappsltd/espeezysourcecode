@@ -75,6 +75,8 @@
   gap: 1.25rem;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 140px;
 }
 
 .hustle-card:hover {

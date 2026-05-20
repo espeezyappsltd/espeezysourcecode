@@ -15,6 +15,7 @@ import { OnboardingModal } from '@/components/marketplace/OnboardingModal'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import { CategoryNavDropdown } from '@/components/nav/CategoryNavDropdown'
 import { ListPagination } from '@/components/nav/ListPagination'
+import { VirtualizedGridList } from '@/components/list/VirtualizedGridList'
 import { SearchField } from '@/components/forms/SearchField'
 import Link from 'next/link'
 import type { MarketplaceCategory } from '@/types/marketplace'
@@ -353,25 +354,30 @@ function MarketplacePageInner() {
               <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem' }}>Try another category or search term.</p>
             </div>
           ) : (
-            <>
-              <div className="marketplace-page__grid" role="list">
-                {filteredListings.map((item) => (
-                  <ListingCard
-                    key={item.id}
-                    item={item}
-                    activeCategory={activeCategory === 'All' ? null : activeCategory}
-                    searchQuery={searchQuery}
-                  />
-                ))}
-              </div>
-              <ListPagination
-                loadedCount={filteredListings.length}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-                onLoadMore={loadMore}
-                itemLabel="listings"
-              />
-            </>
+            <VirtualizedGridList
+              className="marketplace-page__grid"
+              items={filteredListings}
+              getKey={(item) => item.id}
+              rowEstimateSize={208}
+              gapPx={9}
+              columns={{ mobile: 2, tablet: 3, desktop: 4 }}
+              renderItem={(item) => (
+                <ListingCard
+                  item={item}
+                  activeCategory={activeCategory === 'All' ? null : activeCategory}
+                  searchQuery={searchQuery}
+                />
+              )}
+              footer={
+                <ListPagination
+                  loadedCount={filteredListings.length}
+                  hasMore={hasMore}
+                  loadingMore={loadingMore}
+                  onLoadMore={loadMore}
+                  itemLabel="listings"
+                />
+              }
+            />
           )}
         </div>
       </div>

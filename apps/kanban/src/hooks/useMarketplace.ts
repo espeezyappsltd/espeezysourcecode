@@ -5,10 +5,10 @@ import { useNotifications } from '@/components/NotificationProvider'
 import { Listing, MarketplaceCategory } from '@/types/marketplace'
 import { MARKETPLACE_CATEGORIES } from '@/lib/marketplace/listing-validation'
 import { withNormalizedListingImages } from '@/lib/marketplace/listing-images'
+import { getListPageLimit, trimListTail } from '@/lib/list/viewport-list'
 
 const CACHE_PREFIX = 'gf_marketplace_cache_v2'
 const DEBOUNCE_MS = 220
-const PAGE_LIMIT = 32
 
 function cacheKey(q: string, category: string) {
   return `${CACHE_PREFIX}:${category}:${q.trim().toLowerCase()}`
@@ -29,7 +29,7 @@ function readCache(key: string): Listing[] | null {
 
 function writeCache(key: string, listings: Listing[]) {
   try {
-    localStorage.setItem(key, JSON.stringify({ listings: listings.slice(0, PAGE_LIMIT), at: Date.now() }))
+    localStorage.setItem(key, JSON.stringify({ listings: listings.slice(0, 32), at: Date.now() }))
   } catch {
     /* quota */
   }
@@ -80,7 +80,7 @@ export function useMarketplace() {
         if (q.trim()) params.set('q', q.trim())
         if (category && category !== 'All') params.set('category', category)
         params.set('status', 'AVAILABLE')
-        params.set('limit', String(PAGE_LIMIT))
+        params.set('limit', String(getListPageLimit()))
         if (opts?.cursor) params.set('cursor', opts.cursor)
 
         const res = await fetch(`/api/marketplace/listings?${params.toString()}`, {
@@ -100,7 +100,7 @@ export function useMarketplace() {
         }
 
         const incoming = (data.listings ?? []).map((row) => withNormalizedListingImages(row))
-        setListings((prev) => (isMore ? [...prev, ...incoming] : incoming))
+        setListings((prev) => trimListTail(isMore ? [...prev, ...incoming] : incoming))
         setNextCursor(data.nextCursor ?? null)
         setHasMore(Boolean(data.nextCursor))
 

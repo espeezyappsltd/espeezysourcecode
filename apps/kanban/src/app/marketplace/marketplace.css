@@ -5,6 +5,8 @@
 .listing-card {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 220px;
 }
 
 .listing-card:focus-visible {

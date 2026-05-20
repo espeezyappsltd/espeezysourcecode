@@ -1,0 +1,60 @@
+/* Window-virtualized lists — only visible rows mount in the DOM */
+
+.virtual-list {
+  position: relative;
+  width: 100%;
+}
+
+.virtual-list__row {
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: var(--virtual-gap, 0.55rem);
+}
+
+.virtual-list__row > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 140px;
+}
+
+.virtual-grid {
+  position: relative;
+  width: 100%;
+  display: block !important;
+}
+
+.virtual-list.hustle-list {
+  display: block !important;
+}
+
+.virtual-grid__row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: var(--virtual-grid-gap, 0.55rem);
+  box-sizing: border-box;
+  padding-bottom: var(--virtual-grid-gap, 0.55rem);
+}
+
+.virtual-grid__row > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+  min-width: 0;
+}
+
+.list-scroll-sentinel {
+  width: 100%;
+  height: 1px;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+@media (max-width: 768px) {
+  .virtual-list__row > * {
+    contain-intrinsic-size: auto 168px;
+  }
+
+  .virtual-grid__row > * {
+    contain-intrinsic-size: auto 188px;
+  }
+}

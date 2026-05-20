@@ -42,6 +42,7 @@ import {
 } from '@/lib/hustle/gig-ux'
 import { CategoryNavDropdown } from '@/components/nav/CategoryNavDropdown'
 import { ListPagination } from '@/components/nav/ListPagination'
+import { VirtualizedColumnList } from '@/components/list/VirtualizedColumnList'
 import { SearchField } from '@/components/forms/SearchField'
 import {
   hustleCategoryUrl,
@@ -354,10 +355,14 @@ function HustlePage() {
         ) : isFilteredEmpty ? (
           <FilteredEmptyState onClear={() => setGigsFilter('all')} />
         ) : (
-          <div className="hustle-list">
-            {listItems.map((item) => (
+          <VirtualizedColumnList
+            className="hustle-list"
+            items={listItems}
+            getKey={(item) => item.id}
+            estimateSize={136}
+            gapPx={9}
+            renderItem={(item) => (
               <HustleCard
-                key={item.id}
                 item={item}
                 tab={tab}
                 category={category}
@@ -366,16 +371,17 @@ function HustlePage() {
                 showApplicationMeta={tab === 'gigs'}
                 gigPerspective={tab === 'posted' ? 'poster' : tab === 'gigs' ? 'worker' : undefined}
               />
-            ))}
-
-            <ListPagination
-              loadedCount={listItems.length}
-              hasMore={Boolean(nextCursor)}
-              loadingMore={loadingMore}
-              onLoadMore={loadMore}
-              itemLabel="gigs"
-            />
-          </div>
+            )}
+            footer={
+              <ListPagination
+                loadedCount={listItems.length}
+                hasMore={Boolean(nextCursor)}
+                loadingMore={loadingMore}
+                onLoadMore={loadMore}
+                itemLabel="gigs"
+              />
+            }
+          />
         )}
       </main>
 

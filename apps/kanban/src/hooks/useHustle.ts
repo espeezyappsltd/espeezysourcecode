@@ -7,6 +7,7 @@ import {
   matchesGigsFilter,
   sortGigsByPriority,
 } from '@/lib/hustle/gig-ux'
+import { getListPageLimit, trimListTail } from '@/lib/list/viewport-list'
 
 export type HustleTab = 'marketplace' | 'gigs' | 'posted' | 'sales' | 'inventory'
 
@@ -124,6 +125,7 @@ export function useHustle() {
         if (query.trim()) params.set('q', query.trim())
         if (cat !== 'all') params.set('category', cat)
         if (cursor) params.set('cursor', cursor)
+        params.set('limit', String(getListPageLimit()))
 
         let endpoint = ''
         switch (currentTab) {
@@ -182,7 +184,7 @@ export function useHustle() {
           data.assets ??
           []
 
-        setItems((prev) => (isMore ? [...prev, ...newItems] : newItems))
+        setItems((prev) => trimListTail(isMore ? [...prev, ...newItems] : newItems))
         setNextCursor(data.nextCursor ?? null)
 
         if (!isMore) writeCache(key, newItems)

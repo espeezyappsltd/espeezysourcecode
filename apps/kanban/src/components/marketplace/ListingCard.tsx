@@ -37,6 +37,7 @@ export const ListingCard = memo(function ListingCard({ item, href, activeCategor
           category={item.category}
           className="listing-product-image--fill"
           aspectRatio="unset"
+          sizes="(max-width: 768px) 48vw, (max-width: 1024px) 33vw, 280px"
         />
         <Link href={categoryHref} className="listing-card__category-link" prefetch>
           {item.category || 'Item'}
