@@ -1,55 +1,89 @@
-/* Mobile header tool buttons + bottom sheets (search / filters) */
+/* Mobile header tool cluster + bottom sheets (search / filters) */
 
 @media (max-width: 768px) {
   .mobile-header__tools {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.3rem;
+    justify-content: flex-end;
+    gap: 0.4rem;
     flex-shrink: 0;
-    margin-inline: auto;
   }
 
-  .mobile-header__tool-btn {
+  /* Search + filter read as one control on the header glass */
+  .mobile-header__tool-cluster {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border-radius: 999px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  .mobile-header__tool-cluster:not(.mobile-header__tool-cluster--actions) {
+    padding: 2px;
+    background: color-mix(in srgb, var(--text-main) 4%, transparent);
+    outline: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+    outline-offset: -1px;
+  }
+
+  .mobile-header__tool-cluster--actions {
+    margin-left: 0;
+  }
+
+  .mobile-header__tool-divider {
+    width: 1px;
+    align-self: stretch;
+    min-height: 20px;
+    margin: 7px 0;
+    background: color-mix(in srgb, var(--border) 55%, transparent);
+    flex-shrink: 0;
+  }
+
+  .mobile-header__tool-segment {
     position: relative;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text-main);
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-sub);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition:
-      transform 0.15s ease,
+      color 0.15s ease,
       background 0.15s ease,
-      border-color 0.15s ease;
+      box-shadow 0.15s ease,
+      transform 0.12s ease;
   }
 
-  .mobile-header__tool-btn:active {
-    transform: scale(0.92);
+  .mobile-header__tool-segment:active {
+    transform: scale(0.94);
   }
 
-  .mobile-header__tool-btn--active {
-    background: rgba(var(--brand-rgb, 26, 115, 232), 0.14);
-    border-color: var(--brand);
+  .mobile-header__tool-segment--active {
+    background: color-mix(in srgb, var(--text-main) 10%, transparent);
     color: var(--brand);
+    box-shadow: none;
   }
 
-  .mobile-header__tool-btn--primary {
+  .mobile-header__tool-segment--primary {
     background: var(--brand);
-    border-color: transparent;
     color: #fff;
-    box-shadow: 0 4px 14px rgba(var(--brand-rgb, 26, 115, 232), 0.35);
+    box-shadow: 0 2px 8px rgba(var(--brand-rgb, 26, 115, 232), 0.35);
+  }
+
+  .mobile-header__tool-segment--primary:active {
+    filter: brightness(1.05);
   }
 
   .mobile-header__tool-badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 1px;
+    right: 1px;
     min-width: 14px;
     height: 14px;
     padding: 0 3px;
@@ -61,7 +95,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--surface);
+    border: 2px solid color-mix(in srgb, var(--surface) 90%, transparent);
+    pointer-events: none;
   }
 
   /* Hide in-page toolbars — controls live in the top bar */
@@ -211,7 +246,7 @@
   color: var(--text-sub);
 }
 
-/* Dropdowns inside mobile sheets: full width, static menu */
+/* Dropdowns inside mobile sheets: full width, always expanded */
 .mobile-ctrl-filter-block .cat-nav-dropdown {
   width: 100%;
 }
@@ -222,6 +257,7 @@
 
 .mobile-ctrl-filter-block .cat-nav-dropdown__menu {
   position: static;
+  display: block !important;
   max-height: none;
   box-shadow: none;
   border: none;

@@ -186,6 +186,7 @@ function HustlePage() {
             activeId={category}
             allHref={hustleListUrl({ tab, q: navCtx.q, category: navCtx.category })}
             allLabel="All categories"
+            alwaysExpanded
           />
         )}
         {showStatusFilters && (

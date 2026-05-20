@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Filter, Search, X } from 'lucide-react'
@@ -13,14 +13,19 @@ export function MobileHeaderToolbar() {
   const { controls } = useMobilePageControlsContext() ?? {}
   const [open, setOpen] = useState<OpenSheet>(null)
   const [mounted, setMounted] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
   useEffect(() => {
-    setOpen(null)
-  }, [controls])
+    if (open === 'search') {
+      const t = window.setTimeout(() => searchInputRef.current?.focus(), 120)
+      return () => window.clearTimeout(t)
+    }
+    return undefined
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -43,48 +48,76 @@ export function MobileHeaderToolbar() {
   const hasSearch = Boolean(controls.search)
   const hasFilters = Boolean(controls.filterPanels?.length)
   const searchActive = Boolean(controls.search?.value?.trim())
+  const hasCoreCluster = hasSearch || hasFilters
+
+  const toggleSheet = (sheet: OpenSheet) => {
+    setOpen((prev) => (prev === sheet ? null : sheet))
+  }
 
   return (
     <>
       <div className="mobile-header__tools hide-desktop" aria-label="Page tools">
-        {hasSearch && (
-          <button
-            type="button"
-            className={`mobile-header__tool-btn${searchActive ? ' mobile-header__tool-btn--active' : ''}`}
-            onClick={() => setOpen('search')}
-            aria-label="Search"
-            aria-expanded={open === 'search'}
-          >
-            <Search size={17} strokeWidth={2.25} />
-          </button>
-        )}
-        {hasFilters && (
-          <button
-            type="button"
-            className={`mobile-header__tool-btn${open === 'filter' ? ' mobile-header__tool-btn--active' : ''}`}
-            onClick={() => setOpen('filter')}
-            aria-label="Filters"
-            aria-expanded={open === 'filter'}
-          >
-            <Filter size={17} strokeWidth={2.25} />
-          </button>
-        )}
-        {controls.actions?.map((action) => (
-          <button
-            key={action.id}
-            type="button"
-            className={`mobile-header__tool-btn mobile-header__tool-btn--${action.variant ?? 'ghost'}`}
-            onClick={action.onClick}
-            aria-label={action.label}
-          >
-            {action.icon}
-            {action.badge != null && Number(action.badge) > 0 && (
-              <span className="mobile-header__tool-badge" aria-hidden>
-                {typeof action.badge === 'number' && action.badge > 9 ? '9+' : action.badge}
-              </span>
+        {hasCoreCluster && (
+          <div className="mobile-header__tool-cluster" role="group" aria-label="Search and filters">
+            {hasSearch && (
+              <button
+                type="button"
+                className={`mobile-header__tool-segment${open === 'search' || searchActive ? ' mobile-header__tool-segment--active' : ''}`}
+                onClick={() => toggleSheet('search')}
+                aria-label="Search"
+                aria-pressed={open === 'search'}
+                aria-expanded={open === 'search'}
+              >
+                <Search size={17} strokeWidth={2.25} />
+              </button>
             )}
-          </button>
-        ))}
+            {hasSearch && hasFilters && (
+              <span className="mobile-header__tool-divider" aria-hidden />
+            )}
+            {hasFilters && (
+              <button
+                type="button"
+                className={`mobile-header__tool-segment${open === 'filter' ? ' mobile-header__tool-segment--active' : ''}`}
+                onClick={() => toggleSheet('filter')}
+                aria-label="Filters"
+                aria-pressed={open === 'filter'}
+                aria-expanded={open === 'filter'}
+              >
+                <Filter size={17} strokeWidth={2.25} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {controls.actions && controls.actions.length > 0 && (
+          <div
+            className="mobile-header__tool-cluster mobile-header__tool-cluster--actions"
+            role="group"
+            aria-label="Quick actions"
+          >
+            {controls.actions.map((action, index) => (
+              <span key={action.id} style={{ display: 'contents' }}>
+                {index > 0 && <span className="mobile-header__tool-divider" aria-hidden />}
+                <button
+                  type="button"
+                  className={`mobile-header__tool-segment mobile-header__tool-segment--${action.variant ?? 'ghost'}`}
+                  onClick={() => {
+                    setOpen(null)
+                    action.onClick()
+                  }}
+                  aria-label={action.label}
+                >
+                  {action.icon}
+                  {action.badge != null && Number(action.badge) > 0 && (
+                    <span className="mobile-header__tool-badge" aria-hidden>
+                      {typeof action.badge === 'number' && action.badge > 9 ? '9+' : action.badge}
+                    </span>
+                  )}
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {mounted &&
@@ -105,6 +138,7 @@ export function MobileHeaderToolbar() {
                   className="mobile-ctrl-sheet"
                   role="dialog"
                   aria-modal="true"
+                  aria-labelledby="mobile-ctrl-sheet-title"
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
@@ -112,7 +146,7 @@ export function MobileHeaderToolbar() {
                 >
                   <div className="mobile-ctrl-sheet__handle" aria-hidden />
                   <div className="mobile-ctrl-sheet__head">
-                    <h2 className="mobile-ctrl-sheet__title">
+                    <h2 id="mobile-ctrl-sheet-title" className="mobile-ctrl-sheet__title">
                       {open === 'search' ? 'Search' : controls.filterPanels?.[0]?.label ?? 'Filters'}
                     </h2>
                     <button
@@ -129,12 +163,12 @@ export function MobileHeaderToolbar() {
                       <div className="mobile-ctrl-search">
                         <Search size={18} className="mobile-ctrl-search__icon" aria-hidden />
                         <input
+                          ref={searchInputRef}
                           type="search"
                           className="mobile-ctrl-search__input"
                           placeholder={controls.search.placeholder ?? 'Search…'}
                           value={controls.search.value}
                           onChange={(e) => controls.search?.onChange(e.target.value)}
-                          autoFocus
                           enterKeyHint="search"
                         />
                         {controls.search.value && (
@@ -144,6 +178,7 @@ export function MobileHeaderToolbar() {
                             onClick={() => {
                               controls.search?.onClear?.()
                               controls.search?.onChange('')
+                              searchInputRef.current?.focus()
                             }}
                             aria-label="Clear search"
                           >

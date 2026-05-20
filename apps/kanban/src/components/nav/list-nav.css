@@ -75,6 +75,18 @@
   font-weight: 900;
 }
 
+.cat-nav-dropdown--expanded .cat-nav-dropdown__sheet-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.cat-nav-dropdown--expanded .cat-nav-dropdown__sheet-label strong {
+  color: var(--brand);
+  font-weight: 900;
+}
+
 .list-pagination {
   display: flex;
   flex-direction: column;

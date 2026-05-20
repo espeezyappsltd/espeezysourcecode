@@ -216,6 +216,7 @@ function MarketplacePageInner() {
             activeId={activeCategoryId}
             allHref={marketplaceListUrl({ q: navCtx.q })}
             allLabel="All categories"
+            alwaysExpanded
           />
         ),
       },
