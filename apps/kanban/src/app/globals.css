@@ -78,7 +78,8 @@ button, .btn, input, textarea, select {
     width: 100vw !important;
     box-shadow: none !important;
   }
-  .btn, button:not(.onboarding-close-btn):not(.onboarding-avatar-btn) {
+  .btn,
+  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh) {
     width: 100%;
     min-width: 0;
     font-size: clamp(1rem, 4vw, 1.1rem);

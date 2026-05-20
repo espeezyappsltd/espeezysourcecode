@@ -83,14 +83,16 @@ function CreditsAccountContent() {
         </div>
       )}
 
-      <section className="credits-account-fund-card">
-        <h2>Add credits</h2>
-        <p>
-          Pay with Stripe (min £{MIN_CREDIT_FUND_GBP}). Credits appear in your balance only after payment succeeds.
+      <section className="credits-account-fund-card central-type">
+        <h2 className="central-eyebrow" style={{ fontSize: '0.7rem', marginBottom: '0.5rem', color: 'var(--central-ink-soft)' }}>
+          Add credits
+        </h2>
+        <p className="central-caption" style={{ marginBottom: '1rem' }}>
+          Pay with Stripe (min £{MIN_CREDIT_FUND_GBP}). Balance updates after payment clears.
         </p>
-        <FundCreditAccountButton oneClick={false} returnPath="/account/credits" label="Fund cred acc now" />
-        <p className="credits-account-fund-card__fine">
-          50 credits ≈ one month of Pro · secure checkout via Espeezy
+        <FundCreditAccountButton oneClick={false} returnPath="/account/credits" label="Add credits" />
+        <p className="central-caption" style={{ marginTop: '0.75rem' }}>
+          50 credits ≈ one month of Pro · secure checkout via Stripe
         </p>
       </section>
 

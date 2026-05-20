@@ -244,16 +244,16 @@ function MarketplacePageInner() {
     <div className="marketplace-page page-shell marketplace-page--compact page-fade list-page--compact">
       <AccountWalletPanel compact />
 
-      <header className="marketplace-page__header page-list-header page-header page-header--compact">
+      <header className="marketplace-page__header page-list-header page-header page-header--compact central-type">
         <div className="page-header__main">
-          <h1 className="page-header__title">Campus Marketplace</h1>
-          <p className="page-header__desc">Pay with Espeezy credits · fast campus checkout</p>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
-            <Link href="/assets" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)' }}>
-              Arsenal assets →
+          <h1 className="page-header__title central-page-title">Campus Marketplace</h1>
+          <p className="page-header__desc central-page-lead">Pay with Espeezy credits · fast campus checkout</p>
+          <div className="central-type" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+            <Link href="/assets" className="central-link">
+              Arsenal assets
             </Link>
-            <Link href="/account/credits" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)' }}>
-              Credit account →
+            <Link href="/account/credits" className="central-link">
+              Credit ledger
             </Link>
           </div>
         </div>

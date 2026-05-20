@@ -1,13 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Loader2, Wallet } from 'lucide-react'
-import { DEFAULT_CREDIT_FUND_GBP, gbpToCredits } from '@/lib/credits/fund-stripe-shared'
+import { Loader2 } from 'lucide-react'
+import { DEFAULT_CREDIT_FUND_GBP } from '@/lib/credits/fund-stripe-shared'
 import { formatCredits } from '@/lib/credits'
 import {
   CREDIT_FUND_TIERS,
   pickFundTierForShortfall,
-  tierSummary,
   type CreditFundTier,
 } from '@/lib/credits/fund-tiers'
 
@@ -20,7 +19,6 @@ type Props = {
   label?: string
   className?: string
   variant?: 'primary' | 'secondary' | 'link'
-  /** When false, show tier picker so users can switch fund tier before checkout. */
   oneClick?: boolean
 }
 
@@ -30,9 +28,8 @@ export function FundCreditAccountButton({
   returnPath = '/account/credits',
   listingId,
   contextLabel,
-  label = 'Fund cred acc now',
+  label = 'Add credits',
   className = '',
-  variant = 'primary',
   oneClick = false,
 }: Props) {
   const [loading, setLoading] = useState(false)
@@ -76,59 +73,52 @@ export function FundCreditAccountButton({
     }
   }
 
-  const handlePrimaryClick = () => {
-    if (oneClick) {
-      void startCheckout(activeTier)
-      return
-    }
+  const handleCta = () => {
     void startCheckout(activeTier)
   }
 
-  const btnClass =
-    variant === 'link'
-      ? `credit-fund-btn credit-fund-btn--link${className ? ` ${className}` : ''}`
-      : variant === 'secondary'
-        ? `btn btn-secondary credit-fund-btn${className ? ` ${className}` : ''}`
-        : `btn btn-primary credit-fund-btn${className ? ` ${className}` : ''}`
+  const selectionLine =
+    creditsNeeded != null && creditsNeeded > 0
+      ? `Suggested · £${recommendedTier.amountGbp} · ${formatCredits(recommendedTier.credits)}`
+      : `£${activeTier.amountGbp} · ${formatCredits(activeTier.credits)}`
 
   return (
-    <div className="credit-fund-wrap">
-      <div className="credit-fund-tier-switch" role="group" aria-label="Choose fund tier">
-        {CREDIT_FUND_TIERS.map((tier) => {
-          const selected = tier.id === activeTier.id
-          return (
-            <button
-              key={tier.id}
-              type="button"
-              className={`credit-fund-tier${selected ? ' credit-fund-tier--active' : ''}`}
-              disabled={loading}
-              onClick={() => setSelectedTierId(tier.id)}
-              aria-pressed={selected}
-            >
-              <span className="credit-fund-tier__label">{tier.label}</span>
-              <span className="credit-fund-tier__meta">
-                £{tier.amountGbp} · {formatCredits(tier.credits)}
-              </span>
-            </button>
-          )
-        })}
+    <div className={`credit-fund-premium central-type${className ? ` ${className}` : ''}`}>
+      {!oneClick && (
+        <div className="credit-fund-premium__tiers" role="group" aria-label="Choose fund tier">
+          {CREDIT_FUND_TIERS.map((tier) => {
+            const selected = tier.id === activeTier.id
+            return (
+              <button
+                key={tier.id}
+                type="button"
+                className={`credit-fund-premium__tier${selected ? ' credit-fund-premium__tier--active' : ''}`}
+                disabled={loading}
+                onClick={() => setSelectedTierId(tier.id)}
+                aria-pressed={selected}
+              >
+                <span className="credit-fund-premium__tier-name">{tier.label}</span>
+                <span className="credit-fund-premium__tier-price">£{tier.amountGbp}</span>
+                <span className="credit-fund-premium__tier-credits">{formatCredits(tier.credits)}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="credit-fund-premium__footer">
+        <p className="credit-fund-premium__selection">{selectionLine}</p>
+        <button
+          type="button"
+          className="credit-fund-premium__cta"
+          disabled={loading}
+          onClick={handleCta}
+          aria-label={`${label}, ${selectionLine}`}
+        >
+          {loading ? <Loader2 size={12} className="animate-spin" aria-hidden /> : null}
+          {label}
+        </button>
       </div>
-      <p className="credit-fund-picker__hint" style={{ margin: '0.5rem 0 0', fontSize: '0.78rem' }}>
-        {creditsNeeded != null && creditsNeeded > 0
-          ? `Recommended for your shortfall: ${tierSummary(recommendedTier)}`
-          : `Selected: ${tierSummary(activeTier)}`}
-      </p>
-      <button
-        type="button"
-        className={btnClass}
-        disabled={loading}
-        onClick={handlePrimaryClick}
-        aria-label={`${label}, ${tierSummary(activeTier)}`}
-        style={{ marginTop: '0.65rem' }}
-      >
-        {loading ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <Wallet size={16} aria-hidden />}
-        {label}
-      </button>
     </div>
   )
 }

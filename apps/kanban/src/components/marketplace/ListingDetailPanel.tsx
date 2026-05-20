@@ -352,7 +352,7 @@ export function ListingDetailPanel({
                   returnPath={`/marketplace?item=${listing.id}`}
                   listingId={listing.id}
                   contextLabel={`Fund account to buy "${listing.title}"`}
-                  label="Fund cred acc now"
+                  label="Add credits"
                   oneClick={false}
                 />
               </div>

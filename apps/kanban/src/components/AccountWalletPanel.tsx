@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Coins, Loader2, Receipt, ShoppingBag, TrendingUp, RefreshCw } from 'lucide-react'
+import { Loader2, Receipt, ShoppingBag, TrendingUp, RefreshCw } from 'lucide-react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { formatCredits } from '@/lib/credits'
 import { FundCreditAccountButton } from '@/components/credits/FundCreditAccountButton'
@@ -87,8 +87,8 @@ export function AccountWalletPanel({ compact = false }: { compact?: boolean }) {
 
   if (loading && !wallet) {
     return (
-      <div style={{ padding: compact ? '1rem' : '2rem', textAlign: 'center' }}>
-        <Loader2 className="animate-spin" style={{ margin: '0 auto', color: 'var(--brand)' }} />
+      <div className="wallet-premium wallet-premium--compact central-type" style={{ justifyContent: 'center', padding: '1.5rem' }}>
+        <Loader2 className="animate-spin" size={20} style={{ color: 'var(--central-champagne)' }} aria-hidden />
       </div>
     )
   }
@@ -96,68 +96,40 @@ export function AccountWalletPanel({ compact = false }: { compact?: boolean }) {
   const credits = wallet?.credits ?? 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? '1rem' : '1.5rem' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          padding: compact ? '1rem' : '1.5rem',
-          background: 'linear-gradient(135deg, rgba(var(--brand-rgb), 0.12), transparent)',
-          borderRadius: '20px',
-          border: '1px solid var(--border)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Coins size={28} style={{ color: 'var(--brand)' }} aria-hidden />
-          <div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>
-              Personal credit account
-            </div>
-            <div style={{ fontSize: compact ? '1.5rem' : '2rem', fontWeight: 950, color: 'var(--brand)' }}>{credits}</div>
-            {!compact && (
-              <Link href="/account/credits" style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--brand)' }}>
-                View account →
-              </Link>
-            )}
+    <div className="central-type" style={{ display: 'flex', flexDirection: 'column', gap: compact ? '1rem' : '1.5rem' }}>
+      <div className={`wallet-premium${compact ? ' wallet-premium--compact' : ''}`}>
+        <button
+          type="button"
+          className="wallet-premium__refresh"
+          onClick={() => void loadWallet()}
+          aria-label="Refresh credit balance"
+          style={{ position: 'absolute', top: '0.85rem', right: '0.85rem' }}
+        >
+          <RefreshCw size={14} aria-hidden />
+        </button>
+
+        <div className="wallet-premium__balance-col">
+          <span className="central-eyebrow">Personal credit account</span>
+          <div className="wallet-premium__balance-row">
+            <span className="wallet-premium__balance-value">{credits}</span>
+            <span className="wallet-premium__balance-unit">credits</span>
           </div>
+          {!compact && (
+            <Link href="/account/credits" className="central-link">
+              View ledger
+            </Link>
+          )}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-          <FundCreditAccountButton
-            returnPath="/account/credits"
-            label="Fund cred acc now"
-            variant={compact ? 'primary' : 'primary'}
-          />
-          <button
-            type="button"
-            onClick={() => void loadWallet()}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.5rem 0.85rem',
-              borderRadius: '10px',
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              color: 'var(--text-main)',
-              fontWeight: 800,
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              minHeight: 44,
-            }}
-            aria-label="Refresh credit balance"
-          >
-            <RefreshCw size={14} aria-hidden /> Refresh
-          </button>
+
+        <div className="wallet-premium__actions">
+          <FundCreditAccountButton returnPath="/account/credits" label="Add credits" />
         </div>
       </div>
 
       {!compact && (
         <>
-          <TransactionSection title="Purchases" icon={<ShoppingBag size={18} />} rows={wallet?.purchases ?? []} role="buyer" />
-          <TransactionSection title="Sales" icon={<TrendingUp size={18} />} rows={wallet?.sales ?? []} role="seller" />
+          <TransactionSection title="Purchases" icon={<ShoppingBag size={16} />} rows={wallet?.purchases ?? []} role="buyer" />
+          <TransactionSection title="Sales" icon={<TrendingUp size={16} />} rows={wallet?.sales ?? []} role="seller" />
         </>
       )}
     </div>
@@ -176,15 +148,24 @@ function TransactionSection({
   role: 'buyer' | 'seller'
 }) {
   return (
-    <section>
-      <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 950, marginBottom: '0.75rem' }}>
+    <section className="central-type">
+      <h3
+        className="central-eyebrow"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.45rem',
+          marginBottom: '0.75rem',
+          color: 'var(--central-ink-soft)',
+        }}
+      >
         {icon}
         {title}
       </h3>
       {rows.length === 0 ? (
-        <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem' }}>No {title.toLowerCase()} yet.</p>
+        <p className="central-caption">No {title.toLowerCase()} yet.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           {rows.map((row) => (
             <div
               key={row.id}
@@ -193,22 +174,40 @@ function TransactionSection({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: '1rem',
-                padding: '0.85rem 1rem',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '14px',
+                padding: '0.75rem 0.9rem',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--central-rule)',
+                borderRadius: '10px',
               }}
             >
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 900, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-central-ui)',
+                    fontWeight: 500,
+                    fontSize: '0.8125rem',
+                    letterSpacing: '0.02em',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: 'var(--central-ink-soft)',
+                  }}
+                >
                   {row.listing_title}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)', marginTop: '0.2rem' }}>
-                  {row.invoice_number} · {new Date(row.created_at).toLocaleDateString()}
+                <div className="central-caption" style={{ marginTop: '0.15rem' }}>
+                  {row.invoice_number} · {new Date(row.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                <span style={{ fontWeight: 950, color: role === 'seller' ? '#22c55e' : 'var(--brand)', fontSize: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0 }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-central-display)',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                    color: role === 'seller' ? 'rgba(134, 239, 172, 0.85)' : 'var(--central-champagne)',
+                  }}
+                >
                   {role === 'seller' ? '+' : '−'}
                   {formatCredits(row.credits_amount)}
                 </span>
@@ -216,17 +215,10 @@ function TransactionSection({
                   href={role === 'buyer' ? `/marketplace/invoice/${row.id}` : `/marketplace/receipt/${row.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 800,
-                    color: 'var(--brand)',
-                    textDecoration: 'none',
-                  }}
+                  className="central-link"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
                 >
-                  <Receipt size={14} aria-hidden />
+                  <Receipt size={12} aria-hidden />
                   {role === 'buyer' ? 'Invoice' : 'Receipt'}
                 </Link>
               </div>

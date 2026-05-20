@@ -1,0 +1,340 @@
+/**
+ * Central Ultra High End — typography & restrained chrome for wallet / credits surfaces.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap');
+
+:root {
+  --font-central-display: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
+  --font-central-ui: 'Outfit', 'Inter', system-ui, sans-serif;
+  --central-champagne: #d4c4a8;
+  --central-champagne-dim: rgba(212, 196, 168, 0.45);
+  --central-champagne-glow: rgba(212, 196, 168, 0.12);
+  --central-ink-muted: rgba(255, 255, 255, 0.42);
+  --central-ink-soft: rgba(255, 255, 255, 0.62);
+  --central-rule: rgba(255, 255, 255, 0.08);
+}
+
+.central-type {
+  font-family: var(--font-central-ui);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.central-eyebrow {
+  font-family: var(--font-central-ui);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--central-ink-muted);
+  line-height: 1.3;
+}
+
+.central-display {
+  font-family: var(--font-central-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--central-champagne);
+}
+
+.central-caption {
+  font-family: var(--font-central-ui);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--central-ink-muted);
+  line-height: 1.45;
+}
+
+.central-link {
+  font-family: var(--font-central-ui);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--central-champagne-dim);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.central-link:hover {
+  color: var(--central-champagne);
+}
+
+.central-page-title {
+  font-family: var(--font-central-display);
+  font-size: clamp(1.5rem, 3.2vw, 1.95rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--central-champagne);
+  margin: 0;
+}
+
+.central-page-lead {
+  font-family: var(--font-central-ui);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--central-ink-soft);
+  margin: 0.35rem 0 0;
+  line-height: 1.5;
+}
+
+/* Wallet strip on marketplace */
+.wallet-premium {
+  position: relative;
+  font-family: var(--font-central-ui);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 1.5rem;
+  padding: 1.15rem 1.35rem;
+  border-radius: 14px;
+  border: 1px solid var(--central-rule);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 55%,
+    transparent 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.wallet-premium--compact {
+  padding: 1rem 1.15rem;
+}
+
+.wallet-premium__balance-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.wallet-premium__balance-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.wallet-premium__balance-value {
+  font-family: var(--font-central-display);
+  font-size: clamp(1.85rem, 4vw, 2.35rem);
+  font-weight: 500;
+  color: var(--central-champagne);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.wallet-premium__balance-unit {
+  font-family: var(--font-central-ui);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--central-ink-muted);
+}
+
+.wallet-premium__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
+  flex: 1 1 220px;
+  min-width: min(100%, 280px);
+}
+
+.wallet-premium__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.wallet-premium__refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  border: 1px solid var(--central-rule) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--central-ink-soft) !important;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.wallet-premium__refresh:hover {
+  border-color: var(--central-champagne-dim) !important;
+  color: var(--central-champagne) !important;
+}
+
+/* Credit fund — segmented tiers + slim CTA */
+.credit-fund-premium {
+  width: 100%;
+  font-family: var(--font-central-ui);
+}
+
+.credit-fund-premium__tiers {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--central-rule);
+  background: rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.credit-fund-premium__tiers::-webkit-scrollbar {
+  display: none;
+}
+
+.credit-fund-premium__tier {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.5rem 0.65rem;
+  border: none !important;
+  border-right: 1px solid var(--central-rule) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  cursor: pointer;
+  min-height: unset !important;
+  width: auto !important;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.credit-fund-premium__tier:last-child {
+  border-right: none !important;
+}
+
+.credit-fund-premium__tier:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.credit-fund-premium__tier--active {
+  background: var(--central-champagne-glow) !important;
+  box-shadow: inset 0 -1px 0 var(--central-champagne-dim);
+}
+
+.credit-fund-premium__tier-name {
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--central-ink-muted);
+}
+
+.credit-fund-premium__tier--active .credit-fund-premium__tier-name {
+  color: var(--central-champagne);
+}
+
+.credit-fund-premium__tier-price {
+  font-family: var(--font-central-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--central-ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.credit-fund-premium__tier--active .credit-fund-premium__tier-price {
+  color: var(--central-champagne);
+}
+
+.credit-fund-premium__tier-credits {
+  font-size: 0.5625rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--central-ink-muted);
+}
+
+.credit-fund-premium__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.credit-fund-premium__selection {
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--central-ink-muted);
+  margin: 0;
+}
+
+.credit-fund-premium__cta {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  width: auto !important;
+  min-width: unset !important;
+  min-height: 32px !important;
+  padding: 0.35rem 0.75rem !important;
+  font-family: var(--font-central-ui) !important;
+  font-size: 0.625rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: var(--central-champagne) !important;
+  background: transparent !important;
+  border: 1px solid var(--central-champagne-dim) !important;
+  border-radius: 100px !important;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.credit-fund-premium__cta:hover:not(:disabled) {
+  background: var(--central-champagne-glow) !important;
+  border-color: var(--central-champagne) !important;
+}
+
+.credit-fund-premium__cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .wallet-premium {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wallet-premium__actions {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .wallet-premium__actions-row {
+    justify-content: space-between;
+  }
+
+  .credit-fund-premium__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .credit-fund-premium__cta {
+    justify-content: center;
+    width: 100% !important;
+  }
+}
