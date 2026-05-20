@@ -17,9 +17,10 @@ import { submitPreregistration } from '@/services/preregister'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
 import {
   HERO_ANALYTICS_CAPTION,
-  HERO_ANALYTICS_TAGLINE,
+  HERO_COPY_LINES,
   KANBAN_DEMO_LABEL,
   KANBAN_DEMO_PATH,
+  PLATFORM_OPERATIONS_TAGLINE,
 } from '@shared/platform-brand'
 
 // ─── Coming Features ─────────────────────────────────────────────────────────
@@ -145,23 +146,25 @@ export default function PreRegisterPage() {
           </div>
         </motion.div>
 
-        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
-          style={{ fontSize: 'clamp(1.75rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.08, margin: '0 auto 1.25rem', maxWidth: '920px' }}>
-          The Espeezy Analytics Dashboard shows{' '}
-          <span style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #34d399 50%, #ffffff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            who did the work and who didn&apos;t.
-          </span>
-        </motion.h1>
-
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.2 }}
-          style={{ color: 'rgba(255,255,255,0.72)', maxWidth: '720px', margin: '0 auto 1.25rem', fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', lineHeight: 1.65, fontWeight: 500 }}>
-          {HERO_ANALYTICS_TAGLINE}
-        </motion.p>
-
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.28 }}
-          style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '680px', margin: '0 auto 1.5rem', fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)', lineHeight: 1.6, fontWeight: 500 }}>
-          {config.launch_message}
-        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          style={{ maxWidth: '820px', margin: '0 auto 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}
+        >
+          <h1 style={{ margin: 0, fontSize: 'clamp(1.35rem, 3.8vw, 2.35rem)', fontWeight: 950, letterSpacing: '-0.03em', lineHeight: 1.15, color: '#f8fafc' }}>
+            {HERO_COPY_LINES[0]}
+          </h1>
+          <p style={{ margin: 0, fontSize: 'clamp(1rem, 2.2vw, 1.1rem)', fontWeight: 500, lineHeight: 1.55, color: 'rgba(255,255,255,0.78)' }}>
+            {HERO_COPY_LINES[1]}
+          </p>
+          <p style={{ margin: 0, fontSize: 'clamp(0.95rem, 2vw, 1.05rem)', fontWeight: 500, lineHeight: 1.55, color: 'rgba(255,255,255,0.55)' }}>
+            {HERO_COPY_LINES[2]}
+          </p>
+          <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>
+            {PLATFORM_OPERATIONS_TAGLINE}
+          </p>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}

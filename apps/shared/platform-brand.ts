@@ -8,11 +8,17 @@ export const PLATFORM_TEAM_SIZE = 12
 export const PLATFORM_OPERATIONS_TAGLINE =
   'Operated by a 12-member platform team running production backend, billing, and reliability.'
 
-/** Primary marketing hero hook; pair with analytics dashboard screenshot. */
-export const HERO_ANALYTICS_TAGLINE =
-  'The Espeezy Analytics Dashboard shows who contributed what: contribution scores, task ownership, team balance, and exportable intelligence reports your team cannot dispute.'
+/** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
+export const HERO_COPY_LINES = [
+  'The Espeezy Analytics Dashboard shows who did the work and who didn\'t.',
+  'The Espeezy Analytics Dashboard shows who contributed what: contribution scores, task ownership, team balance, and exportable intelligence reports your team cannot dispute.',
+  'Espeezy turns group projects into a fair academic record, with contribution proof for grading, portfolios, and job applications.',
+] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Espeezy Analytics Dashboard · live project intelligence'
+
+/** @deprecated Use HERO_COPY_LINES[1] */
+export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
 
 export const KANBAN_DEMO_LABEL = 'Kanban Demo'
 
@@ -24,7 +30,7 @@ export const PRICING_INTRO =
 export const UPGRADE_HERO_TITLE = 'Support the platform to reach more schools'
 
 export const UPGRADE_HERO_BODY =
-  'A 12-member operations team runs Espeezy’s backend, payments, and campus rollout. Your upgrade funds servers, support, and the features on our roadmap.'
+  'A 12-member team runs Espeezy’s backend, payments, and campus rollout. Your upgrade funds servers, support, and the features on our roadmap.'
 
 export const CHECKOUT_TEAM_NOTE =
   'Payments are processed securely by Stripe. Subscriptions are managed by the Espeezy platform team (12 engineers & operators on backend, billing, and support).'
