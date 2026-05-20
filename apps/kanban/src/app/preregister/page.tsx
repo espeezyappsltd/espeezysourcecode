@@ -14,6 +14,8 @@ import { useLaunchData } from '@/hooks/useLaunchData'
 import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import { submitPreregistration } from '@/services/preregister'
+import { SCREENSHOT_ASSETS } from '@shared/assets'
+import { HERO_ANALYTICS_CAPTION, HERO_ANALYTICS_TAGLINE } from '@shared/platform-brand'
 
 // ─── Coming Features ─────────────────────────────────────────────────────────
 const COMING_FEATURES = [
@@ -139,17 +141,64 @@ export default function PreRegisterPage() {
         </motion.div>
 
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
-          style={{ fontSize: 'clamp(2.8rem, 8vw, 6rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, margin: '0 auto 1.5rem', maxWidth: '960px' }}>
-          The platform that gives every student a{' '}
+          style={{ fontSize: 'clamp(1.75rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.08, margin: '0 auto 1.25rem', maxWidth: '920px' }}>
+          The Espeezy Analytics Dashboard shows{' '}
           <span style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #34d399 50%, #ffffff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            equitable voice.
+            who did the work—and who didn&apos;t.
           </span>
         </motion.h1>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
-          style={{ color: 'rgba(255,255,255,0.55)', maxWidth: '680px', margin: '0 auto 2rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.2 }}
+          style={{ color: 'rgba(255,255,255,0.72)', maxWidth: '720px', margin: '0 auto 1.25rem', fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', lineHeight: 1.65, fontWeight: 500 }}>
+          {HERO_ANALYTICS_TAGLINE}
+        </motion.p>
+
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.28 }}
+          style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '680px', margin: '0 auto 2rem', fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)', lineHeight: 1.6, fontWeight: 500 }}>
           {config.launch_message}
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.35 }}
+          style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '960px',
+            margin: '0 auto 2.5rem',
+            aspectRatio: '16 / 9',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            border: '1px solid rgba(16,185,129,0.25)',
+            boxShadow: '0 32px 64px rgba(0,0,0,0.45)',
+          }}
+        >
+          <Image
+            src={SCREENSHOT_ASSETS.ANALYTICS_DASHBOARD}
+            alt="Espeezy Analytics Dashboard showing contribution scores and project intelligence"
+            fill
+            sizes="(max-width: 960px) 100vw, 960px"
+            quality={55}
+            priority
+            style={{ objectFit: 'cover', objectPosition: 'top center' }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: '1rem',
+              bottom: '1rem',
+              padding: '0.4rem 0.75rem',
+              borderRadius: '8px',
+              background: 'rgba(0,0,0,0.75)',
+              border: '1px solid rgba(16,185,129,0.35)',
+            }}
+          >
+            <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#6ee7b7' }}>
+              {HERO_ANALYTICS_CAPTION}
+            </span>
+          </div>
+        </motion.div>
         <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: 12, padding: '1.25rem 1.5rem', margin: '0 auto 2.5rem', maxWidth: 540, color: '#6ee7b7', fontWeight: 600, fontSize: '1.05rem' }}>
           <span style={{ color: '#10b981', fontWeight: 800 }}>New: Role-Based Access Control (RBAC)</span><br />
           <ul style={{ margin: '0.5em 0 0 1.2em', padding: 0, color: '#6ee7b7', fontSize: '0.98em' }}>

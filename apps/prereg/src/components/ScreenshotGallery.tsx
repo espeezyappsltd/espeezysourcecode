@@ -8,7 +8,7 @@ import { SCREENSHOT_ASSETS } from '@shared/assets'
     import { CategoryTabs } from '@shared/CategoryTabs'
 
 const SCREENSHOTS = [
-  { src: SCREENSHOT_ASSETS.CONTRIBUTION_METRICS, title: 'Contribution Metrics', category: 'Analytics' },
+  { src: SCREENSHOT_ASSETS.ANALYTICS_DASHBOARD, title: 'Analytics Dashboard', category: 'Analytics' },
   { src: SCREENSHOT_ASSETS.TASK_INTERFACE, title: 'Task Interface', category: 'Productivity' },
   { src: SCREENSHOT_ASSETS.COLLABORATION_HUB, title: 'Collaboration Hub', category: 'Communication' },
   { src: SCREENSHOT_ASSETS.ANALYTICS_ENGINE, title: 'Analytics Engine', category: 'Data' },

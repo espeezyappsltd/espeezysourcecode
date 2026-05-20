@@ -15,7 +15,11 @@ import SharedCountdown from '@/components/SharedCountdown'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
-import { PLATFORM_OPERATIONS_TAGLINE } from '@shared/platform-brand'
+import {
+  HERO_ANALYTICS_CAPTION,
+  HERO_ANALYTICS_TAGLINE,
+  PLATFORM_OPERATIONS_TAGLINE,
+} from '@shared/platform-brand'
 
 function HeroVisual({ registeredCount }: { registeredCount: number }) {
   return (
@@ -45,7 +49,7 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
       {/* Screenshot Layout */}
       <div style={{ position: 'relative', height: 'clamp(300px, 50vw, 500px)', width: '100%', perspective: '1000px' }}>
         
-        {/* Landscape Main (Dashboard) */}
+        {/* Landscape Main — Analytics Dashboard (key hook) */}
         <motion.div
           initial={{ opacity: 0, rotateX: 10, y: 40 }}
           animate={{ opacity: 1, rotateX: 0, y: 0 }}
@@ -53,18 +57,35 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
           style={{ 
             position: 'absolute', inset: 0, zIndex: 5, borderRadius: '24px', overflow: 'hidden', 
             border: '1px solid rgba(15,23,42,0.1)', boxShadow: '0 30px 60px rgba(15,23,42,0.15)',
-            background: '#fff'
+            background: '#0f172a'
           }}
         >
           <Image 
-            src={SCREENSHOT_ASSETS.PROJECT_OVERVIEW} 
-            alt="Espeezy Dashboard" 
+            src={SCREENSHOT_ASSETS.ANALYTICS_DASHBOARD} 
+            alt="Espeezy Analytics Dashboard showing contribution scores, task ownership, and team intelligence" 
             fill
             sizes="(max-width: 1024px) 100vw, 800px"
-            quality={50}
+            quality={55}
             priority
-            style={{ objectFit: 'cover' }} 
+            style={{ objectFit: 'cover', objectPosition: 'top center' }} 
           />
+          <div
+            style={{
+              position: 'absolute',
+              left: '1rem',
+              bottom: '1rem',
+              zIndex: 6,
+              padding: '0.45rem 0.85rem',
+              borderRadius: '8px',
+              background: 'rgba(15,23,42,0.82)',
+              border: '1px solid rgba(16,185,129,0.35)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#6ee7b7' }}>
+              {HERO_ANALYTICS_CAPTION}
+            </span>
+          </div>
         </motion.div>
 
         {/* Portrait Left (Mobile View 1) */}
@@ -326,15 +347,22 @@ export default function PreRegisterPage() {
         </motion.div>
 
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
-          style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, maxWidth: '820px', margin: '0 auto 1.25rem' }}>
-          Give every team contribution<br /><span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>the credit it deserves.</span>
+          style={{ fontSize: 'clamp(1.65rem, 4.2vw, 2.75rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.12, maxWidth: '880px', margin: '0 auto 1.25rem' }}>
+          The Espeezy Analytics Dashboard shows{' '}
+          <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            who did the work—and who didn&apos;t.
+          </span>
         </motion.h2>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.25 }}
-          style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 1rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
-          {config.brand_name} records who contributed what in group projects, with a clear academic record for grading, job applications, and proving your skills.
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.2 }}
+          style={{ color: '#475569', maxWidth: '720px', margin: '0 auto 1rem', fontSize: 'clamp(1rem, 2vw, 1.12rem)', lineHeight: 1.65, fontWeight: 500 }}>
+          {HERO_ANALYTICS_TAGLINE}
         </motion.p>
-        <p style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 4rem', fontSize: '0.85rem', lineHeight: 1.55, fontWeight: 600 }}>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }}
+          style={{ color: '#64748b', maxWidth: '640px', margin: '0 auto 1rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
+          {config.brand_name} turns group projects into a fair academic record—contribution proof for grading, portfolios, and job applications.
+        </motion.p>
+        <p style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 2.5rem', fontSize: '0.8rem', lineHeight: 1.55, fontWeight: 600 }}>
           {PLATFORM_OPERATIONS_TAGLINE}
         </p>
 

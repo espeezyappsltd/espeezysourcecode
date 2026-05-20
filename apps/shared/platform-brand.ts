@@ -8,6 +8,12 @@ export const PLATFORM_TEAM_SIZE = 12
 export const PLATFORM_OPERATIONS_TAGLINE =
   'Operated by a 12-member platform team running production backend, billing, and reliability.'
 
+/** Primary marketing hero hook — pair with analytics dashboard screenshot. */
+export const HERO_ANALYTICS_TAGLINE =
+  'The Espeezy Analytics Dashboard shows who contributed what—contribution scores, task ownership, team balance, and exportable intelligence reports your team cannot dispute.'
+
+export const HERO_ANALYTICS_CAPTION = 'Espeezy Analytics Dashboard · live project intelligence'
+
 export const PRICING_INTRO =
   'Espeezy is built for student teams and operated by our platform crew—keeping collaboration infrastructure fast, secure, and affordable at scale.'
 

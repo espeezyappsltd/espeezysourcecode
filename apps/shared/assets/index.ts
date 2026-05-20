@@ -4,6 +4,8 @@ export const SCREENSHOT_ASSETS = {
   TASK_INTERFACE: `${ASSETS_PATH}/dash.png`,
   PROJECT_OVERVIEW: `${ASSETS_PATH}/dashdesktop.png`,
   CONTRIBUTION_METRICS: `${ASSETS_PATH}/hustledesktop.png`,
+  /** Hero / gallery — project intelligence & contribution analytics */
+  ANALYTICS_DASHBOARD: `${ASSETS_PATH}/hustledesktop.png`,
   TEAM_MANAGEMENT: `${ASSETS_PATH}/sidebaropenmobile.png`,
   DASHBOARD_VIEW: `${ASSETS_PATH}/dashboardhomemobile.png`,
   COLLABORATION_HUB: `${ASSETS_PATH}/networkmobile.png`,
