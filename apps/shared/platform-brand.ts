@@ -10,12 +10,12 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
-  'The Espeezy Analytics Dashboard shows who did the work and who didn\'t.',
-  'The Espeezy Analytics Dashboard shows who contributed what: contribution scores, task ownership, team balance, and exportable intelligence reports your team cannot dispute.',
-  'Espeezy turns group projects into a fair academic record, with contribution proof for grading, portfolios, and job applications.',
+  'Espeezy Learning Platform',
+  'The Espeezy Kanban Dashboard shows who contributed what: contribution scores, task ownership, team balance, and exportable intelligence reports.',
+  'Espeezy App turns group projects into a fair academic record, with contribution proof for grading, portfolios, and job applications.',
 ] as const
 
-export const HERO_ANALYTICS_CAPTION = 'Espeezy Analytics Dashboard · live project intelligence'
+export const HERO_ANALYTICS_CAPTION = 'Try out the Espeezy Kanban App, early access is now open... official release soon ... remember to prereg'
 
 /** @deprecated Use HERO_COPY_LINES[1] */
 export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
