@@ -90,17 +90,45 @@ export function MobileHeaderToolbar() {
         )}
 
         {controls.actions && controls.actions.length > 0 && (
-          <div
-            className="mobile-header__tool-cluster mobile-header__tool-cluster--actions"
-            role="group"
-            aria-label="Quick actions"
-          >
-            {controls.actions.map((action, index) => (
-              <span key={action.id} style={{ display: 'contents' }}>
-                {index > 0 && <span className="mobile-header__tool-divider" aria-hidden />}
+          <>
+            {controls.actions.some((a) => a.variant !== 'fab') && (
+              <div
+                className="mobile-header__tool-cluster mobile-header__tool-cluster--actions"
+                role="group"
+                aria-label="Quick actions"
+              >
+                {controls.actions
+                  .filter((a) => a.variant !== 'fab')
+                  .map((action, index) => (
+                    <span key={action.id} style={{ display: 'contents' }}>
+                      {index > 0 && <span className="mobile-header__tool-divider" aria-hidden />}
+                      <button
+                        type="button"
+                        className={`mobile-header__tool-segment mobile-header__tool-segment--${action.variant ?? 'ghost'}`}
+                        onClick={() => {
+                          setOpen(null)
+                          action.onClick()
+                        }}
+                        aria-label={action.label}
+                      >
+                        {action.icon}
+                        {action.badge != null && Number(action.badge) > 0 && (
+                          <span className="mobile-header__tool-badge" aria-hidden>
+                            {typeof action.badge === 'number' && action.badge > 9 ? '9+' : action.badge}
+                          </span>
+                        )}
+                      </button>
+                    </span>
+                  ))}
+              </div>
+            )}
+            {controls.actions
+              .filter((a) => a.variant === 'fab')
+              .map((action) => (
                 <button
+                  key={action.id}
                   type="button"
-                  className={`mobile-header__tool-segment mobile-header__tool-segment--${action.variant ?? 'ghost'}`}
+                  className="mobile-header__fab"
                   onClick={() => {
                     setOpen(null)
                     action.onClick()
@@ -108,15 +136,9 @@ export function MobileHeaderToolbar() {
                   aria-label={action.label}
                 >
                   {action.icon}
-                  {action.badge != null && Number(action.badge) > 0 && (
-                    <span className="mobile-header__tool-badge" aria-hidden>
-                      {typeof action.badge === 'number' && action.badge > 9 ? '9+' : action.badge}
-                    </span>
-                  )}
                 </button>
-              </span>
-            ))}
-          </div>
+              ))}
+          </>
         )}
       </div>
 

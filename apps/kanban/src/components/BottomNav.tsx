@@ -45,18 +45,7 @@ export default function BottomNav() {
                 <span className="mobile-bottom-nav__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
               ) : null}
               {isActive && link.name !== 'Inbox' ? (
-                <span
-                  aria-hidden
-                  style={{
-                    position: 'absolute',
-                    top: -2,
-                    right: -2,
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: 'var(--brand)',
-                  }}
-                />
+                <span className="mobile-bottom-nav__active-dot" aria-hidden />
               ) : null}
             </span>
             <span className="mobile-bottom-nav__label">{link.name}</span>

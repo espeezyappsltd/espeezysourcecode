@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   DollarSign,
+  Menu,
   HardDrive,
   LayoutDashboard,
   Lock,
@@ -325,18 +326,14 @@ export default function Sidebar({ user }: SidebarProps) {
       <header className="mobile-header hide-desktop" aria-label="App navigation">
         <div className="mobile-header__brand">
           <button type="button" className="mobile-header__menu-btn" onClick={() => setIsOpen(true)} aria-label="Open menu">
-            <div className="mobile-header__logo">
-              <Image src="/brand_logo2.svg" width={36} height={36} alt="" priority style={{ objectFit: 'contain' }} />
-            </div>
+            <Menu size={22} strokeWidth={2.25} aria-hidden />
           </button>
-          <div className="mobile-header__title-block">
-            <span className="mobile-header__wordmark">
-              <BrandWordmark />
+          <div className="mobile-header__online-stat" aria-label={`${onlineCount} users online`}>
+            <Users size={18} strokeWidth={2.25} className="mobile-header__online-icon" aria-hidden />
+            <span className="mobile-header__online-count" data-testid="mobile-header-online-count">
+              {onlineCount}
             </span>
-            <div className="mobile-header__status">
-              <PresenceDot isOnline={isProfileLoaded} />
-              <span data-testid="mobile-header-online-count">{onlineLabel}</span>
-            </div>
+            <PresenceDot isOnline={isProfileLoaded} />
           </div>
         </div>
 

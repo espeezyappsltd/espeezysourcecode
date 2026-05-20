@@ -233,9 +233,9 @@ function MarketplacePageInner() {
       {
         id: 'post',
         label: 'Post listing',
-        icon: <Plus size={17} />,
+        icon: <Plus size={20} strokeWidth={2.5} />,
         onClick: () => setIsPosting(true),
-        variant: 'primary',
+        variant: 'fab',
       },
     ],
   })

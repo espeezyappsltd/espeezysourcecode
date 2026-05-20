@@ -724,15 +724,20 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--h-mobile-bottom);
-  background-color: rgba(var(--bg-sub-rgb), 0.8);
-  backdrop-filter: blur(20px);
+  box-sizing: border-box;
+  min-height: var(--mobile-bottom-total);
+  background-color: rgba(var(--bg-sub-rgb), 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
   z-index: 4000;
-  padding: 0 1rem;
-  padding-bottom: env(safe-area-inset-bottom);
-  justify-content: space-around;
-  align-items: center;
+  padding:
+    0.25rem
+    max(0.25rem, env(safe-area-inset-left, 0px))
+    max(0.25rem, env(safe-area-inset-bottom, 0px))
+    max(0.25rem, env(safe-area-inset-right, 0px));
+  justify-content: space-evenly;
+  align-items: flex-end;
 }
 
 @media (max-width: 768px) {

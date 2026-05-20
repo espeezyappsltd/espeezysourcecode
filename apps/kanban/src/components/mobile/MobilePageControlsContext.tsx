@@ -28,7 +28,7 @@ export type MobileHeaderAction = {
   label: string
   icon: ReactNode
   onClick: () => void
-  variant?: 'primary' | 'ghost'
+  variant?: 'primary' | 'ghost' | 'fab'
   badge?: number | string
 }
 
