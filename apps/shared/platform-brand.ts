@@ -3,6 +3,21 @@
  * Use these strings on pricing, checkout, billing, and upgrade surfaces.
  */
 
+import { ESPEEZY_APP_ORIGINS } from './app-url'
+
+/** Primary workspace — sign up, onboarding, and daily collaboration. */
+export const MAIN_APP_ORIGIN = ESPEEZY_APP_ORIGINS.kanban
+
+export const MAIN_APP_HOST_LABEL = 'kanban.espeezy.com'
+
+export const GETTING_STARTED_STEP_1_TITLE = 'Initialize Your Workspace'
+
+export const GETTING_STARTED_STEP_1_DESC = `Sign up at ${MAIN_APP_HOST_LABEL}, the main Espeezy app. It takes under 60 seconds. Set your institution, your role (student, educator, or admin), and your timezone. Done.`
+
+export const GETTING_STARTED_ACCOUNT_BODY = `Head to ${MAIN_APP_HOST_LABEL} and sign up with your university email or a personal email. Espeezy verifies your institution automatically using your email domain. If your institution is not yet listed, you can add it manually and it will be reviewed within 24 hours. There is no credit card required.`
+
+export const INSTALLATION_WEB_BODY = `Espeezy runs entirely in your browser. Open ${MAIN_APP_HOST_LABEL} on any device with a modern browser (Chrome 110+, Firefox 115+, Safari 16+, Edge 110+). Sign in and you are ready. No plugins, no extensions, no downloads.`
+
 export const PLATFORM_TEAM_SIZE = 12
 
 export const PLATFORM_OPERATIONS_TAGLINE =

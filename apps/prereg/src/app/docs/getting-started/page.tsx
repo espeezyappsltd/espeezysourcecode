@@ -1,9 +1,14 @@
+import {
+  GETTING_STARTED_STEP_1_DESC,
+  GETTING_STARTED_STEP_1_TITLE,
+} from '@shared/platform-brand'
+
 export default function GettingStartedPage() {
   const steps = [
     {
       step: '01',
-      title: 'Initialize Your Workspace',
-      desc: 'Sign up at espeezy.com. It takes under 60 seconds. Set your institution, your role (student, educator, or admin), and your timezone. Done.',
+      title: GETTING_STARTED_STEP_1_TITLE,
+      desc: GETTING_STARTED_STEP_1_DESC,
     },
     {
       step: '02',

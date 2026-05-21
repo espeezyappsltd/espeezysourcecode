@@ -7,6 +7,10 @@ import {
   LayoutGrid, Milestone, Users, ShoppingBag,
   Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info, RotateCcw
 } from 'lucide-react'
+import {
+  GETTING_STARTED_ACCOUNT_BODY,
+  INSTALLATION_WEB_BODY,
+} from '@shared/platform-brand'
 
 const BRAND = '#10b981'
 
@@ -33,7 +37,7 @@ const docsContent: Record<string, DocEntry> = {
     sections: [
       {
         heading: 'Step 1: Create your account',
-        body: 'Head to espeezy.com and sign up with your university email or a personal email. Espeezy verifies your institution automatically using your email domain. If your institution is not yet listed, you can add it manually and it will be reviewed within 24 hours. There is no credit card required.',
+        body: GETTING_STARTED_ACCOUNT_BODY,
         items: ['Email verification sent instantly', 'Institutional auto-detection from 4,000+ domains', 'Profile takes under 60 seconds to complete'],
       },
       {
@@ -65,7 +69,7 @@ const docsContent: Record<string, DocEntry> = {
     sections: [
       {
         heading: 'Web app (no installation needed)',
-        body: 'Espeezy runs entirely in your browser. Open espeezy.com on any device with a modern browser (Chrome 110+, Firefox 115+, Safari 16+, Edge 110+). Sign in and you are ready. No plugins, no extensions, no downloads.',
+        body: INSTALLATION_WEB_BODY,
       },
       {
         heading: 'Progressive Web App (PWA)',

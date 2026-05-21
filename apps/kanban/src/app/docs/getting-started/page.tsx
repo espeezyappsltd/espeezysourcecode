@@ -3,13 +3,17 @@
 import React from 'react'
 import Link from 'next/link'
 import { CheckCircle2, UserPlus, Users, Sparkles } from 'lucide-react'
+import {
+  GETTING_STARTED_STEP_1_DESC,
+  GETTING_STARTED_STEP_1_TITLE,
+} from '@shared/platform-brand'
 
 export default function GettingStarted() {
   const steps = [
     {
       icon: <UserPlus size={24} />,
-      title: 'Initialize Workspace',
-      description: 'The journey begins by creating your profile. Select your academic field and set up your institutional identity.'
+      title: GETTING_STARTED_STEP_1_TITLE,
+      description: GETTING_STARTED_STEP_1_DESC,
     },
     {
       icon: <Users size={24} />,
