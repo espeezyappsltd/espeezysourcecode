@@ -25,13 +25,18 @@ npm run predeploy:check            # typecheck + next build
 
 ## Vercel
 
+Dedicated project for **kanban.espeezy.com**. Root `apps/kanban` uses `apps/kanban/vercel.json`.
+
 | Setting | Value |
 | --- | --- |
 | Root Directory | `apps/kanban` |
 | Framework | Next.js |
-| Build Command | `npm run build` |
-| Install Command | `npm install` (from monorepo root if using workspaces) |
+| Build Command | *(from `vercel.json`)* `cd ../.. && npm run vercel-build:kanban` |
+| Install Command | *(from `vercel.json`)* `cd ../.. && npm install` |
+| Output Directory | `.next` |
 | Node | 22.x |
+
+**Do not** use `vercel-build:panel` or repo-root `vercel.json` on this project — those are for `panel.espeezy.com` only (`apps/admin`, root `.`).
 
 Required environment variables (see `src/lib/supabase/env.ts`):
 

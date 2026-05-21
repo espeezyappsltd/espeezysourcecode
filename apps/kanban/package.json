@@ -7,6 +7,7 @@
     "dev:turbo": "next dev -p 3001",
     "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
     "build": "next build",
+    "vercel-build:panel": "cd ../.. && npm run vercel-build:kanban",
     "start": "npx serve out -p 3001",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",

@@ -29,6 +29,7 @@
     "build:panel": "npm run build:admin",
     "vercel-build:admin": "npm install && npm run build --prefix apps/admin",
     "vercel-build:panel": "npm run vercel-build:admin",
+    "vercel-build:kanban": "npm install && npm run build --prefix apps/kanban",
     "vercel-build:games": "npm install && npm run build --prefix apps/games",
     "vercel-build:prereg": "npm install && npm run build --prefix apps/prereg",
     "build:core": "npm --prefix apps/core run build",
