@@ -6,6 +6,8 @@
     "dev": "next dev -p 3005",
     "stop": "taskkill /F /IM node.exe /T || killall node || true",
     "build": "next build",
+    "vercel-build:prereg": "cd ../.. && npm install && npm run build --prefix apps/prereg",
+    "vercel-build:admin": "npm run vercel-build:prereg",
     "start": "npx serve out -p 3001",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
