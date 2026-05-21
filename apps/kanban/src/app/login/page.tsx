@@ -5,14 +5,14 @@ import { useSearchParams } from 'next/navigation'
 import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
 import { SimpleAuthForm } from '@shared/SimpleAuthForm'
-import { sanitizeNextPath } from '@shared/app-url'
+import { sanitizeKanbanNextPath } from '@shared/app-url'
 import { useSimpleAuth } from '@shared/useSimpleAuth'
 import { resolveLoginRedirectPath } from '@/lib/pricing/plan-routes'
 
 function LoginContent() {
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createSupabaseClient(), [])
-  const redirectPath = sanitizeNextPath(
+  const redirectPath = sanitizeKanbanNextPath(
     resolveLoginRedirectPath(
       searchParams?.get('next') ?? searchParams?.get('redirect'),
       searchParams?.get('plan'),

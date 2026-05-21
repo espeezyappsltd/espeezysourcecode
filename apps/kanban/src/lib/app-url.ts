@@ -1,9 +1,12 @@
 import {
   ESPEEZY_APP_ORIGINS,
   buildAuthCallbackUrl,
+  buildKanbanAppUrl,
   isEmbedPreview,
   resolveClientOrigin,
+  resolveLegacyKanbanPath,
   resolveRequestOrigin,
+  sanitizeKanbanNextPath,
   sanitizeNextPath,
   shouldForwardAuthToKanban,
 } from '@shared/app-url'
@@ -11,9 +14,12 @@ import {
 export {
   ESPEEZY_APP_ORIGINS,
   buildAuthCallbackUrl,
+  buildKanbanAppUrl,
   isEmbedPreview,
   resolveClientOrigin,
+  resolveLegacyKanbanPath,
   resolveRequestOrigin,
+  sanitizeKanbanNextPath,
   sanitizeNextPath,
   shouldForwardAuthToKanban,
 }

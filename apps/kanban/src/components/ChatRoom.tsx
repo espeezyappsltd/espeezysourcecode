@@ -112,7 +112,7 @@ export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: s
             type: 'new_message',
             title: currentUser.name,
             message: messageContent.length > 60 ? messageContent.substring(0, 57) + '...' : messageContent,
-            link: `/dashboard/network/chat/${currentUser.id}`,
+            link: `/network/chat/${currentUser.id}`,
             created_at: new Date().toISOString()
           }) : Promise.resolve()
         ]);

@@ -1,3 +1,4 @@
+import { buildKanbanAppUrl } from '@shared/app-url'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { z } from 'zod'
@@ -134,8 +135,8 @@ export async function POST(req: NextRequest) {
       type: 'p2p_transfer',
       transfer_id: transfer.id,
     },
-    success_url: `${APP_URL}/dashboard/wallet?transfer=success&id=${transfer.id}`,
-    cancel_url:  `${APP_URL}/dashboard/wallet?transfer=cancelled`,
+    success_url: buildKanbanAppUrl(`/wallet?transfer=success&id=${transfer.id}`),
+    cancel_url: buildKanbanAppUrl(`/wallet?transfer=cancelled`),
   })
 
   // Store checkout session ID on the transfer record

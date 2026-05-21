@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
         type: 'quiz_prize_paid',
         title: `Prize paid: $${(session.prize_cents_won / 100).toFixed(2)}`,
         message: `Your quiz cash prize has been paid to your connected account.`,
-        link: '/dashboard/wallet',
+        link: '/wallet',
       })
 
       const to = [profile.email, profile.espeezy_email].filter((v): v is string => Boolean(v))

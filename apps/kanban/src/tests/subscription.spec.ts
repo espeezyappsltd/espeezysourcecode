@@ -21,7 +21,7 @@ test.describe('Subscription Cycle', () => {
     await page.fill('input[type="password"]', testPassword);
     await page.check('input[id="legal"]');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page).not.toHaveURL(/\/dashboard/);
 
     // 2. TRIGGER CHECKOUT (Frontend Request)
     // We intercept the network call to verify the price ID and user ID

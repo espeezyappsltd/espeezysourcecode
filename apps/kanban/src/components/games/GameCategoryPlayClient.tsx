@@ -14,7 +14,7 @@ export default function GameCategoryPlayClient({ slug }: { slug: string }) {
       </p>
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
         <Link href="/games" className="btn btn-primary">Back to Games</Link>
-        <Link href="/dashboard" className="btn btn-secondary">Go to Dashboard</Link>
+        <Link href="/" className="btn btn-secondary">Go to Dashboard</Link>
       </div>
     </section>
   )

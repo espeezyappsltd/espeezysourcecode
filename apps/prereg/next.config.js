@@ -6,6 +6,16 @@ const monorepoRoot = path.join(process.cwd(), '../../')
 const nextConfig = {
   async redirects() {
     return [
+      {
+        source: '/dashboard',
+        destination: 'https://kanban.espeezy.com/',
+        permanent: true,
+      },
+      {
+        source: '/dashboard/:path*',
+        destination: 'https://kanban.espeezy.com/:path*',
+        permanent: true,
+      },
       { source: '/fund', destination: '/pricing', permanent: true },
       { source: '/fund/:path*', destination: '/pricing', permanent: true },
       { source: '/donation/:path*', destination: '/pricing', permanent: true },

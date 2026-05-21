@@ -199,7 +199,7 @@ export default function PreRegisterPage() {
     return `${appBaseUrl}/sso?next=${encodeURIComponent(nextPath)}#${hash.toString()}`
   }
 
-  const kanbanSsoUrl = buildSsoUrl(kanbanBaseUrl, '/dashboard')
+  const kanbanSsoUrl = buildSsoUrl(kanbanBaseUrl, '/')
   const kanbanDemoUrl = `${kanbanBaseUrl.replace(/\/$/, '')}${KANBAN_DEMO_PATH}`
   const gamesSsoUrl = buildSsoUrl(gamesBaseUrl, '/')
 

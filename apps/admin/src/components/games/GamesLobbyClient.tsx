@@ -21,7 +21,7 @@ export default function GamesLobbyClient() {
       </div>
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
         <Link href="/games/puzzles" className="btn btn-primary">Open Puzzles</Link>
-        <Link href="/dashboard" className="btn btn-secondary">Back to Dashboard</Link>
+        <Link href="https://kanban.espeezy.com" className="btn btn-secondary">Back to Dashboard</Link>
       </div>
     </section>
   )

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { buildKanbanAppUrl } from '@shared/app-url'
 import { Q } from '@/lib/query-columns'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { getAuthUser, getUserProfile } from '@/utils/auth-server'
@@ -140,10 +141,11 @@ export async function POST(req: Request) {
     await Promise.allSettled(
       batch.map(async (r) => {
         try {
+          const preferencesUrl = buildKanbanAppUrl('/notifications')
           const personalHtml = `${html_body}
 <div style="margin-top:40px;padding-top:20px;border-top:1px solid #eee;font-size:12px;color:#999;text-align:center">
   You received this because you opted in to marketing updates.
-  <a href="https://espeezy.com/dashboard/notifications" style="color:#10b981">Manage preferences</a>
+  <a href="${preferencesUrl}" style="color:#10b981">Manage preferences</a>
 </div>`
           await sendEmail({
             to: r.email,

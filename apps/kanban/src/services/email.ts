@@ -10,6 +10,7 @@
  *   SUPPORT_EMAIL   = support@espeezy.com
  */
 
+import { buildKanbanAppUrl } from '@shared/app-url'
 import nodemailer, { SentMessageInfo } from 'nodemailer'
 
 function createTransport() {
@@ -105,12 +106,12 @@ export async function sendWelcomeEmail(opts: {
         <div style="background:#fff;padding:32px;border:1px solid #eee;border-top:none;border-radius:0 0 16px 16px">
           <p style="font-size:18px;color:#111">Hi <strong>${escapeHtml(opts.displayName)}</strong>,</p>
           <p style="color:#444;line-height:1.6">You're in. Espeezy is a platform where students collaborate on real projects, earn from their contributions, and build proof-of-work credentials that matter.</p>
-          <a href="https://espeezy.com/" style="display:inline-block;margin-top:24px;background:#10b981;color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700">Go to Dashboard →</a>
+          <a href="${buildKanbanAppUrl('/')}" style="display:inline-block;margin-top:24px;background:#10b981;color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700">Go to Dashboard →</a>
           <p style="margin-top:32px;font-size:13px;color:#888">Questions? Reply to this email or visit <a href="https://espeezy.com" style="color:#10b981">espeezy.com</a></p>
         </div>
       </div>
     `,
-    text: `Hi ${opts.displayName},\n\nWelcome to Espeezy!\n\nGo to dashboard: https://espeezy.com/`,
+    text: `Hi ${opts.displayName},\n\nWelcome to Espeezy!\n\nGo to dashboard: ${buildKanbanAppUrl('/')}`,
   })
 }
 

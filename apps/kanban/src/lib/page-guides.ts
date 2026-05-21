@@ -17,16 +17,6 @@ export type PageGuideConfig = {
 }
 
 const GUIDES: Record<string, PageGuideConfig> = {
-  '/dashboard': {
-    id: 'dashboard',
-    pageTitle: 'Dashboard',
-    summary: 'Your command center for tasks, activity, and team pulse.',
-    steps: [
-      { title: 'Overview', body: 'Scan open tasks, deadlines, and cohort activity at a glance.' },
-      { title: 'Quick actions', body: 'Jump to Kanban, Feed, or Marketplace from the sidebar.' },
-    ],
-    actions: [{ label: 'Sidebar', hint: 'Navigate any workspace area' }],
-  },
   '/feed': {
     id: 'feed',
     pageTitle: 'Academic Journeys',
@@ -107,13 +97,17 @@ const GUIDES: Record<string, PageGuideConfig> = {
   },
   '/': {
     id: 'kanban',
-    pageTitle: 'Kanban Board',
-    summary: 'Plan coursework and projects with columns, cards, and deadlines.',
+    pageTitle: 'Workspace',
+    summary: 'Your Kanban board and command center for tasks, activity, and team pulse.',
     steps: [
-      { title: 'Columns', body: 'Drag cards between To Do, In Progress, and Done.' },
+      { title: 'Board', body: 'Drag cards between To Do, In Progress, and Done.' },
       { title: 'Tasks', body: 'Open a card for details, assignees, comments, and due dates.' },
+      { title: 'Navigate', body: 'Use the sidebar for Feed, Marketplace, Hustle, and Settings.' },
     ],
-    actions: [{ label: 'New task', hint: 'Add work to your board' }],
+    actions: [
+      { label: 'New task', hint: 'Add work to your board' },
+      { label: 'Sidebar', hint: 'Navigate any workspace area' },
+    ],
   },
   '/resources': {
     id: 'resources',

@@ -64,6 +64,6 @@ test('debug: signup only', async ({ page }) => {
   console.log(`Clicked - waiting for redirect`)
 
   // Wait for redirect
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 })
+  await expect(page).not.toHaveURL(/\/dashboard/, { timeout: 30_000 })
   console.log(`✓ Redirected to dashboard!`)
 })

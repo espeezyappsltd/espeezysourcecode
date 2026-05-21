@@ -1,3 +1,4 @@
+import { buildKanbanAppUrl } from '@shared/app-url'
 import { STRIPE_API_VERSION } from '@/utils/stripe'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
@@ -62,11 +63,10 @@ export async function POST() {
   }
 
   // Create onboarding link
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com'
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
-    refresh_url: `${appUrl}/dashboard/hustle/connect?refresh=1`,
-    return_url: `${appUrl}/dashboard/hustle/connect?success=1`,
+    refresh_url: buildKanbanAppUrl('/hustle/connect?refresh=1'),
+    return_url: buildKanbanAppUrl('/hustle/connect?success=1'),
     type: 'account_onboarding',
   })
 

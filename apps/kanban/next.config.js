@@ -9,6 +9,8 @@ const sharedDir = path.join(__dirname, '../shared')
 const nextConfig = {
   async redirects() {
     return [
+      { source: '/dashboard', destination: '/', permanent: true },
+      { source: '/dashboard/:path*', destination: '/:path*', permanent: true },
       { source: '/fund', destination: '/upgrade', permanent: true },
       { source: '/fund/:path*', destination: '/upgrade', permanent: true },
       { source: '/donation/:path*', destination: '/upgrade', permanent: true },

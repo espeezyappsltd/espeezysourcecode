@@ -1,4 +1,5 @@
 import type { MarketingPlanKey } from '@/lib/marketing-urls'
+import { sanitizeKanbanNextPath } from '@shared/app-url'
 import { LIFETIME_CTA_AVAILABLE, LIFETIME_CTA_SOLD_OUT } from '@shared/platform-brand'
 
 export type PricingPlanId = 'free' | MarketingPlanKey
@@ -123,9 +124,7 @@ export function resolveLoginRedirectPath(
 ): string {
   const explicit = next?.trim()
   if (explicit) {
-    return explicit.startsWith('/') && !explicit.startsWith('//') && !explicit.includes(':')
-      ? explicit
-      : fallback
+    return sanitizeKanbanNextPath(explicit, fallback)
   }
   const normalized = normalizePricingPlanId(plan)
   if (normalized && normalized !== 'free') {

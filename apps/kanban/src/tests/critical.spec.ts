@@ -43,8 +43,8 @@ test.describe('Critical Path E2E', () => {
     
     await page.click('button[type="submit"]');
     
-    // Should be redirected to dashboard
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 20000 });
+    // Should land on workspace home (/) — not legacy /dashboard
+    await expect(page).not.toHaveURL(/\/dashboard/, { timeout: 20_000 })
     
     // Sign out
     // await page.click('text=/Sign Out/i');

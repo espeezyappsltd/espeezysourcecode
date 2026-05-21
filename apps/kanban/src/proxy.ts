@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { resolveSupabaseAnonKey, resolveSupabaseUrl } from '@/lib/supabase/env'
-import { sanitizeNextPath } from '@shared/app-url'
+import { sanitizeKanbanNextPath } from '@shared/app-url'
 
 const WINDOW_MS = 60 * 1000
 const MAX_REQUESTS = 60
@@ -87,7 +87,7 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
   if (user && pathname === '/login' && !isEmbed) {
-    const next = sanitizeNextPath(request.nextUrl.searchParams.get('next'))
+    const next = sanitizeKanbanNextPath(request.nextUrl.searchParams.get('next'))
     const dest = request.nextUrl.clone()
     dest.pathname = next
     dest.search = ''

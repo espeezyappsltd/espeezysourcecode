@@ -166,7 +166,7 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
           type: 'payment_sent',
           title: `Payment sent to @${recipient.username || 'scholar'}`,
           message: `You sent £${(transfer.amount_cents / 100).toFixed(2)} to ${recipient.full_name || recipient.username}.`,
-          link: '/dashboard/wallet',
+          link: '/wallet',
           created_at: new Date().toISOString()
         })
         await adminDb.from('notifications').insert({
@@ -174,7 +174,7 @@ async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
           type: 'payment_received',
           title: `Payment received from @${sender.username || 'scholar'}`,
           message: `You received £${(transfer.net_cents / 100).toFixed(2)} from ${sender.full_name || sender.username}.`,
-          link: '/dashboard/wallet',
+          link: '/wallet',
           created_at: new Date().toISOString()
         })
 

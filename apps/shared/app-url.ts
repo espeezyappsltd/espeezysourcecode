@@ -129,6 +129,34 @@ export function sanitizeNextPath(next: string | null | undefined, fallback = '/'
   return next
 }
 
+/**
+ * Maps legacy `/dashboard` routes to Kanban App Router paths (workspace home is `/`).
+ * @example `/dashboard/network` → `/network`, `/dashboard` → `/`
+ */
+export function resolveLegacyKanbanPath(path: string | null | undefined, fallback = '/'): string {
+  const safe = sanitizeNextPath(path, fallback)
+  if (safe === '/dashboard' || safe === '/dashboard/') return '/'
+  if (safe.startsWith('/dashboard/')) {
+    const stripped = safe.slice('/dashboard'.length)
+    return stripped === '' ? '/' : stripped
+  }
+  return safe
+}
+
+/** Post-login / SSO `next` paths for Kanban (strips legacy `/dashboard` prefix). */
+export function sanitizeKanbanNextPath(next: string | null | undefined, fallback = '/'): string {
+  return resolveLegacyKanbanPath(next, fallback)
+}
+
+/** Absolute URL on kanban.espeezy.com (or NEXT_PUBLIC_KANBAN_APP_URL in dev). */
+export function buildKanbanAppUrl(path = '/'): string {
+  const base = (
+    process.env.NEXT_PUBLIC_KANBAN_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.kanban
+  ).replace(/\/$/, '')
+  const resolved = resolveLegacyKanbanPath(path, '/')
+  return `${base}${resolved.startsWith('/') ? resolved : `/${resolved}`}`
+}
+
 const EMBED_QUERY = 'embed'
 
 /** True when rendered inside the dev-hub iframe preview (or explicitly tagged). */
