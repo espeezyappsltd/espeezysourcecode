@@ -54,11 +54,19 @@ export async function syncProfileFromSubscription(
   const plan = planFromSubscription(subscription)
 
   if (ACTIVE_STATUSES.has(status)) {
+    const activePlan = plan ?? 'pro'
+    const tier =
+      activePlan === 'premium' || activePlan === 'lifetime'
+        ? 'premium'
+        : activePlan === 'pro'
+          ? 'pro'
+          : 'free'
     await adminDb
       .from('profiles')
       .update({
-        plan: plan ?? undefined,
-        subscription_plan: plan ?? 'pro',
+        plan: activePlan,
+        tier,
+        subscription_plan: activePlan,
         subscription_status: cancelAtPeriodEnd ? 'canceling' : status,
         stripe_customer_id: customerId ?? undefined,
         stripe_subscription_id: subscription.id,
@@ -85,6 +93,7 @@ export async function syncProfileFromSubscription(
       .from('profiles')
       .update({
         plan: 'free',
+        tier: 'free',
         subscription_plan: 'free',
         subscription_status: 'canceled',
         stripe_subscription_id: null,
@@ -112,6 +121,7 @@ export async function downgradeProfileAfterSubscriptionEnded(
     .from('profiles')
     .update({
       plan: 'free',
+      tier: 'free',
       subscription_plan: 'free',
       subscription_status: 'canceled',
       stripe_subscription_id: null,

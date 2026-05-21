@@ -36,4 +36,4 @@ Environment:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-Free-tier users are redirected to login with `?upgrade=1`; Pro/Premium profiles pass through.
+Free-tier users are redirected to login with `?upgrade=1`; Pro/Premium profiles pass through. Access uses the **higher** of `profiles.tier` and `profiles.subscription_plan` (Stripe/Kanban billing).

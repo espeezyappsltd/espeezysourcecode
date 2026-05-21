@@ -172,8 +172,12 @@ async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
     const subscriptionId =
       typeof session.subscription === 'string' ? session.subscription : session.subscription?.toString()
 
+    const tier =
+      plan === 'premium' || plan === 'lifetime' ? 'premium' : plan === 'pro' ? 'pro' : 'free'
+
     const patch = {
       plan,
+      tier,
       subscription_plan: plan,
       subscription_status: 'active' as const,
       stripe_customer_id: customerId ?? undefined,

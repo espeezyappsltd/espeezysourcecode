@@ -226,7 +226,7 @@ export function useAdminDashboard() {
 
       const updateData: Record<string, unknown> =
         action === 'upgrade'
-          ? { subscription_plan: 'premium' }
+          ? { subscription_plan: 'premium', tier: 'premium', plan: 'premium' }
           : action === 'ban'
             ? { role: 'banned' }
             : { role: 'user' }

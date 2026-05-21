@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { effectiveProfileTier } from '@shared/profile-tier'
 import { getAdminDb } from '@/lib/supabase/admin'
 import { canAccessFeature, FEATURE_TIERS } from '@/lib/tier-utils'
 import type { JwtPayload } from '@/types/jwt'
@@ -44,7 +45,7 @@ export async function GET(req: Request) {
       .eq('id', userId)
       .maybeSingle()
 
-    return data?.tier ?? data?.subscription_plan ?? 'free'
+    return effectiveProfileTier(data)
   })
 
   if (!feature) {

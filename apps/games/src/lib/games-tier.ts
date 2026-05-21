@@ -1,6 +1,7 @@
 import type { User } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { effectiveProfileTier, normalizeProfileTier } from '@shared/profile-tier'
 import { resolveSupabaseEnv } from '@/lib/supabase-env'
 
 export const GAMES_TIER_COOKIE = 'espeezy_games_tier'
@@ -10,19 +11,15 @@ export type GamesTier = 'free' | 'pro' | 'premium'
 const PAID_TIERS = new Set<GamesTier>(['pro', 'premium'])
 
 export function normalizeGamesTier(value: unknown): GamesTier {
-  const raw = typeof value === 'string' ? value.trim().toLowerCase() : ''
-  if (raw === 'premium' || raw === 'lifetime') return 'premium'
-  if (raw === 'pro') return 'pro'
-  return 'free'
+  return normalizeProfileTier(value)
 }
 
-/** Paid tier from profile row (tier column and/or subscription_plan). */
+/** Paid tier from profile row — max of `tier` and `subscription_plan` (billing source of truth). */
 export function tierFromProfileRow(profile: {
   tier?: string | null
   subscription_plan?: string | null
 } | null): GamesTier {
-  if (!profile) return 'free'
-  return normalizeGamesTier(profile.tier ?? profile.subscription_plan)
+  return effectiveProfileTier(profile)
 }
 
 export function hasGamesAccess(tier: GamesTier): boolean {
