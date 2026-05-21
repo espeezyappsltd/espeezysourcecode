@@ -11,7 +11,7 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
   'Espeezy Kanban Dashboard App!',
-  'Secure workspaces, real-time project sync, hustle-gigs, campus marketplace resources, real-time project analytics, and so much more.' 
+  'Secure workspaces, real-time project sync, hustle-gigs, campus marketplace resources, peer network, real-time project analytics, and so much more.' 
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Try out the live demo'
