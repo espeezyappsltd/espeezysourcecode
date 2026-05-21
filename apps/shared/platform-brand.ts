@@ -10,17 +10,17 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
-  'Espeezy Learning Platform',
-  'Verified academic records for every student',
-  'See all your team\'s contribution data in real-time, and build your own verified academic record and exportable intelligence reports.',
+  'Check out the brand-new Espeezy Kanban Dashboard!',
+  'Live boards, real-time team sync, contribution analytics, marketplace credits, intelligence exports, and so much more are waiting for you.',
+  'Early access is open. Dive in, explore every feature, and see what your team can build together.',
 ] as const
 
-export const HERO_ANALYTICS_CAPTION = 'Try it out now, early access is now open...'
+export const HERO_ANALYTICS_CAPTION = 'Brand-new Kanban app · early access is live'
 
 /** @deprecated Use HERO_COPY_LINES[1] */
 export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
 
-export const KANBAN_DEMO_LABEL = 'Kanban Demo'
+export const KANBAN_DEMO_LABEL = 'Explore the Kanban Demo'
 export const KANBAN_DEMO_PATH = '/demo'
 
 export const PRICING_INTRO =

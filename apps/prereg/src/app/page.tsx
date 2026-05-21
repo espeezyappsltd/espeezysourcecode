@@ -64,7 +64,7 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
         >
           <Image 
             src={SCREENSHOT_ASSETS.ANALYTICS_DASHBOARD} 
-            alt="Espeezy Analytics Dashboard showing contribution scores, task ownership, and team intelligence" 
+            alt="Espeezy Kanban Dashboard with boards, analytics, and team collaboration features" 
             fill
             sizes="(max-width: 1024px) 100vw, 800px"
             quality={55}
@@ -345,7 +345,7 @@ export default function PreRegisterPage() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Early Access: Now Open</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Brand-new Kanban · Early access open</span>
           </div>
         </motion.div>
 
