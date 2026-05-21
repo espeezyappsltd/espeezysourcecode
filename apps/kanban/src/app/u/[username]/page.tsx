@@ -1,3 +1,4 @@
+import { buildGamesPublicProfileUrl } from '@shared/cross-app-auth'
 import { createAdminClient } from '@/lib/db'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -49,9 +50,12 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
           <p style={{ margin: '0.45rem 0 0', fontSize: '0.84rem', color: '#E5E7EB' }}>
             Sessions completed: <strong>{gamesPlayed}</strong> | Total score: <strong>{totalScore}</strong> | Cash prizes: <strong>${(totalPrizeCents / 100).toFixed(2)}</strong>
           </p>
-          <Link href={`/u/${profile.username}/games`} style={{ display: 'inline-block', marginTop: '0.55rem', color: '#10B981', fontSize: '0.8rem', fontWeight: 800, textDecoration: 'none' }}>
-            View Full Games Stats -&gt;
-          </Link>
+          <a
+            href={buildGamesPublicProfileUrl(profile.username ?? username)}
+            style={{ display: 'inline-block', marginTop: '0.55rem', color: '#10B981', fontSize: '0.8rem', fontWeight: 800, textDecoration: 'none' }}
+          >
+            Open Games profile →
+          </a>
         </div>
 
         <p style={{ margin: '1.5rem 0 0', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>

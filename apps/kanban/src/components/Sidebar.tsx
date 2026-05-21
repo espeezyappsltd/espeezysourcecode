@@ -20,6 +20,7 @@ import {
   Moon,
   Rss,
   Settings,
+  Gamepad2,
   ShieldCheck,
   Sparkles,
   Sun,
@@ -29,6 +30,7 @@ import {
   WifiOff,
   type LucideIcon,
 } from 'lucide-react'
+import { useGamesProfileLink } from '@/hooks/useGamesProfileLink'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { usePresence } from '@/components/PresenceProvider'
 import { useConnectivity } from '@/context/ConnectivityContext'
@@ -54,6 +56,8 @@ type SidebarNavItem = {
   name: string
   path: string
   icon: LucideIcon
+  /** Opens games.espeezy.com (SSO) instead of in-app routing */
+  externalGamesProfile?: boolean
 }
 
 const NAV_LINKS: SidebarNavItem[] = [
@@ -64,6 +68,7 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'My Assets', path: '/assets', icon: HardDrive },
   { name: 'Resources', path: '/marketplace', icon: TrendingUp },
   { name: 'Break Room', path: '/chillout', icon: Sparkles },
+  { name: 'Skirmish', path: '/games', icon: Gamepad2, externalGamesProfile: true },
   { name: 'Jukebox', path: '/jukebox', icon: Music },
   { name: 'Project Stats', path: '/analytics', icon: BarChart3 },
   { name: 'My Profile', path: '/profile', icon: UserCircle },
@@ -194,6 +199,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const smartLoading = useSmartLoading()
   const withLoading = smartLoading?.withLoading
   const showConfirmation = smartLoading?.showConfirmation
+  const gamesProfileUrl = useGamesProfileLink()
 
   const isProfileLoaded = Boolean(profile)
   const onlineCount = globalOnlineCount
@@ -309,6 +315,10 @@ export default function Sidebar({ user }: SidebarProps) {
   const isNavItemActive = (path: string, name: string) => {
     if (name === 'Project Stats') {
       return (pathname ?? '').startsWith('/analytics')
+    }
+
+    if (name === 'Skirmish') {
+      return false
     }
 
     if (path === '/') {
@@ -428,6 +438,11 @@ export default function Sidebar({ user }: SidebarProps) {
               onClick={() => {
                 if (PREMIUM_LINKS.has(link.name) && !isPremiumMember) {
                   window.location.href = APP_PRICING_PATH
+                  return
+                }
+                if (link.externalGamesProfile) {
+                  window.location.href = gamesProfileUrl
+                  if (isMobile) closeSidebar()
                   return
                 }
                 handleNavigation(link.path)

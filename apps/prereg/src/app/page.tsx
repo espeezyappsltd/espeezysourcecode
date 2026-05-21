@@ -22,6 +22,7 @@ import {
   KANBAN_DEMO_PATH,
   PLATFORM_OPERATIONS_TAGLINE,
 } from '@shared/platform-brand'
+import { buildCrossAppSsoUrl, GAMES_PROFILE_PATH } from '@shared/cross-app-auth'
 
 function HeroVisual({ registeredCount }: { registeredCount: number }) {
   return (
@@ -186,22 +187,18 @@ export default function PreRegisterPage() {
   const kanbanBaseUrl = process.env.NEXT_PUBLIC_KANBAN_APP_URL ?? 'https://kanban.espeezy.com'
   const gamesBaseUrl = process.env.NEXT_PUBLIC_GAMES_APP_URL ?? 'https://games.espeezy.com'
 
-  const buildSsoUrl = (appBaseUrl: string, nextPath: string) => {
-    if (!session?.access_token || !session.refresh_token) {
-      return `${appBaseUrl}/login?next=${encodeURIComponent(nextPath)}`
-    }
-
-    const hash = new URLSearchParams({
-      access_token: session.access_token,
-      refresh_token: session.refresh_token,
-    })
-
-    return `${appBaseUrl}/sso?next=${encodeURIComponent(nextPath)}#${hash.toString()}`
-  }
+  const buildSsoUrl = (appBaseUrl: string, nextPath: string) =>
+    buildCrossAppSsoUrl(
+      appBaseUrl,
+      nextPath,
+      session?.access_token && session.refresh_token
+        ? { access_token: session.access_token, refresh_token: session.refresh_token }
+        : null,
+    )
 
   const kanbanSsoUrl = buildSsoUrl(kanbanBaseUrl, '/')
   const kanbanDemoUrl = `${kanbanBaseUrl.replace(/\/$/, '')}${KANBAN_DEMO_PATH}`
-  const gamesSsoUrl = buildSsoUrl(gamesBaseUrl, '/')
+  const gamesSsoUrl = buildSsoUrl(gamesBaseUrl, GAMES_PROFILE_PATH)
 
   useEffect(() => {
     let mounted = true

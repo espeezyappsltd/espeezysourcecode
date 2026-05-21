@@ -1,7 +1,19 @@
-import GamesLobbyClient from '@/components/games/GamesLobbyClient'
+'use client'
 
-export const dynamic = 'force-dynamic'
+import { useEffect } from 'react'
+import { useGamesProfileLink } from '@/hooks/useGamesProfileLink'
 
-export default function GamesPage() {
-  return <GamesLobbyClient />
+/** Legacy /games route → games.espeezy.com profile (SSO). */
+export default function GamesRedirectPage() {
+  const gamesProfileUrl = useGamesProfileLink()
+
+  useEffect(() => {
+    window.location.replace(gamesProfileUrl)
+  }, [gamesProfileUrl])
+
+  return (
+    <div className="page-shell" style={{ padding: '3rem 1rem', textAlign: 'center' }}>
+      <p style={{ color: 'var(--text-sub)', fontWeight: 700 }}>Opening Espeezy Games…</p>
+    </div>
+  )
 }

@@ -5,6 +5,7 @@ import LiveChatWidget from '@/components/LiveChatWidget'
 import CategoriesGamesSection from '@/components/CategoriesGamesSection'
 import { useGamesLanding } from '@/hooks/useGamesLanding'
 import { useCategoriesWithGames } from '@/hooks/useCategoriesWithGames'
+import { useKanbanWorkspaceLink } from '@/hooks/useKanbanWorkspaceLink'
 import features from '@/data/features.json'
 
 export default function HomePage() {
@@ -17,7 +18,8 @@ export default function HomePage() {
     user,
   } = useGamesLanding()
 
-  const { categories, loading, error } = useCategoriesWithGames();
+  const { categories, loading, error } = useCategoriesWithGames()
+  const kanbanWorkspaceUrl = useKanbanWorkspaceLink()
 
   return (
     <main style={{ minHeight: '100vh', background: '#ffffff', color: '#0f172a' }}>
@@ -62,12 +64,18 @@ export default function HomePage() {
               <p style={{ margin: 0, color: '#475569', fontSize: '0.9rem' }}>
                 Logged in as <strong style={{ color: '#0f172a' }}>{user.email}</strong>
               </p>
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <a
-                  href="https://espeezy.com/login"
+                  href="/profile"
+                  style={{ color: '#6366f1', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
+                >
+                  My Games profile
+                </a>
+                <a
+                  href={kanbanWorkspaceUrl}
                   style={{ color: '#059669', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
                 >
-                  Open Main App
+                  Open Kanban
                 </a>
                 <button
                   type="button"
