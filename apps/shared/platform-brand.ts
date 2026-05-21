@@ -10,9 +10,9 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
-  'Check out the brand-new Espeezy Kanban Dashboard!',
-  'Live boards, real-time team sync, contribution analytics, marketplace credits, intelligence exports, and so much more are waiting for you.',
-  'Early access is open. Dive in, explore every feature, and see what your team can build together.',
+  'Try out the brand-new Espeezy Kanban Dashboard!',
+  'You get live boards, real-time project sync, hustle-gigs, real-time project analytics, and so much more.',
+  'Sign up now to get early access and start collaborating in real time.',  
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Brand-new Kanban app · early access is live'
@@ -24,7 +24,7 @@ export const KANBAN_DEMO_LABEL = 'Explore the Kanban Demo'
 export const KANBAN_DEMO_PATH = '/demo'
 
 export const PRICING_INTRO =
-  'The Kanban dashboard is built for student teams and operated by our platform crew, keeping collaboration infrastructure fast, secure, and affordable at scale.'
+  'The Kanban dashboard is built for all types of teams and projects, keeping collaboration infrastructure fast, secure, and affordable at scale. All core features are free for students.'
 
 export const UPGRADE_HERO_TITLE = 'Support the platform to reach more schools'
 
@@ -76,7 +76,7 @@ export const PREREG_LIFETIME_FEATURES = [
 
 /** Site-wide footer and lightweight app footers */
 export const FOOTER_BRAND_BLURB =
-  'Espeezy documents real contribution in group projects. A 12-member platform team runs production backend, billing, and campus rollout, not a solo side project.'
+  'The Espeezy kanban dashboard documents real contribution in group projects. A 12-member platform team runs production backend, billing, and campus rollouts.'
 
 export const FOOTER_TECH_BLURB =
   'Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle. Payments via Stripe; subscriptions managed by our platform team.'
