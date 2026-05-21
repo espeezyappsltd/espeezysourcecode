@@ -15,6 +15,11 @@
   z-index: 4810;
   width: 52px;
   height: 52px;
+  min-width: 52px;
+  max-width: 52px;
+  min-height: 52px;
+  padding: 0;
+  flex: 0 0 auto;
   border: none;
   border-radius: 50%;
   cursor: pointer;

@@ -79,7 +79,7 @@ button, .btn, input, textarea, select {
     box-shadow: none !important;
   }
   .btn:not(.btn-inline),
-  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn) {
+  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn):not(.panel-tool):not(.control-tab):not(.btn-compact):not(.dashboard-home-hud__team-id):not(.mobile-header__tool-segment):not(.mobile-header__fab):not(.social-guide-fab) {
     width: 100%;
     min-width: 0;
     font-size: clamp(1rem, 4vw, 1.1rem);
@@ -92,7 +92,7 @@ button, .btn, input, textarea, select {
     font-size: 14px;
   }
   .btn:not(.btn-inline):not(.btn-row__btn),
-  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn) {
+  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn):not(.panel-tool):not(.control-tab):not(.btn-compact):not(.dashboard-home-hud__team-id):not(.mobile-header__tool-segment):not(.mobile-header__fab):not(.social-guide-fab) {
     font-size: 1rem;
     padding: 0.8em 0.3em;
   }
@@ -1249,9 +1249,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .control-tab {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  gap: 0.5rem;
+  width: auto;
+  min-width: 0;
+  flex-shrink: 0;
   padding: 0.8rem 1.75rem;
   border-radius: 18px;
   border: none;
@@ -1259,9 +1263,12 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-sub);
   font-weight: 850;
   font-size: 0.95rem;
+  line-height: 1.2;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: -0.01em;
+  box-sizing: border-box;
 }
 
 .control-tab.active {
@@ -1274,15 +1281,30 @@ h1, h2, h3, h4, h5, h6 {
 .panel-tool {
   width: 42px;
   height: 42px;
+  min-width: 42px;
+  max-width: 42px;
+  min-height: 42px;
+  padding: 0;
+  flex: 0 0 auto;
+  flex-shrink: 0;
   border-radius: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-sub);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Compact actions (roster requests, inline chips) — not full-width on mobile */
+.btn-compact {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .panel-tool:hover {

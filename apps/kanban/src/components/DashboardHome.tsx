@@ -245,8 +245,8 @@ export default function DashboardHome({
                           <div style={{ fontWeight: 850, fontSize: '0.85rem', color: 'var(--text-main)' }}>{r.profiles?.full_name}</div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.4rem' }}>
-                          <button onClick={() => handleDeclineRequest(r.id)} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--error)', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}>Decline</button>
-                          <button onClick={() => handleAcceptRequest(r.id)} style={{ padding: '6px 10px', borderRadius: '8px', border: 'none', background: 'var(--brand)', color: 'white', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}>Accept</button>
+                          <button type="button" className="btn-compact" onClick={() => handleDeclineRequest(r.id)} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--error)', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}>Decline</button>
+                          <button type="button" className="btn-compact" onClick={() => handleAcceptRequest(r.id)} style={{ padding: '6px 10px', borderRadius: '8px', border: 'none', background: 'var(--brand)', color: 'white', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}>Accept</button>
                         </div>
                       </div>
                     ))}
@@ -333,39 +333,28 @@ export default function DashboardHome({
       </div>
 
       {/* ── COMMAND CENTER CONTROLS ─────────────────────────────────────── */}
-      <div style={{
-        marginTop: '0.5rem',
-        padding: '0.6rem',
-        background: 'rgba(var(--bg-sub-rgb), 0.5)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: 'var(--radius)',
-        border: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+      <div className="kanban-command-bar">
+        <div className="kanban-command-bar__tabs">
           {DASHBOARD_TABS.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id as 'board' | 'calendar')}
               className={`control-tab ${activeTab === tab.id ? 'active' : ''}`}
               aria-current={activeTab === tab.id ? 'page' : undefined}
               aria-label={`Switch to ${tab.label}`}
             >
-              <span aria-hidden="true">{tab.icon}</span> {tab.label}
+              <span aria-hidden="true">{tab.icon}</span>
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', paddingRight: '0.5rem' }}>
-          <button className="panel-tool" data-tooltip="Update view" aria-label="Refresh board data" onClick={() => setSyncToken(v => v + 1)}>
+        <div className="kanban-command-bar__tools">
+          <button type="button" className="panel-tool" data-tooltip="Update view" aria-label="Refresh board data" onClick={() => setSyncToken(v => v + 1)}>
             <Activity size={16} aria-hidden="true" />
           </button>
-          <button className="panel-tool" data-tooltip="Board Settings" aria-label="Open board settings" onClick={() => router.push('/settings')}>
+          <button type="button" className="panel-tool" data-tooltip="Board Settings" aria-label="Open board settings" onClick={() => router.push('/settings')}>
             <TrendingUp size={16} aria-hidden="true" />
           </button>
         </div>
