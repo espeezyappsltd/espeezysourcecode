@@ -505,3 +505,156 @@
   display: flex;
   align-items: center;
 }
+
+/* —— Arsenal hub & section nav —— */
+.assets-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+  padding: 0.35rem;
+  border-radius: 14px;
+  background: var(--bg-sub);
+  border: 1px solid var(--border);
+}
+
+.assets-subnav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-sub);
+  font-weight: 800;
+  font-size: 0.8rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.assets-subnav__link:hover {
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--brand) 8%, transparent);
+}
+
+.assets-subnav__link.is-active {
+  background: var(--brand);
+  color: #000;
+}
+
+.assets-hub-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.assets-hub-stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.assets-hub-stat__label {
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-sub);
+}
+
+.assets-hub-stat__value {
+  font-size: 1.1rem;
+  font-weight: 950;
+  color: var(--text-main);
+  margin-top: 0.15rem;
+}
+
+.assets-hub-stat__sub {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-top: 0.1rem;
+}
+
+.assets-hub-stat__hint {
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  margin-top: 0.1rem;
+}
+
+.assets-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.assets-hub-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.35rem 1.25rem;
+  text-decoration: none;
+  color: inherit;
+  min-height: 220px;
+}
+
+.assets-hub-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  background: var(--bg-sub);
+}
+
+.assets-hub-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.assets-hub-card__desc {
+  margin: 0;
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  line-height: 1.55;
+  font-weight: 600;
+}
+
+.assets-hub-card__cta {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: var(--brand);
+}
+
+.assets-section-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.assets-section-desc {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.assets-section-desc a {
+  color: var(--brand);
+  font-weight: 800;
+}

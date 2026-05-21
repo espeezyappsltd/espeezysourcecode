@@ -249,7 +249,7 @@ function MarketplacePageInner() {
           <h1 className="page-header__title central-page-title">Campus Marketplace</h1>
           <p className="page-header__desc central-page-lead">Pay with Espeezy credits · fast campus checkout</p>
           <div className="central-type" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
-            <Link href="/assets" className="central-link">
+            <Link href="/assets/marketplace" className="central-link">
               Arsenal assets
             </Link>
             <Link href="/account/credits" className="central-link">

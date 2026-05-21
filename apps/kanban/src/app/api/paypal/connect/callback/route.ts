@@ -11,7 +11,7 @@ const STATE_COOKIE = 'paypal_oauth_state'
 const USER_COOKIE = 'paypal_oauth_user'
 
 function assetsRedirect(query: string) {
-  const base = `${getAppUrl().replace(/\/$/, '')}/assets`
+  const base = `${getAppUrl().replace(/\/$/, '')}/assets/marketplace`
   return NextResponse.redirect(`${base}?${query}`)
 }
 
