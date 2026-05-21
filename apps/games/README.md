@@ -24,12 +24,18 @@ npm run predeploy:check            # typecheck + next build
 
 ## Vercel
 
+Use a **dedicated** Vercel project for games (not panel/prereg). Root `apps/games` picks up `apps/games/vercel.json`.
+
 | Setting | Value |
 | --- | --- |
 | Root Directory | `apps/games` |
 | Framework | Next.js |
-| Build Command | `npm run build` |
+| Build Command | *(from `vercel.json`)* `cd ../.. && npm run vercel-build:games` |
+| Install Command | *(from `vercel.json`)* `cd ../.. && npm install` |
+| Output Directory | `.next` |
 | Node | 22.x |
+
+**Do not** use `vercel-build:panel` or root `vercel.json` on this project — that is for `panel.espeezy.com` only (`apps/admin`).
 
 Environment:
 
