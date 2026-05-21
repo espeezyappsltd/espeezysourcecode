@@ -4,11 +4,18 @@ import { getAdminDb } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { getUid } from '@/utils/auth-server'
-import { formatJoinRequestChatContent } from '@/lib/team/membership-transfer'
 import {
   archiveMemberTasksForGroup,
   restoreMemberTasksOnGroupBoard,
 } from '@/lib/team/membership-transfer.server'
+import { friendlyJoinRequestError } from '@/lib/team/join-request-errors'
+import {
+  assertJoinRequestBackend,
+  ensurePendingJoinRequest,
+  notifyTeamLeadsOfJoinRequest,
+  postJoinRequestIntroMessage,
+  validateJoinTarget,
+} from '@/lib/team/join-request.server'
 import { canKickTarget, canManageJoinRequests } from '@/lib/team/rbac'
 
 export async function createGroup(formData: FormData) {
@@ -195,7 +202,13 @@ export async function kickUser(userId: string) {
 }
 
 export type SendJoinRequestResult =
-  | { success: true; alreadySent?: boolean; chatSkipped?: boolean }
+  | {
+      success: true
+      alreadyPending?: boolean
+      chatSkipped?: boolean
+      chatPosted?: boolean
+      notifiedLeads?: boolean
+    }
   | { success: false; error: string }
 
 export type TeamJoinPreview = {
@@ -246,112 +259,44 @@ export async function sendJoinRequest(
   introMessage?: string | null,
 ): Promise<SendJoinRequestResult> {
   const uid = await getUid()
-  if (!uid) return { success: false, error: 'Not authenticated' }
+  if (!uid) return { success: false, error: 'Sign in to request a team.' }
+
+  const backend = await assertJoinRequestBackend()
+  if (!backend.ok) return { success: false, error: backend.error }
+
+  const db = backend.db
 
   try {
-    const adminDb = getAdminDb()
+    const target = await validateJoinTarget(db, groupId, uid)
+    if (!target.ok) return { success: false, error: target.error }
 
-    const { data: me, error: meError } = await adminDb
-      .from('profiles')
-      .select('group_id')
-      .eq('id', uid)
-      .single()
+    const pending = await ensurePendingJoinRequest(db, groupId, uid, introMessage)
+    if (!pending.ok) return { success: false, error: pending.error }
 
-    if (meError) throw meError
-    if (me?.group_id === groupId) {
-      return { success: false, error: 'You are already on this team.' }
-    }
+    const displayName = senderName.trim() || target.requesterName
+    await notifyTeamLeadsOfJoinRequest(db, groupId, uid, displayName)
 
-    const { count: memberCount } = await adminDb
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('group_id', groupId)
-
-    const { data: targetGroup } = await adminDb
-      .from('groups')
-      .select('capacity')
-      .eq('id', groupId)
-      .maybeSingle()
-
-    if ((memberCount ?? 0) >= (targetGroup?.capacity ?? 5)) {
-      return { success: false, error: 'This team is at capacity.' }
-    }
-
-    const { data: existingRequest, error: existingError } = await adminDb
-      .from('group_join_requests')
-      .select('id, intro_message_sent, intro_message')
-      .eq('group_id', groupId)
-      .eq('user_id', uid)
-      .eq('status', 'pending')
-      .limit(1)
-      .maybeSingle()
-
-    if (existingError) throw existingError
-
-    let requestId = existingRequest?.id
-
-    if (!existingRequest) {
-      const trimmedIntro = introMessage?.trim() || null
-      const { data: inserted, error: requestError } = await adminDb
-        .from('group_join_requests')
-        .insert({
-          group_id: groupId,
-          user_id: uid,
-          status: 'pending',
-          intro_message: trimmedIntro,
-          intro_message_sent: false,
-        })
-        .select('id')
-        .single()
-
-      if (requestError) throw requestError
-      requestId = inserted.id
-    } else if (introMessage?.trim() && !existingRequest.intro_message) {
-      await adminDb
-        .from('group_join_requests')
-        .update({ intro_message: introMessage.trim().slice(0, 500) })
-        .eq('id', existingRequest.id)
-    }
-
-    if (existingRequest?.intro_message_sent) {
-      return { success: true, alreadySent: true }
-    }
-
-    const chatBody = formatJoinRequestChatContent(
-      senderName,
-      introMessage ?? existingRequest?.intro_message,
+    const chat = await postJoinRequestIntroMessage(
+      db,
+      groupId,
+      uid,
+      displayName,
+      pending.request,
+      introMessage,
     )
-
-    const { error: messageError } = await adminDb.from('messages').insert({
-      group_id: groupId,
-      user_id: uid,
-      content: chatBody,
-      is_deleted: false,
-    })
-
-    if (messageError) {
-      console.warn('[sendJoinRequest] team chat intro failed:', messageError.message)
-      if (!requestId) throw messageError
-      revalidatePath('/settings')
-      revalidatePath(`/analytics/${groupId}`)
-      return { success: true, chatSkipped: true }
-    }
-
-    if (requestId) {
-      await adminDb
-        .from('group_join_requests')
-        .update({ intro_message_sent: true, updated_at: new Date().toISOString() })
-        .eq('id', requestId)
-    }
 
     revalidatePath('/settings')
     revalidatePath(`/analytics/${groupId}`)
-    return { success: true }
+
+    return {
+      success: true,
+      alreadyPending: !pending.created && pending.request.intro_message_sent,
+      chatPosted: chat.sent,
+      chatSkipped: !chat.sent && !chat.skipped,
+      notifiedLeads: true,
+    }
   } catch (err: unknown) {
-    const raw = err instanceof Error ? err.message : 'Could not send join request'
-    const message = raw.includes('service role')
-      ? 'Join requests are temporarily unavailable. Please try again later or contact support.'
-      : raw
+    const message = friendlyJoinRequestError(err)
     console.error('[sendJoinRequest]', message, err)
     return { success: false, error: message }
   }
@@ -442,7 +387,7 @@ export async function acceptJoinRequest(requestId: string) {
     revalidatePath('/settings')
     return { success: true }
   } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'unknown error' }
+    return { error: friendlyJoinRequestError(err, 'Could not accept join request') }
   }
 }
 
@@ -473,7 +418,7 @@ export async function declineJoinRequest(requestId: string) {
     revalidatePath('/')
     return { success: true }
   } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'unknown error' }
+    return { error: friendlyJoinRequestError(err, 'Could not decline join request') }
   }
 }
 
@@ -533,7 +478,7 @@ export async function fetchSentJoinRequestGroupIds(): Promise<string[]> {
     .from('group_join_requests')
     .select('group_id')
     .eq('user_id', uid)
-    .in('status', ['pending', 'accepted'])
+    .eq('status', 'pending')
 
   if (error) {
     console.warn('[fetchSentJoinRequestGroupIds]', error.message)

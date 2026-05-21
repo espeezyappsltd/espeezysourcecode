@@ -194,24 +194,25 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       const { sendJoinRequest } = await import('@/app/join/actions')
       const res = await sendJoinRequest(groupId, currentUser.full_name || 'A student')
       if (!res.success) {
-        addToast('Could not send join request', res.error, 'error')
+        addToast('Join request failed', res.error, 'error')
         return
       }
       setHasSentRequest(true)
       setJoinPreview((prev) => (prev ? { ...prev, hasPendingRequest: true } : prev))
+      if (res.alreadyPending) {
+        addToast('Already requested', 'You already have a pending request for this team.', 'info')
+        return
+      }
       addToast(
         'Request sent',
-        res.chatSkipped
-          ? 'Your team leader was notified. The intro chat message could not be posted yet.'
-          : 'Your join request and team chat message were sent.',
+        res.chatPosted
+          ? 'Your team lead was notified and your intro was posted in team chat.'
+          : 'Your team lead was notified. You can add a message in Settings → Workspace.',
         'success',
       )
     } catch (err: unknown) {
-      addToast(
-        'Could not send join request',
-        err instanceof Error ? err.message : 'Something went wrong. Try again.',
-        'error',
-      )
+      const { friendlyJoinRequestError } = await import('@/lib/team/join-request-errors')
+      addToast('Join request failed', friendlyJoinRequestError(err), 'error')
     } finally {
       setJoinSubmitting(false)
     }

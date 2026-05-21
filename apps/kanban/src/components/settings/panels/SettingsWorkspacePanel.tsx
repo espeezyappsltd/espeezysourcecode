@@ -20,6 +20,7 @@ export function SettingsWorkspacePanel({ vm }: { vm: SettingsPageViewModel }) {
     setSentRequests,
     setError,
     getErrorMessage,
+    addToast,
   } = vm
 
   const [joinMessageByGroup, setJoinMessageByGroup] = useState<Record<string, string>>({})
@@ -120,12 +121,26 @@ export function SettingsWorkspacePanel({ vm }: { vm: SettingsPageViewModel }) {
                   joinMessageByGroup[group.id] ?? null,
                 )
                 if (!res.success) {
-                  setError(`Request failed: ${res.error}`)
+                  setError(res.error)
+                  addToast('Join request failed', res.error, 'error')
                   return
                 }
                 setSentRequests((prev) => [...new Set([...prev, group.id])])
+                if (res.alreadyPending) {
+                  addToast('Already requested', 'Waiting for this team lead to approve.', 'info')
+                } else {
+                  addToast(
+                    'Request sent',
+                    res.chatPosted
+                      ? 'Team lead notified — intro posted in team chat.'
+                      : 'Team lead notified. They can approve you in the dashboard.',
+                    'success',
+                  )
+                }
               } catch (err: unknown) {
-                setError(`Request failed: ${getErrorMessage(err, 'unknown request error')}`)
+                const msg = getErrorMessage(err, 'Could not send join request')
+                setError(msg)
+                addToast('Join request failed', msg, 'error')
               } finally {
                 setPendingRequests((prev) => prev.filter((id) => id !== group.id))
               }

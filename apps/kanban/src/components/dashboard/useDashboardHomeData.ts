@@ -107,7 +107,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     const { acceptJoinRequest } = await import('@/app/join/actions')
     const res = await acceptJoinRequest(id)
     if (res.error) {
-      addToast('Oops, something went wrong', "We couldn't add the member right now. Let's try again.", 'error')
+      addToast('Could not accept request', res.error, 'error')
       return
     }
 
@@ -120,7 +120,7 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     const { declineJoinRequest } = await import('@/app/join/actions')
     const res = await declineJoinRequest(id)
     if (res.error) {
-      addToast('Slight issue', "We couldn't update the request. Please try again.", 'error')
+      addToast('Could not decline request', res.error, 'error')
       return
     }
 
