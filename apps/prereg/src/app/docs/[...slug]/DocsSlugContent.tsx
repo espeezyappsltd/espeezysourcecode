@@ -33,7 +33,7 @@ const docsContent: Record<string, DocEntry> = {
   'getting-started': {
     title: 'Quick Start Guide',
     icon: <Zap size={40} />,
-    tagline: 'From zero to a fully running group project workspace in under three minutes.',
+    tagline: 'Get your workspace setup in under three minutes.',
     sections: [
       {
         heading: 'Step 1: Create your account',
@@ -42,13 +42,13 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Step 2: Set up your workspace',
-        body: 'Every project lives inside a workspace. A workspace represents your course or module. You set the name, subject area, deadline, and the grading weight of collaboration (used by the team balance summary). You can connect your LMS (Canvas, Blackboard, Moodle) to auto-import assignments and deadlines.',
-        items: ['One workspace per course or group project', 'LMS sync pulls assignment titles, due dates, and members', 'Workspace settings can be locked by an educator or left open to the group'],
+        body: 'Every project lives inside a workspace. A workspace represents your course or module. You set the name, subject area, deadline, and the grading weight of collaboration (used by the team balance summary). You can connect your LMS (Canvas, Blackboard, Moodle) to import assignments and deadlines.',
+        items: ['One workspace per course or group project', 'Workspace settings can be locked by an educator or left open to the group'],
       },
       {
         heading: 'Step 3: Invite your team',
-        body: 'Share a workspace link or send email invites directly from the dashboard. Each new member picks a role (Contributor, Reviewer, or Observer). Role permissions can be changed at any time. The workspace admin (whoever created it) has override access to all task states.',
-        items: ['Share link or email invite', 'Role-based permissions: Contributor, Reviewer, Observer', 'Students can join multiple workspaces simultaneously'],
+        body: 'Share the team name and passcode. Each new member is added as a Contributor. Role permissions can be changed at any time. The workspace admin (whoever created it) has override access to all task states.',
+        items: ['Share team name and passcode', 'Role-based permissions: Contributor, Reviewer, Observer', 'Students can join multiple workspaces simultaneously'],
       },
       {
         heading: 'Step 4: Add your first tasks',
@@ -56,48 +56,48 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Step 5: Record and submit',
-        body: 'As tasks move through the board columns (Backlog, In Progress, Review, Done), Espeezy logs every state change with a timestamp and the user who made it. This contribution log is what generates your individual contribution score, which educators can optionally view. At submission time, you can export a full contribution report as a PDF.',
+        body: 'As tasks move through the board columns (Backlog, In Progress, Review, Done), the app logs every state change with a timestamp and the user who made it. This contribution log is your individual contribution data, which educators can optionally view. At submission time, you can export a full contribution report as a PDF or CSV.',
       },
     ],
-    eli12: 'It is like setting up a new base in a game. You create your character, find your team, give everyone a job, and start your first mission. Espeezy keeps score so nobody can pretend they did more than they actually did.',
+    eli12: 'It is like setting up a new base in a game. You create your character, find your team, give everyone a job, and start your first mission. The app keeps score of the moves you make.',
   },
 
   'installation': {
-    title: 'Setting Up Espeezy',
+    title: 'Setting Up The App',
     icon: <Box size={40} />,
-    tagline: 'Espeezy is a web-first platform. There is nothing to download. Here is what you need to know.',
+    tagline: 'Espeezy Kanban Dashboard is a cross-platform app. There is no download. Here is what you need to know.',
     sections: [
       {
-        heading: 'Web app (no installation needed)',
+        heading: 'Cross-platform app (no installation needed)',
         body: INSTALLATION_WEB_BODY,
       },
       {
         heading: 'Progressive Web App (PWA)',
-        body: 'On mobile, you can install Espeezy as a PWA directly from your browser. This adds it to your home screen like a native app, enables offline task viewing (cached from your last sync), and sends push notifications for task updates and deadlines.',
+        body: 'On mobile, you can install the dashboard app as a PWA directly from your browser. This adds it to your home screen like a native app, enables offline task viewing (cached from your last sync), and sends push notifications for task updates and deadlines.',
         items: ['Android: open in Chrome, tap "Add to Home Screen"', 'iOS: open in Safari, tap Share, then "Add to Home Screen"', 'Offline mode: read-only view of your last synced workspace'],
       },
       {
         heading: 'Self-hosted deployment (for institutions)',
-        body: 'Universities and colleges that need to host Espeezy within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Supabase (PostgreSQL and GoTrue Auth), and runs on any Node 24-compatible server or Vercel/Cloudflare Workers. A Docker image is provided for easy deployment.',
+        body: 'Universities and colleges that need to host the platform within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Supabase (PostgreSQL and GoTrue Auth), and runs on any Node 24-compatible server or Vercel/Cloudflare Workers. A Docker image is provided for easy deployment.',
         items: ['Docker image available: ghcr.io/espeezy/app:latest', 'Environment variables required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY', 'SSO integration via SAML 2.0 and OAuth 2.0 (institutional IdP)'],
       },
       {
-        heading: 'LMS integration setup',
-        body: 'To connect Espeezy to your institution LMS, an administrator generates an API key in the Espeezy institution dashboard and pastes it into the LMS plugin settings. Plugins are available for Canvas, Blackboard Learn, and Moodle. Once connected, all courses, assignments, and enrolled students sync automatically.',
-        items: ['Canvas: install via App Configurations in Admin Settings', 'Blackboard: install via Building Blocks (admin access required)', 'Moodle: install the Espeezy plugin from the Moodle Plugin Directory'],
+        heading: 'LMS Integration',
+        body: 'To connect the Kanban Dashboard App to your institution LMS, an administrator generates an API key in the Espeezy institution dashboard and pastes it into the LMS plugin settings. Plugins are available for Canvas, Blackboard Learn, and Moodle. Once connected, all courses, assignments, and enrolled students sync automatically.',
+        items: ['Canvas: install via App Configurations in Admin Settings', 'Blackboard: install via Building Blocks (admin access required)', 'Moodle: install the Kanban Dashboard plugin from the Moodle Plugin Directory'],
       },
     ],
-    eli12: 'You do not install anything. Just open a website, sign in, and it works. If you want it on your phone like a real app, tap one button in your browser and it appears on your home screen.',
+    eli12: 'You do not install anything. Just open the app, sign in, and it works. If you want it on your phone like a real app, tap one button in your browser and it appears on your home screen.',
   },
 
   'features/kanban': {
-    title: 'Digital Kanban Board',
+    title: 'Kanban Dashboard',
     icon: <LayoutGrid size={40} />,
-    tagline: 'A visual task board that makes every contribution visible, timestamped, and easy to review.',
+    tagline: 'The main task board that you will be working on. Every contribution is visible, timestamped, and easy to review.',
     sections: [
       {
         heading: 'How the board works',
-        body: 'Each project workspace has one Kanban board with five columns: Backlog, In Progress, In Review, Blocked, and Done. Task cards can be dragged between columns by any Contributor. Every move is recorded with the exact timestamp and the username of who moved it. This creates a tamper-evident audit trail of the entire project history.',
+        body: 'Each project workspace has one Kanban board with five columns: Backlog, In Progress, In Review, Blocked, and Done. Task cards can be dragged between columns by any Contributor. Every move is recorded with the exact timestamp and the username of who moved it. This creates a tamper-evident audit trail of the entire workspace history.',
       },
       {
         heading: 'Task cards in detail',
