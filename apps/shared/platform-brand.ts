@@ -10,8 +10,8 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
-  'Espeezy Learning Platform!',
-  'Personal secure workspaces, real-time project analytics, hustle-gigs, campus marketplace, peer networks, and so much more.' 
+  'Espeezy Learning Platform',
+  'Real-time team collaboration, shared verifiable history, free secure storage space, marketplace exchange, hustle-gigs, peer networks, and so much more.' 
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Try out the live demo'
