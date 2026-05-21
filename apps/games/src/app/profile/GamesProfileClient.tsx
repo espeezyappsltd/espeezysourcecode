@@ -91,7 +91,7 @@ export default function GamesProfileClient({ data }: { data: LoadedGamesProfile 
   }
 
   return (
-    <main className="games-profile">
+    <div className="games-profile games-profile--in-shell">
       <div className="games-profile__inner">
         <header className={headerClass}>
           <div className="games-profile__header-glow" aria-hidden />
@@ -147,8 +147,8 @@ export default function GamesProfileClient({ data }: { data: LoadedGamesProfile 
             <a href={kanbanUrl} className="games-profile__btn games-profile__btn--primary">
               Open Kanban
             </a>
-            <Link href="/categories" className="games-profile__btn games-profile__btn--secondary">
-              Browse skirmishes
+            <Link href="/" className="games-profile__btn games-profile__btn--secondary">
+              Browse games
             </Link>
             {publicProfileUrl && (
               <a href={publicProfileUrl} className="games-profile__btn games-profile__btn--ghost">
@@ -262,7 +262,7 @@ export default function GamesProfileClient({ data }: { data: LoadedGamesProfile 
             {recentSessions.length === 0 ? (
               <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.88rem' }}>
                 No skirmishes yet.{' '}
-                <Link href="/categories" style={{ color: '#818cf8', fontWeight: 700 }}>
+                <Link href="/" style={{ color: '#818cf8', fontWeight: 700 }}>
                   Pick a category →
                 </Link>
               </p>
@@ -349,6 +349,6 @@ export default function GamesProfileClient({ data }: { data: LoadedGamesProfile 
           Profile, storage, and folders are linked to your Espeezy account across Games and Kanban.
         </p>
       </div>
-    </main>
+    </div>
   )
 }

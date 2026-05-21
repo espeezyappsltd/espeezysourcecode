@@ -2,6 +2,7 @@ export type Game = {
   id: string;
   name: string;
   url: string;
+  category_id?: string;
   description?: string;
   image_url?: string;
   author?: string;

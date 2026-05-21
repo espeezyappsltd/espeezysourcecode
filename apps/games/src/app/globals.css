@@ -2,16 +2,61 @@
 @import '../shared/design/base.css';
 
 :root {
-  --accent: #10b981;
-  --hero-gradient: linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%);
+  --games-bg: #070b14;
+  --games-bg-elevated: #0c1220;
+  --games-surface: #111827;
+  --games-surface-2: #1a2336;
+  --games-border: rgba(148, 163, 184, 0.12);
+  --games-text: #f1f5f9;
+  --games-muted: #94a3b8;
+  --games-brand: #818cf8;
+  --games-brand-rgb: 129, 140, 248;
+  --games-accent: #22d3ee;
+  --games-accent-2: #a78bfa;
+  --games-success: #34d399;
+  --games-glow: rgba(129, 140, 248, 0.35);
+  --games-sidebar-open: 280px;
+  --games-sidebar-collapsed: 84px;
+  --hero-gradient: linear-gradient(135deg, #4f46e5 0%, #06b6d4 45%, #a78bfa 100%);
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--games-bg);
+  color: var(--games-text);
+}
+
+body.body-lock {
+  overflow: hidden;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }

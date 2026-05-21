@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { loadGamesProfile } from '@/lib/profile/load-games-profile'
-import GamesProfileClient from './GamesProfileClient'
+import GamesProfileClient from '@/app/profile/GamesProfileClient'
 
 export const dynamic = 'force-dynamic'
 

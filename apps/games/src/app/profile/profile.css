@@ -1,3 +1,7 @@
+.games-profile--in-shell {
+  padding: 0;
+}
+
 .games-profile {
   --gp-bg: #0f172a;
   --gp-surface: #111827;
@@ -10,8 +14,7 @@
   --gp-success: #10b981;
   --gp-gold: #fbbf24;
   --gp-pro: #3b82f6;
-  min-height: 100vh;
-  background: var(--gp-bg);
+  background: transparent;
   color: var(--gp-text);
   padding: 2rem 1rem 4rem;
 }
