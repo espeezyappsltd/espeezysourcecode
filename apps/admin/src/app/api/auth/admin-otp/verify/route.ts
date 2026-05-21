@@ -5,8 +5,9 @@ import {
   memberRosterEmail,
   verifyAdminOtpCode,
 } from '@/lib/admin-login-otp'
+import { ensureStaffAuthUser } from '@/lib/staff-auth-sync'
 import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
-import { getAdminMemberByUsername } from '@/utils/admin-auth'
+import { getAdminMemberByUserId, getAdminMemberByUsername } from '@/utils/admin-auth'
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
   }
 
   const svc = await createAdminClient()
-  const member = await getAdminMemberByUsername(normalized, svc)
+  let member = await getAdminMemberByUsername(normalized, svc)
   const email = member ? memberRosterEmail(member) : null
 
   if (!member || !email) {
@@ -55,13 +56,24 @@ export async function POST(req: Request) {
 
   await svc.from('admin_login_otps').update({ consumed_at: new Date().toISOString() }).eq('id', otpRow.id)
 
+  const authSync = await ensureStaffAuthUser(svc, member, { createIfMissing: true })
+  if (!authSync.ok) {
+    return NextResponse.json({ error: authSync.error }, { status: 500 })
+  }
+
+  const authUserId = authSync.userId
+  member = (await getAdminMemberByUserId(authUserId, svc)) ?? member
+
   const { data: linkData, error: linkError } = await svc.auth.admin.generateLink({
     type: 'magiclink',
     email: member.email,
   })
 
   if (linkError || !linkData?.properties?.hashed_token) {
-    return NextResponse.json({ error: 'Could not complete sign in' }, { status: 500 })
+    return NextResponse.json(
+      { error: linkError?.message ?? 'Could not complete sign in' },
+      { status: 500 },
+    )
   }
 
   const db = await createServerSupabaseClient()
@@ -71,26 +83,46 @@ export async function POST(req: Request) {
   })
 
   if (sessionError) {
-    return NextResponse.json({ error: 'Could not complete sign in' }, { status: 500 })
+    return NextResponse.json({ error: `Could not complete sign in: ${sessionError.message}` }, { status: 500 })
+  }
+
+  const {
+    data: { user },
+  } = await db.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Session was not created. Try again.' }, { status: 500 })
+  }
+
+  const rosterMember = await getAdminMemberByUserId(user.id, svc)
+  if (!rosterMember) {
+    await db.auth.signOut()
+    return NextResponse.json(
+      {
+        error:
+          'Signed in, but this account is not on the staff roster. Ask your platform lead to run staff seed for your email.',
+      },
+      { status: 403 },
+    )
   }
 
   await svc
     .from('admin_members')
     .update({ last_seen_at: new Date().toISOString() })
-    .eq('id', member.id)
+    .eq('id', user.id)
 
   await svc.from('chat_events').insert({
     app_scope: 'admin',
     event_type: 'join',
-    username: member.username,
-    supabase_user_id: member.id,
-    details: { at: new Date().toISOString(), method: 'email_otp' },
+    username: rosterMember.username,
+    supabase_user_id: user.id,
+    details: { at: new Date().toISOString(), method: 'email_otp', auth_repaired: authSync.repaired },
   })
 
   return NextResponse.json({
     ok: true,
-    username: member.username,
-    role: member.admin_role,
-    display_name: member.display_name,
+    username: rosterMember.username,
+    role: rosterMember.admin_role,
+    display_name: rosterMember.display_name,
   })
 }

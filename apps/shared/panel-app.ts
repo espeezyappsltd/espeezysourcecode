@@ -1,15 +1,14 @@
-import { ESPEEZY_APP_ORIGINS } from './app-url'
-
 /**
  * Monorepo mapping: `apps/admin` deploys to panel.espeezy.com.
  * Use this constant in docs, dev-hub, and Vercel — not the legacy "admin" hostname alone.
+ * (Do not import from app-url.ts — avoids circular init with ESPEEZY_APP_ORIGINS.)
  */
 export const ESPEEZY_PANEL_APP = {
   id: 'panel',
   /** npm workspace folder */
   packagePath: 'apps/admin',
   packageName: 'espeezy-admin',
-  productionOrigin: ESPEEZY_APP_ORIGINS.panel,
+  productionOrigin: 'https://panel.espeezy.com',
   productionHost: 'panel.espeezy.com',
   localPort: 3004,
   localOrigin: 'http://localhost:3004',

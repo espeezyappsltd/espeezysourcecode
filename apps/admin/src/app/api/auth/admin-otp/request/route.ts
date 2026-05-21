@@ -11,7 +11,9 @@ import {
 } from '@/lib/admin-login-otp'
 import { createAdminClient } from '@/lib/db'
 import { getAdminMemberByUsername } from '@/utils/admin-auth'
-import { deliverAdminLoginOtpEmail } from '@/services/admin-login-notify'
+import { formatSupabaseError } from '@/utils/supabase-errors'
+import { ensureStaffAuthUser } from '@/lib/staff-auth-sync'
+import { deliverAdminLoginOtpEmail, isPanelOtpDevMode } from '@/services/admin-login-notify'
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -23,10 +25,19 @@ export async function POST(req: Request) {
   }
 
   const svc = await createAdminClient()
-  const member = await getAdminMemberByUsername(normalized, svc)
+  let member = await getAdminMemberByUsername(normalized, svc)
 
   if (!member) {
     return NextResponse.json({ error: 'Invalid username' }, { status: 401 })
+  }
+
+  const authSync = await ensureStaffAuthUser(svc, member, { createIfMissing: true })
+  if (!authSync.ok) {
+    return NextResponse.json({ error: authSync.error }, { status: 500 })
+  }
+
+  if (authSync.repaired) {
+    member = (await getAdminMemberByUsername(normalized, svc)) ?? member
   }
 
   const email = memberRosterEmail(member)
@@ -66,29 +77,52 @@ export async function POST(req: Request) {
   })
 
   if (insertError) {
-    return NextResponse.json({ error: 'Could not start login. Try again.' }, { status: 500 })
+    return NextResponse.json(
+      { error: formatSupabaseError(insertError, 'Could not start login. Try again.') },
+      { status: 500 },
+    )
   }
 
-  const emailSent = await deliverAdminLoginOtpEmail({
+  const delivery = await deliverAdminLoginOtpEmail({
     email,
     username: member.username,
     code,
   })
 
-  if (!emailSent) {
-    return NextResponse.json(
-      { error: 'Login email is not configured (Resend/SMTP). Contact your platform lead.' },
-      { status: 503 },
-    )
+  const devMode = isPanelOtpDevMode()
+
+  if (devMode) {
+    console.info('[admin-otp] dev login', {
+      username: member.username,
+      email,
+      code,
+      delivery: delivery.ok ? delivery.channel : delivery.error,
+    })
   }
 
-  if (process.env.ADMIN_OTP_LOG_DEV === 'true' && process.env.NODE_ENV !== 'production') {
-    console.info('[admin-otp]', member.username, email, code)
+  if (!delivery.ok) {
+    if (devMode) {
+      console.info('[admin-otp] email failed — dev code', { username: member.username, email, code })
+      return NextResponse.json({
+        ok: true,
+        emailHint: staffEmailHint(member),
+        emailSent: false,
+        devCode: code,
+        emailError: delivery.error,
+      })
+    }
+    return NextResponse.json(
+      {
+        error: `Could not send login email. ${delivery.error} Check RESEND_API_KEY and RESEND_FROM_EMAIL (use onboarding@resend.dev for Resend sandbox).`,
+      },
+      { status: 503 },
+    )
   }
 
   return NextResponse.json({
     ok: true,
     emailHint: staffEmailHint(member),
     emailSent: true,
+    channel: delivery.channel,
   })
 }

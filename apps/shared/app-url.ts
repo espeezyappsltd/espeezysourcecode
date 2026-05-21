@@ -1,5 +1,3 @@
-export { ESPEEZY_PANEL_APP, PANEL_VERCEL_ROOT, isPanelProductionHost } from './panel-app'
-
 /** Canonical production origins for Espeezy apps (used for auth redirects and links). */
 export const ESPEEZY_APP_ORIGINS = {
   prereg: 'https://espeezy.com',
@@ -150,3 +148,5 @@ export function withEmbedPreviewParam(url: string): string {
     return url
   }
 }
+
+export { ESPEEZY_PANEL_APP, PANEL_VERCEL_ROOT, isPanelProductionHost } from './panel-app'
