@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "$comment": "Espeezy Panel Vercel project only (panel.espeezy.com). Maps monorepo root → apps/admin. Do not use for prereg/kanban.",
   "installCommand": "npm install",
   "buildCommand": "npm run vercel-build:panel",
   "devCommand": "npm run dev:admin",
