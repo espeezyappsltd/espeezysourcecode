@@ -68,15 +68,19 @@ export async function POST(req: Request) {
   const code = generateAdminOtpCode()
   const expiresAt = new Date(Date.now() + ADMIN_OTP_TTL_MS).toISOString()
 
-  const { error: insertError } = await svc.from('admin_login_otps').insert({
-    admin_member_id: member.id,
-    username: member.username,
-    email,
-    code_hash: hashAdminOtpCode(code),
-    expires_at: expiresAt,
-  })
+  const { data: otpRow, error: insertError } = await svc
+    .from('admin_login_otps')
+    .insert({
+      admin_member_id: member.id,
+      username: member.username,
+      email,
+      code_hash: hashAdminOtpCode(code),
+      expires_at: expiresAt,
+    })
+    .select('id')
+    .single()
 
-  if (insertError) {
+  if (insertError || !otpRow?.id) {
     return NextResponse.json(
       { error: formatSupabaseError(insertError, 'Could not start login. Try again.') },
       { status: 500 },
@@ -87,6 +91,7 @@ export async function POST(req: Request) {
     email,
     username: member.username,
     code,
+    otpId: otpRow.id,
   })
 
   const devMode = isPanelOtpDevMode()
@@ -113,7 +118,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(
       {
-        error: `Could not send login email. ${delivery.error} Check RESEND_API_KEY and RESEND_FROM_EMAIL (use onboarding@resend.dev for Resend sandbox).`,
+        error: `Could not send login email. ${delivery.error} Set RESEND_API_KEY and a verified RESEND_FROM_EMAIL on Vercel.`,
       },
       { status: 503 },
     )
