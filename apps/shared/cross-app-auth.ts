@@ -56,15 +56,19 @@ export function buildGamesProfileSsoUrl(
   return buildCrossAppSsoUrl(gamesOrigin ?? resolveGamesAppOrigin(), GAMES_PROFILE_PATH, session)
 }
 
+export function buildKanbanAppSsoUrl(
+  session: CrossAppSessionTokens | null | undefined,
+  nextPath: string = KANBAN_WORKSPACE_PATH,
+  kanbanOrigin?: string,
+): string {
+  return buildCrossAppSsoUrl(kanbanOrigin ?? resolveKanbanAppOrigin(), nextPath, session)
+}
+
 export function buildKanbanWorkspaceSsoUrl(
   session: CrossAppSessionTokens | null | undefined,
   kanbanOrigin?: string,
 ): string {
-  return buildCrossAppSsoUrl(
-    kanbanOrigin ?? resolveKanbanAppOrigin(),
-    KANBAN_WORKSPACE_PATH,
-    session,
-  )
+  return buildKanbanAppSsoUrl(session, KANBAN_WORKSPACE_PATH, kanbanOrigin)
 }
 
 /** Public games profile by username (no SSO). */

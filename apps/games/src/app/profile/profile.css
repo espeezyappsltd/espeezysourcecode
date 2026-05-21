@@ -1,0 +1,408 @@
+.games-profile {
+  --gp-bg: #0f172a;
+  --gp-surface: #111827;
+  --gp-surface-2: #1e293b;
+  --gp-border: rgba(255, 255, 255, 0.08);
+  --gp-text: #f8fafc;
+  --gp-muted: #94a3b8;
+  --gp-brand: #6366f1;
+  --gp-brand-soft: rgba(99, 102, 241, 0.12);
+  --gp-success: #10b981;
+  --gp-gold: #fbbf24;
+  --gp-pro: #3b82f6;
+  min-height: 100vh;
+  background: var(--gp-bg);
+  color: var(--gp-text);
+  padding: 2rem 1rem 4rem;
+}
+
+.games-profile__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.games-profile__header {
+  position: relative;
+  overflow: hidden;
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-border);
+  border-radius: 24px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.games-profile__header--premium {
+  border-color: rgba(251, 191, 36, 0.45);
+  box-shadow: 0 0 40px rgba(251, 191, 36, 0.12);
+}
+
+.games-profile__header--pro {
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+}
+
+.games-profile__header-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, var(--gp-brand) 0%, transparent 70%);
+  opacity: 0.12;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.games-profile__identity {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.games-profile__avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid var(--gp-surface-2);
+  background: var(--gp-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.games-profile__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.games-profile__avatar--premium {
+  border-color: var(--gp-gold);
+}
+
+.games-profile__avatar--pro {
+  border-color: var(--gp-pro);
+}
+
+.games-profile__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #818cf8;
+}
+
+.games-profile__name {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.games-profile__handle {
+  margin: 0.35rem 0 0;
+  color: var(--gp-muted);
+  font-weight: 700;
+}
+
+.games-profile__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.games-profile__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.games-profile__badge--plan {
+  background: var(--gp-brand-soft);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.games-profile__badge--plan.premium {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--gp-gold);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.games-profile__badge--plan.pro {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.games-profile__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--gp-muted);
+}
+
+.games-profile__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 860px) {
+  .games-profile__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.games-profile__card {
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-border);
+  border-radius: 20px;
+  padding: 1.25rem 1.35rem;
+}
+
+.games-profile__card-title {
+  margin: 0 0 1rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gp-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.games-profile__stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.games-profile__stat {
+  background: var(--gp-surface-2);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+
+.games-profile__stat-value {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 950;
+  color: #e2e8f0;
+}
+
+.games-profile__stat-label {
+  font-size: 0.72rem;
+  color: var(--gp-muted);
+  font-weight: 700;
+}
+
+.games-profile__level-bar {
+  margin-top: 1rem;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--gp-surface-2);
+  overflow: hidden;
+}
+
+.games-profile__level-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gp-brand), #818cf8);
+  transition: width 0.4s ease;
+}
+
+.games-profile__storage {
+  margin-top: 0.5rem;
+}
+
+.games-profile__storage-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--gp-muted);
+  margin-bottom: 0.5rem;
+}
+
+.games-profile__storage-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--gp-surface-2);
+  overflow: hidden;
+}
+
+.games-profile__storage-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.games-profile__storage-fill.warn {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.games-profile__storage-fill.critical {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.games-profile__folders {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.games-profile__folder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: var(--gp-surface-2);
+  border: 1px solid transparent;
+}
+
+.games-profile__folder-name {
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+.games-profile__folder-desc {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  color: var(--gp-muted);
+  line-height: 1.4;
+}
+
+.games-profile__folder-count {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #a5b4fc;
+  white-space: nowrap;
+}
+
+.games-profile__sessions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.games-profile__session {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: var(--gp-surface-2);
+  font-size: 0.82rem;
+}
+
+.games-profile__session-status {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+}
+
+.games-profile__session-status.completed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
+.games-profile__session-status.active {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+}
+
+.games-profile__bio {
+  margin-top: 1.25rem;
+}
+
+.games-profile__bio-text {
+  margin: 0;
+  line-height: 1.65;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.games-profile__bio-edit textarea {
+  width: 100%;
+  min-height: 100px;
+  border-radius: 12px;
+  border: 1px solid var(--gp-border);
+  background: var(--gp-surface-2);
+  color: var(--gp-text);
+  padding: 0.75rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  resize: vertical;
+}
+
+.games-profile__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.games-profile__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.84rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.games-profile__btn--primary {
+  background: var(--gp-success);
+  color: #fff;
+}
+
+.games-profile__btn--secondary {
+  background: transparent;
+  border: 1px solid var(--gp-border);
+  color: #e2e8f0;
+}
+
+.games-profile__btn--ghost {
+  background: var(--gp-brand-soft);
+  color: #c7d2fe;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.games-profile__btn--small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.games-profile__footer-note {
+  margin-top: 1.5rem;
+  font-size: 0.72rem;
+  color: rgba(148, 163, 184, 0.65);
+  text-align: center;
+}
