@@ -1,5 +1,4 @@
 import { createHash, randomInt, timingSafeEqual } from 'crypto'
-import { parsePhoneNumber, type CountryCode } from 'libphonenumber-js'
 import type { AdminMember } from '@/lib/admin-rbac'
 
 export const ADMIN_OTP_TTL_MS = 10 * 60 * 1000
@@ -35,35 +34,26 @@ export function verifyAdminOtpCode(code: string, storedHash: string): boolean {
   }
 }
 
-export function normalizeStaffPhone(input: string, defaultCountry: CountryCode = 'US'): string | null {
-  const raw = input.trim()
-  if (!raw) return null
-  try {
-    const parsed = raw.startsWith('+')
-      ? parsePhoneNumber(raw)
-      : parsePhoneNumber(raw, defaultCountry)
-    if (!parsed?.isValid()) return null
-    return parsed.format('E.164')
-  } catch {
-    return null
-  }
+export function normalizeStaffEmail(email: string): string {
+  return email.trim().toLowerCase()
 }
 
-export function staffPhoneMatches(member: AdminMember, enteredPhone: string): boolean {
-  const stored = member.phone ? normalizeStaffPhone(member.phone) : null
-  const entered = normalizeStaffPhone(enteredPhone)
-  if (!stored || !entered) return false
-  return stored === entered
+export function maskStaffEmail(email: string): string {
+  const normalized = normalizeStaffEmail(email)
+  const at = normalized.indexOf('@')
+  if (at < 1) return '•••@•••'
+  const local = normalized.slice(0, at)
+  const domain = normalized.slice(at + 1)
+  const visible = local.slice(0, Math.min(2, local.length))
+  return `${visible}•••@${domain}`
 }
 
-export function maskStaffPhone(e164: string): string {
-  const digits = e164.replace(/\D/g, '')
-  if (digits.length < 4) return '••••'
-  return `••••${digits.slice(-4)}`
+export function staffEmailHint(member: AdminMember): string | null {
+  if (!member.email?.trim()) return null
+  return maskStaffEmail(member.email)
 }
 
-export function staffPhoneHint(member: AdminMember): string | null {
-  if (!member.phone) return null
-  const e164 = normalizeStaffPhone(member.phone)
-  return e164 ? maskStaffPhone(e164) : null
+export function memberRosterEmail(member: AdminMember): string | null {
+  if (!member.email?.trim()) return null
+  return normalizeStaffEmail(member.email)
 }

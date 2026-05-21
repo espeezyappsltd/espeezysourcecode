@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ShieldCheck } from 'lucide-react'
 import { ESPEEZY_APP_ORIGINS } from '@shared/app-url'
 
-type Step = 'username' | 'phone' | 'code'
+type Step = 'username' | 'code'
 
 function AdminLoginForm() {
   const router = useRouter()
@@ -15,13 +15,34 @@ function AdminLoginForm() {
 
   const [step, setStep] = useState<Step>('username')
   const [username, setUsername] = useState('')
-  const [phoneHint, setPhoneHint] = useState<string | null>(null)
+  const [emailHint, setEmailHint] = useState<string | null>(null)
   const [displayName, setDisplayName] = useState<string | null>(null)
-  const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
-  const [smsSent, setSmsSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  async function sendCode() {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/auth/admin-otp/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(data.error ?? 'Could not send code')
+        return
+      }
+      setEmailHint(data.emailHint ?? null)
+      setStep('code')
+    } catch {
+      setError('Could not send code')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   async function onUsernameSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -38,36 +59,11 @@ function AdminLoginForm() {
         setError(data.error ?? 'Could not find staff account')
         return
       }
-      setPhoneHint(data.phoneHint ?? null)
+      setEmailHint(data.emailHint ?? null)
       setDisplayName(data.displayName ?? null)
-      setStep('phone')
+      await sendCode()
     } catch {
       setError('Something went wrong')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function onPhoneSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/auth/admin-otp/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, phone }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError(data.error ?? 'Could not send code')
-        return
-      }
-      setSmsSent(Boolean(data.smsSent))
-      setStep('code')
-    } catch {
-      setError('Could not send code')
-    } finally {
       setLoading(false)
     }
   }
@@ -80,7 +76,7 @@ function AdminLoginForm() {
       const res = await fetch('/api/auth/admin-otp/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, phone, code }),
+        body: JSON.stringify({ username, code }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -91,28 +87,6 @@ function AdminLoginForm() {
       router.refresh()
     } catch {
       setError('Sign in failed')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function resendCode() {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/auth/admin-otp/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, phone }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError(data.error ?? 'Could not resend code')
-        return
-      }
-      setSmsSent(Boolean(data.smsSent))
-    } catch {
-      setError('Could not resend code')
     } finally {
       setLoading(false)
     }
@@ -130,13 +104,7 @@ function AdminLoginForm() {
       }}
     >
       <form
-        onSubmit={
-          step === 'username'
-            ? onUsernameSubmit
-            : step === 'phone'
-              ? onPhoneSubmit
-              : onCodeSubmit
-        }
+        onSubmit={step === 'username' ? onUsernameSubmit : onCodeSubmit}
         style={{
           width: '100%',
           maxWidth: '400px',
@@ -162,26 +130,22 @@ function AdminLoginForm() {
         <p style={{ color: '#666', fontSize: '0.82rem', marginBottom: '1.5rem', lineHeight: 1.45 }}>
           {step === 'username' && (
             <>
-              Enter your staff username (e.g. <strong style={{ color: '#999' }}>pete</strong>). We link it to your
-              roster email and send a one-time code to your registered phone.
-            </>
-          )}
-          {step === 'phone' && (
-            <>
-              Hi{displayName ? ` ${displayName}` : ''} — enter the mobile number on file
-              {phoneHint ? (
-                <>
-                  {' '}
-                  (ends in <strong style={{ color: '#999' }}>{phoneHint.replace(/^••••/, '')}</strong>)
-                </>
-              ) : null}
-              .
+              Enter your staff username (e.g. <strong style={{ color: '#999' }}>pete</strong>). We send a one-time code to
+              your linked roster email.
             </>
           )}
           {step === 'code' && (
             <>
-              Enter the 6-digit code sent to your phone
-              {smsSent ? '' : ' and your linked email'}.
+              Enter the 6-digit code we sent
+              {emailHint ? (
+                <>
+                  {' '}
+                  to <strong style={{ color: '#999' }}>{emailHint}</strong>
+                </>
+              ) : (
+                ' to your roster email'
+              )}
+              {displayName ? ` (${displayName})` : ''}.
             </>
           )}
         </p>
@@ -212,52 +176,20 @@ function AdminLoginForm() {
           </label>
         )}
 
-        {step === 'phone' && (
+        {step === 'code' && (
           <>
             <p style={{ color: '#555', fontSize: '0.75rem', marginBottom: '1rem' }}>
-              Signed in as <strong style={{ color: '#888' }}>@{username}</strong>
+              Code for <strong style={{ color: '#888' }}>@{username}</strong>
               <button
                 type="button"
                 onClick={() => {
                   setStep('username')
-                  setError(null)
-                }}
-                style={linkButtonStyle}
-              >
-                Change
-              </button>
-            </p>
-            <label style={{ display: 'block', marginBottom: '1.5rem' }}>
-              <span style={{ display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.35rem' }}>
-                Mobile number
-              </span>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                autoComplete="tel"
-                type="tel"
-                required
-                style={inputStyle}
-                placeholder="+1 555 000 0000"
-              />
-            </label>
-          </>
-        )}
-
-        {step === 'code' && (
-          <>
-            <p style={{ color: '#555', fontSize: '0.75rem', marginBottom: '1rem' }}>
-              Code sent for <strong style={{ color: '#888' }}>@{username}</strong>
-              <button
-                type="button"
-                onClick={() => {
-                  setStep('phone')
                   setCode('')
                   setError(null)
                 }}
                 style={linkButtonStyle}
               >
-                Change number
+                Change username
               </button>
             </p>
             <label style={{ display: 'block', marginBottom: '1rem' }}>
@@ -277,7 +209,14 @@ function AdminLoginForm() {
             </label>
             <p style={{ marginBottom: '1.25rem', fontSize: '0.78rem', color: '#555' }}>
               Didn&apos;t get it?{' '}
-              <button type="button" onClick={resendCode} disabled={loading} style={linkButtonStyle}>
+              <button
+                type="button"
+                onClick={() => {
+                  void sendCode()
+                }}
+                disabled={loading}
+                style={linkButtonStyle}
+              >
                 Resend code
               </button>
             </p>
@@ -285,13 +224,7 @@ function AdminLoginForm() {
         )}
 
         <button type="submit" disabled={loading} style={buttonStyle}>
-          {loading
-            ? 'Please wait…'
-            : step === 'username'
-              ? 'Continue'
-              : step === 'phone'
-                ? 'Send login code'
-                : 'Sign in'}
+          {loading ? 'Please wait…' : step === 'username' ? 'Send login code' : 'Sign in'}
         </button>
       </form>
     </div>

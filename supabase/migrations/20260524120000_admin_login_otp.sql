@@ -1,10 +1,10 @@
--- Staff panel login OTP (username + registered phone → code → session)
+-- Staff panel login OTP (username + roster email → code → session)
 
 CREATE TABLE IF NOT EXISTS public.admin_login_otps (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   admin_member_id uuid NOT NULL REFERENCES public.admin_members(id) ON DELETE CASCADE,
   username text NOT NULL,
-  phone_e164 text NOT NULL,
+  email text NOT NULL,
   code_hash text NOT NULL,
   attempts int NOT NULL DEFAULT 0,
   expires_at timestamptz NOT NULL,
@@ -19,6 +19,7 @@ CREATE INDEX IF NOT EXISTS admin_login_otps_active_idx
   ON public.admin_login_otps (admin_member_id, expires_at DESC)
   WHERE consumed_at IS NULL;
 
-COMMENT ON TABLE public.admin_login_otps IS 'Hashed OTP codes for panel.espeezy.com staff phone login.';
+COMMENT ON TABLE public.admin_login_otps IS 'Hashed OTP codes for panel.espeezy.com staff email login.';
+COMMENT ON COLUMN public.admin_login_otps.email IS 'Roster email the code was sent to (lowercase).';
 
 ALTER TABLE public.admin_login_otps ENABLE ROW LEVEL SECURITY;

@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { normalizeAdminUsername } from '@/lib/admin-rbac'
 import {
   ADMIN_OTP_MAX_VERIFY_ATTEMPTS,
-  normalizeStaffPhone,
-  staffPhoneMatches,
+  memberRosterEmail,
   verifyAdminOtpCode,
 } from '@/lib/admin-login-otp'
 import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
@@ -12,7 +11,6 @@ import { getAdminMemberByUsername } from '@/utils/admin-auth'
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
   const username = typeof body.username === 'string' ? body.username : ''
-  const phone = typeof body.phone === 'string' ? body.phone : ''
   const code = typeof body.code === 'string' ? body.code.replace(/\D/g, '').slice(0, 6) : ''
   const normalized = normalizeAdminUsername(username)
 
@@ -20,15 +18,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Username and 6-digit code are required' }, { status: 400 })
   }
 
-  const phoneE164 = normalizeStaffPhone(phone)
-  if (!phoneE164) {
-    return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 })
-  }
-
   const svc = await createAdminClient()
   const member = await getAdminMemberByUsername(normalized, svc)
+  const email = member ? memberRosterEmail(member) : null
 
-  if (!member || !staffPhoneMatches(member, phone)) {
+  if (!member || !email) {
     return NextResponse.json({ error: 'Invalid login' }, { status: 401 })
   }
 
@@ -36,7 +30,7 @@ export async function POST(req: Request) {
     .from('admin_login_otps')
     .select('id, code_hash, attempts, expires_at')
     .eq('admin_member_id', member.id)
-    .eq('phone_e164', phoneE164)
+    .eq('email', email)
     .is('consumed_at', null)
     .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
@@ -90,7 +84,7 @@ export async function POST(req: Request) {
     event_type: 'join',
     username: member.username,
     supabase_user_id: member.id,
-    details: { at: new Date().toISOString(), method: 'phone_otp' },
+    details: { at: new Date().toISOString(), method: 'email_otp' },
   })
 
   return NextResponse.json({
