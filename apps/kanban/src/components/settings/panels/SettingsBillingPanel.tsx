@@ -93,14 +93,14 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div className="btn-row">
           {showUpgrade && (
             <button
               type="button"
               onClick={() => void handleCheckout('pro')}
               disabled={switching}
-              className="btn btn-primary"
-              style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+              className="btn btn-primary btn-row__btn"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
             >
               <Sparkles size={16} aria-hidden />
               {switching ? 'Opening checkout…' : 'Upgrade to Pro'}
@@ -111,8 +111,7 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
               type="button"
               onClick={() => void handleCheckout('premium')}
               disabled={switching}
-              className="btn btn-secondary"
-              style={{ width: 'auto' }}
+              className="btn btn-secondary btn-row__btn"
             >
               {switching ? 'Opening…' : 'Upgrade to Premium'}
             </button>
@@ -122,8 +121,8 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
               type="button"
               onClick={() => void handleManageSubscription()}
               disabled={loadingPortal}
-              className="btn btn-secondary"
-              style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+              className="btn btn-secondary btn-row__btn"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
             >
               {loadingPortal ? 'Opening portal…' : 'Manage billing'}
               <ArrowUpRight size={16} />
@@ -131,8 +130,8 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
           )}
           <Link
             href={APP_PRICING_PATH}
-            className="btn btn-secondary"
-            style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+            className="btn btn-secondary btn-row__btn"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
           >
             View all plans
           </Link>

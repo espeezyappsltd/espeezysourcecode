@@ -78,8 +78,8 @@ button, .btn, input, textarea, select {
     width: 100vw !important;
     box-shadow: none !important;
   }
-  .btn,
-  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh) {
+  .btn:not(.btn-inline),
+  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn) {
     width: 100%;
     min-width: 0;
     font-size: clamp(1rem, 4vw, 1.1rem);
@@ -91,7 +91,8 @@ button, .btn, input, textarea, select {
   html {
     font-size: 14px;
   }
-  .btn, button {
+  .btn:not(.btn-inline):not(.btn-row__btn),
+  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn) {
     font-size: 1rem;
     padding: 0.8em 0.3em;
   }
@@ -648,7 +649,22 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 12px;
   min-height: 3.25rem;
 }
-.btn-inline { width: auto; }
+.btn-inline { width: auto; max-width: 100%; }
+
+/* Horizontal button groups (settings billing, toolbars) */
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.btn-row .btn,
+.btn-row__btn {
+  width: auto !important;
+  max-width: 100%;
+  flex: 0 1 auto;
+}
 
 /* Mobile Button Enhancements (Targeting 13 Mini & others) */
 @media (max-width: 480px) {

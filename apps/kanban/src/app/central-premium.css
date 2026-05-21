@@ -142,10 +142,17 @@
 .wallet-premium__actions {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 0.65rem;
   flex: 1 1 220px;
   min-width: min(100%, 280px);
+  max-width: 100%;
+}
+
+.wallet-premium--compact .wallet-premium__actions {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
 }
 
 .wallet-premium__actions-row {
@@ -180,20 +187,22 @@
 /* Credit fund — segmented tiers + slim CTA */
 .credit-fund-premium {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   font-family: var(--font-central-ui);
 }
 
 .credit-fund-premium__tiers {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   padding: 0;
   border-radius: 10px;
   border: 1px solid var(--central-rule);
   background: rgba(0, 0, 0, 0.2);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .credit-fund-premium__tiers::-webkit-scrollbar {
@@ -282,11 +291,14 @@
 .credit-fund-premium__cta {
   display: inline-flex !important;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
+  flex-shrink: 0;
   width: auto !important;
+  max-width: 100% !important;
   min-width: unset !important;
-  min-height: 32px !important;
-  padding: 0.35rem 0.75rem !important;
+  min-height: 36px !important;
+  padding: 0.45rem 1rem !important;
   font-family: var(--font-central-ui) !important;
   font-size: 0.625rem !important;
   font-weight: 500 !important;
@@ -313,7 +325,7 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .wallet-premium {
     flex-direction: column;
     align-items: stretch;
@@ -322,19 +334,40 @@
   .wallet-premium__actions {
     align-items: stretch;
     min-width: 0;
+    width: 100%;
   }
 
   .wallet-premium__actions-row {
     justify-content: space-between;
   }
 
+  .credit-fund-premium__tiers {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .credit-fund-premium__tier {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 5.25rem !important;
+  }
+
   .credit-fund-premium__footer {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .credit-fund-premium__selection {
+    text-align: center;
   }
 
   .credit-fund-premium__cta {
     justify-content: center;
     width: 100% !important;
+    max-width: 100% !important;
   }
 }
