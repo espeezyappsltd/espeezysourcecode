@@ -26,7 +26,11 @@ export function getStripeWebhookSecret(): string {
 }
 
 export function getAppUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com').replace(/\/$/, '')
+  const url =
+    process.env.NEXT_PUBLIC_ADMIN_URL?.trim() ||
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    'https://panel.espeezy.com'
+  return url.replace(/\/$/, '')
 }
 
 export function getStripePortalConfigurationId(): string | undefined {

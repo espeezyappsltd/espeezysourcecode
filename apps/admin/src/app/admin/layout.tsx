@@ -8,6 +8,7 @@ import { AdminConsoleShell } from '@/components/console/AdminConsoleShell'
 import { AdminOnboardingProvider } from '@/context/AdminOnboardingContext'
 import { getAdminMemberByUserId } from '@/utils/admin-auth'
 import { canAccessAdminRoute } from '@/lib/admin-rbac'
+import { buildAdminLoginUrl, resolvePanelOrigin, sanitizeNextPath } from '@/lib/app-url'
 import '@/app/admin-console.css'
 
 export const dynamic = 'force-dynamic'
@@ -17,11 +18,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const host = headersList.get('host') || ''
   const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https')
   const pathname = headersList.get('x-pathname') || '/admin'
-  const loginBase = host.includes('localhost')
-    ? `${protocol}://localhost:3004`
-    : host.startsWith('admin.')
-      ? `${protocol}://${host}`
-      : `${protocol}://admin.${host.split(':')[0]}`
+  const requestOrigin = resolvePanelOrigin({ headers: headersList })
+  const afterLogin = sanitizeNextPath(pathname, '/admin')
+  const redirectTarget = `${protocol}://${host}${afterLogin.startsWith('/') ? afterLogin : `/${afterLogin}`}`
 
   const db = await createServerSupabaseClient()
   const {
@@ -29,11 +28,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   } = await db.auth.getUser().catch(() => ({ data: { user: null } }))
 
   if (!user) {
-    redirect(`${loginBase}/login?redirect=${encodeURIComponent(`${protocol}://${host}/admin`)}`)
+    redirect(buildAdminLoginUrl({ headers: headersList }, { redirect: redirectTarget }))
   }
 
   const member = await getAdminMemberByUserId(user.id)
-  if (!member) redirect(`${loginBase}/login?error=not_staff`)
+  if (!member) redirect(buildAdminLoginUrl({ headers: headersList }, { error: 'not_staff' }))
 
   if (!canAccessAdminRoute(member.admin_role, pathname)) {
     redirect('/admin')

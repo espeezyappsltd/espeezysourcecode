@@ -190,7 +190,12 @@ function looksLikeExistingAuthUserError(data: unknown) {
 }
 
 async function generateSupabaseRecoveryLink(email: string): Promise<string | null> {
-	const redirectTo = `${(process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com').replace(/\/$/, '')}/auth/reset-password`
+	const panelBase = (
+		process.env.NEXT_PUBLIC_ADMIN_URL ??
+		process.env.NEXT_PUBLIC_APP_URL ??
+		'https://panel.espeezy.com'
+	).replace(/\/$/, '')
+	const redirectTo = `${panelBase}/auth/callback?type=recovery&next=/auth/reset-password`
 	const { ok, data } = await authAdminRequest('generate_link', 'POST', {
 		type: 'recovery',
 		email,

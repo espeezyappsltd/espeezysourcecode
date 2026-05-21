@@ -118,7 +118,11 @@ export async function sendPreregistrationConfirmationEmail(opts: {
   to: string
   referralCode: string
 }): Promise<void> {
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com').replace(/\/$/, '')
+  const appUrl = (
+    process.env.NEXT_PUBLIC_ADMIN_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    'https://panel.espeezy.com'
+  ).replace(/\/$/, '')
   const shareUrl = `${appUrl}/preregister?ref=${encodeURIComponent(opts.referralCode)}`
 
   await sendEmail({
