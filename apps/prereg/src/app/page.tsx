@@ -364,9 +364,7 @@ export default function PreRegisterPage() {
           <p style={{ margin: 0, fontSize: 'clamp(0.95rem, 2vw, 1.05rem)', fontWeight: 500, lineHeight: 1.55, color: '#64748b' }}>
             {HERO_COPY_LINES[2]}
           </p>
-          <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, fontWeight: 600, color: '#94a3b8' }}>
-            {PLATFORM_OPERATIONS_TAGLINE}
-          </p>
+          
         </motion.div>
 
         <motion.div
