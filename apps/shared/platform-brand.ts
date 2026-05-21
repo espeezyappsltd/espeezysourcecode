@@ -10,11 +10,11 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
-  'Try out our brand-new Kanban Dashboard!',
-  'You get secure workspaces, real-time project sync, hustle-gigs, campus marketplace resources, real-time project analytics, and so much more. All core features are free for students.' 
+  'Espeezy Kanban Dashboard App!',
+  'Secure workspaces, real-time project sync, hustle-gigs, campus marketplace resources, real-time project analytics, and so much more.' 
 ] as const
 
-export const HERO_ANALYTICS_CAPTION = 'Brand-new Kanban app · early access is live'
+export const HERO_ANALYTICS_CAPTION = 'Try out the live demo'
 
 /** @deprecated Use HERO_COPY_LINES[1] */
 export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
