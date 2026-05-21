@@ -37,42 +37,44 @@ export default function GamesShell({ children }: { children: React.ReactNode }) 
     return () => document.body.classList.remove('body-lock')
   }, [isMobile, mobileMenuOpen])
 
-  if (!isClient) {
-    return <div className="games-shell">{children}</div>
-  }
-
-  const mainClass = `games-shell__main${!isMobile && !sidebarOpen ? ' is-collapsed' : ''}`
+  const mainClass = `games-shell__main${isClient && !isMobile && !sidebarOpen ? ' is-collapsed' : ''}`
 
   return (
     <CategoriesProvider>
       <div className="games-shell">
-        <div
-          className={`games-shell__backdrop${isMobile && mobileMenuOpen ? ' is-visible' : ''}`}
-          onClick={() => setMobileMenuOpen(false)}
-          aria-hidden={!mobileMenuOpen}
-        />
-        <GamesSidebar
-          isOpen={sidebarOpen}
-          isCollapsed={!sidebarOpen}
-          isMobile={isMobile}
-          isMobileOpen={mobileMenuOpen}
-          onToggleCollapse={() => setSidebarOpen((o) => !o)}
-          onCloseMobile={() => setMobileMenuOpen(false)}
-        />
+        {isClient && (
+          <div
+            className={`games-shell__backdrop${isMobile && mobileMenuOpen ? ' is-visible' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden={!mobileMenuOpen}
+          />
+        )}
+        {isClient && (
+          <GamesSidebar
+            isOpen={sidebarOpen}
+            isCollapsed={!sidebarOpen}
+            isMobile={isMobile}
+            isMobileOpen={mobileMenuOpen}
+            onToggleCollapse={() => setSidebarOpen((o) => !o)}
+            onCloseMobile={() => setMobileMenuOpen(false)}
+          />
+        )}
         <div className={mainClass}>
-          <header className="games-mobile-bar">
-            <button
-              type="button"
-              className="games-mobile-bar__menu"
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open menu"
-            >
-              <Menu size={20} />
-            </button>
-            <span style={{ fontWeight: 900, letterSpacing: '-0.03em' }}>
-              Espe<span style={{ color: 'var(--games-brand)' }}>ezy</span> Games
-            </span>
-          </header>
+          {isClient && (
+            <header className="games-mobile-bar">
+              <button
+                type="button"
+                className="games-mobile-bar__menu"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+              >
+                <Menu size={20} />
+              </button>
+              <span style={{ fontWeight: 900, letterSpacing: '-0.03em' }}>
+                Espe<span style={{ color: 'var(--games-brand)' }}>ezy</span> Games
+              </span>
+            </header>
+          )}
           <div className="games-shell__content">{children}</div>
         </div>
       </div>
