@@ -82,15 +82,18 @@ export function UploadModal({
   }
 
   return (
-    <ModalOverlay maxWidth="500px" onClickOutside={onClose}>
+    <ModalOverlay maxWidth="500px" onClickOutside={onClose} ariaLabel="Add asset">
       <div style={{ padding: '2rem' }}>
-        <h2 style={{ margin: '0 0 0.35rem', fontWeight: 950, color: 'var(--text-main)' }}>Add asset</h2>
+        <h2 id="assets-upload-modal-title" style={{ margin: '0 0 0.35rem', fontWeight: 950, color: 'var(--text-main)' }}>
+          Add asset
+        </h2>
         <p style={{ margin: '0 0 1.25rem', fontSize: '0.82rem', color: 'var(--text-sub)' }}>
           Saving to folder: <strong>{currentFolder === '/' ? 'Root' : currentFolder}</strong>
         </p>
 
         {error && (
           <motion.div
+            role="alert"
             style={{
               background: 'rgba(239, 68, 68, 0.1)',
               color: '#ef4444',

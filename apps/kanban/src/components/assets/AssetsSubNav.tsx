@@ -24,8 +24,13 @@ export function AssetsSubNav() {
       {LINKS.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname === href || pathname?.startsWith(`${href}/`)
         return (
-          <Link key={href} href={href} className={`assets-subnav__link${active ? ' is-active' : ''}`}>
-            <Icon size={16} strokeWidth={active ? 2.5 : 2} />
+          <Link
+            key={href}
+            href={href}
+            className={`assets-subnav__link${active ? ' is-active' : ''}`}
+            aria-current={active ? 'page' : undefined}
+          >
+            <Icon size={16} strokeWidth={active ? 2.5 : 2} aria-hidden />
             <span>{label}</span>
           </Link>
         )

@@ -2,10 +2,12 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { AlertCircle, Coins, Loader2 } from 'lucide-react'
 import { formatCreditCapHint, formatCredits, formatGbpApprox } from '@/lib/credits'
 import { useNotifications } from '@/components/NotificationProvider'
+import { AssetsPageFrame } from './AssetsPageFrame'
+import { AssetsMotionRoot } from './AssetsMotionRoot'
 import { AssetsSubNav } from './AssetsSubNav'
 import { useAssetsVault } from './shared/useAssetsVault'
 import { AssetCard } from './shared/AssetCard'
@@ -45,8 +47,15 @@ export function CreditsVaultView() {
     }
   }
 
+  const statusMessage = loading
+    ? 'Loading credit values.'
+    : loadError
+      ? loadError
+      : null
+
   return (
-    <motion.div className="assets-page page-shell" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <AssetsPageFrame statusMessage={statusMessage} statusRole={loadError ? 'alert' : 'status'}>
+      <AssetsMotionRoot className="assets-page page-shell">
       <header className="assets-hero ui-hero-row page-header">
         <div className="ui-hero-row__main page-header__main">
           <h1 className="page-header__title">
@@ -56,7 +65,7 @@ export function CreditsVaultView() {
             Set credit values on every asset in your arsenal. {formatCreditCapHint()}.
           </p>
           <div className="assets-value-card ui-panel ui-panel--accent ui-panel--compact">
-            <Coins size={20} color="var(--brand)" />
+            <Coins size={20} color="var(--brand)" aria-hidden />
             <div>
               <div
                 style={{
@@ -91,12 +100,12 @@ export function CreditsVaultView() {
           </button>
         </div>
       ) : loading ? (
-        <motion.div style={{ textAlign: 'center', padding: '5rem' }}>
-          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} />
-        </motion.div>
+        <div className="assets-loading" role="status" aria-busy="true" aria-label="Loading credit values">
+          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} aria-hidden />
+        </div>
       ) : creditAssets.length === 0 ? (
         <div className="assets-empty ui-panel ui-panel--dashed">
-          <Coins size={48} style={{ margin: '0 auto 1rem', opacity: 0.15 }} />
+          <Coins size={48} style={{ margin: '0 auto 1rem', opacity: 0.15 }} aria-hidden />
           <h3 style={{ margin: '0 0 0.5rem', fontWeight: 900 }}>No assets yet</h3>
           <p style={{ color: 'var(--text-sub)', marginBottom: '1rem' }}>
             Upload files or links first, then assign credit values here.
@@ -124,6 +133,7 @@ export function CreditsVaultView() {
           </AnimatePresence>
         </div>
       )}
-    </motion.div>
+      </AssetsMotionRoot>
+    </AssetsPageFrame>
   )
 }

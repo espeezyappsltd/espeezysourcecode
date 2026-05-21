@@ -7,9 +7,11 @@ import { FormField } from '@/components/forms/FormField'
 export function FolderModal({ onClose, onCreate }: { onClose: () => void; onCreate: (name: string) => void }) {
   const [name, setName] = useState('')
   return (
-    <ModalOverlay maxWidth="400px" onClickOutside={onClose}>
+    <ModalOverlay maxWidth="400px" onClickOutside={onClose} ariaLabel="New folder">
       <div style={{ padding: '1.5rem' }}>
-        <h2 style={{ margin: '0 0 0.5rem', fontWeight: 950, color: 'var(--text-main)' }}>New folder</h2>
+        <h2 id="assets-folder-modal-title" style={{ margin: '0 0 0.5rem', fontWeight: 950, color: 'var(--text-main)' }}>
+          New folder
+        </h2>
         <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--text-sub)' }}>
           Organize uploads in a virtual folder. Names cannot include slashes.
         </p>

@@ -2,10 +2,12 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { AlertCircle, Loader2, ShoppingBag } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { TradingMetricsDashboard } from '@/components/assets/TradingMetricsDashboard'
+import { AssetsPageFrame } from './AssetsPageFrame'
+import { AssetsMotionRoot } from './AssetsMotionRoot'
 import { AssetsSubNav } from './AssetsSubNav'
 import { useAssetsVault } from './shared/useAssetsVault'
 import { AssetCard } from './shared/AssetCard'
@@ -37,8 +39,15 @@ export function MarketplaceVaultView() {
     [assets],
   )
 
+  const statusMessage = loading
+    ? 'Loading marketplace desk.'
+    : loadError
+      ? loadError
+      : null
+
   return (
-    <motion.div className="assets-page page-shell" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <AssetsPageFrame statusMessage={statusMessage} statusRole={loadError ? 'alert' : 'status'}>
+      <AssetsMotionRoot className="assets-page page-shell">
       <header className="assets-hero ui-hero-row page-header">
         <div className="ui-hero-row__main page-header__main">
           <h1 className="page-header__title">
@@ -63,9 +72,9 @@ export function MarketplaceVaultView() {
           </button>
         </div>
       ) : loading ? (
-        <motion.div style={{ textAlign: 'center', padding: '3rem' }}>
-          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} />
-        </motion.div>
+        <div className="assets-loading assets-loading--compact" role="status" aria-busy="true" aria-label="Loading marketplace">
+          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} aria-hidden />
+        </div>
       ) : (
         <>
           {readyToList.length > 0 && (
@@ -147,6 +156,7 @@ export function MarketplaceVaultView() {
           </section>
         </>
       )}
-    </motion.div>
+      </AssetsMotionRoot>
+    </AssetsPageFrame>
   )
 }

@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { ArrowRight, Coins, HardDrive, ShoppingBag, FolderOpen } from 'lucide-react'
 import { formatCreditCapHint, formatCredits, formatGbpApprox } from '@/lib/credits'
 import { formatStorageBytes } from '@/lib/storage-quotas'
+import { AssetsPageFrame } from './AssetsPageFrame'
+import { AssetsMotionRoot } from './AssetsMotionRoot'
 import { AssetsSubNav } from './AssetsSubNav'
 import { useAssetsVault } from './shared/useAssetsVault'
 
@@ -44,8 +45,11 @@ export function AssetsLanding() {
       ? Math.min(100, Math.round((snapshot.storageUsed / snapshot.storageQuota) * 100))
       : 0
 
+  const statusMessage = loading ? 'Loading Personal Arsenal overview.' : null
+
   return (
-    <motion.div className="assets-page page-shell" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <AssetsPageFrame statusMessage={statusMessage}>
+      <AssetsMotionRoot className="assets-page page-shell">
       <header className="assets-hero ui-hero-row page-header">
         <div className="ui-hero-row__main page-header__main">
           <h1 className="page-header__title">
@@ -60,16 +64,21 @@ export function AssetsLanding() {
 
       <AssetsSubNav />
 
-      <div className="assets-hub-stats">
+      <section className="assets-hub-stats" aria-labelledby="assets-hub-stats-heading">
+        <h2 id="assets-hub-stats-heading" className="sr-only">
+          Arsenal summary
+        </h2>
         <div className="assets-hub-stat ui-panel ui-panel--compact">
-          <FolderOpen size={18} color="var(--brand)" />
+          <FolderOpen size={18} color="var(--brand)" aria-hidden />
           <div>
             <div className="assets-hub-stat__label">Files & links</div>
-            <div className="assets-hub-stat__value">{loading ? '…' : fileCount}</div>
+            <div className="assets-hub-stat__value" aria-busy={loading}>
+              {loading ? 'Loading' : fileCount}
+            </div>
           </div>
         </div>
         <div className="assets-hub-stat ui-panel ui-panel--compact">
-          <Coins size={18} color="#f59e0b" />
+          <Coins size={18} color="#f59e0b" aria-hidden />
           <div>
             <div className="assets-hub-stat__label">Arsenal value</div>
             <div className="assets-hub-stat__value">
@@ -91,29 +100,33 @@ export function AssetsLanding() {
           </div>
         </div>
         <div className="assets-hub-stat ui-panel ui-panel--compact">
-          <ShoppingBag size={18} color="var(--success)" />
+          <ShoppingBag size={18} color="var(--success)" aria-hidden />
           <div>
             <div className="assets-hub-stat__label">Marketplace</div>
             <div className="assets-hub-stat__value">{loading ? '…' : listedCount}</div>
             <div className="assets-hub-stat__hint">listed / purchased refs</div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="assets-hub-grid">
+      <section className="assets-hub-grid" aria-labelledby="assets-hub-sections-heading">
+        <h2 id="assets-hub-sections-heading" className="sr-only">
+          Arsenal sections
+        </h2>
         {HUB_CARDS.map(({ href, title, description, icon: Icon, accent }) => (
           <Link key={href} href={href} className="assets-hub-card ui-panel hover-card">
             <div className="assets-hub-card__icon" style={{ color: accent, borderColor: `${accent}33` }}>
-              <Icon size={26} />
+              <Icon size={26} aria-hidden />
             </div>
-            <h2 className="assets-hub-card__title">{title}</h2>
+            <h3 className="assets-hub-card__title">{title}</h3>
             <p className="assets-hub-card__desc">{description}</p>
             <span className="assets-hub-card__cta">
-              Open <ArrowRight size={16} />
+              Open <ArrowRight size={16} aria-hidden />
             </span>
           </Link>
         ))}
-      </div>
-    </motion.div>
+      </section>
+      </AssetsMotionRoot>
+    </AssetsPageFrame>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import {
   File,
   Plus,
@@ -13,12 +13,15 @@ import {
 } from 'lucide-react'
 import { joinFolderPath, normalizeFolderPath } from '@/lib/assets/folders'
 import { useNotifications } from '@/components/NotificationProvider'
+import { AssetsPageFrame } from './AssetsPageFrame'
+import { AssetsMotionRoot } from './AssetsMotionRoot'
 import { AssetsSubNav } from './AssetsSubNav'
 import { useAssetsVault } from './shared/useAssetsVault'
 import { AssetCard } from './shared/AssetCard'
 import { FolderModal } from './shared/FolderModal'
 import { UploadModal } from './shared/UploadModal'
 import { StorageMeter } from './shared/StorageMeter'
+import { FilterTabGroup } from './shared/FilterTabGroup'
 
 export function StorageVaultView() {
   const { addToast } = useNotifications()
@@ -113,8 +116,15 @@ export function StorageVaultView() {
 
   const breadcrumbParts = normCurrent === '/' ? [] : normCurrent.split('/').filter(Boolean)
 
+  const statusMessage = loading
+    ? 'Loading storage and files.'
+    : loadError
+      ? loadError
+      : null
+
   return (
-    <motion.div className="assets-page page-shell" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <AssetsPageFrame statusMessage={statusMessage} statusRole={loadError ? 'alert' : 'status'}>
+      <AssetsMotionRoot className="assets-page page-shell">
       <header className="assets-hero ui-hero-row page-header">
         <div className="ui-hero-row__main page-header__main">
           <h1 className="page-header__title">
@@ -136,7 +146,12 @@ export function StorageVaultView() {
       <AssetsSubNav />
 
       <nav className="assets-breadcrumb" aria-label="Folder path">
-        <button type="button" className={normCurrent === '/' ? 'active' : ''} onClick={() => setCurrentFolder('/')}>
+        <button
+          type="button"
+          className={normCurrent === '/' ? 'active' : ''}
+          onClick={() => setCurrentFolder('/')}
+          aria-current={normCurrent === '/' ? 'location' : undefined}
+        >
           Root
         </button>
         {breadcrumbParts.map((segment, i) => {
@@ -144,8 +159,13 @@ export function StorageVaultView() {
           const isLast = i === breadcrumbParts.length - 1
           return (
             <span key={path} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <ChevronRight size={14} style={{ opacity: 0.35 }} />
-              <button type="button" className={isLast ? 'active' : ''} onClick={() => setCurrentFolder(path)}>
+              <ChevronRight size={14} style={{ opacity: 0.35 }} aria-hidden />
+              <button
+                type="button"
+                className={isLast ? 'active' : ''}
+                onClick={() => setCurrentFolder(path)}
+                aria-current={isLast ? 'location' : undefined}
+              >
                 {segment}
               </button>
             </span>
@@ -154,36 +174,29 @@ export function StorageVaultView() {
       </nav>
 
       <div className="assets-toolbar">
-        <div className="assets-filter-tabs ui-panel ui-panel--inset ui-panel--compact">
-          {(['all', 'file', 'link'] as const).map((f) => (
-            <button key={f} type="button" className={filter === f ? 'active' : ''} onClick={() => setFilter(f)}>
-              {f}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <FilterTabGroup
+          label="Filter assets by type"
+          options={['all', 'file', 'link'] as const}
+          value={filter}
+          onChange={setFilter}
+        />
+        <div className="assets-toolbar__actions">
           <button
             type="button"
-            className="btn btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            className="btn btn-secondary assets-toolbar__btn"
             onClick={() => setShowFolderModal(true)}
           >
-            <FolderPlus size={16} /> New folder
+            <FolderPlus size={16} aria-hidden /> New folder
           </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-            onClick={() => setShowUploadModal(true)}
-          >
-            <Plus size={18} /> Add asset
+          <button type="button" className="btn btn-primary assets-toolbar__btn" onClick={() => setShowUploadModal(true)}>
+            <Plus size={18} aria-hidden /> Add asset
           </button>
         </div>
       </div>
 
       {loadError && !loading ? (
-        <div className="assets-empty ui-panel ui-panel--dashed">
-          <AlertCircle size={40} style={{ margin: '0 auto 1rem', color: '#ef4444' }} />
+        <div className="assets-empty ui-panel ui-panel--dashed" role="alert">
+          <AlertCircle size={40} style={{ margin: '0 auto 1rem', color: '#ef4444' }} aria-hidden />
           <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>Could not load arsenal</h3>
           <p style={{ margin: '0 0 1.25rem', color: 'var(--text-sub)', fontWeight: 600 }}>{loadError}</p>
           <button type="button" className="btn btn-primary" onClick={() => void fetchAssets()}>
@@ -191,21 +204,23 @@ export function StorageVaultView() {
           </button>
         </div>
       ) : loading ? (
-        <motion.div style={{ textAlign: 'center', padding: '5rem' }}>
-          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} />
-        </motion.div>
+        <div className="assets-loading" role="status" aria-busy="true" aria-label="Loading files and folders">
+          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--brand)', margin: '0 auto' }} aria-hidden />
+          <span className="sr-only">Loading storage and files</span>
+        </div>
       ) : (
-        <>
+        <div id="assets-filter-panel" role="tabpanel" aria-label="Filtered assets">
           {childFolders.length > 0 && (
-            <div className="assets-grid" style={{ marginBottom: '1.25rem' }}>
+            <div className="assets-grid assets-grid--folders" style={{ marginBottom: '1.25rem' }}>
               {childFolders.map(({ path, name }) => (
                 <button
                   key={path}
                   type="button"
                   className="assets-folder-tile ui-panel ui-panel--compact"
                   onClick={() => setCurrentFolder(path)}
+                  aria-label={`Open folder ${name}`}
                 >
-                  <Folder size={28} color="var(--brand)" />
+                  <Folder size={28} color="var(--brand)" aria-hidden />
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontWeight: 900, color: 'var(--text-main)' }}>{name}</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-sub)', fontWeight: 600 }}>Open folder</div>
@@ -249,7 +264,7 @@ export function StorageVaultView() {
               </AnimatePresence>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {showFolderModal && (
@@ -266,6 +281,7 @@ export function StorageVaultView() {
           }}
         />
       )}
-    </motion.div>
+      </AssetsMotionRoot>
+    </AssetsPageFrame>
   )
 }

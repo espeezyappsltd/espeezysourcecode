@@ -112,9 +112,13 @@ export function AssetCard({
     >
       <div className="ui-card__media">
         {asset.preview_url ? (
-          <img src={asset.preview_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img
+            src={asset.preview_url}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         ) : (
-          <Icon size={36} style={{ opacity: 0.2, color: 'var(--text-sub)' }} />
+          <Icon size={36} style={{ opacity: 0.2, color: 'var(--text-sub)' }} aria-hidden />
         )}
         {showDelete && (
           <button
@@ -134,9 +138,9 @@ export function AssetCard({
               borderRadius: 10,
               cursor: 'pointer',
             }}
-            title="Delete asset"
+            aria-label={`Delete ${asset.title}`}
           >
-            <Trash2 size={16} />
+            <Trash2 size={16} aria-hidden />
           </button>
         )}
       </div>

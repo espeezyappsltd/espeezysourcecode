@@ -18,7 +18,11 @@ export function StorageMeter({
   const percentUsed = storageQuota > 0 ? Math.min(100, (storageUsed / storageQuota) * 100) : 0
 
   return (
-    <div className={`assets-storage-card ui-panel${compact ? ' ui-panel--compact' : ''}`}>
+    <div
+      className={`assets-storage-card ui-panel${compact ? ' ui-panel--compact' : ''}`}
+      role="group"
+      aria-label="Storage usage"
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
         <div
           style={{
@@ -37,7 +41,14 @@ export function StorageMeter({
           {formatStorageBytes(storageUsed)} / {formatStorageBytes(storageQuota)}
         </span>
       </div>
-      <div style={{ height: '8px', background: 'var(--bg-sub)', borderRadius: '100px', overflow: 'hidden' }}>
+      <div
+        style={{ height: '8px', background: 'var(--bg-sub)', borderRadius: '100px', overflow: 'hidden' }}
+        role="progressbar"
+        aria-valuenow={Math.round(percentUsed)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`${Math.round(percentUsed)} percent of storage quota used`}
+      >
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentUsed}%` }}
