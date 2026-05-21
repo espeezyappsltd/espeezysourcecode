@@ -11,21 +11,20 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
   'Espeezy Learning Platform',
-  'The Espeezy Kanban Dashboard shows who contributed what: contribution scores, task ownership, team balance, and exportable intelligence reports.',
-  'Espeezy App turns group projects into a fair academic record, with contribution proof for grading, portfolios, and job applications.',
+  'Verified academic records for every student',
+  'See all your team\'s contribution data in real-time, and build your own verified academic record and exportable intelligence reports.',
 ] as const
 
-export const HERO_ANALYTICS_CAPTION = 'Try out the Espeezy Kanban App, early access is now open... official release soon ... remember to prereg'
+export const HERO_ANALYTICS_CAPTION = 'Try it out now, early access is now open...'
 
 /** @deprecated Use HERO_COPY_LINES[1] */
 export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
 
 export const KANBAN_DEMO_LABEL = 'Kanban Demo'
-
 export const KANBAN_DEMO_PATH = '/demo'
 
 export const PRICING_INTRO =
-  'Espeezy is built for student teams and operated by our platform crew, keeping collaboration infrastructure fast, secure, and affordable at scale.'
+  'The Kanban dashboard is built for student teams and operated by our platform crew, keeping collaboration infrastructure fast, secure, and affordable at scale.'
 
 export const UPGRADE_HERO_TITLE = 'Support the platform to reach more schools'
 

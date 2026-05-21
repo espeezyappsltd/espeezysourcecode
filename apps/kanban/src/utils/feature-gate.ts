@@ -39,12 +39,22 @@ const FEATURE_CONFIG: Record<Feature, PlanTier> = {
 /**
  * Checks if a user profile has access to a specific feature based on their subscription plan.
  */
+function subscriptionGrantsPaidAccess(profile: Profile): boolean {
+  const status = profile.subscription_status?.toLowerCase()
+  if (!status) return true
+  if (status === 'active' || status === 'trialing' || status === 'canceling') return true
+  if (status === 'past_due') return true
+  return false
+}
+
 export function hasFeature(profile: Profile | null | undefined, feature: Feature): boolean {
   if (!profile) return false
 
   const userTier = (profile.subscription_plan?.toLowerCase() as PlanTier) || 'free'
-  const requiredTier = FEATURE_CONFIG[feature]
+  if (userTier === 'free') return false
+  if (!subscriptionGrantsPaidAccess(profile)) return false
 
+  const requiredTier = FEATURE_CONFIG[feature]
   return TIER_HIERARCHY[userTier] >= TIER_HIERARCHY[requiredTier]
 }
 
@@ -70,7 +80,8 @@ export function getPlanName(plan: string | null | undefined): string {
 export function isPaidUser(profile: Profile | null | undefined): boolean {
   if (!profile) return false
   const userTier = (profile.subscription_plan?.toLowerCase() as PlanTier) || 'free'
-  return userTier !== 'free'
+  if (userTier === 'free') return false
+  return subscriptionGrantsPaidAccess(profile)
 }
 
 /** Theme palette tier access (pro themes = ADVANCED_THEMES, premium = premium+ lifetime). */

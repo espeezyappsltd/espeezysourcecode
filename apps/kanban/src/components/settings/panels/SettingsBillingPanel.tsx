@@ -1,17 +1,39 @@
 'use client'
 
-import { ArrowUpRight, CreditCard, ExternalLink } from 'lucide-react'
+import { ArrowUpRight, CreditCard, Sparkles } from 'lucide-react'
+import Link from 'next/link'
 import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import PlansUsagePanel from '@/components/PlansUsagePanel'
 import type { SettingsPageViewModel } from '../settings-types'
 import { BILLING_PANEL_SUBTITLE } from '@/lib/platform/brand-copy'
-import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
+import { APP_PRICING_PATH, planRank } from '@/lib/pricing/plan-routes'
+
+function statusLabel(status: string | null | undefined): string {
+  if (!status) return 'Active'
+  switch (status.toLowerCase()) {
+    case 'active':
+      return 'Active'
+    case 'trialing':
+      return 'Trial'
+    case 'canceling':
+      return 'Cancels at period end'
+    case 'past_due':
+      return 'Payment issue'
+    case 'canceled':
+      return 'Canceled'
+    default:
+      return status
+  }
+}
 
 export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
-  const { profile, handleManageSubscription, loadingPortal } = vm
+  const { profile, handleManageSubscription, handleCheckout, loadingPortal, switching } = vm
   if (!profile) return null
 
-  const pricingPath = APP_PRICING_PATH
+  const plan = (profile.subscription_plan ?? 'free').toLowerCase()
+  const isSubscribed = plan !== 'free' && Boolean(profile.stripe_customer_id)
+  const canPortal = isSubscribed
+  const showUpgrade = planRank(plan) < planRank('pro')
 
   return (
     <div className="auth-card" style={{ maxWidth: '100%' }}>
@@ -37,49 +59,83 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
               <CreditCard size={20} />
             </div>
             <h3 style={{ margin: 0, fontWeight: 900 }}>
-              {profile.subscription_plan === 'premium'
+              {plan === 'premium'
                 ? 'Premium'
-                : profile.subscription_plan === 'pro'
+                : plan === 'pro'
                   ? 'Pro'
-                  : profile.subscription_plan === 'lifetime'
+                  : plan === 'lifetime'
                     ? 'Lifetime Scholar'
                     : 'Free'}
             </h3>
+            {plan !== 'free' && (
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  padding: '0.2rem 0.55rem',
+                  borderRadius: '999px',
+                  background: 'rgba(var(--brand-rgb), 0.12)',
+                  color: 'var(--brand)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                {statusLabel(profile.subscription_status)}
+              </span>
+            )}
           </div>
-          <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem' }}>
-            {profile.subscription_plan
-              ? `Active since ${new Date(profile.subscription_started_at || '1970-01-01').toLocaleDateString()}`
-              : 'Compare plans and subscribe from the pricing page.'}
+          <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem', maxWidth: '420px', lineHeight: 1.5 }}>
+            {plan === 'free'
+              ? 'Upgrade in one step, or compare plans on the pricing page.'
+              : canPortal
+                ? 'Change plan, update payment method, or cancel anytime in the Stripe billing portal. You keep access until the end of your billing period after canceling.'
+                : 'Your plan is active. Contact support if billing looks incorrect.'}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          {profile.subscription_plan ? (
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {showUpgrade && (
             <button
               type="button"
-              onClick={handleManageSubscription}
-              disabled={loadingPortal}
+              onClick={() => void handleCheckout('pro')}
+              disabled={switching}
               className="btn btn-primary"
-              style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
             >
-              {loadingPortal ? 'Opening...' : 'Manage billing'}
+              <Sparkles size={16} aria-hidden />
+              {switching ? 'Opening checkout…' : 'Upgrade to Pro'}
+            </button>
+          )}
+          {plan === 'pro' && (
+            <button
+              type="button"
+              onClick={() => void handleCheckout('premium')}
+              disabled={switching}
+              className="btn btn-secondary"
+              style={{ width: 'auto' }}
+            >
+              {switching ? 'Opening…' : 'Upgrade to Premium'}
+            </button>
+          )}
+          {canPortal && (
+            <button
+              type="button"
+              onClick={() => void handleManageSubscription()}
+              disabled={loadingPortal}
+              className="btn btn-secondary"
+              style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              {loadingPortal ? 'Opening portal…' : 'Manage billing'}
               <ArrowUpRight size={16} />
             </button>
-          ) : null}
-          <a
-            href={pricingPath}
-            className="btn btn-primary"
-            style={{
-              width: 'auto',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              textDecoration: 'none',
-            }}
+          )}
+          <Link
+            href={APP_PRICING_PATH}
+            className="btn btn-secondary"
+            style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
           >
-            View plans on espeezy.com
-            <ExternalLink size={16} />
-          </a>
+            View all plans
+          </Link>
         </div>
       </div>
 

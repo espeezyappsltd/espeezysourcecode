@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import type Stripe from 'stripe'
 import { z } from 'zod'
 import { getRequestUser } from '@/lib/supabase/admin'
+import {
+  createCheckoutSessionForUser,
+  getCheckoutPlanConfig,
+  type CheckoutPlanKey,
+} from '@/lib/stripe/create-checkout-session'
 import { getStripeClient } from '@/utils/stripe'
+import { getAdminDb } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -17,17 +23,16 @@ const publicCheckoutSchema = z.object({
   prefilled_promo_code: z.string().max(100).optional(),
 })
 
-const PLAN_CONFIG: Record<z.infer<typeof checkoutSchema>['plan'], { priceEnvKey: string; mode: 'subscription' | 'payment'; label: string }> = {
-  pro: { priceEnvKey: 'STRIPE_PRICE_PRO_ID', mode: 'subscription', label: 'Pro Scholar - GBP 3.99/month' },
-  premium: { priceEnvKey: 'STRIPE_PRICE_PREMIUM_ID', mode: 'subscription', label: 'Premium Scholar - GBP 10.49/month' },
-  lifetime: { priceEnvKey: 'STRIPE_PRICE_LIFETIME_ID', mode: 'payment', label: 'Lifetime Scholar · GBP 149 (one-time)' },
+const PLAN_LABELS: Record<CheckoutPlanKey, string> = {
+  pro: 'Pro Scholar - GBP 3.99/month',
+  premium: 'Premium Scholar - GBP 10.49/month',
+  lifetime: 'Lifetime Scholar · GBP 149 (one-time)',
 }
 
 /**
  * POST /api/stripe/checkout
- * Backend session creation (called from espeezy.com marketing checkout, not Kanban UI).
- * - Authenticated: requires Bearer token for logged-in users
- * - Public: accepts email for pre-registration signups
+ * - Authenticated: Stripe Checkout for the signed-in user (metadata user_id)
+ * - Public: email-based checkout for marketing signups
  */
 export async function POST(req: Request) {
   let stripe: Stripe
@@ -57,52 +62,54 @@ async function handleAuthenticatedCheckout(stripe: Stripe, req: Request, body: u
   const user = await getRequestUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const uid = user.id
-  const email = user.email
-
   const parsedBody = checkoutSchema.safeParse(body)
   if (!parsedBody.success) {
     return NextResponse.json({ error: 'Invalid plan selected.' }, { status: 422 })
   }
 
   const planKey = parsedBody.data.plan
-  const config = PLAN_CONFIG[planKey]
+  const adminDb = getAdminDb()
+  let stripeCustomerId: string | null = null
 
-  const priceId = process.env[config.priceEnvKey]
-  const successUrl = process.env.STRIPE_SUCCESS_URL
-  const cancelUrl = process.env.STRIPE_CANCEL_URL
+  if (adminDb) {
+    const { data: profile } = await adminDb
+      .from('profiles')
+      .select('stripe_customer_id, subscription_plan, stripe_subscription_id')
+      .eq('id', user.id)
+      .maybeSingle()
 
-  if (!priceId || !successUrl || !cancelUrl) {
-    return NextResponse.json({ error: 'Stripe is not configured correctly.' }, { status: 500 })
+    stripeCustomerId = profile?.stripe_customer_id ?? null
+
+    if (
+      profile?.stripe_subscription_id &&
+      profile.subscription_plan &&
+      profile.subscription_plan !== 'free' &&
+      profile.subscription_plan !== 'lifetime' &&
+      planKey !== 'lifetime'
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'You already have an active subscription. Use Manage billing in Settings to change or cancel your plan.',
+          portal: true,
+        },
+        { status: 409 },
+      )
+    }
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: config.mode,
-    payment_method_types: ['card'],
-    line_items: [{ price: priceId, quantity: 1 }],
-    customer_email: email,
-    success_url: successUrl,
-    cancel_url: cancelUrl,
-    billing_address_collection: 'auto',
-    allow_promotion_codes: true,
-    metadata: {
-      user_id: uid,
-      plan: planKey,
-      product_label: config.label,
-    },
+  const session = await createCheckoutSessionForUser({
+    stripe,
+    plan: planKey,
+    userId: user.id,
+    email: user.email ?? '',
+    stripeCustomerId,
+    request: req,
   })
-
-  if (!session.url) {
-    throw new Error('Unable to initialize Stripe checkout session.')
-  }
 
   return NextResponse.json({ url: session.url })
 }
 
-/**
- * Public checkout for pre-registration signups (no Firebase auth required)
- * Creates a Stripe checkout session with email in metadata for webhook to create user
- */
 async function handlePublicCheckout(stripe: Stripe, body: unknown) {
   const parsed = publicCheckoutSchema.safeParse(body)
   if (!parsed.success) {
@@ -110,17 +117,16 @@ async function handlePublicCheckout(stripe: Stripe, body: unknown) {
   }
 
   const { plan: planKey, email, prefilled_promo_code } = parsed.data
-  const config = PLAN_CONFIG[planKey]
-  const priceId = process.env[config.priceEnvKey]
+  const { priceId, mode } = getCheckoutPlanConfig(planKey)
   const successUrl = (process.env.STRIPE_PROMO_SUCCESS_URL ?? process.env.STRIPE_SUCCESS_URL)?.replace(/\/$/, '')
   const cancelUrl = (process.env.STRIPE_CANCEL_URL ?? 'https://espeezy.com/checkout')?.replace(/\/$/, '')
 
-  if (!priceId || !successUrl || !cancelUrl) {
+  if (!successUrl || !cancelUrl) {
     return NextResponse.json({ error: 'Stripe is not configured correctly.' }, { status: 500 })
   }
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
-    mode: config.mode,
+    mode,
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
     customer_email: email,
@@ -130,7 +136,7 @@ async function handlePublicCheckout(stripe: Stripe, body: unknown) {
     allow_promotion_codes: true,
     metadata: {
       plan: planKey,
-      product_label: config.label,
+      product_label: PLAN_LABELS[planKey],
       is_public_signup: 'true',
     },
   }

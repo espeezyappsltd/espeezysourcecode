@@ -9,7 +9,8 @@ import { logActivity } from '@/utils/logging'
 import { TabName } from '@/types/ui'
 import { Profile } from '@/types/auth'
 import { Achievement, Group } from '@/types/database'
-import { marketingCheckoutUrl } from '@/lib/marketing-urls'
+import { startAuthenticatedCheckout } from '@/services/billing'
+import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
 import { subscriptionCheckoutCopy } from '@/lib/platform/transaction-confirm-copy'
@@ -28,6 +29,21 @@ import {
 } from '@/services/dashboard'
 import { formatSupabaseError, friendlySupabaseError } from '@/utils/supabase-errors'
 import { canManageTeamSettings } from '@/lib/team/rbac'
+
+const SETTINGS_TABS: TabName[] = [
+  'identity',
+  'pulse',
+  'activity',
+  'intercom',
+  'security',
+  'appearance',
+  'workspace',
+  'data',
+  'team',
+  'billing',
+  'support',
+  'identity_hub',
+]
 
 export function useSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabName>('identity')
@@ -279,7 +295,7 @@ export function useSettingsPage() {
     setSaving(false)
   }
 
-  const handleCheckout = async (plan: 'pro' | 'premium') => {
+  const handleCheckout = async (plan: 'pro' | 'premium' | 'lifetime') => {
     setError(null)
 
     if (!profile?.id) {
@@ -287,11 +303,26 @@ export function useSettingsPage() {
       return
     }
 
-    const ok = await confirmTransaction(subscriptionCheckoutCopy(plan))
+    if (profile.stripe_subscription_id && profile.subscription_plan && profile.subscription_plan !== 'free' && profile.subscription_plan !== 'lifetime' && plan !== 'lifetime') {
+      await handleManageSubscription()
+      return
+    }
+
+    const ok = await confirmTransaction(subscriptionCheckoutCopy(plan === 'lifetime' ? 'pro' : plan))
     if (!ok) return
 
     setSwitching(true)
-    window.location.href = marketingCheckoutUrl(plan)
+    const result = await startAuthenticatedCheckout(plan)
+    if (!result.ok) {
+      setSwitching(false)
+      if (result.openPortal) {
+        await handleManageSubscription()
+        return
+      }
+      setError(result.error ?? 'Checkout could not start.')
+      return
+    }
+    window.location.href = result.url!
   }
 
   const handleRequestOtp = async () => {
@@ -464,6 +495,29 @@ export function useSettingsPage() {
       setLoadingPortal(false)
     }
   }
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (tab && SETTINGS_TABS.includes(tab as TabName)) {
+      setActiveTab(tab as TabName)
+    }
+    if (params.get('checkout') === 'success') {
+      addToast('Plan updated', 'Your subscription is active. Changes may take a moment to sync.', 'success')
+      void refreshProfile()
+      window.history.replaceState({}, '', '/settings?tab=billing')
+    }
+  }, [addToast, refreshProfile])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !profile?.stripe_customer_id) return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('billing') !== 'portal') return
+    void handleManageSubscription()
+    window.history.replaceState({}, '', '/settings?tab=billing')
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- portal deep link once profile loads
+  }, [profile?.stripe_customer_id])
 
   const isAdmin = profile?.role?.toLowerCase() === 'admin'
 
