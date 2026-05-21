@@ -1,7 +1,6 @@
 import {
   CREDITS_PER_PRO_MONTH,
   PRO_MONTHLY_GBP,
-  clampCreditValue,
   creditsToGbpEquivalent,
 } from '@/lib/credits'
 
@@ -12,14 +11,15 @@ export const ESPEEZY_CREDITS_STRIPE_PRODUCT_ID =
 export const MIN_CREDIT_FUND_GBP = 2
 export const DEFAULT_CREDIT_FUND_GBP = 5
 
+/** Wallet top-up credits (not capped at max listing/asset value of 100). */
 export function gbpToCredits(amountGbp: number): number {
   if (!Number.isFinite(amountGbp) || amountGbp < MIN_CREDIT_FUND_GBP) return 0
   const credits = Math.floor((amountGbp / PRO_MONTHLY_GBP) * CREDITS_PER_PRO_MONTH)
-  return Math.max(1, clampCreditValue(credits))
+  return Math.max(1, credits)
 }
 
 export function creditsToFundGbp(credits: number): number {
-  const c = clampCreditValue(credits)
+  const c = Math.max(0, Math.floor(credits))
   if (c <= 0) return MIN_CREDIT_FUND_GBP
   const gbp = creditsToGbpEquivalent(c)
   return Math.max(MIN_CREDIT_FUND_GBP, Math.round(gbp * 100) / 100)
