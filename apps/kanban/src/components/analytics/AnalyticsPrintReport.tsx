@@ -5,7 +5,7 @@ import type { MarketplaceTxRow } from '@/services/dashboard'
 
 type ChartSlice = { name: string; value: number }
 type CategorySlice = { fullName: string; count: number }
-type MemberSlice = { name: string; completed: number; assigned: number; totalScore: number }
+type MemberSlice = { name: string; completed: number; assigned: number }
 
 export function AnalyticsPrintReport({
   group,
@@ -106,10 +106,10 @@ export function AnalyticsPrintReport({
           Member contribution (chart data)
         </h2>
         <table className="analytics-print-table">
-          <thead><tr><th>Member</th><th>Done</th><th>Assigned</th><th>Score</th></tr></thead>
+          <thead><tr><th>Member</th><th>Done</th><th>Assigned</th></tr></thead>
           <tbody>
             {memberBarData.map((m) => (
-              <tr key={m.name}><td>{m.name}</td><td>{m.completed}</td><td>{m.assigned}</td><td>{m.totalScore}</td></tr>
+              <tr key={m.name}><td>{m.name}</td><td>{m.completed}</td><td>{m.assigned}</td></tr>
             ))}
           </tbody>
         </table>

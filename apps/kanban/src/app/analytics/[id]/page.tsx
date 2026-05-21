@@ -15,13 +15,12 @@ import Link from 'next/link'
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
-  RadialBarChart, RadialBar
 } from 'recharts'
 import {
   fetchActivityLogByGroup,
   fetchArtifactsByGroup,
   fetchGroupById,
-  fetchGroupMembersByScore,
+  fetchGroupMembers,
   fetchGroupTasks,
   fetchProfileById,
   fetchTeamMarketplaceTransactions,
@@ -35,8 +34,6 @@ import { useProfile } from '@/context/ProfileContext'
 import { hasFeature } from '@/utils/feature-gate'
 import PremiumFeatureGate from '@/components/PremiumFeatureGate'
 import { friendlySupabaseError } from '@/utils/supabase-errors'
-import { CONTRIBUTION_SCORES_UPDATED } from '@/lib/kanban/contribution-events'
-
 const CATEGORY_COLORS: Record<string, string> = {
   'Implementation': '#38bdf8',
   'Architecture':   '#8b5cf6',
@@ -97,7 +94,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         fetchProfileById(authUser.id),
         fetchGroupById(groupId),
         fetchGroupTasks(groupId),
-        fetchGroupMembersByScore(groupId),
+        fetchGroupMembers(groupId),
         fetchArtifactsByGroup(groupId),
       ])
 
@@ -189,17 +186,6 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     void fetchData()
   }, [profileLoading, canViewStats, fetchData])
 
-  useEffect(() => {
-    if (!canViewStats) return
-    const onScoresUpdated = (event: Event) => {
-      const detail = (event as CustomEvent<{ groupId?: string }>).detail
-      if (detail?.groupId && detail.groupId !== groupId) return
-      void fetchData()
-    }
-    window.addEventListener(CONTRIBUTION_SCORES_UPDATED, onScoresUpdated)
-    return () => window.removeEventListener(CONTRIBUTION_SCORES_UPDATED, onScoresUpdated)
-  }, [groupId, canViewStats, fetchData])
-
   const handleJoinRequest = async () => {
     if (!currentUser || !group || hasSentRequest || joinSubmitting) return
 
@@ -264,8 +250,11 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     name: (m.full_name || 'Unknown').split(' ')[0],
     completed: calculateMemberEffort(m.id),
     assigned: tasks.filter((t) => t.assignees?.includes(m.id)).length,
-    totalScore: m.total_score ?? 0,
   }))
+
+  const leaderboardMembers = [...members].sort(
+    (a, b) => calculateMemberEffort(b.id) - calculateMemberEffort(a.id),
+  )
 
   const reportKpis = {
     completionRate,
@@ -569,7 +558,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             <p style={{ color: 'var(--text-sub)', textAlign: 'center', padding: '1rem 0' }}>Syncing with the institutional graph...</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {members.map((member, idx) => {
+              {leaderboardMembers.map((member, idx) => {
                 const isOnline = onlineUsers.has(member.id)
                 const tasksDone = calculateMemberEffort(member.id)
                 const assigned = tasks.filter(t => t.assignees?.includes(member.id)).length
@@ -603,14 +592,21 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem' }}>
                         <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 700, textTransform: 'uppercase' }}>{member.role || 'Collaborator'}</span>
                         <span style={{ width: '2px', height: '2px', borderRadius: '50%', background: 'var(--border)' }} />
-                        <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 800 }}>{tasksDone} Tasks Done</span>
+                        <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 800 }}>{tasksDone} done</span>
+                        {assigned > 0 && (
+                          <>
+                            <span style={{ width: '2px', height: '2px', borderRadius: '50%', background: 'var(--border)' }} />
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 700 }}>{assigned} assigned</span>
+                          </>
+                        )}
                       </div>
                     </div>
 
-                    {/* Points Tally */}
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontWeight: 950, fontSize: '1.25rem', color: idx === 0 ? 'var(--brand)' : 'var(--text-main)', lineHeight: 1 }}>{member.total_score ?? 0}</div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Points</div>
+                      <div style={{ fontWeight: 950, fontSize: '1.1rem', color: idx === 0 ? 'var(--brand)' : 'var(--text-main)', lineHeight: 1 }}>
+                        {tasksDone}/{assigned || '—'}
+                      </div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Done</div>
                     </div>
                   </div>
                 )

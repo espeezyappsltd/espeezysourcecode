@@ -19,7 +19,7 @@ export type AnalyticsKpis = {
 
 export type ChartSlice = { name: string; value: number; color?: string }
 export type CategorySlice = { fullName: string; count: number }
-export type MemberSlice = { name: string; completed: number; assigned: number; totalScore: number }
+export type MemberSlice = { name: string; completed: number; assigned: number }
 
 export type MarketplaceTxRow = {
   date: string
@@ -145,8 +145,8 @@ export function buildIntelligenceReportCsv(input: {
   blank()
 
   push('=== MEMBER CONTRIBUTION (CHART DATA) ===')
-  push('Member', 'Completed', 'Assigned', 'Total score')
-  input.memberBar.forEach((m) => push(m.name, m.completed, m.assigned, m.totalScore))
+  push('Member', 'Completed', 'Assigned')
+  input.memberBar.forEach((m) => push(m.name, m.completed, m.assigned))
   blank()
 
   push('=== ALL TASKS ===')
@@ -199,10 +199,8 @@ export function buildIntelligenceReportCsv(input: {
   blank()
 
   push('=== TEAM ROSTER ===')
-  push('Name', 'Role', 'Total score', 'Email')
-  input.members.forEach((m) =>
-    push(m.full_name || 'Anonymous', m.role, m.total_score ?? 0, m.email ?? ''),
-  )
+  push('Name', 'Role', 'Email')
+  input.members.forEach((m) => push(m.full_name || 'Anonymous', m.role, m.email ?? ''))
 
   return `${lines.join('\n')}\n`
 }
