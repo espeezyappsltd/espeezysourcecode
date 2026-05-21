@@ -11,7 +11,7 @@ This repository contains the Espeezy platform: standalone Next.js apps, shared U
 | `apps/kanban` | **Main scholar workspace** (kanban, analytics, chillout) | **https://kanban.espeezy.com** | `npm --prefix apps/kanban run dev` | 3001 |
 | `apps/games` | Skirmish / quiz (Pro tier) | games subdomain | `npm run dev:games` | 3002 |
 | `apps/dashboard` | Internal dashboard | dashboard host | `npm run dev:dashboard` | — |
-| `apps/admin` | Admin console | admin host | `npm run dev:admin` | — |
+| `apps/admin` | **Panel** (staff console) | **https://panel.espeezy.com** | `npm run dev:admin` | 3004 |
 | `apps/core` | Local-first core runtime | — | `npm run dev:core` | 3000 |
 | `apps/shared` | Cross-app UI fragments | — | — | — |
 

@@ -9,6 +9,10 @@ const nextConfig = {
       { source: '/fund', destination: '/upgrade', permanent: true },
       { source: '/fund/:path*', destination: '/upgrade', permanent: true },
       { source: '/donation/:path*', destination: '/upgrade', permanent: true },
+      // Legacy staff entry points → panel login / console
+      { source: '/admin-login', destination: '/login', permanent: false },
+      { source: '/staff', destination: '/login', permanent: false },
+      { source: '/dashboard', destination: '/admin', permanent: false },
     ]
   },
   // Deployed to Vercel — server mode (no static export)

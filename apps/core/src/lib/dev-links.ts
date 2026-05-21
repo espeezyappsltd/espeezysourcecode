@@ -39,9 +39,9 @@ export const LOCAL_APPS: DevLink[] = [
     external: true,
   },
   {
-    title: 'Admin',
-    description: 'Operations & admin console',
-    href: process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3004',
+    title: 'Panel',
+    description: 'Staff console — panel.espeezy.com (apps/admin)',
+    href: process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3004/login',
     external: true,
   },
   {

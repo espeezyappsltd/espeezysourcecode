@@ -1,10 +1,11 @@
-// Panel proxy: pathname header for admin layout + panel host root redirect + API rate limit helper
+// Panel proxy: pathname for /admin layout + panel host hints
 const WINDOW_MS = 60 * 1000
 const MAX_REQUESTS = 60
 const ipMap = new Map<string, { count: number; start: number }>()
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isPanelProductionHost } from '@shared/panel-app'
 
 export async function rateLimit(req: Request) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'local'
@@ -30,17 +31,21 @@ export async function rateLimit(req: Request) {
 
 export default async function proxy(request: NextRequest) {
   const host = request.headers.get('host')?.split(':')[0] ?? ''
-  const isPanelHost = host === 'panel.espeezy.com' || host.startsWith('panel.')
-
-  if (isPanelHost && request.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/admin', request.url))
-  }
-
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
+  if (isPanelProductionHost(host)) {
+    requestHeaders.set('x-espeezy-app', 'panel')
+  }
+
   return NextResponse.next({ request: { headers: requestHeaders } })
 }
 
 export const config = {
-  matcher: ['/', '/admin/:path*'],
+  matcher: [
+    '/',
+    '/login',
+    '/admin/:path*',
+    '/auth/:path*',
+  ],
 }

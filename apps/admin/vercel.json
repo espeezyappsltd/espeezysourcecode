@@ -1,8 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "$comment": "Alternative: Vercel Root Directory = apps/admin. Same app as panel.espeezy.com.",
   "framework": "nextjs",
   "installCommand": "cd ../.. && npm install",
-  "buildCommand": "npm run build",
+  "buildCommand": "cd ../.. && npm run build --prefix apps/admin",
   "devCommand": "npm run dev",
   "outputDirectory": ".next"
 }
