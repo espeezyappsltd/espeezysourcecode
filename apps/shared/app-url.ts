@@ -140,6 +140,8 @@ export function resolveLegacyKanbanPath(path: string | null | undefined, fallbac
     const stripped = safe.slice('/dashboard'.length)
     return stripped === '' ? '/' : stripped
   }
+  /** SSO bridge only — never a post-login destination */
+  if (safe === '/sso' || safe.startsWith('/sso/')) return fallback
   return safe
 }
 

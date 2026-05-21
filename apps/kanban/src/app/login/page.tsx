@@ -27,7 +27,7 @@ function LoginContent() {
   const { ready, busy, error, info, signIn, signUp, resetPassword } = useSimpleAuth(
     supabase,
     redirectPath,
-    { recoveryRedirectTo },
+    { recoveryRedirectTo, kanbanPaths: true },
   )
 
   return (

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { sanitizeNextPath } from '@shared/app-url'
+import { sanitizeKanbanNextPath, sanitizeNextPath } from '@shared/app-url'
 
 export type SimpleAuthResult = {
   ok: boolean
@@ -15,6 +15,8 @@ export function useSimpleAuth(
   supabase: SupabaseClient | null,
   redirectPath: string,
   options?: {
+    /** Use Kanban path rules (maps /sso and /dashboard to workspace `/`). Default false. */
+    kanbanPaths?: boolean
     recoveryRedirectTo?: string
     /** When true, keep the login form visible even if a session already exists. */
     skipSessionRedirect?: boolean
@@ -28,8 +30,9 @@ export function useSimpleAuth(
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const checkedRef = useRef(false)
-  const pathRef = useRef(sanitizeNextPath(redirectPath))
-  pathRef.current = sanitizeNextPath(redirectPath)
+  const normalizePath = options?.kanbanPaths ? sanitizeKanbanNextPath : sanitizeNextPath
+  const pathRef = useRef(normalizePath(redirectPath))
+  pathRef.current = normalizePath(redirectPath)
 
   const goAfterAuth = useCallback(async () => {
     if (options?.canProceedAfterAuth) {
