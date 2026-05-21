@@ -11,7 +11,7 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
   'Introducing the Espeezy App!',
-  'Secure workspaces, real-time project analytics, hustle-gigs, campus marketplace, peer networks, and so much more.' 
+  'Personal secure workspaces, real-time project analytics, hustle-gigs, campus marketplace, peer networks, and so much more.' 
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Try out the live demo'
