@@ -3,6 +3,7 @@ export const ESPEEZY_APP_ORIGINS = {
   prereg: 'https://espeezy.com',
   kanban: 'https://kanban.espeezy.com',
   games: 'https://games.espeezy.com',
+  panel: 'https://panel.espeezy.com',
 } as const
 
 export type EspeezyAppKey = keyof typeof ESPEEZY_APP_ORIGINS
@@ -14,6 +15,7 @@ const ALLOWED_HOSTS = new Set([
   'espeezy.com',
   'www.espeezy.com',
   'kanban.espeezy.com',
+  'panel.espeezy.com',
   'games.espeezy.com',
   'localhost',
   '127.0.0.1',
@@ -79,6 +81,36 @@ export function shouldForwardAuthToKanban(hostname: string, searchParams: URLSea
   if (searchParams.get('type') === 'recovery') return true
   if (searchParams.get('app') === 'kanban') return true
   return searchParams.has('code') && searchParams.get('redirect_to')?.includes('kanban.espeezy.com') === true
+}
+
+/** Admin console origin (panel.espeezy.com in production). */
+export function resolvePanelOrigin(
+  request?: Request | { headers: Headers } | null,
+): string {
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL?.trim()
+  if (adminUrl) return normalizeOrigin(adminUrl)
+  return resolveRequestOrigin(request, ESPEEZY_APP_ORIGINS.panel)
+}
+
+/** @deprecated Use resolvePanelOrigin */
+export const resolveAdminAppOrigin = resolvePanelOrigin
+
+export function buildAdminLoginUrl(
+  request?: Request | { headers: Headers } | null,
+  options?: { redirect?: string; error?: string },
+): string {
+  const base = new URL('/login', resolvePanelOrigin(request))
+  if (options?.redirect) base.searchParams.set('redirect', options.redirect)
+  if (options?.error) base.searchParams.set('error', options.error)
+  return base.toString()
+}
+
+/** True when auth should complete on the admin panel host. */
+export function shouldForwardAuthToPanel(hostname: string, searchParams: URLSearchParams): boolean {
+  const isPreregHost = hostname === 'espeezy.com' || hostname === 'www.espeezy.com'
+  if (!isPreregHost) return false
+  if (searchParams.get('app') === 'panel' || searchParams.get('app') === 'admin') return true
+  return searchParams.has('code') && searchParams.get('redirect_to')?.includes('panel.espeezy.com') === true
 }
 
 export function isLocalOrigin(origin: string): boolean {

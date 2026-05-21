@@ -158,9 +158,6 @@ export default function PreRegisterPage() {
           <p style={{ margin: 0, fontSize: 'clamp(1rem, 2.2vw, 1.1rem)', fontWeight: 500, lineHeight: 1.55, color: 'rgba(255,255,255,0.78)' }}>
             {HERO_COPY_LINES[1]}
           </p>
-          <p style={{ margin: 0, fontSize: 'clamp(0.95rem, 2vw, 1.05rem)', fontWeight: 500, lineHeight: 1.55, color: 'rgba(255,255,255,0.55)' }}>
-            {HERO_COPY_LINES[2]}
-          </p>
           <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>
             {PLATFORM_OPERATIONS_TAGLINE}
           </p>
@@ -315,11 +312,11 @@ export default function PreRegisterPage() {
                       <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
                         <div style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <code style={{ fontSize: '0.8rem', color: 'white', wordBreak: 'break-all', flex: 1 }}>
-                            https://espeezy.com/preregister?ref={myReferralCode}
+                            https://kanban.espeezy.com/pricing?ref={myReferralCode}
                           </code>
                           <button
                             onClick={() => {
-                              const url = `https://espeezy.com/preregister?ref=${myReferralCode}`
+                              const url = `https://kanban.espeezy.com/pricing?ref=${myReferralCode}`
                               navigator.clipboard.writeText(url).catch(() => alert('Failed to copy'))
                             }}
                             style={{ marginLeft: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--brand)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}

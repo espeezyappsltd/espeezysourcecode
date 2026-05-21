@@ -4,7 +4,8 @@ export type PaidPlanKey = 'pro' | 'premium' | 'lifetime'
 
 export async function startAuthenticatedCheckout(
   plan: PaidPlanKey,
-): Promise<{ ok: boolean; url?: string; error?: string; openPortal?: boolean }> {
+  options?: { referralCode?: string | null },
+): Promise<{ ok: boolean; url?: string; error?: string; openPortal?: boolean; referralApplied?: boolean }> {
   const supabase = createBrowserSupabaseClient()
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.access_token) {
@@ -17,17 +18,25 @@ export async function startAuthenticatedCheckout(
       'Content-Type': 'application/json',
       Authorization: `Bearer ${session.access_token}`,
     },
-    body: JSON.stringify({ plan }),
+    body: JSON.stringify({
+      plan,
+      ...(options?.referralCode ? { referral_code: options.referralCode.trim().toUpperCase() } : {}),
+    }),
   })
 
-  const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string; portal?: boolean }
+  const data = (await res.json().catch(() => ({}))) as {
+    url?: string
+    error?: string
+    portal?: boolean
+    referral_applied?: boolean
+  }
   if (res.status === 409 && data.portal) {
     return { ok: false, error: data.error ?? 'Use Manage billing to change your plan.', openPortal: true }
   }
   if (!res.ok || !data.url) {
     return { ok: false, error: data.error ?? 'Unable to start checkout.' }
   }
-  return { ok: true, url: data.url }
+  return { ok: true, url: data.url, referralApplied: data.referral_applied }
 }
 
 export type CheckoutStartResult = Awaited<ReturnType<typeof startAuthenticatedCheckout>>

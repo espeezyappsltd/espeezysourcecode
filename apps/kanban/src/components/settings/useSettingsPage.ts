@@ -10,6 +10,7 @@ import { TabName } from '@/types/ui'
 import { Profile } from '@/types/auth'
 import { Achievement, Group } from '@/types/database'
 import { startAuthenticatedCheckout } from '@/services/billing'
+import { isValidReferralCode, normalizeReferralCode } from '@shared/referrals'
 import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useTransactionConfirm } from '@/hooks/useTransactionConfirm'
@@ -312,7 +313,15 @@ export function useSettingsPage() {
     if (!ok) return
 
     setSwitching(true)
-    const result = await startAuthenticatedCheckout(plan)
+    let referralCode: string | null = null
+    if (plan === 'pro' && typeof window !== 'undefined') {
+      const stored = localStorage.getItem('espeezy_ref_code')
+      if (stored && isValidReferralCode(stored)) {
+        referralCode = normalizeReferralCode(stored)
+      }
+    }
+
+    const result = await startAuthenticatedCheckout(plan, { referralCode })
     if (!result.ok) {
       setSwitching(false)
       if (result.openPortal) {
@@ -321,6 +330,10 @@ export function useSettingsPage() {
       }
       setError(result.error ?? 'Checkout could not start.')
       return
+    }
+
+    if (result.referralApplied) {
+      addToast('Referral applied', '30% off Pro is included in your checkout.', 'success')
     }
     window.location.href = result.url!
   }

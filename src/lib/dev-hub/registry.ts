@@ -51,11 +51,14 @@ export const DEV_APPS: DevAppDefinition[] = [
   },
   {
     id: 'admin',
-    name: 'Admin',
-    description: 'Admin console & operations',
+    name: 'Panel',
+    description: 'Staff console — panel.espeezy.com',
     packagePath: 'apps/admin',
     port: 3004,
     inspectPort: 9234,
+    previewPath: '/login',
+    healthPath: '/login',
+    productionUrl: 'https://panel.espeezy.com',
     accent: '#f59e0b',
   },
   {

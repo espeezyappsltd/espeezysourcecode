@@ -9,12 +9,14 @@ import {
 } from '@/lib/stripe/create-checkout-session'
 import { getStripeClient } from '@/utils/stripe'
 import { getAdminDb } from '@/lib/supabase/admin'
+import { resolveReferralProDiscount } from '@/lib/referrals/referral-pro'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const checkoutSchema = z.object({
   plan: z.enum(['pro', 'premium', 'lifetime']).default('pro'),
+  referral_code: z.string().trim().max(8).optional(),
 })
 
 const publicCheckoutSchema = z.object({
@@ -98,6 +100,26 @@ async function handleAuthenticatedCheckout(stripe: Stripe, req: Request, body: u
     }
   }
 
+  let referral:
+    | { couponId: string; referrerProfileId: string; referralCode: string }
+    | null = null
+
+  if (parsedBody.data.referral_code && adminDb) {
+    const discount = await resolveReferralProDiscount(adminDb, {
+      buyerUserId: user.id,
+      referralCode: parsedBody.data.referral_code,
+      plan: planKey,
+    })
+    if (!discount.valid) {
+      return NextResponse.json({ error: discount.reason }, { status: 422 })
+    }
+    referral = {
+      couponId: discount.couponId,
+      referrerProfileId: discount.referrerProfileId,
+      referralCode: discount.normalizedCode,
+    }
+  }
+
   const session = await createCheckoutSessionForUser({
     stripe,
     plan: planKey,
@@ -105,9 +127,13 @@ async function handleAuthenticatedCheckout(stripe: Stripe, req: Request, body: u
     email: user.email ?? '',
     stripeCustomerId,
     request: req,
+    referral,
   })
 
-  return NextResponse.json({ url: session.url })
+  return NextResponse.json({
+    url: session.url,
+    referral_applied: Boolean(referral),
+  })
 }
 
 async function handlePublicCheckout(stripe: Stripe, body: unknown) {

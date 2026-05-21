@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { ESPEEZY_APP_ORIGINS, sanitizeNextPath, shouldForwardAuthToKanban } from '@shared/app-url'
+import {
+  ESPEEZY_APP_ORIGINS,
+  sanitizeNextPath,
+  shouldForwardAuthToKanban,
+  shouldForwardAuthToPanel,
+} from '@shared/app-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +18,12 @@ export async function GET(request: Request) {
   const errorDesc = searchParams.get('error_description')
   const code = searchParams.get('code')
   const isRecovery = searchParams.get('type') === 'recovery'
+
+  if (shouldForwardAuthToPanel(requestUrl.hostname, searchParams)) {
+    const panelCallback = new URL('/auth/callback', ESPEEZY_APP_ORIGINS.panel)
+    panelCallback.search = requestUrl.search
+    return NextResponse.redirect(panelCallback.toString())
+  }
 
   if (shouldForwardAuthToKanban(requestUrl.hostname, searchParams)) {
     const kanbanCallback = new URL('/auth/callback', ESPEEZY_APP_ORIGINS.kanban)

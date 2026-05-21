@@ -25,6 +25,12 @@ export function getCheckoutPlanConfig(plan: CheckoutPlanKey) {
   return { ...config, priceId, plan }
 }
 
+type ReferralDiscountInput = {
+  couponId: string
+  referrerProfileId: string
+  referralCode: string
+}
+
 type CreateCheckoutInput = {
   stripe: Stripe
   plan: CheckoutPlanKey
@@ -32,10 +38,11 @@ type CreateCheckoutInput = {
   email: string
   stripeCustomerId?: string | null
   request?: Request | null
+  referral?: ReferralDiscountInput | null
 }
 
 export async function createCheckoutSessionForUser(input: CreateCheckoutInput): Promise<Stripe.Checkout.Session> {
-  const { stripe, plan, userId, email, stripeCustomerId, request } = input
+  const { stripe, plan, userId, email, stripeCustomerId, request, referral } = input
   const { priceId, mode, label } = getCheckoutPlanConfig(plan)
   const appOrigin = getAppUrl(request ?? null)
 
@@ -60,7 +67,18 @@ export async function createCheckoutSessionForUser(input: CreateCheckoutInput): 
       user_id: userId,
       plan,
       product_label: label,
+      ...(referral
+        ? {
+            referral_code: referral.referralCode,
+            referrer_profile_id: referral.referrerProfileId,
+          }
+        : {}),
     },
+  }
+
+  if (referral?.couponId) {
+    params.discounts = [{ coupon: referral.couponId }]
+    params.allow_promotion_codes = false
   }
 
   if (stripeCustomerId) {

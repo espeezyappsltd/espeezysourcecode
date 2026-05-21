@@ -9,6 +9,7 @@ import {
 } from '@/lib/stripe/subscription-sync'
 import { getStripeClient, getStripeWebhookSecret } from '@/utils/stripe'
 import { Q } from '@/lib/query-columns'
+import { recordReferralProRedemption } from '@/lib/referrals/referral-pro'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -183,6 +184,11 @@ async function handleSubscriptionWebhook(session: Stripe.Checkout.Session) {
 
     if (userId) {
       await adminDb.from('profiles').update(patch).eq('id', userId)
+
+      const referrerId = session.metadata?.referrer_profile_id
+      if (plan === 'pro' && referrerId && session.payment_status === 'paid' && session.id) {
+        await recordReferralProRedemption(adminDb, referrerId, userId, session.id)
+      }
     } else if (isPublicSignup && email) {
       const { data: existingProfile } = await adminDb
         .from('profiles')

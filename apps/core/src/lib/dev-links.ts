@@ -41,7 +41,7 @@ export const LOCAL_APPS: DevLink[] = [
   {
     title: 'Admin',
     description: 'Operations & admin console',
-    href: 'http://localhost:3004',
+    href: process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3004',
     external: true,
   },
   {

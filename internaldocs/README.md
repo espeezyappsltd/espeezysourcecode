@@ -76,6 +76,9 @@ Each app is deployed as its own Vercel project with **Root Directory** set to th
 | Kanban | `apps/kanban` | `npm run build` |
 | Games | `apps/games` | `npm run build` |
 | Prereg | `apps/prereg` | `npm run build` |
+| **Admin (Panel)** | `.` (repo root) or `apps/admin` | `npm run build:admin` from root — see [`apps/admin/README.md`](../apps/admin/README.md) |
+
+**Panel production URL:** `https://panel.espeezy.com`
 
 Use Node **22.x**. Set Supabase env vars in the Vercel project settings. Run `npm run predeploy:kanban` locally before merging auth or schema changes.
 

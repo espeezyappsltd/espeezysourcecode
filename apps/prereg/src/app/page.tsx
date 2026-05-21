@@ -475,16 +475,16 @@ export default function PreRegisterPage() {
                         <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Share &amp; Get Rewards</span>
                       </div>
                       <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                        Refer friends and climb the leaderboard. Top referrers get 6 months free when we launch.
+                        Give friends 30% off Espeezy Pro on kanban.espeezy.com with your code. Terms apply — up to 5 Pro subscriptions per code.
                       </p>
                       <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
                         <div style={{ padding: '0.75rem', background: '#f1f5f9', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <code style={{ fontSize: '0.8rem', color: '#0f172a', wordBreak: 'break-all', flex: 1 }}>
-                            https://espeezy.com/preregister?ref={myReferralCode}
+                            https://kanban.espeezy.com/pricing?ref={myReferralCode}
                           </code>
                           <button
                             onClick={() => {
-                              const url = `https://espeezy.com/preregister?ref=${myReferralCode}`
+                              const url = `https://kanban.espeezy.com/pricing?ref=${myReferralCode}`
                               navigator.clipboard.writeText(url).catch(() => alert('Failed to copy'))
                             }}
                             style={{ marginLeft: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--brand)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>

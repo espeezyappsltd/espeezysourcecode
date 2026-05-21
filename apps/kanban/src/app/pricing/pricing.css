@@ -26,6 +26,28 @@
   font-size: 0.95rem;
 }
 
+.pricing-page__referral-hint {
+  margin-top: 1rem !important;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--brand) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, transparent);
+  font-size: 0.82rem !important;
+  color: var(--text-sub, #64748b) !important;
+}
+
+.pricing-page__referral-hint strong {
+  color: var(--brand, #10b981);
+  letter-spacing: 0.06em;
+}
+
+.pricing-page__referral-terms {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.65rem;
+  opacity: 0.85;
+}
+
 .pricing-page__grid {
   max-width: 1100px;
   margin: 0 auto;

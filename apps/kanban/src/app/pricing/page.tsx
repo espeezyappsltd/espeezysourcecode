@@ -18,6 +18,10 @@ import {
 } from '@shared/platform-brand'
 import { fetchLiveMetrics } from '@/services/launch'
 import './pricing.css'
+import { ReferralProgramPanel } from '@/components/ReferralProgramPanel'
+import { useStoredReferralCode } from '@/hooks/useStoredReferralCode'
+import { REFERRAL_PRO_DISCOUNT_PERCENT, REFERRAL_PROMO_TERMS } from '@shared/referrals'
+import '@/components/referral-panel.css'
 
 const LIFETIME_LIMIT = 100
 
@@ -72,6 +76,7 @@ export default function PricingPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [currentPlan, setCurrentPlan] = useState<string | null>(null)
   const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
+  const storedReferralCode = useStoredReferralCode()
 
   const refreshLifetimeSeats = useCallback(() => {
     void fetchLiveMetrics().then((data) => {
@@ -164,7 +169,19 @@ export default function PricingPage() {
             Your current plan: <strong>{currentLabel}</strong>
           </p>
         )}
+        {storedReferralCode && (
+          <p className="pricing-page__referral-hint">
+            Referral code <strong>{storedReferralCode}</strong> saved — {REFERRAL_PRO_DISCOUNT_PERCENT}% off Pro at checkout.{' '}
+            <span className="pricing-page__referral-terms">{REFERRAL_PROMO_TERMS}</span>
+          </p>
+        )}
       </header>
+
+      {isAuthenticated && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <ReferralProgramPanel compact />
+        </div>
+      )}
 
       <div className="pricing-page__grid">
         {PLANS.map((product) => {
@@ -183,6 +200,7 @@ export default function PricingPage() {
             currentPlan,
             userId,
             lifetimeSoldOut: soldOut,
+            referralCode: storedReferralCode,
           })
           const label = getPlanCtaLabel({
             plan: product.id,

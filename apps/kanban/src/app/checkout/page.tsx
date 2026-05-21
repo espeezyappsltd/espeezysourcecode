@@ -4,9 +4,12 @@ import { marketingCheckoutUrl, type MarketingPlanKey } from '@/lib/marketing-url
 import { createServerSupabaseClient } from '@/lib/db'
 import { getStripeClient } from '@/utils/stripe'
 import { createCheckoutSessionForUser } from '@/lib/stripe/create-checkout-session'
+import { getAdminDb } from '@/lib/supabase/admin'
+import { resolveReferralProDiscount } from '@/lib/referrals/referral-pro'
+import { isValidReferralCode, normalizeReferralCode } from '@shared/referrals'
 
 type PageProps = {
-  searchParams: Promise<{ plan?: string; coupon?: string }>
+  searchParams: Promise<{ plan?: string; coupon?: string; ref?: string }>
 }
 
 /** Logged-in users: Stripe Checkout in-app. Guests: marketing checkout. */
@@ -41,6 +44,26 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
     redirect('/settings?tab=billing&billing=portal')
   }
 
+  let referral: { couponId: string; referrerProfileId: string; referralCode: string } | null = null
+  const refParam = params.ref?.trim()
+  if (refParam && isValidReferralCode(refParam) && plan === 'pro') {
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      const discount = await resolveReferralProDiscount(adminDb, {
+        buyerUserId: user.id,
+        referralCode: normalizeReferralCode(refParam),
+        plan: 'pro',
+      })
+      if (discount.valid) {
+        referral = {
+          couponId: discount.couponId,
+          referrerProfileId: discount.referrerProfileId,
+          referralCode: discount.normalizedCode,
+        }
+      }
+    }
+  }
+
   try {
     const stripe = getStripeClient()
     const session = await createCheckoutSessionForUser({
@@ -49,6 +72,7 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
       userId: user.id,
       email: user.email,
       stripeCustomerId: profile?.stripe_customer_id ?? null,
+      referral,
     })
     if (session.url) {
       redirect(session.url)

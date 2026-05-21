@@ -51,6 +51,7 @@ export type PlanCtaOptions = {
   currentPlan?: string | null
   userId?: string | null
   lifetimeSoldOut?: boolean
+  referralCode?: string | null
 }
 
 export function getPlanCtaHref({
@@ -59,6 +60,7 @@ export function getPlanCtaHref({
   currentPlan,
   userId,
   lifetimeSoldOut,
+  referralCode,
 }: PlanCtaOptions): string {
   if (lifetimeSoldOut && plan === 'lifetime') {
     return APP_PRICING_PATH

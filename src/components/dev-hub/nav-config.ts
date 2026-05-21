@@ -19,7 +19,7 @@ export function getNavApp(id: string): DevHubNavApp | undefined {
   return DEV_HUB_NAV_APPS.find((a) => a.id === id)
 }
 
-/** Admin console tabs (admin.espeezy.com) — shown in hub sidebar for staff. */
+/** Admin console tabs (panel.espeezy.com) — shown in hub sidebar for staff. */
 export type DevHubAdminTab = {
   label: string
   path: string
@@ -36,11 +36,15 @@ export const DEV_HUB_ADMIN_TABS: DevHubAdminTab[] = [
   { label: 'Settings', path: '/admin/settings', permission: 'settings' },
 ]
 
+const PANEL_PRODUCTION = 'https://panel.espeezy.com'
+
 export function getAdminAppBaseUrl(): string {
-  if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3004'
+  const configured = process.env.NEXT_PUBLIC_ADMIN_URL?.trim()
+  if (configured) return configured.replace(/\/$/, '')
+  if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
+    return 'http://localhost:3004'
   }
-  return process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3004'
+  return PANEL_PRODUCTION
 }
 
 export function adminConsoleHref(path: string): string {

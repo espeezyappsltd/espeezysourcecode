@@ -14,6 +14,7 @@ import {
   HardDrive,
   LayoutDashboard,
   Lock,
+  HelpCircle,
   LogOut,
   Music,
   Moon,
@@ -41,6 +42,8 @@ import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
+import { SIDEBAR_UPGRADE_BLURB } from '@shared/platform-brand'
+import './sidebar-premium.css'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
 const THEME_SEQUENCE = ['Google Light', 'Deep Oceanic', 'Cyberpunk'] as const
@@ -434,99 +437,99 @@ export default function Sidebar({ user }: SidebarProps) {
         </nav>
 
         <div className="sidebar-bottom">
-        {isOpen && showUpgradeCard && (
-          <div className="sidebar-upgrade-card" style={{ padding: '0 0.75rem 0.35rem' }}>
-            <div className="glass-card-prestige" style={{ padding: '1rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => { window.location.href = APP_PRICING_PATH }}>
-              <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <Sparkles size={16} className="shimmer-gold" />
-                <span style={{ fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', color: 'var(--text-main)' }}>TEAM SUPPORT</span>
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.25rem' }}>Upgrade to Pro Member</div>
-              <p style={{ fontSize: '0.65rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.4 }}>Support the platform team—unlock advanced themes and priority features.</p>
-            </div>
-          </div>
-        )}
-
-        <div className="sidebar-status-panel" style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.1)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: isConnected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isConnected ? 'var(--brand)' : 'var(--error)' }}>
-              {isConnected ? <ShieldCheck size={18} /> : <WifiOff size={18} />}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: isConnected ? 'var(--brand)' : 'var(--error)' }}>
-                {isConnected ? 'Vault Verified' : 'Uplink Offline'}
-              </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 700 }}>
-                {isSlow ? 'Bandwidth Restricted' : 'Optimal Connectivity'}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ fontSize: '0.55rem', fontWeight: 800, color: 'var(--text-sub)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            <span>Node: GF-2026-X</span>
-            <Lock size={10} />
-          </div>
-        </div>
-
-        {/* Persistent Help Button */}
-        <div style={{ padding: isOpen ? '0 1rem 0.5rem' : '0 0.75rem 0.5rem', display: 'flex', justifyContent: isOpen ? 'flex-start' : 'center', alignItems: 'center', gap: '0.5rem' }}>
-          <button
-            aria-label="Help & Onboarding"
-            title="Help & Onboarding"
-            style={{
-              width: isOpen ?  '100%' : '38px',
-              height: '38px',
-              borderRadius: '10px',
-              background: 'rgba(59,130,246,0.08)',
-              border: '1px solid rgba(59,130,246,0.18)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: isOpen ? 'flex-start' : 'center',
-              color: '#2563eb',
-              fontWeight: 900,
-              fontSize: '0.95rem',
-              gap: '0.7rem',
-              cursor: 'pointer',
-              padding: isOpen ? '0.625rem 1rem' : 0,
-              outline: 'none',
-              boxShadow: 'var(--shadow-xs)'
-            }}
-            onClick={() => window.dispatchEvent(new CustomEvent('open-help-tray'))}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="20" height="20" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-            </span>
-            {isOpen && <span>Help & Onboarding</span>}
-          </button>
-        </div>
-
-        <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: isOpen ? '0.5rem' : '0', backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent', borderRadius: '12px', border: isOpen ? '1px solid var(--border)' : 'none', justifyContent: isOpen ? 'flex-start' : 'center', cursor: 'pointer', transition: 'all 0.2s ease', minHeight: '40px' }} className="identity-pill" onClick={() => pushRoute('/profile')}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 950, flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 8px rgba(var(--brand-rgb), 0.15)' }}>
-              <ProfileAvatar avatarUrl={profile?.avatar_url} fallback={profile?.full_name?.charAt(0) || 'U'} size={38} alt="User avatar" />
-            </div>
-            {isOpen && (
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div style={{ color: 'var(--text-main)', fontWeight: 900, fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', letterSpacing: '-0.02em' }}>
-                  {profile?.full_name || 'Anonymous'}
-                </div>
-                <div style={{ color: 'var(--success)', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Session Active
+          <div className="sidebar-foot">
+            {isOpen && showUpgradeCard && (
+              <div className="sidebar-foot__upgrade sidebar-upgrade-card">
+                <div
+                  className="glass-card-prestige"
+                  style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
+                  onClick={() => { window.location.href = APP_PRICING_PATH }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { window.location.href = APP_PRICING_PATH } }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} aria-hidden />
+                  <div className="sidebar-foot__upgrade-eyebrow">
+                    <Sparkles size={14} className="shimmer-gold" aria-hidden />
+                    Team support
+                  </div>
+                  <p className="sidebar-foot__upgrade-title">Upgrade to Pro Member</p>
+                  <p className="sidebar-foot__upgrade-copy">{SIDEBAR_UPGRADE_BLURB}</p>
                 </div>
               </div>
             )}
-          </div>
 
-          <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.4rem' }}>
-            <button onClick={toggleTheme} style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Toggle Aesthetics" aria-label="Toggle Theme" className="panel-tool">
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            <div className="sidebar-foot__vault" data-connected={isConnected ? 'true' : 'false'}>
+              <div className="sidebar-foot__vault-icon" aria-hidden>
+                {isConnected ? <ShieldCheck size={17} /> : <WifiOff size={17} />}
+              </div>
+              <div className="sidebar-foot__vault-body">
+                <div className="sidebar-foot__vault-title">
+                  {isConnected ? 'Vault Verified' : 'Uplink Offline'}
+                </div>
+                <div className="sidebar-foot__vault-sub">
+                  {isSlow ? 'Bandwidth restricted' : 'Optimal connectivity'}
+                </div>
+                <div className="sidebar-foot__vault-meta">
+                  <span>Node GF-2026-X</span>
+                  <Lock size={10} aria-hidden />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="sidebar-foot__help"
+              aria-label="Help and onboarding"
+              title="Help & Onboarding"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-help-tray'))}
+            >
+              <span className="sidebar-foot__help-icon" aria-hidden>
+                <HelpCircle size={17} />
+              </span>
+              <span className="sidebar-foot__help-label">Help & Onboarding</span>
             </button>
-            <button onClick={handleSignOut} style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="End Session" aria-label="Sign Out" className="panel-tool">
-              <LogOut size={18} />
-            </button>
+
+            <div className="sidebar-foot__session">
+              <button
+                type="button"
+                className="sidebar-foot__profile identity-pill"
+                onClick={() => pushRoute('/profile')}
+                aria-label="Open profile"
+              >
+                <div className="sidebar-foot__avatar">
+                  <ProfileAvatar avatarUrl={profile?.avatar_url} fallback={profile?.full_name?.charAt(0) || 'U'} size={36} alt="User avatar" />
+                </div>
+                <div className="sidebar-foot__profile-text">
+                  <div className="sidebar-foot__profile-name">{profile?.full_name || 'Anonymous'}</div>
+                  <div className="sidebar-foot__profile-status">Session active</div>
+                </div>
+              </button>
+
+              <div className="sidebar-foot__actions">
+                <button
+                  type="button"
+                  className="sidebar-foot-btn sidebar-foot-btn--theme"
+                  onClick={toggleTheme}
+                  title={`Theme: ${currentPalette.name}`}
+                  aria-label="Toggle theme"
+                >
+                  {isDark ? <Sun size={17} aria-hidden /> : <Moon size={17} aria-hidden />}
+                  <span className="sidebar-foot-btn-label">Theme</span>
+                </button>
+                <button
+                  type="button"
+                  className="sidebar-foot-btn sidebar-foot-btn--signout"
+                  onClick={handleSignOut}
+                  title="End session"
+                  aria-label="Sign out"
+                >
+                  <LogOut size={17} aria-hidden />
+                  <span className="sidebar-foot-btn-label">Sign out</span>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
       </aside>
 
@@ -566,10 +569,8 @@ export default function Sidebar({ user }: SidebarProps) {
           transform: scale(0.96);
         }
 
-        .identity-pill:hover {
-          border-color: var(--brand) !important;
-          background: var(--bg-main) !important;
-          box-shadow: 0 4px 15px rgba(var(--brand-rgb), 0.05);
+        .sidebar-foot__profile.identity-pill:hover {
+          box-shadow: none;
         }
 
         .sidebar-backdrop {
@@ -639,18 +640,8 @@ export default function Sidebar({ user }: SidebarProps) {
             margin-right: 0.65rem !important;
           }
 
-          .sidebar-upgrade-card,
-          .sidebar-status-panel {
-            display: none !important;
-          }
-
           .sidebar-bottom {
             padding-bottom: env(safe-area-inset-bottom, 0);
-          }
-
-          .sidebar-bottom > div:last-child {
-            padding: 0.65rem 0.85rem !important;
-            gap: 0.5rem !important;
           }
         }
 
@@ -723,12 +714,6 @@ export default function Sidebar({ user }: SidebarProps) {
           font-weight: 950;
           margin-left: auto;
           box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
-        }
-
-        .panel-tool:hover {
-          background: var(--surface) !important;
-          border-color: var(--brand) !important;
-          color: var(--brand) !important;
         }
 
         .support-link:hover {

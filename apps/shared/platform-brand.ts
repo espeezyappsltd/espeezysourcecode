@@ -10,13 +10,13 @@ export const MAIN_APP_ORIGIN = ESPEEZY_APP_ORIGINS.kanban
 
 export const MAIN_APP_HOST_LABEL = 'kanban.espeezy.com'
 
-export const GETTING_STARTED_STEP_1_TITLE = 'Initialize Your Workspace'
+export const GETTING_STARTED_STEP_1_TITLE = 'Get Started'
 
-export const GETTING_STARTED_STEP_1_DESC = `Sign up at ${MAIN_APP_HOST_LABEL}, the main Espeezy app. It takes under 60 seconds. Set your institution, your role (student, educator, or admin), and your timezone. Done.`
+export const GETTING_STARTED_STEP_1_DESC = `Sign up at ${MAIN_APP_HOST_LABEL}, the main Espeezy app. It takes under 20 seconds.`
 
-export const GETTING_STARTED_ACCOUNT_BODY = `Head to ${MAIN_APP_HOST_LABEL} and sign up with your university email or a personal email. Espeezy verifies your institution automatically using your email domain. If your institution is not yet listed, you can add it manually and it will be reviewed within 24 hours. There is no credit card required.`
+export const GETTING_STARTED_ACCOUNT_BODY = `Head to ${MAIN_APP_HOST_LABEL} and sign up with your university email. No institution? No problem! You can still use the app with a personal email.`
 
-export const INSTALLATION_WEB_BODY = `Espeezy runs entirely in your browser. Open ${MAIN_APP_HOST_LABEL} on any device with a modern browser (Chrome 110+, Firefox 115+, Safari 16+, Edge 110+). Sign in and you are ready. No plugins, no extensions, no downloads.`
+export const INSTALLATION_WEB_BODY = `Espeezy runs entirely in your browser. Open ${MAIN_APP_HOST_LABEL} on any device with a modern browser. Sign in and you are ready.`
 
 export const PLATFORM_TEAM_SIZE = 12
 
@@ -34,11 +34,11 @@ export const HERO_ANALYTICS_CAPTION = 'Try out the live demo'
 /** @deprecated Use HERO_COPY_LINES[1] */
 export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
 
-export const KANBAN_DEMO_LABEL = 'Explore The Live Demo'
+export const KANBAN_DEMO_LABEL = 'Explore The App'
 export const KANBAN_DEMO_PATH = '/demo'
 
 export const PRICING_INTRO =
-  'The app is built for all types of teams and projects, keeping collaboration fast, secure, and affordable at scale. All core features are free for students.'
+  'Espeezy Learning Platform is built for all types of teams and projects, keeping collaboration fast, secure, and affordable at scale. All core features are free for students.'
 
 export const UPGRADE_HERO_TITLE = 'Support the platform to reach more schools'
 
@@ -119,3 +119,10 @@ export const APP_FOOTER_TAGLINE_DASHBOARD =
 
 export const SIDEBAR_UPGRADE_BLURB =
   'Support the platform team and unlock advanced themes and priority features.'
+
+export {
+  REFERRAL_PRO_DISCOUNT_PERCENT,
+  REFERRAL_PRO_MAX_REDEMPTIONS,
+  REFERRAL_PROMO_HEADLINE,
+  REFERRAL_PROMO_TERMS,
+} from './referrals'

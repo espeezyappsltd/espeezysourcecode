@@ -7,6 +7,8 @@ import PlansUsagePanel from '@/components/PlansUsagePanel'
 import type { SettingsPageViewModel } from '../settings-types'
 import { BILLING_PANEL_SUBTITLE } from '@/lib/platform/brand-copy'
 import { APP_PRICING_PATH, planRank } from '@/lib/pricing/plan-routes'
+import { ReferralProgramPanel } from '@/components/ReferralProgramPanel'
+import '@/components/referral-panel.css'
 
 function statusLabel(status: string | null | undefined): string {
   if (!status) return 'Active'
@@ -38,7 +40,11 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
   return (
     <div className="auth-card" style={{ maxWidth: '100%' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Subscription & Billing</h2>
-      <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>{BILLING_PANEL_SUBTITLE}</p>
+      <p style={{ color: 'var(--text-sub)', marginBottom: '1.25rem' }}>{BILLING_PANEL_SUBTITLE}</p>
+
+      <div style={{ marginBottom: '1.75rem' }}>
+        <ReferralProgramPanel />
+      </div>
 
       <div
         style={{

@@ -13,6 +13,8 @@ import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import SupportChat from '@/components/SupportChat'
+import HelpTray from '@/components/HelpTray'
+import ReferralCapture from '@/components/ReferralCapture'
 import { PageGuideHost } from '@/components/guide/PageGuideHost'
 import { MobilePageControlsProvider } from '@/components/mobile/MobilePageControlsContext'
 import { getCachedLayoutSession } from '@/utils/auth-server'
@@ -94,6 +96,7 @@ function DashboardShell({
       <NotificationProvider>
         <PresenceProvider user={user}>
           <MobilePageControlsProvider>
+            <ReferralCapture />
             <Sidebar user={user} />
             <main className="main-content">
             <ConnectionAlertTray />
@@ -101,6 +104,7 @@ function DashboardShell({
             <PageGuideHost />
           </main>
           <GlobalAnnouncement />
+          <HelpTray />
           <SupportChat />
           <BottomNav />
           </MobilePageControlsProvider>
