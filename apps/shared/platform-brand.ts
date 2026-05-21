@@ -6,12 +6,12 @@
 export const PLATFORM_TEAM_SIZE = 12
 
 export const PLATFORM_OPERATIONS_TAGLINE =
-  'Operated by a 12-member platform team running production backend, billing, and reliability.'
+  'Operated by a 12-member team running production and reliable service delivery.'
 
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
-  'Try out the brand-new Espeezy Kanban Dashboard!',
-  'You get live boards, real-time project sync, hustle-gigs, real-time project analytics, and so much more.',
+  'Try out the brand-new Espeezy Learning Platform!',
+  'You get secure workspaces, real-time project sync, hustle-gigs, campus marketplace resources, real-time project analytics, and so much more. All core features are free for students.',
   'Sign up now to get early access and start collaborating in real time.',  
 ] as const
 
@@ -20,19 +20,19 @@ export const HERO_ANALYTICS_CAPTION = 'Brand-new Kanban app · early access is l
 /** @deprecated Use HERO_COPY_LINES[1] */
 export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
 
-export const KANBAN_DEMO_LABEL = 'Explore the Kanban Demo'
+export const KANBAN_DEMO_LABEL = 'Explore Your New Personal Workspace'
 export const KANBAN_DEMO_PATH = '/demo'
 
 export const PRICING_INTRO =
-  'The Kanban dashboard is built for all types of teams and projects, keeping collaboration infrastructure fast, secure, and affordable at scale. All core features are free for students.'
+  'The application is built for all types of teams and projects, keeping collaboration infrastructure fast, secure, and affordable at scale. All core features are free for students.'
 
 export const UPGRADE_HERO_TITLE = 'Support the platform to reach more schools'
 
 export const UPGRADE_HERO_BODY =
-  'A 12-member team runs Espeezy’s backend, payments, and campus rollout. Your upgrade funds servers, support, and the features on our roadmap.'
+  'A 12-member team runs Espeezy’s backend, payments, and campus rollouts. Your upgrade funds servers, support, and the features on our roadmap.'
 
 export const CHECKOUT_TEAM_NOTE =
-  'Payments are processed securely by Stripe. Subscriptions are managed by the Espeezy platform team (12 engineers & operators on backend, billing, and support).'
+  'Payments are processed securely by Stripe. Subscriptions are managed by the Espeezy team.'
 
 export const LIFETIME_PLAN_NAME = 'Lifetime Scholar'
 
