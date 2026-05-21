@@ -12,7 +12,7 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 export const HERO_COPY_LINES = [
   'Try out the brand-new Espeezy Learning Platform!',
   'You get secure workspaces, real-time project sync, hustle-gigs, campus marketplace resources, real-time project analytics, and so much more. All core features are free for students.',
-  'Sign up now to get early access and start collaborating in real time.',  
+  'Sign up now!',  
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Brand-new Kanban app · early access is live'
