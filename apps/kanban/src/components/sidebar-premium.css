@@ -1,0 +1,371 @@
+/**
+ * Sidebar footer — vault, help, session, theme & sign-out.
+ * Restrained glass panels; works in collapsed and expanded modes.
+ */
+
+.sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-sub) 35%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 92%, transparent) 100%
+  );
+}
+
+.sidebar-foot__upgrade {
+  padding: 0 0.35rem 0.15rem;
+}
+
+.sidebar-foot__upgrade .glass-card-prestige {
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+}
+
+.sidebar-foot__upgrade-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--text-main);
+  margin: 0 0 0.2rem;
+  line-height: 1.25;
+}
+
+.sidebar-foot__upgrade-copy {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  margin: 0;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+.sidebar-foot__upgrade-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  margin-bottom: 0.35rem;
+}
+
+/* Vault / connectivity */
+.sidebar-foot__vault {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
+}
+
+.sidebar-foot__vault[data-connected='false'] {
+  border-color: color-mix(in srgb, var(--error) 22%, var(--border));
+  background: color-mix(in srgb, var(--error) 4%, var(--surface));
+}
+
+.sidebar-foot__vault-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  color: var(--brand);
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+.sidebar-foot__vault[data-connected='false'] .sidebar-foot__vault-icon {
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 20%, transparent);
+}
+
+.sidebar-foot__vault-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-foot__vault-title {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand);
+  line-height: 1.2;
+}
+
+.sidebar-foot__vault[data-connected='false'] .sidebar-foot__vault-title {
+  color: var(--error);
+}
+
+.sidebar-foot__vault-sub {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-sub);
+  letter-spacing: 0.03em;
+  margin-top: 0.15rem;
+}
+
+.sidebar-foot__vault-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-sub) 85%, transparent);
+}
+
+.sidebar-container.closed .sidebar-foot__vault {
+  display: none;
+}
+
+/* Help & onboarding */
+.sidebar-foot__help {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border));
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+  box-shadow: 0 1px 0 color-mix(in srgb, #fff 5%, transparent);
+}
+
+.sidebar-foot__help:hover {
+  background: color-mix(in srgb, var(--brand) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--border));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+.sidebar-foot__help:active {
+  transform: scale(0.98);
+}
+
+.sidebar-foot__help-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+  color: var(--brand);
+}
+
+.sidebar-container.closed .sidebar-foot__help {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  justify-content: center;
+  margin-inline: auto;
+}
+
+.sidebar-container.closed .sidebar-foot__help-label {
+  display: none;
+}
+
+/* Session block: profile + actions */
+.sidebar-foot__session {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.55rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 55%, var(--surface));
+}
+
+.sidebar-container.closed .sidebar-foot__session {
+  padding: 0.35rem;
+  align-items: center;
+  border: none;
+  background: transparent;
+  gap: 0.4rem;
+}
+
+.sidebar-foot__profile {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.35rem 0.4rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.sidebar-foot__profile:hover {
+  background: color-mix(in srgb, var(--brand) 6%, transparent);
+}
+
+.sidebar-container.closed .sidebar-foot__profile {
+  width: auto;
+  padding: 0;
+  justify-content: center;
+}
+
+.sidebar-foot__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--brand) 28%, transparent);
+}
+
+.sidebar-foot__profile-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sidebar-foot__profile-name {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-foot__profile-status {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--success);
+  margin-top: 0.1rem;
+}
+
+.sidebar-container.closed .sidebar-foot__profile-text {
+  display: none;
+}
+
+.sidebar-foot__actions {
+  display: flex;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.sidebar-container.closed .sidebar-foot__actions {
+  flex-direction: column;
+  width: auto;
+  gap: 0.3rem;
+}
+
+.sidebar-foot-btn {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 0.5rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  color: var(--text-sub);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.12s ease;
+  box-sizing: border-box;
+}
+
+.sidebar-foot-btn:hover {
+  color: var(--brand);
+  border-color: color-mix(in srgb, var(--brand) 30%, var(--border));
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--brand) 8%, transparent);
+}
+
+.sidebar-foot-btn:active {
+  transform: scale(0.97);
+}
+
+.sidebar-foot-btn--signout {
+  color: color-mix(in srgb, var(--error) 88%, var(--text-sub));
+  border-color: color-mix(in srgb, var(--error) 18%, var(--border));
+  background: color-mix(in srgb, var(--error) 4%, var(--surface));
+}
+
+.sidebar-foot-btn--signout:hover {
+  color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 35%, var(--border));
+  background: color-mix(in srgb, var(--error) 8%, var(--surface));
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--error) 10%, transparent);
+}
+
+.sidebar-container.closed .sidebar-foot-btn {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.sidebar-container.closed .sidebar-foot-btn-label {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar-foot {
+    padding: 0.45rem 0.55rem 0.65rem;
+    gap: 0.4rem;
+  }
+
+  .sidebar-foot__vault,
+  .sidebar-foot__upgrade {
+    display: none;
+  }
+
+  .sidebar-foot__session {
+    padding: 0.45rem;
+  }
+}

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
   GETTING_STARTED_STEP_1_DESC,
   GETTING_STARTED_STEP_1_TITLE,
@@ -13,12 +14,22 @@ export default function GettingStartedPage() {
     {
       step: '02',
       title: 'Assemble Your Team',
-      desc: 'Invite teammates by email or share a workspace link. Your group project board auto-creates from your LMS course data if you connect Canvas, Blackboard, or Moodle.',
+      desc: 'Invite teammates by sharing your team name and secure login code.',
     },
     {
       step: '03',
-      title: 'Configure Protocols',
-      desc: 'Set contribution rules, deadlines, and team expectations. The AI advisor reviews workload distribution and highlights imbalances before they become problems.',
+      title: 'Start Collaborating',
+      desc: 'Start collaborating on your project in real time. Add tasks, assign them to teammates, and start working together. Your work is being logged in real time.',
+    },
+    {
+      step: '04',
+      title: 'Manage Your Project',
+      desc: 'Manage your project in real time. Add tasks, assign them to teammates, and start working together. View real-time project analytics on project stats page in the sidebar, exportable to Excel at any time.',
+    },
+    {
+      step: '05',
+      title: 'Export Your Data',
+      desc: 'Export your project data to Excel at any time and see how your team is contributing to the project.',
     },
   ]
 
@@ -54,8 +65,8 @@ export default function GettingStartedPage() {
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid #222', paddingTop: '2rem' }}>
-        <a href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>← Back to Home</a>
-        <a href="/docs/features/kanban" style={{ color: '#10b981', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, marginLeft: 'auto' }}>Next: Kanban Boards →</a>
+        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>← Back to Home</Link>
+        <Link href="/docs/features/kanban" style={{ color: '#10b981', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, marginLeft: 'auto' }}>Next: Kanban Boards →</Link>
       </div>
     </div>
   )

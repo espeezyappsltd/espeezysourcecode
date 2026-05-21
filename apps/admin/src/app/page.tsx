@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import { Activity, Users, FolderKanban, MessageSquare, RefreshCcw, Shield, Database, LayoutDashboard } from 'lucide-react'
 import type { AdminActivityEvent, AdminPlatformMetrics } from '@/types/admin'
 import { getErrorMessage } from '@/utils/errors'
@@ -26,34 +25,26 @@ export default function AdminDashboard() {
   const [loginError, setLoginError] = useState<string | null>(null)
   const [metrics, setMetrics] = useState<AdminPlatformMetrics | null>(null)
   const [activityFeed, setActivityFeed] = useState<AdminActivityEvent[]>([])
-  const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const errParam = params.get('error')
-    if (errParam) {
-      setError(errParam)
-    }
-    checkAccessAndFetch()
-  }, [])
-
-  const checkAccessAndFetch = async () => {
+  const checkAccessAndFetch = useCallback(async () => {
+    const urlError = new URLSearchParams(window.location.search).get('error')
     try {
-      setLoading(true)
-      setError(null)
-      setNeedsLogin(false)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        // Not logged in
         setNeedsLogin(true)
+        setError(urlError)
         setLoading(false)
         return
       }
 
+      setLoading(true)
+      setError(urlError)
+      setNeedsLogin(false)
+
       const res = await fetch('/api/admin/metrics')
       if (res.status === 401 || res.status === 403) {
-        setError("You do not have permission to view this super-admin dashboard.")
+        setError('You do not have permission to view this super-admin dashboard.')
         setLoading(false)
         return
       }
@@ -63,12 +54,17 @@ export default function AdminDashboard() {
 
       setMetrics(data.metrics)
       setActivityFeed(data.recentActivity || [])
+      setError(null)
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to load dashboard data'))
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    void checkAccessAndFetch()
+  }, [checkAccessAndFetch])
 
   if (loading) {
     return (

@@ -1,0 +1,154 @@
+.referral-panel {
+  padding: 1.15rem 1.2rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--brand) 7%, var(--surface)) 0%,
+    color-mix(in srgb, var(--surface) 96%, transparent) 100%
+  );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 5%, transparent);
+}
+
+.referral-panel--compact {
+  padding: 0.95rem 1rem;
+}
+
+.referral-panel__header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+}
+
+.referral-panel__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+  color: var(--brand);
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, transparent);
+}
+
+.referral-panel__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.referral-panel__lead {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+
+.referral-panel__code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.referral-panel__code {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  color: var(--brand);
+}
+
+.referral-panel__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.referral-panel__slots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  color: var(--text-sub);
+}
+
+.referral-panel__slots strong {
+  color: var(--text-main);
+}
+
+.referral-panel__terms {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--text-sub) 90%, transparent);
+  letter-spacing: 0.02em;
+}
+
+.referral-panel__friend {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+.referral-panel__friend-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  color: var(--text-main);
+}
+
+.referral-panel__friend-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.referral-panel__friend-input {
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+
+.referral-panel__friend-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+.referral-panel__skeleton {
+  height: 88px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+  animation: referral-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes referral-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}

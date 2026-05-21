@@ -14,7 +14,7 @@ export const GETTING_STARTED_STEP_1_TITLE = 'Get Started'
 
 export const GETTING_STARTED_STEP_1_DESC = `Sign up at ${MAIN_APP_HOST_LABEL}, the main Espeezy app. It takes under 20 seconds.`
 
-export const GETTING_STARTED_ACCOUNT_BODY = `Head to ${MAIN_APP_HOST_LABEL} and sign up with your university email. No institution? No problem! You can still use the app with a personal email.`
+export const GETTING_STARTED_ACCOUNT_BODY = `Head to ${MAIN_APP_HOST_LABEL} and sign up with your University email. No Uni? No problem! You can still use the app with a personal email.`
 
 export const INSTALLATION_WEB_BODY = `Espeezy runs entirely in your browser. Open ${MAIN_APP_HOST_LABEL} on any device with a modern browser. Sign in and you are ready.`
 
@@ -125,4 +125,4 @@ export {
   REFERRAL_PRO_MAX_REDEMPTIONS,
   REFERRAL_PROMO_HEADLINE,
   REFERRAL_PROMO_TERMS,
-} from './referrals'
+} from './referrals-constants'
