@@ -16,7 +16,7 @@ export const GETTING_STARTED_STEP_1_DESC = `Sign up at ${MAIN_APP_HOST_LABEL}, t
 
 export const GETTING_STARTED_ACCOUNT_BODY = `Head to ${MAIN_APP_HOST_LABEL} and sign up with your University email. No Uni? No problem! You can still use the app with a personal email.`
 
-export const INSTALLATION_WEB_BODY = `Espeezy runs entirely in your browser. Open ${MAIN_APP_HOST_LABEL} on any device with a modern browser. Sign in and you are ready.`
+export const INSTALLATION_WEB_BODY = `The Espeezy collaborative apps run entirely in your browser. Open ${MAIN_APP_HOST_LABEL} on any device with a modern browser. Sign in and you are ready.`
 
 export const PLATFORM_TEAM_SIZE = 12
 
@@ -26,24 +26,24 @@ export const PLATFORM_OPERATIONS_TAGLINE =
 /** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
 export const HERO_COPY_LINES = [
   'Espeezy Learning Platform',
-  'Real-time team collaboration, shared verifiable history, free secure storage space, marketplace exchange, hustle-gigs, peer networks, and so much more.' 
+  'You get real-time team collaboration, shared verifiable history, free secure storage space, marketplace exchange, hustle-gigs, peer networks, and so much more.' 
 ] as const
 
-export const HERO_ANALYTICS_CAPTION = 'Try out the live demo'
+export const HERO_ANALYTICS_CAPTION = 'See it in action'
 
 /** @deprecated Use HERO_COPY_LINES[1] */
 export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
 
-export const KANBAN_DEMO_LABEL = 'Explore The App'
+export const KANBAN_DEMO_LABEL = 'Get a first look at the Kanban Dashboard'
 export const KANBAN_DEMO_PATH = '/demo'
 
 export const PRICING_INTRO =
-  'Espeezy Learning Platform is built for all types of teams and projects, keeping collaboration fast, secure, and affordable at scale. All core features are free for students.'
+  'Espeezy learning apps are built for all types of teams and projects, keeping collaboration fast, secure, and affordable at scale. All core features are free for students.'
 
-export const UPGRADE_HERO_TITLE = 'Support the platform to reach more schools'
+export const UPGRADE_HERO_TITLE = 'Unleash the full potential of your team'
 
 export const UPGRADE_HERO_BODY =
-  'A 12-member team runs Espeezy’s backend, payments, and campus rollouts. Your upgrade funds servers, support, and the features on our roadmap.'
+  'A 12-member team runs Espeezy’s backend, payments, and campus rollouts. Your upgrade funds servers, support, and the features on our roadmap. All core features are free for students.'
 
 export const CHECKOUT_TEAM_NOTE =
   'Payments are processed securely by Stripe. Subscriptions are managed by the Espeezy team.'

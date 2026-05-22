@@ -1,7 +1,8 @@
 'use client'
 
-import { type ComponentPropsWithoutRef, useEffect, useState } from 'react'
+import { type ComponentPropsWithoutRef, Suspense, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -41,7 +42,9 @@ const NAV_LINKS = [
 ]
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-export default function PreRegisterPage() {
+function PreRegisterPageContent() {
+  const searchParams = useSearchParams()
+  const referrerCode = searchParams?.get('ref') ?? null
   const { config, registeredCount, configLoaded, timeLeft, setRegisteredCount } = useLaunchData()
 
   // Form state
@@ -49,19 +52,9 @@ export default function PreRegisterPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [referrerCode, setReferrerCode] = useState<string | null>(null)
   const [myReferralCode, setMyReferralCode] = useState<string | null>(null)
   const [myReferralCount, setMyReferralCount] = useState(0)
   const [confirmMessage, setConfirmMessage] = useState('')
-
-  // Extract ?ref= parameter on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const ref = params.get('ref')
-      setReferrerCode(ref)
-    }
-  }, [])
 
   const goal = parseInt(config.preregister_goal ?? '5000000', 10)
 
@@ -142,7 +135,7 @@ export default function PreRegisterPage() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Brand-new Kanban · Early access open</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Brand-new Apps · Early access open</span>
           </div>
         </motion.div>
 
@@ -560,5 +553,28 @@ export default function PreRegisterPage() {
         @media (max-width: 640px) { .hide-mobile { display: none !important; } }
       `}</style>
     </div>
+  )
+}
+
+export default function PreRegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#0a0a0a',
+            color: '#94a3b8',
+          }}
+        >
+          Loading…
+        </div>
+      }
+    >
+      <PreRegisterPageContent />
+    </Suspense>
   )
 }
