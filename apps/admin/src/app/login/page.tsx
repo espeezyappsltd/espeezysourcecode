@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ShieldCheck } from 'lucide-react'
+import { ShieldCheck, Smartphone } from 'lucide-react'
 import { ESPEEZY_APP_ORIGINS } from '@shared/app-url'
 
 type Step = 'username' | 'code'
@@ -15,56 +15,11 @@ function AdminLoginForm() {
 
   const [step, setStep] = useState<Step>('username')
   const [username, setUsername] = useState('')
-  const [emailHint, setEmailHint] = useState<string | null>(null)
   const [displayName, setDisplayName] = useState<string | null>(null)
+  const [devMode, setDevMode] = useState(false)
   const [code, setCode] = useState('')
-  const [devCode, setDevCode] = useState<string | null>(null)
-  const [emailDeliveryNote, setEmailDeliveryNote] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-
-  function applyOtpResponse(data: {
-    devCode?: string
-    emailError?: string
-    emailSent?: boolean
-    channel?: string
-    emailHint?: string
-  }) {
-    if (data.emailHint) setEmailHint(data.emailHint)
-    if (data.devCode) setDevCode(data.devCode)
-    if (data.emailError) {
-      setEmailDeliveryNote(`Email failed: ${data.emailError}. Use the dev code below.`)
-    } else if (data.emailSent && data.channel) {
-      setEmailDeliveryNote(`Code sent via ${data.channel}.`)
-    } else if (data.emailSent) {
-      setEmailDeliveryNote('Code sent to your roster email.')
-    } else {
-      setEmailDeliveryNote(null)
-    }
-  }
-
-  async function sendCode() {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/auth/admin-otp/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError(data.error ?? 'Could not send code')
-        return
-      }
-      applyOtpResponse(data)
-      setStep('code')
-    } catch {
-      setError('Could not send code')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   async function onUsernameSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -82,10 +37,11 @@ function AdminLoginForm() {
         return
       }
       setDisplayName(data.displayName ?? null)
-      setEmailHint(data.emailHint ?? null)
-      await sendCode()
+      setDevMode(Boolean(data.devMode))
+      setStep('code')
     } catch {
       setError('Something went wrong')
+    } finally {
       setLoading(false)
     }
   }
@@ -152,22 +108,15 @@ function AdminLoginForm() {
         <p style={{ color: '#666', fontSize: '0.82rem', marginBottom: '1.5rem', lineHeight: 1.45 }}>
           {step === 'username' && (
             <>
-              Enter your staff username (e.g. <strong style={{ color: '#999' }}>pete</strong>). We send a one-time code to
-              your linked roster email.
+              Enter your staff username (e.g. <strong style={{ color: '#999' }}>pete</strong>). Next step uses your
+              authenticator app — not SMS or email codes.
             </>
           )}
           {step === 'code' && (
             <>
-              Enter the 6-digit code we sent
-              {emailHint ? (
-                <>
-                  {' '}
-                  to <strong style={{ color: '#999' }}>{emailHint}</strong>
-                </>
-              ) : (
-                ' to your roster email'
-              )}
-              {displayName ? ` (${displayName})` : ''}.
+              Open your authenticator app (Google Authenticator, 1Password, Authy, Microsoft Authenticator) and enter the
+              6-digit code for <strong style={{ color: '#999' }}>Espeezy Panel</strong>
+              {displayName ? ` — ${displayName}` : ''}.
             </>
           )}
         </p>
@@ -198,7 +147,7 @@ function AdminLoginForm() {
           </label>
         )}
 
-        {step === 'code' && devCode && (
+        {step === 'code' && devMode && (
           <div
             style={{
               marginBottom: '1rem',
@@ -208,37 +157,45 @@ function AdminLoginForm() {
               border: '1px solid rgba(16,185,129,0.25)',
             }}
           >
-            <p style={{ margin: 0, fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>DEV LOGIN</p>
-            <p style={{ margin: '0.35rem 0 0', fontSize: '1.35rem', fontWeight: 800, letterSpacing: '0.25em' }}>
-              {devCode}
+            <p style={{ margin: 0, fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>DEV MODE</p>
+            <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: '#888', lineHeight: 1.4 }}>
+              No authenticator enrolled — use code <strong style={{ color: '#ccc' }}>000000</strong> locally only.
             </p>
-            {emailDeliveryNote && (
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: '#888', lineHeight: 1.4 }}>
-                {emailDeliveryNote}
-              </p>
-            )}
           </div>
         )}
 
         {step === 'code' && (
           <>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '1rem',
+                color: '#10b981',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+              }}
+            >
+              <Smartphone size={16} aria-hidden />
+              Authenticator code
+            </div>
             <p style={{ color: '#555', fontSize: '0.75rem', marginBottom: '1rem' }}>
-              Code for <strong style={{ color: '#888' }}>@{username}</strong>
+              Signing in as <strong style={{ color: '#888' }}>@{username}</strong>
               <button
                 type="button"
                 onClick={() => {
                   setStep('username')
                   setCode('')
-                  setDevCode(null)
-                  setEmailDeliveryNote(null)
                   setError(null)
+                  setDevMode(false)
                 }}
                 style={linkButtonStyle}
               >
                 Change username
               </button>
             </p>
-            <label style={{ display: 'block', marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '1.25rem' }}>
               <span style={{ display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.35rem' }}>
                 6-digit code
               </span>
@@ -251,26 +208,14 @@ function AdminLoginForm() {
                 maxLength={6}
                 style={{ ...inputStyle, letterSpacing: '0.35em', textAlign: 'center', fontSize: '1.25rem' }}
                 placeholder="000000"
+                autoFocus
               />
             </label>
-            <p style={{ marginBottom: '1.25rem', fontSize: '0.78rem', color: '#555' }}>
-              Didn&apos;t get it?{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  void sendCode()
-                }}
-                disabled={loading}
-                style={linkButtonStyle}
-              >
-                Resend code
-              </button>
-            </p>
           </>
         )}
 
         <button type="submit" disabled={loading} style={buttonStyle}>
-          {loading ? 'Please wait…' : step === 'username' ? 'Send login code' : 'Sign in'}
+          {loading ? 'Please wait…' : step === 'username' ? 'Continue' : 'Sign in'}
         </button>
       </form>
     </div>
@@ -316,4 +261,3 @@ const linkButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
   textDecoration: 'underline',
 }
-

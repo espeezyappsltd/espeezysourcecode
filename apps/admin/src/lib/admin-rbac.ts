@@ -27,6 +27,10 @@ export type AdminMember = {
   phone: string | null
   is_active: boolean
   last_seen_at: string | null
+  totp_secret_enc?: string | null
+  totp_enrolled_at?: string | null
+  totp_verify_attempts?: number | null
+  totp_locked_until?: string | null
 }
 
 const ROLE_PERMISSIONS: Record<AdminStaffRole, AdminPermission[] | ['*']> = {

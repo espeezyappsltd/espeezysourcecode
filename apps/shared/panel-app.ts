@@ -12,7 +12,7 @@ export const ESPEEZY_PANEL_APP = {
   productionHost: 'panel.espeezy.com',
   localPort: 3004,
   localOrigin: 'http://localhost:3004',
-  /** Staff OTP login (username → roster email) */
+  /** Staff login (username + authenticator app TOTP) */
   loginPath: '/login',
   /** Protected console (requires admin_members row) */
   consolePath: '/admin',

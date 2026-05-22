@@ -61,6 +61,12 @@ export async function ensureStaffAuthUser(
 
   if (member.id !== userId) {
     repaired = true
+    const { data: totpRow } = await svc
+      .from('admin_members')
+      .select('totp_secret_enc, totp_enrolled_at')
+      .eq('id', member.id)
+      .maybeSingle()
+
     await svc.from('admin_login_otps').delete().eq('admin_member_id', member.id)
     await svc.from('admin_members').delete().eq('id', member.id)
 
@@ -75,6 +81,8 @@ export async function ensureStaffAuthUser(
         title: member.title,
         phone: member.phone,
         is_active: true,
+        totp_secret_enc: totpRow?.totp_secret_enc ?? null,
+        totp_enrolled_at: totpRow?.totp_enrolled_at ?? null,
       },
       { onConflict: 'id' },
     )

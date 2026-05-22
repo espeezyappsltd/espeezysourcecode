@@ -1,13 +1,21 @@
 import { NextResponse } from 'next/server'
 import { normalizeAdminUsername } from '@/lib/admin-rbac'
 import {
-  ADMIN_OTP_MAX_VERIFY_ATTEMPTS,
-  memberRosterEmail,
-  verifyAdminOtpCode,
-} from '@/lib/admin-login-otp'
+  ADMIN_TOTP_LOCKOUT_MS,
+  ADMIN_TOTP_MAX_VERIFY_ATTEMPTS,
+  decryptTotpSecret,
+  isAdminTotpDevBypass,
+  isPanelTotpDevMode,
+  isTotpLocked,
+  memberHasTotpEnrolled,
+  verifyTotpToken,
+} from '@/lib/admin-totp'
 import { ensureStaffAuthUser } from '@/lib/staff-auth-sync'
 import { createAdminClient, createServerSupabaseClient } from '@/lib/db'
 import { getAdminMemberByUserId, getAdminMemberByUsername } from '@/utils/admin-auth'
+
+const MEMBER_TOTP_SELECT =
+  'id, profile_id, username, email, admin_role, display_name, title, phone, is_active, last_seen_at, totp_secret_enc, totp_enrolled_at, totp_verify_attempts, totp_locked_until'
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -16,45 +24,69 @@ export async function POST(req: Request) {
   const normalized = normalizeAdminUsername(username)
 
   if (normalized.length < 3 || code.length !== 6) {
-    return NextResponse.json({ error: 'Username and 6-digit code are required' }, { status: 400 })
+    return NextResponse.json({ error: 'Username and 6-digit authenticator code are required' }, { status: 400 })
   }
 
   const svc = await createAdminClient()
-  let member = await getAdminMemberByUsername(normalized, svc)
-  const email = member ? memberRosterEmail(member) : null
+  const { data: row } = await svc
+    .from('admin_members')
+    .select(MEMBER_TOTP_SELECT)
+    .eq('username', normalized)
+    .eq('is_active', true)
+    .maybeSingle()
 
-  if (!member || !email) {
+  if (!row?.email?.trim()) {
     return NextResponse.json({ error: 'Invalid login' }, { status: 401 })
   }
 
-  const { data: otpRow } = await svc
-    .from('admin_login_otps')
-    .select('id, code_hash, attempts, expires_at')
-    .eq('admin_member_id', member.id)
-    .eq('email', email)
-    .is('consumed_at', null)
-    .gt('expires_at', new Date().toISOString())
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  let member = row as import('@/lib/admin-rbac').AdminMember
 
-  if (!otpRow) {
-    return NextResponse.json({ error: 'Code expired or not found. Request a new one.' }, { status: 401 })
+  if (isTotpLocked(member)) {
+    return NextResponse.json(
+      { error: 'Too many failed attempts. Wait 15 minutes or contact your platform lead.' },
+      { status: 429 },
+    )
   }
 
-  if (otpRow.attempts >= ADMIN_OTP_MAX_VERIFY_ATTEMPTS) {
-    return NextResponse.json({ error: 'Too many attempts. Request a new code.' }, { status: 429 })
+  const enrolled = memberHasTotpEnrolled(member)
+  const devBypass = isAdminTotpDevBypass(code)
+
+  if (!enrolled && !devBypass) {
+    return NextResponse.json(
+      {
+        error:
+          'Authenticator not enrolled for this account. Your platform lead must run npm run seed:admin-totp in apps/admin.',
+      },
+      { status: 401 },
+    )
   }
 
-  if (!verifyAdminOtpCode(code, otpRow.code_hash)) {
-    await svc
-      .from('admin_login_otps')
-      .update({ attempts: otpRow.attempts + 1 })
-      .eq('id', otpRow.id)
-    return NextResponse.json({ error: 'Incorrect code' }, { status: 401 })
+  if (enrolled && member.totp_secret_enc) {
+    const secret = decryptTotpSecret(member.totp_secret_enc)
+    if (!secret) {
+      return NextResponse.json({ error: 'Could not read authenticator configuration' }, { status: 500 })
+    }
+    if (!verifyTotpToken(secret, code) && !(isPanelTotpDevMode() && devBypass)) {
+      const attempts = (member.totp_verify_attempts ?? 0) + 1
+      const updates: Record<string, unknown> = { totp_verify_attempts: attempts }
+      if (attempts >= ADMIN_TOTP_MAX_VERIFY_ATTEMPTS) {
+        updates.totp_locked_until = new Date(Date.now() + ADMIN_TOTP_LOCKOUT_MS).toISOString()
+      }
+      await svc.from('admin_members').update(updates).eq('id', member.id)
+      return NextResponse.json({ error: 'Incorrect authenticator code' }, { status: 401 })
+    }
+  } else if (!devBypass) {
+    return NextResponse.json({ error: 'Invalid authenticator code' }, { status: 401 })
   }
 
-  await svc.from('admin_login_otps').update({ consumed_at: new Date().toISOString() }).eq('id', otpRow.id)
+  await svc
+    .from('admin_members')
+    .update({
+      totp_verify_attempts: 0,
+      totp_locked_until: null,
+      last_seen_at: new Date().toISOString(),
+    })
+    .eq('id', member.id)
 
   const authSync = await ensureStaffAuthUser(svc, member, { createIfMissing: true })
   if (!authSync.ok) {
@@ -116,7 +148,7 @@ export async function POST(req: Request) {
     event_type: 'join',
     username: rosterMember.username,
     supabase_user_id: user.id,
-    details: { at: new Date().toISOString(), method: 'email_otp', auth_repaired: authSync.repaired },
+    details: { at: new Date().toISOString(), method: 'totp_authenticator', auth_repaired: authSync.repaired },
   })
 
   return NextResponse.json({

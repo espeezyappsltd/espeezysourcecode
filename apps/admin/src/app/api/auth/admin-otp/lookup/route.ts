@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { normalizeAdminUsername } from '@/lib/admin-rbac'
-import { staffEmailHint } from '@/lib/admin-login-otp'
+import { memberHasTotpEnrolled, isPanelTotpDevMode } from '@/lib/admin-totp'
 import { createAdminClient } from '@/lib/db'
-import { getAdminMemberByUsername } from '@/utils/admin-auth'
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -14,17 +13,24 @@ export async function POST(req: Request) {
   }
 
   const svc = await createAdminClient()
-  const member = await getAdminMemberByUsername(normalized, svc)
+  const { data: member } = await svc
+    .from('admin_members')
+    .select('username, display_name, email, totp_secret_enc, totp_enrolled_at, is_active')
+    .eq('username', normalized)
+    .eq('is_active', true)
+    .maybeSingle()
 
   if (!member) {
     return NextResponse.json({ error: 'Staff username not found' }, { status: 404 })
   }
 
-  if (!member.email?.trim()) {
+  const totpEnrolled = memberHasTotpEnrolled(member)
+
+  if (!totpEnrolled && !isPanelTotpDevMode()) {
     return NextResponse.json(
       {
         error:
-          'This account has no roster email. Ask your platform lead to update the staff roster.',
+          'Authenticator not set up for this account. Ask your platform lead to run npm run seed:admin-totp.',
       },
       { status: 400 },
     )
@@ -32,7 +38,9 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    emailHint: staffEmailHint(member),
     displayName: member.display_name ?? member.username,
+    totpEnrolled,
+    authMethod: 'authenticator',
+    devMode: isPanelTotpDevMode() && !totpEnrolled,
   })
 }

@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
     "test:e2e": "playwright test",
-    "seed:staff": "node scripts/seed-admin-members.mjs"
+    "seed:staff": "node scripts/seed-admin-members.mjs",
+    "seed:admin-totp": "node scripts/seed-admin-totp.mjs"
   },
   "dependencies": {
     "@radix-ui/react-toast": "^1.2.15",
