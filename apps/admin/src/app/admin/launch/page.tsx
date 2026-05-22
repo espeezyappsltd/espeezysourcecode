@@ -13,7 +13,7 @@ export default function AdminLaunchPage() {
     <>
       <AdminPageHeader title="Launch" description="Launch configuration and prereg settings." />
       <div className="admin-console-card">
-        <p style={{ margin: 0, color: '#5f6368' }}>API: /api/admin/settings and /api/launch-config</p>
+        <p className="admin-console-muted">API: /api/admin/settings and /api/launch-config</p>
       </div>
     </>
   )

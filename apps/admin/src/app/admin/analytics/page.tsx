@@ -13,7 +13,7 @@ export default function AdminAnalyticsPage() {
     <>
       <AdminPageHeader title="Analytics" description="Business intelligence and usage metrics." />
       <div className="admin-console-card">
-        <p style={{ margin: 0, color: '#5f6368' }}>Charts load from /api/admin/analytics. Open Home for a metrics snapshot.</p>
+        <p className="admin-console-muted">Charts load from /api/admin/analytics. Open Home for a metrics snapshot.</p>
       </div>
     </>
   )

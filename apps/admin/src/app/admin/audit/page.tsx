@@ -13,7 +13,7 @@ export default function AdminAuditPage() {
     <>
       <AdminPageHeader title="Audit log" description="Security and compliance event history." />
       <div className="admin-console-card">
-        <p style={{ margin: 0, color: '#5f6368' }}>API: /api/admin/audit</p>
+        <p className="admin-console-muted">API: /api/admin/audit</p>
       </div>
     </>
   )

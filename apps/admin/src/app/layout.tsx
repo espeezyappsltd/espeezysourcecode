@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#10b981',
+  themeColor: '#0a0a0a',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5, // Allow zooming for accessibility
@@ -39,6 +39,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var p=location.pathname;if(p==='/login'||p.indexOf('/admin')===0)document.documentElement.classList.add('admin-theme-dark')}catch(e){}})();`,
+          }}
+        />
         {/* Critical preconnects  -  reduce first-auth latency */}
         <link rel="preconnect" href="https://othntbcrtmemavfsslrb.db.co" />
         <link rel="dns-prefetch" href="https://othntbcrtmemavfsslrb.db.co" />

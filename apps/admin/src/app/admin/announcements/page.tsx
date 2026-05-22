@@ -13,7 +13,7 @@ export default function AdminAnnouncementsPage() {
     <>
       <AdminPageHeader title="Announcements" description="Create and manage global announcements." />
       <div className="admin-console-card">
-        <p style={{ margin: 0, color: '#5f6368' }}>API: /api/admin/announcements</p>
+        <p className="admin-console-muted">API: /api/admin/announcements</p>
       </div>
     </>
   )

@@ -24,7 +24,7 @@ export default function AdminUsersPage() {
       <AdminPageHeader title="Users" description="Platform user directory and moderation tools." />
       <div className="admin-console-card">
         <h2>User list</h2>
-        <p style={{ fontSize: '0.875rem', color: '#5f6368' }}>
+        <p className="admin-console-muted">
           {Array.isArray(users) ? `${users.length} users loaded` : 'Loading…'}
         </p>
       </div>

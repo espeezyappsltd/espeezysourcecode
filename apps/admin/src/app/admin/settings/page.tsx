@@ -13,7 +13,7 @@ export default function AdminSettingsPage() {
     <>
       <AdminPageHeader title="Settings" description="Global platform configuration." />
       <div className="admin-console-card">
-        <p style={{ margin: 0, color: '#5f6368' }}>API: /api/admin/settings</p>
+        <p className="admin-console-muted">API: /api/admin/settings</p>
       </div>
     </>
   )
