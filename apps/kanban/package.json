@@ -16,6 +16,7 @@
     "test:profile-realtime": "node --test src/lib/profile/realtime.node-test.mjs",
     "validate:profile-realtime": "node scripts/validate-profile-realtime.mjs",
     "validate:assets-a11y": "node scripts/validate-assets-a11y.mjs",
+    "validate:hustle": "node scripts/validate-hustle.mjs",
     "test:e2e:assets-a11y": "playwright test src/tests/assets-accessibility.spec.ts --config src/playwright.config.ts --project=chromium"
   },
   "dependencies": {

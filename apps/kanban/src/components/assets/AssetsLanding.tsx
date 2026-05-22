@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Coins, HardDrive, ShoppingBag, FolderOpen } from 'lucide-react'
+import { ArrowRight, Activity, Coins, HardDrive, ShoppingBag, FolderOpen } from 'lucide-react'
 import { formatCreditCapHint, formatCredits, formatGbpApprox } from '@/lib/credits'
 import { formatStorageBytes } from '@/lib/storage-quotas'
 import { AssetsPageFrame } from './AssetsPageFrame'
@@ -30,6 +30,14 @@ const HUB_CARDS = [
     description: 'List assets, track sales, withdraw earnings, and manage marketplace inventory.',
     icon: ShoppingBag,
     accent: 'var(--success)',
+  },
+  {
+    href: '/assets/impact',
+    title: 'Impact log',
+    description:
+      'Verifiable timeline of marketplace invoices and hustle escrow ledger events — your overall credit impact.',
+    icon: Activity,
+    accent: '#8b5cf6',
   },
 ] as const
 

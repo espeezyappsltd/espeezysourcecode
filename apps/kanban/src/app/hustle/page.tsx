@@ -243,7 +243,14 @@ function HustlePage() {
         title="Hustle"
         titleAccent="Board"
         icon={Briefcase}
-        description="Campus gigs paid in Espeezy credits · escrow-backed trades"
+        description={
+          <>
+            Campus gigs paid in Espeezy credits · escrow-backed trades.{' '}
+            <Link href="/assets/impact" style={{ fontWeight: 800, color: 'var(--brand)' }}>
+              Verifiable impact log →
+            </Link>
+          </>
+        }
         actions={
           <button type="button" className="btn btn-primary hustle-post-btn hide-mobile-inline" onClick={() => setPostOpen(true)}>
             <Plus size={18} aria-hidden />

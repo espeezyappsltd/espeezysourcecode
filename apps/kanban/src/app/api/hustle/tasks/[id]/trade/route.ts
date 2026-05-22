@@ -209,6 +209,29 @@ export async function POST(req: NextRequest, ctx: RouteCtx) {
     const { data: fresh } = await adminDb.from('hustle_tasks').select(Q.hustleTask).eq('id', taskId).single()
     const [updated] = await enrichHustleTasks(adminDb, [fresh])
 
+    const { data: profileRow } = await adminDb.from('profiles').select('group_id').eq('id', uid).maybeSingle()
+    const groupId = profileRow?.group_id ?? null
+    const hustleLogAction =
+      action === 'fund'
+        ? 'hustle_escrow_funded'
+        : action === 'approve'
+          ? 'hustle_gig_paid'
+          : action === 'cancel'
+            ? 'hustle_gig_cancelled'
+            : null
+    if (hustleLogAction) {
+      void adminDb.from('activity_logs').insert({
+        user_id: uid,
+        group_id: groupId,
+        app_scope: 'kanban',
+        action: hustleLogAction,
+        resource_type: 'hustle_task',
+        resource_id: taskId,
+        details: { message: `${hustleLogAction}: ${task.title}`, task_id: taskId },
+        status: 'success',
+      })
+    }
+
     return NextResponse.json({
       success: true,
       action,

@@ -506,6 +506,260 @@
   align-items: center;
 }
 
+.trading-metrics__panel--activity h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.trading-metrics__impact-link {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.trading-metrics__impact-link:hover {
+  text-decoration: underline;
+}
+
+/* —— Impact log (marketplace + hustle) —— */
+.impact-log__loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: var(--text-sub);
+}
+
+.impact-log__error {
+  padding: 1.25rem;
+}
+
+.impact-log__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.impact-log__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.impact-log__desc {
+  margin: 0 0 1.25rem;
+  color: var(--text-sub);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  max-width: 42rem;
+}
+
+.impact-log__refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.impact-log__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.impact-log__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.impact-log__kpi-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-sub);
+}
+
+.impact-log__kpi-hint {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+.impact-log__breakdown {
+  margin-bottom: 1.25rem;
+  padding: 1.25rem;
+}
+
+.impact-log__breakdown h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.impact-log__breakdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.impact-log__breakdown-list li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.impact-log__hustle-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 800;
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.impact-log__panel {
+  padding: 1.25rem;
+}
+
+.impact-log__panel h3 {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.impact-log__empty {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 0.88rem;
+}
+
+.impact-log__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.impact-log__row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-sub);
+}
+
+.impact-log__row--hustle {
+  border-left: 3px solid #8b5cf6;
+}
+
+.impact-log__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.impact-log__icon--in {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.impact-log__icon--out {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.impact-log__row-title {
+  font-weight: 850;
+  font-size: 0.9rem;
+}
+
+.impact-log__row-sub {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+}
+
+.impact-log__verify {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.impact-log__verify-label {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-sub);
+}
+
+.impact-log__verify code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  background: var(--surface);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.impact-log__amount {
+  text-align: right;
+}
+
+.impact-log__amount .positive {
+  color: #22c55e;
+  font-weight: 950;
+}
+
+.impact-log__amount .negative {
+  color: #ef4444;
+  font-weight: 950;
+}
+
+.impact-log__muted {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-sub);
+}
+
+.impact-log__link {
+  color: var(--brand);
+}
+
+@media (max-width: 640px) {
+  .impact-log__row {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .impact-log__amount,
+  .impact-log__link {
+    grid-column: 2;
+  }
+}
+
 /* —— Arsenal hub & section nav —— */
 .assets-subnav {
   display: flex;

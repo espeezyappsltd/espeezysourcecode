@@ -332,9 +332,15 @@ export function TradingMetricsDashboard() {
       <div className="trading-metrics__panel trading-metrics__panel--activity ui-panel">
         <h3>
           <Activity size={18} /> Activity feed
+          <Link href="/assets/impact" className="trading-metrics__impact-link">
+            Full impact log →
+          </Link>
         </h3>
         {metrics.activity.length === 0 ? (
-          <p className="trading-metrics__empty">No marketplace trades yet.</p>
+          <p className="trading-metrics__empty">
+            No marketplace trades yet.{' '}
+            <Link href="/assets/impact">View full impact log</Link> (includes hustle ledger).
+          </p>
         ) : (
           <ul className="trading-metrics__activity">
             {metrics.activity.map((item) => (

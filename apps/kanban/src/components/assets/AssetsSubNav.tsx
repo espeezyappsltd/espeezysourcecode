@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Coins, HardDrive, LayoutGrid, ShoppingBag } from 'lucide-react'
+import { Activity, Coins, HardDrive, LayoutGrid, ShoppingBag } from 'lucide-react'
 
 const LINKS: Array<{
   href: string
@@ -14,6 +14,7 @@ const LINKS: Array<{
   { href: '/assets/storage', label: 'Storage & files', icon: HardDrive },
   { href: '/assets/credits', label: 'Credits', icon: Coins },
   { href: '/assets/marketplace', label: 'Marketplace', icon: ShoppingBag },
+  { href: '/assets/impact', label: 'Impact log', icon: Activity },
 ]
 
 export function AssetsSubNav() {
