@@ -40,6 +40,8 @@ export type ImpactLogPayload = {
   entries: ImpactLogEntry[]
 }
 
+type HustleTaskSnap = { title: string; category: string; status: string }
+
 type HustleLedgerRow = {
   id: string
   task_id: string
@@ -48,7 +50,14 @@ type HustleLedgerRow = {
   credits_amount: number
   kind: 'escrow_in' | 'release' | 'refund' | 'platform_fee'
   created_at: string
-  hustle_tasks: { title: string; category: string; status: string } | null
+  hustle_tasks?: HustleTaskSnap | HustleTaskSnap[] | null
+}
+
+function taskFromLedgerRow(row: HustleLedgerRow): HustleTaskSnap | null {
+  const t = row.hustle_tasks
+  if (!t) return null
+  if (Array.isArray(t)) return t[0] ?? null
+  return t
 }
 
 const HUSTLE_KIND_LABEL: Record<HustleLedgerRow['kind'], string> = {
@@ -82,7 +91,7 @@ function marketplaceToImpact(row: TradingActivityRow): ImpactLogEntry {
 }
 
 function hustleLedgerToImpact(row: HustleLedgerRow, userId: string): ImpactLogEntry | null {
-  const taskTitle = row.hustle_tasks?.title ?? 'Hustle gig'
+  const taskTitle = taskFromLedgerRow(row)?.title ?? 'Hustle gig'
   const taskHref = `/hustle?tab=gigs&task=${row.task_id}`
 
   if (row.kind === 'escrow_in' && row.from_user_id === userId) {
@@ -199,7 +208,7 @@ export async function getImpactLogForUser(userId: string): Promise<ImpactLogPayl
       .eq('status', 'paid'),
   ])
 
-  const ledgerRows = (ledgerRes.data ?? []) as HustleLedgerRow[]
+  const ledgerRows = (ledgerRes.data ?? []) as unknown as HustleLedgerRow[]
   const hustleEntries = ledgerRows
     .map((row) => hustleLedgerToImpact(row, userId))
     .filter((e): e is ImpactLogEntry => e !== null)
