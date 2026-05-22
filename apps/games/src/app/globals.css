@@ -65,6 +65,16 @@ body.body-lock {
 
 .games-settings-page {
   max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2.5rem;
+}
+
+.games-settings-status {
+  min-height: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--games-brand, var(--brand));
 }
 
 .games-settings-nav {
@@ -82,11 +92,9 @@ body.body-lock {
   color: var(--games-brand, var(--brand));
 }
 
-.games-settings-panel {
-  padding: 1.5rem;
-  border-radius: 20px;
-  border: 1px solid var(--games-border, var(--border));
-  background: var(--games-surface, var(--surface));
+.has-custom-bg .games-settings-page .auth-card {
+  background: rgba(var(--surface-glass, 255, 255, 255), 0.85);
+  backdrop-filter: blur(10px);
 }
 
 @keyframes pulse-glow {
