@@ -10,7 +10,7 @@ import {
   CreditCard,
   MessageSquare,
   User,
-  MapPin,
+  Users,
   AlertTriangle,
   HardDrive,
 } from 'lucide-react'
@@ -43,17 +43,14 @@ export function SettingsTabNav({ vm }: { vm: SettingsPageViewModel }) {
         { id: 'pulse', label: 'Presence', icon: PulseIcon },
         { id: 'activity', label: 'Activity Log', icon: History },
         { id: 'intercom', label: 'Mail', icon: Mail },
-        { id: 'team', label: 'Admin', icon: Shield, hidden: !isAdmin },
-        { id: 'workspace', label: 'Workspace', icon: MapPin },
+        { id: 'workspace', label: 'Teams', icon: Users },
         { id: 'appearance', label: 'Design', icon: PaletteIcon },
         { id: 'security', label: 'Security', icon: Shield },
         { id: 'billing', label: 'Go Pro', icon: CreditCard },
         { id: 'storage', label: 'Storage Node', icon: HardDrive },
         { id: 'data', label: 'Privacy', icon: AlertTriangle },
         { id: 'support', label: 'Feedback', icon: MessageSquare },
-      ]
-        .filter((t) => !t.hidden)
-        .map((tab) => (
+      ].map((tab) => (
           <button
             key={tab.id}
             type="button"

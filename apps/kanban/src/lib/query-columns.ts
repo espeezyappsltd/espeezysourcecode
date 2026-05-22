@@ -3,10 +3,10 @@
 export const Q = {
   profile: {
     layout:
-      'id, full_name, avatar_url, username, role, group_id, subscription_plan, subscription_status, theme_config, custom_bg_url, email, biography, tagline, total_score, badges_count, course_name, school_id, country_code, created_at, storage_used, rank, enrollment_year, completion_year',
+      'id, full_name, avatar_url, username, role, group_id, archived_group_id, subscription_plan, subscription_status, theme_config, custom_bg_url, email, biography, tagline, total_score, badges_count, course_name, school_id, country_code, created_at, storage_used, rank, enrollment_year, completion_year',
     /** Full profile row for settings / dashboard services (omit columns not in all DB envs). */
     detail:
-      'id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen, storage_used, country_code, theme_config, custom_bg_url',
+      'id, email, full_name, avatar_url, course_name, enrollment_year, completion_year, role, rank, badges_count, school_id, group_id, archived_group_id, subscription_plan, subscription_status, subscription_started_at, total_score, created_at, tagline, biography, stack, last_seen, storage_used, country_code, theme_config, custom_bg_url',
     card: 'id, full_name, avatar_url, username, role',
     list: 'id, full_name, avatar_url, username, role, subscription_plan, created_at',
     webhook: 'id, username, full_name, total_score, email, espeezy_email',

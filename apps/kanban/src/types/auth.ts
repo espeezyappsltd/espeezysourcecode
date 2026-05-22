@@ -13,6 +13,7 @@ export type Profile = {
   badges_count: number | null;
   school_id: string | null;
   group_id: string | null;
+  archived_group_id?: string | null;
   is_educator?: boolean | null;
   subscription_plan?: string | null;
   subscription_status?: string | null;

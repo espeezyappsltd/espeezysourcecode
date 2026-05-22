@@ -460,8 +460,40 @@ export function useSettingsPage() {
 
   const handleDownloadData = () => window.open('/api/account', '_blank')
 
-  const handleSwitchGroup = async (newGroupId: string | null) => {
+  const handleSwitchGroup = async (newGroupId: string | null, teamLabel?: string) => {
     if (!profile) return
+
+    const currentId = profile.group_id
+    const archivedId =
+      typeof profile.archived_group_id === 'string' ? profile.archived_group_id : null
+
+    if (newGroupId === null) {
+      if (
+        !confirm(
+          'Leave your current team? Your board stays saved — you can switch back from Settings → Teams anytime.',
+        )
+      ) {
+        return
+      }
+    } else if (newGroupId !== currentId) {
+      const name =
+        teamLabel ||
+        availableGroups.find((g) => g.id === newGroupId)?.name ||
+        'this team'
+      const isReturn = newGroupId === archivedId
+      if (
+        !confirm(
+          isReturn
+            ? `Switch back to ${name}? Your saved tasks for that team will be restored.`
+            : `Switch to ${name}? Your current team’s work stays saved — you can switch back later.`,
+        )
+      ) {
+        return
+      }
+    } else {
+      return
+    }
+
     setSwitching(true)
     setError(null)
 
@@ -470,13 +502,25 @@ export function useSettingsPage() {
       const res = await switchTeamGroup(newGroupId)
       if (res.error) {
         setError(`Sync failed: ${res.error}`)
+        addToast('Could not switch team', res.error, 'error')
         return
       }
       await fetchUserData()
       refreshProfile()
-      addToast('Team Switched', 'You have been successfully re-assigned to the new project group.', 'success')
+      if (newGroupId === null) {
+        addToast('Left team', 'You are not on a team right now. Pick another team below when ready.', 'info')
+      } else if (newGroupId === archivedId) {
+        addToast('Welcome back', `You are now on ${teamLabel || 'your previous team'}.`, 'success')
+      } else {
+        addToast('Team switched', `You are now working in ${teamLabel || 'the new team'}.`, 'success')
+      }
+      if (typeof window !== 'undefined') {
+        window.location.href = '/'
+      }
     } catch (err: unknown) {
-      setError(`Sync failed: ${err instanceof Error ? err.message : 'unknown error'}`)
+      const msg = err instanceof Error ? err.message : 'unknown error'
+      setError(`Sync failed: ${msg}`)
+      addToast('Could not switch team', msg, 'error')
     }
     setSwitching(false)
   }
@@ -513,8 +557,9 @@ export function useSettingsPage() {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
     const tab = params.get('tab')
-    if (tab && SETTINGS_TABS.includes(tab as TabName)) {
-      setActiveTab(tab as TabName)
+    const normalizedTab = tab === 'team' ? 'workspace' : tab
+    if (normalizedTab && SETTINGS_TABS.includes(normalizedTab as TabName)) {
+      setActiveTab(normalizedTab as TabName)
     }
     if (params.get('checkout') === 'success') {
       addToast('Plan updated', 'Your subscription is active. Changes may take a moment to sync.', 'success')

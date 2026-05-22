@@ -107,7 +107,7 @@ export async function ensurePendingJoinRequest(
   if (existing?.status === 'accepted') {
     return {
       ok: false,
-      error: 'You were already accepted to this team. Open Settings → Workspace to switch back, or leave your current team first.',
+      error: 'You were already accepted to this team. Open Settings → Teams to switch back, or leave your current team first.',
     }
   }
 
