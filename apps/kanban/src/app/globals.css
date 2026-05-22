@@ -16,7 +16,11 @@ img, svg, video, canvas, audio, iframe, embed, object {
   height: auto;
 }
 
-button, .btn, input, textarea, select {
+button:not(.mobile-header__avatar-btn):not(.onboarding-avatar-btn),
+.btn,
+input,
+textarea,
+select {
   min-height: 44px;
   min-width: 44px;
   font-size: clamp(1rem, 2.5vw, 1.1rem);
@@ -79,7 +83,7 @@ button, .btn, input, textarea, select {
     box-shadow: none !important;
   }
   .btn:not(.btn-inline),
-  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn):not(.panel-tool):not(.control-tab):not(.btn-compact):not(.dashboard-home-hud__team-id):not(.mobile-header__tool-segment):not(.mobile-header__fab):not(.social-guide-fab):not(.sidebar-foot__help):not(.sidebar-foot-btn):not(.sidebar-foot__profile):not(.help-tray-backdrop):not(.help-tray-close):not(.promo-banner__dismiss) {
+  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn):not(.panel-tool):not(.control-tab):not(.btn-compact):not(.dashboard-home-hud__team-id):not(.mobile-header__tool-segment):not(.mobile-header__fab):not(.mobile-header__avatar-btn):not(.social-guide-fab):not(.sidebar-foot__help):not(.sidebar-foot-btn):not(.sidebar-foot__profile):not(.help-tray-backdrop):not(.help-tray-close):not(.promo-banner__dismiss) {
     width: 100%;
     min-width: 0;
     font-size: clamp(1rem, 4vw, 1.1rem);
@@ -92,7 +96,7 @@ button, .btn, input, textarea, select {
     font-size: 14px;
   }
   .btn:not(.btn-inline):not(.btn-row__btn),
-  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn):not(.panel-tool):not(.control-tab):not(.btn-compact):not(.dashboard-home-hud__team-id):not(.mobile-header__tool-segment):not(.mobile-header__fab):not(.social-guide-fab):not(.sidebar-foot__help):not(.sidebar-foot-btn):not(.sidebar-foot__profile):not(.help-tray-backdrop):not(.help-tray-close):not(.promo-banner__dismiss) {
+  button:not(.onboarding-close-btn):not(.onboarding-avatar-btn):not(.credit-fund-premium__tier):not(.credit-fund-premium__cta):not(.wallet-premium__refresh):not(.btn-row__btn):not(.panel-tool):not(.control-tab):not(.btn-compact):not(.dashboard-home-hud__team-id):not(.mobile-header__tool-segment):not(.mobile-header__fab):not(.mobile-header__avatar-btn):not(.social-guide-fab):not(.sidebar-foot__help):not(.sidebar-foot-btn):not(.sidebar-foot__profile):not(.help-tray-backdrop):not(.help-tray-close):not(.promo-banner__dismiss) {
     font-size: 1rem;
     padding: 0.8em 0.3em;
   }

@@ -238,18 +238,9 @@
   justify-content: center;
 }
 
+/* Avatar ring — circular (see remote-avatar.css for img rules) */
 .sidebar-foot__avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 11px;
-  background: var(--brand);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--brand) 28%, transparent);
+  border: 2px solid color-mix(in srgb, var(--brand) 35%, transparent);
 }
 
 .sidebar-foot__profile-text {

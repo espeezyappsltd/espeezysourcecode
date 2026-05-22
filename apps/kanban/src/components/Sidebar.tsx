@@ -100,11 +100,14 @@ function ProfileAvatar({
   fallback,
   size,
   alt,
+  fill,
 }: {
   avatarUrl?: string | null
   fallback: React.ReactNode
   size: number
   alt: string
+  /** Fill parent (e.g. mobile header avatar button) */
+  fill?: boolean
 }) {
   return (
     <RemoteAvatar
@@ -112,7 +115,12 @@ function ProfileAvatar({
       alt={alt}
       size={size}
       fallback={fallback}
-      imgStyle={{ width: '100%', height: 'auto', aspectRatio: '1/1', objectFit: 'cover' }}
+      className="remote-avatar"
+      style={
+        fill
+          ? { width: '100%', height: '100%', minWidth: 0, minHeight: 0 }
+          : undefined
+      }
     />
   )
 }
@@ -345,7 +353,13 @@ export default function Sidebar({ user }: SidebarProps) {
             <NotificationBell />
           </div>
           <button type="button" className="mobile-header__avatar-btn" onClick={() => pushRoute('/profile')} aria-label="Open profile">
-            <ProfileAvatar avatarUrl={profile?.avatar_url} fallback={<UserCircle size={18} color="var(--text-sub)" />} size={34} alt="" />
+            <ProfileAvatar
+              avatarUrl={profile?.avatar_url}
+              fallback={<UserCircle size={18} color="var(--text-sub)" />}
+              size={36}
+              alt=""
+              fill
+            />
           </button>
         </div>
       </header>

@@ -373,4 +373,4 @@ export const PALETTES: EspeezyPalette[] = [
       '--overlay': 'rgba(2, 6, 23, 0.85)',
     }
   }
-]
+]

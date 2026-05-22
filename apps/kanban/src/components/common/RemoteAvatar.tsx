@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import './remote-avatar.css'
 
 type RemoteAvatarProps = {
   src?: string | null
@@ -52,12 +53,17 @@ export default function RemoteAvatar({
 
   const showImage = Boolean(normalized) && !failed
 
+  const mergedClass = ['remote-avatar', className].filter(Boolean).join(' ')
+
   return (
     <div
-      className={className}
+      className={mergedClass}
       style={{
         width: size,
         height: size,
+        minWidth: size,
+        minHeight: size,
+        aspectRatio: '1 / 1',
         borderRadius: '50%',
         overflow: 'hidden',
         display: 'flex',
@@ -79,8 +85,8 @@ export default function RemoteAvatar({
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
           style={{
-            width: size,
-            height: size,
+            width: '100%',
+            height: '100%',
             objectFit: 'cover',
             display: 'block',
             ...imgStyle,
