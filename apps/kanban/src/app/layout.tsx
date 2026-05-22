@@ -25,6 +25,8 @@ import './ui-panels.css'
 import './mobile-shell.css'
 import './forms-a11y.css'
 import './central-premium.css'
+import '@shared/theme-cycle.css'
+import '@shared/espeezy-appearance.css'
 
 export const metadata: Metadata = {
   title: 'Espeezy Kanban',

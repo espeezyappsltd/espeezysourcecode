@@ -73,29 +73,15 @@ export interface ChatMessage {
 
 export type Palette = {
   name: string
-  colors: {
-    '--bg-main': string
-    '--bg-sub': string
-    '--text-main': string
-    '--text-sub': string
-    '--brand': string
-    '--brand-hover': string
-    '--accent': string
-    '--border': string
-    '--surface': string
-    '--error': string
-    '--success': string
-    '--warning': string
-    '--overlay': string
-  }
+  colors: Record<string, string>
   tier?: 'free' | 'pro' | 'premium'
 }
 
 export type ThemeContextType = {
   currentPalette: Palette
-  setPalette: (name: string) => void
+  setPalette: (name: string) => Promise<void>
   customBg: string | null
-  setCustomBg: (url: string | null) => void
+  setCustomBg: (url: string | null) => Promise<void>
 }
 
 export type Notification = {

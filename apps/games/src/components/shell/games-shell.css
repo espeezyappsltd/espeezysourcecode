@@ -1,8 +1,8 @@
 .games-shell {
   display: flex;
   min-height: 100vh;
-  background: var(--games-bg);
-  color: var(--games-text);
+  background: var(--games-bg, var(--bg-main));
+  color: var(--games-text, var(--text-main));
 }
 
 .games-shell__backdrop {
@@ -299,6 +299,22 @@
 
 .games-sidebar.is-collapsed .games-sidebar__foot-link span {
   display: none;
+}
+
+.games-sidebar__foot-actions {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0 0.35rem;
+}
+
+.games-sidebar__theme-btn {
+  flex: 1;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.games-sidebar.is-collapsed .games-sidebar__theme-btn {
+  justify-content: center;
 }
 
 .games-sidebar.is-collapsed .games-sidebar__foot-link {

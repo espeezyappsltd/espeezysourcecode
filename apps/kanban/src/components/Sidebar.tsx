@@ -17,13 +17,11 @@ import {
   HelpCircle,
   LogOut,
   Music,
-  Moon,
   Rss,
   Settings,
   Gamepad2,
   ShieldCheck,
   Sparkles,
-  Sun,
   TrendingUp,
   UserCircle,
   Users,
@@ -35,7 +33,8 @@ import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { usePresence } from '@/components/PresenceProvider'
 import { useConnectivity } from '@/context/ConnectivityContext'
 import { useProfile } from '@/context/ProfileContext'
-import { useTheme } from '@/context/ThemeContext'
+import { ThemeCycleButton } from '@shared/ThemeCycleButton'
+import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
 import { SidebarProps } from '@/types/ui'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
 import GlobalSearch from './GlobalSearch'
@@ -43,12 +42,10 @@ import { MobileHeaderToolbar } from './mobile/MobileHeaderToolbar'
 import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
-import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
 import { SIDEBAR_UPGRADE_BLURB } from '@shared/platform-brand'
 import './sidebar-premium.css'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
-const THEME_SEQUENCE = ['Google Light', 'Deep Oceanic', 'Cyberpunk'] as const
 const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats'])
 const subscribeToClient = () => () => {}
 
@@ -194,7 +191,6 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const { isOnline: isConnected, isSlow } = useConnectivity()
   const { profile } = useProfile()
-  const { currentPalette, setPalette } = useTheme()
   const { globalOnlineCount } = usePresence()
   const smartLoading = useSmartLoading()
   const withLoading = smartLoading?.withLoading
@@ -204,7 +200,6 @@ export default function Sidebar({ user }: SidebarProps) {
   const isProfileLoaded = Boolean(profile)
   const onlineCount = globalOnlineCount
   const onlineLabel = onlineCount === 1 ? '1 ONLINE' : `${onlineCount} ONLINE`
-  const isDark = currentPalette.name !== 'Google Light'
   const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
   const showUpgradeCard = profile?.subscription_plan === 'free' || !profile?.subscription_plan
   const projectStatsPath = profile?.group_id ? `/analytics/${profile.group_id}` : '/analytics'
@@ -258,13 +253,6 @@ export default function Sidebar({ user }: SidebarProps) {
     if (isMobile) {
       closeSidebar()
     }
-  }
-
-  const toggleTheme = () => {
-    const currentIndex = THEME_SEQUENCE.indexOf(currentPalette.name as (typeof THEME_SEQUENCE)[number])
-    const safeIndex = currentIndex === -1 ? 0 : currentIndex
-    const nextIndex = (safeIndex + 1) % THEME_SEQUENCE.length
-    setPalette(THEME_SEQUENCE[nextIndex])
   }
 
   const handleNavigation = (path: string) => {
@@ -522,16 +510,11 @@ export default function Sidebar({ user }: SidebarProps) {
               </button>
 
               <div className="sidebar-foot__actions">
-                <button
-                  type="button"
+                <ThemeCycleButton
                   className="sidebar-foot-btn sidebar-foot-btn--theme"
-                  onClick={toggleTheme}
-                  title={`Theme: ${currentPalette.name}`}
-                  aria-label="Toggle theme"
-                >
-                  {isDark ? <Sun size={17} aria-hidden /> : <Moon size={17} aria-hidden />}
-                  <span className="sidebar-foot-btn-label">Theme</span>
-                </button>
+                  labelClassName="sidebar-foot-btn-label"
+                  onLocked={() => pushRoute(APP_PRICING_PATH)}
+                />
                 <button
                   type="button"
                   className="sidebar-foot-btn sidebar-foot-btn--signout"

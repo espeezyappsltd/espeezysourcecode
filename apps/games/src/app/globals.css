@@ -1,6 +1,7 @@
 @import '../shared/design/tokens.css';
 @import '../shared/design/base.css';
 
+/* Theme sync: EspeezyThemeProvider injects --bg-main, --brand, etc. */
 :root {
   --games-bg: #070b14;
   --games-bg-elevated: #0c1220;
@@ -23,8 +24,19 @@
 html,
 body {
   min-height: 100%;
-  background: var(--games-bg);
-  color: var(--games-text);
+  background: var(--bg-main, var(--games-bg));
+  color: var(--text-main, var(--games-text));
+}
+
+.espeezy-theme-root.games-theme-bridge {
+  --games-bg: var(--bg-main, #070b14);
+  --games-surface: var(--surface, #111827);
+  --games-surface-2: var(--bg-sub, #1a2336);
+  --games-border: var(--border, rgba(148, 163, 184, 0.12));
+  --games-text: var(--text-main, #f1f5f9);
+  --games-muted: var(--text-sub, #94a3b8);
+  --games-brand: var(--brand, #818cf8);
+  --games-accent: var(--accent, #22d3ee);
 }
 
 body.body-lock {
@@ -49,6 +61,32 @@ body.body-lock {
   100% {
     background-position: -200% 0;
   }
+}
+
+.games-settings-page {
+  max-width: 960px;
+}
+
+.games-settings-nav {
+  margin-bottom: 1.25rem;
+}
+
+.games-settings-nav__link {
+  color: var(--games-muted, var(--text-sub));
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.games-settings-nav__link:hover {
+  color: var(--games-brand, var(--brand));
+}
+
+.games-settings-panel {
+  padding: 1.5rem;
+  border-radius: 20px;
+  border: 1px solid var(--games-border, var(--border));
+  background: var(--games-surface, var(--surface));
 }
 
 @keyframes pulse-glow {

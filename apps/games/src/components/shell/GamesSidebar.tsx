@@ -12,9 +12,12 @@ import {
   LayoutGrid,
   LogIn,
   LogOut,
+  Settings,
   UserCircle,
 } from 'lucide-react'
+import { ThemeCycleButton } from '@shared/ThemeCycleButton'
 import { useCategoriesContext } from '@/context/CategoriesContext'
+import { useKanbanAppLink } from '@/hooks/useKanbanAppLink'
 import { useKanbanWorkspaceLink } from '@/hooks/useKanbanWorkspaceLink'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { getSupabaseClient } from '@/lib/supabase-client'
@@ -72,6 +75,7 @@ export default function GamesSidebar({
   const { categories, loading } = useCategoriesContext()
   const user = useSupabaseUser()
   const kanbanUrl = useKanbanWorkspaceLink()
+  const kanbanAppearanceUrl = useKanbanAppLink('/settings?tab=appearance')
   const isClient = useSyncExternalStore(subscribeToClient, () => true, () => false)
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
@@ -242,10 +246,24 @@ export default function GamesSidebar({
               <UserCircle size={18} />
               <span>My profile</span>
             </Link>
+            <Link href="/settings" className="games-sidebar__foot-link" onClick={() => isMobile && onCloseMobile()}>
+              <Settings size={18} aria-hidden />
+              <span>Theme settings</span>
+            </Link>
             <a href={kanbanUrl} className="games-sidebar__foot-link">
-              <LayoutGrid size={18} />
+              <LayoutGrid size={18} aria-hidden />
               <span>Kanban workspace</span>
             </a>
+            <div className="games-sidebar__foot-actions">
+              <ThemeCycleButton
+                className="games-sidebar__foot-link games-sidebar__theme-btn"
+                labelClassName=""
+                showLabel={!collapsed}
+                onLocked={() => {
+                  window.location.href = kanbanAppearanceUrl
+                }}
+              />
+            </div>
             <button type="button" className="games-sidebar__foot-link" onClick={() => void handleSignOut()}>
               <LogOut size={18} />
               <span>Sign out</span>
