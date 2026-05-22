@@ -9,7 +9,7 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 5000;
+    z-index: var(--z-mobile-header);
     box-sizing: border-box;
     min-height: var(--mobile-header-total);
     padding:
@@ -97,6 +97,7 @@
     flex-shrink: 0;
     grid-area: actions;
     min-height: 40px;
+    overflow: visible;
   }
 
   .mobile-header__notif {
@@ -106,6 +107,7 @@
     width: 40px;
     height: 40px;
     flex-shrink: 0;
+    overflow: visible;
   }
 
   .mobile-header__notif > div {
@@ -166,7 +168,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 4000;
+    z-index: var(--z-mobile-bottom);
     box-sizing: border-box;
     min-height: var(--mobile-bottom-total);
     height: auto;

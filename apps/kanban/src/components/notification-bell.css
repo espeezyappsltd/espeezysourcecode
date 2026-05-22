@@ -1,0 +1,212 @@
+/* Notification bell dropdown — stacks above mobile header, sidebar, and page-control sheets */
+
+.notification-bell-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-bell-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.notification-bell-trigger[aria-expanded='true'] {
+  color: var(--brand);
+}
+
+.notification-bell-trigger:active {
+  transform: scale(0.96);
+}
+
+.notification-bell-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--error);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 10px rgba(var(--error-rgb, 239, 68, 68), 0.3);
+  pointer-events: none;
+}
+
+.notification-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-notification-backdrop);
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  cursor: pointer;
+  animation: notification-backdrop-in 0.2s ease;
+}
+
+.notification-panel {
+  position: fixed;
+  z-index: var(--z-notification-panel);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: notification-panel-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.notification-panel__head {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.notification-panel__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.notification-panel__clear {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: var(--brand);
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 36px;
+  min-width: auto;
+  padding: 0.25rem 0.5rem;
+}
+
+.notification-panel__clear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.notification-panel__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.notification-panel__empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-sub);
+}
+
+.notification-panel__foot {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.notification-panel__timeline {
+  background: none;
+  border: none;
+  font-size: 0.7rem;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  min-width: auto;
+  padding: 0.35rem 0.5rem;
+}
+
+.notification-panel__timeline:hover {
+  color: var(--brand);
+}
+
+.notif-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--bg-main);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.notif-item--unread {
+  background: rgba(var(--brand-rgb), 0.03);
+}
+
+.notif-item:hover {
+  background: var(--bg-main) !important;
+}
+
+.notif-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* Compact actions inside the panel (override global 44px touch targets) */
+.notification-panel .notification-panel__action,
+.notification-panel .btn-sm {
+  min-height: 32px;
+  min-width: auto;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+}
+
+.notification-panel__action:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+@keyframes notification-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes notification-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-header__notif,
+  .mobile-header__actions {
+    overflow: visible;
+  }
+}

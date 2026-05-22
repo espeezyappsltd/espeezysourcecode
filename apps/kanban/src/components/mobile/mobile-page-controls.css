@@ -163,7 +163,7 @@
 .mobile-ctrl-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 5200;
+  z-index: var(--z-mobile-ctrl-backdrop);
   border: none;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
@@ -176,7 +176,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 5210;
+  z-index: var(--z-mobile-ctrl-sheet);
   max-height: min(72dvh, 480px);
   display: flex;
   flex-direction: column;

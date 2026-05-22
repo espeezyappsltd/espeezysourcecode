@@ -149,6 +149,16 @@ select {
   --gap-md: 0.75rem;
   --gap-lg: 1rem;
   --vh-dynamic: 100dvh;
+
+  /* Layering — shell UI through modals (higher = on top) */
+  --z-mobile-bottom: 4000;
+  --z-sidebar-backdrop: 4500;
+  --z-mobile-header: 5000;
+  --z-sidebar: 5100;
+  --z-mobile-ctrl-backdrop: 5200;
+  --z-mobile-ctrl-sheet: 5210;
+  --z-notification-backdrop: 5250;
+  --z-notification-panel: 5300;
 }
 
 /* Light Mode Overrides (Explicit or Preferred) */
