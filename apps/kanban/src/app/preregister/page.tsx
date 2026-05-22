@@ -21,6 +21,7 @@ import SharedCountdown from '@/components/SharedCountdown'
 import UserRegistrationCounter from '@/components/UserRegistrationCounter'
 import { submitPreregistration } from '@/services/preregister'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
+import { ESPEEZY_APP_ORIGINS } from '@shared/app-url'
 import {
   HERO_ANALYTICS_CAPTION,
   HERO_COPY_LINES,
@@ -645,9 +646,46 @@ function PreRegisterPageContent() {
 
       <footer className="prereg-section prereg-section--border" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
         <div className="prereg-container">
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.88rem', lineHeight: 1.65, maxWidth: '640px', marginBottom: '2rem' }}>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.88rem', lineHeight: 1.65, maxWidth: '640px', marginBottom: '1.5rem' }}>
             {FOOTER_TECH_BLURB} Pre-registration helps us size campus rollouts. No spam — launch updates only.
           </p>
+
+          <aside
+            className="prereg-live-apps"
+            aria-label="Live Espeezy apps"
+            style={{
+              marginBottom: '2rem',
+              padding: '1rem 1.15rem',
+              borderRadius: '12px',
+              border: '1px solid rgba(16,185,129,0.22)',
+              background: 'rgba(16,185,129,0.06)',
+              maxWidth: '520px',
+            }}
+          >
+            <p style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.55, color: 'rgba(255,255,255,0.55)' }}>
+              <strong style={{ color: '#6ee7b7', fontWeight: 800 }}>Apps are live now.</strong> You can sign in and use the platform today — pre-register is for the next cohort perks, not a wait for access.
+            </p>
+            <p style={{ margin: '0.65rem 0 0', fontSize: '0.85rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1rem', alignItems: 'center' }}>
+              <a
+                href={ESPEEZY_APP_ORIGINS.kanban}
+                style={{ color: 'var(--brand)', fontWeight: 800, textDecoration: 'none' }}
+                rel="noopener noreferrer"
+              >
+                Kanban → {ESPEEZY_APP_ORIGINS.kanban.replace(/^https:\/\//, '')}
+              </a>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }} aria-hidden>
+                ·
+              </span>
+              <a
+                href={ESPEEZY_APP_ORIGINS.games}
+                style={{ color: 'var(--brand)', fontWeight: 800, textDecoration: 'none' }}
+                rel="noopener noreferrer"
+              >
+                Games → {ESPEEZY_APP_ORIGINS.games.replace(/^https:\/\//, '')}
+              </a>
+            </p>
+          </aside>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <Sparkles size={16} color="var(--brand)" aria-hidden />
