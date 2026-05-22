@@ -9,9 +9,11 @@ export function AdminOnboardingBanner() {
     return (
       <div className="admin-console-onboarding" role="note">
         <p>{pageHint}</p>
-        <button type="button" className="admin-console-btn" onClick={() => setPageHint(null)}>
-          Got it
-        </button>
+        <div className="admin-console-onboarding-actions">
+          <button type="button" className="admin-console-btn" onClick={() => setPageHint(null)}>
+            Got it
+          </button>
+        </div>
       </div>
     )
   }
@@ -27,7 +29,7 @@ export function AdminOnboardingBanner() {
         </strong>
         <p>{step.body}</p>
       </div>
-      <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+      <div className="admin-console-onboarding-actions">
         <button type="button" className="admin-console-btn" onClick={dismiss}>
           Skip
         </button>

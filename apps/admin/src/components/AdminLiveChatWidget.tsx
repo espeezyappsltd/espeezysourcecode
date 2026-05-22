@@ -318,6 +318,24 @@ export default function AdminLiveChatWidget({
           padding: 0.6rem 0.8rem;
           font-size: 0.8rem;
         }
+        @media (max-width: 768px) {
+          .admin-chat-fab {
+            right: max(0.75rem, env(safe-area-inset-right, 0px));
+            bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+          }
+          .admin-chat-panel {
+            left: max(0.75rem, env(safe-area-inset-left, 0px));
+            right: max(0.75rem, env(safe-area-inset-right, 0px));
+            width: auto;
+            max-height: min(70dvh, 480px);
+            bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+          }
+          .admin-chat-toast {
+            left: max(0.75rem, env(safe-area-inset-left, 0px));
+            right: max(0.75rem, env(safe-area-inset-right, 0px));
+            bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+          }
+        }
       `}</style>
     </>
   )

@@ -30,14 +30,12 @@ export default function AdminHomePage() {
 
       <div className="admin-console-card">
         <h2>Platform snapshot</h2>
-        <pre style={{ fontSize: '0.75rem', overflow: 'auto', margin: 0, color: '#5f6368' }}>
-          {metrics ? JSON.stringify(metrics, null, 2) : 'Loading metrics…'}
-        </pre>
+        <pre>{metrics ? JSON.stringify(metrics, null, 2) : 'Loading metrics…'}</pre>
       </div>
 
       <div className="admin-console-learn-grid">
         {ADMIN_NAV_ITEMS.filter((n) => n.href !== '/admin').map((item) => (
-          <Link key={item.href} href={item.href} className="admin-console-learn-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link key={item.href} href={item.href} className="admin-console-learn-card">
             <h3>{item.label}</h3>
             <p>{item.description ?? `Open ${item.label}`}</p>
             <span className="admin-console-btn">Open →</span>
