@@ -323,7 +323,7 @@ export default function FeedPage() {
         <div className="page-header__main">
           <h1 className="page-header__title">Academic Journeys</h1>
           <p className="page-header__desc">Real-time signals from students building the future. Share milestones, wins, and campus life.</p>
-        </div>
+      </div>
         {profile && (
           <Link href="/feed/manage" className="feed-manage-link">
             Manage your posts
@@ -396,7 +396,7 @@ export default function FeedPage() {
                   gap: '0.5rem',
                 }}
               >
-                <VisibilityToggle value={composerVisibility} onChange={setComposerVisibility} />
+                  <VisibilityToggle value={composerVisibility} onChange={setComposerVisibility} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <span
                     style={{
@@ -683,7 +683,7 @@ function PostCard({
                 </button>
               </div>
             )}
-          </div>
+      </div>
         )}
       </div>
 
@@ -720,15 +720,15 @@ function PostCard({
           {post.content}
         </p>
         )}
-      </div>
+        </div>
 
       {totalReactions > 0 && (
         <div style={{ padding: '0 0.35rem 0.5rem 1.15rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-          {reactionCounts.slice(0, 3).map(([r]) => (
+            {reactionCounts.slice(0, 3).map(([r]) => (
             <span key={r} style={{ fontSize: '0.85rem' }}>
               {REACTION_META[r].emoji}
             </span>
-          ))}
+            ))}
           <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>{totalReactions}</span>
         </div>
       )}
@@ -749,7 +749,7 @@ function PostCard({
             label={userReaction ? `${REACTION_META[userReaction].emoji} ${REACTION_META[userReaction].label}` : 'React'}
           />
           {showReactionPicker && (
-            <div
+            <div 
               role="group"
               aria-label="Reactions"
               style={{
@@ -815,8 +815,8 @@ function PostCard({
             </div>
           ))}
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.35rem' }}>
-            <input
-              value={commentText}
+              <input
+                value={commentText}
               onChange={(e) => onCommentTextChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -824,8 +824,8 @@ function PostCard({
                   onSubmitComment()
                 }
               }}
-              placeholder="Write a comment…"
-              maxLength={500}
+                placeholder="Write a comment…"
+                maxLength={500}
               style={{
                 flex: 1,
                 padding: '0.5rem 0.75rem',
@@ -836,11 +836,11 @@ function PostCard({
                 fontSize: '0.83rem',
                 outline: 'none',
               }}
-            />
-            <button
+              />
+              <button
               type="button"
-              onClick={onSubmitComment}
-              disabled={!commentText.trim() || submittingComment}
+                onClick={onSubmitComment}
+                disabled={!commentText.trim() || submittingComment}
               style={{
                 background: 'none',
                 border: 'none',
@@ -849,7 +849,7 @@ function PostCard({
               }}
             >
               {submittingComment ? <Loader2 size={16} className="feed-spin" /> : <Send size={16} />}
-            </button>
+              </button>
           </div>
         </div>
       )}
@@ -867,9 +867,9 @@ function ActionButton({
   active?: boolean
 }) {
   return (
-    <button
+    <button 
       type="button"
-      onClick={onClick}
+      onClick={onClick} 
       style={{
         background: 'none',
         border: 'none',
