@@ -1,11 +1,22 @@
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from 'crypto'
 
+/** Shown in Microsoft Authenticator as the account issuer (standard TOTP / RFC 6238). */
 export const ADMIN_TOTP_ISSUER = 'Espeezy Panel'
+export const MS_AUTHENTICATOR_APP_NAME = 'Microsoft Authenticator'
 export const ADMIN_TOTP_STEP_SEC = 30
 export const ADMIN_TOTP_DIGITS = 6
 export const ADMIN_TOTP_MAX_VERIFY_ATTEMPTS = 8
 export const ADMIN_TOTP_LOCKOUT_MS = 15 * 60 * 1000
-export const ADMIN_TOTP_WINDOW = 1
+/** ±2 steps (±60s) — helps phones with clock drift (common on Microsoft Authenticator). */
+export const ADMIN_TOTP_WINDOW = 2
+
+export const MS_AUTHENTICATOR_ENROLL_STEPS = [
+  'Install Microsoft Authenticator (iOS or Android).',
+  'Tap + → Other account (work/school style account — not your personal Microsoft login).',
+  'Scan the QR from npm run seed:admin-totp, or enter the secret key manually.',
+  'Confirm Type: Time based, Digits: 6, Period: 30 seconds, Algorithm: SHA-1.',
+  'At panel login, open Microsoft Authenticator and use the 6-digit code for Espeezy Panel.',
+] as const
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
 
@@ -97,10 +108,58 @@ export function verifyTotpToken(secretBase32: string, token: string, window = AD
   return false
 }
 
+/**
+ * otpauth URI tuned for Microsoft Authenticator QR scan + manual entry.
+ * @see https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-oath-tokens
+ */
 export function buildOtpAuthUri(username: string, secretBase32: string): string {
-  const account = encodeURIComponent(`${ADMIN_TOTP_ISSUER}:${username}`)
+  const secret = secretBase32.replace(/\s/g, '').toUpperCase()
+  const label = encodeURIComponent(`${ADMIN_TOTP_ISSUER} (${username})`)
   const issuer = encodeURIComponent(ADMIN_TOTP_ISSUER)
-  return `otpauth://totp/${account}?secret=${secretBase32}&issuer=${issuer}&algorithm=SHA1&digits=${ADMIN_TOTP_DIGITS}&period=${ADMIN_TOTP_STEP_SEC}`
+  return `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=${ADMIN_TOTP_DIGITS}&period=${ADMIN_TOTP_STEP_SEC}`
+}
+
+export function buildMicrosoftAuthenticatorQrUrl(otpauthUri: string, size = 240): string {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(otpauthUri)}`
+}
+
+export type MicrosoftAuthenticatorEnrollment = {
+  username: string
+  accountLabel: string
+  secretBase32: string
+  otpauthUri: string
+  qrImageUrl: string
+  manualEntry: {
+    accountName: string
+    secretKey: string
+    type: 'Time based'
+    digits: number
+    periodSeconds: number
+    algorithm: 'SHA-1'
+  }
+}
+
+export function buildMicrosoftAuthenticatorEnrollment(
+  username: string,
+  secretBase32: string,
+): MicrosoftAuthenticatorEnrollment {
+  const secret = secretBase32.replace(/\s/g, '').toUpperCase()
+  const otpauthUri = buildOtpAuthUri(username, secret)
+  return {
+    username,
+    accountLabel: `${ADMIN_TOTP_ISSUER} (${username})`,
+    secretBase32: secret,
+    otpauthUri,
+    qrImageUrl: buildMicrosoftAuthenticatorQrUrl(otpauthUri),
+    manualEntry: {
+      accountName: `${ADMIN_TOTP_ISSUER} (${username})`,
+      secretKey: secret,
+      type: 'Time based',
+      digits: ADMIN_TOTP_DIGITS,
+      periodSeconds: ADMIN_TOTP_STEP_SEC,
+      algorithm: 'SHA-1',
+    },
+  }
 }
 
 export function encryptTotpSecret(secretBase32: string): string {

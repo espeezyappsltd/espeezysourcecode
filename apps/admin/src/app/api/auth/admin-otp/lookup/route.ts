@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { normalizeAdminUsername } from '@/lib/admin-rbac'
-import { memberHasTotpEnrolled, isPanelTotpDevMode } from '@/lib/admin-totp'
+import {
+  memberHasTotpEnrolled,
+  isPanelTotpDevMode,
+  MS_AUTHENTICATOR_APP_NAME,
+  ADMIN_TOTP_ISSUER,
+} from '@/lib/admin-totp'
 import { createAdminClient } from '@/lib/db'
 
 export async function POST(req: Request) {
@@ -40,7 +45,9 @@ export async function POST(req: Request) {
     ok: true,
     displayName: member.display_name ?? member.username,
     totpEnrolled,
-    authMethod: 'authenticator',
+    authMethod: 'microsoft_authenticator',
+    authenticatorApp: MS_AUTHENTICATOR_APP_NAME,
+    accountLabel: ADMIN_TOTP_ISSUER,
     devMode: isPanelTotpDevMode() && !totpEnrolled,
   })
 }

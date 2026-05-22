@@ -5,7 +5,7 @@ export async function POST() {
   return NextResponse.json(
     {
       error:
-        'Email login codes are disabled. Use Google Authenticator, 1Password, Authy, or Microsoft Authenticator with your staff username.',
+        'Email and SMS login codes are disabled. Sign in with Microsoft Authenticator (6-digit code) and your staff username.',
       authMethod: 'authenticator',
     },
     { status: 410 },

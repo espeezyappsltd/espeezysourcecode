@@ -148,7 +148,11 @@ export async function POST(req: Request) {
     event_type: 'join',
     username: rosterMember.username,
     supabase_user_id: user.id,
-    details: { at: new Date().toISOString(), method: 'totp_authenticator', auth_repaired: authSync.repaired },
+    details: {
+      at: new Date().toISOString(),
+      method: 'microsoft_authenticator',
+      auth_repaired: authSync.repaired,
+    },
   })
 
   return NextResponse.json({

@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ShieldCheck, Smartphone } from 'lucide-react'
 import { ESPEEZY_APP_ORIGINS } from '@shared/app-url'
+import { ADMIN_TOTP_ISSUER, MS_AUTHENTICATOR_APP_NAME } from '@/lib/admin-totp'
 
 type Step = 'username' | 'code'
 
@@ -108,15 +109,16 @@ function AdminLoginForm() {
         <p style={{ color: '#666', fontSize: '0.82rem', marginBottom: '1.5rem', lineHeight: 1.45 }}>
           {step === 'username' && (
             <>
-              Enter your staff username (e.g. <strong style={{ color: '#999' }}>pete</strong>). Next step uses your
-              authenticator app — not SMS or email codes.
+              Enter your staff username (e.g. <strong style={{ color: '#999' }}>pete</strong>). Next step uses{' '}
+              <strong style={{ color: '#999' }}>{MS_AUTHENTICATOR_APP_NAME}</strong> — not SMS, email, or personal
+              Microsoft account password.
             </>
           )}
           {step === 'code' && (
             <>
-              Open your authenticator app (Google Authenticator, 1Password, Authy, Microsoft Authenticator) and enter the
-              6-digit code for <strong style={{ color: '#999' }}>Espeezy Panel</strong>
-              {displayName ? ` — ${displayName}` : ''}.
+              Open <strong style={{ color: '#999' }}>{MS_AUTHENTICATOR_APP_NAME}</strong> on your phone. Use the 6-digit
+              code for <strong style={{ color: '#999' }}>{ADMIN_TOTP_ISSUER}</strong>
+              {displayName ? ` (${displayName})` : ''}.
             </>
           )}
         </p>
@@ -171,15 +173,21 @@ function AdminLoginForm() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                marginBottom: '1rem',
+                marginBottom: '0.75rem',
                 color: '#10b981',
                 fontSize: '0.78rem',
                 fontWeight: 700,
               }}
             >
               <Smartphone size={16} aria-hidden />
-              Authenticator code
+              {MS_AUTHENTICATOR_APP_NAME} code
             </div>
+            {!devMode && (
+              <p style={{ margin: '0 0 1rem', fontSize: '0.72rem', color: '#555', lineHeight: 1.45 }}>
+                First time? Your platform lead runs <code style={{ color: '#888' }}>npm run seed:admin-totp</code> and
+                sends you a QR to add under <strong style={{ color: '#777' }}>Other account</strong> in the app.
+              </p>
+            )}
             <p style={{ color: '#555', fontSize: '0.75rem', marginBottom: '1rem' }}>
               Signing in as <strong style={{ color: '#888' }}>@{username}</strong>
               <button
