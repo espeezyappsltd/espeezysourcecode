@@ -4,12 +4,18 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useCategoriesContext } from '@/context/CategoriesContext'
 import { useGamesByCategoryPaginated } from '@/hooks/useGamesByCategoryPaginated'
+import { AddGameToCategoryForm } from '@/components/catalog/AddGameToCategoryForm'
 import type { Game } from '@/types/games'
 
 export default function CategoryGamesView({ categoryId }: { categoryId: string }) {
-  const { categories } = useCategoriesContext()
+  const { categories, refresh } = useCategoriesContext()
   const category = categories.find((c) => c.id === categoryId)
-  const { games, count, loading, error } = useGamesByCategoryPaginated(categoryId, 1, 100)
+  const { games, count, loading, error, reload } = useGamesByCategoryPaginated(categoryId, 1, 100)
+
+  const handleGameAdded = () => {
+    refresh()
+    reload()
+  }
 
   if (loading) {
     return (
@@ -39,6 +45,12 @@ export default function CategoryGamesView({ categoryId }: { categoryId: string }
           use the sidebar to jump between lanes.
         </p>
       </div>
+
+      <AddGameToCategoryForm
+        categoryId={categoryId}
+        categoryName={title}
+        onAdded={handleGameAdded}
+      />
 
       {games.length === 0 ? (
         <p className="games-state">No games in this category yet.</p>

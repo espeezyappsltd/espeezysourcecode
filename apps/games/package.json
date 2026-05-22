@@ -8,6 +8,7 @@
     "start": "npx serve out -p 3002",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
+    "seed:catalog": "node ../../scripts/seed-games-catalog.mjs",
     "test:e2e": "playwright test --config src/playwright.config.ts"
   },
   "dependencies": {

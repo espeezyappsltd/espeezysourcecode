@@ -8,6 +8,7 @@ type CategoriesContextValue = {
   categories: Category[]
   loading: boolean
   error: string | null
+  refresh: () => void
 }
 
 const CategoriesContext = createContext<CategoriesContextValue | null>(null)

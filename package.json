@@ -58,6 +58,7 @@
     "predeploy:core": "npm --prefix apps/core run predeploy:check",
     "predeploy:kanban": "npm --prefix apps/kanban run predeploy:check",
     "predeploy:apps": "npm run predeploy:prereg ; npm run predeploy:games ; npm run predeploy:kanban ; npm run predeploy:dashboard ; npm run predeploy:admin ; npm run predeploy:core",
+    "seed:games-catalog": "node scripts/seed-games-catalog.mjs",
     "build:kanban": "npm --prefix apps/kanban run build"
   },
   "dependencies": {

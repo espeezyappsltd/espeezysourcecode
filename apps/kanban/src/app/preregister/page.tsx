@@ -286,7 +286,9 @@ function PreRegisterPageContent() {
                     You are in the list 🙂
                   </h2>
                   <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '0.75rem', fontSize: '0.95rem' }}>
-                    We will be in touch the moment {config.brand_name} launches.
+                    {confirmMessage.trim()
+                      ? confirmMessage
+                      : `We will be in touch the moment ${config.brand_name} launches.`}
                   </p>
                   <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', marginBottom: '2rem' }}>
                     What would you like to do next?

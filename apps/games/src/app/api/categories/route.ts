@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addCategory, getCategoriesWithGames } from '@/services/categories';
+import { getCategoriesWithGames } from '@/services/categories';
 import { getErrorMessage } from '@/utils/errors';
 
 export async function GET() {
@@ -11,13 +11,10 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const { name } = await req.json();
-    if (!name) return NextResponse.json({ error: 'Name required' }, { status: 400 });
-    const category = await addCategory(name);
-    return NextResponse.json(category);
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
-  }
+/** Categories are managed by admins/seed only — users add games, not categories. */
+export async function POST(_req: NextRequest) {
+  return NextResponse.json(
+    { error: 'Adding categories is not allowed. You can add games to existing categories only.' },
+    { status: 403 },
+  );
 }

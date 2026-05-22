@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getGamesByCategoryPaginated } from '@/services/categories-paginated';
 import type { Game } from '@/types/games';
 
@@ -9,16 +9,32 @@ export function useGamesByCategoryPaginated(categoryId: string, page: number, pa
   const [count, setCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const reload = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
     getGamesByCategoryPaginated(categoryId, page, pageSize)
       .then(({ data, count }) => {
-        setGames(data);
-        setCount(count || 0);
+        if (!cancelled) {
+          setGames(data);
+          setCount(count || 0);
+        }
       })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [categoryId, page, pageSize]);
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [categoryId, page, pageSize, refreshKey]);
 
-  return { games, count, loading, error };
+  return { games, count, loading, error, reload };
 }
