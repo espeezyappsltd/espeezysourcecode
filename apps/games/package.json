@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
     "seed:catalog": "node ../../scripts/seed-games-catalog.mjs",
+    "validate:catalog": "node scripts/validate-catalog.mjs",
     "test:e2e": "playwright test --config src/playwright.config.ts"
   },
   "dependencies": {

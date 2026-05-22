@@ -388,6 +388,97 @@
   .games-sidebar__toggle.hide-mobile {
     display: none;
   }
+
+  .games-shell__content {
+    padding:
+      0.85rem
+      max(0.75rem, env(safe-area-inset-right, 0px))
+      calc(2.5rem + env(safe-area-inset-bottom, 0px))
+      max(0.75rem, env(safe-area-inset-left, 0px));
+  }
+
+  /* Denser catalog on phones: 2-up game grid, single-column categories */
+  :root {
+    --games-category-grid-min: 100%;
+    --games-card-grid-min: 0;
+    --games-category-gap: 0.75rem;
+    --games-card-gap: 0.65rem;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-card {
+    padding: 1rem 1rem 0.9rem;
+  }
+
+  .category-card__title {
+    font-size: 1.05rem;
+  }
+
+  .game-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .game-card__body {
+    padding: 0.6rem 0.65rem;
+  }
+
+  .game-card__title {
+    font-size: 0.88rem;
+    line-height: 1.25;
+  }
+
+  .game-card__play-hint {
+    font-size: 0.68rem;
+    margin-top: 0.2rem;
+  }
+
+  .games-page-hero {
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+  }
+
+  .games-page-hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .games-sidebar__games {
+    margin-left: 1.15rem;
+  }
+
+  .games-sidebar__game-link {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.76rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .games-sidebar__category-btn {
+    min-height: 44px;
+  }
+
+  .games-add-game {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .game-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  :root {
+    --games-category-grid-min: 240px;
+    --games-card-grid-min: 200px;
+  }
 }
 
 @media (min-width: 769px) {
@@ -399,8 +490,9 @@
 /* Category cards */
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(var(--games-category-grid-min), 1fr));
+  gap: var(--games-category-gap);
+  content-visibility: auto;
 }
 
 .category-card {
@@ -448,21 +540,28 @@
 }
 
 .category-card__samples {
-  margin-top: 1rem;
-  padding-top: 0.85rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem 0 0;
   border-top: 1px solid var(--games-border);
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
 .category-card__sample {
-  display: block;
   font-size: 0.78rem;
   color: var(--games-muted);
-  padding: 0.25rem 0;
-  text-decoration: none;
+  padding: 0.2rem 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.category-card__sample:hover {
-  color: var(--games-accent);
+.category-card__sample--more {
+  opacity: 0.75;
+  font-weight: 700;
 }
 
 .games-page-hero {
@@ -474,6 +573,19 @@
     radial-gradient(ellipse 70% 80% at 100% 0%, rgba(129, 140, 248, 0.18) 0%, transparent 55%),
     radial-gradient(ellipse 50% 60% at 0% 100%, rgba(34, 211, 238, 0.12) 0%, transparent 50%),
     var(--games-surface);
+}
+
+.games-page-hero--compact {
+  margin-bottom: 1.25rem;
+}
+
+.games-page-hero__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--games-brand);
 }
 
 .games-page-hero h1 {
@@ -493,8 +605,13 @@
 
 .game-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(var(--games-card-grid-min), 1fr));
+  gap: var(--games-card-gap);
+  content-visibility: auto;
+}
+
+.game-card-grid--loading {
+  min-height: 12rem;
 }
 
 .game-card {
@@ -521,8 +638,17 @@
   width: 100%;
 }
 
+.game-card__img--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--games-muted);
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+
 .game-card__body {
-  padding: 1rem;
+  padding: 0.85rem 0.9rem;
 }
 
 .game-card__title {
@@ -732,4 +858,15 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s ease infinite;
+}
+
+.skeleton-card--game {
+  height: 200px;
+  border-radius: 16px;
+}
+
+@media (max-width: 768px) {
+  .skeleton-card--game {
+    height: 168px;
+  }
 }

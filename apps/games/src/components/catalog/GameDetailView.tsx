@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ExternalLink, Play } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import type { Game } from '@/types/games'
@@ -10,18 +10,40 @@ import { useCategoriesContext } from '@/context/CategoriesContext'
 
 export default function GameDetailView({ gameId }: { gameId: string }) {
   const { categories } = useCategoriesContext()
-  const [game, setGame] = useState<Game | null>(null)
-  const [loading, setLoading] = useState(true)
+  const cachedGame = useMemo(() => {
+    for (const cat of categories) {
+      const hit = cat.games?.find((g) => g.id === gameId)
+      if (hit) return hit
+    }
+    return null
+  }, [categories, gameId])
+
+  const [game, setGame] = useState<Game | null>(cachedGame)
+  const [loading, setLoading] = useState(!cachedGame)
   const [error, setError] = useState<string | null>(null)
 
   const category = categories.find((c) => c.games?.some((g) => g.id === gameId))
 
   useEffect(() => {
+    setError(null)
+    if (cachedGame) {
+      setGame(cachedGame)
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
+  }, [gameId, cachedGame])
+
+  useEffect(() => {
+    let cancelled = false
+
     async function fetchGame() {
       const supabase = getSupabaseClient()
       if (!supabase) {
-        setError('Authentication is not configured.')
-        setLoading(false)
+        if (!cancelled) {
+          setError('Authentication is not configured.')
+          setLoading(false)
+        }
         return
       }
       const { data, error: err } = await supabase
@@ -29,11 +51,16 @@ export default function GameDetailView({ gameId }: { gameId: string }) {
         .select('id, name, url, description, image_url, author, created_at, clicked_count, category_id')
         .eq('id', gameId)
         .single()
+      if (cancelled) return
       if (err) setError(err.message)
       else setGame(data)
       setLoading(false)
     }
+
     void fetchGame()
+    return () => {
+      cancelled = true
+    }
   }, [gameId])
 
   const handlePlayGame = async () => {
@@ -47,7 +74,7 @@ export default function GameDetailView({ gameId }: { gameId: string }) {
     window.open(game.url, '_blank', 'noopener')
   }
 
-  if (loading) return <p className="games-state">Loading game…</p>
+  if (loading && !game) return <p className="games-state">Loading game…</p>
   if (error) return <p className="games-state games-state--error">{error}</p>
   if (!game) return <p className="games-state">Game not found.</p>
 

@@ -5,7 +5,7 @@ const supabase = () => getSupabase();
 export async function getCategoriesWithGames() {
   const { data, error } = await supabase()
     .from('categories')
-    .select('id, name, games(id, name, url)')
+    .select('id, name, games(id, name, url, image_url)')
     .order('name', { ascending: true });
   if (error) throw error;
   return data;

@@ -19,7 +19,7 @@ export async function getGamesByCategoryPaginated(categoryId: string, page: numb
   const to = from + pageSize - 1;
   const { data, error, count } = await supabase()
     .from('games')
-    .select('id, name, url', { count: 'exact' })
+    .select('id, name, url, image_url', { count: 'exact' })
     .eq('category_id', categoryId)
     .order('name', { ascending: true })
     .range(from, to);

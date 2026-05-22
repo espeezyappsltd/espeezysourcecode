@@ -2,26 +2,30 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useMemo } from 'react'
 import { useCategoriesContext } from '@/context/CategoriesContext'
-import { useGamesByCategoryPaginated } from '@/hooks/useGamesByCategoryPaginated'
 import { AddGameToCategoryForm } from '@/components/catalog/AddGameToCategoryForm'
 import type { Game } from '@/types/games'
 
 export default function CategoryGamesView({ categoryId }: { categoryId: string }) {
-  const { categories, refresh } = useCategoriesContext()
-  const category = categories.find((c) => c.id === categoryId)
-  const { games, count, loading, error, reload } = useGamesByCategoryPaginated(categoryId, 1, 100)
+  const { categories, loading, error, refresh } = useCategoriesContext()
+
+  const category = useMemo(
+    () => categories.find((c) => c.id === categoryId),
+    [categories, categoryId],
+  )
+
+  const games: Game[] = category?.games ?? []
 
   const handleGameAdded = () => {
     refresh()
-    reload()
   }
 
-  if (loading) {
+  if (loading && !category) {
     return (
-      <div className="game-card-grid" aria-busy="true">
-        {[1, 2, 3, 4].map((n) => (
-          <div key={n} className="skeleton-card" style={{ height: 220 }} />
+      <div className="game-card-grid game-card-grid--loading" aria-busy="true">
+        {[1, 2, 3, 4, 5, 6].map((n) => (
+          <div key={n} className="skeleton-card skeleton-card--game" />
         ))}
       </div>
     )
@@ -35,33 +39,43 @@ export default function CategoryGamesView({ categoryId }: { categoryId: string }
 
   return (
     <>
-      <div className="games-page-hero">
-        <p style={{ margin: '0 0 0.5rem', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--games-brand)' }}>
-          Category
-        </p>
+      <div className="games-page-hero games-page-hero--compact">
+        <p className="games-page-hero__eyebrow">Category</p>
         <h1>{title}</h1>
         <p>
-          {count ?? games.length} game{(count ?? games.length) === 1 ? '' : 's'} ready to play. Pick a title below or
-          use the sidebar to jump between lanes.
+          {games.length} game{games.length === 1 ? '' : 's'} ready to play. Pick a title below or use the sidebar to
+          jump between lanes.
         </p>
       </div>
 
-      <AddGameToCategoryForm
-        categoryId={categoryId}
-        categoryName={title}
-        onAdded={handleGameAdded}
-      />
+      <AddGameToCategoryForm categoryId={categoryId} categoryName={title} onAdded={handleGameAdded} />
 
       {games.length === 0 ? (
         <p className="games-state">No games in this category yet.</p>
       ) : (
-        <div className="game-card-grid">
+        <div className="game-card-grid" role="list" aria-label={`${title} games`}>
           {games.map((game: Game) => (
-            <Link key={game.id} href={`/games/${game.id}`} className="game-card">
+            <Link
+              key={game.id}
+              href={`/games/${game.id}`}
+              className="game-card"
+              role="listitem"
+            >
               {game.image_url ? (
-                <Image src={game.image_url} alt="" width={400} height={225} className="game-card__img" unoptimized />
+                <Image
+                  src={game.image_url}
+                  alt=""
+                  width={400}
+                  height={225}
+                  className="game-card__img"
+                  unoptimized
+                  sizes="(max-width: 480px) 50vw, (max-width: 768px) 50vw, 240px"
+                />
               ) : (
-                <div className="game-card__img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--games-muted)', fontWeight: 800 }}>
+                <div
+                  className="game-card__img game-card__img--placeholder"
+                  aria-hidden
+                >
                   {game.name[0]}
                 </div>
               )}

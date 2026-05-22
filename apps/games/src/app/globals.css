@@ -19,6 +19,12 @@
   --games-sidebar-open: 280px;
   --games-sidebar-collapsed: 84px;
   --hero-gradient: linear-gradient(135deg, #4f46e5 0%, #06b6d4 45%, #a78bfa 100%);
+
+  /* Catalog list density (overridden on narrow viewports in games-shell.css) */
+  --games-category-grid-min: 280px;
+  --games-card-grid-min: 220px;
+  --games-category-gap: 1.25rem;
+  --games-card-gap: 0.85rem;
 }
 
 html,

@@ -14,7 +14,7 @@ type CategoryGridProps = {
 export default function CategoryGrid({ categories, loading, error }: CategoryGridProps) {
   if (loading) {
     return (
-      <div className="category-grid" aria-busy="true">
+      <div className="category-grid category-grid--loading" aria-busy="true">
         {[1, 2, 3, 4, 5, 6].map((n) => (
           <div key={n} className="skeleton-card" />
         ))}
@@ -35,35 +35,35 @@ export default function CategoryGrid({ categories, loading, error }: CategoryGri
   }
 
   return (
-    <div className="category-grid">
+    <div className="category-grid" role="list" aria-label="Game categories">
       {categories.map((cat, index) => {
         const glow = GLOWS[index % GLOWS.length]
         const games = cat.games ?? []
         return (
-          <Link key={cat.id} href={`/categories/${cat.id}`} className="category-card">
+          <Link
+            key={cat.id}
+            href={`/categories/${cat.id}`}
+            className="category-card"
+            role="listitem"
+          >
             <div className="category-card__glow" style={{ background: glow }} aria-hidden />
             <h3 className="category-card__title">{cat.name}</h3>
             <p className="category-card__meta">
               {games.length} game{games.length === 1 ? '' : 's'} in this lane
             </p>
             {games.length > 0 && (
-              <div className="category-card__samples">
+              <ul className="category-card__samples" aria-label={`Preview games in ${cat.name}`}>
                 {games.slice(0, 3).map((game) => (
-                  <Link
-                    key={game.id}
-                    href={`/games/${game.id}`}
-                    className="category-card__sample"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <li key={game.id} className="category-card__sample">
                     {game.name}
-                  </Link>
+                  </li>
                 ))}
                 {games.length > 3 && (
-                  <span className="category-card__sample" style={{ opacity: 0.7 }}>
+                  <li className="category-card__sample category-card__sample--more">
                     +{games.length - 3} more
-                  </span>
+                  </li>
                 )}
-              </div>
+              </ul>
             )}
           </Link>
         )
