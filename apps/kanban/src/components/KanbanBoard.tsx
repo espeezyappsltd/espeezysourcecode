@@ -164,6 +164,16 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal, onBoardRe
     return () => window.removeEventListener('open-kanban-onboarding', handler)
   }, [])
 
+  useEffect(() => {
+    const onBoardRefresh = (event: Event) => {
+      const detail = (event as CustomEvent<{ groupId?: string }>).detail
+      if (detail?.groupId && detail.groupId !== groupId) return
+      void loadTasks()
+    }
+    window.addEventListener('espeezy-kanban-board-refresh', onBoardRefresh)
+    return () => window.removeEventListener('espeezy-kanban-board-refresh', onBoardRefresh)
+  }, [groupId, loadTasks])
+
   const refreshTasks = useCallback(async () => {
     await loadTasks()
   }, [loadTasks])

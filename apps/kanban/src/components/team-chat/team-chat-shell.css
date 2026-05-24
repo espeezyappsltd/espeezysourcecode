@@ -1,0 +1,39 @@
+.team-chat-join-toast {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: calc(var(--h-mobile-bottom) + 5.5rem + env(safe-area-inset-bottom, 0px));
+  z-index: 5100;
+  max-width: min(320px, calc(100vw - 2rem));
+  background: #111827;
+  color: #f9fafb;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  animation: teamJoinToastIn 0.25s ease-out;
+}
+
+.team-chat-join-toast strong {
+  color: var(--brand, #10b981);
+  font-weight: 700;
+}
+
+@keyframes teamJoinToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 769px) {
+  .team-chat-join-toast {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}

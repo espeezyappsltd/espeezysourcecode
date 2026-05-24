@@ -12,7 +12,7 @@ import { ProfileProvider } from '@/context/ProfileContext'
 import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
-import SupportChat from '@/components/SupportChat'
+import TeamChatShell from '@/components/TeamChatShell'
 import HelpTray from '@/components/HelpTray'
 import ReferralCapture from '@/components/ReferralCapture'
 import { PageGuideHost } from '@/components/guide/PageGuideHost'
@@ -107,7 +107,7 @@ function DashboardShell({
           </main>
           <GlobalAnnouncement />
           <HelpTray />
-          <SupportChat />
+          <TeamChatShell />
           <BottomNav />
           </MobilePageControlsProvider>
         </PresenceProvider>

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from 'react'
 import { useDashboardHomeData, type JoinRequest } from '@/components/dashboard/useDashboardHomeData'
+import { useSilentWorkspaceRefresh } from '@/hooks/useSilentWorkspaceRefresh'
 import type { Group, Profile } from '@/types/database'
 
 type DashboardMetricsContextValue = ReturnType<typeof useDashboardHomeData>
@@ -12,14 +13,18 @@ export function DashboardMetricsProvider({
   groupId,
   profile,
   addToast,
+  silentRefreshEnabled = true,
   children,
 }: {
   groupId: string
   profile: { id?: string | null; role?: string | null } | null | undefined
   addToast: (title: string, description: string, variant: 'success' | 'error' | 'info') => void
+  /** Pause background sync during home-pickup landing overlay. */
+  silentRefreshEnabled?: boolean
   children: ReactNode
 }) {
   const value = useDashboardHomeData(groupId, profile, addToast)
+  useSilentWorkspaceRefresh({ groupId, enabled: silentRefreshEnabled })
   return <DashboardMetricsContext.Provider value={value}>{children}</DashboardMetricsContext.Provider>
 }
 

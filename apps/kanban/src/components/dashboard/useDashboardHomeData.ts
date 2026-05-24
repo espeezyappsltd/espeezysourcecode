@@ -234,14 +234,6 @@ export function useDashboardHomeData(groupId: string, profile: ViewerProfile | n
     }
 
     void initializeDashboardData()
-
-    const pollId = window.setInterval(() => {
-      void initializeDashboardData()
-    }, 20000)
-
-    return () => {
-      window.clearInterval(pollId)
-    }
   }, [
     profile?.id,
     groupId,

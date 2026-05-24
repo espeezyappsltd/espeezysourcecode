@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useTransition, useMemo } from 'react'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { PresenceContextType, LayoutUser } from '@/types/ui'
-import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 import { PRESENCE_ONLINE_WINDOW_MS } from '@/lib/presence/team-presence'
 
@@ -28,7 +27,6 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [, startTransition] = useTransition()
-  const { addToast } = useNotifications()
   const { profile } = useProfile()
 
   const userId = user?.id
@@ -81,11 +79,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
 
           if (row.user_id !== userId && !previousTeamOnlineRef.current.has(row.user_id)) {
             const now = Date.now()
-            const lastTime = lastNotified.current.get(row.user_id) || 0
-            if (now - lastTime > 60_000) {
-              addToast('Teammate online', 'Someone on your team is active now.', 'success')
-              lastNotified.current.set(row.user_id, now)
-            }
+            lastNotified.current.set(row.user_id, now)
           }
         }
       })
@@ -174,7 +168,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         .eq('user_id', userId)
       db.removeChannel(channel)
     }
-  }, [addToast, db, groupId, startTransition, userId, userName])
+  }, [db, groupId, startTransition, userId, userName])
 
   const globalOnlineCount = onlineUsers.size
 

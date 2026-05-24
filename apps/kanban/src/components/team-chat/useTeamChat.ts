@@ -10,6 +10,9 @@ import { ChatMessage, ChatPayload } from '@/types/ui'
 import { Profile } from '@/types/auth'
 import { formatDateLabel } from './team-chat-utils'
 
+const TEAM_CHAT_POLL_MS = 5_000
+const JOIN_TOAST_MS = 5_000
+
 export type TeamChatProps = {
   groupId: string
   user: Profile
@@ -26,7 +29,11 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [chatSearch, setChatSearch] = useState('')
+  const [joinToast, setJoinToast] = useState<{ id: string; name: string } | null>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const joinToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const previousTeamOnlineRef = useRef<Set<string>>(new Set())
+  const lastMessageCountRef = useRef(0)
 
   const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -37,6 +44,18 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior })
   }
 
+  const showJoinToast = useCallback((member: Profile) => {
+    const name = member.full_name?.trim() || 'Teammate'
+    setJoinToast({ id: member.id, name })
+    if (joinToastTimeoutRef.current) clearTimeout(joinToastTimeoutRef.current)
+    joinToastTimeoutRef.current = setTimeout(() => setJoinToast(null), JOIN_TOAST_MS)
+  }, [])
+
+  const clearJoinToast = useCallback(() => {
+    setJoinToast(null)
+    if (joinToastTimeoutRef.current) clearTimeout(joinToastTimeoutRef.current)
+  }, [])
+
   // Request Notification Permission
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -46,11 +65,9 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
     }
   }, [])
 
-  // Real-time Subscription
-  useEffect(() => {
-    let active = true
-
-    const loadMessages = async () => {
+  const loadMessages = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const silent = opts?.silent ?? false
       const { data, error } = await db
         .from('messages')
         .select('id, group_id, user_id, content, payload, is_deleted, created_at, profiles:profiles!messages_user_id_fkey(full_name, avatar_url, role)')
@@ -58,23 +75,53 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
         .order('created_at', { ascending: true })
         .limit(50)
 
-      if (!active) return
       if (error) {
         console.error('Messages load error:', error.message)
-        setLoading(false)
+        if (!silent) setLoading(false)
         return
       }
 
       const normalized = (data ?? []).map((row: Record<string, unknown>) => ({
         ...row,
         profiles: Array.isArray(row.profiles) ? row.profiles[0] : row.profiles,
-      }))
-      setMessages(normalized as ChatMessage[])
-      setLoading(false)
-      setTimeout(() => scrollToBottom('smooth'), 100)
+      })) as ChatMessage[]
+
+      const grew = normalized.length > lastMessageCountRef.current
+      lastMessageCountRef.current = normalized.length
+      setMessages(normalized)
+      if (!silent) setLoading(false)
+
+      if (grew && (isOpen || silent)) {
+        const shouldScroll = isOpen && !silent
+        if (shouldScroll) {
+          setTimeout(() => scrollToBottom(grew && silent ? 'auto' : 'smooth'), 80)
+        }
+      }
+    },
+    [db, groupId, isOpen],
+  )
+
+  const loadMembers = useCallback(async () => {
+    const { data, error } = await db.from('profiles').select('*').eq('group_id', groupId)
+
+    if (error) {
+      console.error('Group members load error:', error.message)
+      return
     }
 
-    loadMessages()
+    setGroupMembers((data ?? []) as Profile[])
+  }, [db, groupId])
+
+  // Real-time subscription
+  useEffect(() => {
+    let active = true
+
+    const bootstrap = async () => {
+      await loadMessages()
+      if (!active) return
+    }
+
+    void bootstrap()
 
     const channel = db
       .channel(`team-messages:${groupId}`)
@@ -94,7 +141,7 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
             }
           }
 
-          loadMessages()
+          void loadMessages({ silent: true })
         },
       )
       .subscribe()
@@ -103,35 +150,39 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
       active = false
       db.removeChannel(channel)
     }
-  }, [db, groupId, isOpen, user.id])
+  }, [db, groupId, isOpen, user.id, loadMessages])
 
+  // Games-style silent poll while tab is visible (backup when realtime lags)
   useEffect(() => {
-    if (!isOpen) return
-
-    let active = true
-    const loadMembers = async () => {
-      const { data, error } = await db
-        .from('profiles')
-        .select('*')
-        .eq('group_id', groupId)
-
-      if (!active) return
-      if (error) {
-        console.error('Group members load error:', error.message)
-        return
-      }
-
-      setGroupMembers((data ?? []) as Profile[])
+    const poll = () => {
+      if (document.visibilityState !== 'visible') return
+      void loadMessages({ silent: true })
+      void loadMembers()
     }
 
-    loadMembers()
+    const intervalId = window.setInterval(poll, TEAM_CHAT_POLL_MS)
+    document.addEventListener('visibilitychange', poll)
+
+    return () => {
+      window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', poll)
+    }
+  }, [loadMessages, loadMembers])
+
+  // Team roster — always loaded for lobby + join detection
+  useEffect(() => {
+    let active = true
+
+    void loadMembers()
 
     const channel = db
       .channel(`team-members:${groupId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },
-        () => loadMembers(),
+        () => {
+          if (active) void loadMembers()
+        },
       )
       .subscribe()
 
@@ -139,7 +190,67 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
       active = false
       db.removeChannel(channel)
     }
-  }, [db, isOpen, groupId])
+  }, [db, groupId, loadMembers])
+
+  // Live join toasts (games-style) when teammates come online
+  useEffect(() => {
+    if (!groupMembers.length) return
+
+    const teamOnline = new Set(
+      groupMembers.filter((m) => m.id !== user.id && onlineUsers.has(m.id)).map((m) => m.id),
+    )
+
+    for (const member of groupMembers) {
+      if (member.id === user.id) continue
+      if (teamOnline.has(member.id) && !previousTeamOnlineRef.current.has(member.id)) {
+        showJoinToast(member)
+      }
+    }
+
+    previousTeamOnlineRef.current = teamOnline
+  }, [groupMembers, onlineUsers, user.id, showJoinToast])
+
+  // Announce active in scoped kanban live chat (parity with games widget)
+  useEffect(() => {
+    const username =
+      user.full_name?.trim().replace(/\s+/g, '_').toLowerCase().slice(0, 24) ||
+      `user_${user.id.slice(0, 6)}`
+
+    fetch('/api/chat/presence', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        app_scope: 'kanban',
+        event_type: 'new_user',
+        user_id: user.id,
+        username,
+        supabase_user_id: user.id,
+      }),
+    }).catch(() => undefined)
+
+    const heartbeat = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      fetch('/api/chat/presence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          app_scope: 'kanban',
+          event_type: 'active',
+          user_id: user.id,
+          username,
+          supabase_user_id: user.id,
+        }),
+      }).catch(() => undefined)
+    }, TEAM_CHAT_POLL_MS)
+
+    return () => window.clearInterval(heartbeat)
+  }, [user.full_name, user.id])
+
+  useEffect(() => {
+    return () => {
+      if (joinToastTimeoutRef.current) clearTimeout(joinToastTimeoutRef.current)
+    }
+  }, [])
 
   const handleTyping = (text: string) => {
     setNewMessage(text)
@@ -177,7 +288,6 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
 
       if (error) throw error
 
-      // Verifiable Logging
       logActivity(
         user.id,
         groupId,
@@ -311,6 +421,8 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
     groupedMessages,
     othersTyping,
     teamOnlineCount,
+    joinToast,
+    clearJoinToast,
     handleTyping,
     handleSendMessage,
     handleDeleteMessage,

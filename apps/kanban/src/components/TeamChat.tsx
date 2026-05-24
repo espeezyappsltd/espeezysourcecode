@@ -5,7 +5,9 @@ import { TeamChatHeader } from './team-chat/TeamChatHeader'
 import { TeamLobby } from './team-chat/TeamLobby'
 import { MessageList } from './team-chat/MessageList'
 import { ChatInputBar } from './team-chat/ChatInputBar'
+import { TeamJoinToast } from './team-chat/TeamJoinToast'
 import { useTeamChat, type TeamChatProps } from './team-chat/useTeamChat'
+import './team-chat/team-chat-shell.css'
 
 export type { TeamChatProps }
 
@@ -26,6 +28,8 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
     groupedMessages,
     othersTyping,
     teamOnlineCount,
+    joinToast,
+    clearJoinToast,
     handleTyping,
     handleSendMessage,
     handleDeleteMessage,
@@ -39,10 +43,21 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
   } = useTeamChat({ groupId, user })
 
   if (!isOpen) {
-    return <ClosedChatButton onOpen={openChat} />
+    return (
+      <>
+        {joinToast && (
+          <TeamJoinToast name={joinToast.name} onDismiss={clearJoinToast} />
+        )}
+        <ClosedChatButton onOpen={openChat} />
+      </>
+    )
   }
 
   return (
+    <>
+    {joinToast && (
+      <TeamJoinToast name={joinToast.name} onDismiss={clearJoinToast} />
+    )}
     <div
       style={{
         position: 'fixed',
@@ -141,5 +156,6 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
           }
        `}</style>
     </div>
+    </>
   )
 }

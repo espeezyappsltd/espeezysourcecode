@@ -27,7 +27,12 @@ export function HomePickupShell({ groupId }: Props) {
   }, [enterWorkspace, isLanding])
 
   return (
-    <DashboardMetricsProvider groupId={groupId} profile={profile} addToast={addToast}>
+    <DashboardMetricsProvider
+      groupId={groupId}
+      profile={profile}
+      addToast={addToast}
+      silentRefreshEnabled={!isLanding}
+    >
       {isLanding && (
         <HomePickupDashboard
           workspaceReady={workspaceReady}
