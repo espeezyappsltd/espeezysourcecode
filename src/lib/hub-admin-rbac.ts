@@ -1,8 +1,7 @@
-export type HubAdminRole = 'superuser' | 'admin' | 'moderator' | 'viewer'
+export type HubAdminRole = 'admin' | 'moderator' | 'viewer'
 
 const ROLE_PERMISSIONS: Record<HubAdminRole, string[]> = {
-  superuser: ['*'],
-  admin: ['overview', 'users', 'analytics', 'announcements', 'launch', 'audit', 'settings', 'chat'],
+  admin: ['*'],
   moderator: ['overview', 'users', 'analytics', 'announcements', 'chat'],
   viewer: ['overview', 'analytics', 'chat'],
 }

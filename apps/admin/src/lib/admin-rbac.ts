@@ -2,7 +2,7 @@
  * Admin staff RBAC — backed by public.admin_members (max 20 active).
  */
 
-export type AdminStaffRole = 'superuser' | 'admin' | 'moderator' | 'viewer'
+export type AdminStaffRole = 'admin' | 'moderator' | 'viewer'
 
 export type AdminPermission =
   | 'overview'
@@ -33,20 +33,9 @@ export type AdminMember = {
   totp_locked_until?: string | null
 }
 
+/** Full panel access — shared equally by every `admin` staff member (no superuser tier). */
 const ROLE_PERMISSIONS: Record<AdminStaffRole, AdminPermission[] | ['*']> = {
-  superuser: ['*'],
-  admin: [
-    'overview',
-    'users',
-    'analytics',
-    'announcements',
-    'launch',
-    'audit',
-    'settings',
-    'chat',
-    'learn',
-    'files',
-  ],
+  admin: ['*'],
   moderator: ['overview', 'users', 'analytics', 'announcements', 'chat', 'learn', 'files'],
   viewer: ['overview', 'analytics', 'chat', 'learn'],
 }
@@ -64,7 +53,6 @@ export function hasAdminPermission(role: AdminStaffRole, permission: AdminPermis
 }
 
 export function canAccessAdminRoute(role: AdminStaffRole, pathname: string): boolean {
-  if (role === 'superuser') return true
   if (pathname === '/admin' || pathname === '/admin/') return hasAdminPermission(role, 'overview')
   if (pathname.startsWith('/admin/users')) return hasAdminPermission(role, 'users')
   if (pathname.startsWith('/admin/analytics')) return hasAdminPermission(role, 'analytics')

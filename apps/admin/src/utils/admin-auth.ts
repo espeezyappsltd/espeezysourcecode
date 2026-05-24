@@ -84,12 +84,12 @@ export async function requireAdmin(
 }
 
 /**
- * Moderator-level API access (moderator, admin, superuser).
+ * Moderator-level API access (moderator or admin).
  */
 export async function requireModerator(): Promise<AdminContext | NextResponse> {
   const ctx = await requireAdmin()
   if (isAuthError(ctx)) return ctx
-  if (!['superuser', 'admin', 'moderator'].includes(ctx.role)) {
+  if (!['admin', 'moderator'].includes(ctx.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   return ctx

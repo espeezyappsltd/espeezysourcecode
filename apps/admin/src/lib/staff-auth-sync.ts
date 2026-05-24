@@ -91,8 +91,7 @@ export async function ensureStaffAuthUser(
     }
   }
 
-  const profileRole =
-    member.admin_role === 'superuser' || member.admin_role === 'admin' ? 'admin' : member.admin_role
+  const profileRole = member.admin_role === 'admin' ? 'admin' : member.admin_role
 
   await svc.from('profiles').upsert(
     {

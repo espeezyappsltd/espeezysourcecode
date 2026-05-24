@@ -11,7 +11,7 @@ const MODULES = [
   },
   {
     title: 'Staff sign-in',
-    body: 'Use username (pete) at /login — not email. Roles: superuser, admin, moderator, viewer.',
+    body: 'Use username at /login — not email. Roles: admin (full access), moderator, viewer.',
   },
   {
     title: 'Private files vault',

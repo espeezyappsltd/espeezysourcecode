@@ -11,6 +11,7 @@
     "predeploy:check": "npm run typecheck && npm run build",
     "test:e2e": "playwright test",
     "seed:staff": "node scripts/seed-admin-members.mjs",
+    "seed:staff:purge": "node scripts/seed-admin-members.mjs --purge-seed",
     "seed:admin-totp": "node scripts/seed-admin-totp.mjs"
   },
   "dependencies": {
