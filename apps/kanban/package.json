@@ -9,6 +9,7 @@
     "build": "next build",
     "vercel-build:panel": "cd ../.. && npm run vercel-build:kanban",
     "start": "npx serve out -p 3001",
+    "stop": "npx kill-port 3001",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
     "test:e2e": "playwright test --config src/playwright.config.ts",
