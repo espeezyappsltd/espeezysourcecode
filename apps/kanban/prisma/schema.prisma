@@ -6,3 +6,22 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+model Profile {
+  id          String    @id @default(uuid())
+  full_name   String?
+  avatar_url  String?
+  role        String?
+  messages    Message[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  group_id   String
+  user_id    String
+  content    String
+  payload    String?
+  is_deleted Boolean  @default(false)
+  created_at DateTime @default(now())
+  profiles   Profile  @relation(fields: [user_id], references: [id])
+}

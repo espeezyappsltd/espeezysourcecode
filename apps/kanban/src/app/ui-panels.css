@@ -286,6 +286,8 @@
 
 /* ── Hero row (title + side panel) — layout alias ────────────── */
 .ui-hero-row {
+	
+}
 
 .ui-hero-row__main {
   flex: 1 1 16rem;

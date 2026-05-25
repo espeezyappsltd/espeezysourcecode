@@ -118,6 +118,39 @@
     height: 100%;
   }
 
+  /* --- Notification bell and top bar icon spacing improvements for mobile --- */
+  .mobile-header__actions {
+    gap: 0.6rem;
+  }
+  .mobile-header__notif {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mobile-header__notif .nav-bubble,
+  .notification-bell-trigger {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notification-bell-badge {
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+
   .mobile-header__notif .nav-bubble {
     width: 40px;
     height: 40px;
