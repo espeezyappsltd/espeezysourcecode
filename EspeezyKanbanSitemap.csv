@@ -1,0 +1,53 @@
+Id,Name,Shape Library,Page ID,Contained By,Group,Line Source,Line Destination,Source Arrow,Destination Arrow,Status,Text Area 1,Comments,Notes,Shape ID,SpreadsheetColumnParentKey,SpreadsheetRowParentKey
+1,Document,,,,,,,,,Draft,Blank diagram,,,5d4dbbaf-ec30-4b6f-96c0-e8ffbc52bbcb,,
+2,Page,,,,,,,,,,Page 1,,,0_0,,
+3,SparkFrameBlock,Lucidspark Shapes,2,,,,,,,,Kanban Espeezy User Journey Flow,,,aFW0A.R6t4zf,,
+4,Process,Flowchart Shapes/Containers,2,3,,,,,,,"1. Create your account
+App: Sign up & onboarding
+Path: /login
+Sign up with personal email (free) or verify school email for Premium. Roles: Personal, Student, Educator, Admin.",,,bFW0OCUwV2PK,COLUMN,ROW
+5,Process,Flowchart Shapes/Containers,2,3,,,,,,,"2. Join or create a team
+App: Welcome onboarding · Settings → Teams
+Path: /settings?tab=workspace
+Start a team or request to join. Team leads approve join requests in chat.",,,bFW04dl1uB4D,COLUMN,ROW
+6,Process,Flowchart Shapes/Containers,2,3,,,,,,,"3. Run work on the board
+App: Dashboard
+Path: /
+Plan sprints: tasks, assignees, categories, due dates, with team chat tied to your group.",,,bFW0B-N2Hw33,COLUMN,ROW
+7,Process,Flowchart Shapes/Containers,2,3,,,,,,,"4. Prove who did what
+App: Activity log · Project Stats
+Path: /analytics
+Logs, stats, and artifacts verify contributions for fair assessments.",,,bFW0qWgPPeHC,COLUMN,ROW
+8,Process,Flowchart Shapes/Containers,2,3,,,,,,,"5. Store work & track impact
+App: My Assets · Impact
+Path: /assets/impact
+My Assets stores files/links. Impact Log records marketplace & Hustle events with verification IDs.",,,bFW0_H3oFcIw,COLUMN,ROW
+9,Process,Flowchart Shapes/Containers,2,3,,,,,,,"6. Earn and trade on campus
+App: Hustle · Resources
+Path: /hustle
+Post/accept Hustle gigs with escrow credits. Buy/sell on Resources with a traceable credit trail.",,,bFW0CO7Utqzg,COLUMN,ROW
+10,Process,Flowchart Shapes/Containers,2,3,,,,,,,"7. Stay in sync with people
+App: Feed · Teammates
+Path: /network
+Journey feed, roster/network, in-app notifications, and team chat on the board.",,,bFW0W3kxpD77,COLUMN,ROW
+11,Process,Flowchart Shapes/Containers,2,3,,,,,,,"8. Switch teams in one tap
+App: Settings → Teams
+Path: /settings?tab=workspace
+Set active team, switch back, or request new — boards stay saved.",,,bFW0Cj8_0wfG,COLUMN,ROW
+12,Process,Flowchart Shapes/Containers,2,3,,,,,,,"9. Recharge between sprints
+App: Break Room · Games · Jukebox
+Path: /chillout
+Break Room quizzes, Skirmish games, and Jukebox between serious work.",,,bFW0gNqXdp7k,COLUMN,ROW
+13,Supabase,Agentic AI Workflows,2,,,,,,,,Supabase,,,7zW0SH4.Fc3N,,
+14,Github,Agentic AI Workflows,2,,,,,,,,GitHub,,,8zW0HYpf8FeM,,
+15,Line,,2,,,4,5,None,Arrow,,,,,bFW0iyHx588u,,
+16,Line,,2,,,5,6,None,Arrow,,,,,bFW0mz50WEbh,,
+17,Line,,2,,,6,7,None,Arrow,,,,,bFW09I0fZFoK,,
+18,Line,,2,,,7,8,None,Arrow,,,,,bFW0.lDjFB-W,,
+19,Line,,2,,,8,9,None,Arrow,,,,,bFW00cu5MmlM,,
+20,Line,,2,,,9,10,None,Arrow,,,,,bFW03wCQhFnF,,
+21,Line,,2,,,10,11,None,Arrow,,,,,bFW0Z_RFjruW,,
+22,Line,,2,,,11,12,None,Arrow,,,,,bFW0AmboFcNP,,
+23,Line,,2,,,5,11,None,Arrow,,manage/switch teams,,,cFW0-eyMwfxl,,
+24,Line,,2,,,6,10,None,Arrow,,chat + notifications,,,cFW0npa9YT40,,
+25,Line,,2,,,8,9,None,Arrow,,verified credits trail,,,cFW0wd503_0w,,
