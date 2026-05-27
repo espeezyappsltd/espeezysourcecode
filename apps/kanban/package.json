@@ -39,7 +39,7 @@
     "jspdf": "^4.2.1",
     "libphonenumber-js": "^1.13.1",
     "lucide-react": "^1.8.0",
-    "next": "^16.2.4",
+    "next": "^15.5.18",
     "next-intl": "^4.12.0",
     "nodemailer": "^8.0.7",
     "@types/nodemailer": "^6.4.17",
