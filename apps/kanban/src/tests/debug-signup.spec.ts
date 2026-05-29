@@ -23,12 +23,12 @@ test('debug: signup only', async ({ page }) => {
 
   // Take a snapshot of what's visible
   const pageContent = await page.content()
-  const hasToggle = pageContent.includes("Don't have an account")
-  console.log(`Has "Don't have an account" text: ${hasToggle}`)
+  const hasToggle = pageContent.includes('Sign up')
+  console.log(`Has "Sign up" text: ${hasToggle}`)
 
   // Try to click the toggle
   console.log(`Clicking signup toggle...`)
-  await page.click("text=/Don.*t have an account/i")
+  await page.getByRole('button', { name: /^Sign up$/i }).click()
   console.log(`Clicked toggle`)
 
   await page.waitForTimeout(1000)
@@ -38,9 +38,9 @@ test('debug: signup only', async ({ page }) => {
   console.log(`Buttons on page: ${JSON.stringify(buttons)}`)
 
   // Fill signup form
-  await page.fill('input[type="email"]', EMAIL)
-  await page.fill('input[type="password"]', PASSWORD)
-  await page.check('input[id="legal"]')
+  await page.fill('#auth-email', EMAIL)
+  await page.fill('#auth-password', PASSWORD)
+  await page.getByRole('checkbox').check()
   console.log(`Form filled`)
 
   // Check buttons again

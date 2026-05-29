@@ -9,6 +9,7 @@ export function StripeInstructions() {
         <li><b>List your items:</b> Post items for sale on the marketplace. Buyers can pay securely via Stripe.</li>
         <li><b>Receive funds:</b> When your item sells, your earnings are credited to your Espeezy account balance.</li>
         <li><b>Withdraw funds:</b> Enter the amount to withdraw (minimum £1.00, up to your available balance) and click <b>Withdraw</b>. Funds are sent to your linked bank account via Stripe.</li>
+        <li><b>Earnings hold &amp; withdrawal window:</b> Withdrawal of earnings can be made <b>7 days</b> after a sale by emailing your sales invoice to <a href="mailto:invoice@espeezy.com">invoice@espeezy.com</a> (or <a href="mailto:support@espeezy.com">support@espeezy.com</a>).</li>
         <li><b>Security:</b> All payments and withdrawals are processed by Stripe. Espeezy never stores your bank details. For support, contact <a href="mailto:support@espeezy.com">support@espeezy.com</a>.</li>
       </ol>
       <div style={{ marginTop: '2rem', color: 'var(--text-sub)', fontSize: '0.95rem' }}>

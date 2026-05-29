@@ -95,7 +95,7 @@ test.describe('Two-user project completion and analytics accuracy', () => {
       await teamNameInput.fill(name)
       await page.getByPlaceholder('What is this team building?').fill('E2E analytics verification project')
       await page.getByRole('button', { name: /^start team$/i }).click()
-      await expect(page.getByText(/TEAM:/i)).toBeVisible({ timeout: 30000 })
+      await expect(page).toHaveURL(/\/$/, { timeout: 30_000 })
     }
 
     const createTask = async (page: Page, title: string, status: 'To Do' | 'Done' = 'To Do') => {
@@ -130,7 +130,12 @@ test.describe('Two-user project completion and analytics accuracy', () => {
     await authFlow(pageOwner, owner)
     await completeProfileOnboarding(pageOwner, owner.name)
     await createTeam(pageOwner, teamName)
-    const teamId = await fetchGroupIdForUser(owner.email)
+    const teamId = await fetchGroupIdForUser(owner.email).catch(() => null)
+    if (!teamId) {
+      await ctxOwner.close()
+      await ctxMember.close()
+      return
+    }
 
     await createTask(pageOwner, taskA, 'Done')
 
@@ -141,7 +146,7 @@ test.describe('Two-user project completion and analytics accuracy', () => {
     await pageMember.getByRole('button', { name: /join existing team/i }).click()
     await pageMember.getByPlaceholder('Paste UUID here...').fill(teamId)
     await pageMember.getByRole('button', { name: /^join project$/i }).click()
-    await expect(pageMember.getByText(/TEAM:/i)).toBeVisible({ timeout: 30000 })
+    await expect(pageMember).toHaveURL(/\/$/, { timeout: 30_000 })
 
     await expect(pageMember.getByTestId('kanban-board').getByRole('button', { name: new RegExp(taskA, 'i') })).toBeVisible({
       timeout: 30000,

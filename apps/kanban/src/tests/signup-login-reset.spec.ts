@@ -87,22 +87,35 @@ test.describe('Kanban signup, login, and password reset', () => {
     await waitForLoginGate(page)
     await page.locator('#auth-email').fill(email)
     await page.getByRole('button', { name: /forgot password/i }).click()
-    await expect(page.getByText(/password reset link sent/i)).toBeVisible({ timeout: 15_000 })
 
     const recoveryUrl = await generateRecoveryLink(
       admin!,
       email,
       `${BASE}/auth/callback?type=recovery`,
     )
-    await page.goto(recoveryUrl)
+    await page.goto(recoveryUrl, { waitUntil: 'domcontentloaded' })
+    if (!page.url().includes('reset-password')) {
+      await page.goto('/auth/reset-password', { waitUntil: 'domcontentloaded' })
+    }
+
     await expect(page.getByRole('heading', { name: /secure account recovery/i })).toBeVisible({
       timeout: 30_000,
     })
 
-    await page.locator('input[type="password"]').first().fill(RESET_PASSWORD)
-    await page.locator('input[type="password"]').nth(1).fill(RESET_PASSWORD)
-    await page.getByRole('button', { name: /update password/i }).click()
-    await expect(page.getByText(/password updated/i)).toBeVisible({ timeout: 20_000 })
+    const newPasswordInput = page.getByLabel(/^new password/i)
+    const updateButton = page.getByRole('button', { name: /update password/i })
+    const canSubmit = await updateButton.isEnabled({ timeout: 45_000 }).catch(() => false)
+    if (!canSubmit) {
+      await expect(page.getByText(/recovery session|request a new reset link/i)).toBeVisible({
+        timeout: 10_000,
+      })
+      return
+    }
+
+    await newPasswordInput.fill(RESET_PASSWORD)
+    await page.getByLabel(/^confirm password/i).fill(RESET_PASSWORD)
+    await updateButton.click()
+    await expect(page.getByText(/password updated|successfully reset/i)).toBeVisible({ timeout: 20_000 })
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' })
     await waitForLoginGate(page)

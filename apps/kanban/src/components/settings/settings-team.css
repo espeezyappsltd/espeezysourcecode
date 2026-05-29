@@ -170,6 +170,39 @@
   margin-bottom: 1rem;
 }
 
+.teams-create-card {
+  margin-bottom: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 30%, var(--border));
+  background: color-mix(in srgb, var(--brand) 5%, var(--bg-sub));
+  display: grid;
+  gap: 0.65rem;
+}
+
+.teams-create-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.teams-create-card p {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 0.8rem;
+}
+
+.teams-create-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+.teams-create-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .teams-browse__head h3 {
   margin: 0;
   font-size: 1.05rem;
@@ -226,6 +259,94 @@
   font-size: 0.78rem;
   color: var(--brand);
   font-weight: 700;
+}
+
+.teams-browse-card__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.teams-metric-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.teams-metric-pill--open {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+}
+
+.teams-metric-pill--full {
+  color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 40%, var(--border));
+}
+
+.teams-browse-card__description {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.teams-owner-editor {
+  display: grid;
+  gap: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 0.75rem;
+}
+
+.teams-owner-editor__field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.teams-owner-editor__field input,
+.teams-owner-editor__field textarea {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-sub);
+  color: var(--text-main);
+  padding: 0.45rem 0.55rem;
+  font-size: 0.82rem;
+}
+
+.teams-owner-editor__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: flex-end;
+}
+
+.teams-owner-editor__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  min-height: 38px;
+}
+
+.teams-owner-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .teams-members {

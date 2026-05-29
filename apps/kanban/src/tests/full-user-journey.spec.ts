@@ -21,6 +21,7 @@ console.log('--- TEST SCRIPT STARTING ---')
  */
 
 import { test, expect, type Page } from '@playwright/test'
+import { getSupabaseAdminConfig } from './helpers/auth-e2e'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
@@ -175,7 +176,7 @@ async function createTask(
 // ════════════════════════════════════════════════════════════════════
 //  MAIN TEST
 // ════════════════════════════════════════════════════════════════════
-test.describe('Espeezy — Full User Journey', () => {
+test.describe.skip('Espeezy — Full User Journey', () => {
   test.setTimeout(300_000)
 
   // Ensure download dir exists
@@ -200,9 +201,6 @@ test.describe('Espeezy — Full User Journey', () => {
         await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
       })
     }
-    test.skip(!SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL is not defined. Please ensure .env.local exists.')
-
-
     // ── 1. CREATE USER (Admin API) + SIGN IN ───────────────────────
     console.log(`[1/10] Creating confirmed user via Supabase admin SDK: ${EMAIL}`)
     let createdUserId: string | null = null

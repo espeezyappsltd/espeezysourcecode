@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 
 export type SupabaseAdminConfig = {
   url: string
@@ -45,10 +45,101 @@ export async function waitForLoginGate(page: Page): Promise<void> {
 }
 
 export async function isAdminApiAvailable(config: SupabaseAdminConfig): Promise<boolean> {
-  const res = await fetch(`${config.url}/auth/v1/admin/users?page=1&per_page=1`, {
-    headers: adminHeaders(config.serviceRole),
-  })
-  return res.ok
+  try {
+    const res = await fetch(`${config.url}/auth/v1/admin/users?page=1&per_page=1`, {
+      headers: adminHeaders(config.serviceRole),
+      signal: AbortSignal.timeout(12_000),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+const DISMISSED_PAGE_GUIDES = [
+  'kanban',
+  'feed',
+  'hustle',
+  'marketplace',
+  'assets',
+  'settings',
+  'resources',
+  'plans',
+  'messages',
+]
+
+/** Close modals/overlays that block dashboard interactions in E2E. */
+export async function dismissBlockingOverlays(page: Page): Promise<void> {
+  await page.evaluate((guideIds) => {
+    for (const id of guideIds) {
+      localStorage.setItem(`espeezy_guide_${id}_dismissed`, 'true')
+    }
+  }, DISMISSED_PAGE_GUIDES)
+
+  const closeProfile = page.getByRole('button', { name: /close profile setup/i })
+  if (await closeProfile.isVisible().catch(() => false)) {
+    await closeProfile.click({ force: true })
+    await page.locator('.onboarding-overlay').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => null)
+  }
+
+  const gotIt = page.getByRole('button', { name: /^got it$/i })
+  if (await gotIt.isVisible().catch(() => false)) {
+    await gotIt.click({ force: true })
+    await page.locator('.social-guide-root').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => null)
+  }
+
+  const enterWorkspace = page.getByRole('button', { name: /^enter workspace$/i })
+  if (await enterWorkspace.isVisible().catch(() => false)) {
+    await enterWorkspace.click()
+    return
+  }
+
+  const closeGuide = page.getByRole('button', { name: /close guide/i })
+  if (await closeGuide.isVisible().catch(() => false)) {
+    await closeGuide.click({ force: true })
+    await page.locator('.social-guide-root').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => null)
+    return
+  }
+
+  if (await page.locator('.onboarding-overlay').isVisible().catch(() => false)) {
+    await page.keyboard.press('Escape')
+    await page.locator('.onboarding-overlay').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => null)
+  }
+}
+
+/** Wait until the main kanban surface is visible (post onboarding). */
+export async function waitForKanbanBoard(page: Page): Promise<void> {
+  const board = page
+    .getByRole('region', { name: /kanban board/i })
+    .or(page.getByTestId('kanban-board'))
+  await board.first().waitFor({ state: 'visible', timeout: 60_000 })
+}
+
+/** Create a team from WelcomeOnboarding when needed, then wait for the board. */
+export async function completeWelcomeOnboardingTeam(
+  page: Page,
+  teamName: string,
+): Promise<boolean> {
+  const welcome = page.getByText(/welcome to the hub/i)
+  const board = page.getByTestId('kanban-board').or(page.getByRole('region', { name: /kanban board/i }))
+
+  await welcome.or(board).first().waitFor({ state: 'visible', timeout: 45_000 }).catch(() => null)
+
+  if (await welcome.isVisible().catch(() => false)) {
+    await page.getByRole('button', { name: /create new team/i }).click()
+    await page.getByPlaceholder(/capstone alpha/i).fill(teamName)
+    await page.getByPlaceholder(/what is this team building/i).fill('E2E automated team')
+    await page.getByRole('button', { name: /start team/i }).click()
+    await expect(welcome).not.toBeVisible({ timeout: 45_000 }).catch(() => null)
+  }
+
+  try {
+    await waitForKanbanBoard(page)
+    await dismissBlockingOverlays(page)
+    return true
+  } catch {
+    return false
+  }
 }
 
 function adminHeaders(serviceRole: string): Record<string, string> {
@@ -93,6 +184,37 @@ export async function confirmUserByEmail(config: SupabaseAdminConfig, email: str
   if (!res.ok) {
     const text = await res.text()
     throw new Error(`Failed to confirm user: ${text}`)
+  }
+}
+
+/** Sign up (or sign in after admin confirm) until off /login. */
+export async function signUpToDashboard(
+  page: Page,
+  admin: SupabaseAdminConfig | null,
+  adminWorks: boolean,
+  email: string,
+  password: string,
+): Promise<void> {
+  await page.goto('/login?signup=true', { waitUntil: 'domcontentloaded' })
+  await waitForLoginGate(page)
+  await page.locator('#auth-email').fill(email)
+  await page.locator('#auth-password').fill(password)
+  await page.getByRole('checkbox').check()
+  await page.locator('form').getByRole('button', { name: /^create account$/i }).click()
+
+  const leftLogin = await page
+    .waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45_000 })
+    .then(() => true)
+    .catch(() => false)
+
+  if (!leftLogin && adminWorks && admin) {
+    await confirmUserByEmail(admin, email)
+    await page.goto('/login', { waitUntil: 'domcontentloaded' })
+    await waitForLoginGate(page)
+    await page.locator('#auth-email').fill(email)
+    await page.locator('#auth-password').fill(password)
+    await page.locator('form').getByRole('button', { name: /^sign in$/i }).click()
+    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45_000 })
   }
 }
 

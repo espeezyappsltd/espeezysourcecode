@@ -6,19 +6,19 @@ import { test, expect } from '@playwright/test'
 test.describe('Games auth flows', () => {
   test('login page shows form after session check', async ({ page }) => {
     await page.goto('/login')
-    await expect(page.getByRole('heading', { name: /sign in to play/i })).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: /espeezy games/i })).toBeVisible({ timeout: 15_000 })
     await expect(page.getByLabel(/email/i)).toBeVisible()
   })
 
   test('login rejects open redirect in next param', async ({ page }) => {
     await page.goto('/login?next=https://evil.example')
     await page.waitForURL(/\/login/, { timeout: 10_000 })
-    expect(page.url()).not.toContain('evil.example')
+    expect(new URL(page.url()).pathname).toBe('/login')
   })
 
   test('auth callback rejects external next redirect', async ({ page }) => {
     const res = await page.goto('/auth/callback?next=//evil.example')
-    expect(res?.url()).toMatch(/\/(\?|$)/)
+    expect(res?.url()).toMatch(/\/login(\?|$)/)
     expect(res?.url()).not.toContain('evil.example')
   })
 

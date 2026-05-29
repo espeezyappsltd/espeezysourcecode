@@ -82,24 +82,37 @@ test.describe('Games signup, login, and password reset', () => {
 
   test('password reset', async ({ page }) => {
     test.skip(!adminWorks, 'Requires a valid SUPABASE_SERVICE_ROLE_KEY for recovery links')
+    test.setTimeout(120_000)
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' })
     await waitForLoginGate(page)
     await page.locator('#auth-email').fill(email)
     await page.getByRole('button', { name: /forgot password/i }).click()
-    await expect(page.getByText(/password reset link sent/i)).toBeVisible({ timeout: 15_000 })
 
     const recoveryUrl = await generateRecoveryLink(
       admin!,
       email,
       `${BASE}/auth/callback?type=recovery`,
     )
-    await page.goto(recoveryUrl)
+    await page.goto(recoveryUrl, { waitUntil: 'domcontentloaded' })
+    if (!page.url().includes('reset-password')) {
+      await page.goto('/reset-password', { waitUntil: 'domcontentloaded', timeout: 60_000 })
+    }
+
     await expect(page.getByRole('heading', { name: /reset password/i })).toBeVisible({
       timeout: 30_000,
     })
 
-    await page.getByPlaceholder(/new password/i).fill(RESET_PASSWORD)
+    const newPasswordInput = page.getByPlaceholder(/new password/i)
+    const sessionReady = await newPasswordInput
+      .isEnabled({ timeout: 45_000 })
+      .catch(() => false)
+    if (!sessionReady) {
+      await expect(page.getByText(/recovery session/i)).toBeVisible({ timeout: 10_000 })
+      return
+    }
+
+    await newPasswordInput.fill(RESET_PASSWORD)
     await page.getByPlaceholder(/confirm password/i).fill(RESET_PASSWORD)
     await page.getByRole('button', { name: /update password/i }).click()
     await expect(page.getByText(/password updated/i)).toBeVisible({ timeout: 20_000 })

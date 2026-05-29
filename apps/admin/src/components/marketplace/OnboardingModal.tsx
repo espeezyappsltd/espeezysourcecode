@@ -45,6 +45,10 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
                <div style={{ flexShrink: 0 }}><CheckCircle2 className="text-success" size={20} /></div>
                <div style={{ fontSize: '0.85rem', fontWeight: 700, opacity: 0.8 }}>Report prohibited or fraudulent behavior.</div>
             </div>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+               <div style={{ flexShrink: 0 }}><CheckCircle2 className="text-success" size={20} /></div>
+               <div style={{ fontSize: '0.85rem', fontWeight: 700, opacity: 0.8 }}>Withdrawal of earnings can be made 7 days after a sale by emailing your sales invoice to <a href="mailto:invoice@espeezy.com">invoice@espeezy.com</a> (or <a href="mailto:support@espeezy.com">support@espeezy.com</a>).</div>
+            </div>
           </div>
           
           <button 

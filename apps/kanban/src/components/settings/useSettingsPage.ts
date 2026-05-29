@@ -30,6 +30,7 @@ import {
 } from '@/services/dashboard'
 import { formatSupabaseError, friendlySupabaseError } from '@/utils/supabase-errors'
 import { canManageTeamSettings } from '@/lib/team/rbac'
+import type { TeamGroupMetric } from '@/app/join/actions'
 
 const SETTINGS_TABS: TabName[] = [
   'identity',
@@ -76,6 +77,10 @@ export function useSettingsPage() {
   const [availableGroups, setAvailableGroups] = useState<Group[]>([])
   const [groupSearch, setGroupSearch] = useState('')
   const [switching, setSwitching] = useState(false)
+  const [groupMetricsById, setGroupMetricsById] = useState<Record<string, TeamGroupMetric>>({})
+  const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null)
+  const [updatingOwnedGroupId, setUpdatingOwnedGroupId] = useState<string | null>(null)
+  const [creatingGroup, setCreatingGroup] = useState(false)
 
   const [teamMembers, setTeamMembers] = useState<Profile[]>([])
   const [isEncrypted, setIsEncrypted] = useState(false)
@@ -127,14 +132,35 @@ export function useSettingsPage() {
     else document.body.classList.remove('toaster-mode')
   }, [isToasterMode])
 
+  const fetchGroupMetrics = useCallback(async (groupIds: string[]) => {
+    const uniqueIds = Array.from(new Set(groupIds.filter(Boolean)))
+    if (uniqueIds.length === 0) {
+      setGroupMetricsById({})
+      return
+    }
+
+    try {
+      const { fetchTeamGroupMetrics } = await import('@/app/join/actions')
+      const metrics = await fetchTeamGroupMetrics(uniqueIds)
+      const next: Record<string, TeamGroupMetric> = {}
+      for (const metric of metrics) {
+        next[metric.groupId] = metric
+      }
+      setGroupMetricsById(next)
+    } catch (err) {
+      console.warn('Fetch group metrics for settings:', formatSupabaseError(err))
+    }
+  }, [])
+
   const fetchGroups = useCallback(async () => {
     try {
       const data = await fetchGroupsOrderedByName()
       setAvailableGroups(data)
+      void fetchGroupMetrics(data.map((group) => group.id))
     } catch (err) {
       console.warn('Fetch groups for settings:', formatSupabaseError(err))
     }
-  }, [])
+  }, [fetchGroupMetrics])
 
   const fetchJoinRequests = useCallback(async () => {
     try {
@@ -506,6 +532,7 @@ export function useSettingsPage() {
         return
       }
       await fetchUserData()
+      await fetchGroups()
       refreshProfile()
       if (newGroupId === null) {
         addToast('Left team', 'You are not on a team right now. Pick another team below when ready.', 'info')
@@ -523,6 +550,117 @@ export function useSettingsPage() {
       addToast('Could not switch team', msg, 'error')
     }
     setSwitching(false)
+  }
+
+  const handleDeleteGroup = async (groupId: string, groupName: string) => {
+    const metric = groupMetricsById[groupId]
+    if (!metric?.canDelete) {
+      addToast('Cannot delete team', 'Delete is only available when no members are left.', 'error')
+      return
+    }
+
+    if (
+      !confirm(
+        `Delete ${groupName}? This cannot be undone and only works because no members are left in the team.`,
+      )
+    ) {
+      return
+    }
+
+    setDeletingGroupId(groupId)
+    setError(null)
+    try {
+      const { deleteOwnedEmptyGroup } = await import('@/app/join/actions')
+      const result = await deleteOwnedEmptyGroup(groupId)
+      if (result.error) {
+        setError(result.error)
+        addToast('Could not delete team', result.error, 'error')
+        return
+      }
+      setAvailableGroups((prev) => prev.filter((group) => group.id !== groupId))
+      setGroupMetricsById((prev) => {
+        const next = { ...prev }
+        delete next[groupId]
+        return next
+      })
+      addToast('Team deleted', `${groupName} has been removed.`, 'success')
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, 'Could not delete team')
+      setError(msg)
+      addToast('Could not delete team', msg, 'error')
+    } finally {
+      setDeletingGroupId(null)
+    }
+  }
+
+  const handleUpdateOwnedGroup = async (input: {
+    groupId: string
+    name: string
+    description: string
+    capacity: number
+    isEncrypted: boolean
+  }) => {
+    setUpdatingOwnedGroupId(input.groupId)
+    setError(null)
+    try {
+      const { updateOwnedGroup } = await import('@/app/join/actions')
+      const result = await updateOwnedGroup({
+        groupId: input.groupId,
+        name: input.name,
+        description: input.description,
+        capacity: input.capacity,
+        isEncrypted: input.isEncrypted,
+      })
+      if (result.error) {
+        setError(result.error)
+        addToast('Could not update team', result.error, 'error')
+        return { ok: false as const, error: result.error }
+      }
+      await fetchGroups()
+      addToast('Team updated', `${input.name} has been updated.`, 'success')
+      return { ok: true as const }
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, 'Could not update team')
+      setError(msg)
+      addToast('Could not update team', msg, 'error')
+      return { ok: false as const, error: msg }
+    } finally {
+      setUpdatingOwnedGroupId(null)
+    }
+  }
+
+  const handleCreateGroup = async (input: { name: string; description: string }) => {
+    const trimmedName = input.name.trim()
+    if (!trimmedName) {
+      const msg = 'Team name is required.'
+      setError(msg)
+      addToast('Could not create team', msg, 'error')
+      return { ok: false as const, error: msg }
+    }
+
+    setCreatingGroup(true)
+    setError(null)
+    try {
+      const { createWorkspaceTeam } = await import('@/app/onboarding/actions')
+      const result = await createWorkspaceTeam(trimmedName, input.description)
+      if (result.error) {
+        setError(result.error)
+        addToast('Could not create team', result.error, 'error')
+        return { ok: false as const, error: result.error }
+      }
+      await fetchUserData()
+      await fetchGroups()
+      await refreshProfile()
+      addToast('Team created', `${trimmedName} is now active.`, 'success')
+      return { ok: true as const, teamId: result.teamId }
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, 'Could not create team')
+      setError(msg)
+      addToast('Could not create team', msg, 'error')
+      return { ok: false as const, error: msg }
+    } finally {
+      setCreatingGroup(false)
+    }
   }
 
   const handleAccountTermination = async () => {
@@ -626,6 +764,10 @@ export function useSettingsPage() {
     groupSearch,
     setGroupSearch,
     switching,
+    groupMetricsById,
+    deletingGroupId,
+    updatingOwnedGroupId,
+    creatingGroup,
     teamMembers,
     isEncrypted,
     updatingGroup,
@@ -672,6 +814,9 @@ export function useSettingsPage() {
     handleKickUser,
     handleDownloadData,
     handleSwitchGroup,
+    handleDeleteGroup,
+    handleUpdateOwnedGroup,
+    handleCreateGroup,
     handleAccountTermination,
     handleManageSubscription,
     isAdmin,

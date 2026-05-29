@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
     "test:e2e": "playwright test --config src/playwright.config.ts",
+    "test:e2e:ci": "playwright test --config src/playwright.config.ts --project=chromium",
     "test:e2e:completion": "playwright test src/tests/two-user-project-completion.spec.ts --config src/playwright.config.ts --project=chromium",
     "test:profile-realtime": "node --test src/lib/profile/realtime.node-test.mjs",
     "validate:profile-realtime": "node scripts/validate-profile-realtime.mjs",

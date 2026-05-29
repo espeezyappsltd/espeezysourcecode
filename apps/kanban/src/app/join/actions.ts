@@ -217,6 +217,14 @@ export type TeamJoinPreview = {
   hasPendingRequest: boolean
 }
 
+export type TeamGroupMetric = {
+  groupId: string
+  memberCount: number
+  hasPendingRequest: boolean
+  isOwner: boolean
+  canDelete: boolean
+}
+
 /** Public team stats for join / analytics preview (service role). */
 export async function fetchTeamJoinPreview(groupId: string): Promise<TeamJoinPreview> {
   const uid = await getUid()
@@ -486,4 +494,174 @@ export async function fetchSentJoinRequestGroupIds(): Promise<string[]> {
   }
 
   return Array.from(new Set((data ?? []).map((r) => r.group_id)))
+}
+
+export async function fetchTeamGroupMetrics(groupIds: string[]): Promise<TeamGroupMetric[]> {
+  const uid = await getUid()
+  if (!uid) return []
+
+  const uniqueGroupIds = Array.from(
+    new Set(groupIds.map((id) => id.trim()).filter(Boolean)),
+  )
+  if (uniqueGroupIds.length === 0) return []
+
+  const adminDb = getAdminDb()
+
+  try {
+    const [{ data: groups, error: groupsError }, { data: memberships, error: membershipsError }, { data: pendingRows, error: pendingError }] =
+      await Promise.all([
+        adminDb
+          .from('groups')
+          .select('id, owner_id')
+          .in('id', uniqueGroupIds),
+        adminDb
+          .from('profiles')
+          .select('group_id')
+          .in('group_id', uniqueGroupIds),
+        adminDb
+          .from('group_join_requests')
+          .select('group_id')
+          .eq('user_id', uid)
+          .eq('status', 'pending')
+          .in('group_id', uniqueGroupIds),
+      ])
+
+    if (groupsError) throw groupsError
+    if (membershipsError) throw membershipsError
+    if (pendingError) throw pendingError
+
+    const memberCountByGroup = new Map<string, number>()
+    for (const row of memberships ?? []) {
+      const groupId = row.group_id
+      if (!groupId) continue
+      memberCountByGroup.set(groupId, (memberCountByGroup.get(groupId) ?? 0) + 1)
+    }
+
+    const pendingSet = new Set((pendingRows ?? []).map((row) => row.group_id).filter(Boolean))
+
+    return (groups ?? []).map((group) => {
+      const memberCount = memberCountByGroup.get(group.id) ?? 0
+      const isOwner = group.owner_id === uid
+      return {
+        groupId: group.id,
+        memberCount,
+        hasPendingRequest: pendingSet.has(group.id),
+        isOwner,
+        canDelete: isOwner && memberCount === 0,
+      }
+    })
+  } catch (err) {
+    console.warn('[fetchTeamGroupMetrics]', err)
+    return []
+  }
+}
+
+export async function deleteOwnedEmptyGroup(groupId: string): Promise<{ success?: true; error?: string }> {
+  const uid = await getUid()
+  if (!uid) return { error: 'Not authenticated' }
+
+  const groupIdTrimmed = groupId.trim()
+  if (!groupIdTrimmed) return { error: 'Missing group id' }
+
+  try {
+    const adminDb = getAdminDb()
+    const { data: group, error: groupError } = await adminDb
+      .from('groups')
+      .select('id, owner_id, name')
+      .eq('id', groupIdTrimmed)
+      .maybeSingle()
+
+    if (groupError) throw groupError
+    if (!group) return { error: 'Team not found.' }
+    if (group.owner_id !== uid) {
+      return { error: 'Only the team owner can delete this team.' }
+    }
+
+    const { count, error: countError } = await adminDb
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('group_id', groupIdTrimmed)
+
+    if (countError) throw countError
+    if ((count ?? 0) > 0) {
+      return { error: 'This team still has members. Remove everyone first.' }
+    }
+
+    const { error: deleteError } = await adminDb.from('groups').delete().eq('id', groupIdTrimmed)
+    if (deleteError) throw deleteError
+
+    revalidatePath('/settings')
+    revalidatePath('/join')
+    revalidatePath('/', 'layout')
+    return { success: true }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Could not delete team.' }
+  }
+}
+
+export type UpdateOwnedGroupInput = {
+  groupId: string
+  name: string
+  description: string | null
+  capacity: number
+  isEncrypted: boolean
+}
+
+export async function updateOwnedGroup(input: UpdateOwnedGroupInput): Promise<{ success?: true; error?: string }> {
+  const uid = await getUid()
+  if (!uid) return { error: 'Not authenticated' }
+
+  const groupId = input.groupId.trim()
+  const name = input.name.trim()
+  const description = input.description?.trim() ?? ''
+  const capacity = Number(input.capacity)
+
+  if (!groupId) return { error: 'Missing group id' }
+  if (!name) return { error: 'Team name is required.' }
+  if (!Number.isFinite(capacity) || capacity < 1 || capacity > 500) {
+    return { error: 'Capacity must be between 1 and 500.' }
+  }
+
+  try {
+    const adminDb = getAdminDb()
+    const { data: group, error: groupError } = await adminDb
+      .from('groups')
+      .select('id, owner_id')
+      .eq('id', groupId)
+      .maybeSingle()
+
+    if (groupError) throw groupError
+    if (!group) return { error: 'Team not found.' }
+    if (group.owner_id !== uid) {
+      return { error: 'Only the team owner can edit this team.' }
+    }
+
+    const { count: memberCount, error: countError } = await adminDb
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('group_id', groupId)
+    if (countError) throw countError
+
+    if ((memberCount ?? 0) > capacity) {
+      return { error: `Capacity cannot be lower than current members (${memberCount ?? 0}).` }
+    }
+
+    const { error: updateError } = await adminDb
+      .from('groups')
+      .update({
+        name,
+        description: description.length > 0 ? description : null,
+        capacity,
+        is_encrypted: input.isEncrypted,
+      })
+      .eq('id', groupId)
+    if (updateError) throw updateError
+
+    revalidatePath('/settings')
+    revalidatePath('/join')
+    revalidatePath('/', 'layout')
+    return { success: true }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Could not update team.' }
+  }
 }

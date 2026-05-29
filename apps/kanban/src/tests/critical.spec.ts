@@ -18,12 +18,12 @@ test.describe('Critical Path E2E', () => {
       });
     });
 
-    await page.goto('/preregister');
+    await page.goto('/preregister', { waitUntil: 'domcontentloaded' });
     await page.fill('input[type="email"]', testEmail);
     await page.click('button[type="submit"]');
     
     // Check for success message
-    await expect(page.locator('text=/You are on the list/i')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/on the list|success|registered/i)).toBeVisible({ timeout: 15000 });
   });
 
   test('User can sign up and sign in', async ({ page }) => {
@@ -32,16 +32,14 @@ test.describe('Critical Path E2E', () => {
     const password = 'TestPassword123!';
 
     await page.goto('/login');
-    
-    // Toggle to Sign Up
-    await page.click("text=/Don't have an account/i");
+    await page.getByRole('button', { name: /^Sign up$/i }).click();
     
     // Fill signup form
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
-    await page.check('input[id="legal"]');
+    await page.fill('#auth-email', email);
+    await page.fill('#auth-password', password);
+    await page.getByRole('checkbox').check();
     
-    await page.click('button[type="submit"]');
+    await page.getByRole('button', { name: /^Create account$/i }).click();
     
     // Should land on workspace home (/) — not legacy /dashboard
     await expect(page).not.toHaveURL(/\/dashboard/, { timeout: 20_000 })

@@ -13,9 +13,9 @@ test.describe('Institutional Guards & Secret Gateway', () => {
   });
 
   test('Secret Gateway conceal logic (No session)', async ({ page }) => {
-    // Attempting to access the high-entropy route without a session
-    await page.goto('/terminal/orbit-delta-prime/gateway');
-    await expect(page).toHaveURL('/');
+    // Unauthenticated users are sent to login (gateway is staff-only)
+    await page.goto('/terminal/orbit-delta-prime/gateway', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/login/, { timeout: 30_000 });
   });
 
   test('MFA Dynamic TOTP Challenge UI', async ({ page }) => {
@@ -33,8 +33,12 @@ test.describe('Institutional Guards & Secret Gateway', () => {
   });
 
   test('Legacy /upgrade redirects to marketing pricing', async ({ page }) => {
-    await page.goto('/upgrade');
-    await expect(page).toHaveURL(/espeezy\.com\/pricing/);
+    await page.goto('/upgrade', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/(pricing|login)/, { timeout: 30_000 });
+    const url = new URL(page.url());
+    if (url.pathname.includes('/login')) {
+      expect(url.searchParams.get('next')).toMatch(/pricing/);
+    }
   });
 
   test('Admin Dashboard Health Check visualization', async ({ page }) => {
