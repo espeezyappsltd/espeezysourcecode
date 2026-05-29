@@ -3,28 +3,27 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
+import { motion, MotionConfig } from 'framer-motion'
 import type { Session, User } from '@supabase/supabase-js'
 import {
-  ArrowRight, CheckCircle, Users, Globe,
-  BookOpen, Cpu, Zap, BarChart2, Mail,
-  GraduationCap, TrendingUp, Heart, LayoutDashboard,
+  ArrowRight, Users, Globe,
+  BookOpen, Cpu, Zap, BarChart2,
+  GraduationCap, TrendingUp,
 } from 'lucide-react'
 import { useLaunchData } from '@/hooks/useLaunchData'
-import SharedCountdown from '@/components/SharedCountdown'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
 import {
   HERO_ANALYTICS_CAPTION,
-  HERO_COPY_LINES,
-  KANBAN_DEMO_LABEL,
   KANBAN_DEMO_PATH,
-  PLATFORM_OPERATIONS_TAGLINE,
 } from '@shared/platform-brand'
+import { PLATFORM_APPS_FALLBACK, type PlatformApp } from '@shared/platform-apps'
+import PlatformHero from '@/components/landing/PlatformHero'
+import AppsCatalog from '@/components/landing/AppsCatalog'
 import { buildCrossAppSsoUrl, GAMES_PROFILE_PATH } from '@shared/cross-app-auth'
 
-function HeroVisual({ registeredCount }: { registeredCount: number }) {
+function HeroVisual({ userCount }: { userCount: number }) {
   return (
     <div style={{ position: 'relative', marginTop: '4rem', width: '100%', maxWidth: '1000px', margin: '4rem auto 0' }}>
       {/* Join Badge */}
@@ -45,7 +44,11 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
           ))}
         </div>
         <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'white', letterSpacing: '-0.01em' }}>
-          Join <span style={{ color: 'var(--brand)' }}>{registeredCount.toLocaleString()}</span> members already onboard
+          {userCount > 0 ? (
+            <>Join <span style={{ color: 'var(--brand)' }}>{userCount.toLocaleString()}</span> students using Espeezy</>
+          ) : (
+            <>Built for student project teams</>
+          )}
         </span>
       </motion.div>
 
@@ -146,43 +149,32 @@ function HeroVisual({ registeredCount }: { registeredCount: number }) {
   )
 }
 import { supabase } from '@/lib/supabase-client'
-import { submitPreregistration } from '@/services/preregister'
 
 const COMING_FEATURES = [
-  { icon: <Zap size={20} />, title: 'Unified Project Hub', desc: 'A high-performance workspace that integrates Kanban boards, shared documents, and group chat, so you never have to switch between apps to manage your academic work.', tag: 'Productivity' },
-  { icon: <BarChart2 size={20} />, title: 'Contribution Proof', desc: 'A shared activity log for task updates and document edits, with exportable reports that build an academic record you can use for grading, job applications, and proving your skills.', tag: 'Visibility' },
-  { icon: <BookOpen size={20} />, title: 'Deep LMS Sync', desc: 'Bi-directional connectors for Canvas, Blackboard, and Moodle automatically sync your assignments, deadlines, and grades into your centralized Espeezy dashboard.', tag: 'Integrations' },
-  { icon: <GraduationCap size={20} />, title: 'Smart Study Groups', desc: 'Our AI-driven matching algorithm connects you with peers who complement your strengths, forming optimal study groups that boost collective performance.', tag: 'Collaboration' },
-  { icon: <TrendingUp size={20} />, title: 'Performance Analytics', desc: 'Advanced analytics identify your work patterns and provide actionable insights to help you optimize your contributions and maximize your grades.', tag: 'Insights' },
-  { icon: <Cpu size={20} />, title: 'AI-Powered Insights', desc: 'Intelligent analytics that identify your strengths in group projects, offering personalized recommendations to help you improve and excel in your coursework.', tag: 'Intelligence' },
-  { icon: <Globe size={20} />, title: 'Global Peer Network', desc: 'A verified, student-only platform connecting you with peers worldwide, facilitating secure resource sharing and cross-institutional study groups.', tag: 'Community' },
-  { icon: <Users size={20} />, title: 'Digital Asset Marketplace', desc: 'A secure platform where you can trade digital assets for Espeezy Credits, which can be used for exclusive features or exchanged for Pro membership.', tag: 'Opportunities' },
+  { icon: <Zap size={20} />, title: 'One place for the project', desc: 'Boards, shared docs, and group chat together, so your team stops switching between apps to get work done.', tag: 'Productivity' },
+  { icon: <BarChart2 size={20} />, title: 'Proof of who did the work', desc: 'Every task and edit is logged. Export it as a record you can show graders, recruiters, and teammates.', tag: 'Visibility' },
+  { icon: <BookOpen size={20} />, title: 'Works with your LMS', desc: 'Connect Canvas, Blackboard, or Moodle so assignments, deadlines, and grades show up in Espeezy automatically.', tag: 'Integrations' },
+  { icon: <GraduationCap size={20} />, title: 'Better study groups', desc: 'Get matched with classmates whose strengths complement yours, so group work actually works.', tag: 'Collaboration' },
+  { icon: <TrendingUp size={20} />, title: 'See how work is split', desc: 'A clear view of who is doing what and where a project is stalling, so nothing slips through the cracks.', tag: 'Insights' },
+  { icon: <Cpu size={20} />, title: 'Tips to do better next time', desc: 'Personalised suggestions on where you contribute most and how to improve on your next project.', tag: 'Insights' },
+  { icon: <Globe size={20} />, title: 'Find collaborators anywhere', desc: 'A verified, students-only network to share resources and team up with people at other campuses.', tag: 'Community' },
+  { icon: <Users size={20} />, title: 'Marketplace & credits', desc: 'Trade digital assets for Espeezy Credits and spend them on Pro features.', tag: 'Opportunities' },
 ]
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
+  { href: '/#apps', label: 'Apps' },
   { href: '/#features', label: 'Features' },
-  { href: '/pricing', label: 'Plans' },
-  { href: '/docs', label: 'Docs' },
   { href: '/pricing', label: 'Pricing' },
+  { href: '/docs', label: 'Docs' },
 ]
 
 export default function PreRegisterPage() {
-  const { config, registeredCount, authUserCount, configLoaded, timeLeft, setRegisteredCount } = useLaunchData()
+  const { config, authUserCount } = useLaunchData()
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [userTier, setUserTier] = useState<'free' | 'pro' | 'premium' | 'unknown'>('unknown')
-
-  const [email, setEmail] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [submitError, setSubmitError] = useState('')
-  const [referrerCode] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null
-    return new URLSearchParams(window.location.search).get('ref')
-  })
-  const [myReferralCode, setMyReferralCode] = useState<string | null>(null)
-  const [myReferralCount, setMyReferralCount] = useState(0)
+  const [platformApps, setPlatformApps] = useState<PlatformApp[]>(PLATFORM_APPS_FALLBACK)
 
   const kanbanBaseUrl = process.env.NEXT_PUBLIC_KANBAN_APP_URL ?? 'https://kanban.espeezy.com'
   const gamesBaseUrl = process.env.NEXT_PUBLIC_GAMES_APP_URL ?? 'https://games.espeezy.com'
@@ -199,6 +191,17 @@ export default function PreRegisterPage() {
   const kanbanSsoUrl = buildSsoUrl(kanbanBaseUrl, '/')
   const kanbanDemoUrl = `${kanbanBaseUrl.replace(/\/$/, '')}${KANBAN_DEMO_PATH}`
   const gamesSsoUrl = buildSsoUrl(gamesBaseUrl, GAMES_PROFILE_PATH)
+
+  useEffect(() => {
+    void fetch('/api/platform-apps')
+      .then((r) => r.json())
+      .then((data: { apps?: PlatformApp[] }) => {
+        if (Array.isArray(data.apps) && data.apps.length > 0) {
+          setPlatformApps(data.apps)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -259,38 +262,6 @@ export default function PreRegisterPage() {
     await supabase.auth.signOut()
   }
 
-  const goal = parseInt(config.preregister_goal ?? '5000', 10)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSubmitError('')
-    if (!email.trim()) { setSubmitError('Please enter a valid email address.'); return }
-    setSubmitting(true)
-    try {
-      const { ok, data } = await submitPreregistration({
-        email,
-        source: 'preregister_page',
-        ...(referrerCode != null ? { referrer_code: referrerCode } : {}),
-      })
-      if (!ok) {
-        setSubmitError(data.error ?? 'Registration failed. Please try again.')
-      } else {
-        setSubmitted(true)
-        setMyReferralCode(data.referral_code || null)
-        setMyReferralCount(data.referral_count || 0)
-        if (typeof data.count === 'number') {
-          setRegisteredCount(data.count)
-        } else {
-          // Fallback UI bump so the counter updates immediately after a successful registration.
-          setRegisteredCount(prev => prev + 1)
-        }
-      }
-    } catch {
-      setSubmitError('Network error. Please check your connection and try again.')
-    }
-    setSubmitting(false)
-  }
-
   return (
     <MotionConfig reducedMotion="user">
     <>
@@ -331,101 +302,16 @@ export default function PreRegisterPage() {
             <Link href="/login" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, color: 'rgba(15,23,42,0.7)', textDecoration: 'none' }}>Account</Link>
           )}
         </div>
-        <a href="#register" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-          Join Early Access
+        <a href={kanbanSsoUrl} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--brand)', fontSize: '0.8rem', fontWeight: 800, color: 'white', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          Start Free
         </a>
       </nav>
 
-      {/* Hero */}
       <main id="main-content">
-      <section id="hero" style={{ padding: 'clamp(4rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '7px 18px', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '100px', marginBottom: '2rem' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Brand-new Kanban · Early access open</span>
-          </div>
-        </motion.div>
+      <PlatformHero apps={platformApps} kanbanAppUrl={kanbanSsoUrl} kanbanDemoUrl={kanbanDemoUrl} userCount={authUserCount} />
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          style={{ maxWidth: '820px', margin: '0 auto 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}
-        >
-          <h1 style={{ margin: 0, fontSize: 'clamp(1.35rem, 3.8vw, 2.35rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.15, color: '#0f172a' }}>
-            {HERO_COPY_LINES[0]}
-          </h1>
-          <p style={{ margin: 0, fontSize: 'clamp(1rem, 2.2vw, 1.15rem)', fontWeight: 500, lineHeight: 1.55, color: '#475569' }}>
-            {HERO_COPY_LINES[1]}
-          </p>
-          
-          
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.35 }}
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-            justifyContent: 'center',
-            alignItems: 'center',
-            margin: '0 auto 2.5rem',
-          }}
-        >
-          <a
-            href={kanbanDemoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.85rem 1.5rem',
-              borderRadius: '12px',
-              border: '2px solid var(--brand)',
-              background: 'rgba(16,185,129,0.08)',
-              color: '#047857',
-              fontSize: '0.9rem',
-              fontWeight: 800,
-              textDecoration: 'none',
-              letterSpacing: '-0.01em',
-              boxShadow: '0 8px 24px rgba(16,185,129,0.15)',
-            }}
-          >
-            <LayoutDashboard size={18} aria-hidden />
-            {KANBAN_DEMO_LABEL}
-            <ArrowRight size={16} aria-hidden />
-          </a>
-          <a
-            href="#register"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.85rem 1.5rem',
-              borderRadius: '12px',
-              background: 'var(--brand)',
-              color: 'white',
-              fontSize: '0.9rem',
-              fontWeight: 800,
-              textDecoration: 'none',
-              letterSpacing: '-0.01em',
-              boxShadow: '0 8px 24px rgba(99,102,241,0.25)',
-            }}
-          >
-            Join Early Access
-            <ArrowRight size={16} aria-hidden />
-          </a>
-        </motion.div>
-
-        {configLoaded && <SharedCountdown timeLeft={timeLeft} />}
-
-        {/* Hero Visual Section */}
-        <HeroVisual registeredCount={registeredCount} />
-
+      <section style={{ padding: '2rem clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <HeroVisual userCount={authUserCount} />
         {authUser && (
           <div style={{ margin: '2rem auto 0', maxWidth: '680px', background: 'white', border: '1px solid rgba(15,23,42,0.1)', borderRadius: '14px', padding: '1rem', textAlign: 'left', boxShadow: '0 8px 30px rgba(15,23,42,0.08)' }}>
             <p style={{ margin: 0, color: '#0f172a', fontWeight: 700, fontSize: '0.92rem' }}>
@@ -443,7 +329,7 @@ export default function PreRegisterPage() {
               </a>
               {userTier === 'free' && (
                 <a href="https://espeezy.com/checkout" style={{ padding: '0.55rem 0.9rem', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.25)', color: '#4338ca', textDecoration: 'none', fontWeight: 700, fontSize: '0.82rem', background: 'rgba(99,102,241,0.08)' }}>
-                  You need Pro for Games - Upgrade
+                  Upgrade to Pro to play Games
                 </a>
               )}
             </div>
@@ -451,102 +337,7 @@ export default function PreRegisterPage() {
         )}
       </section>
 
-      {/* Registration Form */}
-      <section id="register" style={{ padding: '0 clamp(1rem, 4vw, 2.5rem) clamp(4rem, 8vw, 7rem)', position: 'relative', zIndex: 1 }}>
-        <div style={{ maxWidth: '560px', margin: '0 auto' }}>
-          <div style={{ background: 'white', border: '1px solid rgba(15,23,42,0.09)', borderRadius: '20px', padding: 'clamp(2rem, 5vw, 3rem)', backdropFilter: 'blur(20px)', boxShadow: '0 8px 40px rgba(15,23,42,0.1)' }}>
-            <AnimatePresence mode="wait">
-              {submitted ? (
-                <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center', padding: '1rem 0' }}>
-                  <div style={{ width: '64px', height: '64px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                    <CheckCircle size={28} color="var(--brand)" />
-                  </div>
-                  <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '0.75rem' }}>You are in the list 🙂</h2>
-                  <p style={{ color: '#64748b', lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.95rem' }}>
-                    We will be in touch the moment {config.brand_name} launches.
-                  </p>
-                  {myReferralCode && (
-                    <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', textAlign: 'left' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                        <Users size={18} color="var(--brand)" />
-                        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Share &amp; Get Rewards</span>
-                      </div>
-                      <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                        Give friends 30% off Espeezy Pro on kanban.espeezy.com with your code. Terms apply — up to 5 Pro subscriptions per code.
-                      </p>
-                      <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
-                        <div style={{ padding: '0.75rem', background: '#f1f5f9', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <code style={{ fontSize: '0.8rem', color: '#0f172a', wordBreak: 'break-all', flex: 1 }}>
-                            https://kanban.espeezy.com/pricing?ref={myReferralCode}
-                          </code>
-                          <button
-                            onClick={() => {
-                              const url = `https://kanban.espeezy.com/pricing?ref=${myReferralCode}`
-                              navigator.clipboard.writeText(url).catch(() => alert('Failed to copy'))
-                            }}
-                            style={{ marginLeft: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--brand)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                            Copy Link
-                          </button>
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                          <span style={{ color: '#64748b' }}>You&apos;ve referred:</span>
-                          <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{myReferralCount} {myReferralCount === 1 ? 'friend' : 'friends'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link href="/" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', border: '1px solid rgba(15,23,42,0.15)', color: '#64748b', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
-                      Back to Home
-                    </Link>
-                    <Link href="/pricing" style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}>
-                      View Plans →
-                    </Link>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.form key="form" onSubmit={handleSubmit} aria-label="Register for early access" noValidate>
-                  <div style={{ marginBottom: '0.5rem', display: 'inline-flex', padding: '4px 12px', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '100px' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Free Forever Plan · Early Access</span>
-                  </div>
-                  <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 1.9rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: '1rem 0 0.5rem', lineHeight: 1.1 }}>
-                    Get credit for every contribution.<br />
-                    <span style={{ color: 'var(--brand)' }}>Show your work clearly.</span>
-                  </h2>
-                  <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                    Join the waitlist for a platform that records individual contributions as your team works.
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <label htmlFor="prereg-email" className="sr-only">Email address (required)</label>
-                    <input
-                      id="prereg-email"
-                      type="email"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      aria-required="true"
-                      aria-describedby={submitError ? 'prereg-error' : undefined}
-                      style={{ width: '100%', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(15,23,42,0.15)', background: '#f8fafc', color: '#0f172a', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }} />
-                    {submitError && (
-                      <div id="prereg-error" role="alert" aria-live="assertive" style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', color: '#dc2626', fontSize: '0.85rem' }}>
-                        {submitError}
-                      </div>
-                    )}
-                    <button type="submit" disabled={submitting}
-                      style={{ width: '100%', padding: '0.95rem', borderRadius: '10px', background: submitting ? 'rgba(99,102,241,0.5)' : 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', color: 'white', fontWeight: 800, fontSize: '0.95rem', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', transition: 'opacity 0.15s' }}>
-                      {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist. It&apos;s Free.</>}
-                    </button>
-                    <p style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
-                      By registering you agree to our <Link href="/privacy" style={{ color: '#64748b', textDecoration: 'underline' }}>Privacy Policy</Link>. No spam. Ever.
-                    </p>
-                  </div>
-                </motion.form>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </section>
+      <AppsCatalog apps={platformApps} />
 
       {/* Product Gallery */}
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)', background: '#f8fafc' }}>
@@ -556,7 +347,7 @@ export default function PreRegisterPage() {
               Get a first look at the product.
             </h2>
             <p style={{ color: '#64748b', maxWidth: '620px', margin: '0 auto', fontSize: '1rem', lineHeight: 1.6 }}>
-              Built for students, educators, and institutions who need clarity and speed.
+              Built for students, educators, and the teams they work in.
             </p>
           </div>
 
@@ -599,7 +390,7 @@ export default function PreRegisterPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
             <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '1rem' }}>
-              Built for the next era of education.
+              What&apos;s coming next.
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
@@ -636,14 +427,14 @@ export default function PreRegisterPage() {
       <section style={{ padding: 'clamp(5rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)', background: 'linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(6,182,212,0.04) 50%, rgba(16,185,129,0.04) 100%)' }}>
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ maxWidth: '720px', margin: '0 auto' }}>
           <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, marginBottom: '1.5rem' }}>
-            Join the<br /><span style={{ color: 'var(--brand)' }}>campus launch cohort.</span>
+            Get credit for<br /><span style={{ color: 'var(--brand)' }}>your work.</span>
           </h2>
           <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            One mission: Document real work in group projects with an academic record you can show graders, recruiters, and hiring teams. Join students building proof of what each person contributed.
+            Run group projects on a shared board, keep a record of who did what, and export proof for graders, recruiters, and teammates. Free for students.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="#register" style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              Register Now <ArrowRight size={18} />
+            <a href={kanbanSsoUrl} style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              Start Free <ArrowRight size={18} />
             </a>
             <Link href="/pricing" style={{ padding: '1rem 2.25rem', borderRadius: '12px', border: '1px solid rgba(15,23,42,0.15)', color: '#475569', fontWeight: 700, fontSize: '1rem', textDecoration: 'none' }}>
               View Plans
@@ -652,7 +443,7 @@ export default function PreRegisterPage() {
         </motion.div>
       </section>
 
-      {submitted && <LiveChatWidget appScope='prereg' />}
+      <LiveChatWidget appScope='prereg' />
       </main>
       </div>
     </>

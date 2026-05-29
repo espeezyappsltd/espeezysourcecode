@@ -58,6 +58,7 @@ export function canAccessAdminRoute(role: AdminStaffRole, pathname: string): boo
   if (pathname.startsWith('/admin/analytics')) return hasAdminPermission(role, 'analytics')
   if (pathname.startsWith('/admin/announcements')) return hasAdminPermission(role, 'announcements')
   if (pathname.startsWith('/admin/launch')) return hasAdminPermission(role, 'launch')
+  if (pathname.startsWith('/admin/apps')) return hasAdminPermission(role, 'launch')
   if (pathname.startsWith('/admin/audit')) return hasAdminPermission(role, 'audit')
   if (pathname.startsWith('/admin/settings')) return hasAdminPermission(role, 'settings')
   if (pathname.startsWith('/admin/learn')) return hasAdminPermission(role, 'learn')
@@ -80,6 +81,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { href: '/admin/learn', label: 'Dev learning', permission: 'learn', description: 'Guides & onboarding' },
   { href: '/admin/announcements', label: 'Announcements', permission: 'announcements' },
   { href: '/admin/launch', label: 'Launch', permission: 'launch' },
+  { href: '/admin/apps', label: 'Apps catalog', permission: 'launch', description: 'Landing app listings' },
   { href: '/admin/audit', label: 'Audit log', permission: 'audit' },
   { href: '/admin/settings', label: 'Settings', permission: 'settings' },
 ]

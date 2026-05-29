@@ -1,27 +1,36 @@
 import React, { useMemo } from 'react';
 
-// WCAG-compliant random color generator
-function getRandomWCAGColor(existing: string[]): string {
-  // Palette of high-contrast, accessible colors
-  const palette = [
-    '#6366f1', // Indigo
-    '#06b6d4', // Cyan
-    '#10b981', // Emerald
-    '#f59e42', // Orange
-    '#f43f5e', // Rose
-    '#a21caf', // Purple
-    '#fbbf24', // Amber
-    '#0ea5e9', // Sky
-    '#84cc16', // Lime
-    '#e11d48', // Red
-    '#1e293b', // Slate
-    '#f1f5f9', // Light
-  ];
-  // Avoid duplicates
-  const available = palette.filter(c => !existing.includes(c));
-  return available.length > 0
-    ? available[Math.floor(Math.random() * available.length)]
-    : palette[Math.floor(Math.random() * palette.length)];
+/** High-contrast palette — assignment is deterministic (SSR-safe). */
+const CATEGORY_PALETTE = [
+  '#6366f1', // Indigo
+  '#06b6d4', // Cyan
+  '#10b981', // Emerald
+  '#f59e42', // Orange
+  '#f43f5e', // Rose
+  '#a21caf', // Purple
+  '#fbbf24', // Amber
+  '#0ea5e9', // Sky
+  '#84cc16', // Lime
+  '#e11d48', // Red
+  '#1e293b', // Slate
+] as const;
+
+function hashCategoryKey(key: string): number {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) {
+    h = (h * 31 + key.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+/** Stable color per category name — same output on server and client. */
+function getDeterministicCategoryColor(category: string, existing: string[]): string {
+  const start = hashCategoryKey(category) % CATEGORY_PALETTE.length;
+  for (let i = 0; i < CATEGORY_PALETTE.length; i++) {
+    const color = CATEGORY_PALETTE[(start + i) % CATEGORY_PALETTE.length];
+    if (!existing.includes(color)) return color;
+  }
+  return CATEGORY_PALETTE[start];
 }
 
 export interface CategoryTabsProps {
@@ -31,11 +40,10 @@ export interface CategoryTabsProps {
 }
 
 export const CategoryTabs: React.FC<CategoryTabsProps> = ({ categories, selected, onSelect }) => {
-  // Assign a random color to each category, stable per render
   const colorMap = useMemo(() => {
     const map: Record<string, string> = {};
-    categories.forEach(cat => {
-      map[cat] = getRandomWCAGColor(Object.values(map));
+    categories.forEach((cat) => {
+      map[cat] = getDeterministicCategoryColor(cat, Object.values(map));
     });
     return map;
   }, [categories.join(',')]);

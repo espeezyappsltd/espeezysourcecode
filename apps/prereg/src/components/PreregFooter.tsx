@@ -10,6 +10,7 @@ import {
 
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
+  { href: '/#apps', label: 'Apps' },
   { href: '/#features', label: 'Features' },
   { href: '/checkout', label: 'Pricing' },
   { href: '/contact', label: 'Contact' },

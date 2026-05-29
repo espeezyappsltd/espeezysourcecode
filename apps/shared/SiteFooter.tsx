@@ -5,6 +5,7 @@ import Image from 'next/image'
 
 const PLATFORM_LINKS = [
   { href: 'https://espeezy.com', label: 'Home' },
+  { href: 'https://espeezy.com/#apps', label: 'Apps' },
   { href: 'https://espeezy.com/#features', label: 'Features' },
   { href: 'https://espeezy.com/checkout', label: 'Pricing' },
   { href: 'https://espeezy.com/contact', label: 'Contact' },
@@ -47,6 +48,8 @@ import {
   FOOTER_BRAND_BLURB,
   FOOTER_COPYRIGHT_TAGLINE,
   FOOTER_TECH_BLURB,
+  SUPPORT_PHONE,
+  SUPPORT_PHONE_TEL,
 } from './platform-brand'
 
 function FooterLink({ href, children, external = false }: { href: string; children: React.ReactNode; external?: boolean }) {
@@ -119,6 +122,13 @@ export default function SiteFooter() {
 
           <p style={{ fontSize: '0.82rem', lineHeight: 1.6, color: '#475569', marginBottom: '1rem', maxWidth: '240px' }}>
             {FOOTER_TECH_BLURB}
+          </p>
+
+          <p style={{ fontSize: '0.85rem', lineHeight: 1.6, color: '#64748b', marginBottom: '1.5rem' }}>
+            Call us:{' '}
+            <a href={`tel:${SUPPORT_PHONE_TEL}`} style={{ color: '#94a3b8', fontWeight: 700, textDecoration: 'none' }}>
+              {SUPPORT_PHONE}
+            </a>
           </p>
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>

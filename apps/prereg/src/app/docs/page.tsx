@@ -7,19 +7,19 @@ export default function DocsHomePage() {
     { icon: <BookOpen size={20} />, title: 'Kanban Boards', desc: 'Visualize every task in your group project lifecycle.', href: '/docs/features/kanban' },
     { icon: <Globe size={20} />, title: 'Peer Network', desc: 'Find collaborators and share resources across your institution.', href: '/docs/features/network' },
     { icon: <Shield size={20} />, title: 'Infrastructure', desc: 'Stripe, Supabase sync, and real-time presence architecture.', href: '/docs/infra/payments' },
-    { icon: <BarChart size={20} />, title: 'Impact Stats', desc: 'See how Espeezy is changing education globally.', href: '/docs/impact' },
+    { icon: <BarChart size={20} />, title: 'Impact & Research', desc: 'The research on why visible contribution improves group work.', href: '/docs/impact' },
     { icon: <ShoppingBag size={20} />, title: 'Side Hustle', desc: 'A managed task marketplace for academic and creative side work.', href: '/docs/features/hustle' },
-    { icon: <Sparkles size={20} />, title: 'Our Vision', desc: 'The mission behind building the most transparent LMS on Earth.', href: '/docs/vision' },
+    { icon: <Sparkles size={20} />, title: 'Our Vision', desc: 'Why we built Espeezy and where it is headed.', href: '/docs/vision' },
   ]
 
   return (
     <div className="docs-content">
       <div className="docs-hero">
-        <span className="docs-badge">THE Espeezy ARCHIVE</span>
+        <span className="docs-badge">Espeezy Docs</span>
         <h1 className="docs-title">Documentation</h1>
         <p className="docs-description">
-          Everything you need to understand, use, and build with Espeezy. Structured for both
-          technical teams and students who just want to get things done.
+          Everything you need to set up, use, and self-host Espeezy — for technical teams
+          and for students who just want to get started.
         </p>
       </div>
 

@@ -20,13 +20,19 @@ export const INSTALLATION_WEB_BODY = `The Espeezy collaborative apps run entirel
 
 export const PLATFORM_TEAM_SIZE = 12
 
-export const PLATFORM_OPERATIONS_TAGLINE =
-  'Operated by a 12-member team running production and reliable service delivery.'
+export const PLATFORM_OPERATIONS_TAGLINE = 'Built and run by a 12-person team.'
 
-/** Prereg hero: three lines + PLATFORM_OPERATIONS_TAGLINE below. */
+/**
+ * One-sentence pitch. Leads with what it is, the problem, and who it's for —
+ * no jargon. Reuse this verbatim across hero, metadata, and social cards.
+ */
+export const PLATFORM_ONE_LINER =
+  'Espeezy is a group-project workspace that records who did what, so every student gets credit for their work.'
+
+/** Prereg/kanban hero: headline + supporting sentence. */
 export const HERO_COPY_LINES = [
-  'Espeezy Learning Platform',
-  'You get real-time team collaboration, shared verifiable history, free secure storage space, marketplace exchange, hustle-gigs, peer networks, and so much more.' 
+  'Group projects, with proof of who did the work.',
+  'Plan tasks on a shared board, track every contribution automatically, and export a record you can show graders, recruiters, and teammates.',
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'See it in action'
@@ -40,7 +46,7 @@ export const KANBAN_DEMO_PATH = '/demo'
 export const PRICING_INTRO =
   'Espeezy learning apps are built for all types of teams and projects, keeping collaboration fast, secure, and affordable at scale. All core features are free for students.'
 
-export const UPGRADE_HERO_TITLE = 'Unleash the full potential of your team'
+export const UPGRADE_HERO_TITLE = 'More for your team, when you need it'
 
 export const UPGRADE_HERO_BODY =
   'A 12-member team runs Espeezy’s backend, payments, and campus rollouts. Your upgrade funds servers, support, and the features on our roadmap. All core features are free for students.'
@@ -95,7 +101,11 @@ export const FOOTER_BRAND_BLURB =
 export const FOOTER_TECH_BLURB =
   'Built on Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle. Payments via Stripe; subscriptions managed by our platform team.'
 
-export const FOOTER_IMPORTANT_INFO = `Support: support@espeezy.com
+/** Business contact phone — display format and E.164 tel: link. */
+export const SUPPORT_PHONE = '01604 969068'
+export const SUPPORT_PHONE_TEL = '+441604969068'
+
+export const FOOTER_IMPORTANT_INFO = `Support: support@espeezy.com · Tel: ${SUPPORT_PHONE}
 Payments via Stripe · Managed by the Espeezy platform team (${PLATFORM_TEAM_SIZE} operators on backend, billing, and support).
 Core student tier stays free.`
 

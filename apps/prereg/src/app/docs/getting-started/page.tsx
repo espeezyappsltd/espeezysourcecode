@@ -23,8 +23,8 @@ export default function GettingStartedPage() {
     },
     {
       step: '04',
-      title: 'Manage Your Project',
-      desc: 'Manage your project in real time. Add tasks, assign them to teammates, and start working together. View real-time project analytics on project stats page in the sidebar, exportable to Excel at any time.',
+      title: 'Track Progress',
+      desc: 'Watch real-time analytics on the project stats page in the sidebar — who is contributing what, and where the project stands.',
     },
     {
       step: '05',
@@ -40,7 +40,7 @@ export default function GettingStartedPage() {
         Quick Start Guide
       </h1>
       <p style={{ fontSize: '1.1rem', color: '#9ca3af', lineHeight: 1.65, marginBottom: '3rem', maxWidth: '640px' }}>
-        Get your team collaborating with a clear academic record in three steps. No credit card required for the core platform.
+        Get your team collaborating with a clear contribution record in a few short steps. No credit card needed for the core platform.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '4rem' }}>

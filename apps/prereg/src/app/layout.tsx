@@ -5,11 +5,14 @@ import PreregFooter from '@/components/PreregFooter'
 import { CentralLoadingProvider } from '@shared/CentralLoadingProvider'
 import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import { Analytics } from '@vercel/analytics/next'
+import { PLATFORM_ONE_LINER } from '@shared/platform-brand'
+
+const OG_TITLE = 'Espeezy — group projects with proof of who did the work'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://espeezy.com'),
-  title: 'Espeezy: Early Access',
-  description: 'Join 5 million students shaping the future of collaborative education.',
+  title: 'Espeezy — group projects with proof of who did the work',
+  description: PLATFORM_ONE_LINER,
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
@@ -18,22 +21,22 @@ export const metadata: Metadata = {
       { rel: 'mask-icon', url: '/icon.svg', color: '#6366f1' },
     ],
   },
-  keywords: ['education', 'collaboration', 'students', 'early access', 'learning platform'],
+  keywords: ['group projects', 'students', 'kanban', 'collaboration', 'contribution tracking', 'education'],
   authors: [{ name: 'Espeezy' }],
   creator: 'Espeezy',
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Espeezy: Early Access',
-    description: 'The platform that gives every student an equitable voice.',
-    url: 'https://espeezy.com/preregister',
+    title: OG_TITLE,
+    description: PLATFORM_ONE_LINER,
+    url: 'https://espeezy.com',
     siteName: 'Espeezy',
     type: 'website',
     images: [{ url: '/icon.svg', width: 64, height: 64, alt: 'Espeezy' }],
   },
   twitter: {
     card: 'summary',
-    title: 'Espeezy: Early Access',
-    description: 'The platform that gives every student an equitable voice.',
+    title: OG_TITLE,
+    description: PLATFORM_ONE_LINER,
     creator: '@espeezy',
   },
 }
