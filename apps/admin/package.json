@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3004",
     "build": "next build",
+    "vercel-build:panel": "cd ../.. && npm install && npm run build --prefix apps/admin",
     "start": "next start -p 3004",
     "typecheck": "tsc --noEmit",
     "validate:admin-mobile": "node scripts/validate-admin-mobile.mjs",
