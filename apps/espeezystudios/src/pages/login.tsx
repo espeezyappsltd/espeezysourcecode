@@ -17,13 +17,49 @@ export default function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: '80px auto', padding: 32, background: '#fff', borderRadius: 12 }}>
+    <div style={{ maxWidth: 400, margin: '48px auto', padding: 32, background: '#fff', borderRadius: 12 }}>
       <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required style={{ width: '100%', marginBottom: 12 }} />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%', marginBottom: 12 }} />
-        <button type="submit" style={{ width: '100%' }}>Sign In</button>
-        {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+      <form onSubmit={handleLogin} noValidate>
+        <div style={{ marginBottom: 12 }}>
+          <label htmlFor="login-email" style={{ display: 'block', marginBottom: 4 }}>
+            Email
+          </label>
+          <input
+            id="login-email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'login-error' : undefined}
+            style={{ width: '100%', minHeight: 44, padding: '8px 10px' }}
+          />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label htmlFor="login-password" style={{ display: 'block', marginBottom: 4 }}>
+            Password
+          </label>
+          <input
+            id="login-password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'login-error' : undefined}
+            style={{ width: '100%', minHeight: 44, padding: '8px 10px' }}
+          />
+        </div>
+        <button type="submit" style={{ width: '100%', minHeight: 44 }}>
+          Sign In
+        </button>
+        {error && (
+          <div id="login-error" role="alert" style={{ color: '#b00020', marginTop: 8 }}>
+            {error}
+          </div>
+        )}
       </form>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
@@ -12,19 +13,47 @@ const menu = [
 
 export default function Sidebar() {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+
   return (
-    <aside style={{ width: 220, padding: 24, background: '#f5f5f5', height: '100vh', position: 'fixed' }}>
-      <nav>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {menu.map(item => (
-            <li key={item.name} style={{ margin: '18px 0' }}>
-              <Link href={item.path} legacyBehavior>
-                <a style={{ color: router.pathname === item.path ? '#1976d2' : '#222', fontWeight: router.pathname === item.path ? 700 : 400 }}>{item.name}</a>
-              </Link>
-            </li>
-          ))}
+    <header className="sidebar">
+      <div className="sidebar__bar">
+        <span className="sidebar__brand">Espeezy Studios</span>
+        <button
+          type="button"
+          className="sidebar__toggle"
+          aria-expanded={open}
+          aria-controls="primary-navigation"
+          onClick={() => setOpen(prev => !prev)}
+        >
+          <span aria-hidden="true">{open ? '\u2715' : '\u2630'}</span>
+          {open ? 'Close menu' : 'Menu'}
+        </button>
+      </div>
+      <nav
+        id="primary-navigation"
+        className="sidebar__nav"
+        aria-label="Primary"
+        style={{ display: open ? 'block' : 'none' }}
+      >
+        <ul className="sidebar__list">
+          {menu.map(item => {
+            const isCurrent = router.asPath === item.path;
+            return (
+              <li key={item.name}>
+                <Link
+                  href={item.path}
+                  className="sidebar__link"
+                  aria-current={isCurrent ? 'page' : undefined}
+                  onClick={() => setOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
-    </aside>
+    </header>
   );
 }

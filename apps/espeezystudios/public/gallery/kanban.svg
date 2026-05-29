@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2196f3"/>
+      <stop offset="100%" stop-color="#1565c0"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" rx="24" fill="url(#bg)"/>
+  <rect x="48" y="56" width="144" height="20" rx="6" fill="rgba(255,255,255,0.9)"/>
+  <rect x="48" y="92" width="112" height="16" rx="5" fill="rgba(255,255,255,0.55)"/>
+  <rect x="48" y="120" width="128" height="16" rx="5" fill="rgba(255,255,255,0.55)"/>
+  <rect x="48" y="148" width="96" height="16" rx="5" fill="rgba(255,255,255,0.55)"/>
+  <text x="120" y="200" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="22" font-weight="700">Kanban</text>
+</svg>

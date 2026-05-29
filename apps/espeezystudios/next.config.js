@@ -1,6 +1,9 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ['espeezy.com', 'yourdomain.com'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'espeezy.com' },
+      { protocol: 'https', hostname: 'yourdomain.com' },
+    ],
   },
 };

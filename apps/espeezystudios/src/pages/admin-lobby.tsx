@@ -26,8 +26,8 @@ export default function AdminLobby() {
   return (
     <div style={{ maxWidth: 600, margin: '80px auto', padding: 32, background: '#fff', borderRadius: 12 }}>
       <h2>Admin Lobby</h2>
-      <button onClick={sendGlobalNotification} style={{ marginBottom: 16 }}>Send Global Notification</button>
-      {notification && <div style={{ color: 'green', marginBottom: 16 }}>{notification}</div>}
+      <button onClick={sendGlobalNotification} style={{ marginBottom: 16, minHeight: 44 }}>Send Global Notification</button>
+      {notification && <div role="status" style={{ color: '#1b5e20', marginBottom: 16 }}>{notification}</div>}
       <div>Welcome, {user.email}!</div>
       <div>One-click access to admin tools here.</div>
     </div>

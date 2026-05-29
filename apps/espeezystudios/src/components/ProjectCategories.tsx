@@ -1,7 +1,7 @@
 const categories = [
-  { name: 'Ongoing', color: '#4caf50', symbol: '🟢' },
-  { name: 'Finished', color: '#2196f3', symbol: '🔵' },
-  { name: '£££', color: '#ff9800', symbol: '💰' },
+  { name: 'Ongoing', color: '#2e7d32', symbol: '🟢' },
+  { name: 'Finished', color: '#1565c0', symbol: '🔵' },
+  { name: '£££', color: '#b45309', symbol: '💰' },
 ];
 
 const projects = [
@@ -12,16 +12,21 @@ const projects = [
 
 export default function ProjectCategories() {
   return (
-    <section style={{ margin: '32px 0' }}>
-      <h2>Project Categories</h2>
-      <div style={{ display: 'flex', gap: 32 }}>
+    <section id="projects" className="section" aria-labelledby="projects-heading">
+      <h2 id="projects-heading">Project Categories</h2>
+      <div className="card-grid">
         {categories.map(cat => (
-          <div key={cat.name} style={{ minWidth: 120 }}>
-            <h3 style={{ color: cat.color }}>{cat.symbol} {cat.name}</h3>
-            <ul>
-              {projects.filter(p => p.status === cat.name).map(p => (
-                <li key={p.title}>{p.title}</li>
-              ))}
+          <div key={cat.name}>
+            <h3 className="category__heading" style={{ color: cat.color }}>
+              <span aria-hidden="true">{cat.symbol} </span>
+              {cat.name}
+            </h3>
+            <ul className="category__list">
+              {projects
+                .filter(p => p.status === cat.name)
+                .map(p => (
+                  <li key={p.title}>{p.title}</li>
+                ))}
             </ul>
           </div>
         ))}

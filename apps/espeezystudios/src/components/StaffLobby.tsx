@@ -6,13 +6,13 @@ const staff = [
 
 export default function StaffLobby() {
   return (
-    <section style={{ margin: '32px 0' }}>
-      <h2>Staff Lobby</h2>
-      <ul style={{ display: 'flex', gap: 32 }}>
+    <section id="staff" className="section" aria-labelledby="staff-heading">
+      <h2 id="staff-heading">Staff Lobby</h2>
+      <ul className="card-grid">
         {staff.map(member => (
-          <li key={member.name} style={{ minWidth: 120 }}>
-            <div style={{ fontWeight: 'bold' }}>{member.name}</div>
-            <div>{member.role}</div>
+          <li key={member.name}>
+            <span className="staff__name">{member.name}</span>
+            <span className="staff__role"> — {member.role}</span>
           </li>
         ))}
       </ul>

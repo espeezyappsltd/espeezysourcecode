@@ -1,5 +1,235 @@
+:root {
+  --sidebar-width: 240px;
+  --color-bg: #f0f2f5;
+  --color-surface: #ffffff;
+  --color-sidebar: #f5f5f5;
+  --color-text: #1a1a1a;
+  --color-muted: #44494f;
+  --color-link: #0b5cab; /* contrast >= 4.5:1 on light surfaces */
+  --color-link-hover: #08406f;
+  --color-border: #d0d4da;
+  --color-hover-bg: #e3e6ea;
+  --focus-ring: #0b5cab;
+  --radius: 12px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
+  padding: 0;
+}
+
+body {
   font-family: 'Inter', Arial, sans-serif;
-  background: #f0f2f5;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+a {
+  color: var(--color-link);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+/* Visible keyboard focus for every interactive element (WCAG 2.4.7). */
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip link: hidden until focused (WCAG 2.4.1 Bypass Blocks). */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--color-surface);
+  color: var(--color-link);
+  font-weight: 700;
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ---------- Layout (mobile-first: single column) ---------- */
+.layout {
+  min-block-size: 100dvh;
+}
+
+.main {
+  padding: 16px;
+}
+
+.main:focus {
+  outline: none;
+}
+
+/* ---------- Sidebar (mobile-first: top bar that expands) ---------- */
+.sidebar {
+  background: var(--color-sidebar);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.sidebar__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.sidebar__brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.sidebar__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  min-block-size: 44px; /* WCAG 2.5.5 target size */
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sidebar__toggle:hover {
+  background: var(--color-hover-bg);
+}
+
+.sidebar__nav {
+  padding: 0 8px 8px;
+}
+
+.sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar__link {
+  display: block;
+  padding: 12px 12px;
+  min-block-size: 44px;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.sidebar__link:hover {
+  background: var(--color-hover-bg);
+  color: var(--color-text);
+}
+
+.sidebar__link[aria-current='page'] {
+  font-weight: 700;
+  color: var(--color-link);
+  background: var(--color-hover-bg);
+}
+
+/* ---------- Gallery ---------- */
+.gallery {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.gallery__item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--color-link);
+}
+
+.gallery__item img {
+  border-radius: var(--radius);
+}
+
+/* ---------- Card grids (categories + staff) ---------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section {
+  margin: 32px 0;
+}
+
+.category__heading {
+  margin: 0 0 8px;
+}
+
+.category__list {
+  margin: 0;
+  padding-inline-start: 1.2em;
+}
+
+.staff__name {
+  font-weight: 700;
+}
+
+.staff__role {
+  color: var(--color-muted);
+}
+
+/* ---------- Desktop: fixed sidebar + offset main ---------- */
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--sidebar-width);
+    border-block-end: none;
+    border-inline-end: 1px solid var(--color-border);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .sidebar__toggle {
+    display: none;
+  }
+
+  /* Always show the menu on wide screens regardless of toggle state. */
+  .sidebar__nav {
+    display: block !important;
+    padding: 8px;
+  }
+
+  .main {
+    margin-inline-start: var(--sidebar-width);
+    padding: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
 }
