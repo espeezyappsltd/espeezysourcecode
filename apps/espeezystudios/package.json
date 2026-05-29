@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "vercel-build:espeezystudios": "cd ../.. && npm install && npm run build --prefix apps/espeezystudios"
+    "lint": "next lint",
+    "stop": "taskkill /f /im node.exe"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

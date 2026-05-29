@@ -1,6 +1,8 @@
+
 import GalleryNav from '../components/GalleryNav';
 import ProjectCategories from '../components/ProjectCategories';
 import StaffLobby from '../components/StaffLobby';
+import JobsDashboard from '../components/JobsDashboard';
 
 export default function Home() {
   return (
@@ -9,6 +11,7 @@ export default function Home() {
       <GalleryNav />
       <ProjectCategories />
       <StaffLobby />
+      <JobsDashboard />
     </>
   );
 }
