@@ -1,8 +1,99 @@
+/* Global Footer Styles */
+.global-footer {
+  width: 100%;
+  background: var(--studios-surface-2);
+  color: var(--studios-muted);
+  border-top: 1.5px solid var(--studios-border);
+  padding: 1.2rem 0 1.2rem 0;
+  margin-top: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.04);
+  z-index: 100;
+}
+.global-footer__content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: center;
+  justify-content: center;
+}
+.global-footer__links {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+}
+.global-footer__links a {
+  color: var(--studios-brand);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.18s;
+}
+.global-footer__links a:hover {
+  color: var(--studios-accent);
+  text-decoration: underline;
+}
+/* High-end sidebar overlay and animation */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.32);
+  z-index: 1001;
+  transition: background 0.3s;
+}
 
-@import './tokens.css';
-@import './base.css';
+.highend-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 270px;
+  background: var(--studios-surface-2);
+  border-right: 1.5px solid var(--studios-border);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+  will-change: transform;
+  z-index: 1002;
+}
+
+.sidebar-theme-toggle {
+  margin-left: 12px;
+  background: var(--studios-bg);
+  color: var(--studios-text);
+  border: 1px solid var(--studios-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+}
+.sidebar-theme-toggle:hover {
+  background: var(--studios-brand);
+  color: #fff;
+  border-color: var(--studios-brand);
+}
+
+@media (min-width: 768px) {
+  .highend-sidebar {
+    transform: none !important;
+    box-shadow: none !important;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 270px;
+    z-index: 1002;
+  }
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
 
 /* Modern dashboard utility styles */
+.dashboard-action-btn {
 .dashboard-action-btn {
   background: var(--studios-surface-2);
   color: var(--studios-foreground);

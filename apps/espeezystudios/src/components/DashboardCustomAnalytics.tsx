@@ -27,7 +27,8 @@ export default function DashboardCustomAnalytics() {
       // 2. Average job completion time per day (line)
       const userCounts: Record<string, number> = {};
       const completionTimes: Record<string, number[]> = {};
-      jobs?.forEach((job: any) => {
+      type Job = { assigned_to?: string; status: string; created_at?: string; completed_at?: string };
+      (jobs as Job[] | undefined)?.forEach((job) => {
         // Jobs per user
         const user = job.assigned_to || 'Unassigned';
         userCounts[user] = (userCounts[user] || 0) + 1;

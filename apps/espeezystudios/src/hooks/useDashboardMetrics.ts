@@ -20,11 +20,12 @@ export function useDashboardMetrics() {
       // Fetch team (assuming a 'team_members' table)
       const { data: team, error: teamError } = await supabase.from('team_members').select('*');
       // Completed jobs
-      const completed = jobs ? jobs.filter((j: any) => j.status === 'done').length : 0;
+      type Job = { status: string };
+      const completed = jobs ? jobs.filter((j: Job) => j.status === 'done').length : 0;
       if (mounted) {
         setMetrics({
           projects: projects?.length || 0,
-          jobs: jobs?.filter((j: any) => j.status !== 'done').length || 0,
+          jobs: jobs?.filter((j: Job) => j.status !== 'done').length || 0,
           team: team?.length || 0,
           completed,
           loading: false,

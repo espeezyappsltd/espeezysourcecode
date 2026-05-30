@@ -30,7 +30,8 @@ function getInstance(): SupabaseClient {
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_: SupabaseClient, prop: string | symbol) {
     const client = getInstance();
-    const value = (client as any)[prop];
+    // Support both string and symbol keys for proxy
+    const value = (client as unknown as Record<string | symbol, unknown>)[prop];
     return typeof value === 'function' ? value.bind(client) : value;
   },
 });

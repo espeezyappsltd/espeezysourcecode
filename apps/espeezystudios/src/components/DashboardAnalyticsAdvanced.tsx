@@ -34,8 +34,9 @@ export default function DashboardAnalyticsAdvanced() {
       });
       const jobsPerDay = days.map(day => jobs?.filter(j => j.created_at?.slice(0, 10) === day).length || 0);
       // Project stats
-      const active = projects?.filter((p: any) => p.status !== 'done').length || 0;
-      const completed = projects?.filter((p: any) => p.status === 'done').length || 0;
+      type Project = { status: string };
+      const active = projects?.filter((p: Project) => p.status !== 'done').length || 0;
+      const completed = projects?.filter((p: Project) => p.status === 'done').length || 0;
       setJobHistory(jobsPerDay);
       setProjectStats({ active, completed });
       setLoading(false);

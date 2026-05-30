@@ -22,9 +22,10 @@ export default function DashboardAnalytics() {
     async function fetchStats() {
       const { data, error } = await supabase.from('jobs').select('status');
       if (!error && data) {
-        const pending = data.filter((j: any) => j.status === 'pending').length;
-        const in_progress = data.filter((j: any) => j.status === 'in_progress').length;
-        const done = data.filter((j: any) => j.status === 'done').length;
+        type Job = { status: string };
+        const pending = data.filter((j: Job) => j.status === 'pending').length;
+        const in_progress = data.filter((j: Job) => j.status === 'in_progress').length;
+        const done = data.filter((j: Job) => j.status === 'done').length;
         setJobStats({ pending, in_progress, done });
       }
       setLoading(false);

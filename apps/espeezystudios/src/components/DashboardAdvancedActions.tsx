@@ -7,7 +7,7 @@ async function downloadCSV() {
   if (error || !data) return alert('Failed to fetch jobs');
   const csv = [
     Object.keys(data[0] || {}).join(','),
-    ...data.map((row: any) => Object.values(row).map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')),
+    ...data.map((row: Record<string, unknown>) => Object.values(row).map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')),
   ].join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   saveAs(blob, 'jobs-export.csv');
@@ -16,7 +16,7 @@ async function downloadCSV() {
 async function downloadPDF() {
   const { data, error } = await supabase.from('jobs').select('*');
   if (error || !data) return alert('Failed to fetch jobs');
-  const rows = data.map((row: any) => Object.values(row).join(' | ')).join('\n');
+  const rows = data.map((row: Record<string, unknown>) => Object.values(row).join(' | ')).join('\n');
   const pdfText = `Jobs Export\n\n${Object.keys(data[0] || {}).join(' | ')}\n${rows}`;
   const blob = new Blob([pdfText], { type: 'application/pdf' });
   saveAs(blob, 'jobs-export.pdf');
