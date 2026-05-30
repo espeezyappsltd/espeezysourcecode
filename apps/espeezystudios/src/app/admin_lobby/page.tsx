@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase-client';
+import { supabase } from '../../lib/supabase-client';
 import type { User } from '@supabase/supabase-js';
 
 export default function AdminLobby() {

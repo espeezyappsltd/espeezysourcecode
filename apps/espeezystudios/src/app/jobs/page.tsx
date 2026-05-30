@@ -1,4 +1,4 @@
-import JobsDashboard from '../components/JobsDashboard';
+import JobsDashboard from '../../components/JobsDashboard';
 
 export default function JobsPage() {
   return (
