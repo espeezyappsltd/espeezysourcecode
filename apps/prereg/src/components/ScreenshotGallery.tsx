@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { withBasePath } from '../shared/withBasePath'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { SCREENSHOT_ASSETS } from '@shared/assets'
@@ -85,7 +86,7 @@ export default function ScreenshotGallery() {
               background: '#f1f5f9' // Fallback color while loading
             }}>
               <Image 
-                src={img.src} 
+                src={withBasePath(img.src)} 
                 alt={img.title} 
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
@@ -97,7 +98,7 @@ export default function ScreenshotGallery() {
                   opacity: loadedImages[img.src] ? 1 : 0,
                   transition: 'opacity 1s ease-in-out',
                   transform: loadedImages[img.src] ? 'scale(1)' : 'scale(1.05)',
-                }} 
+                }}
               />
                 
                 {/* Subtle Floating Animation Overlay */}
@@ -240,7 +241,7 @@ export default function ScreenshotGallery() {
                 position: 'relative'
               }}>
                 <Image
-                  src={SCREENSHOTS[selectedImage].src}
+                  src={withBasePath(SCREENSHOTS[selectedImage].src)}
                   alt={SCREENSHOTS[selectedImage].title}
                   width={800} // Smaller width for faster lightbox
                   height={533}
