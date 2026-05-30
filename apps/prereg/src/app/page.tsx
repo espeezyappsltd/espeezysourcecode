@@ -1,6 +1,4 @@
-'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, MotionConfig } from 'framer-motion'
@@ -13,8 +11,6 @@ import {
 import { useLaunchData } from '@/hooks/useLaunchData'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
-import dynamic from 'next/dynamic'
-const LatestArticlesSection = dynamic(() => import('@/components/LatestArticlesSection'), { ssr: false })
 import { SCREENSHOT_ASSETS } from '@shared/assets'
 import {
   HERO_ANALYTICS_CAPTION,
@@ -24,6 +20,8 @@ import { PLATFORM_APPS_FALLBACK, type PlatformApp } from '@shared/platform-apps'
 import PlatformHero from '@/components/landing/PlatformHero'
 import AppsCatalog from '@/components/landing/AppsCatalog'
 import { buildCrossAppSsoUrl, GAMES_PROFILE_PATH } from '@shared/cross-app-auth'
+import LatestArticlesSection from '@/components/LatestArticlesSection'
+import { getLatestArticles } from '@/lib/latest-articles'
 
 function HeroVisual({ userCount }: { userCount: number }) {
   return (
@@ -363,96 +361,17 @@ export default function PreRegisterPage() {
 
       {/* Why This Matters */}
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 'clamp(2.8rem, 8vw, 6rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, maxWidth: '960px', margin: '0 auto 1.5rem' }}>
-            A shared record that makes every contribution{' '}
-            <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              easy to see.
-            </span>
-          </h2>
-          <p style={{ color: '#64748b', maxWidth: '680px', margin: '0 auto 3rem', fontSize: 'clamp(1rem, 2.2vw, 1.2rem)', lineHeight: 1.6, fontWeight: 500 }}>
-            Less guesswork for teams and educators. Espeezy keeps a clear contribution history that becomes an academic record for grades, portfolios, and employers.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+        export default async function PreRegisterPage() {
+          const { articles } = await getLatestArticles({ limit: 10, page: 1 });
+          // ...existing code...
+          return (
+            <MotionConfig reducedMotion="user">
+            <>
+              {/* ...existing code... */}
+              <LatestArticlesSection articles={articles} />
+              {/* ...existing code... */}
+            </>
+            </MotionConfig>
+          );
+        }
             {[
-              { icon: <GraduationCap size={22} />, stat: '73%', label: 'of students feel their individual effort is not accurately recognised in group assessments.' },
-              { icon: <Users size={22} />, stat: '2.4B+', label: 'students worldwide could benefit from group-work tools with academic records for résumés and skill proof.' },
-              { icon: <TrendingUp size={22} />, stat: '3x', label: 'more likely to complete a course when accountability and recognition systems are in place.' },
-              { icon: <Globe size={22} />, stat: '195', label: 'countries where equitable access to quality educational tools remains a critical gap.' },
-            ].map((item, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                style={{ padding: '1.75rem 1.5rem', background: 'white', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '16px', textAlign: 'left', boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
-                <div style={{ color: 'var(--brand)', marginBottom: '1rem', opacity: 0.7 }}>{item.icon}</div>
-                <div style={{ fontSize: 'clamp(2rem, 5vw, 2.75rem)', fontWeight: 950, letterSpacing: '-0.05em', marginBottom: '0.5rem' }}>{item.stat}</div>
-                <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.55, margin: 0 }}>{item.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Coming Features */}
-      <section id="features" style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)', background: '#f8fafc' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-            <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '1rem' }}>
-              What&apos;s coming next.
-            </h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-            {COMING_FEATURES.map((f, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                style={{ padding: '1.5rem', background: 'white', border: '1px solid rgba(15,23,42,0.08)', borderRadius: '14px', boxShadow: '0 2px 8px rgba(15,23,42,0.04)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                  <div style={{ padding: '0.5rem', background: 'rgba(99,102,241,0.08)', borderRadius: '8px', color: 'var(--brand)' }}>{f.icon}</div>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '3px 8px', border: '1px solid rgba(15,23,42,0.1)', borderRadius: '100px' }}>{f.tag}</span>
-                </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.5rem' }}>{f.title}</h3>
-                <p style={{ color: '#64748b', fontSize: '0.83rem', lineHeight: 1.55, margin: 0 }}>{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust badges */}
-      <section style={{ padding: 'clamp(3rem, 6vw, 5rem) clamp(1rem, 4vw, 2.5rem)', borderTop: '1px solid rgba(15,23,42,0.07)', position: 'relative', zIndex: 1 }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <p style={{ textAlign: 'center', fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '2rem' }}>
-            Designed to work alongside
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}>
-            {['Nile LMS', 'Canvas', 'Blackboard', 'Moodle', 'Google Classroom', 'Microsoft Teams for Education', 'Turnitin', 'GitHub Education'].map(name => (
-              <div key={name} style={{ padding: '0.6rem 1.25rem', border: '1px solid rgba(15,23,42,0.1)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>{name}</div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem)', textAlign: 'center', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)', background: 'linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(6,182,212,0.04) 50%, rgba(16,185,129,0.04) 100%)' }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, letterSpacing: '-0.05em', lineHeight: 0.95, marginBottom: '1.5rem' }}>
-            Get credit for<br /><span style={{ color: 'var(--brand)' }}>your work.</span>
-          </h2>
-          <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            Run group projects on a shared board, keep a record of who did what, and export proof for graders, recruiters, and teammates. Free for students.
-          </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href={kanbanSsoUrl} style={{ padding: '1rem 2.25rem', borderRadius: '12px', background: 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              Start Free <ArrowRight size={18} />
-            </a>
-            <Link href="/pricing" style={{ padding: '1rem 2.25rem', borderRadius: '12px', border: '1px solid rgba(15,23,42,0.15)', color: '#475569', fontWeight: 700, fontSize: '1rem', textDecoration: 'none' }}>
-              View Plans
-            </Link>
-          </div>
-        </motion.div>
-      </section>
-
-      <LiveChatWidget appScope='prereg' />
-      </main>
-      </div>
-    </>
-    </MotionConfig>
-  )
-}

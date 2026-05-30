@@ -21,8 +21,7 @@ const colors = {
   catText: '#10b981',
 };
 
-export default async function LatestArticlesSection({ page = 1 }) {
-  const { articles, total } = await getLatestArticles({ limit: 10, page });
+export default function LatestArticlesSection({ articles = [] }) {
   // Get unique tags, categories, authors for filter bar
   const allTags = Array.from(new Set(articles.flatMap(a => Array.isArray(a.tags) ? a.tags : [])));
   const allCategories = Array.from(new Set(articles.map(a => a.category).filter(Boolean)));
