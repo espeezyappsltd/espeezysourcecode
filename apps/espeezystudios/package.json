@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "stop": "taskkill /f /im node.exe"
+    "stop": "taskkill /f /im node.exe",
+    "vercel-build:panel": "npm run build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

@@ -10,7 +10,8 @@ export default function AdminLobby() {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       // Example: check admin role from user metadata or fetch from backend
-      setIsAdmin(data.user?.role === 'admin' || data.user?.email?.endsWith('@espeezy.com'));
+      const isAdmin = Boolean(data.user && (data.user.role === 'admin' || (data.user.email && data.user.email.endsWith('@espeezy.com'))));
+      setIsAdmin(isAdmin);
     });
   }, []);
 

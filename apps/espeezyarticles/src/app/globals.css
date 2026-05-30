@@ -1,0 +1,6 @@
+@import './tokens.css';
+@import './base.css';
+
+:root {
+  /* Article-specific overrides can go here */
+}
