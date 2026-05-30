@@ -67,7 +67,7 @@ function HeroVisual({ userCount }: { userCount: number }) {
           }}
         >
           <Image 
-            src="/screenshots/hero_sc.png"
+            src="/screenshots/hustle_p.png"
             alt="Hero Screenshot"
             fill
             sizes="(max-width: 1024px) 100vw, 800px"
@@ -107,7 +107,7 @@ function HeroVisual({ userCount }: { userCount: number }) {
           className="show-desktop"
         >
           <Image 
-            src={SCREENSHOT_ASSETS.RESOURCE_CENTER} 
+            src="/screenshots/identity_p.png"
             alt="Mobile Dashboard" 
             fill
             sizes="180px"
@@ -129,7 +129,7 @@ function HeroVisual({ userCount }: { userCount: number }) {
           className="show-desktop"
         >
           <Image 
-            src={SCREENSHOT_ASSETS.ASSET_MARKETPLACE} 
+            src="/screenshots/hustle_wd.png"
             alt="Mobile Marketplace" 
             fill
             sizes="180px"

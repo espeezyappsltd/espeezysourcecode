@@ -8,13 +8,18 @@ import { SCREENSHOT_ASSETS } from '@shared/assets'
     import { CategoryTabs } from '@shared/CategoryTabs'
 
 const SCREENSHOTS = [
-  { src: SCREENSHOT_ASSETS.ANALYTICS_DASHBOARD, title: 'Analytics Dashboard', category: 'Analytics' },
-  { src: SCREENSHOT_ASSETS.TASK_INTERFACE, title: 'Task Interface', category: 'Productivity' },
-  { src: SCREENSHOT_ASSETS.COLLABORATION_HUB, title: 'Collaboration Hub', category: 'Communication' },
-  { src: SCREENSHOT_ASSETS.ANALYTICS_ENGINE, title: 'Analytics Engine', category: 'Data' },
-  { src: SCREENSHOT_ASSETS.GLOBAL_NETWORK, title: 'Global Network', category: 'Community' },
-  { src: SCREENSHOT_ASSETS.SIDE_HUSTLE, title: 'Side Hustle', category: 'Income' },
-  { src: SCREENSHOT_ASSETS.EARNING_PORTAL, title: 'Earning Portal', category: 'Finance' },
+  { src: '/screenshots/assets_p.png', title: 'Assets', category: 'Core' },
+  { src: '/screenshots/data_p.png', title: 'Data', category: 'Core' },
+  { src: '/screenshots/feedback_p.png', title: 'Feedback', category: 'Feedback' },
+  { src: '/screenshots/hustle_p.png', title: 'Hustle', category: 'Hustle' },
+  { src: '/screenshots/hustle_wd.png', title: 'Hustle Wide', category: 'Hustle' },
+  { src: '/screenshots/identity_p.png', title: 'Identity', category: 'Identity' },
+  { src: '/screenshots/respurces_wd.png', title: 'Resources Wide', category: 'Resources' },
+  { src: '/screenshots/settings_p.png', title: 'Settings', category: 'Settings' },
+  { src: '/screenshots/storage_p.png', title: 'Storage', category: 'Storage' },
+  { src: '/screenshots/subscr_p.png', title: 'Subscription', category: 'Subscription' },
+  { src: '/screenshots/team_p.png', title: 'Team', category: 'Team' },
+  { src: '/screenshots/teams_p.png', title: 'Teams', category: 'Team' },
 ]
 
 export default function ScreenshotGallery() {
