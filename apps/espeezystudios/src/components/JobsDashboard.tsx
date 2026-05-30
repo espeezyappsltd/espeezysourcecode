@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase-client';
+import { useRealtimeJobs } from '../hooks/useRealtimeJobs';
 
 export type Job = {
   id: string;
@@ -25,9 +26,17 @@ export default function JobsDashboard() {
   const inProgressJobs = jobs.filter(j => j.status === 'in_progress').length;
   const doneJobs = jobs.filter(j => j.status === 'done').length;
 
-  useEffect(() => {
+
+  const fetchJobsCallback = useCallback(() => {
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useRealtimeJobs(fetchJobsCallback);
 
   async function fetchJobs() {
     setLoading(true);
@@ -38,20 +47,23 @@ export default function JobsDashboard() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    let changed = false;
     if (editingJob) {
-      await supabase.from('jobs').update(form).eq('id', editingJob.id);
+      const { error } = await supabase.from('jobs').update(form).eq('id', editingJob.id);
+      changed = !error;
     } else {
-      await supabase.from('jobs').insert([{ ...form }]);
+      const { error } = await supabase.from('jobs').insert([{ ...form }]);
+      changed = !error;
     }
     setShowModal(false);
     setForm({ title: '', description: '', status: 'pending' });
     setEditingJob(null);
-    fetchJobs();
+    if (changed) await fetchJobs();
   }
 
   async function handleDelete(id: string) {
-    await supabase.from('jobs').delete().eq('id', id);
-    fetchJobs();
+    const { error } = await supabase.from('jobs').delete().eq('id', id);
+    if (!error) await fetchJobs();
   }
 
   function openEdit(job: Job) {

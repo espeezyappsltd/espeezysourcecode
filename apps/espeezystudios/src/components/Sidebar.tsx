@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import AppsNav from './AppsNav';
@@ -9,6 +9,7 @@ const menu = [
   { name: 'Projects', path: '/#projects' },
   { name: 'Staff Lobby', path: '/#staff' },
   { name: 'Jobs', path: '/jobs' },
+  { name: 'Profile', path: '/profile' },
   { name: 'Login', path: '/login' },
   { name: 'Admin Lobby', path: '/admin-lobby' },
 ];
@@ -16,6 +17,11 @@ const menu = [
 export default function Sidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   return (
     <header className="sidebar">
@@ -30,6 +36,14 @@ export default function Sidebar() {
         >
           <span aria-hidden="true">{open ? '\u2715' : '\u2630'}</span>
           {open ? 'Close menu' : 'Menu'}
+        </button>
+        <button
+          type="button"
+          aria-label="Toggle theme"
+          style={{ marginLeft: 12, background: theme === 'dark' ? '#fff' : '#222', color: theme === 'dark' ? '#222' : '#fff', border: '1px solid #888', borderRadius: 8, padding: '8px 14px', fontWeight: 700, cursor: 'pointer' }}
+          onClick={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
+        >
+          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
         </button>
       </div>
       <nav
