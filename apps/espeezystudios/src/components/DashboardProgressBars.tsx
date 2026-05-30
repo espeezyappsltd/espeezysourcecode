@@ -1,5 +1,4 @@
 
-
 const progressData = [
   { label: 'Jobs Progress', value: 70, color: '#6366f1' },
   { label: 'Projects Complete', value: 40, color: '#22c55e' },

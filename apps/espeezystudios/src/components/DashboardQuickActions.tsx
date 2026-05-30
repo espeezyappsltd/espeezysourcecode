@@ -1,3 +1,6 @@
+"use client";
+
+
 import { Plus, UserPlus, Rocket } from 'lucide-react';
 
 const actions = [

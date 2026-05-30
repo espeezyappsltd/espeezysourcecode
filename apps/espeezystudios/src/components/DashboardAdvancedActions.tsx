@@ -1,3 +1,5 @@
+"use client";
+import { useEffect, useState } from 'react';
 import { Download, FileText, BarChart2 } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase-client';

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase-client';
 import { Bar, Line } from 'react-chartjs-2';

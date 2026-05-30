@@ -1,3 +1,5 @@
+"use client";
+
 
 import Link from 'next/link';
 // Static list for browser compatibility; update as needed

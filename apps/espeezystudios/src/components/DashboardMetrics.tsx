@@ -1,3 +1,6 @@
+"use client";
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase-client';
 import { Briefcase, Users, CheckCircle, ListTodo } from 'lucide-react';
 import { useDashboardMetrics } from '../hooks/useDashboardMetrics';
 
