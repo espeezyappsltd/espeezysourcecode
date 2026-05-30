@@ -12,7 +12,7 @@ export default function GlobalFooter() {
           <span>·</span>
           <a href="/terms" target="_blank" rel="noopener noreferrer">Terms</a>
           <span>·</span>
-          <a href="https://github.com/espeezy" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://github.com/EspeezyTeam" target="_blank" rel="noopener noreferrer">GitHub</a>
         </span>
       </div>
     </footer>
