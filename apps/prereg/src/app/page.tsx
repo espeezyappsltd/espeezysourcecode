@@ -13,6 +13,8 @@ import {
 import { useLaunchData } from '@/hooks/useLaunchData'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
+import dynamic from 'next/dynamic'
+const LatestArticlesSection = dynamic(() => import('@/components/LatestArticlesSection'), { ssr: false })
 import { SCREENSHOT_ASSETS } from '@shared/assets'
 import {
   HERO_ANALYTICS_CAPTION,
@@ -337,7 +339,11 @@ export default function PreRegisterPage() {
         )}
       </section>
 
+
       <AppsCatalog apps={platformApps} />
+
+      {/* Latest Articles Section */}
+      <LatestArticlesSection />
 
       {/* Product Gallery */}
       <section style={{ padding: 'clamp(4rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, borderTop: '1px solid rgba(15,23,42,0.07)', background: '#f8fafc' }}>
