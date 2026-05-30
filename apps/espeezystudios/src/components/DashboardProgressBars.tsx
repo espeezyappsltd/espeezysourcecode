@@ -1,4 +1,4 @@
-import { Progress } from 'framer-motion';
+
 
 const progressData = [
   { label: 'Jobs Progress', value: 70, color: '#6366f1' },

@@ -1,3 +1,6 @@
+@import './tokens.css';
+@import './base.css';
+
 /* Modern dashboard utility styles */
 .dashboard-action-btn {
   background: var(--studios-surface-2);
@@ -59,8 +62,6 @@
   font-size: 1.2rem;
 }
 
-@import './tokens.css';
-@import './base.css';
 
 :root {
   --studios-bg: var(--games-bg, #070b14);

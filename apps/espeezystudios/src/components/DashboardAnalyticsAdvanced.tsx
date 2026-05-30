@@ -16,7 +16,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
 export default function DashboardAnalyticsAdvanced() {
-  const [jobHistory, setJobHistory] = useState([]);
+  const [jobHistory, setJobHistory] = useState<number[]>([]);
   const [projectStats, setProjectStats] = useState({ active: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
 
