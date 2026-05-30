@@ -54,3 +54,14 @@ model Reaction {
   createdAt  DateTime @default(now())
   Article    Article  @relation(fields: [articleId], references: [id])
 }
+
+
+model jobs {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  status      String   @default("pending")
+  client_id   String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}

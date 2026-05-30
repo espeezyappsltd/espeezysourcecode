@@ -39,7 +39,7 @@ export default function ProfilePage() {
           <div><b>Full Name:</b> {profile.full_name}</div>
           <div><b>Username:</b> {profile.username}</div>
           <div><b>Bio:</b> {profile.biography}</div>
-          <div><b>Joined:</b> {new Date(profile.created_at).toLocaleDateString()}</div>
+          <div><b>Joined:</b> {profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Unknown'}</div>
         </>
       )}
     </main>
