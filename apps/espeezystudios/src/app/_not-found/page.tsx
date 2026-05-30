@@ -17,7 +17,13 @@ export default function NotFoundPage() {
   return (
     <div style={{ maxWidth: 600, margin: '80px auto', padding: 32, background: '#fff', borderRadius: 12 }}>
       <h2>Page Not Found</h2>
-      <div>Sorry, the page you are looking for does not exist.</div>
+      <div style={{ fontSize: '1.25rem', color: '#4b5563', marginBottom: '2rem', lineHeight: '1.6', padding: '0 1rem', background: '#fef3c7'}}>
+
+        <p>It seems you have ventured into uncharted territory. <br/>Let us get you back on track!</p>
+        <button onClick={() => window.history.back()} style={{ marginTop: 16, minHeight: 44 }}>Go Back</button>
+
+
+      </div>
     </div>
   );
 }
