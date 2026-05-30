@@ -1,6 +1,6 @@
 
 
-import { getLatestArticles } from 'apps/espeezyarticles/src/lib/latest-articles';
+import { getLatestArticles } from '../lib/latest-articles';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
