@@ -9,11 +9,17 @@ export const metadata: Metadata = {
 };  
 
 import GlobalFooter from '../components/GlobalFooter';
+import AppsNav from '../components/AppsNav';
+import GalleryNav from '../components/GalleryNav';
+import Sidebar from '../components/Sidebar';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <AppsNav />
+        <GalleryNav />
+        <Sidebar />
         {children}
         <GlobalFooter />
       </body>

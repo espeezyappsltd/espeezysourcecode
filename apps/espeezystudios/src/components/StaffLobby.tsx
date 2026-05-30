@@ -1,7 +1,8 @@
 const staff = [
-  { name: 'Alice', role: 'Lead Dev' },
-  { name: 'Bob', role: 'Designer' },
-  { name: 'Eve', role: 'Product' },
+  { name: 'Pete', role: 'Lead Dev' },
+  { name: 'Pete', role: 'Designer' },
+  { name: 'Pete', role: 'Product' },
+  { name: 'EvryBady Digital', role: 'Marketing' },
 ];
 
 export default function StaffLobby() {
