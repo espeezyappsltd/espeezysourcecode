@@ -19,6 +19,11 @@ export default function Home() {
       <h1 style={{ textAlign: 'center', fontWeight: 900, fontSize: '2.5rem', margin: '2rem 0 1.5rem 0', letterSpacing: '-1px', textShadow: '0 2px 12px #6366f122' }}>
         Espeezy Studios
       </h1>
+      
+      <div style={{ textAlign: 'center', fontSize: '1.25rem', color: '#4b5563', marginBottom: '2rem', maxWidth: '90vw', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6', padding: '0 1rem' , textShadow: '0 1px 6px #6366f122' , fontStyle: 'italic', alignItems: 'center', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+        <p>Welcome to the Espeezy Studios dashboard! <br /> 
+          Explore our current ongoing projects, track progress, and manage your team all in one place.</p>
       <DashboardMetrics />
       <DashboardQuickActions />
       <DashboardAdvancedActions />
@@ -29,6 +34,9 @@ export default function Home() {
       <ProjectCategories />
       <StaffLobby />
       <JobsDashboard />
+        
+      </div>
+      
     </>
   );
 }
