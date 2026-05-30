@@ -67,8 +67,8 @@ function HeroVisual({ userCount }: { userCount: number }) {
           }}
         >
           <Image 
-            src={SCREENSHOT_ASSETS.ANALYTICS_DASHBOARD} 
-            alt="Espeezy Kanban Dashboard with boards, analytics, and team collaboration features" 
+            src="/screenshotshero_sv"
+            alt="Hero Screenshot"
             fill
             sizes="(max-width: 1024px) 100vw, 800px"
             quality={55}

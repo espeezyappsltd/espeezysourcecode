@@ -31,6 +31,7 @@ model account_credits {
   updated_at       DateTime @updatedAt
 }
  
+
 model Article {
   id             String   @id @default(uuid())
   title          String
@@ -43,4 +44,14 @@ model Article {
   metaImage      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  reactions      Reaction[]
+}
+
+model Reaction {
+  id         String   @id @default(uuid())
+  articleId  String
+  userId     String
+  type       String // e.g. 'like', 'star', 'comment', 'love', etc.
+  createdAt  DateTime @default(now())
+  Article    Article  @relation(fields: [articleId], references: [id])
 }
