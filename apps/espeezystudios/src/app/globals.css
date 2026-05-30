@@ -31,6 +31,10 @@ a:hover {
   color: var(--studios-accent);
 }
 
+li{
+  list-style: none;
+}
+
 main, .main-content {
   background: var(--studios-surface);
   border-radius: var(--radius-lg, 18px);
@@ -84,4 +88,92 @@ label {
   color: var(--studios-success);
   font-weight: 700;
   margin-top: 1em;
+}
+
+
+.card {  background: var(--studios-surface-2);
+  border: 1px solid var(--studios-border);
+  border-radius: var(--radius, 12px);
+  padding: 1.5em;
+  text-align: center;
+}
+
+.staff-card {
+  background: var(--studios-surface-2);
+  border: 1px solid var(--studios-border);
+  border-radius: var(--radius, 12px);
+  padding: 1.5em;
+  text-align: center;
+}
+
+.global-footer {
+  background: var(--studios-surface-2);
+  border-top: 1px solid var(--studios-border);
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.global-footer__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.global-footer__links {
+  display: flex;
+  gap: 1rem;
+}
+
+.staff__name {
+  font-weight: 700;
+  color: var(--studios-brand);
+}
+
+.staff__role {
+  color: var(--studios-muted);
+  font-size: var(--text-sm);
+}
+
+.staff-lobby {
+  background: var(--studios-surface-2);
+  border: 1px solid var(--studios-border);
+  border-radius: var(--radius, 12px);
+  padding: 1.5em;
+  text-align: center;
+}
+
+
+.section h2{
+  text-align: center;
+  color: var(--studios-brand);
+  font-size: 1.75rem;
+}
+
+.section {
+  background: var(--studios-surface-2);
+  border: 1px solid var(--studios-border);
+  border-radius: var(--radius, 12px);
+  padding: 1.5em;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.jobs-dashboard, section{
+  max-width: var(--content-narrow, 860px);
+  margin: 0 auto;
+}
+
+.jobs-dashboard .job-card {
+  background: var(--studios-surface-2);
+  border: 1px solid var(--studios-border);
+  border-radius: var(--radius, 12px);
+  padding: 1.5em;
+  text-align: left;
 }

@@ -7,7 +7,6 @@ const categories = [
 const projects = [
   { title: 'Kanban Board', status: 'Ongoing' },
   { title: 'Hustle Marketplace', status: 'Finished' },
-  { title: 'Break Room', status: '£££' },
 ];
 
 export default function ProjectCategories() {

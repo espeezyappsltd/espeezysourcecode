@@ -81,7 +81,7 @@ export default function JobsDashboard() {
   }
 
   return (
-    <div style={{ margin: '2rem 0' }}>
+    <div className="section jobs-dashboard" style={{ marginTop: 32 }}>
       <h2>Jobs Queue</h2>
       {/* Metrics */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>

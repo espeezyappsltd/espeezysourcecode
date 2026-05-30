@@ -6,13 +6,13 @@ const staff = [
 
 export default function StaffLobby() {
   return (
-    <section id="staff" className="section" aria-labelledby="staff-heading">
-      <h2 id="staff-heading">Staff Lobby</h2>
+    <section id="staff" className="section staff-lobby" aria-labelledby="staff-heading">
+      <h2 id="staff-heading">Active Team</h2>
       <ul className="card-grid">
         {staff.map(member => (
-          <li key={member.name}>
+          <li key={member.name} className="card staff-card">
             <span className="staff__name">{member.name}</span>
-            <span className="staff__role"> — {member.role}</span>
+            <span className="staff__role"> : {member.role}</span>
           </li>
         ))}
       </ul>
