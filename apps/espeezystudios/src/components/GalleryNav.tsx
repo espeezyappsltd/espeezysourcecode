@@ -2,7 +2,6 @@ import Image from 'next/image';
 
 const games = [
   { name: 'Kanban', img: '/gallery/kanban.svg', link: '/games/kanban' },
-  { name: 'Hustle', img: '/gallery/hustle.svg', link: '/games/hustle' },
   { name: 'Break Room', img: '/gallery/breakroom.svg', link: '/games/breakroom' },
 ];
 

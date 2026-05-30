@@ -15,6 +15,15 @@ export default function JobsDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [form, setForm] = useState({ title: '', description: '', status: 'pending' });
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+
+  // Metrics
+  const totalJobs = jobs.length;
+  const pendingJobs = jobs.filter(j => j.status === 'pending').length;
+  const inProgressJobs = jobs.filter(j => j.status === 'in_progress').length;
+  const doneJobs = jobs.filter(j => j.status === 'done').length;
 
   useEffect(() => {
     fetchJobs();
@@ -60,35 +69,52 @@ export default function JobsDashboard() {
   return (
     <div style={{ margin: '2rem 0' }}>
       <h2>Jobs Queue</h2>
+      {/* Metrics */}
+      <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
+        <span style={{ fontWeight: 600 }}>Total: {totalJobs}</span>
+        <span style={{ color: '#f59e42' }}>Pending: {pendingJobs}</span>
+        <span style={{ color: '#38bdf8' }}>In Progress: {inProgressJobs}</span>
+        <span style={{ color: '#22c55e' }}>Done: {doneJobs}</span>
+      </div>
       <button onClick={openAdd} style={{ marginBottom: 16 }}>Add Job</button>
       {loading ? (
         <p>Loading...</p>
       ) : jobs.length === 0 ? (
         <p>No jobs found.</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map(job => (
-              <tr key={job.id}>
-                <td>{job.title}</td>
-                <td>{job.description}</td>
-                <td>{job.status}</td>
-                <td>
-                  <button onClick={() => openEdit(job)}>Edit</button>
-                  <button onClick={() => handleDelete(job.id)} style={{ marginLeft: 8 }}>Delete</button>
-                </td>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem' }}>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {jobs.slice((page-1)*pageSize, page*pageSize).map((job, idx) => (
+                <tr key={job.id}>
+                  <td>{(page-1)*pageSize + idx + 1}</td>
+                  <td>{job.title}</td>
+                  <td style={{ maxWidth: 200, overflowWrap: 'break-word' }}>{job.description}</td>
+                  <td>{job.status}</td>
+                  <td>
+                    <button onClick={() => openEdit(job)}>Edit</button>
+                    <button onClick={() => handleDelete(job.id)} style={{ marginLeft: 8 }}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* Pagination Controls */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
+            <button disabled={page === 1} onClick={() => setPage(p => Math.max(1, p-1))}>Prev</button>
+            <span>Page {page} / {Math.max(1, Math.ceil(jobs.length / pageSize))}</span>
+            <button disabled={page >= Math.ceil(jobs.length / pageSize)} onClick={() => setPage(p => p+1)}>Next</button>
+          </div>
+        </div>
       )}
       {showModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

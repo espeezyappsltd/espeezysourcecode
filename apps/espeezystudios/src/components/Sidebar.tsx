@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import AppsNav from './AppsNav';
 
 const menu = [
   { name: 'Home', path: '/' },
   { name: 'Gallery', path: '/#gallery' },
   { name: 'Projects', path: '/#projects' },
   { name: 'Staff Lobby', path: '/#staff' },
+  { name: 'Jobs', path: '/jobs' },
   { name: 'Login', path: '/login' },
   { name: 'Admin Lobby', path: '/admin-lobby' },
 ];
@@ -53,6 +55,7 @@ export default function Sidebar() {
             );
           })}
         </ul>
+        <AppsNav />
       </nav>
     </header>
   );

@@ -1,0 +1,87 @@
+@import '../styles/tokens.css';
+@import '../styles/base.css';
+
+:root {
+  --studios-bg: var(--games-bg, #070b14);
+  --studios-surface: var(--games-surface, #111827);
+  --studios-surface-2: var(--games-surface-2, #1a2336);
+  --studios-border: var(--games-border, rgba(148, 163, 184, 0.12));
+  --studios-text: var(--games-text, #f1f5f9);
+  --studios-muted: var(--games-muted, #94a3b8);
+  --studios-brand: var(--games-brand, #818cf8);
+  --studios-accent: var(--games-accent, #22d3ee);
+  --studios-success: var(--games-success, #34d399);
+  --studios-glow: var(--games-glow, rgba(129, 140, 248, 0.35));
+  --studios-hero-gradient: var(--hero-gradient, linear-gradient(135deg, #4f46e5 0%, #06b6d4 45%, #a78bfa 100%));
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--studios-bg);
+  color: var(--studios-text);
+}
+
+a {
+  color: var(--studios-brand);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+a:hover {
+  color: var(--studios-accent);
+}
+
+main, .main-content {
+  background: var(--studios-surface);
+  border-radius: var(--radius-lg, 18px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  padding: var(--space-5, 2rem);
+  margin: 2rem auto;
+  max-width: var(--content-narrow, 860px);
+}
+
+h1, h2, h3, h4 {
+  color: var(--studios-brand);
+  font-weight: 800;
+}
+
+.sidebar, .apps-nav-pro {
+  background: var(--studios-surface-2);
+  border-right: 1px solid var(--studios-border);
+}
+
+button, .button {
+  background: var(--studios-brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius, 12px);
+  padding: 0.6em 1.2em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+button:hover, .button:hover {
+  background: var(--studios-accent);
+}
+
+input, textarea {
+  background: var(--studios-surface-2);
+  color: var(--studios-text);
+  border: 1px solid var(--studios-border);
+  border-radius: var(--radius, 12px);
+  padding: 0.5em 1em;
+  margin-bottom: 1em;
+}
+
+label {
+  color: var(--studios-muted);
+  font-size: var(--text-sm);
+  margin-bottom: 0.3em;
+  display: block;
+}
+
+.success {
+  color: var(--studios-success);
+  font-weight: 700;
+  margin-top: 1em;
+}
