@@ -67,7 +67,7 @@ function HeroVisual({ userCount }: { userCount: number }) {
           }}
         >
           <Image 
-            src="/screenshotshero_sv"
+            src="/screenshots/hero_sc.png"
             alt="Hero Screenshot"
             fill
             sizes="(max-width: 1024px) 100vw, 800px"
