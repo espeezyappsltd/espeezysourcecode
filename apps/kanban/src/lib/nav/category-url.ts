@@ -99,3 +99,31 @@ export function marketplaceNavContext(
     q: q.trim() || null,
   }
 }
+
+export function askListUrl(opts?: {
+  category?: string | null
+  q?: string | null
+  page?: number | null
+}): string {
+  const params = new URLSearchParams()
+  if (opts?.category && opts.category !== 'all') params.set('category', opts.category)
+  if (opts?.q?.trim()) params.set('q', opts.q.trim())
+  if (opts?.page && opts.page > 1) params.set('page', String(opts.page))
+  const qs = params.toString()
+  return qs ? `/ask?${qs}` : '/ask'
+}
+
+export function askCategoryUrl(category: string, ctx?: ListUrlContext & { page?: number }): string {
+  return askListUrl({
+    category: category === 'all' ? null : category,
+    q: ctx?.q,
+    page: ctx?.page && ctx.page > 1 ? ctx.page : null,
+  })
+}
+
+export function askNavContext(category: string, q: string): { category: string | null; q: string | null } {
+  return {
+    category: category !== 'all' ? category : null,
+    q: q.trim() || null,
+  }
+}

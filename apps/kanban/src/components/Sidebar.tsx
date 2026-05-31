@@ -63,6 +63,7 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Hustle', path: '/hustle', icon: DollarSign },
   { name: 'Teammates', path: '/network', icon: Users },
   { name: 'My Assets', path: '/assets', icon: HardDrive },
+  { name: 'Ask', path: '/ask', icon: HelpCircle },
   { name: 'Resources', path: '/marketplace', icon: TrendingUp },
   { name: 'Break Room', path: '/chillout', icon: Sparkles },
   { name: 'Skirmish', path: '/games', icon: Gamepad2, externalGamesProfile: true },

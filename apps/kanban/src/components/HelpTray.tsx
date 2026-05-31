@@ -72,7 +72,8 @@ export default function HelpTray() {
         <div className="help-tray-body">
           <h3 className="help-tray-lead-title">How can we help?</h3>
           <p className="help-tray-lead">
-            Explore guides for every feature, or jump to the{" "}
+            Explore guides for every feature, search the{" "}
+            <Link href="/ask">Ask directory</Link>, or jump to the{" "}
             <Link href="/docs/getting-started">Quick Start Guide <ArrowRight size={14} style={{ verticalAlign: "middle" }} /></Link>.
           </p>
           <div className="help-tray-list">
