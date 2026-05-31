@@ -1,5 +1,4 @@
-import GlobalFooter from '../../components/GlobalFooter'
-import StudiosLogo from '@/components/StudiosLogo'
+import StudioPageShell from '@/components/StudioPageShell'
 import { serverSupabase } from '../../lib/server-db'
 import type { StudioJob } from '@/lib/jobs/types'
 
@@ -25,31 +24,30 @@ export default async function PublicFeedPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-50 dark:bg-neutral-900">
-      <main className="flex-1 w-full max-w-5xl mx-auto py-8 px-4">
-        <div className="public-portfolio__head">
-          <StudiosLogo variant="hero" className="public-portfolio__logo" />
-          <p className="public-portfolio__kicker">Portfolio</p>
-        </div>
-        <div className="border rounded-lg p-6 bg-white dark:bg-neutral-800 shadow">
-          {error && (
-            <div className="text-red-500 mb-4">Failed to load jobs: {String(error.message || error)}</div>
-          )}
-          {jobs.length === 0 && !error && (
-            <p className="text-neutral-500">No jobs found.</p>
-          )}
-          <ul className="space-y-6">
+    <StudioPageShell
+      title="Portfolio"
+      description="Public showcase of completed and in-progress studio work."
+      wide
+    >
+      <div className="studio-panel">
+        {error ? (
+          <p className="studio-panel__error">Failed to load jobs: {String(error.message || error)}</p>
+        ) : null}
+        {jobs.length === 0 && !error ? <p>No published work yet.</p> : null}
+        {jobs.length > 0 ? (
+          <ul className="studio-list">
             {jobs.map((job) => (
-              <li key={job.id} className="border-b pb-4">
-                <div className="font-semibold text-lg">{job.title}</div>
-                <div className="text-neutral-500 text-sm mb-1">{job.status} · {job.created_at ? new Date(job.created_at).toLocaleDateString() : ''}</div>
-                <div className="text-neutral-700 dark:text-neutral-200">{job.description}</div>
+              <li key={job.id} className="studio-list__item">
+                <div className="studio-list__title">{job.title}</div>
+                <div className="studio-list__meta">
+                  {job.status} · {job.created_at ? new Date(job.created_at).toLocaleDateString() : ''}
+                </div>
+                {job.description ? <p className="studio-list__desc">{job.description}</p> : null}
               </li>
             ))}
           </ul>
-        </div>
-      </main>
-      <GlobalFooter />
-    </div>
-  );
+        ) : null}
+      </div>
+    </StudioPageShell>
+  )
 }

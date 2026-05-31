@@ -58,7 +58,7 @@ function StudiosSsoBridgeContent() {
   }, [router, target])
 
   return (
-    <div className="studio-sso-bridge">
+    <main id="main-content" className="studio-sso-bridge">
       <div className="studio-sso-bridge__card">
         <StudiosLogo variant="login" className="studio-sso-bridge__logo" />
         <h1>Signing you in…</h1>
@@ -73,13 +73,13 @@ function StudiosSsoBridgeContent() {
           <p className="studio-sso-bridge__redirect">Redirecting…</p>
         )}
       </div>
-    </div>
+    </main>
   )
 }
 
 export default function StudiosSsoPage() {
   return (
-    <Suspense fallback={<div className="studio-sso-bridge"><p>Loading…</p></div>}>
+    <Suspense fallback={<main id="main-content" className="studio-sso-bridge"><p>Loading…</p></main>}>
       <StudiosSsoBridgeContent />
     </Suspense>
   )
