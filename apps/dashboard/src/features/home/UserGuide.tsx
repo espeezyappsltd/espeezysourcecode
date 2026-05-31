@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useState } from 'react'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
 import { X, ChevronDown, Keyboard } from 'lucide-react'
 import { KEYBOARD_SHORTCUTS, USER_GUIDE_SECTIONS } from './content'
 
@@ -112,6 +112,8 @@ export function UserGuide() {
               </tbody>
             </table>
           </section>
+
+          <AppCopyrightStrip style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(15,23,42,0.08)', color: '#64748b' }} showTagline />
         </div>
       </div>
     </div>

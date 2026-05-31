@@ -107,7 +107,7 @@ export function MarketplaceVaultView() {
           {listedFromVault.length > 0 && (
             <section style={{ marginBottom: '2.5rem' }}>
               <h2 className="assets-section-title">Active listings</h2>
-              <p className="assets-section-desc">Vault assets currently listed on the campus marketplace.</p>
+              <p className="assets-section-desc">Vault assets currently listed on the peer marketplace.</p>
               <div className="assets-grid">
                 {listedFromVault.map((asset) => (
                   <AssetCard

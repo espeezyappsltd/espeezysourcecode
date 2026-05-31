@@ -322,7 +322,7 @@ export default function FeedPage() {
       <header className="feed-hero page-header page-header--center">
         <div className="page-header__main">
           <h1 className="page-header__title">Academic Journeys</h1>
-          <p className="page-header__desc">Real-time signals from students building the future. Share milestones, wins, and campus life.</p>
+          <p className="page-header__desc">Real-time updates from students and teams. Share milestones, project progress, and learning resources.</p>
       </div>
         {profile && (
           <Link href="/feed/manage" className="feed-manage-link">
@@ -369,7 +369,7 @@ export default function FeedPage() {
                 id="feed-composer"
                 value={composerText}
                 onChange={(e) => setComposerText(e.target.value)}
-                placeholder="Share a milestone, project update, or campus tip…"
+                placeholder="Share a milestone, project update, or study resource…"
                 rows={composerText.length > 100 ? 4 : 2}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) void submitPost()

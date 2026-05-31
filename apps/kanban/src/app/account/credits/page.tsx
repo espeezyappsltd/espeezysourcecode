@@ -55,7 +55,7 @@ function CreditsAccountContent() {
         className="credits-account-page__header"
         title="Your project balance"
         icon={Coins}
-        description="Personal GBP balance for marketplace listings, hustle gigs, and campus trades."
+        description="Personal balance for marketplace listings, freelance gigs, and peer transactions."
       />
 
       {fund === 'success' && (

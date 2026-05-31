@@ -19,18 +19,18 @@ export type PageGuideConfig = {
 const GUIDES: Record<string, PageGuideConfig> = {
   '/feed': {
     id: 'feed',
-    pageTitle: 'Academic Journeys',
+    pageTitle: 'Academic journeys',
     theme: 'journeys',
     emoji: '✨',
-    summary: 'Share milestones and react to your cohort in real time.',
+    summary: 'Share milestones and engage with peers in your learning community.',
     steps: [
-      { title: 'Compose', body: 'Post updates with public or connections-only visibility.' },
-      { title: 'Engage', body: 'React and comment to support peers on their journey.' },
-      { title: 'Stories', body: 'Active scholars appear at the top when they have recent posts.' },
+      { title: 'Compose', body: 'Publish updates with public or connections-only visibility.' },
+      { title: 'Engage', body: 'React and comment to support classmates on their academic progress.' },
+      { title: 'Stories', body: 'Active members appear at the top when they share recent posts.' },
     ],
     actions: [
       { label: 'Post', hint: 'Share a milestone' },
-      { label: 'React', hint: 'Support your cohort' },
+      { label: 'React', hint: 'Support your peers' },
     ],
   },
   '/studio': {
@@ -38,17 +38,17 @@ const GUIDES: Record<string, PageGuideConfig> = {
     pageTitle: 'Espeezy Studio',
     theme: 'default',
     emoji: '🏢',
-    summary: 'Premium sign-on for marketplace, jobs, and client delivery (migrated from Kanban).',
+    summary: 'Premium access for client projects, invoicing, and professional delivery workflows.',
     steps: [
-      { title: 'Premium only', body: 'Upgrade to Premium Scholar in Kanban to unlock Studio access.' },
-      { title: 'Sign on', body: 'Use the button to open studios.espeezy.com with your Espeezy session.' },
-      { title: 'Monetize there', body: 'Listings, jobs, invoices, and payouts live in Studio — not Kanban.' },
+      { title: 'Premium access', body: 'Upgrade to Premium Scholar in Kanban to unlock Studio.' },
+      { title: 'Single sign-on', body: 'Open studios.espeezy.com with your existing Espeezy session.' },
+      { title: 'Professional delivery', body: 'Listings, jobs, invoices, and payouts are managed in Studio.' },
     ],
   },
   '/assets': {
     id: 'assets',
     pageTitle: 'Files',
-    summary: 'Upload files and links, organize folders, and manage storage.',
+    summary: 'Upload files and links, organize folders, and manage storage for your team.',
     steps: [
       { title: 'Upload', body: 'Add files and links into folders for your team.' },
       { title: 'Organize', body: 'Create folders and browse with the path breadcrumb.' },
@@ -81,11 +81,11 @@ const GUIDES: Record<string, PageGuideConfig> = {
   '/': {
     id: 'kanban',
     pageTitle: 'Workspace',
-    summary: 'Your Kanban board and command center for tasks, activity, and team pulse.',
+    summary: 'Your Kanban board for tasks, activity, and team coordination.',
     steps: [
       { title: 'Board', body: 'Drag cards between To Do, In Progress, and Done.' },
       { title: 'Tasks', body: 'Open a card for details, assignees, comments, and due dates.' },
-      { title: 'Navigate', body: 'Use the sidebar for Feed, Marketplace, Hustle, and Settings.' },
+      { title: 'Navigate', body: 'Use the sidebar for Feed, Marketplace, Studio, and Settings.' },
     ],
     actions: [
       { label: 'New task', hint: 'Add work to your board' },
@@ -95,21 +95,21 @@ const GUIDES: Record<string, PageGuideConfig> = {
   '/resources': {
     id: 'resources',
     pageTitle: 'Resources',
-    summary: 'Curated links and materials for your cohort.',
-    steps: [{ title: 'Browse', body: 'Filter by category and save useful items to your arsenal.' }],
+    summary: 'Curated links and materials for your team or course.',
+    steps: [{ title: 'Browse', body: 'Filter by category and save useful items to your library.' }],
   },
   '/plans': {
     id: 'plans',
     pageTitle: 'Plans',
     summary: 'Compare Free, Pro, and Premium tiers for storage and features.',
     steps: [
-      { title: 'Upgrade', body: 'Higher tiers unlock more storage and premium areas.' },
+      { title: 'Upgrade', body: 'Higher tiers unlock more storage and premium capabilities.' },
       { title: 'Credits', body: 'Espeezy credits power marketplace checkout and asset values.' },
     ],
   },
   '/profile': {
     id: 'profile',
-    pageTitle: 'My Profile',
+    pageTitle: 'My profile',
     summary: 'Your public academic identity on Espeezy.',
     steps: [
       { title: 'Avatar', body: 'Upload a photo so teammates recognize you in Feed and messages.' },
@@ -119,7 +119,7 @@ const GUIDES: Record<string, PageGuideConfig> = {
   '/jukebox': {
     id: 'jukebox',
     pageTitle: 'Espeezy Jukebox',
-    summary: 'Pro feature: share what you are listening to with your cohort.',
+    summary: 'Pro feature: share what you are listening to with your study group.',
     steps: [
       { title: 'Unlock', body: 'Upgrade to Pro or Premium from Plans to enable Jukebox.' },
       { title: 'Presence', body: 'When connected, your track can appear on your profile presence.' },
@@ -135,7 +135,7 @@ export function getGuideForPath(pathname: string | null): PageGuideConfig | null
     return {
       id: 'messages',
       pageTitle: 'Messages',
-      summary: 'Chat with sellers and peers. Keep deals on-campus and respectful.',
+      summary: 'Chat with sellers and peers. Keep conversations respectful and within platform policy.',
       steps: [
         { title: 'Listing context', body: 'Threads started from a listing include that item for reference.' },
         { title: 'Policy', body: 'No spam, harassment, or off-platform payment requests.' },

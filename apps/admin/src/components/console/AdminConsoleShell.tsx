@@ -8,6 +8,8 @@ import { ADMIN_NAV_ITEMS, hasAdminPermission, type AdminStaffRole } from '@/lib/
 import { AdminOnboardingBanner } from './AdminOnboardingBanner'
 import { useAdminOnboarding } from '@/context/AdminOnboardingContext'
 import { useIsMobileShell } from '@/hooks/useMobileShell'
+import HelpTray from '@/components/HelpTray'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
 
 type Props = {
   children: React.ReactNode
@@ -128,6 +130,7 @@ export function AdminConsoleShell({ children, adminRole, username, displayName, 
               @{username} · {adminRole}
             </div>
             <div className="admin-console-nav-foot-email">{email}</div>
+            <AppCopyrightStrip style={{ marginTop: '0.85rem', color: 'rgba(148, 163, 184, 0.85)', fontSize: '0.68rem' }} />
           </div>
         </aside>
 
@@ -146,6 +149,7 @@ export function AdminConsoleShell({ children, adminRole, username, displayName, 
           </div>
         </div>
       </div>
+      <HelpTray />
     </div>
   )
 }

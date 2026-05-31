@@ -3,35 +3,13 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { X, BookOpen, LifeBuoy, ArrowRight } from "lucide-react";
+import {
+  HELP_TRAY_CTA_LABEL,
+  HELP_TRAY_TITLE,
+  KANBAN_HELP_GUIDES,
+} from "@shared/app-ui-copy";
+import AppCopyrightStrip from "@shared/AppCopyrightStrip";
 import "./help-tray.css";
-
-const FEATURE_GUIDES = [
-  {
-    title: "Kanban Board",
-    desc: "Organize tasks, drag to reorder, assign teammates, and track progress.",
-    link: "/docs/features/kanban"
-  },
-  {
-    title: "Roadmap",
-    desc: "Plan milestones, set deadlines, and visualize your project timeline.",
-    link: "/docs/features/roadmap"
-  },
-  {
-    title: "Team & Chat",
-    desc: "Invite teammates, manage roles, and collaborate in real-time chat.",
-    link: "/docs/features/team"
-  },
-  {
-    title: "Espeezy Studio",
-    desc: "Premium workspace for marketplace, jobs, and client delivery.",
-    link: "/studio"
-  },
-  {
-    title: "Profile & Settings",
-    desc: "Customize your profile, manage notifications, and set preferences.",
-    link: "/docs/features/profile"
-  }
-];
 
 export default function HelpTray() {
   const [open, setOpen] = useState(false);
@@ -58,7 +36,7 @@ export default function HelpTray() {
             <span className="help-tray-header-icon" aria-hidden>
               <LifeBuoy size={20} />
             </span>
-            Help & Onboarding
+            {HELP_TRAY_TITLE}
           </div>
           <button
             type="button"
@@ -72,20 +50,22 @@ export default function HelpTray() {
         <div className="help-tray-body">
           <h3 className="help-tray-lead-title">How can we help?</h3>
           <p className="help-tray-lead">
-            Explore guides for every feature, search the{" "}
-            <Link href="/ask">Ask directory</Link>, or jump to the{" "}
-            <Link href="/docs/getting-started">Quick Start Guide <ArrowRight size={14} style={{ verticalAlign: "middle" }} /></Link>.
+            Browse feature guides, search the <Link href="/ask">Ask directory</Link>, or open the{' '}
+            <Link href="/docs/getting-started">
+              {HELP_TRAY_CTA_LABEL} <ArrowRight size={14} style={{ verticalAlign: 'middle' }} />
+            </Link>
+            .
           </p>
           <div className="help-tray-list">
-            {FEATURE_GUIDES.map((f) =>
-              f.title === "Kanban Board" ? (
+            {KANBAN_HELP_GUIDES.map((f) =>
+              f.actionEvent ? (
                 <button
                   key={f.title}
                   type="button"
                   className="help-tray-card"
                   onClick={() => {
                     setOpen(false);
-                    window.dispatchEvent(new CustomEvent("open-kanban-onboarding"));
+                    window.dispatchEvent(new CustomEvent(f.actionEvent!));
                   }}
                 >
                   <div className="help-tray-card-title">
@@ -108,8 +88,9 @@ export default function HelpTray() {
         </div>
         <footer className="help-tray-footer">
           <Link href="/docs/getting-started" className="help-tray-cta" onClick={() => setOpen(false)}>
-            Quick Start Guide <ArrowRight size={16} />
+            {HELP_TRAY_CTA_LABEL} <ArrowRight size={16} />
           </Link>
+          <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} showTagline />
         </footer>
       </aside>
     </>

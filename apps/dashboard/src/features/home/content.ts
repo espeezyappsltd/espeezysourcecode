@@ -81,7 +81,7 @@ export const HOME_HIGHLIGHTS = [
   {
     icon: Columns3,
     title: 'Academic Kanban boards',
-    description: 'Drag tasks across To Do, In Progress, In Review, and Done with a board built for coursework.',
+    description: 'Drag tasks across To Do, In Progress, In Review, and Done with a board designed for university and college coursework.',
   },
   {
     icon: Users,
@@ -179,7 +179,7 @@ export const USER_GUIDE_SECTIONS: GuideSection[] = [
       'Free tier: personal email sign-in with core board and team features.',
       'Premium: verify an institutional email to unlock advanced analytics and modules.',
       'Log out from the account strip whenever you use a shared computer.',
-      'Contact hello@espeezy.com for access issues or data questions.',
+      'Contact support@espeezy.com for access issues or data questions.',
     ],
   },
 ]

@@ -42,6 +42,7 @@ import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { SIDEBAR_STUDIO_BLURB } from '@shared/platform-brand'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
 import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import './sidebar-premium.css'
 
@@ -495,13 +496,13 @@ export default function Sidebar({ user }: SidebarProps) {
               </div>
               <div className="sidebar-foot__vault-body">
                 <div className="sidebar-foot__vault-title">
-                  {isConnected ? 'Vault Verified' : 'Uplink Offline'}
+                  {isConnected ? 'Connection verified' : 'Connection offline'}
                 </div>
                 <div className="sidebar-foot__vault-sub">
-                  {isSlow ? 'Bandwidth restricted' : 'Optimal connectivity'}
+                  {isSlow ? 'Reduced bandwidth detected' : 'Stable connection'}
                 </div>
                 <div className="sidebar-foot__vault-meta">
-                  <span>Node GF-2026-X</span>
+                  <span>Espeezy platform</span>
                   <Lock size={10} aria-hidden />
                 </div>
               </div>
@@ -554,6 +555,11 @@ export default function Sidebar({ user }: SidebarProps) {
                 </button>
               </div>
             </div>
+
+            <AppCopyrightStrip
+              className="sidebar-foot__copyright"
+              style={{ padding: '0.75rem 0.5rem 0', color: 'var(--text-sub)' }}
+            />
           </div>
         </div>
       </aside>

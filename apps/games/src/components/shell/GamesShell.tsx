@@ -4,6 +4,8 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Menu } from 'lucide-react'
 import { CategoriesProvider } from '@/context/CategoriesContext'
 import GamesSidebar from './GamesSidebar'
+import { GAMES_SHELL_TAGLINE } from '@shared/app-ui-copy'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
 import './games-shell.css'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
@@ -75,7 +77,13 @@ export default function GamesShell({ children }: { children: React.ReactNode }) 
               </span>
             </header>
           )}
-          <div className="games-shell__content">{children}</div>
+          <div className="games-shell__content">
+            {children}
+            <footer className="games-shell__footer" aria-label="Site footer">
+              <p className="games-shell__footer-tagline">{GAMES_SHELL_TAGLINE}</p>
+              <AppCopyrightStrip style={{ color: 'var(--games-muted)' }} showTagline />
+            </footer>
+          </div>
         </div>
       </div>
     </CategoriesProvider>

@@ -293,6 +293,23 @@ section {
   letter-spacing: 0.04em;
 }
 
+.global-footer__legal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.global-footer__trademark {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--studios-muted);
+  opacity: 0.85;
+  max-width: 36rem;
+}
+
 .studio-app-shell--minimal .studio-app-shell__main {
   min-height: 100vh;
   padding-bottom: 0;

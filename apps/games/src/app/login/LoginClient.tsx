@@ -9,6 +9,7 @@ import { SimpleAuthForm } from '@shared/SimpleAuthForm'
 import { sanitizeNextPath } from '@shared/app-url'
 import { useSimpleAuth } from '@shared/useSimpleAuth'
 import { GAMES_UPGRADE_GATE_NOTE } from '@/lib/platform/brand-copy'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
 
 export default function LoginClient() {
   const router = useRouter()
@@ -60,8 +61,8 @@ export default function LoginClient() {
       }}
       role="status"
     >
-      <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Pro account required</strong>
-      Espeezy Games needs a Pro or Premium plan on your Espeezy account. Free accounts cannot play here.
+      <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Pro or Premium plan required</strong>
+      Espeezy Games requires a Pro or Premium subscription on your Espeezy account. Free-tier accounts cannot access this application.
       <span style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem', color: '#78716c' }}>{GAMES_UPGRADE_GATE_NOTE}</span>
       <a
         href={`${ESPEEZY_APP_ORIGINS.prereg}/pricing`}
@@ -78,37 +79,40 @@ export default function LoginClient() {
   ) : null
 
   return (
-    <>
-      {upgradeBanner}
-      {urlError ? (
-        <p
-          style={{
-            maxWidth: 400,
-            margin: '0 auto 1rem',
-            padding: '0.75rem',
-            borderRadius: 8,
-            background: '#fef2f2',
-            color: '#b91c1c',
-            fontSize: '0.85rem',
-          }}
-          role="alert"
-        >
-          {decodeURIComponent(urlError)}
-        </p>
-      ) : null}
-      <SimpleAuthForm
-        appName="Espeezy Games"
-        logoApp="games"
-        tagline="Email and password, same account as Kanban."
-        busy={busy}
-        ready={ready}
-        error={error}
-        info={info}
-        defaultMode={defaultMode}
-        onSignIn={signIn}
-        onSignUp={signUp}
-        onResetPassword={resetPassword}
-      />
-    </>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '2rem 1rem' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        {upgradeBanner}
+        {urlError ? (
+          <p
+            style={{
+              maxWidth: 400,
+              margin: '0 auto 1rem',
+              padding: '0.75rem',
+              borderRadius: 8,
+              background: '#fef2f2',
+              color: '#b91c1c',
+              fontSize: '0.85rem',
+            }}
+            role="alert"
+          >
+            {decodeURIComponent(urlError)}
+          </p>
+        ) : null}
+        <SimpleAuthForm
+          appName="Espeezy Games"
+          logoApp="games"
+          tagline="Use the same Espeezy account as Kanban and other Espeezy applications."
+          busy={busy}
+          ready={ready}
+          error={error}
+          info={info}
+          defaultMode={defaultMode}
+          onSignIn={signIn}
+          onSignUp={signUp}
+          onResetPassword={resetPassword}
+        />
+      </div>
+      <AppCopyrightStrip style={{ marginTop: '2rem', textAlign: 'center', color: '#64748b' }} showTagline />
+    </div>
   )
 }

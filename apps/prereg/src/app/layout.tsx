@@ -6,11 +6,11 @@ import { CentralLoadingProvider } from '@shared/CentralLoadingProvider'
 import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import { PLATFORM_ONE_LINER } from '@shared/platform-brand'
 
-const OG_TITLE = 'Espeezy — group projects with proof of who did the work'
+const OG_TITLE = 'Espeezy — collaborative workspace for academic teams'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://espeezy.com'),
-  title: 'Espeezy — group projects with proof of who did the work',
+  title: 'Espeezy — collaborative workspace for academic teams',
   description: PLATFORM_ONE_LINER,
   manifest: '/manifest.json',
   icons: {

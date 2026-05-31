@@ -30,7 +30,7 @@ import '@shared/espeezy-appearance.css'
 
 export const metadata: Metadata = {
   title: 'Espeezy Kanban',
-  description: 'Visual task management and collaboration for students and teams.',
+  description: 'Visual task management and structured collaboration for university teams, educators, and student groups.',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
