@@ -19,7 +19,7 @@
     "file-saver": "^2.0.5",
     "lucide-react": "^1.14.0",
     "next": "^16.2.6",
-    "nodemailer": "^6.10.0",
+    "nodemailer": "^8.0.5",
     "react": "19.2.4",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "19.2.4"

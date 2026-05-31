@@ -42,7 +42,7 @@
     "lucide-react": "^1.8.0",
     "next": "^16.2.4",
     "next-intl": "^4.12.0",
-    "nodemailer": "^8.0.7",
+    "nodemailer": "^8.0.5",
     "@types/nodemailer": "^6.4.17",
     "openai": "^6.37.0",
     "react": "19.2.4",
