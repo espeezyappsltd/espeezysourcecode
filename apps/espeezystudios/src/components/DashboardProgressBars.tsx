@@ -38,6 +38,8 @@ export default function DashboardProgressBars() {
         <StudioCrudPanel<ProgressItem>
           table="studio_progress_items"
           title="progress metric"
+          gearToggle
+          gearLabel="Progress settings"
           fields={[
             { key: 'label', label: 'Label' },
             { key: 'value', label: 'Percent (0-100)', type: 'number', min: 0, max: 100 },

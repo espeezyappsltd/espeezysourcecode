@@ -1563,6 +1563,40 @@ section {
   margin-top: 1rem;
 }
 
+.jobs-docs-storage {
+  margin-bottom: 1rem;
+}
+
+.jobs-docs-storage__hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+}
+
+.jobs-docs-storage__uploads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.jobs-docs-storage__upload {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--studios-muted);
+}
+
+.jobs-docs-storage__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .jobs-delivery-meta {
   margin: 1rem 0;
   padding-left: 1.2rem;

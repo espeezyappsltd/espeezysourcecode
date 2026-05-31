@@ -21,6 +21,7 @@ import { supabase } from '@/lib/supabase-client'
 import { useJobBundle } from '@/hooks/useJobBundle'
 import { useStudioEditor } from '@/hooks/useStudioEditor'
 import type { JobBudgetEntry, JobMilestone, JobTimelineEvent, StudioJob } from '@/lib/jobs/types'
+import { JobDocumentsStoragePanel } from '@/components/jobs/JobDocumentsStoragePanel'
 
 const TABS = ['overview', 'timeline', 'budget', 'milestones', 'docs', 'delivery'] as const
 type Tab = (typeof TABS)[number]
@@ -274,7 +275,8 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
       {tab === 'docs' && (
         <section className="jobs-panel">
           <h3><FileText size={18} /> Requirements & PRD</h3>
-          <p className="studio-muted">Edit source text; delivery regenerates requirements.txt and PRD.md from this content.</p>
+          <JobDocumentsStoragePanel jobId={jobId} onMutate={() => void refresh()} />
+          <p className="studio-muted">Edit source text or upload files above; delivery uses the latest content.</p>
           {canEdit ? (
             <>
               <label className="studio-crud__field">

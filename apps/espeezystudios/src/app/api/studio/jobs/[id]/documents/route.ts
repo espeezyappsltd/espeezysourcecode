@@ -2,11 +2,10 @@ import { NextResponse } from 'next/server'
 import { fetchJobBundle } from '@/lib/jobs/fetch-bundle'
 import {
   generateFinalReport,
-  generatePrdMarkdown,
-  generateRequirementsTxt,
   nextInvoiceNumber,
   nextReceiptNumber,
 } from '@/lib/jobs/documents'
+import { resolvePrdContent, resolveRequirementsContent } from '@/lib/jobs/resolve-document-content'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /** GET ?type=requirements|prd|report: download generated document */
@@ -35,7 +34,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
 
   switch (type) {
     case 'prd':
-      content = bundle.job.prd_text || generatePrdMarkdown(bundle)
+      content = await resolvePrdContent(db, bundle)
       filename = 'PRD.md'
       contentType = 'text/markdown; charset=utf-8'
       break
@@ -54,8 +53,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       filename = 'invoice.txt'
       contentType = 'text/plain; charset=utf-8'
       break
-  default:
-      content = bundle.job.requirements_text || generateRequirementsTxt(bundle)
+    default:
+      content = await resolveRequirementsContent(db, bundle)
       filename = 'requirements.txt'
       contentType = 'text/plain; charset=utf-8'
   }

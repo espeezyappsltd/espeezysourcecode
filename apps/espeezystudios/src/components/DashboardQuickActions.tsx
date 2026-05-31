@@ -41,6 +41,8 @@ export default function DashboardQuickActions() {
         <StudioCrudPanel<QuickAction>
           table="studio_quick_actions"
           title="quick action"
+          gearToggle
+          gearLabel="Quick action settings"
           fields={[
             { key: 'label', label: 'Label' },
             { key: 'href', label: 'Link path', type: 'url' },

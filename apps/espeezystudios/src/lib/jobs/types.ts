@@ -1,3 +1,17 @@
+export type JobDocumentKind = 'requirements' | 'prd'
+
+export type JobDocument = {
+  id: string
+  job_id: string
+  kind: JobDocumentKind
+  storage_path: string
+  filename: string
+  content_type?: string | null
+  size_bytes: number
+  created_at?: string | null
+  updated_at?: string | null
+}
+
 export type JobStatus = 'pending' | 'in_progress' | 'review' | 'done' | 'cancelled'
 export type DeliveryStatus = 'draft' | 'in_delivery' | 'delivered' | 'invoiced'
 

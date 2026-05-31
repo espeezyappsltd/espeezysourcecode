@@ -16,6 +16,8 @@ export default function StaffLobby() {
     <StudioCrudPanel<TeamMember>
       table="studio_team_members"
       title="team member"
+      gearToggle
+      gearLabel="Team settings"
       fields={[
         { key: 'name', label: 'Name' },
         { key: 'role', label: 'Role' },

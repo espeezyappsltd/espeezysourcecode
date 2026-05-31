@@ -11,6 +11,7 @@ export const STUDIO_SCHEMA_TABLES = [
   'studio_job_budget_entries',
   'studio_job_timeline_events',
   'studio_job_delivery_logs',
+  'studio_job_documents',
 ] as const
 
 export type StudioTableStatus = {
@@ -64,7 +65,7 @@ export async function fetchStudioSchemaSetup(): Promise<StudioSchemaCheck> {
           ready: false,
           tables,
           migrationRequired:
-            'Apply supabase/migrations/20260529120000_studio_content_tables.sql and 20260529140000_studio_jobs_delivery_system.sql',
+            'Apply supabase/migrations/20260529120000_studio_content_tables.sql, 20260529140000_studio_jobs_delivery_system.sql, and 20260529150000_studio_job_documents_storage.sql',
         }
       }
     } else {

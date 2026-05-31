@@ -2,18 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase-client'
-import { StudioCrudPanel } from '@/components/studio/StudioCrudPanel'
 import { STUDIO_NOT_SET } from '@/lib/studio/ui-copy'
 import { useStudioEditor } from '@/hooks/useStudioEditor'
+import { StudioProjectsCrudPanel } from '@/components/studio/StudioProjectsCrudPanel'
+import type { StudioProject } from '@/lib/studio/studio-project'
 
-export type StudioProject = {
-  id: string
-  title: string
-  status: string
-  status_color: string
-  symbol: string
-  sort_order: number
-}
+export type { StudioProject }
 
 const STATUS_OPTIONS = ['Ongoing', 'Finished', '£££'] as const
 
@@ -43,41 +37,12 @@ export default function ProjectCategories() {
 
   return (
     <div className="studio-projects">
-      {canEdit ? (
-        <StudioCrudPanel<StudioProject>
-          table="studio_projects"
-          title="project"
-          gearToggle
-          gearLabel="Category settings"
-          fields={[
-            { key: 'title', label: 'Title' },
-            { key: 'status', label: 'Status (Ongoing, Finished, £££)' },
-            { key: 'status_color', label: 'Color', type: 'color' },
-            { key: 'symbol', label: 'Symbol (emoji)' },
-            { key: 'sort_order', label: 'Sort order', type: 'number', min: 0 },
-          ]}
-          emptyLabel="No projects yet. Add a project to organize delivery lanes."
-          buildEmpty={() => ({
-            title: '',
-            status: 'Ongoing',
-            status_color: '#2e7d32',
-            symbol: '🟢',
-            sort_order: 0,
-          })}
-          renderRow={(p) => (
-            <>
-              <span aria-hidden>{p.symbol} </span>
-              {p.title}
-            </>
-          )}
-          onMutate={() => void fetchProjects()}
-        />
-      ) : null}
+      {canEdit ? <StudioProjectsCrudPanel onMutate={() => void fetchProjects()} /> : null}
 
       <section id="projects" className="section" aria-labelledby="projects-heading">
         <h2 id="projects-heading">Project Categories</h2>
         {loading ? (
-          <p className="studio-muted">Loading projects…</p>
+          <p className="studio-muted">Loading studio projects…</p>
         ) : (
           <div className="card-grid">
             {byStatus.map((cat) => {
