@@ -22,6 +22,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body>
         <StudiosThemeProvider initialTheme={initialTheme} userPlan={userPlan}>
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
           <AppsNav />
           {children}
           <GlobalFooter />

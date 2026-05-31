@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "start": "next start",
     "lint": "next lint",
+    "validate:studios": "node scripts/validate-studios.mjs",
     "stop": "taskkill /f /im node.exe",
     "vercel-build:panel": "npm run build"
   },
