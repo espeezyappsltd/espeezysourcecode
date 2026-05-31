@@ -1,7 +1,7 @@
 const staff = [
   { name: 'Pete', role: 'Lead Dev' },
-  { name: 'Pete', role: 'Designer' },
-  { name: 'Pete', role: 'Product' },
+  { name: 'EspeezyTeam', role: 'Designer' },
+  { name: 'dev Pete', role: 'Product' },
   { name: 'EvryBady Digital', role: 'Marketing' },
 ];
 
