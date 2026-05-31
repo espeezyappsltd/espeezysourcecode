@@ -48,6 +48,7 @@
   "exclude": [
     "node_modules",
     "functions",
-    "apps"
+    "apps",
+    "workers"
   ]
 }

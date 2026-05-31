@@ -1,27 +1,26 @@
+import GlobalFooter from '../../components/GlobalFooter'
+import { serverSupabase } from '../../lib/server-db'
+import type { StudioJob } from '@/lib/jobs/types'
 
-import GlobalFooter from '../../components/GlobalFooter';
-import { serverSupabase } from '../../lib/server-db';
-
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export default async function PublicFeedPage() {
-  // Pagination params (could be extended to use searchParams)
-  const pageSize = 10;
-  const page = 1;
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-  let jobs: any[] = [];
-  let error: any = null;
+  const pageSize = 10
+  const page = 1
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+  let jobs: StudioJob[] = []
+  let error: { message?: string } | null = null
   try {
     const { data, error: fetchError } = await serverSupabase
       .from('jobs')
       .select('*')
       .order('created_at', { ascending: false })
-      .range(from, to);
-    jobs = data || [];
-    error = fetchError;
+      .range(from, to)
+    jobs = (data ?? []) as StudioJob[]
+    error = fetchError
   } catch (e) {
-    error = e;
+    error = e instanceof Error ? { message: e.message } : { message: String(e) }
   }
 
   return (

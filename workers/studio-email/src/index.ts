@@ -80,7 +80,11 @@ function escapeHtml(s: string) {
 
 export default {
   /** Inbound — Email Routing → this worker */
-  async email(message: ForwardableEmailMessage, env: Env, ctx: ExecutionContext) {
+  async email(
+    message: import('@cloudflare/workers-types').ForwardableEmailMessage,
+    env: Env,
+    ctx: import('@cloudflare/workers-types').ExecutionContext,
+  ) {
     const toAddress = message.to ?? ''
     const fallback = env.INBOUND_FORWARD_TO || INBOUND_FORWARD_TO
     const forwardTo = forwardTargetForRecipient(toAddress, fallback)

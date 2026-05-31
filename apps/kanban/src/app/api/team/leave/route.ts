@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
   try {
     await leaveTeam(userId, teamId)
     return NextResponse.json({ success: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to leave team' }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to leave team'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
