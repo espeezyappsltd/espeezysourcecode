@@ -1,14 +1,14 @@
 import StudioPageShell from '../../components/StudioPageShell'
-import JobsDashboard from '../../components/JobsDashboard'
+import JobsList from '../../components/jobs/JobsList'
 
 export default function JobsPage() {
   return (
     <StudioPageShell
       title="Jobs"
-      description="Live job queue and delivery status across studio work."
+      description="Professional project delivery — timeline, budget, milestones, PRD, and client invoicing."
       wide
     >
-      <JobsDashboard />
+      <JobsList />
     </StudioPageShell>
   )
 }
