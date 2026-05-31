@@ -19,6 +19,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
   // Removed unsupported 'turbo' key from experimental
 }

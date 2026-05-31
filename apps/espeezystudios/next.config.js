@@ -8,6 +8,7 @@ const nextConfig = {
     root: path.join(__dirname),
   },
   // Monorepo: trace from repo root when hoisted; Cloudflare builds still resolve this path.
+  output: 'standalone',
   outputFileTracingRoot: path.join(__dirname, '../..'),
   images: {
     remotePatterns: [

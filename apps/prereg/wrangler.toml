@@ -1,4 +1,5 @@
 name = "espeezy-prereg"
+account_id = "6f6d20dab3acd55c37b5ff2ff5a02d95"
 main = ".open-next/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
@@ -8,11 +9,9 @@ binding = "ASSETS"
 directory = ".open-next/assets"
 
 [[routes]]
-pattern = "espeezy.com/*"
-zone_name = "espeezy.com"
+pattern = "espeezy.com"
 custom_domain = true
 
 [[routes]]
-pattern = "www.espeezy.com/*"
-zone_name = "espeezy.com"
+pattern = "www.espeezy.com"
 custom_domain = true
