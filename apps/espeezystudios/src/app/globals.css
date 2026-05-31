@@ -1087,17 +1087,81 @@ section {
   color: var(--studios-muted);
 }
 
-.studio-crud__field input,
-.studio-crud__field textarea {
-  margin-bottom: 0;
-  font-weight: 400;
-}
-
 .studio-crud__modal-actions {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
   margin-top: 0.5rem;
+}
+
+.studio-crud--gear {
+  margin-bottom: 0.85rem;
+}
+
+.studio-crud__gear-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.studio-crud__gear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  min-height: 38px;
+  border: 1px solid var(--studios-border);
+  border-radius: 10px;
+  background: var(--studios-surface-2);
+  color: var(--studios-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.studio-crud__gear:hover,
+.studio-crud__gear.is-active {
+  border-color: var(--studios-brand);
+  color: var(--studios-brand);
+  background: rgba(129, 140, 248, 0.08);
+}
+
+.studio-crud__gear-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--studios-border);
+  border-radius: 8px;
+  background: var(--studios-surface);
+  color: var(--studios-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.studio-crud__gear-close:hover {
+  border-color: var(--studios-brand);
+  color: var(--studios-brand);
+}
+
+.studio-crud__panel {
+  margin-top: 0.65rem;
+  padding: 0.85rem;
+  border: 1px solid var(--studios-border);
+  border-radius: 12px;
+  background: var(--studios-surface-2);
+}
+
+.studio-crud__field input,
+.studio-crud__field textarea,
+.studio-crud__field select {
+  margin-bottom: 0;
+  font-weight: 400;
 }
 
 .studio-profile-form {
@@ -1270,13 +1334,38 @@ section {
   color: var(--studios-muted);
 }
 
+.jobs-workspace__top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.jobs-workspace__settings {
+  margin-left: auto;
+}
+
+.jobs-panel__settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.jobs-panel__settings-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
 .jobs-workspace__back {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   font-size: 0.85rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
 .jobs-workspace__title {

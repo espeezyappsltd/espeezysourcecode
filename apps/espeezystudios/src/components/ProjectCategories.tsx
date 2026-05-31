@@ -47,6 +47,8 @@ export default function ProjectCategories() {
         <StudioCrudPanel<StudioProject>
           table="studio_projects"
           title="project"
+          gearToggle
+          gearLabel="Category settings"
           fields={[
             { key: 'title', label: 'Title' },
             { key: 'status', label: 'Status (Ongoing, Finished, £££)' },

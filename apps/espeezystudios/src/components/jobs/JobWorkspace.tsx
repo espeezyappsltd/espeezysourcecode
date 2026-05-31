@@ -12,6 +12,7 @@ import {
   Mail,
   Package,
   Save,
+  Settings,
   Trash2,
   Download,
 } from 'lucide-react'
@@ -33,6 +34,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
   const { bundle, loading, error, refresh } = useJobBundle(jobId)
   const { canEdit } = useStudioEditor()
   const [tab, setTab] = useState<Tab>('overview')
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [delivering, setDelivering] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
@@ -45,8 +47,8 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
   if (error || !bundle) {
     return (
       <div>
-        <p className="studio-crud__error">{error ?? 'Job not found'}</p>
-        <Link href="/jobs" className="studio-link">← All jobs</Link>
+        <p className="studio-crud__error">{error ?? 'Project not found'}</p>
+        <Link href="/jobs" className="studio-link">← All projects</Link>
       </div>
     )
   }
@@ -103,7 +105,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
   }
 
   async function deleteJob() {
-    if (!confirm('Delete this job and all timeline/budget data?')) return
+    if (!confirm('Delete this project and all timeline/budget data?')) return
     await supabase.from('jobs').delete().eq('id', jobId)
     window.location.href = '/jobs'
   }
@@ -111,9 +113,26 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
   return (
     <div className="jobs-workspace">
       <div className="jobs-workspace__top">
-        <Link href="/jobs" className="jobs-workspace__back">
-          <ArrowLeft size={16} /> Jobs
-        </Link>
+        <div className="jobs-workspace__top-row">
+          <Link href="/jobs" className="jobs-workspace__back">
+            <ArrowLeft size={16} /> Projects
+          </Link>
+          {canEdit ? (
+            <button
+              type="button"
+              className={`studio-crud__gear jobs-workspace__settings${settingsOpen ? ' is-active' : ''}`}
+              aria-expanded={settingsOpen}
+              aria-label="Project settings"
+              onClick={() => {
+                setTab('overview')
+                setSettingsOpen((open) => !open)
+              }}
+            >
+              <Settings size={18} aria-hidden />
+              <span>Settings</span>
+            </button>
+          ) : null}
+        </div>
         <h2 className="jobs-workspace__title">{job.title}</h2>
         <p className="jobs-workspace__sub">
           {job.client_name || 'No client'}
@@ -141,8 +160,19 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
 
       {tab === 'overview' && (
         <section className="jobs-panel">
-          {canEdit ? (
+          {canEdit && settingsOpen ? (
             <>
+              <div className="jobs-panel__settings-head">
+                <h3>Project settings</h3>
+                <button
+                  type="button"
+                  className="studio-crud__gear-close"
+                  aria-label="Close settings"
+                  onClick={() => setSettingsOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
               <div className="jobs-form-grid">
                 <label className="studio-crud__field">
                   <span>Title</span>
@@ -199,6 +229,8 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
                 </button>
               </div>
             </>
+          ) : canEdit ? (
+            <p className="studio-muted">{job.description || 'Open settings to edit this project.'}</p>
           ) : (
             <p>{job.description}</p>
           )}
