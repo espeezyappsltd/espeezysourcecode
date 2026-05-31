@@ -5,7 +5,7 @@ import { attachTierCacheCookie, resolveGamesTier } from '@/lib/resolve-games-tie
 import { hasGamesAccess } from '@/lib/games-tier'
 import { sanitizeNextPath } from '@shared/app-url'
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isEmbed = request.nextUrl.searchParams.get('embed') === '1'
 

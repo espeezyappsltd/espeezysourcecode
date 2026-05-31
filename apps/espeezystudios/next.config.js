@@ -3,7 +3,7 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Keep Turbopack scoped to this app so it does not pick up ../../src/proxy.ts (dev hub).
+  // Keep Turbopack scoped to this app so it does not pick up ../../src/middleware.ts (dev hub).
   turbopack: {
     root: path.join(__dirname),
   },

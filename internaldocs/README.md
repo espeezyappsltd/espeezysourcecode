@@ -19,7 +19,7 @@ This repository contains the Espeezy platform: standalone Next.js apps, shared U
 
 ## Architecture
 
-- **Auth:** Supabase (SSR cookies). Kanban and Games use `src/proxy.ts` (Next.js 16 proxy convention) for session refresh and route protection.
+- **Auth:** Supabase (SSR cookies). Kanban and Games use `src/middleware.ts` (Edge) for session refresh and route protection.
 - **Data:** Supabase Postgres + RLS. Server routes use service role only on the server.
 - **Prereg:** Marketing site; prereg API may proxy to shared backend routes on the root app.
 - **Deploy:** Production apps target **Cloudflare Workers** via OpenNext (`cf-build`, `wrangler deploy`). Docker/Caddy in `Caddyfile` remains for local/self-hosted stacks only.
@@ -79,6 +79,9 @@ Each app is a **Cloudflare Worker** (OpenNext) with custom-domain routing on `es
 | **Panel (Admin)** | `espeezy-panel` | panel.espeezy.com | `npm run cf-build:panel` |
 | Studios | `espeezy-studios` | studios.espeezy.com | `npm run cf-build:espeezystudios` |
 | Dashboard | `espeezy-dashboard` | dashboard.espeezy.com | `npm run cf-build:dashboard` |
+| Articles | `espeezy-articles` | articles.espeezy.com, blog.espeezy.com | `npm run cf-build:articles` |
+| Core | `espeezy-core` | devlaunch.espeezy.com, core.espeezy.com | `npm run cf-build:core` |
+| Base (root) | `espeezy-base` | base.espeezy.com | `npm run cf-build:base` |
 
 ```bash
 npm run validate:cloudflare   # wrangler + routing parity

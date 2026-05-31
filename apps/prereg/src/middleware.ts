@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-/** Espeezy Articles is a public content app — no dev-hub or dashboard auth gate. */
-export function proxy(request: NextRequest) {
+/** Prereg is a public marketing app — no dev-hub or dashboard auth here. */
+export function middleware(request: NextRequest) {
   return NextResponse.next({ request })
 }
 

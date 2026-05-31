@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Q } from '@/lib/query-columns'
 import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server'
-import { rateLimit } from '../../../proxy'
+import { rateLimit } from '@/lib/rate-limit'
 import { marketplaceCreditPriceSchema } from '@/lib/credit-schema'
 import { validateCreditValue } from '@/lib/credits'
 

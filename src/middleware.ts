@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { HUB_SESSION_COOKIE, verifyHubSession } from '@/lib/dev-hub/auth'
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.next({ request })
   }
