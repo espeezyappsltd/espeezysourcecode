@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@prisma/internals": "^7.8.0",
-    "next": "*",
-    "react": "*",
-    "react-dom": "*"
+    "next": "^16.2.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   }
 }

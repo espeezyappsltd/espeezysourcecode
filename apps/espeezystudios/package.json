@@ -19,6 +19,6 @@
     "chart.js": "^4.4.1",
     "react-chartjs-2": "^5.2.0",
     "file-saver": "^2.0.5",
-    "lucide-react": "^0.367.0"
+    "lucide-react": "^1.14.0"
   }
 }

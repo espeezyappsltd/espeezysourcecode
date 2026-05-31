@@ -1,6 +1,6 @@
+'use client';
 
-
-import { getLatestArticles } from '../lib/latest-articles';
+import type { ArticleSummary } from '../lib/latest-articles';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -21,7 +21,7 @@ const colors = {
   catText: '#10b981',
 };
 
-export default function LatestArticlesSection({ articles = [] }) {
+export default function LatestArticlesSection({ articles = [] }: { articles?: ArticleSummary[] }) {
   // Get unique tags, categories, authors for filter bar
   const allTags = Array.from(new Set(articles.flatMap(a => Array.isArray(a.tags) ? a.tags : [])));
   const allCategories = Array.from(new Set(articles.map(a => a.category).filter(Boolean)));

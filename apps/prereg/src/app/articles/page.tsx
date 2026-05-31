@@ -2,8 +2,6 @@
 
 import { getLatestArticles } from '../../lib/latest-articles';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
 
 function getInitials(name: string) {
   return name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
@@ -23,19 +21,36 @@ const colors = {
   catText: '#10b981',
 };
 
-export default async function AllArticlesPage({ searchParams }) {
-  // Filtering state (SSR fallback: get from searchParams)
-  const page = parseInt(searchParams?.page || '1', 10);
-  const filterTag = searchParams?.tag || '';
-  const filterCategory = searchParams?.category || '';
-  const filterAuthor = searchParams?.author || '';
+type ArticlesSearchParams = {
+  page?: string
+  tag?: string
+  category?: string
+  author?: string
+}
+
+export default async function AllArticlesPage({
+  searchParams,
+}: {
+  searchParams: Promise<ArticlesSearchParams>
+}) {
+  const params = await searchParams
+  const page = parseInt(params.page || '1', 10)
+  const filterTag = params.tag || ''
+  const filterCategory = params.category || ''
+  const filterAuthor = params.author || ''
   const { articles, total } = await getLatestArticles({ limit: 20, page });
   const totalPages = Math.ceil((total || 0) / 20);
 
   // Get unique tags, categories, authors for filter bar
-  const allTags = Array.from(new Set(articles.flatMap(a => Array.isArray(a.tags) ? a.tags : [])));
-  const allCategories = Array.from(new Set(articles.map(a => a.category).filter(Boolean)));
-  const allAuthors = Array.from(new Set(articles.map(a => a.author).filter(Boolean)));
+  const allTags = Array.from(
+    new Set(articles.flatMap((a) => (Array.isArray(a.tags) ? a.tags : []))),
+  )
+  const allCategories = Array.from(
+    new Set(articles.map((a) => a.category).filter((c): c is string => Boolean(c))),
+  )
+  const allAuthors = Array.from(
+    new Set(articles.map((a) => a.author).filter((a): a is string => Boolean(a))),
+  )
 
   // Filter articles client-side (for demo; ideally, filter in backend)
   const filtered = articles.filter(a =>
@@ -72,13 +87,9 @@ export default async function AllArticlesPage({ searchParams }) {
         gap: '2.2rem',
       }}>
         {filtered.length === 0 && <div>No articles found.</div>}
-        {filtered.map((article, i) => (
-          <motion.article
+        {filtered.map((article) => (
+          <article
             key={article.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: i * 0.06, ease: 'easeOut' }}
             style={{
               background: colors.bg,
               borderRadius: 18,
@@ -92,7 +103,6 @@ export default async function AllArticlesPage({ searchParams }) {
               overflow: 'hidden',
               transition: 'box-shadow 0.2s, border 0.2s',
             }}
-            whileHover={{ boxShadow: '0 8px 40px rgba(16,185,129,0.13)', borderColor: colors.accent }}
             tabIndex={0}
             aria-labelledby={`article-title-${article.id}`}
             role="article"
@@ -153,7 +163,7 @@ export default async function AllArticlesPage({ searchParams }) {
               boxShadow: '0 2px 8px rgba(16,185,129,0.08)',
               transition: 'background 0.2s',
             }} aria-label={`Read more about ${article.title}`}>Read more</Link>
-          </motion.article>
+          </article>
         ))}
       </div>
       {/* Pagination */}

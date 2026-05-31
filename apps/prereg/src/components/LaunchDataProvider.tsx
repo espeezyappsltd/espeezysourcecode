@@ -1,9 +1,24 @@
-"use client";
-import { useLaunchData } from '@/hooks/useLaunchData';
-import type { User, Session } from '@supabase/supabase-js';
-import { useState } from 'react';
+'use client';
 
-export default function LaunchDataProvider({ children }: { children: (props: any) => JSX.Element }) {
+import type { User, Session } from '@supabase/supabase-js';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+import { useLaunchData } from '@/hooks/useLaunchData';
+
+type LaunchDataRenderProps = {
+  config: ReturnType<typeof useLaunchData>['config'];
+  authUserCount: number;
+  authUser: User | null;
+  setAuthUser: (user: User | null) => void;
+  session: Session | null;
+  setSession: (session: Session | null) => void;
+};
+
+export default function LaunchDataProvider({
+  children,
+}: {
+  children: (props: LaunchDataRenderProps) => ReactNode;
+}) {
   const { config, authUserCount } = useLaunchData();
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
