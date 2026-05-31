@@ -11,11 +11,11 @@ export type PlatformAppUseCase = {
 
 export const PLATFORM_APP_USE_CASES: Record<string, PlatformAppUseCase> = {
   kanban: {
-    audience: 'Students in group projects',
+    audience: 'University and college students, anywhere',
     scenarios: [
-      'Split coursework into tasks the whole team can see',
-      'Show your tutor who did what before grades go in',
-      'Keep one shared board for your module or capstone team',
+      'Break a group assignment into tasks everyone can see and update',
+      'Show your professor or TA who handled what before the deadline',
+      'Keep one board for your course project, club, or study group',
     ],
   },
   games: {
@@ -51,11 +51,11 @@ export const PLATFORM_APP_USE_CASES: Record<string, PlatformAppUseCase> = {
     ],
   },
   studios: {
-    audience: 'Students and freelancers doing client work',
+    audience: 'Freelancers and side-hustle builders',
     scenarios: [
-      'Track a client project from brief to final delivery',
-      'Send invoices and project files when the work is done',
-      'Keep paid gigs separate from your study boards',
+      'Run a client job from first brief to final handoff in one place',
+      'Send invoices and deliverables when the work is done — get paid faster',
+      'Keep freelance gigs separate from your school boards on Kanban',
     ],
   },
   articles: {
