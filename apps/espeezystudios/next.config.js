@@ -3,6 +3,10 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Keep Turbopack scoped to this app so it does not pick up ../../src/proxy.ts (dev hub).
+  turbopack: {
+    root: path.join(__dirname),
+  },
   // Monorepo: trace from repo root when hoisted; Vercel app-root installs still resolve this path.
   outputFileTracingRoot: path.join(__dirname, '../..'),
   images: {
