@@ -47,16 +47,16 @@ const GUIDES: Record<string, PageGuideConfig> = {
   },
   '/assets': {
     id: 'assets',
-    pageTitle: 'My Files',
-    summary: 'Store files and links for study and collaboration.',
+    pageTitle: 'Files',
+    summary: 'Upload files and links, organize folders, and manage storage.',
     steps: [
-      { title: 'Upload', body: 'Add files and links organized in folders for your team.' },
+      { title: 'Upload', body: 'Add files and links into folders for your team.' },
+      { title: 'Organize', body: 'Create folders and browse with the path breadcrumb.' },
       { title: 'Storage', body: 'Usage follows your plan tier (Free 1 GB, Pro 5 GB, Premium 20 GB).' },
-      { title: 'Marketplace', body: 'Selling and billing moved to Espeezy Studio (Premium).' },
     ],
     actions: [
       { label: 'Add file', hint: 'Upload or save a link' },
-      { label: 'Studio', hint: 'Premium marketplace' },
+      { label: 'New folder', hint: 'Group related files' },
     ],
   },
   '/settings': {
@@ -112,7 +112,7 @@ const GUIDES: Record<string, PageGuideConfig> = {
     pageTitle: 'My Profile',
     summary: 'Your public academic identity on Espeezy.',
     steps: [
-      { title: 'Avatar', body: 'Upload a photo so teammates recognize you in Feed and Hustle.' },
+      { title: 'Avatar', body: 'Upload a photo so teammates recognize you in Feed and messages.' },
       { title: 'Details', body: 'Program, year, and bio appear on your profile card.' },
     ],
   },

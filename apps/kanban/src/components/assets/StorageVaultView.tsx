@@ -15,7 +15,6 @@ import { joinFolderPath, normalizeFolderPath } from '@/lib/assets/folders'
 import { useNotifications } from '@/components/NotificationProvider'
 import { AssetsPageFrame } from './AssetsPageFrame'
 import { AssetsMotionRoot } from './AssetsMotionRoot'
-import { AssetsSubNav } from './AssetsSubNav'
 import { useAssetsVault } from './shared/useAssetsVault'
 import { AssetCard } from './shared/AssetCard'
 import { FolderModal } from './shared/FolderModal'
@@ -43,7 +42,7 @@ export function StorageVaultView() {
   const normCurrent = normalizeFolderPath(currentFolder)
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Remove this asset from your arsenal?')) return
+    if (!confirm('Remove this file from your workspace?')) return
     try {
       const res = await fetch(`/api/assets?id=${id}`, { method: 'DELETE', credentials: 'include' })
       if (res.ok) {
@@ -128,10 +127,10 @@ export function StorageVaultView() {
       <header className="assets-hero ui-hero-row page-header">
         <div className="ui-hero-row__main page-header__main">
           <h1 className="page-header__title">
-            Storage & <span className="page-header__title-accent">files</span>
+            <span className="page-header__title-accent">Files</span>
           </h1>
           <p className="page-header__desc">
-            Upload files and links into folders. Marketplace purchases land in MARKETPLACE BUYS automatically.
+            Upload files, save links, and organize folders. Storage usage follows your plan tier.
           </p>
         </div>
         <div className="ui-hero-row__aside ui-hero-row__aside--fixed">
@@ -142,8 +141,6 @@ export function StorageVaultView() {
           />
         </div>
       </header>
-
-      <AssetsSubNav />
 
       <nav className="assets-breadcrumb" aria-label="Folder path">
         <button
@@ -175,7 +172,7 @@ export function StorageVaultView() {
 
       <div className="assets-toolbar">
         <FilterTabGroup
-          label="Filter assets by type"
+          label="Filter files by type"
           options={['all', 'file', 'link'] as const}
           value={filter}
           onChange={setFilter}
@@ -189,7 +186,7 @@ export function StorageVaultView() {
             <FolderPlus size={16} aria-hidden /> New folder
           </button>
           <button type="button" className="btn btn-primary assets-toolbar__btn" onClick={() => setShowUploadModal(true)}>
-            <Plus size={18} aria-hidden /> Add asset
+            <Plus size={18} aria-hidden /> Add file
           </button>
         </div>
       </div>
@@ -197,7 +194,7 @@ export function StorageVaultView() {
       {loadError && !loading ? (
         <div className="assets-empty ui-panel ui-panel--dashed" role="alert">
           <AlertCircle size={40} style={{ margin: '0 auto 1rem', color: '#ef4444' }} aria-hidden />
-          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>Could not load arsenal</h3>
+          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>Could not load files</h3>
           <p style={{ margin: '0 0 1.25rem', color: 'var(--text-sub)', fontWeight: 600 }}>{loadError}</p>
           <button type="button" className="btn btn-primary" onClick={() => void fetchAssets()}>
             Try again
@@ -209,7 +206,7 @@ export function StorageVaultView() {
           <span className="sr-only">Loading storage and files</span>
         </div>
       ) : (
-        <div id="assets-filter-panel" role="tabpanel" aria-label="Filtered assets">
+        <div id="assets-filter-panel" role="tabpanel" aria-label="Filtered files">
           {childFolders.length > 0 && (
             <div className="assets-grid assets-grid--folders" style={{ marginBottom: '1.25rem' }}>
               {childFolders.map(({ path, name }) => (
@@ -233,16 +230,16 @@ export function StorageVaultView() {
           {filteredAssets.length === 0 && childFolders.length === 0 ? (
             <div className="assets-empty ui-panel ui-panel--dashed">
               <File size={48} style={{ margin: '0 auto 1rem', opacity: 0.15, color: 'var(--text-sub)' }} />
-              <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>No assets in this folder</h3>
+              <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-main)', fontWeight: 900 }}>No files in this folder</h3>
               <p style={{ margin: '0 0 1.25rem', color: 'var(--text-sub)', fontWeight: 600 }}>
-                Create a folder or upload a file or link. Set credit values under Credits when you are ready to sell.
+                Create a folder or upload a file or link to get started.
               </p>
               <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowFolderModal(true)}>
                   New folder
                 </button>
                 <button type="button" className="btn btn-primary" onClick={() => setShowUploadModal(true)}>
-                  Add asset
+                  Add file
                 </button>
               </div>
             </div>

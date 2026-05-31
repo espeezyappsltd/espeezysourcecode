@@ -2,8 +2,8 @@
 
 import { type ComponentPropsWithoutRef, Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sparkles,
@@ -39,6 +39,7 @@ import {
   ROADMAP_ITEMS,
   buildPlatformTeamSlots,
 } from './preregister-content'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import './preregister.css'
 
 const PLATFORM_TEAM = buildPlatformTeamSlots()
@@ -152,20 +153,7 @@ function PreRegisterPageContent() {
         }}
       >
         <Link href="/preregister" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Image src="/brand_logo2.svg" width={22} height={22} style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Espeezy" priority />
-          </div>
-          <span style={{ fontWeight: 950, fontSize: '1rem', color: 'white', letterSpacing: '-0.03em' }}>{config.brand_name}</span>
+          <EspeezyAppLogo app="kanban" variant="nav" />
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="hide-mobile">

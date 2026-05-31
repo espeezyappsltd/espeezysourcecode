@@ -1,9 +1,12 @@
 'use client'
 
 import { useState, type CSSProperties, type FormEvent } from 'react'
+import EspeezyAppLogo, { type EspeezyAppLogoSlug } from './EspeezyAppLogo'
 
 export type SimpleAuthFormProps = {
   appName: string
+  /** When set, renders the SVG wordmark instead of a text heading */
+  logoApp?: EspeezyAppLogoSlug
   tagline?: string
   busy: boolean
   ready: boolean
@@ -67,6 +70,7 @@ const btn: CSSProperties = {
 
 export function SimpleAuthForm({
   appName,
+  logoApp,
   tagline,
   busy,
   ready,
@@ -104,7 +108,13 @@ export function SimpleAuthForm({
   return (
     <div style={shell}>
       <div style={card}>
-        <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>{appName}</h1>
+        {logoApp ? (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: tagline ? '0.75rem' : '1.5rem' }}>
+            <EspeezyAppLogo app={logoApp} variant="login" />
+          </div>
+        ) : (
+          <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>{appName}</h1>
+        )}
         {tagline && <p style={{ margin: '0 0 1.5rem', color: '#64748b', fontSize: '0.9rem' }}>{tagline}</p>}
 
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>

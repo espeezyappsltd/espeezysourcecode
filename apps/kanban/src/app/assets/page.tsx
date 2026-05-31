@@ -1,7 +1,7 @@
 ﻿'use client'
 
-import { AssetsLanding } from '@/components/assets/AssetsLanding'
+import { StorageVaultView } from '@/components/assets/StorageVaultView'
 
-export default function PersonalAssetsPage() {
-  return <AssetsLanding />
+export default function FilesPage() {
+  return <StorageVaultView />
 }

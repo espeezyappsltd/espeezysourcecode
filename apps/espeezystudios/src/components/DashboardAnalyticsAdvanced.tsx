@@ -13,9 +13,16 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
+import {
+  StudioAnalyticsGrid,
+  StudioAnalyticsPanel,
+  studioBarLineChartOptions,
+  studioPieChartOptions,
+} from './analytics/StudioAnalyticsPanel';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 export default function DashboardAnalyticsAdvanced() {
   const [jobHistory, setJobHistory] = useState<number[]>([]);
@@ -24,18 +31,14 @@ export default function DashboardAnalyticsAdvanced() {
 
   useEffect(() => {
     async function fetchData() {
-      // Time series: jobs created per day (last 14 days)
-      const { data: jobs, error: jobsError } = await supabase.from('jobs').select('created_at, status');
-      // Cross-table: projects (active/completed)
-      const { data: projects, error: projectsError } = await supabase.from('projects').select('status');
-      // Prepare time series
+      const { data: jobs } = await supabase.from('jobs').select('created_at, status');
+      const { data: projects } = await supabase.from('projects').select('status');
       const days = Array.from({ length: 14 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() - (13 - i));
         return d.toISOString().slice(0, 10);
       });
       const jobsPerDay = days.map(day => jobs?.filter(j => j.created_at?.slice(0, 10) === day).length || 0);
-      // Project stats
       type Project = { status: string };
       const active = projects?.filter((p: Project) => p.status !== 'done').length || 0;
       const completed = projects?.filter((p: Project) => p.status === 'done').length || 0;
@@ -50,7 +53,7 @@ export default function DashboardAnalyticsAdvanced() {
     labels: Array.from({ length: 14 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (13 - i));
-      return d.toLocaleDateString();
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }),
     datasets: [
       {
@@ -77,15 +80,13 @@ export default function DashboardAnalyticsAdvanced() {
   };
 
   return (
-    <div style={{ margin: '2.5rem 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', maxWidth: 900, width: '100%' }}>
-      <div style={{ background: 'var(--studios-surface-2)', borderRadius: 16, padding: '1.5rem', boxShadow: '0 2px 12px rgba(15,23,42,0.07)' }}>
-        <h3 style={{ marginBottom: 16 }}>Jobs Created (Last 14 Days)</h3>
-        {loading ? <p>Loading…</p> : <Line data={lineData} options={{ responsive: true, plugins: { legend: { display: false } } }} />}
-      </div>
-      <div style={{ background: 'var(--studios-surface-2)', borderRadius: 16, padding: '1.5rem', boxShadow: '0 2px 12px rgba(15,23,42,0.07)' }}>
-        <h3 style={{ marginBottom: 16 }}>Projects Status</h3>
-        {loading ? <p>Loading…</p> : <Doughnut data={doughnutData} options={{ responsive: true, plugins: { legend: { position: 'bottom' } } }} />}
-      </div>
-    </div>
+    <StudioAnalyticsGrid label="Jobs and projects trends">
+      <StudioAnalyticsPanel title="Jobs Created (Last 14 Days)" loading={loading}>
+        <Line data={lineData} options={studioBarLineChartOptions} />
+      </StudioAnalyticsPanel>
+      <StudioAnalyticsPanel title="Projects Status" loading={loading}>
+        <Doughnut data={doughnutData} options={studioPieChartOptions} />
+      </StudioAnalyticsPanel>
+    </StudioAnalyticsGrid>
   );
 }

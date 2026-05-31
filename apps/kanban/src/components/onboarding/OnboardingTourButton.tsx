@@ -49,7 +49,7 @@ export default function OnboardingTourButton({
       data-testid={`onboarding-tour-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       {isPersonal ? <UserCircle size={18} aria-hidden /> : <ArrowUpRight size={18} aria-hidden />}
-      {isPersonal ? 'Open Personal Arsenal' : action.label}
+      {isPersonal ? 'Open Files' : action.label}
     </button>
   )
 }

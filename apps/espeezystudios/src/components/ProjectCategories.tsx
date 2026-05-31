@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { StudioCrudPanel } from '@/components/studio/StudioCrudPanel'
+import { STUDIO_NOT_SET } from '@/lib/studio/ui-copy'
 import { useStudioEditor } from '@/hooks/useStudioEditor'
 
 export type StudioProject = {
@@ -53,7 +54,7 @@ export default function ProjectCategories() {
             { key: 'symbol', label: 'Symbol (emoji)' },
             { key: 'sort_order', label: 'Sort order', type: 'number', min: 0 },
           ]}
-          emptyLabel="No projects yet."
+          emptyLabel="No projects yet. Add a project to organize delivery lanes."
           buildEmpty={() => ({
             title: '',
             status: 'Ongoing',
@@ -88,7 +89,7 @@ export default function ProjectCategories() {
                   </h3>
                   <ul className="category__list">
                     {cat.items.length === 0 ? (
-                      <li className="studio-muted">—</li>
+                      <li className="studio-muted">{STUDIO_NOT_SET}</li>
                     ) : (
                       cat.items.map((p) => <li key={p.id}>{p.title}</li>)
                     )}

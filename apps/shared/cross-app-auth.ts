@@ -1,4 +1,4 @@
-import { ESPEEZY_APP_ORIGINS, sanitizeNextPath } from './app-url'
+import { resolveAppOrigin, sanitizeNextPath } from './app-url'
 
 /** Default post-SSO path on games.espeezy.com for the signed-in user. */
 export const GAMES_PROFILE_PATH = '/profile'
@@ -39,17 +39,27 @@ export function buildCrossAppSsoUrl(
 }
 
 export function resolveGamesAppOrigin(): string {
-  return (process.env.NEXT_PUBLIC_GAMES_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.games).replace(
-    /\/$/,
-    '',
-  )
+  return resolveAppOrigin('games')
 }
 
 export function resolveKanbanAppOrigin(): string {
-  return (process.env.NEXT_PUBLIC_KANBAN_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.kanban).replace(
-    /\/$/,
-    '',
-  )
+  return resolveAppOrigin('kanban')
+}
+
+export function resolveStudiosAppOrigin(): string {
+  return resolveAppOrigin('studios')
+}
+
+export function resolveCoreAppOrigin(): string {
+  return resolveAppOrigin('core')
+}
+
+export function resolveArticlesAppOrigin(): string {
+  return resolveAppOrigin('articles')
+}
+
+export function resolveBaseAppOrigin(): string {
+  return resolveAppOrigin('base')
 }
 
 export function buildGamesProfileSsoUrl(
@@ -72,13 +82,6 @@ export function buildKanbanWorkspaceSsoUrl(
   kanbanOrigin?: string,
 ): string {
   return buildKanbanAppSsoUrl(session, KANBAN_WORKSPACE_PATH, kanbanOrigin)
-}
-
-export function resolveStudiosAppOrigin(): string {
-  return (process.env.NEXT_PUBLIC_STUDIOS_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.studios).replace(
-    /\/$/,
-    '',
-  )
 }
 
 export function buildStudiosSsoUrl(

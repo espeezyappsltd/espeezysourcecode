@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '../../lib/supabase-client';
+import StudiosLogo from '@/components/StudiosLogo';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,7 +35,9 @@ export default function LoginPage() {
 function LoginContent({ searchParams }: { searchParams: URLSearchParams }) {
   return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>Espeezy Studios Login</h1>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+        <StudiosLogo variant="login" />
+      </div>
       <p style={{ color: '#64748b', marginBottom: '2rem' }}>Please sign in to access your dashboard and projects.</p>   
       <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '1rem' }}>
         <a

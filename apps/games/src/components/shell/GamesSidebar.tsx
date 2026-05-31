@@ -16,6 +16,7 @@ import {
   UserCircle,
 } from 'lucide-react'
 import { ThemeCycleButton } from '@shared/ThemeCycleButton'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import { useCategoriesContext } from '@/context/CategoriesContext'
 import { useKanbanAppLink } from '@/hooks/useKanbanAppLink'
 import { useKanbanWorkspaceLink } from '@/hooks/useKanbanWorkspaceLink'
@@ -131,16 +132,10 @@ export default function GamesSidebar({
     <aside className={sidebarClass} aria-label="Games navigation">
       <div className="games-sidebar__head">
         <Link href="/" className="games-sidebar__brand" onClick={() => isMobile && onCloseMobile()}>
-          <div className="games-sidebar__brand-mark" aria-hidden>
-            <Gamepad2 size={18} color="#fff" />
-          </div>
-          {!collapsed && (
-            <div className="games-sidebar__brand-text">
-              Espe<span>ezy</span>
-              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--games-muted)', letterSpacing: '0.08em' }}>
-                GAMES
-              </div>
-            </div>
+          {collapsed ? (
+            <EspeezyAppLogo app="games" variant="mark" />
+          ) : (
+            <EspeezyAppLogo app="games" variant="nav" />
           )}
         </Link>
         {!isMobile && (

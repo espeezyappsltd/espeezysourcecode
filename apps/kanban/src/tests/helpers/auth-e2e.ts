@@ -59,7 +59,7 @@ export async function isAdminApiAvailable(config: SupabaseAdminConfig): Promise<
 const DISMISSED_PAGE_GUIDES = [
   'kanban',
   'feed',
-  'hustle',
+  'studio',
   'marketplace',
   'assets',
   'settings',

@@ -98,6 +98,7 @@ export default function LoginClient() {
       ) : null}
       <SimpleAuthForm
         appName="Espeezy Games"
+        logoApp="games"
         tagline="Email and password, same account as Kanban."
         busy={busy}
         ready={ready}

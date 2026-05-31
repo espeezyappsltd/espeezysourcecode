@@ -1,4 +1,5 @@
 import GlobalFooter from '../../components/GlobalFooter'
+import StudiosLogo from '@/components/StudiosLogo'
 import { serverSupabase } from '../../lib/server-db'
 import type { StudioJob } from '@/lib/jobs/types'
 
@@ -26,7 +27,10 @@ export default async function PublicFeedPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50 dark:bg-neutral-900">
       <main className="flex-1 w-full max-w-5xl mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-6">Espeezy Studio Portfolio</h1>
+        <div className="public-portfolio__head">
+          <StudiosLogo variant="hero" className="public-portfolio__logo" />
+          <p className="public-portfolio__kicker">Portfolio</p>
+        </div>
         <div className="border rounded-lg p-6 bg-white dark:bg-neutral-800 shadow">
           {error && (
             <div className="text-red-500 mb-4">Failed to load jobs: {String(error.message || error)}</div>

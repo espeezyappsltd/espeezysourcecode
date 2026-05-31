@@ -52,11 +52,11 @@ export const ONBOARDING_TASK_TEMPLATES: OnboardingTaskTemplate[] = [
   },
   {
     key: 'assets',
-    title: 'Tour: My Files storage',
-    description: `${ONBOARDING_MARKER_PREFIX}assets] Upload a file or save a link in My Files, then mark Done.`,
+    title: 'Tour: Files',
+    description: `${ONBOARDING_MARKER_PREFIX}assets] Upload a file or save a link in Files, then mark Done.`,
     category: 'Documentation',
-    path: '/assets/storage',
-    tourButtonLabel: 'My Files',
+    path: '/assets',
+    tourButtonLabel: 'Files',
   },
   {
     key: 'teammates',

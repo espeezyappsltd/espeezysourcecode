@@ -3,7 +3,7 @@ import { fetchStudioSchemaSetup } from '@/lib/studio/check-schema'
 
 export const dynamic = 'force-dynamic'
 
-/** GET /api/health/studio-schema — validates studio_* tables exist and are readable. */
+/** GET /api/health/studio-schema: validates studio_* tables exist and are readable. */
 export async function GET() {
   const result = await fetchStudioSchemaSetup()
 

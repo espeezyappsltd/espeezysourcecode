@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 type Props = {
-  title: string
+  title?: ReactNode
   description?: string
   children: ReactNode
   wide?: boolean
@@ -20,10 +20,12 @@ export default function StudioPageShell({ title, description, children, wide, ce
 
   return (
     <main id="main-content" className={pageClass}>
-      <header className="studio-page__header">
-        <h1 className="studio-page__title">{title}</h1>
-        {description ? <p className="studio-page__desc">{description}</p> : null}
-      </header>
+      {(title || description) ? (
+        <header className="studio-page__header">
+          {title ? <h1 className="studio-page__title">{title}</h1> : null}
+          {description ? <p className="studio-page__desc">{description}</p> : null}
+        </header>
+      ) : null}
       <div className="studio-page__body">{children}</div>
     </main>
   )

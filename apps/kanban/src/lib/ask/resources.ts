@@ -287,7 +287,7 @@ export const ASK_RESOURCES: AskResource[] = [
     id: 'campus-assets',
     title: 'My files',
     description: 'Upload and organize study files and links for your team.',
-    url: '/assets/storage',
+    url: '/assets',
     category: 'campus',
     kind: 'link',
     tags: ['assets', 'storage', 'files'],

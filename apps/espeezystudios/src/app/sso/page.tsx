@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { sanitizeNextPath } from '@shared/app-url'
 import { supabase } from '@/lib/supabase-client'
+import StudiosLogo from '@/components/StudiosLogo'
 
 function StudiosSsoBridgeContent() {
   const router = useRouter()
@@ -59,6 +60,7 @@ function StudiosSsoBridgeContent() {
   return (
     <div className="studio-sso-bridge">
       <div className="studio-sso-bridge__card">
+        <StudiosLogo variant="login" className="studio-sso-bridge__logo" />
         <h1>Signing you in…</h1>
         {error ? (
           <>
@@ -68,7 +70,7 @@ function StudiosSsoBridgeContent() {
             </button>
           </>
         ) : (
-          <p>Redirecting to Espeezy Studio…</p>
+          <p className="studio-sso-bridge__redirect">Redirecting…</p>
         )}
       </div>
     </div>

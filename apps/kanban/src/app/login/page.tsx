@@ -33,6 +33,7 @@ function LoginContent() {
   return (
     <SimpleAuthForm
       appName="Espeezy Kanban"
+      logoApp="kanban"
       tagline="Sign in with your email and password."
       busy={busy}
       ready={ready}

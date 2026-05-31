@@ -70,18 +70,18 @@ export const USER_JOURNEY: JourneyStep[] = [
     step: 5,
     title: 'Store work & track impact',
     summary:
-      'My Assets holds your files and links. Personal Arsenal Impact Log records marketplace and Hustle ledger events with verification IDs.',
-    appSurface: 'My Assets · Impact',
-    path: '/assets/impact',
+      'Upload files and links into folders. Track storage usage from Settings or this page.',
+    appSurface: 'Files',
+    path: '/assets',
     icon: <HardDrive size={20} aria-hidden />,
   },
   {
     step: 6,
-    title: 'Earn and trade on campus',
+    title: 'Monetize in Espeezy Studio',
     summary:
-      'Post or accept Hustle gigs with escrow credits. Buy and sell on Resources (marketplace) with a traceable credit trail.',
-    appSurface: 'Hustle · Resources',
-    path: '/hustle',
+      'Premium members open Espeezy Studio for gigs, jobs, listings, and client delivery. Kanban stays focused on collaboration.',
+    appSurface: 'Espeezy Studio',
+    path: '/studio',
     icon: <Wallet size={20} aria-hidden />,
   },
   {
@@ -136,13 +136,13 @@ export const VERIFIABLE_OUTCOMES: VerifiableOutcome[] = [
   {
     title: 'Campus commerce with receipts',
     youGet: 'Hustle gigs and marketplace trades tied to your profile, not handshake deals.',
-    verifiedBy: 'Personal Arsenal → Impact log (ledger IDs, escrow, payouts)',
+    verifiedBy: 'Espeezy Studio · verified delivery and invoices (Premium)',
     metric: 'Credits in / out summarized',
   },
   {
     title: 'Portable project memory',
     youGet: 'Secure storage for deliverables plus a paper trail across teams.',
-    verifiedBy: 'My Assets vault · team switch restores archived boards',
+    verifiedBy: 'Files vault · team switch restores archived boards',
     metric: 'One account, multiple teams',
   },
   {
@@ -168,10 +168,9 @@ export type LiveModule = {
 export const LIVE_MODULES: LiveModule[] = [
   { name: 'Dashboard', path: '/', desc: 'Kanban board, tasks, team chat, notifications' },
   { name: 'Feed', path: '/feed', desc: 'Academic journeys and peer updates' },
-  { name: 'Hustle', path: '/hustle', desc: 'Campus gigs with escrow credits' },
+  { name: 'Espeezy Studio', path: '/studio', desc: 'Premium jobs, gigs, and client delivery' },
   { name: 'Teammates', path: '/network', desc: 'Roster, connections, join flows' },
-  { name: 'My Assets', path: '/assets', desc: 'Files, links, Personal Arsenal' },
-  { name: 'Resources', path: '/marketplace', desc: 'Listings, credits checkout' },
+  { name: 'Files', path: '/assets', desc: 'Upload files, links, and folders' },
   { name: 'Break Room', path: '/chillout', desc: 'Quizzes and rooms' },
   { name: 'Skirmish', path: '/games', desc: 'Espeezy Games (SSO)' },
   { name: 'Project Stats', path: '/analytics', desc: 'Team velocity and contribution views' },

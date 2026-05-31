@@ -46,7 +46,7 @@ export default function DashboardQuickActions() {
             { key: 'href', label: 'Link path', type: 'url' },
             { key: 'sort_order', label: 'Sort order', type: 'number', min: 0 },
           ]}
-          emptyLabel="No quick actions."
+          emptyLabel="No quick actions yet. Add shortcuts your team uses daily."
           buildEmpty={() => ({ label: '', href: '/', sort_order: 0 })}
           renderRow={(a) => (
             <span>

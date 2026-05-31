@@ -61,7 +61,7 @@ export default function AppsCatalog({ apps }: Props) {
                     className="platform-app-card__icon"
                     style={{ background: `${app.accent_color}18`, color: app.accent_color }}
                   >
-                    <PlatformAppIcon iconKey={app.icon_key} color={app.accent_color} />
+                    <PlatformAppIcon iconKey={app.icon_key} appSlug={app.slug} color={app.accent_color} />
                   </div>
                   <span className={`platform-app-card__status platform-app-card__status--${app.status}`}>
                     {PLATFORM_APP_STATUS_LABEL[app.status]}

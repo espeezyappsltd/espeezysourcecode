@@ -60,7 +60,7 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
       <div className="hero-apps-strip">
         {liveApps.map((app) => (
           <Link key={app.slug} href={`/apps/${app.slug}`} className="hero-apps-pill">
-            <PlatformAppIcon iconKey={app.icon_key} size={16} color={app.accent_color} />
+            <PlatformAppIcon iconKey={app.icon_key} appSlug={app.slug} size={16} color={app.accent_color} />
             {app.name.replace(/^Espeezy\s+/i, '')}
             <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 800 }}>
               {PLATFORM_APP_STATUS_LABEL[app.status]}
@@ -69,7 +69,7 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
         ))}
         {devApps.map((app) => (
           <Link key={app.slug} href={`/apps/${app.slug}`} className="hero-apps-pill hero-apps-pill--dev">
-            <PlatformAppIcon iconKey={app.icon_key} size={16} color={app.accent_color} />
+            <PlatformAppIcon iconKey={app.icon_key} appSlug={app.slug} size={16} color={app.accent_color} />
             {app.name.replace(/^Espeezy\s+/i, '')}
             <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>
               {PLATFORM_APP_STATUS_LABEL[app.status]}

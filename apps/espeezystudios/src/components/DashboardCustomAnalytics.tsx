@@ -13,9 +13,15 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
+import {
+  StudioAnalyticsGrid,
+  StudioAnalyticsPanel,
+  studioBarLineChartOptions,
+} from './analytics/StudioAnalyticsPanel';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 export default function DashboardCustomAnalytics() {
   const [userJobCounts, setUserJobCounts] = useState<{ name: string; count: number }[]>([]);
@@ -24,17 +30,13 @@ export default function DashboardCustomAnalytics() {
 
   useEffect(() => {
     async function fetchCustomAnalytics() {
-      // 1. Jobs per user (bar)
-      const { data: jobs, error: jobsError } = await supabase.from('jobs').select('assigned_to, status, created_at, completed_at');
-      // 2. Average job completion time per day (line)
+      const { data: jobs } = await supabase.from('jobs').select('assigned_to, status, created_at, completed_at');
       const userCounts: Record<string, number> = {};
       const completionTimes: Record<string, number[]> = {};
       type Job = { assigned_to?: string; status: string; created_at?: string; completed_at?: string };
       (jobs as Job[] | undefined)?.forEach((job) => {
-        // Jobs per user
         const user = job.assigned_to || 'Unassigned';
         userCounts[user] = (userCounts[user] || 0) + 1;
-        // Completion time
         if (job.status === 'done' && job.created_at && job.completed_at) {
           const day = job.completed_at.slice(0, 10);
           const created = new Date(job.created_at).getTime();
@@ -82,16 +84,35 @@ export default function DashboardCustomAnalytics() {
     ],
   };
 
+  const userBarOptions = {
+    ...studioBarLineChartOptions,
+    scales: {
+      ...studioBarLineChartOptions.scales,
+      x: {
+        ...studioBarLineChartOptions.scales?.x,
+        ticks: {
+          ...studioBarLineChartOptions.scales?.x?.ticks,
+          maxTicksLimit: 6,
+        },
+      },
+    },
+  };
+
+  const completionLineOptions = {
+    ...studioBarLineChartOptions,
+    plugins: {
+      legend: { position: 'bottom' as const, labels: { boxWidth: 12, padding: 10 } },
+    },
+  };
+
   return (
-    <div style={{ margin: '2.5rem 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', maxWidth: 900, width: '100%' }}>
-      <div style={{ background: 'var(--studios-surface-2)', borderRadius: 16, padding: '1.5rem', boxShadow: '0 2px 12px rgba(15,23,42,0.07)' }}>
-        <h3 style={{ marginBottom: 16 }}>Jobs per User</h3>
-        {loading ? <p>Loading…</p> : <Bar data={barData} options={{ responsive: true, plugins: { legend: { display: false } } }} />}
-      </div>
-      <div style={{ background: 'var(--studios-surface-2)', borderRadius: 16, padding: '1.5rem', boxShadow: '0 2px 12px rgba(15,23,42,0.07)' }}>
-        <h3 style={{ marginBottom: 16 }}>Avg Job Completion Time (hrs)</h3>
-        {loading ? <p>Loading…</p> : <Line data={lineData} options={{ responsive: true, plugins: { legend: { position: 'bottom' } } }} />}
-      </div>
-    </div>
+    <StudioAnalyticsGrid label="Team and completion metrics">
+      <StudioAnalyticsPanel title="Jobs per User" loading={loading}>
+        <Bar data={barData} options={userBarOptions} />
+      </StudioAnalyticsPanel>
+      <StudioAnalyticsPanel title="Avg Job Completion Time (hrs)" loading={loading}>
+        <Line data={lineData} options={completionLineOptions} />
+      </StudioAnalyticsPanel>
+    </StudioAnalyticsGrid>
   );
 }

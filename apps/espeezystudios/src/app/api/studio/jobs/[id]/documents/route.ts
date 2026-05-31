@@ -9,7 +9,7 @@ import {
 } from '@/lib/jobs/documents'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-/** GET ?type=requirements|prd|report — download generated document */
+/** GET ?type=requirements|prd|report: download generated document */
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id: jobId } = await ctx.params
   const type = new URL(req.url).searchParams.get('type') ?? 'requirements'
@@ -46,7 +46,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       break
     case 'invoice':
       content = [
-        'ESPEEZY STUDIOS — INVOICE',
+        'ESPEEZY STUDIOS: INVOICE',
         `Invoice: ${inv}`,
         `Project: ${bundle.job.title}`,
         `Client: ${bundle.job.client_name}`,

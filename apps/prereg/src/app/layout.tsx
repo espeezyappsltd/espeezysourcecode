@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link 
           rel="preload" 
-          href="/brand_logo2.svg" 
+          href="/espeezy-app-mark.svg" 
           as="image" 
           type="image/svg+xml" 
         />

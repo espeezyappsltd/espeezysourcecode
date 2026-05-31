@@ -7,6 +7,7 @@ import { EspeezyAppearanceSettings } from '@shared/EspeezyAppearanceSettings'
 import { uploadThemeBackground } from '@shared/upload-theme-background'
 import { useTheme } from '@/components/theme/StudiosThemeProvider'
 import { supabase } from '@/lib/supabase-client'
+import { STUDIO_PAGE_COPY } from '@/lib/studio/ui-copy'
 import StudioPageShell from '@/components/StudioPageShell'
 
 const KANBAN_SETTINGS =
@@ -67,7 +68,7 @@ export default function StudiosSettingsPage() {
   return (
     <StudioPageShell
       title="Settings"
-      description="Appearance and performance — synced with Kanban and Games when you are signed in."
+      description={STUDIO_PAGE_COPY.settings}
       wide
     >
       <nav className="studio-settings-nav" aria-label="Settings">
@@ -115,7 +116,7 @@ export default function StudiosSettingsPage() {
 
       <p className="studio-muted studio-settings-footnote">
         <Settings size={14} aria-hidden />
-        Studio page content (team, projects, KPIs) is editable when signed in as an Espeezy admin.
+        Studio page content (team, projects, analytics) is editable when you sign in as an Espeezy admin.
       </p>
     </StudioPageShell>
   )

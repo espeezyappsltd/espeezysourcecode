@@ -21,7 +21,7 @@ export default function StaffLobby() {
         { key: 'role', label: 'Role' },
         { key: 'sort_order', label: 'Sort order', type: 'number', min: 0 },
       ]}
-      emptyLabel="No team members yet."
+      emptyLabel="No team members yet. Add names and roles above."
       buildEmpty={() => ({ name: '', role: '', sort_order: 0 })}
       renderRow={(m) => (
         <>

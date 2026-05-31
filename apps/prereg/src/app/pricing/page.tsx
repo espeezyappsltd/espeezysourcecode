@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { motion, MotionConfig } from 'framer-motion'
 import {
   Sparkles, ArrowRight, CheckCircle2,
@@ -10,6 +9,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { PLAN_PAYMENT_LINKS } from '@/lib/stripe-payment-links'
 import { PREREG_LIFETIME_FEATURES, LIFETIME_PLAN_DESCRIPTION, LIFETIME_PLAN_NAME, PLATFORM_OPERATIONS_TAGLINE } from '@shared/platform-brand'
 import { fetchLiveMetrics } from '@/services/launch'
+import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 
 const STRIPE_SUPPORT_PRODUCTS = [
   {
@@ -83,10 +83,7 @@ export default function PricingPage() {
       {/* Nav */}
       <nav aria-label="Primary navigation" style={{ position: 'sticky', top: 0, zIndex: 1000, height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(1rem, 4vw, 2.5rem)', borderBottom: '1px solid rgba(15,23,42,0.07)', backdropFilter: 'blur(16px)', backgroundColor: 'rgba(255,255,255,0.9)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
-          <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Image src="/brand_logo2.svg" width={22} height={22} style={{ objectFit: 'contain' }} alt="" aria-hidden="true" priority />
-          </div>
-          <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a', letterSpacing: '-0.03em' }}>Espeezy</span>
+          <EspeezyMarketingBrand variant="nav" />
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/" style={{ padding: '0.4rem 0.875rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(15,23,42,0.55)', textDecoration: 'none' }}>Pre-Register</Link>
@@ -167,10 +164,7 @@ export default function PricingPage() {
       <footer style={{ borderTop: '1px solid rgba(15,23,42,0.07)', padding: '2rem clamp(1rem, 4vw, 2.5rem)', position: 'relative', zIndex: 1, background: '#f8fafc' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
-            <div style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Sparkles size={13} color="white" />
-            </div>
-            <span style={{ fontWeight: 900, fontSize: '0.9rem', color: '#475569' }}>Espeezy</span>
+            <EspeezyMarketingBrand variant="footer" />
           </Link>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             {[['/', 'Home'], ['/pricing', 'Pricing'], ['/terms', 'Terms'], ['/privacy', 'Privacy']].map(([href, label]) => (

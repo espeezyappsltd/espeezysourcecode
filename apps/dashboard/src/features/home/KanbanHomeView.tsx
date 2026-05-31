@@ -3,6 +3,7 @@
 import type { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, LayoutDashboard } from 'lucide-react'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import { BOARD_PREVIEW, HOME_HIGHLIGHTS, QUICK_ACTIONS, USER_GUIDE_SECTIONS } from './content'
 import './kanban-home.css'
 
@@ -27,8 +28,7 @@ export function KanbanHomeView({ user, registeredCount, onLogout }: Props) {
 
       <header className="kanban-home-nav">
         <Link href="/" className="kanban-home-brand" aria-label="Espeezy Kanban Home">
-          <span className="kanban-home-brand-name">espeezy</span>
-          <span className="kanban-home-badge">Kanban</span>
+          <EspeezyAppLogo app="kanban" variant="nav" />
         </Link>
         <nav className="kanban-home-nav-actions" aria-label="Primary">
           <button type="button" className="kanban-home-btn kanban-home-btn--ghost" onClick={openUserGuide}>

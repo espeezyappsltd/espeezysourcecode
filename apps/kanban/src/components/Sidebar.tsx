@@ -42,6 +42,7 @@ import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
 import { SIDEBAR_STUDIO_BLURB } from '@shared/platform-brand'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import './sidebar-premium.css'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
@@ -60,7 +61,7 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Feed', path: '/feed', icon: Rss },
   { name: 'Teammates', path: '/network', icon: Users },
-  { name: 'My Files', path: '/assets/storage', icon: HardDrive },
+  { name: 'Files', path: '/assets', icon: HardDrive },
   { name: 'Ask', path: '/ask', icon: HelpCircle },
   { name: 'Espeezy Studio', path: '/studio', icon: Briefcase },
   { name: 'Break Room', path: '/chillout', icon: Sparkles },
@@ -71,11 +72,11 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Settings', path: '/settings', icon: Settings },
 ]
 
-function BrandWordmark() {
-  return (
-    <>
-      Espe<span style={{ color: 'var(--brand)' }}>ezy</span>
-    </>
+function BrandWordmark({ compact = false }: { compact?: boolean }) {
+  return compact ? (
+    <EspeezyAppLogo app="kanban" variant="mark" />
+  ) : (
+    <EspeezyAppLogo app="kanban" variant="nav" />
   )
 }
 

@@ -1,7 +1,6 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { StorageVaultView } from '@/components/assets/StorageVaultView'
-
-export default function AssetsStoragePage() {
-  return <StorageVaultView />
+/** Legacy path: storage lives at /assets */
+export default function AssetsStorageRedirect() {
+  redirect('/assets')
 }

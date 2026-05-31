@@ -15,6 +15,7 @@ import {
   Trash2,
   Download,
 } from 'lucide-react'
+import { STUDIO_NOT_SET, STUDIO_STATUS } from '@/lib/studio/ui-copy'
 import { supabase } from '@/lib/supabase-client'
 import { useJobBundle } from '@/hooks/useJobBundle'
 import { useStudioEditor } from '@/hooks/useStudioEditor'
@@ -92,7 +93,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
       const res = await fetch(`/api/studio/jobs/${jobId}/deliver`, { method: 'POST', credentials: 'include' })
       const data = (await res.json()) as { ok?: boolean; error?: string; invoiceNumber?: string }
       if (!res.ok) throw new Error(data.error ?? 'Delivery failed')
-      setStatus(`Delivered — invoice ${data.invoiceNumber} emailed to client.`)
+      setStatus(STUDIO_STATUS.jobDelivered(data.invoiceNumber ?? 'pending'))
       await refresh()
     } catch (e) {
       setStatus(e instanceof Error ? e.message : 'Delivery failed')
@@ -269,7 +270,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
               </button>
             </>
           ) : (
-            <pre className="jobs-code">{job.requirements_text || '—'}</pre>
+            <pre className="jobs-code">{job.requirements_text || STUDIO_NOT_SET}</pre>
           )}
           <div className="jobs-downloads">
             <a href={`/api/studio/jobs/${jobId}/documents?type=requirements`} className="studio-link">
@@ -289,8 +290,8 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
             Sends requirements.txt, PRD.md, final report, invoice, and receipt to the client email. Logs delivery on the timeline.
           </p>
           <ul className="jobs-delivery-meta">
-            <li>Invoice: <strong>{job.invoice_number || '— (generated on send)'}</strong></li>
-            <li>Receipt: <strong>{job.receipt_number || '—'}</strong></li>
+            <li>Invoice: <strong>{job.invoice_number || 'Generated on send'}</strong></li>
+            <li>Receipt: <strong>{job.receipt_number || STUDIO_NOT_SET}</strong></li>
             <li>Last delivered: <strong>{job.last_delivered_at ? new Date(job.last_delivered_at).toLocaleString() : 'Never'}</strong></li>
           </ul>
           {canEdit ? (

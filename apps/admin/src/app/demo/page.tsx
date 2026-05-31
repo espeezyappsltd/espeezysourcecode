@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { LayoutDashboard, Calendar, History, Activity, Zap, TrendingUp, Award, UserCircle, AlertCircle, Info } from 'lucide-react'
 import Link from 'next/link'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 
 export default function DemoPage() {
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
@@ -52,10 +53,7 @@ export default function DemoPage() {
         {/* Header Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ padding: '6px', background: 'var(--brand)', borderRadius: '10px' }}>
-                 <Activity size={20} color="white" />
-              </div>
-              <span style={{ fontWeight: 900, fontSize: '1.25rem' }}>Espeezy Demo</span>
+              <EspeezyAppLogo app="admin" variant="nav" />
            </Link>
            <Link href="/login" className="btn btn-primary btn-sm btn-inline" style={{ width: 'auto' }}>Create Account</Link>
         </div>

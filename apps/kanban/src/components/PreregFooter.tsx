@@ -7,6 +7,7 @@ import {
   FOOTER_IMPORTANT_INFO,
   FOOTER_TECH_BLURB,
 } from '@/lib/platform/brand-copy'
+import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
@@ -70,30 +71,7 @@ export default function PreregFooter() {
         {/* Brand */}
         <div style={{ gridColumn: 'span 1' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand_logo2.svg"
-                width={20}
-                height={20}
-                style={{ objectFit: 'contain' }}
-                alt=""
-                aria-hidden="true"
-                loading="lazy"
-              />
-            </div>
-            <span style={{ fontWeight: 900, fontSize: '1rem', color: '#f1f5f9', letterSpacing: '-0.01em' }}>Espeezy</span>
+            <EspeezyMarketingBrand variant="nav" />
           </div>
 
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: '#64748b', marginBottom: '1.5rem', maxWidth: '240px' }}>

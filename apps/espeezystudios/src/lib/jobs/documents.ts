@@ -1,4 +1,5 @@
 import type { JobBundle } from './types'
+import { STUDIO_NOT_SET } from '@/lib/studio/ui-copy'
 
 function fmtMoney(cents: number, currency: string) {
   const sym = currency === 'GBP' ? '£' : currency === 'USD' ? '$' : `${currency} `
@@ -19,9 +20,9 @@ function fmtDate(iso?: string | null) {
 export function generateRequirementsTxt(bundle: JobBundle): string {
   const { job, milestones } = bundle
   const lines = [
-    '# Espeezy Studios — Requirements',
+    '# Espeezy Studios: Requirements',
     `# Project: ${job.title}`,
-    `# Client: ${job.client_name || '—'}`,
+    `# Client: ${job.client_name || STUDIO_NOT_SET}`,
     `# Deadline: ${fmtDate(job.deadline_at)}`,
     `# Generated: ${new Date().toISOString()}`,
     '',
@@ -36,7 +37,7 @@ export function generateRequirementsTxt(bundle: JobBundle): string {
     '## Milestones to satisfy',
     ...milestones.map(
       (m, i) =>
-        `${i + 1}. [${m.status}] ${m.title} — due ${fmtDate(m.due_at)}${m.description ? `\n   ${m.description}` : ''}`,
+        `${i + 1}. [${m.status}] ${m.title}, due ${fmtDate(m.due_at)}${m.description ? `\n   ${m.description}` : ''}`,
     ),
     '',
     '## Non-functional',
@@ -64,7 +65,7 @@ export function generatePrdMarkdown(bundle: JobBundle): string {
 
 | Field | Value |
 |-------|-------|
-| Client | ${job.client_name || '—'} |
+| Client | ${job.client_name || STUDIO_NOT_SET} |
 | Status | ${job.status} |
 | Delivery | ${job.delivery_status || 'draft'} |
 | Budget (line items) | ${fmtMoney(budgetTotal, currency)} |
@@ -90,7 +91,7 @@ ${milestones.length === 0 ? '_No milestones defined._' : milestones.map((m) => `
 
 ## Timeline
 
-${timeline.length === 0 ? '_No events logged._' : timeline.map((e) => `- **${fmtDate(e.event_at)}** [${e.kind}] ${e.title} — ${e.description || ''}`).join('\n')}
+${timeline.length === 0 ? '_No events logged._' : timeline.map((e) => `- **${fmtDate(e.event_at)}** [${e.kind}] ${e.title}: ${e.description || 'No details'}`).join('\n')}
 
 ## Budget breakdown
 
@@ -118,7 +119,7 @@ export function generateFinalReport(bundle: JobBundle, invoiceNumber: string, re
   return `# Final Delivery Report
 
 **Project:** ${job.title}  
-**Client:** ${job.client_name || '—'} (${job.client_email || '—'})  
+**Client:** ${job.client_name || STUDIO_NOT_SET} (${job.client_email || STUDIO_NOT_SET})  
 **Report date:** ${fmtDate(new Date().toISOString())}  
 **Invoice:** ${invoiceNumber}  
 **Receipt:** ${receiptNumber}
@@ -141,11 +142,11 @@ Espeezy Studios has completed delivery for **${job.title}**. This report summari
 
 ## Timeline (full)
 
-${timeline.map((e) => `1. **${fmtDate(e.event_at)}** — ${e.title} (${e.kind})${e.description ? `\n   ${e.description}` : ''}`).join('\n') || '_No timeline events._'}
+${timeline.map((e) => `1. **${fmtDate(e.event_at)}** ${e.title} (${e.kind})${e.description ? `\n   ${e.description}` : ''}`).join('\n') || '_No timeline events._'}
 
 ## Milestones
 
-${milestones.map((m) => `- **${m.title}** — ${m.status} (due ${fmtDate(m.due_at)})`).join('\n') || '_None_'}
+${milestones.map((m) => `- **${m.title}**: ${m.status} (due ${fmtDate(m.due_at)})`).join('\n') || '_None_'}
 
 ## Budget entries
 
@@ -153,8 +154,8 @@ ${budgetEntries.map((b) => `- ${b.label}: ${fmtMoney(b.amount_cents, currency)} 
 
 ## Documents included in package
 
-1. \`requirements.txt\` — technical & functional requirements
-2. \`PRD.md\` — product requirements document
+1. \`requirements.txt\`: technical and functional requirements
+2. \`PRD.md\`: product requirements document
 3. This final report
 4. Client invoice **${invoiceNumber}**
 5. Payment receipt **${receiptNumber}**

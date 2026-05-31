@@ -92,7 +92,7 @@ function marketplaceToImpact(row: TradingActivityRow): ImpactLogEntry {
 
 function hustleLedgerToImpact(row: HustleLedgerRow, userId: string): ImpactLogEntry | null {
   const taskTitle = taskFromLedgerRow(row)?.title ?? 'Hustle gig'
-  const taskHref = `/hustle?tab=gigs&task=${row.task_id}`
+  const taskHref = '/studio'
 
   if (row.kind === 'escrow_in' && row.from_user_id === userId) {
     return {
@@ -141,7 +141,7 @@ function hustleLedgerToImpact(row: HustleLedgerRow, userId: string): ImpactLogEn
       direction: 'out',
       gbpApprox: creditsToGbpEquivalent(row.credits_amount),
       createdAt: row.created_at,
-      href: `/hustle?tab=posted&task=${row.task_id}`,
+      href: '/studio',
     }
   }
 
@@ -158,7 +158,7 @@ function hustleLedgerToImpact(row: HustleLedgerRow, userId: string): ImpactLogEn
       direction: 'in',
       gbpApprox: creditsToGbpEquivalent(row.credits_amount),
       createdAt: row.created_at,
-      href: `/hustle?tab=posted&task=${row.task_id}`,
+      href: '/studio',
     }
   }
 

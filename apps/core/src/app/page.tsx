@@ -1,5 +1,6 @@
 import { DEV_LINK_SECTIONS, LOCAL_APPS } from '@/lib/dev-links'
 import { FOOTER_COPYRIGHT_TAGLINE } from '@/lib/platform/brand-copy'
+import DevLaunchHeroLogo from '@/components/DevLaunchHeroLogo'
 import './local-server.css'
 
 type LinkItem = {
@@ -41,7 +42,8 @@ export default function LocalServerPage() {
       <div className="page-shell">
         <header className="local-server-hero">
           <div className="local-server-hero-inner">
-            <p className="local-server-eyebrow">Espeezy · Local Server</p>
+            <DevLaunchHeroLogo />
+            <p className="local-server-eyebrow">Local Server</p>
             <h1 className="local-server-title">Developer launchpad</h1>
             <p className="local-server-lead">
               Quick links to monorepo apps, official docs, web fundamentals, and curated tutorials. Bookmark this page

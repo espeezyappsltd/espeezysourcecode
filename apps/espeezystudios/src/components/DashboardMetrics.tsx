@@ -1,7 +1,8 @@
-"use client";
+'use client'
 
-import { Briefcase, Users, CheckCircle, ListTodo } from 'lucide-react';
-import { useDashboardMetrics } from '../hooks/useDashboardMetrics';
+import { Briefcase, Users, CheckCircle, ListTodo } from 'lucide-react'
+import { STUDIO_LOADING_METRIC } from '@/lib/studio/ui-copy'
+import { useDashboardMetrics } from '../hooks/useDashboardMetrics'
 
 export default function DashboardMetrics() {
   const { projects, jobs, team, completed, loading } = useDashboardMetrics();
@@ -9,25 +10,25 @@ export default function DashboardMetrics() {
     {
       icon: <Briefcase size={28} color="#6366f1" aria-hidden />,
       label: 'Projects',
-      value: loading ? '—' : projects,
+      value: loading ? STUDIO_LOADING_METRIC : projects,
       color: '#6366f1',
     },
     {
       icon: <ListTodo size={28} color="#f59e42" aria-hidden />,
       label: 'Active Jobs',
-      value: loading ? '—' : jobs,
+      value: loading ? STUDIO_LOADING_METRIC : jobs,
       color: '#f59e42',
     },
     {
       icon: <Users size={28} color="#10b981" aria-hidden />,
       label: 'Team Members',
-      value: loading ? '—' : team,
+      value: loading ? STUDIO_LOADING_METRIC : team,
       color: '#10b981',
     },
     {
       icon: <CheckCircle size={28} color="#22c55e" aria-hidden />,
       label: 'Completed',
-      value: loading ? '—' : completed,
+      value: loading ? STUDIO_LOADING_METRIC : completed,
       color: '#22c55e',
     },
   ];

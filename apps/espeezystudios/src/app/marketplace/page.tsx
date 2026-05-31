@@ -2,6 +2,8 @@ import Link from 'next/link'
 import StudioPageShell from '@/components/StudioPageShell'
 import { Briefcase, Receipt, ShoppingBag, TrendingUp } from 'lucide-react'
 
+import { STUDIO_PAGE_COPY } from '@/lib/studio/ui-copy'
+
 const HUB_LINKS = [
   {
     href: '/jobs',
@@ -18,7 +20,7 @@ const HUB_LINKS = [
   {
     href: '/analytics',
     title: 'Studio analytics',
-    description: 'KPIs and operational metrics for your studio pipeline.',
+    description: 'Charts and operational metrics for your studio pipeline.',
     icon: TrendingUp,
   },
   {
@@ -33,7 +35,7 @@ export default function StudioMarketplacePage() {
   return (
     <StudioPageShell
       title="Marketplace & jobs"
-      description="Monetization lives in Espeezy Studio — migrated from Kanban. Run listings, gigs, and professional delivery here."
+      description={STUDIO_PAGE_COPY.marketplace}
       wide
       centered
     >

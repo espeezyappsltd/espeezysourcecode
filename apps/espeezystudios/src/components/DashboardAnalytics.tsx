@@ -13,6 +13,12 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
+import {
+  StudioAnalyticsGrid,
+  StudioAnalyticsPanel,
+  studioBarLineChartOptions,
+  studioPieChartOptions,
+} from './analytics/StudioAnalyticsPanel';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -59,15 +65,13 @@ export default function DashboardAnalytics() {
   };
 
   return (
-    <div style={{ margin: '2.5rem 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', maxWidth: 900, width: '100%' }}>
-      <div style={{ background: 'var(--studios-surface-2)', borderRadius: 16, padding: '1.5rem', boxShadow: '0 2px 12px rgba(15,23,42,0.07)' }}>
-        <h3 style={{ marginBottom: 16 }}>Jobs Status (Bar)</h3>
-        {loading ? <p>Loading…</p> : <Bar data={barData} options={{ responsive: true, plugins: { legend: { display: false } } }} />}
-      </div>
-      <div style={{ background: 'var(--studios-surface-2)', borderRadius: 16, padding: '1.5rem', boxShadow: '0 2px 12px rgba(15,23,42,0.07)' }}>
-        <h3 style={{ marginBottom: 16 }}>Jobs Status (Pie)</h3>
-        {loading ? <p>Loading…</p> : <Pie data={pieData} options={{ responsive: true, plugins: { legend: { position: 'bottom' } } }} />}
-      </div>
-    </div>
+    <StudioAnalyticsGrid label="Job status overview">
+      <StudioAnalyticsPanel title="Jobs Status (Bar)" loading={loading}>
+        <Bar data={barData} options={studioBarLineChartOptions} />
+      </StudioAnalyticsPanel>
+      <StudioAnalyticsPanel title="Jobs Status (Pie)" loading={loading}>
+        <Pie data={pieData} options={studioPieChartOptions} />
+      </StudioAnalyticsPanel>
+    </StudioAnalyticsGrid>
   );
 }

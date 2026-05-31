@@ -6,7 +6,6 @@ export const STUDIO_SCHEMA_TABLES = [
   'studio_projects',
   'studio_progress_items',
   'studio_quick_actions',
-  'studio_analytics_kpis',
   'jobs',
   'studio_job_milestones',
   'studio_job_budget_entries',

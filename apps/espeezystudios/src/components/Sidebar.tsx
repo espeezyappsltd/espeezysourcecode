@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import AppsNav from './AppsNav';
+import StudiosLogo from '@/components/StudiosLogo';
 
 const menu = [
   { name: 'Home', path: '/' },
@@ -74,7 +75,9 @@ export default function Sidebar() {
         aria-label="Sidebar navigation"
       >
         <div className="sidebar__bar">
-          <span className="sidebar__brand">Espeezy Studios</span>
+          <Link href="/" className="sidebar__brand">
+            <StudiosLogo variant="nav" />
+          </Link>
           <button
             type="button"
             className="sidebar__toggle"

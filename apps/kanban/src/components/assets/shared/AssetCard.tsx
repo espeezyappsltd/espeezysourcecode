@@ -176,15 +176,6 @@ export function AssetCard({
           {asset.description || 'No description provided.'}
         </p>
 
-        {variant === 'storage' && (
-          <p style={{ margin: '0.65rem 0 0', fontSize: '0.72rem', color: 'var(--text-sub)', fontWeight: 700 }}>
-            Value: {formatCredits(asset.credit_value ?? 0)}
-            <span style={{ marginLeft: '0.35rem', opacity: 0.8 }}>
-              · edit in <Link href="/assets/credits">Credits</Link>
-            </span>
-          </p>
-        )}
-
         {showCreditBlock && (
           <motion.div
             style={{

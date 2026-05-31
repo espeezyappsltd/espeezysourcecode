@@ -1,4 +1,5 @@
-﻿# ──────────────────────────────────────────────────────────────────────────────
+﻿# Synced with repo-root Caddyfile — update both when changing production routes.
+# ──────────────────────────────────────────────────────────────────────────────
 # espeezy.com — Caddyfile
 #
 # Required env vars (set in .env.local or shell before docker compose up):
@@ -9,11 +10,9 @@
 #
 # Architecture:
 #   [User browser]
-#       → prereg.espeezy.com / espeezy.com (DNS → VPS IP)
+#       → *.espeezy.com (DNS → VPS IP)
 #       → Caddy (ports 80/443, auto-TLS via Let's Encrypt)
-#       → Next.js app (container: app, port 3000)
-#       → Firebase Firestore (espeezydb)
-#       → Firestore real-time push → user browser
+#       → Next.js app containers (see docker-compose.local.yml)
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ── Shared proxy snippet factory ─────────────────────────────────────────────
@@ -58,10 +57,15 @@
     import app_proxy app 3000
 }
 
-# ── Apex domain: espeezy.com → main app ──────────────────────────────────────
+# ── Apex domain: espeezy.com → marketing (prereg) ────────────────────────────
 {$CADDY_DOMAIN}, www.{$CADDY_DOMAIN} {
     @www host www.{$CADDY_DOMAIN}
     redir @www https://{$CADDY_DOMAIN}{uri} 308
+    import app_proxy app 3000
+}
+
+# ── base.espeezy.com → monorepo dev hub (repo root Next.js) ──────────────────
+base.{$CADDY_DOMAIN} {
     import app_proxy app 3000
 }
 
@@ -80,9 +84,28 @@ kanban.{$CADDY_DOMAIN} {
     import app_proxy kanban 3003
 }
 
-# ── core.espeezy.com → core app ──────────────────────────────────────────────
-core.{$CADDY_DOMAIN} {
+# ── devlaunch.espeezy.com → core / developer launchpad (apps/core) ───────────
+devlaunch.{$CADDY_DOMAIN} {
     import app_proxy core 3000
+}
+
+# ── core.espeezy.com → legacy alias → devlaunch ──────────────────────────────
+core.{$CADDY_DOMAIN} {
+    redir https://devlaunch.{$CADDY_DOMAIN}{uri} permanent
+}
+
+# ── studios.espeezy.com → Espeezy Studios (marketplace & jobs) ───────────────
+studios.{$CADDY_DOMAIN} {
+    import app_proxy studios 3000
+}
+
+# ── articles.espeezy.com + blog.espeezy.com → articles app ───────────────────
+articles.{$CADDY_DOMAIN} {
+    import app_proxy articles 3000
+}
+
+blog.{$CADDY_DOMAIN} {
+    import app_proxy articles 3000
 }
 
 # ── planka.espeezy.com → Planka board ────────────────────────────────────────

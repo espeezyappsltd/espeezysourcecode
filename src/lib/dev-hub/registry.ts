@@ -1,3 +1,5 @@
+import { ESPEEZY_APP_ORIGINS } from '../../../apps/shared/espeezy-app-origins'
+
 export type DevAppDefinition = {
   id: string
   name: string
@@ -26,7 +28,7 @@ export const DEV_APPS: DevAppDefinition[] = [
     inspectPort: 9231,
     previewPath: '/login',
     healthPath: '/login',
-    productionUrl: 'https://kanban.espeezy.com',
+    productionUrl: ESPEEZY_APP_ORIGINS.kanban,
     accent: '#10b981',
   },
   {
@@ -38,7 +40,7 @@ export const DEV_APPS: DevAppDefinition[] = [
     inspectPort: 9232,
     previewPath: '/login',
     healthPath: '/login',
-    productionUrl: 'https://games.espeezy.com',
+    productionUrl: ESPEEZY_APP_ORIGINS.games,
     accent: '#6366f1',
   },
   {
@@ -47,6 +49,7 @@ export const DEV_APPS: DevAppDefinition[] = [
     description: 'Internal product dashboard',
     packagePath: 'apps/dashboard',
     port: 3003,
+    productionUrl: ESPEEZY_APP_ORIGINS.dashboard,
     accent: '#06b6d4',
   },
   {
@@ -58,7 +61,7 @@ export const DEV_APPS: DevAppDefinition[] = [
     inspectPort: 9234,
     previewPath: '/login',
     healthPath: '/login',
-    productionUrl: 'https://panel.espeezy.com',
+    productionUrl: ESPEEZY_APP_ORIGINS.panel,
     accent: '#f59e0b',
   },
   {
@@ -67,26 +70,49 @@ export const DEV_APPS: DevAppDefinition[] = [
     description: 'espeezy.com — registration at /#register',
     packagePath: 'apps/prereg',
     port: 3005,
-    productionUrl: 'https://espeezy.com/#register',
+    productionUrl: `${ESPEEZY_APP_ORIGINS.prereg}/#register`,
     accent: '#8b5cf6',
   },
   {
     id: 'core',
-    name: 'Local Server',
-    description: 'Developer launchpad — docs, tutorials & local app links',
+    name: 'Dev Launch',
+    description: 'Developer launchpad — devlaunch.espeezy.com',
     packagePath: 'apps/core',
     port: 3006,
     inspectPort: 9236,
+    productionUrl: ESPEEZY_APP_ORIGINS.core,
     accent: '#ec4899',
+  },
+  {
+    id: 'espeezystudios',
+    name: 'Studios',
+    description: 'Marketplace & jobs — studios.espeezy.com',
+    packagePath: 'apps/espeezystudios',
+    port: 3007,
+    inspectPort: 9237,
+    previewPath: '/login',
+    healthPath: '/login',
+    productionUrl: ESPEEZY_APP_ORIGINS.studios,
+    accent: '#f59e0b',
+  },
+  {
+    id: 'espeezyarticles',
+    name: 'Articles',
+    description: 'Articles & blog — articles.espeezy.com / blog.espeezy.com',
+    packagePath: 'apps/espeezyarticles',
+    port: 3008,
+    productionUrl: ESPEEZY_APP_ORIGINS.articles,
+    accent: '#06b6d4',
   },
 ]
 
 export const HUB_APP: DevAppDefinition = {
   id: 'hub',
   name: 'Monorepo Hub',
-  description: 'This control plane (root Next.js app)',
+  description: 'This control plane (root Next.js app) — base.espeezy.com',
   packagePath: '.',
   port: 3000,
+  productionUrl: ESPEEZY_APP_ORIGINS.base,
   accent: '#34d399',
 }
 

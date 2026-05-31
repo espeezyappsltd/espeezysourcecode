@@ -66,7 +66,7 @@ export async function POST(
         {
           filename: 'invoice.txt',
           content: [
-            'ESPEEZY STUDIOS — INVOICE',
+            'ESPEEZY STUDIOS: INVOICE',
             `Invoice: ${invoiceNumber}`,
             `Receipt: ${receiptNumber}`,
             `Project: ${bundle.job.title}`,
@@ -78,7 +78,7 @@ export async function POST(
         {
           filename: 'receipt.txt',
           content: [
-            'ESPEEZY STUDIOS — PAYMENT RECEIPT',
+            'ESPEEZY STUDIOS: PAYMENT RECEIPT',
             `Receipt: ${receiptNumber}`,
             `Invoice: ${invoiceNumber}`,
             `Paid by: ${bundle.job.client_name}`,

@@ -10,7 +10,7 @@ export type MailPayload = {
   attachments?: { filename: string; content: string }[]
 }
 
-/** Cloudflare Email Worker (workers/studio-email) — preferred when configured */
+/** Cloudflare Email Worker (workers/studio-email), preferred when configured */
 async function sendViaCloudflareWorker(payload: MailPayload): Promise<boolean> {
   const baseUrl = process.env.STUDIO_EMAIL_WORKER_URL?.replace(/\/$/, '')
   const secret = process.env.STUDIO_EMAIL_WORKER_SECRET
@@ -83,7 +83,7 @@ export async function sendStudioDeliveryEmail(opts: {
   reportExcerpt: string
   attachments: { filename: string; content: string }[]
 }) {
-  const subject = `Delivery package: ${opts.projectTitle} — Invoice ${opts.invoiceNumber}`
+  const subject = `Delivery package: ${opts.projectTitle} (Invoice ${opts.invoiceNumber})`
 
   await sendEmail({
     to: opts.to,
@@ -93,7 +93,7 @@ export async function sendStudioDeliveryEmail(opts: {
     html: `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
         <div style="background:linear-gradient(135deg,#6366f1,#06b6d4);padding:24px;border-radius:12px 12px 0 0;color:#fff">
-          <h1 style="margin:0;font-size:22px">Espeezy Studios — Project Delivered</h1>
+          <h1 style="margin:0;font-size:22px">Espeezy Studios: Project Delivered</h1>
           <p style="margin:8px 0 0;opacity:0.9;font-size:14px">${opts.invoiceNumber}</p>
         </div>
         <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;color:#334155">

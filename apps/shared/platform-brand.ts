@@ -131,7 +131,7 @@ export const SIDEBAR_UPGRADE_BLURB =
   'Support the platform team and unlock advanced themes and priority features.'
 
 export const SIDEBAR_STUDIO_BLURB =
-  'Premium unlocks Espeezy Studio — marketplace, jobs, invoices, and client delivery.'
+  'Premium unlocks Espeezy Studio: marketplace, jobs, invoices, and client delivery.'
 
 export {
   REFERRAL_PRO_DISCOUNT_PERCENT,

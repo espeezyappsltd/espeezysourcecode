@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ShieldCheck, Download, CheckCircle2, AlertTriangle, Sparkles, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 
 interface CertData {
   id: string
@@ -42,10 +43,7 @@ export default function CertificateViewer({ cert, displayName, avatarUrl, downlo
     }}>
       {/* Nav */}
       <Link href="/" style={{ position: 'fixed', top: '1.25rem', left: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', zIndex: 100 }}>
-        <div style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg,#10b981,#059669)', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Sparkles size={14} color="white" />
-        </div>
-        <span style={{ color: 'white', fontWeight: 950, fontSize: '0.9rem', letterSpacing: '-0.03em' }}>Espeezy</span>
+        <EspeezyMarketingBrand variant="nav" />
       </Link>
 
       <div style={{ width: '100%', maxWidth: '680px', marginTop: '2rem' }}>

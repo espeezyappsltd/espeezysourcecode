@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase-client'
 import type { User } from '@supabase/supabase-js'
 import StudioPageShell from '../../components/StudioPageShell'
 import Link from 'next/link'
+import { STUDIO_PAGE_COPY, STUDIO_STATUS } from '@/lib/studio/ui-copy'
 
 export default function AdminLobbyPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -30,7 +31,7 @@ export default function AdminLobbyPage() {
   }
 
   return (
-    <StudioPageShell title="Admin" description="Staff-only tools and broadcast controls.">
+    <StudioPageShell title="Admin" description={STUDIO_PAGE_COPY.admin}>
       {loading && <p className="studio-muted">Loading…</p>}
       {!loading && !user && (
         <div className="studio-card">
@@ -58,7 +59,7 @@ export default function AdminLobbyPage() {
               {notification}
             </p>
           ) : null}
-          <p className="studio-muted">One-click access to admin tools — more panels coming soon.</p>
+          <p className="studio-muted">{STUDIO_STATUS.adminTools}</p>
         </div>
       )}
     </StudioPageShell>

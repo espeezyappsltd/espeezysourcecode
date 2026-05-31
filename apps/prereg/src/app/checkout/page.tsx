@@ -8,6 +8,7 @@ import {
   Users, CreditCard, Building2, Gift
 } from 'lucide-react'
 import Link from 'next/link'
+import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 import { fetchLiveMetrics } from '@/services/launch'
 import { createStripeCheckout } from '@/services/checkout'
@@ -192,10 +193,7 @@ function CheckoutFlow() {
       {/* Nav */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '56px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(15,23,42,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', zIndex: 100 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-          <div style={{ width: '28px', height: '28px', background: BRAND, borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sparkles size={14} color="white" />
-          </div>
-          <span style={{ color: '#0f172a', fontWeight: 950, fontSize: '0.9rem', letterSpacing: '-0.03em' }}>Espeezy</span>
+          <EspeezyMarketingBrand variant="nav" />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'rgba(15,23,42,0.4)', fontWeight: 600 }}>
           <Lock size={12} />

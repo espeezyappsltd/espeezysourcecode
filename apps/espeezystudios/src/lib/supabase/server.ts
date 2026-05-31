@@ -21,7 +21,7 @@ export async function createClient() {
             cookieStore.set(name, value, options),
           )
         } catch {
-          /* Server Component — session refreshed on navigation */
+          /* Server Component: session refreshed on navigation */
         }
       },
     },

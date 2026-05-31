@@ -13,6 +13,7 @@
     "dev": "next dev",
     "stop": "taskkill /F /IM node.exe /T || killall node || true",
     "shortcuts": "node ./scripts/seed-shortcuts.mjs",
+    "validate:origins": "node scripts/validate-app-origins.mjs",
     "sync:supabase-env": "node ./scripts/sync-supabase-env.mjs",
     "dev:kanban": "npm --prefix apps/kanban run dev",
     "dev:prereg": "npm --prefix apps/prereg run dev",

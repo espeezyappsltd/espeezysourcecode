@@ -40,15 +40,15 @@ export default function DashboardProgressBars() {
           title="progress metric"
           fields={[
             { key: 'label', label: 'Label' },
-            { key: 'value', label: 'Percent (0–100)', type: 'number', min: 0, max: 100 },
+            { key: 'value', label: 'Percent (0-100)', type: 'number', min: 0, max: 100 },
             { key: 'color', label: 'Color', type: 'color' },
             { key: 'sort_order', label: 'Sort order', type: 'number', min: 0 },
           ]}
-          emptyLabel="No progress metrics."
+          emptyLabel="No progress metrics yet. Add one above to track pipeline completion."
           buildEmpty={() => ({ label: '', value: 0, color: '#6366f1', sort_order: 0 })}
           renderRow={(p) => (
             <span>
-              {p.label} — {p.value}%
+              {p.label}: {p.value}%
             </span>
           )}
           onMutate={() => void fetchItems()}

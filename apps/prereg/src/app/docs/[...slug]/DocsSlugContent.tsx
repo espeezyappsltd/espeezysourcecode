@@ -5,12 +5,14 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   LayoutGrid, Milestone, Users, ShoppingBag,
-  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info, RotateCcw
+  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info, RotateCcw,
+  Briefcase, Newspaper, Cpu,
 } from 'lucide-react'
 import {
   GETTING_STARTED_ACCOUNT_BODY,
   INSTALLATION_WEB_BODY,
 } from '@shared/platform-brand'
+import { ESPEEZY_APP_ORIGINS } from '@shared/espeezy-app-origins'
 
 const BRAND = '#10b981'
 
@@ -183,10 +185,14 @@ const docsContent: Record<string, DocEntry> = {
   },
 
   'features/marketplace': {
-    title: 'Marketplace',
+    title: 'Resource Marketplace',
     icon: <ShoppingBag size={40} />,
-    tagline: 'A peer-to-peer resource exchange where students share study materials, templates, and tools.',
+    tagline: 'A peer-to-peer resource exchange inside Kanban for study materials, templates, and tools.',
     sections: [
+      {
+        heading: 'Where monetization lives now',
+        body: `Free resource sharing stays in Kanban. Paid gigs, professional jobs, invoices, and client delivery moved to Espeezy Studio (${ESPEEZY_APP_ORIGINS.studios.replace('https://', '')}). Premium Kanban members open Studio from the workspace sidebar.`,
+      },
       {
         heading: 'What you can share',
         body: 'The Marketplace lets students publish resources for others to access. Resources can be: document templates (report structures, bibliography formats), datasets (anonymised, for analysis projects), study guides and flashcard decks, code repositories with worked examples, and design assets (presentation templates, infographics).',
@@ -236,11 +242,76 @@ const docsContent: Record<string, DocEntry> = {
     eli12: 'It is like Kahoot but smarter. You and your friends join a live quiz about your subject. Questions pop up on screen and you have a few seconds to answer. The faster and more correct you are, the higher you score. At the end, Espeezy shows you what you need to study more.',
   },
 
+  'features/studios': {
+    title: 'Espeezy Studio',
+    icon: <Briefcase size={40} />,
+    tagline: 'Premium marketplace, jobs, and client delivery at studios.espeezy.com.',
+    sections: [
+      {
+        heading: 'Who can access Studio',
+        body: 'Espeezy Studio is for Premium Kanban members. Sign in on Kanban, then open Studio from the sidebar or bottom nav. Cross-app SSO keeps one Espeezy account across Kanban, Games, and Studio.',
+        items: ['Premium plan required', 'SSO from kanban.espeezy.com', 'Shared profile and billing'],
+      },
+      {
+        heading: 'What you do in Studio',
+        body: 'Run the monetization hub: list work, manage professional jobs, track milestones and budgets, generate PRD and requirements docs, and email invoices and receipts to clients.',
+        items: ['Marketplace hub', 'Job delivery workspace', 'Analytics for your pipeline'],
+      },
+      {
+        heading: 'Hosted URL',
+        body: `Production: ${ESPEEZY_APP_ORIGINS.studios}. Local dev default port: 3007.`,
+      },
+    ],
+    eli12: 'When your group is ready to earn from real client work, Studio is the shop: list jobs, finish them, and send the invoice.',
+  },
+
+  'features/articles': {
+    title: 'Articles & Blog',
+    icon: <Newspaper size={40} />,
+    tagline: 'Campus articles and blog posts on articles.espeezy.com and blog.espeezy.com.',
+    sections: [
+      {
+        heading: 'Two hostnames, one app',
+        body: `articles.espeezy.com is the primary reader. blog.espeezy.com is an alias to the same Articles app for blog-style URLs and sharing.`,
+      },
+      {
+        heading: 'Where articles appear',
+        body: 'Featured articles can surface on espeezy.com marketing pages. Authors and categories sync from Supabase when configured.',
+      },
+      {
+        heading: 'Hosted URLs',
+        body: `Articles: ${ESPEEZY_APP_ORIGINS.articles}. Blog alias: ${ESPEEZY_APP_ORIGINS.blog}.`,
+      },
+    ],
+    eli12: 'Think of it as the school newspaper online: short updates on the blog hostname, longer reads on the articles site.',
+  },
+
+  'features/dev-launch': {
+    title: 'Dev Launch',
+    icon: <Cpu size={40} />,
+    tagline: 'Developer launchpad with docs links and local app shortcuts.',
+    sections: [
+      {
+        heading: 'Purpose',
+        body: 'Dev Launch (devlaunch.espeezy.com) is the on-ramp for contributors: framework docs, Espeezy app links, and pointers to the monorepo dev hub at base.espeezy.com.',
+      },
+      {
+        heading: 'Related apps',
+        body: `Dev Hub control plane: ${ESPEEZY_APP_ORIGINS.base}. Dev Launch: ${ESPEEZY_APP_ORIGINS.core}. Use Dev Hub to start local apps; use Dev Launch for daily documentation lookups.`,
+      },
+    ],
+    eli12: 'It is the launch pad for people building Espeezy: one page with links to every app and the docs you need.',
+  },
+
   'features/hustle': {
     title: 'Side Hustle',
     icon: <ShoppingBag size={40} />,
-    tagline: 'A managed marketplace for academic and creative side work where students earn credits for their skills.',
+    tagline: 'Legacy Kanban hustle flows. New paid delivery runs in Espeezy Studio.',
     sections: [
+      {
+        heading: 'Current direction',
+        body: `Side Hustle UI in Kanban now redirects to Espeezy Studio (${ESPEEZY_APP_ORIGINS.studios.replace('https://', '')}) for Premium members. Use Studio for listings, gigs, invoices, and client delivery.`,
+      },
       {
         heading: 'What is the Side Hustle?',
         body: 'The Side Hustle is a curated task marketplace within Espeezy. It allows students with specific skills (research, coding, graphic design, proofreading) to find paid opportunities posted by other students or external partners. Unlike the general Marketplace which is for sharing existing resources, the Side Hustle is for active service delivery.',

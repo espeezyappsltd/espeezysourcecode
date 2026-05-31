@@ -129,8 +129,8 @@ export function ImpactLogDashboard() {
             <strong>{formatCredits(hustle.creditsRefunded)}</strong>
           </li>
         </ul>
-        <Link href="/hustle" className="impact-log__hustle-link">
-          Open Hustle Board →
+        <Link href="/studio" className="impact-log__hustle-link">
+          Open Espeezy Studio →
         </Link>
       </div>
 

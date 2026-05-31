@@ -1,7 +1,6 @@
 ﻿'use client'
 
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -36,6 +35,7 @@ import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
 const THEME_SEQUENCE = ['Google Light', 'Deep Oceanic', 'Cyberpunk'] as const
@@ -61,11 +61,11 @@ const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Settings', path: '/dashboard/settings', icon: Settings },
 ]
 
-function BrandWordmark() {
-  return (
-    <>
-      Espe<span style={{ color: 'var(--brand)' }}>ezy</span>
-    </>
+function BrandWordmark({ compact = false }: { compact?: boolean }) {
+  return compact ? (
+    <EspeezyAppLogo app="admin" variant="mark" />
+  ) : (
+    <EspeezyAppLogo app="admin" variant="nav" />
   )
 }
 
@@ -325,32 +325,13 @@ export default function Sidebar({ user }: SidebarProps) {
             aria-label="Open menu"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
-            <div
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                background: 'var(--brand)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)',
-              }}
-            >
-              <Image src="/brand-logo-black-gold.png" width={38} height={38} alt="Logo" priority style={{ objectFit: 'cover' }} />
-            </div>
+            <BrandWordmark />
           </button>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.1rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
-              <BrandWordmark />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <PresenceDot isOnline={isProfileLoaded} />
+            <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {onlineCount} ACTIVE MEMBERS
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
-              <PresenceDot isOnline={isProfileLoaded} />
-              <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {onlineCount} ACTIVE MEMBERS
-              </span>
-            </div>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import '@shared/espeezy-appearance.css'
 import type { Metadata } from 'next'
 import GlobalFooter from '../components/GlobalFooter'
 import AppsNav from '../components/AppsNav'
+import StudioBottomNav from '../components/StudioBottomNav'
 import { StudiosThemeProvider } from '@/components/theme/StudiosThemeProvider'
 import { getStudiosLayoutTheme } from '@/lib/layout-theme'
 
@@ -28,6 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="studio-app-shell">
             <AppsNav />
             <div className="studio-app-shell__main">{children}</div>
+            <StudioBottomNav />
             <GlobalFooter />
           </div>
         </StudiosThemeProvider>

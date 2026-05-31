@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase-client'
 import type { User } from '@supabase/supabase-js'
 import StudioPageShell from '../../components/StudioPageShell'
 import Link from 'next/link'
+import { STUDIO_NOT_SET, STUDIO_PAGE_COPY, STUDIO_STATUS } from '@/lib/studio/ui-copy'
 
 type Profile = {
   id: string
@@ -64,14 +65,14 @@ export default function ProfilePage() {
       setStatus(error.message)
       return
     }
-    setStatus('Profile saved — synced with Kanban & Games.')
+    setStatus(STUDIO_STATUS.profileSaved)
     setEditing(false)
     const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
     setProfile(data)
   }
 
   return (
-    <StudioPageShell title="Profile" description="Your studio account — update fields shared across Espeezy apps.">
+    <StudioPageShell title="Profile" description={STUDIO_PAGE_COPY.profile}>
       {loading && <p className="studio-muted">Loading…</p>}
       {!loading && !user && (
         <div className="studio-card">
@@ -129,15 +130,15 @@ export default function ProfilePage() {
             <>
               <div>
                 <span className="studio-label">Full name</span>
-                <p>{profile?.full_name || '—'}</p>
+                <p>{profile?.full_name || STUDIO_NOT_SET}</p>
               </div>
               <div>
                 <span className="studio-label">Username</span>
-                <p>{profile?.username ? `@${profile.username}` : '—'}</p>
+                <p>{profile?.username ? `@${profile.username}` : STUDIO_NOT_SET}</p>
               </div>
               <div>
                 <span className="studio-label">Bio</span>
-                <p>{profile?.biography || '—'}</p>
+                <p>{profile?.biography || STUDIO_NOT_SET}</p>
               </div>
               <button type="button" className="studio-btn" onClick={() => setEditing(true)}>
                 Edit profile

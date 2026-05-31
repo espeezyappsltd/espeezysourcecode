@@ -9,6 +9,7 @@ import { logActivity } from '@/utils/logging'
 import { ChatMessage, ChatPayload } from '@/types/ui'
 import { Profile } from '@/types/auth'
 import { formatDateLabel } from './team-chat-utils'
+import { ESPEEZY_APP_MARK_ICON_PATH } from '@shared/espeezy-app-logo-config'
 
 const TEAM_CHAT_POLL_MS = 5_000
 const JOIN_TOAST_MS = 5_000
@@ -135,7 +136,7 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
               if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('New Team Message', {
                   body: incoming.content || 'Sent an attachment',
-                  icon: '/brand_logo2.svg',
+                  icon: ESPEEZY_APP_MARK_ICON_PATH,
                 })
               }
             }

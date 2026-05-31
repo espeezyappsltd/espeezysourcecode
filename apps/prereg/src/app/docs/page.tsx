@@ -1,14 +1,18 @@
 import Link from 'next/link'
-import { BookOpen, Zap, Shield, Sparkles, Globe, BarChart, ShoppingBag } from 'lucide-react'
+import { BookOpen, Zap, Shield, Sparkles, Globe, BarChart, ShoppingBag, Briefcase, Newspaper, Cpu } from 'lucide-react'
+import { ESPEEZY_APP_ORIGINS } from '@shared/espeezy-app-origins'
 
 export default function DocsHomePage() {
   const sections = [
     { icon: <Zap size={20} />, title: 'Getting Started', desc: 'Set up your workspace and invite your team in minutes.', href: '/docs/getting-started' },
     { icon: <BookOpen size={20} />, title: 'Kanban Boards', desc: 'Visualize every task in your group project lifecycle.', href: '/docs/features/kanban' },
+    { icon: <Briefcase size={20} />, title: 'Espeezy Studio', desc: 'Premium jobs, marketplace, invoices, and client delivery.', href: '/docs/features/studios' },
+    { icon: <Newspaper size={20} />, title: 'Articles & Blog', desc: 'Campus articles at articles.espeezy.com and blog.espeezy.com.', href: '/docs/features/articles' },
+    { icon: <Cpu size={20} />, title: 'Dev Launch', desc: 'Developer docs and links to every Espeezy app.', href: '/docs/features/dev-launch' },
     { icon: <Globe size={20} />, title: 'Peer Network', desc: 'Find collaborators and share resources across your institution.', href: '/docs/features/network' },
     { icon: <Shield size={20} />, title: 'Infrastructure', desc: 'Stripe, Supabase sync, and real-time presence architecture.', href: '/docs/infra/payments' },
     { icon: <BarChart size={20} />, title: 'Impact & Research', desc: 'The research on why visible contribution improves group work.', href: '/docs/impact' },
-    { icon: <ShoppingBag size={20} />, title: 'Side Hustle', desc: 'A managed task marketplace for academic and creative side work.', href: '/docs/features/hustle' },
+    { icon: <ShoppingBag size={20} />, title: 'Resource Marketplace', desc: 'Share study materials and templates inside Kanban.', href: '/docs/features/marketplace' },
     { icon: <Sparkles size={20} />, title: 'Our Vision', desc: 'Why we built Espeezy and where it is headed.', href: '/docs/vision' },
   ]
 
@@ -18,8 +22,11 @@ export default function DocsHomePage() {
         <span className="docs-badge">Espeezy Docs</span>
         <h1 className="docs-title">Documentation</h1>
         <p className="docs-description">
-          Everything you need to set up, use, and self-host Espeezy — for technical teams
-          and for students who just want to get started.
+          Everything you need to set up, use, and self-host Espeezy. Written for technical teams
+          and for students who want a quick path to their first workspace.
+        </p>
+        <p className="docs-description" style={{ marginTop: '0.75rem', fontSize: '0.9rem' }}>
+          Live apps: Kanban ({ESPEEZY_APP_ORIGINS.kanban.replace('https://', '')}), Games, Studio, Articles, Dev Launch, and Dev Hub.
         </p>
       </div>
 
