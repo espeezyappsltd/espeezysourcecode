@@ -23,8 +23,8 @@ export type StudioNavLink = {
 
 export const STUDIO_NAV_LINKS: StudioNavLink[] = [
   { name: 'Home', url: '/', icon: LayoutDashboard, bottomNav: true },
-  { name: 'Jobs', url: '/jobs', icon: Briefcase, bottomNav: true },
-  { name: 'Marketplace', shortName: 'Market', url: '/marketplace', icon: ShoppingBag, bottomNav: true },
+  { name: 'Projects', url: '/jobs', icon: Briefcase, bottomNav: true },
+  { name: 'Studio hub', shortName: 'Hub', url: '/marketplace', icon: ShoppingBag, bottomNav: true },
   { name: 'Team', url: '/team', icon: Users },
   { name: 'Analytics', url: '/analytics', icon: BarChart3, bottomNav: true },
   { name: 'Profile', url: '/profile', icon: User },

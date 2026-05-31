@@ -41,15 +41,15 @@ export default function StudioSignOnPage() {
           <Sparkles size={12} aria-hidden /> Premium workspace
         </div>
         <h2 style={{ fontSize: '1.35rem', fontWeight: 950, margin: '0 0 0.65rem', letterSpacing: '-0.02em' }}>
-          Marketplace, jobs &amp; client delivery
+          Studio hub, projects &amp; client delivery
         </h2>
         <p style={{ color: 'var(--text-sub)', lineHeight: 1.55, margin: '0 0 1.25rem', fontSize: '0.95rem' }}>
-          Kanban stays focused on study and collaboration. Espeezy Studio is where you list work, run jobs,
-          invoices, and marketplace operations — included with Premium Scholar.
+          Kanban stays focused on study and collaboration. Espeezy Studio is where you list gigs, run projects,
+          send invoices, and manage client delivery — included with Premium Scholar.
         </p>
         <ul style={{ margin: '0 0 1.5rem', paddingLeft: '1.2rem', color: 'var(--text-sub)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-          <li>Professional jobs pipeline with milestones &amp; delivery</li>
-          <li>Marketplace listings and client billing</li>
+          <li>Professional project pipeline with milestones &amp; delivery</li>
+          <li>Studio hub listings and client billing in £</li>
           <li>Team analytics and studio admin tools</li>
         </ul>
         <a

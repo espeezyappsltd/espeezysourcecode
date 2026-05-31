@@ -28,7 +28,7 @@ export function FundCreditAccountButton({
   returnPath = '/account/credits',
   listingId,
   contextLabel,
-  label = 'Add credits',
+  label = 'Add funds',
   className = '',
   oneClick = false,
 }: Props) {
@@ -79,8 +79,8 @@ export function FundCreditAccountButton({
 
   const selectionLine =
     creditsNeeded != null && creditsNeeded > 0
-      ? `Suggested · £${recommendedTier.amountGbp} · ${formatCredits(recommendedTier.credits)}`
-      : `£${activeTier.amountGbp} · ${formatCredits(activeTier.credits)}`
+      ? `Suggested · ${formatCredits(recommendedTier.credits)}`
+      : formatCredits(activeTier.credits)
 
   return (
     <div className={`credit-fund-premium central-type${className ? ` ${className}` : ''}`}>
@@ -98,8 +98,7 @@ export function FundCreditAccountButton({
                 aria-pressed={selected}
               >
                 <span className="credit-fund-premium__tier-name">{tier.label}</span>
-                <span className="credit-fund-premium__tier-price">£{tier.amountGbp}</span>
-                <span className="credit-fund-premium__tier-credits">{formatCredits(tier.credits)}</span>
+                <span className="credit-fund-premium__tier-price">{formatCredits(tier.credits)}</span>
               </button>
             )
           })}

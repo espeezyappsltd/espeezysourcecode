@@ -2,6 +2,8 @@
  * Platform apps catalog — types, status labels, and offline fallback seed.
  */
 
+import { normalizeGbpLabel } from './format-gbp'
+
 export type PlatformAppStatus = 'live' | 'beta' | 'development' | 'coming_soon'
 
 export type PlatformAppSetupSection = {
@@ -51,13 +53,13 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
     id: 'seed-kanban',
     slug: 'kanban',
     name: 'Espeezy Kanban',
-    tagline: 'The main app: shared boards that track who does the work.',
+    tagline: 'The main app: shared boards that track who contributes to each project.',
     description:
       'The main Espeezy workspace. Plan group projects on shared boards, keep a record of every contribution, and export it for grades and portfolios.',
     status: 'live',
     price_cents: 49900,
     price_currency: 'GBP',
-    price_label: 'GBP 499 one-time · self-host license',
+    price_label: '£499 one-time · self-host license',
     stripe_payment_link: null,
     download_url: null,
     live_url: 'https://kanban.espeezy.com',
@@ -67,7 +69,7 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
       'Kanban boards & drag-and-drop columns',
       'Contribution proof & academic exports',
       'Teams, RBAC, and institutional guards',
-      'Premium opens Espeezy Studio (jobs & delivery)',
+      'Premium opens Espeezy Studio (projects & delivery)',
     ],
     setup_sections: [],
     db_setup_markdown: '',
@@ -85,7 +87,7 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
     status: 'live',
     price_cents: 29900,
     price_currency: 'GBP',
-    price_label: 'GBP 299 one-time · self-host license',
+    price_label: '£299 one-time · self-host license',
     stripe_payment_link: null,
     download_url: null,
     live_url: 'https://games.espeezy.com',
@@ -108,7 +110,7 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
     status: 'beta',
     price_cents: 19900,
     price_currency: 'GBP',
-    price_label: 'GBP 199 one-time · self-host license',
+    price_label: '£199 one-time · self-host license',
     stripe_payment_link: null,
     download_url: null,
     live_url: 'https://panel.espeezy.com',
@@ -131,7 +133,7 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
     status: 'live',
     price_cents: 9900,
     price_currency: 'GBP',
-    price_label: 'GBP 99 one-time · self-host license',
+    price_label: '£99 one-time · self-host license',
     stripe_payment_link: null,
     download_url: null,
     live_url: 'https://espeezy.com',
@@ -172,8 +174,8 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
     id: 'seed-studios',
     slug: 'studios',
     name: 'Espeezy Studio',
-    tagline: 'Marketplace, jobs, and client delivery for Premium members.',
-    description: 'Run gigs, professional jobs, invoices, and delivery docs at studios.espeezy.com.',
+    tagline: 'Studio hub, projects, and client delivery for Premium members.',
+    description: 'Run gigs, professional projects, invoices, and delivery docs at studios.espeezy.com.',
     status: 'development',
     price_cents: 0,
     price_currency: 'GBP',
@@ -183,7 +185,7 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
     live_url: 'https://studios.espeezy.com',
     icon_key: 'palette',
     accent_color: '#f59e0b',
-    features: ['Marketplace hub', 'Job delivery workspace', 'Invoices and client email'],
+    features: ['Studio hub', 'Project delivery workspace', 'Invoices and client email'],
     setup_sections: [],
     db_setup_markdown: '',
     ui_customization_markdown: '',
@@ -217,10 +219,11 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
 ]
 
 export function formatPlatformAppPrice(app: Pick<PlatformApp, 'price_cents' | 'price_currency' | 'price_label'>): string {
-  if (app.price_label?.trim()) return app.price_label.trim()
+  if (app.price_label?.trim()) return normalizeGbpLabel(app.price_label.trim())
   if (app.price_cents <= 0) return 'Free'
-  const major = (app.price_cents / 100).toFixed(app.price_cents % 100 === 0 ? 0 : 2)
-  return `${app.price_currency} ${major}`
+  const major = app.price_cents / 100
+  const formatted = major % 1 === 0 ? major.toFixed(0) : major.toFixed(2)
+  return `£${formatted}`
 }
 
 export function platformAppProductPath(slug: string): string {

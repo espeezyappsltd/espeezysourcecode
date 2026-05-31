@@ -1,9 +1,8 @@
-/**
- * Platform fees on credit transactions (marketplace + hustle).
- * 1 credit fee per 50 credits sold (50 → 1, 100 → 2, etc.).
- */
+import { formatGbpApprox } from '@/lib/credits'
 
-/** Gross credits per 1 platform fee credit. */
+/**
+ * Platform fees on marketplace and hustle transactions (internal units → £ in UI).
+ */
 export const CREDITS_PER_PLATFORM_FEE = 50
 
 export type PlatformFeeBreakdown = {
@@ -40,7 +39,7 @@ export function breakdownPlatformFee(gross: number): PlatformFeeBreakdown {
 export function formatPlatformFeeHint(gross: number): string {
   const { platformFeeCredits, netCredits } = breakdownPlatformFee(gross)
   if (platformFeeCredits <= 0) {
-    return 'No platform fee under 50 credits.'
+    return 'No platform fee on small amounts.'
   }
-  return `1 cr platform fee per 50 cr sold (${platformFeeCredits} cr fee) · recipient gets ${netCredits} cr`
+  return `Platform fee ${formatGbpApprox(platformFeeCredits)} · recipient gets ${formatGbpApprox(netCredits)}`
 }

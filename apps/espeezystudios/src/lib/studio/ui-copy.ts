@@ -6,11 +6,11 @@ export const STUDIO_LOADING_METRIC = '...'
 
 /** Page descriptions: informational (what this is) and directional (what to do). */
 export const STUDIO_PAGE_COPY = {
-  home: 'Your dashboard: projects, jobs, and quick actions in one place.',
-  jobs: 'Create and deliver client work: timeline, budget, milestones, PRD, and invoicing.',
+  home: 'Your dashboard: projects and quick actions in one place.',
+  jobs: 'Create and deliver client projects: timeline, budget, milestones, PRD, and invoicing.',
   jobsWorkspace: 'Track one project: timeline, budget, milestones, PRD, and client delivery.',
-  marketplace:
-    'List work, run gigs, and deliver to clients. Open from Kanban when you have Premium.',
+  studioHub:
+    'List gigs, run projects, and deliver to clients. Open from Kanban when you have Premium.',
   settings: 'Theme and performance. Syncs with Kanban and Games when you are signed in.',
   profile: 'Update account fields shared across Espeezy apps.',
   team: 'Manage your studio roster, roles, and project lanes.',

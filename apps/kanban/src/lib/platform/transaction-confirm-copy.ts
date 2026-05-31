@@ -26,7 +26,7 @@ export function marketplacePurchaseCopy(
   const fee = breakdownPlatformFee(priceCredits)
   const feeNote =
     fee.platformFeeCredits > 0
-      ? ` A ${fee.platformFeeCredits} credit platform fee (${formatGbpApprox(fee.platformFeeCredits)} approx.) is included.`
+      ? ` A ${formatGbpApprox(fee.platformFeeCredits)} platform fee is included.`
       : ''
   return {
     title: 'Confirm purchase',
@@ -43,7 +43,7 @@ export function marketplaceWithdrawCopy(
   const via = payoutMethod === 'paypal' ? 'PayPal' : 'your linked bank (Stripe)'
   return {
     title: 'Confirm withdrawal',
-    message: `Withdraw ${formatCredits(creditsAmount)} (${formatGbpApprox(creditsAmount)} approx.) to ${via}? Processing may take 1–2 business days.`,
+    message: `Withdraw ${formatGbpApprox(creditsAmount)} to ${via}? Processing may take 1–2 business days.`,
     confirmLabel: 'Withdraw',
     type: 'warning',
   }
@@ -58,14 +58,14 @@ export function hustlePostCopy(
   if (fundNow) {
     return {
       title: 'Post and fund escrow?',
-      message: `Post "${title}" with ${formatCredits(payoutCredits)} in escrow now. ${feeHint} Workers can apply once funded.`,
+      message: `Post "${title}" with ${formatGbpApprox(payoutCredits)} in escrow now. ${feeHint} Contributors can apply once funded.`,
       confirmLabel: 'Post & fund',
       type: 'warning',
     }
   }
   return {
     title: 'Post this gig?',
-    message: `Publish "${title}" with a ${formatCredits(payoutCredits)} payout? You can fund escrow when you accept a worker.`,
+    message: `Publish "${title}" with a ${formatGbpApprox(payoutCredits)} payout? You can fund escrow when you accept a contributor.`,
     confirmLabel: 'Post gig',
     type: 'info',
   }
@@ -77,7 +77,7 @@ const HUSTLE_ACTION_COPY: Record<
 > = {
   fund: ({ taskTitle, credits }) => ({
     title: 'Fund escrow?',
-    message: `Lock ${formatCredits(credits)} in escrow for "${taskTitle}"? Credits leave your balance until the gig completes or is cancelled.`,
+    message: `Lock ${formatGbpApprox(credits)} in escrow for "${taskTitle}"? Funds leave your balance until the project completes or is cancelled.`,
     confirmLabel: 'Fund escrow',
     type: 'warning',
   }),
@@ -89,19 +89,19 @@ const HUSTLE_ACTION_COPY: Record<
   }),
   accept: ({ taskTitle, applicantName }) => ({
     title: 'Accept this worker?',
-    message: `Assign ${applicantName ?? 'this scholar'} to "${taskTitle}"? Escrow will be funded automatically if you have enough credits.`,
+    message: `Assign ${applicantName ?? 'this scholar'} to "${taskTitle}"? Escrow will be funded automatically if your balance is sufficient.`,
     confirmLabel: 'Accept',
     type: 'warning',
   }),
   start: ({ taskTitle }) => ({
-    title: 'Start work?',
+    title: 'Start project?',
     message: `Mark "${taskTitle}" as in progress? The poster will be notified.`,
     confirmLabel: 'Start',
     type: 'info',
   }),
   submit: ({ taskTitle }) => ({
     title: 'Submit for review?',
-    message: `Submit your work on "${taskTitle}" for poster approval?`,
+    message: `Submit your delivery on "${taskTitle}" for poster approval?`,
     confirmLabel: 'Submit',
     type: 'info',
   }),
@@ -109,11 +109,11 @@ const HUSTLE_ACTION_COPY: Record<
     const fee = breakdownPlatformFee(credits)
     const netLine =
       fee.platformFeeCredits > 0
-        ? ` Worker receives ${formatCredits(fee.netCredits)} after ${fee.platformFeeCredits} cr platform fee.`
+        ? ` Worker receives ${formatGbpApprox(fee.netCredits)} after ${formatGbpApprox(fee.platformFeeCredits)} platform fee.`
         : ''
     return {
       title: 'Approve and pay?',
-      message: `Release ${formatCredits(credits)} from escrow for "${taskTitle}"?${netLine} This cannot be undone.`,
+      message: `Release ${formatGbpApprox(credits)} from escrow for "${taskTitle}"?${netLine} This cannot be undone.`,
       confirmLabel: 'Approve & pay',
       type: 'warning',
     }
@@ -122,7 +122,7 @@ const HUSTLE_ACTION_COPY: Record<
     title: 'Cancel this task?',
     message:
       credits > 0
-        ? `Cancel "${taskTitle}" and refund ${formatCredits(credits)} escrow to your balance?`
+        ? `Cancel "${taskTitle}" and refund ${formatGbpApprox(credits)} escrow to your balance?`
         : `Cancel "${taskTitle}"? This cannot be undone.`,
     confirmLabel: 'Cancel task',
     destructive: true,
@@ -161,7 +161,7 @@ export function marketplaceListingPublishCopy(
     title: 'Publish listing?',
     message:
       priceCredits > 0
-        ? `List "${title}" for ${formatCredits(priceCredits)}? Buyers pay in Espeezy credits when they purchase.`
+        ? `List "${title}" for ${formatGbpApprox(priceCredits)}? Buyers pay in GBP when they purchase.`
         : `List "${title}" for free on the campus marketplace?`,
     confirmLabel: 'Publish',
     type: 'info',

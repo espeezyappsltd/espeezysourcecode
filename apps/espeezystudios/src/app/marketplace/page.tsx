@@ -7,14 +7,14 @@ import { STUDIO_PAGE_COPY } from '@/lib/studio/ui-copy'
 const HUB_LINKS = [
   {
     href: '/jobs',
-    title: 'Professional jobs',
+    title: 'Professional projects',
     description: 'Timeline, milestones, budgets, PRD, delivery docs, and client invoicing.',
     icon: Briefcase,
   },
   {
     href: '/jobs',
-    title: 'List & deliver work',
-    description: 'Create jobs, track progress, and email receipts when work is complete.',
+    title: 'List & deliver gigs',
+    description: 'Create projects, track progress, and email receipts when delivery is complete.',
     icon: Receipt,
   },
   {
@@ -31,22 +31,22 @@ const HUB_LINKS = [
   },
 ] as const
 
-export default function StudioMarketplacePage() {
+export default function StudioHubPage() {
   return (
     <StudioPageShell
-      title="Marketplace & jobs"
-      description={STUDIO_PAGE_COPY.marketplace}
+      title="Studio hub"
+      description={STUDIO_PAGE_COPY.studioHub}
       wide
       centered
     >
       <p className="studio-muted" style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>
         Kanban is for study, collaboration, and communication. Premium members sign on from Kanban to manage
-        marketplace operations in Studio.
+        client projects and delivery in Studio.
       </p>
 
       <div className="card-grid">
         {HUB_LINKS.map(({ href, title, description, icon: Icon }) => (
-          <Link key={title} href={href} className="studio-card studio-marketplace-card">
+          <Link key={title} href={href} className="studio-card studio-hub-card">
             <Icon size={22} aria-hidden style={{ color: 'var(--studios-brand)', marginBottom: '0.35rem' }} />
             <h3 style={{ margin: '0 0 0.35rem', fontSize: '1rem' }}>{title}</h3>
             <p className="studio-muted" style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.45 }}>

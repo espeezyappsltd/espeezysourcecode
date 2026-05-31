@@ -22,14 +22,14 @@ import {
 const PLANS = {
   pro: {
     name: 'Espeezy Pro',
-    price: 'GBP 4.99',
+    price: '£4.99',
     period: '/month',
     badge: 'Best Place To Start',
     hasTrial: true,
     features: [
       'Unlimited group workspaces',
       'Deeper contribution analytics',
-      'AI Study Coach credits each month',
+      'AI Study Coach allowance each month',
       'Priority task templates and smarter planning',
       'Verified contributor badge',
       'Better export formats for proof of work',
@@ -39,7 +39,7 @@ const PLANS = {
   },
   premium: {
     name: 'Espeezy Premium',
-    price: 'GBP 14.99',
+    price: '£14.99',
     period: '/month',
     badge: 'Power Users',
     hasTrial: true,
@@ -57,7 +57,7 @@ const PLANS = {
   },
   lifetime: {
     name: LIFETIME_PLAN_NAME,
-    price: 'GBP 149.00',
+    price: '£149.00',
     period: 'one-time',
     badge: 'First 100 lifetime seats',
     hasTrial: false,

@@ -1,5 +1,4 @@
 import { gbpToCredits, MIN_CREDIT_FUND_GBP } from '@/lib/credits/fund-stripe-shared'
-import { formatCredits } from '@/lib/credits'
 
 export type CreditFundTier = {
   id: string
@@ -47,5 +46,5 @@ export function pickFundTierForShortfall(shortfallCredits: number): CreditFundTi
 }
 
 export function tierSummary(tier: CreditFundTier): string {
-  return `${tier.label} · £${tier.amountGbp.toFixed(2)} · ${formatCredits(tier.credits)}`
+  return `${tier.label} · £${tier.amountGbp.toFixed(2)}`
 }

@@ -102,17 +102,16 @@ export function AccountWalletPanel({ compact = false }: { compact?: boolean }) {
           type="button"
           className="wallet-premium__refresh"
           onClick={() => void loadWallet()}
-          aria-label="Refresh credit balance"
+          aria-label="Refresh balance"
           style={{ position: 'absolute', top: '0.85rem', right: '0.85rem' }}
         >
           <RefreshCw size={14} aria-hidden />
         </button>
 
         <div className="wallet-premium__balance-col">
-          <span className="central-eyebrow">Personal credit account</span>
+          <span className="central-eyebrow">Personal balance</span>
           <div className="wallet-premium__balance-row">
-            <span className="wallet-premium__balance-value">{credits}</span>
-            <span className="wallet-premium__balance-unit">credits</span>
+            <span className="wallet-premium__balance-value">{formatCredits(credits)}</span>
           </div>
           {!compact && (
             <Link href="/account/credits" className="central-link">
@@ -122,7 +121,7 @@ export function AccountWalletPanel({ compact = false }: { compact?: boolean }) {
         </div>
 
         <div className="wallet-premium__actions">
-          <FundCreditAccountButton returnPath="/account/credits" label="Add credits" />
+          <FundCreditAccountButton returnPath="/account/credits" label="Add funds" />
         </div>
       </div>
 

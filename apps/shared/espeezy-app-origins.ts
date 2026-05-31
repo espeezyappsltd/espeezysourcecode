@@ -14,7 +14,7 @@ export const ESPEEZY_APP_ORIGINS = {
   games: 'https://games.espeezy.com',
   /** Staff console (apps/admin) */
   panel: 'https://panel.espeezy.com',
-  /** Marketplace & jobs (apps/espeezystudios) */
+  /** Studio hub & projects (apps/espeezystudios) */
   studios: 'https://studios.espeezy.com',
   /** Developer launchpad (apps/core) */
   core: 'https://devlaunch.espeezy.com',

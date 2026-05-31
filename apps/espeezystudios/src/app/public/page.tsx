@@ -26,14 +26,14 @@ export default async function PublicFeedPage() {
   return (
     <StudioPageShell
       title="Portfolio"
-      description="Public showcase of completed and in-progress studio work."
+      description="Public showcase of completed and in-progress studio projects."
       wide
     >
       <div className="studio-panel">
         {error ? (
           <p className="studio-panel__error">Failed to load jobs: {String(error.message || error)}</p>
         ) : null}
-        {jobs.length === 0 && !error ? <p>No published work yet.</p> : null}
+        {jobs.length === 0 && !error ? <p>No published projects yet.</p> : null}
         {jobs.length > 0 ? (
           <ul className="studio-list">
             {jobs.map((job) => (

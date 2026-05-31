@@ -6,7 +6,7 @@ export const GAMES_PROFILE_PATH = '/profile'
 /** Kanban workspace home (board). */
 export const KANBAN_WORKSPACE_PATH = '/'
 
-/** Default post-SSO path on Espeezy Studios (marketplace & jobs hub). */
+/** Default post-SSO path on Espeezy Studios (studio hub). */
 export const STUDIOS_MARKETPLACE_PATH = '/marketplace'
 
 export type CrossAppSessionTokens = {

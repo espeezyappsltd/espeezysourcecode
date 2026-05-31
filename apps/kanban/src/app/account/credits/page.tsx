@@ -28,7 +28,7 @@ function CreditsAccountContent() {
       })
       const data = (await res.json()) as { status?: string; message?: string; balance?: number }
       if (data.status === 'completed') {
-        setStatusMsg(data.message ?? 'Credits added to your account.')
+        setStatusMsg(data.message ?? 'Funds added to your account.')
         setPolling(false)
         return
       }
@@ -53,9 +53,9 @@ function CreditsAccountContent() {
 
       <PageHeader
         className="credits-account-page__header"
-        title="Your credit account"
+        title="Your project balance"
         icon={Coins}
-        description="Personal Espeezy credits for marketplace, hustle gigs, and campus trades."
+        description="Personal GBP balance for marketplace listings, hustle gigs, and campus trades."
       />
 
       {fund === 'success' && (
@@ -79,20 +79,20 @@ function CreditsAccountContent() {
 
       {fund === 'cancelled' && (
         <div className="credits-account-banner credits-account-banner--muted" role="status">
-          Payment cancelled — no credits were added.
+          Payment cancelled — no funds were added.
         </div>
       )}
 
       <section className="credits-account-fund-card central-type">
         <h2 className="central-eyebrow" style={{ fontSize: '0.7rem', marginBottom: '0.5rem', color: 'var(--central-ink-soft)' }}>
-          Add credits
+          Add funds
         </h2>
         <p className="central-caption" style={{ marginBottom: '1rem' }}>
           Pay with Stripe (min £{MIN_CREDIT_FUND_GBP}). Balance updates after payment clears.
         </p>
-        <FundCreditAccountButton oneClick={false} returnPath="/account/credits" label="Add credits" />
+        <FundCreditAccountButton oneClick={false} returnPath="/account/credits" label="Add funds" />
         <p className="central-caption" style={{ marginTop: '0.75rem' }}>
-          50 credits ≈ one month of Pro · secure checkout via Stripe
+          £4.99 ≈ one month of Pro · secure checkout via Stripe
         </p>
       </section>
 

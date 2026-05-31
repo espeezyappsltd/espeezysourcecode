@@ -21,7 +21,7 @@ import {
 const PLANS = {
   pro: {
     name: 'Pro Scholar',
-    price: '$9',
+    price: '£4.99',
     period: '/month',
     badge: 'Most Popular',
     color: '#10b981',
@@ -37,7 +37,7 @@ const PLANS = {
   },
   premium: {
     name: 'Premium Scholar',
-    price: '$19',
+    price: '£14.99',
     period: '/month',
     badge: 'Best Value',
     color: '#6366f1',
@@ -54,7 +54,7 @@ const PLANS = {
   },
   lifetime: {
     name: LIFETIME_PLAN_NAME,
-    price: '$149',
+    price: '£149',
     period: 'one-time',
     badge: 'Limited · 100 seats',
     color: '#f59e0b',

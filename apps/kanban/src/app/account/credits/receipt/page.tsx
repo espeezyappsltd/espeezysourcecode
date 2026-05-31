@@ -32,7 +32,7 @@ function ReceiptFrame() {
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <p>{error}</p>
         <Link href="/account/credits" style={{ color: 'var(--brand)', fontWeight: 800 }}>
-          Back to credits
+          Back to balance
         </Link>
       </div>
     )
@@ -48,7 +48,7 @@ function ReceiptFrame() {
 
   return (
     <iframe
-      title="Credit fund receipt"
+      title="Fund receipt"
       srcDoc={html}
       style={{ width: '100%', minHeight: '100vh', border: 'none' }}
     />

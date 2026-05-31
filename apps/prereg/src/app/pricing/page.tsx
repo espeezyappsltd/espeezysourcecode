@@ -23,16 +23,16 @@ const STRIPE_SUPPORT_PRODUCTS = [
   },
   {
     name: 'Espeezy Pro',
-    price: 'GBP 4.99 / month',
+    price: '£4.99 / month',
     tag: 'Best Place To Start',
     href: PLAN_PAYMENT_LINKS.pro,
     cta: 'Choose Pro',
     description: 'The main paid plan for students who want better execution, deeper analytics, and a measurable academic edge.',
-    features: ['Unlimited workspaces', 'AI Study Coach credits', '5GB storage included'],
+    features: ['Unlimited workspaces', 'AI Study Coach allowance', '5GB storage included'],
   },
   {
     name: 'Espeezy Premium',
-    price: 'GBP 14.99 / month',
+    price: '£14.99 / month',
     tag: 'Advanced Workflows',
     href: PLAN_PAYMENT_LINKS.premium,
     cta: 'Choose Premium',
@@ -41,7 +41,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
   },
   {
     name: LIFETIME_PLAN_NAME,
-    price: 'GBP 149.00 one-time',
+    price: '£149.00 one-time',
     tag: 'First 100 Only - Limited',
     href: PLAN_PAYMENT_LINKS.lifetime,
     cta: 'Claim Lifetime',

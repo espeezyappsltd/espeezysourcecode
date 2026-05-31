@@ -1129,7 +1129,7 @@ section {
   color: var(--text-main, var(--studios-text));
 }
 
-.studio-marketplace-card {
+.studio-hub-card {
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -1137,7 +1137,7 @@ section {
   transition: border-color 0.15s;
 }
 
-.studio-marketplace-card:hover {
+.studio-hub-card:hover {
   border-color: var(--studios-brand);
 }
 

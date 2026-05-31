@@ -27,11 +27,11 @@ export const PLATFORM_OPERATIONS_TAGLINE = 'Built and run by a 12-person team.'
  * no jargon. Reuse this verbatim across hero, metadata, and social cards.
  */
 export const PLATFORM_ONE_LINER =
-  'Espeezy is a group-project workspace that records who did what, so every student gets credit for their work.'
+  'Espeezy is a group-project workspace that records who did what, so every student gets recognition for their contribution.'
 
 /** Prereg/kanban hero: headline + supporting sentence. */
 export const HERO_COPY_LINES = [
-  'Group projects, with proof of who did the work.',
+  'Group projects, with proof of who contributed.',
   'Plan tasks on a shared board, track every contribution automatically, and export a record you can show graders, recruiters, and teammates.',
 ] as const
 
@@ -77,7 +77,7 @@ export const LIFETIME_CTA_SOLD_OUT = 'Lifetime seats sold out'
 export const LIFETIME_SCARCITY_LABEL = (left: number) =>
   left <= 0 ? 'Sold out' : `Only ${left} lifetime seat${left === 1 ? '' : 's'} left`
 
-export const STRIPE_LIFETIME_LABEL = 'Lifetime Scholar · GBP 149 (one-time)'
+export const STRIPE_LIFETIME_LABEL = 'Lifetime Scholar · £149 (one-time)'
 
 export const BILLING_PANEL_SUBTITLE =
   'View your current plan and usage here. Subscribe or change tiers on espeezy.com; billing is handled by our platform team via Stripe.'
@@ -131,7 +131,7 @@ export const SIDEBAR_UPGRADE_BLURB =
   'Support the platform team and unlock advanced themes and priority features.'
 
 export const SIDEBAR_STUDIO_BLURB =
-  'Premium unlocks Espeezy Studio: marketplace, jobs, invoices, and client delivery.'
+  'Premium unlocks Espeezy Studio: studio hub, projects, invoices, and client delivery.'
 
 export {
   REFERRAL_PRO_DISCOUNT_PERCENT,
