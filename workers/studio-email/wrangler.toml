@@ -1,0 +1,15 @@
+name = "espeezy-studio-email"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+# Outbound send from Next.js deliver API (POST /send)
+[[send_email]]
+name = "SEND_EMAIL"
+
+[vars]
+# CF Email Routing subdomains (all @espeezy.com):
+# admin, newsletter, marketing, panel, promos, news, email, notifications,
+# feedback, orders, billing, support, help, contact, hello, info
+STUDIO_FROM_EMAIL = "billing@espeezy.com"
+STUDIO_REPLY_TO = "hello@espeezy.com"
+INBOUND_FORWARD_TO = "support@espeezy.com"

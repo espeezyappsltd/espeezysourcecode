@@ -1,11 +1,36 @@
 import nodemailer from 'nodemailer'
+import { ESPEEZY_MAILBOX, STUDIO_EMAIL } from '@shared/platform-email-routes'
 
 export type MailPayload = {
   to: string | string[]
   subject: string
   html: string
   text?: string
+  replyTo?: string
   attachments?: { filename: string; content: string }[]
+}
+
+/** Cloudflare Email Worker (workers/studio-email) — preferred when configured */
+async function sendViaCloudflareWorker(payload: MailPayload): Promise<boolean> {
+  const baseUrl = process.env.STUDIO_EMAIL_WORKER_URL?.replace(/\/$/, '')
+  const secret = process.env.STUDIO_EMAIL_WORKER_SECRET
+  if (!baseUrl || !secret) return false
+
+  const res = await fetch(`${baseUrl}/send`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${secret}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const err = (await res.json().catch(() => null)) as { error?: string } | null
+    throw new Error(err?.error ?? `Email worker failed (${res.status})`)
+  }
+
+  return true
 }
 
 function createTransport() {
@@ -28,11 +53,18 @@ function createTransport() {
 }
 
 export async function sendEmail(payload: MailPayload) {
+  if (await sendViaCloudflareWorker(payload)) {
+    return
+  }
+
   const transport = createTransport()
-  const from = `"Espeezy Studios" <${process.env.SMTP_USER}>`
+  const smtpFrom = process.env.STUDIO_FROM_EMAIL || STUDIO_EMAIL.deliveryFrom
+  const from = `"Espeezy Studios" <${smtpFrom}>`
+  const replyTo = process.env.STUDIO_REPLY_TO || STUDIO_EMAIL.deliveryReplyTo
 
   return transport.sendMail({
     from,
+    replyTo,
     to: Array.isArray(payload.to) ? payload.to.join(', ') : payload.to,
     subject: payload.subject,
     html: payload.html,
@@ -56,6 +88,7 @@ export async function sendStudioDeliveryEmail(opts: {
   await sendEmail({
     to: opts.to,
     subject,
+    replyTo: process.env.STUDIO_REPLY_TO || STUDIO_EMAIL.deliveryReplyTo,
     attachments: opts.attachments,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
@@ -77,7 +110,7 @@ export async function sendStudioDeliveryEmail(opts: {
             <tr><td style="padding:8px 0;color:#64748b">Amount</td><td><strong>${opts.amountLabel}</strong></td></tr>
           </table>
           <pre style="background:#f8fafc;padding:12px;border-radius:8px;font-size:12px;white-space:pre-wrap">${opts.reportExcerpt.slice(0, 1200)}…</pre>
-          <p style="font-size:12px;color:#64748b">Questions? Reply to this email or contact support@espeezy.com</p>
+          <p style="font-size:12px;color:#64748b">Questions? Reply to this email or ${ESPEEZY_MAILBOX.support}</p>
         </div>
       </div>
     `,
