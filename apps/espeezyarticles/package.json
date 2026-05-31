@@ -7,6 +7,9 @@
     "dev": "next dev -p 3008 --webpack",
     "dev:turbo": "next dev -p 3008",
     "build": "next build",
+    "cf-build": "opennextjs-cloudflare build",
+    "deploy:cf": "wrangler deploy",
+    "preview:cf": "opennextjs-cloudflare preview",
     "stop": "node ../../scripts/stop-app-port.mjs 3008",
     "start": "next start -p 3008"
   },
@@ -15,5 +18,13 @@
     "next": "^16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5",
+    "wrangler": "^4.95.0"
   }
 }

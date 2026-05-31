@@ -84,6 +84,24 @@ export const CLOUDFLARE_APP_DEPLOYS: CloudflareAppDeploy[] = [
     zoneName: ZONE,
   },
   {
+    workerName: 'espeezy-articles',
+    appFolder: 'espeezyarticles',
+    originKey: 'articles',
+    hostnames: [...hosts('articles'), ...hosts('blog')],
+    rootBuildScript: 'cf-build:articles',
+    wranglerPath: 'apps/espeezyarticles/wrangler.toml',
+    zoneName: ZONE,
+  },
+  {
+    workerName: 'espeezy-core',
+    appFolder: 'core',
+    originKey: 'core',
+    hostnames: [...hosts('core'), 'core.espeezy.com'],
+    rootBuildScript: 'cf-build:core',
+    wranglerPath: 'apps/core/wrangler.toml',
+    zoneName: ZONE,
+  },
+  {
     workerName: 'espeezy-base',
     appFolder: '.',
     originKey: 'base',
@@ -103,7 +121,5 @@ export function cloudflareDeployByWorker(name: string): CloudflareAppDeploy | un
 }
 
 export function allCloudflareProductionHostnames(): string[] {
-  const hosts = CLOUDFLARE_APP_DEPLOYS.flatMap((d) => d.hostnames)
-  hosts.push('core.espeezy.com')
-  return [...new Set(hosts)]
+  return [...new Set(CLOUDFLARE_APP_DEPLOYS.flatMap((d) => d.hostnames))]
 }
