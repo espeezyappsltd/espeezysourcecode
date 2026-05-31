@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ThemeCycleButton } from '@shared/ThemeCycleButton'
 
 const navlinks = [
   { name: 'Home', url: '/' },
@@ -9,6 +10,7 @@ const navlinks = [
   { name: 'Analytics', url: '/analytics' },
   { name: 'Profile', url: '/profile' },
   { name: 'Jobs', url: '/jobs' },
+  { name: 'Settings', url: '/settings' },
   { name: 'Admin', url: '/admin_lobby' },
 ] as const
 
@@ -45,6 +47,9 @@ export default function AppsNav() {
             )
           })}
         </ul>
+        <div className="apps-nav-pro__tools">
+          <ThemeCycleButton className="apps-nav-pro__theme" labelClassName="apps-nav-pro__theme-label" />
+        </div>
       </div>
     </nav>
   )

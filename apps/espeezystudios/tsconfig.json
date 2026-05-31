@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@shared/*": [
+        "../shared/*"
       ]
     }
   },
@@ -32,6 +35,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "../shared/**/*.ts",
+    "../shared/**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
