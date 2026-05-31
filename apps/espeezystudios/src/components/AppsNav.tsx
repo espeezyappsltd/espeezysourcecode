@@ -20,7 +20,7 @@ export default function AppsNav() {
 
       <div style={{ padding: '0.5rem 1rem', backgroundColor: '#000', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <a href="https://studio.espeezy.com/" style={{ fontWeight: 900, fontSize: '1.5rem', color: '#fff', textShadow: '0 1px 6px #6366f122' }}>
-          App Galore
+          Cool Apps ONLY Galore
         </a>
       
       <ul style={{
