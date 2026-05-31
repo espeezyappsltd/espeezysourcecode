@@ -2,20 +2,14 @@
 import { useState, useEffect } from 'react';
 import { getArticleReactions, addReaction } from '../lib/reactions';
 
-type Article = {
-  id: string;
-  title: string;
-  author: string;
-  content: string;
-  createdAt: string;
-};
+import type { ArticleRow } from '../lib/articles'
 
 type Reaction = {
   type: string;
   userId: string;
 };
 
-export default function ArticleCard({ article }: { article: Article }) {
+export default function ArticleCard({ article }: { article: ArticleRow }) {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +38,7 @@ export default function ArticleCard({ article }: { article: Article }) {
     <article style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(15,23,42,0.07)', padding: '2rem', border: '1px solid #f1f5f9' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>{article.title}</h2>
       <div style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.2rem' }}>
-        By {article.author} &middot; {new Date(article.createdAt).toLocaleDateString()}
+        By {article.author} &middot; {new Date(article.createdat).toLocaleDateString()}
       </div>
       <div style={{ color: '#334155', fontSize: '1.08rem', marginBottom: '1.5rem' }}>
         {article.content.slice(0, 320)}{article.content.length > 320 ? '...' : ''}

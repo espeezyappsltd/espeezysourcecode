@@ -6,13 +6,13 @@ export type ArticleSummary = {
   slug: string
   content: string
   author: string
-  authorAvatar?: string | null
+  authoravatar?: string | null
   category?: string | null
   tags?: string[] | null
-  createdAt: string
-  metaTitle?: string | null
-  metaDescription?: string | null
-  metaImage?: string | null
+  createdat: string
+  metatitle?: string | null
+  metadescription?: string | null
+  metaimage?: string | null
 }
 
 export async function getLatestArticles({
@@ -25,13 +25,13 @@ export async function getLatestArticles({
   const from = (page - 1) * limit
   const to = from + limit - 1
   const { data, error, count } = await supabase
-    .from('Article')
+    .from('article')
     .select(
-      'id, title, slug, content, author, authorAvatar, category, tags, createdAt, metaTitle, metaDescription, metaImage',
+      'id, title, slug, content, author, authoravatar, category, tags, createdat, metatitle, metadescription, metaimage',
       { count: 'exact' },
     )
     .eq('published', true)
-    .order('createdAt', { ascending: false })
+    .order('createdat', { ascending: false })
     .range(from, to)
   if (error) throw error
   return { articles: (data ?? []) as ArticleSummary[], total: count }

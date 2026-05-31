@@ -1,28 +1,15 @@
-import { supabase } from '../lib/supabase-client';
+/** Article reactions are not migrated yet — keep UI working without throwing. */
 
-export async function getArticles() {
-  const { data, error } = await supabase
-    .from('Article')
-    .select('*')
-    .eq('published', true)
-    .order('createdAt', { ascending: false });
-  if (error) throw error;
-  return data;
+export type ArticleReaction = { type: string; userId: string }
+
+export async function getArticleReactions(_articleId: string): Promise<ArticleReaction[]> {
+  return []
 }
 
-export async function getArticleReactions(articleId: string) {
-  const { data, error } = await supabase
-    .from('Reaction')
-    .select('type, userId')
-    .eq('articleId', articleId);
-  if (error) throw error;
-  return data as { type: string; userId: string }[];
-}
-
-export async function addReaction(articleId: string, userId: string, type: string) {
-  const { data, error } = await supabase
-    .from('Reaction')
-    .insert([{ articleId, userId, type }]);
-  if (error) throw error;
-  return data;
+export async function addReaction(
+  _articleId: string,
+  _userId: string,
+  _type: string,
+): Promise<null> {
+  return null
 }

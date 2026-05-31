@@ -108,8 +108,8 @@ export default async function AllArticlesPage({
             role="article"
           >
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.1rem', gap: '0.9rem' }}>
-              {article.authorAvatar ? (
-                <img src={article.authorAvatar} alt={article.author} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${colors.border}` }} />
+              {article.authoravatar ? (
+                <img src={article.authoravatar} alt={article.author} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${colors.border}` }} />
               ) : (
                 <div style={{
                   width: 44, height: 44, borderRadius: '50%', background: colors.tagBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.1rem', color: colors.accent2, border: `2px solid ${colors.border}`,
@@ -117,22 +117,22 @@ export default async function AllArticlesPage({
               )}
               <div>
                 <div style={{ fontWeight: 800, fontSize: '1.01rem', color: colors.text, marginBottom: 2 }}>{article.author}</div>
-                <div style={{ color: colors.subtext, fontSize: '0.93rem' }}>{new Date(article.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                <div style={{ color: colors.subtext, fontSize: '0.93rem' }}>{new Date(article.createdat).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
               </div>
             </div>
             <h3 id={`article-title-${article.id}`} style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.7rem', color: colors.text, letterSpacing: '-0.01em', lineHeight: 1.18 }}>{article.title}</h3>
             {/* Meta description */}
-            {article.metaDescription && (
+            {article.metadescription && (
               <div style={{ color: colors.subtext, fontSize: '1.01rem', marginBottom: '0.7rem', lineHeight: 1.45 }}>
-                {article.metaDescription}
+                {article.metadescription}
               </div>
             )}
             <div style={{ color: colors.subtext, fontSize: '1.08rem', marginBottom: '1.1rem', lineHeight: 1.55, flex: 1 }}>
               {article.content.slice(0, 180)}{article.content.length > 180 ? '...' : ''}
             </div>
             {/* Meta image */}
-            {article.metaImage && (
-              <img src={article.metaImage} alt={article.metaTitle || article.title} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', borderRadius: 10, marginBottom: 10 }} />
+            {article.metaimage && (
+              <img src={article.metaimage} alt={article.metatitle || article.title} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', borderRadius: 10, marginBottom: 10 }} />
             )}
             {/* Real tags and category chips */}
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.1rem', flexWrap: 'wrap' }}>

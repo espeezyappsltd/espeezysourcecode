@@ -1,12 +1,11 @@
 
 
-import { getArticles } from '../lib/articles';
-import Link from 'next/link';
-import ArticleCard from './ArticleCard';
-
+import { getArticles } from '../lib/articles'
+import Link from 'next/link'
+import ArticleCard from './ArticleCard'
 
 export default async function ArticlesPage() {
-  const articles = await getArticles();
+  const articles = await getArticles()
 
   return (
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
@@ -14,7 +13,7 @@ export default async function ArticlesPage() {
       <p style={{ color: '#64748b', marginBottom: '2.5rem' }}>Latest articles, sorted by most recent. React, comment, and share your favorites!</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
         {articles?.length === 0 && <div>No articles found.</div>}
-        {articles?.map((article: any) => (
+        {articles.map((article) => (
           <ArticleCard key={article.id} article={article} />
         ))}
       </div>
