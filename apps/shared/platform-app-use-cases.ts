@@ -1,11 +1,12 @@
 /**
  * Plain-language use cases per platform app (marketing landing + product pages).
+ * Written in universal, informative language — no region-specific terms.
  */
 
 export type PlatformAppUseCase = {
   /** Who this app is for — one short phrase */
   audience: string
-  /** 2–3 real situations, written for students and campus teams */
+  /** 2–3 real situations anyone can relate to */
   scenarios: string[]
 }
 
@@ -15,39 +16,39 @@ export const PLATFORM_APP_USE_CASES: Record<string, PlatformAppUseCase> = {
     scenarios: [
       'Break a group assignment into tasks everyone can see and update',
       'Show your professor or TA who handled what before the deadline',
-      'Keep one board for your course project, club, or study group',
+      'Keep one board for a course project, club, or study group',
     ],
   },
   games: {
-    audience: 'Study groups before exams',
+    audience: 'Students and study groups, anywhere',
     scenarios: [
-      'Quiz each other on lecture topics in quick rounds',
-      'Run friendly matches to see who knows the material',
-      'Use the same Espeezy login as Kanban — no extra signup',
+      'Quiz each other on lecture notes and readings before an exam',
+      'Run short competitive rounds with classmates online or in person',
+      'Use the same Espeezy login as Kanban — one account across apps',
     ],
   },
   admin: {
-    audience: 'Staff running campus rollouts',
+    audience: 'Administrators running an Espeezy deployment',
     scenarios: [
-      'Control who can access admin tools on your deployment',
-      'Update launch copy and pricing from one console',
-      'Review signups and support without digging through code',
+      'Control who can access admin tools on your instance',
+      'Update public pages, pricing, and launch copy from one console',
+      'Review signups and support requests without editing code',
     ],
   },
   prereg: {
-    audience: 'Clubs and teams launching Espeezy',
+    audience: 'Teams launching Espeezy to their audience',
     scenarios: [
       'Collect early-access emails before you go live',
-      'Share pricing, docs, and app links from one site',
-      'Give new students a clear path to the right app',
+      'Share pricing, docs, and app links from one public site',
+      'Help visitors find the right Espeezy app for their need',
     ],
   },
   core: {
-    audience: 'Developers and IT teams',
+    audience: 'Developers and technical teams',
     scenarios: [
-      'Self-host any Espeezy app on Cloudflare or your own server',
-      'Jump between setup docs and live app links in one place',
-      'Connect Supabase and your branding step by step',
+      'Self-host any Espeezy app on Cloudflare or your own infrastructure',
+      'Follow setup docs and open live app links from one hub',
+      'Connect Supabase, domains, and branding step by step',
     ],
   },
   studios: {
@@ -59,11 +60,11 @@ export const PLATFORM_APP_USE_CASES: Record<string, PlatformAppUseCase> = {
     ],
   },
   articles: {
-    audience: 'Writers and campus media',
+    audience: 'Writers, creators, and student publications',
     scenarios: [
-      'Publish society news or module write-ups online',
-      'Share longer reads on blog.espeezy.com',
-      'Reach readers who already use Espeezy apps',
+      'Publish news, essays, and project write-ups online',
+      'Share long-form posts on blog.espeezy.com or articles.espeezy.com',
+      'Reach readers who already use other Espeezy apps',
     ],
   },
 }

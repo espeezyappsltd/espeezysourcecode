@@ -200,7 +200,7 @@ export default function AppProductClient({ app }: Props) {
             <strong>Need help deploying?</strong>
           </div>
           <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6 }}>
-            Our platform team supports campus rollouts. After checkout you receive download access and can follow the steps above
+            Our platform team supports school, team, and organization deployments. After checkout you receive download access and can follow the steps above
             to point the app at your Supabase project and brand assets.
           </p>
           <Link href="/contact" style={{ display: 'inline-block', marginTop: '1rem', fontWeight: 700, color: 'var(--brand)' }}>

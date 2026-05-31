@@ -17,7 +17,7 @@ const FEATURES = [
   {
     icon: FileCheck,
     title: 'Ready for grading',
-    body: 'Export a clear summary you can share with tutors, recruiters, or teammates when the project wraps.',
+    body: 'Export a clear summary you can share with professors, TAs, recruiters, or teammates when the project wraps.',
   },
 ] as const
 
@@ -33,7 +33,7 @@ export default function LandingFeaturesSection() {
             Group work that feels fair
           </h2>
           <p className="landing-lead">
-            Built for students who are tired of carrying the project alone — and tutors who want evidence, not arguments.
+            Built for students who are tired of carrying the project alone — and instructors who want clear evidence of who contributed.
           </p>
         </div>
 
