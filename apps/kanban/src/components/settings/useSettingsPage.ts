@@ -42,7 +42,6 @@ const SETTINGS_TABS: TabName[] = [
   'workspace',
   'data',
   'team',
-  'billing',
   'support',
   'identity_hub',
 ]
@@ -698,11 +697,13 @@ export function useSettingsPage() {
     const normalizedTab = tab === 'team' ? 'workspace' : tab
     if (normalizedTab && SETTINGS_TABS.includes(normalizedTab as TabName)) {
       setActiveTab(normalizedTab as TabName)
+    } else if (normalizedTab === 'billing') {
+      setActiveTab('appearance')
     }
     if (params.get('checkout') === 'success') {
       addToast('Plan updated', 'Your subscription is active. Changes may take a moment to sync.', 'success')
       void refreshProfile()
-      window.history.replaceState({}, '', '/settings?tab=billing')
+      window.history.replaceState({}, '', '/studio')
     }
   }, [addToast, refreshProfile])
 
@@ -711,7 +712,7 @@ export function useSettingsPage() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('billing') !== 'portal') return
     void handleManageSubscription()
-    window.history.replaceState({}, '', '/settings?tab=billing')
+    window.history.replaceState({}, '', '/settings?tab=appearance')
     // eslint-disable-next-line react-hooks/exhaustive-deps -- portal deep link once profile loads
   }, [profile?.stripe_customer_id])
 

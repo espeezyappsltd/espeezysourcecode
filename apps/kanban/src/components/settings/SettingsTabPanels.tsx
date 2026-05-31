@@ -4,7 +4,6 @@ import { TabName } from '@/types/ui'
 import type { SettingsPageViewModel } from './settings-types'
 import { SettingsActivityPanel, SettingsIntercomPanel, SettingsPresencePanel } from './panels/SettingsEmbeddedPanels'
 import { SettingsAppearancePanel } from './panels/SettingsAppearancePanel'
-import { SettingsBillingPanel } from './panels/SettingsBillingPanel'
 import { SettingsDataPanel } from './panels/SettingsDataPanel'
 import { SettingsIdentityHubPanel } from './panels/SettingsIdentityHubPanel'
 import { SettingsIdentityPanel } from './panels/SettingsIdentityPanel'
@@ -21,8 +20,6 @@ export function SettingsTabPanels({ vm }: { vm: SettingsPageViewModel }) {
       {activeTab === 'support' && <SettingsSupportPanel vm={vm} />}
 
       {activeTab === ('storage' as TabName) && profile && <SettingsStoragePanel vm={vm} />}
-
-      {activeTab === 'billing' && profile && <SettingsBillingPanel vm={vm} />}
 
       {activeTab === 'intercom' && profile && <SettingsIntercomPanel vm={vm} />}
 

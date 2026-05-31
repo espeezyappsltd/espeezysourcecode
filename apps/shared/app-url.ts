@@ -4,6 +4,7 @@ export const ESPEEZY_APP_ORIGINS = {
   kanban: 'https://kanban.espeezy.com',
   games: 'https://games.espeezy.com',
   panel: 'https://panel.espeezy.com',
+  studios: 'https://studios.espeezy.com',
 } as const
 
 export type EspeezyAppKey = keyof typeof ESPEEZY_APP_ORIGINS
@@ -17,6 +18,7 @@ const ALLOWED_HOSTS = new Set([
   'kanban.espeezy.com',
   'panel.espeezy.com',
   'games.espeezy.com',
+  'studios.espeezy.com',
   'localhost',
   '127.0.0.1',
 ])

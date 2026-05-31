@@ -6,6 +6,9 @@ export const GAMES_PROFILE_PATH = '/profile'
 /** Kanban workspace home (board). */
 export const KANBAN_WORKSPACE_PATH = '/'
 
+/** Default post-SSO path on Espeezy Studios (marketplace & jobs hub). */
+export const STUDIOS_MARKETPLACE_PATH = '/marketplace'
+
 export type CrossAppSessionTokens = {
   access_token: string
   refresh_token: string
@@ -69,6 +72,21 @@ export function buildKanbanWorkspaceSsoUrl(
   kanbanOrigin?: string,
 ): string {
   return buildKanbanAppSsoUrl(session, KANBAN_WORKSPACE_PATH, kanbanOrigin)
+}
+
+export function resolveStudiosAppOrigin(): string {
+  return (process.env.NEXT_PUBLIC_STUDIOS_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.studios).replace(
+    /\/$/,
+    '',
+  )
+}
+
+export function buildStudiosSsoUrl(
+  session: CrossAppSessionTokens | null | undefined,
+  nextPath: string = STUDIOS_MARKETPLACE_PATH,
+  studiosOrigin?: string,
+): string {
+  return buildCrossAppSsoUrl(studiosOrigin ?? resolveStudiosAppOrigin(), nextPath, session)
 }
 
 /** Public games profile by username (no SSO). */

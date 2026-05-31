@@ -22,9 +22,9 @@ const FEATURE_GUIDES = [
     link: "/docs/features/team"
   },
   {
-    title: "Marketplace",
-    desc: "Buy, sell, or swap resources securely with other students.",
-    link: "/docs/features/marketplace"
+    title: "Espeezy Studio",
+    desc: "Premium workspace for marketplace, jobs, and client delivery.",
+    link: "/studio"
   },
   {
     title: "Profile & Settings",

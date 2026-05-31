@@ -9,7 +9,6 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
   Menu,
   HardDrive,
   LayoutDashboard,
@@ -17,12 +16,12 @@ import {
   HelpCircle,
   LogOut,
   Music,
+  Briefcase,
   Rss,
   Settings,
   Gamepad2,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   UserCircle,
   Users,
   WifiOff,
@@ -42,11 +41,11 @@ import { MobileHeaderToolbar } from './mobile/MobileHeaderToolbar'
 import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
-import { SIDEBAR_UPGRADE_BLURB } from '@shared/platform-brand'
+import { SIDEBAR_STUDIO_BLURB } from '@shared/platform-brand'
 import './sidebar-premium.css'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
-const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats'])
+const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats', 'Espeezy Studio'])
 const subscribeToClient = () => () => {}
 
 type SidebarNavItem = {
@@ -60,11 +59,10 @@ type SidebarNavItem = {
 const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Feed', path: '/feed', icon: Rss },
-  { name: 'Hustle', path: '/hustle', icon: DollarSign },
   { name: 'Teammates', path: '/network', icon: Users },
-  { name: 'My Assets', path: '/assets', icon: HardDrive },
+  { name: 'My Files', path: '/assets/storage', icon: HardDrive },
   { name: 'Ask', path: '/ask', icon: HelpCircle },
-  { name: 'Resources', path: '/marketplace', icon: TrendingUp },
+  { name: 'Espeezy Studio', path: '/studio', icon: Briefcase },
   { name: 'Break Room', path: '/chillout', icon: Sparkles },
   { name: 'Skirmish', path: '/games', icon: Gamepad2, externalGamesProfile: true },
   { name: 'Jukebox', path: '/jukebox', icon: Music },
@@ -210,7 +208,8 @@ export default function Sidebar({ user }: SidebarProps) {
   const onlineCount = globalOnlineCount
   const onlineLabel = onlineCount === 1 ? '1 ONLINE' : `${onlineCount} ONLINE`
   const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
-  const showUpgradeCard = profile?.subscription_plan === 'free' || !profile?.subscription_plan
+  const hasStudioAccess = hasFeature(profile, 'ESPEEZY_STUDIO')
+  const showStudioPromo = !hasStudioAccess
   const projectStatsPath = profile?.group_id ? `/analytics/${profile.group_id}` : '/analytics'
 
   const navLinks = useMemo(
@@ -312,6 +311,10 @@ export default function Sidebar({ user }: SidebarProps) {
   const isNavItemActive = (path: string, name: string) => {
     if (name === 'Project Stats') {
       return (pathname ?? '').startsWith('/analytics')
+    }
+
+    if (name === 'Espeezy Studio') {
+      return (pathname ?? '').startsWith('/studio')
     }
 
     if (name === 'Skirmish') {
@@ -435,11 +438,19 @@ export default function Sidebar({ user }: SidebarProps) {
               key={link.name}
               collapsed={!isOpen}
               isActive={isNavItemActive(link.path, link.name)}
-              isLocked={PREMIUM_LINKS.has(link.name) && !isPremiumMember}
+              isLocked={
+                link.name === 'Espeezy Studio'
+                  ? !hasStudioAccess
+                  : PREMIUM_LINKS.has(link.name) && !isPremiumMember
+              }
               label={link.name}
               icon={link.icon}
               onClick={() => {
-                if (PREMIUM_LINKS.has(link.name) && !isPremiumMember) {
+                if (link.name === 'Espeezy Studio' && !hasStudioAccess) {
+                  pushRoute('/studio')
+                  return
+                }
+                if (PREMIUM_LINKS.has(link.name) && link.name !== 'Espeezy Studio' && !isPremiumMember) {
                   window.location.href = APP_PRICING_PATH
                   return
                 }
@@ -456,23 +467,23 @@ export default function Sidebar({ user }: SidebarProps) {
 
         <div className="sidebar-bottom">
           <div className="sidebar-foot">
-            {isOpen && showUpgradeCard && (
+            {isOpen && showStudioPromo && (
               <div className="sidebar-foot__upgrade sidebar-upgrade-card">
                 <div
                   className="glass-card-prestige"
                   style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
-                  onClick={() => { window.location.href = APP_PRICING_PATH }}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { window.location.href = APP_PRICING_PATH } }}
+                  onClick={() => pushRoute('/studio')}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') pushRoute('/studio') }}
                   role="button"
                   tabIndex={0}
                 >
                   <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} aria-hidden />
                   <div className="sidebar-foot__upgrade-eyebrow">
-                    <Sparkles size={14} className="shimmer-gold" aria-hidden />
-                    Team support
+                    <Briefcase size={14} aria-hidden />
+                    Premium workspace
                   </div>
-                  <p className="sidebar-foot__upgrade-title">Upgrade to Pro Member</p>
-                  <p className="sidebar-foot__upgrade-copy">{SIDEBAR_UPGRADE_BLURB}</p>
+                  <p className="sidebar-foot__upgrade-title">Espeezy Studio</p>
+                  <p className="sidebar-foot__upgrade-copy">{SIDEBAR_STUDIO_BLURB}</p>
                 </div>
               </div>
             )}

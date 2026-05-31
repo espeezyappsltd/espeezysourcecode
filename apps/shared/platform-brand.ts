@@ -130,6 +130,9 @@ export const APP_FOOTER_TAGLINE_DASHBOARD =
 export const SIDEBAR_UPGRADE_BLURB =
   'Support the platform team and unlock advanced themes and priority features.'
 
+export const SIDEBAR_STUDIO_BLURB =
+  'Premium unlocks Espeezy Studio — marketplace, jobs, invoices, and client delivery.'
+
 export {
   REFERRAL_PRO_DISCOUNT_PERCENT,
   REFERRAL_PRO_MAX_REDEMPTIONS,

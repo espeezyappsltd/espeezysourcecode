@@ -788,6 +788,54 @@ section {
   color: var(--text-main, var(--studios-text));
 }
 
+.studio-marketplace-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+
+.studio-marketplace-card:hover {
+  border-color: var(--studios-brand);
+}
+
+.studio-sso-bridge {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--studios-bg);
+  color: var(--studios-text);
+}
+
+.studio-sso-bridge__card {
+  text-align: center;
+  max-width: 420px;
+}
+
+.studio-sso-bridge__card h1 {
+  font-size: 1.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.studio-sso-bridge__error {
+  color: #f87171;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.studio-sso-bridge__card button {
+  border: none;
+  border-radius: 10px;
+  background: var(--studios-brand);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 @keyframes studio-spin {
   to {
     transform: rotate(360deg);

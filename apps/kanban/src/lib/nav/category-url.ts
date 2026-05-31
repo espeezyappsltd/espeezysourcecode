@@ -5,79 +5,56 @@ export type ListUrlContext = {
   category?: string | null
 }
 
-export function marketplaceListUrl(opts?: {
+/** Marketplace moved to Espeezy Studio (Premium) — Kanban links to /studio. */
+export function marketplaceListUrl(_opts?: {
   category?: string | null
   q?: string | null
   item?: string | null
   inquiry?: string | null
   listing?: string | null
 }): string {
-  const params = new URLSearchParams()
-  if (opts?.category && opts.category !== 'All') params.set('category', opts.category)
-  if (opts?.q?.trim()) params.set('q', opts.q.trim())
-  if (opts?.item) params.set('item', opts.item)
-  if (opts?.inquiry) params.set('inquiry', opts.inquiry)
-  if (opts?.listing) params.set('listing', opts.listing)
-  const q = params.toString()
-  return q ? `/marketplace?${q}` : '/marketplace'
+  return '/studio'
 }
 
-export function marketplaceCategoryUrl(category: string, ctx?: ListUrlContext): string {
-  return marketplaceListUrl({
-    category: category === 'All' ? null : category,
-    q: ctx?.q,
-  })
+export function marketplaceCategoryUrl(_category?: string, _ctx?: ListUrlContext): string {
+  return '/studio'
 }
 
 export function marketplaceItemUrl(
-  itemId: string,
-  opts?: { category?: string | null; q?: string | null },
+  _itemId?: string,
+  _opts?: { category?: string | null; q?: string | null },
 ): string {
-  return marketplaceListUrl({ category: opts?.category, q: opts?.q, item: itemId })
+  return '/studio'
 }
 
-export function hustleListUrl(opts?: {
+/** Hustle moved to Espeezy Studio (Premium). */
+export function hustleListUrl(_opts?: {
   tab?: string | null
   category?: string | null
   q?: string | null
   task?: string | null
 }): string {
-  const params = new URLSearchParams()
-  if (opts?.tab && opts.tab !== 'marketplace') params.set('tab', opts.tab)
-  if (opts?.category && opts.category !== 'all') params.set('category', opts.category)
-  if (opts?.q?.trim()) params.set('q', opts.q.trim())
-  if (opts?.task) params.set('task', opts.task)
-  const q = params.toString()
-  return q ? `/hustle?${q}` : '/hustle'
+  return '/studio'
 }
 
-export function hustleCategoryUrl(category: string, tab?: string, ctx?: ListUrlContext): string {
-  return hustleListUrl({
-    tab,
-    category: category === 'all' ? null : category,
-    q: ctx?.q,
-  })
+export function hustleCategoryUrl(_category?: string, _tab?: string, _ctx?: ListUrlContext): string {
+  return '/studio'
 }
 
 export function hustleItemUrl(
-  taskId: string,
-  opts?: { tab?: string; category?: string | null; q?: string | null },
+  _taskId?: string,
+  _opts?: { tab?: string; category?: string | null; q?: string | null },
 ): string {
-  return hustleListUrl({ ...opts, task: taskId })
+  return '/studio'
 }
 
 export function hustleTabUrl(
-  tab: string,
-  ctx?: { category?: string | null; q?: string | null },
+  _tab?: string,
+  _ctx?: { category?: string | null; q?: string | null },
 ): string {
-  return hustleListUrl({
-    tab,
-    category: ctx?.category && ctx.category !== 'all' ? ctx.category : null,
-    q: ctx?.q,
-  })
+  return '/studio'
 }
 
-/** Preserve current list filters when building the next link. */
 export function hustleNavContext(
   tab: string,
   category: string,

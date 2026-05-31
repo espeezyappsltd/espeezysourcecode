@@ -8,6 +8,7 @@ const navlinks = [
   { name: 'Home', url: '/' },
   { name: 'Team', url: '/team' },
   { name: 'Analytics', url: '/analytics' },
+  { name: 'Marketplace', url: '/marketplace' },
   { name: 'Profile', url: '/profile' },
   { name: 'Jobs', url: '/jobs' },
   { name: 'Settings', url: '/settings' },

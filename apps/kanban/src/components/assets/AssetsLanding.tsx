@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Activity, Coins, HardDrive, ShoppingBag, FolderOpen } from 'lucide-react'
-import { formatCreditCapHint, formatCredits, formatGbpApprox } from '@/lib/credits'
+import { ArrowRight, FolderOpen, HardDrive } from 'lucide-react'
 import { formatStorageBytes } from '@/lib/storage-quotas'
 import { AssetsPageFrame } from './AssetsPageFrame'
 import { AssetsMotionRoot } from './AssetsMotionRoot'
@@ -13,31 +12,9 @@ const HUB_CARDS = [
   {
     href: '/assets/storage',
     title: 'Storage & files',
-    description: 'Upload files, save links, and organize folders. Storage counts against your plan quota.',
+    description: 'Upload files, save links, and organize folders for your study workspace.',
     icon: HardDrive,
     accent: 'var(--brand)',
-  },
-  {
-    href: '/assets/credits',
-    title: 'Credits & value',
-    description: 'Set Espeezy credit values on each asset for marketplace pricing and cash conversion.',
-    icon: Coins,
-    accent: '#f59e0b',
-  },
-  {
-    href: '/assets/marketplace',
-    title: 'Marketplace',
-    description: 'List assets, track sales, withdraw earnings, and manage marketplace inventory.',
-    icon: ShoppingBag,
-    accent: 'var(--success)',
-  },
-  {
-    href: '/assets/impact',
-    title: 'Impact log',
-    description:
-      'Verifiable timeline of marketplace invoices and hustle escrow ledger events — your overall credit impact.',
-    icon: Activity,
-    accent: '#8b5cf6',
   },
 ] as const
 
@@ -47,13 +24,12 @@ export function AssetsLanding() {
   const fileCount = assets.filter(
     (a) => !a.is_folder && a.title !== 'README.txt' && (a.asset_type === 'file' || a.asset_type === 'link'),
   ).length
-  const listedCount = assets.filter((a) => a.asset_type === 'marketplace_ref' || a.marketplace_listing_id).length
   const percentUsed =
     snapshot.storageQuota > 0
       ? Math.min(100, Math.round((snapshot.storageUsed / snapshot.storageQuota) * 100))
       : 0
 
-  const statusMessage = loading ? 'Loading Personal Arsenal overview.' : null
+  const statusMessage = loading ? 'Loading files overview.' : null
 
   return (
     <AssetsPageFrame statusMessage={statusMessage}>
@@ -61,11 +37,10 @@ export function AssetsLanding() {
       <header className="assets-hero ui-hero-row page-header">
         <div className="ui-hero-row__main page-header__main">
           <h1 className="page-header__title">
-            Personal <span className="page-header__title-accent">Arsenal</span>
+            My <span className="page-header__title-accent">Files</span>
           </h1>
           <p className="page-header__desc">
-            Your academic vault — organized into storage, credit values, and marketplace tools.{' '}
-            {formatCreditCapHint()}.
+            Shared study files and links for your team. Marketplace and billing live in Espeezy Studio (Premium).
           </p>
         </div>
       </header>
@@ -74,7 +49,7 @@ export function AssetsLanding() {
 
       <section className="assets-hub-stats" aria-labelledby="assets-hub-stats-heading">
         <h2 id="assets-hub-stats-heading" className="sr-only">
-          Arsenal summary
+          Files summary
         </h2>
         <div className="assets-hub-stat ui-panel ui-panel--compact">
           <FolderOpen size={18} color="var(--brand)" aria-hidden />
@@ -82,16 +57,6 @@ export function AssetsLanding() {
             <div className="assets-hub-stat__label">Files & links</div>
             <div className="assets-hub-stat__value" aria-busy={loading}>
               {loading ? 'Loading' : fileCount}
-            </div>
-          </div>
-        </div>
-        <div className="assets-hub-stat ui-panel ui-panel--compact">
-          <Coins size={18} color="#f59e0b" aria-hidden />
-          <div>
-            <div className="assets-hub-stat__label">Arsenal value</div>
-            <div className="assets-hub-stat__value">
-              {loading ? '…' : formatCredits(snapshot.totalCreditValue)}
-              <span className="assets-hub-stat__sub">{formatGbpApprox(snapshot.totalCreditValue)}</span>
             </div>
           </div>
         </div>
@@ -107,19 +72,11 @@ export function AssetsLanding() {
             </div>
           </div>
         </div>
-        <div className="assets-hub-stat ui-panel ui-panel--compact">
-          <ShoppingBag size={18} color="var(--success)" aria-hidden />
-          <div>
-            <div className="assets-hub-stat__label">Marketplace</div>
-            <div className="assets-hub-stat__value">{loading ? '…' : listedCount}</div>
-            <div className="assets-hub-stat__hint">listed / purchased refs</div>
-          </div>
-        </div>
       </section>
 
       <section className="assets-hub-grid" aria-labelledby="assets-hub-sections-heading">
         <h2 id="assets-hub-sections-heading" className="sr-only">
-          Arsenal sections
+          File sections
         </h2>
         {HUB_CARDS.map(({ href, title, description, icon: Icon, accent }) => (
           <Link key={href} href={href} className="assets-hub-card ui-panel hover-card">

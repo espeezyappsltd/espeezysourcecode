@@ -1,0 +1,65 @@
+import Link from 'next/link'
+import StudioPageShell from '@/components/StudioPageShell'
+import { Briefcase, Receipt, ShoppingBag, TrendingUp } from 'lucide-react'
+
+const HUB_LINKS = [
+  {
+    href: '/jobs',
+    title: 'Professional jobs',
+    description: 'Timeline, milestones, budgets, PRD, delivery docs, and client invoicing.',
+    icon: Briefcase,
+  },
+  {
+    href: '/jobs',
+    title: 'List & deliver work',
+    description: 'Create jobs, track progress, and email receipts when work is complete.',
+    icon: Receipt,
+  },
+  {
+    href: '/analytics',
+    title: 'Studio analytics',
+    description: 'KPIs and operational metrics for your studio pipeline.',
+    icon: TrendingUp,
+  },
+  {
+    href: '/team',
+    title: 'Team & clients',
+    description: 'Manage studio team roster and client-facing project categories.',
+    icon: ShoppingBag,
+  },
+] as const
+
+export default function StudioMarketplacePage() {
+  return (
+    <StudioPageShell
+      title="Marketplace & jobs"
+      description="Monetization lives in Espeezy Studio — migrated from Kanban. Run listings, gigs, and professional delivery here."
+      wide
+      centered
+    >
+      <p className="studio-muted" style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>
+        Kanban is for study, collaboration, and communication. Premium members sign on from Kanban to manage
+        marketplace operations in Studio.
+      </p>
+
+      <div className="card-grid">
+        {HUB_LINKS.map(({ href, title, description, icon: Icon }) => (
+          <Link key={title} href={href} className="studio-card studio-marketplace-card">
+            <Icon size={22} aria-hidden style={{ color: 'var(--studios-brand)', marginBottom: '0.35rem' }} />
+            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1rem' }}>{title}</h3>
+            <p className="studio-muted" style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.45 }}>
+              {description}
+            </p>
+          </Link>
+        ))}
+      </div>
+
+      <p className="studio-muted" style={{ marginTop: '0.75rem', fontSize: '0.78rem' }}>
+        Need Kanban?{' '}
+        <a href="https://kanban.espeezy.com" className="studio-link">
+          Return to workspace
+        </a>
+      </p>
+    </StudioPageShell>
+  )
+}
