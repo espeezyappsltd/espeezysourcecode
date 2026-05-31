@@ -29,7 +29,7 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
         <div className="landing-eyebrow">
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)' }} />
-          Free for students
+          Free tier for students
         </div>
       </motion.div>
 

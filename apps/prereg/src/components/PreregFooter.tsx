@@ -1,12 +1,11 @@
 'use client'
 
 import {
-  FOOTER_BOTTOM_RIGHT,
   FOOTER_BRAND_BLURB,
-  FOOTER_COPYRIGHT_TAGLINE,
   FOOTER_IMPORTANT_INFO,
   FOOTER_TECH_BLURB,
 } from '@shared/platform-brand'
+import FooterCopyrightNotice from '@shared/FooterCopyrightNotice'
 import { ESPEEZY_PUBLIC_APP_LINKS } from '@shared/espeezy-apps-catalog'
 import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 
@@ -234,19 +233,9 @@ export default function PreregFooter() {
           padding: '1.5rem clamp(1.25rem, 4vw, 2.5rem)',
           maxWidth: '1200px',
           margin: '0 auto',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.75rem',
         }}
       >
-        <p style={{ fontSize: '0.78rem', color: '#334155', margin: 0 }}>
-          &copy; {new Date().getFullYear()} Espeezy. All rights reserved. {FOOTER_COPYRIGHT_TAGLINE}
-        </p>
-        <p style={{ fontSize: '0.78rem', color: '#1e293b', margin: 0, fontWeight: 600 }}>
-          {FOOTER_BOTTOM_RIGHT}
-        </p>
+        <FooterCopyrightNotice showTrademark />
       </div>
     </footer>
   )

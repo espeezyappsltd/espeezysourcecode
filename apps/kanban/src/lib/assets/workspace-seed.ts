@@ -124,7 +124,7 @@ Plans and checkout: espeezy.com/pricing
 
 1. Dashboard — see your active group board.
 2. Move tasks: To Do → In Progress → Done (Done earns contribution points).
-3. Assign owners on each card so graders see who did what.
+3. Assign owners on each card so instructors can review who completed each task.
 4. Use Project Stats and Break Room on Pro/Premium plans.
 
 Finish the onboarding tasks on your dashboard for bonus credits.

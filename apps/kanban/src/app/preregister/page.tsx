@@ -30,6 +30,7 @@ import {
   PLATFORM_OPERATIONS_TAGLINE,
   PLATFORM_TEAM_SIZE,
   FOOTER_TECH_BLURB,
+  formatCopyrightNotice,
 } from '@shared/platform-brand'
 import {
   PREREG_NAV,
@@ -473,7 +474,7 @@ function PreRegisterPageContent() {
                 Your journey on <span style={{ color: 'var(--brand)' }}>Espeezy</span>
               </h2>
               <p className="prereg-lead prereg-lead--center" style={{ marginBottom: 0 }}>
-                Nine steps mirror what is live in the Kanban app today — from signup through team switching, contribution proof, and campus exchange.
+                Nine steps mirror what is live in the Kanban app today — from registration through team coordination, contribution records, and peer resource exchange.
               </p>
             </div>
             <ol className="journey-list">
@@ -551,7 +552,7 @@ function PreRegisterPageContent() {
                 What&apos;s live right now
               </h2>
               <p className="prereg-lead prereg-lead--center" style={{ marginBottom: 0 }}>
-                Sidebar routes you can use today after signup. Pre-register to join the cohort as we scale campus rollouts.
+                Sidebar routes you can use after registration. Pre-register to receive product updates as new capabilities are released.
               </p>
             </div>
             <div className="live-grid">
@@ -584,8 +585,7 @@ function PreRegisterPageContent() {
               The {PLATFORM_TEAM_SIZE}-person platform team
             </h2>
             <p className="prereg-lead prereg-lead--center">
-              Espeezy is operated by a dedicated team running production backend, billing, campus rollouts, and support — not a solo side project.
-              Each member will add their personal bio here before launch.
+              Espeezy is operated by a dedicated team responsible for production infrastructure, billing, deployments, and customer support.
             </p>
             <div className="team-grid" style={{ textAlign: 'center' }}>
               {PLATFORM_TEAM.map((member) => (
@@ -609,7 +609,7 @@ function PreRegisterPageContent() {
               <span style={{ color: 'var(--brand)' }}>Use Espeezy as it was built.</span>
             </h2>
             <p className="prereg-lead prereg-lead--center">
-              Fair group work, traceable contribution, and campus tools that match how students actually collaborate.
+              Structured group collaboration, traceable contribution records, and tools designed for academic teams.
             </p>
             <a
               href="#register"
@@ -635,7 +635,7 @@ function PreRegisterPageContent() {
       <footer className="prereg-section prereg-section--border" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
         <div className="prereg-container">
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.88rem', lineHeight: 1.65, maxWidth: '640px', marginBottom: '1.5rem' }}>
-            {FOOTER_TECH_BLURB} Pre-registration helps us size campus rollouts. No spam — launch updates only.
+            {FOOTER_TECH_BLURB} Pre-registration helps us plan capacity for new deployments. You will receive launch updates only.
           </p>
 
           <aside
@@ -651,7 +651,7 @@ function PreRegisterPageContent() {
             }}
           >
             <p style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.55, color: 'rgba(255,255,255,0.55)' }}>
-              <strong style={{ color: '#6ee7b7', fontWeight: 800 }}>Apps are live now.</strong> You can sign in and use the platform today — pre-register is for the next cohort perks, not a wait for access.
+              <strong style={{ color: '#6ee7b7', fontWeight: 800 }}>Applications are live.</strong> You can sign in and use the platform today. Pre-registration provides early-access updates and benefits; it is not required for access.
             </p>
             <p style={{ margin: '0.65rem 0 0', fontSize: '0.85rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1rem', alignItems: 'center' }}>
               <a
@@ -686,8 +686,8 @@ function PreRegisterPageContent() {
                 </a>
               ))}
             </div>
-            <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', margin: 0 }} suppressHydrationWarning>
-              © {new Date().getFullYear()} {config.brand_name}
+            <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.55, maxWidth: '520px' }} suppressHydrationWarning>
+              {formatCopyrightNotice()}
             </p>
           </div>
         </div>

@@ -15,6 +15,7 @@ import {
   LIFETIME_FEATURES,
   LIFETIME_PLAN_DESCRIPTION,
   LIFETIME_PLAN_NAME,
+  CHECKOUT_TRUST_LINE,
 } from '@shared/platform-brand'
 
 // ─── Plan definitions ──────────────────────────────────────────────────────────
@@ -232,7 +233,7 @@ export default function CheckoutFlow() {
             </p>
             <motion.div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem', fontWeight: 600 }}>
               <Users size={13} />
-              <span>Trusted by student teams on campuses worldwide</span>
+              <span>{CHECKOUT_TRUST_LINE}</span>
             </motion.div>
           </motion.div>
         ) : (

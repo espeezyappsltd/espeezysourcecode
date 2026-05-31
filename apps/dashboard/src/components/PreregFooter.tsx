@@ -1,6 +1,10 @@
 'use client'
 
-import { APP_FOOTER_TAGLINE_DASHBOARD, FOOTER_IMPORTANT_INFO } from '@/lib/platform/brand-copy'
+import {
+  APP_FOOTER_TAGLINE_DASHBOARD,
+  FOOTER_IMPORTANT_INFO,
+} from '@/lib/platform/brand-copy'
+import FooterCopyrightNotice from '@shared/FooterCopyrightNotice'
 
 export default function PreregFooter() {
   const linkStyle: React.CSSProperties = {
@@ -40,15 +44,15 @@ export default function PreregFooter() {
           <p style={{ margin: 0, fontSize: '0.9rem' }}>{APP_FOOTER_TAGLINE_DASHBOARD}</p>
           <nav aria-label="Footer links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <a href="https://espeezy.com" style={linkStyle}>Home</a>
-            <a href="https://espeezy.com/preregister" style={linkStyle}>Early Access</a>
-            <a href="https://espeezy.com/pricing" style={linkStyle}>Pricing</a>
+            <a href="https://espeezy.com/docs" target="_blank" rel="noopener noreferrer" style={linkStyle}>Documentation</a>
             <a href="https://espeezy.com/privacy" style={linkStyle}>Privacy</a>
-            <a href="https://games.espeezy.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>Games</a>
+            <a href="https://espeezy.com/terms" style={linkStyle}>Terms</a>
           </nav>
         </div>
         <p style={{ margin: 0, fontSize: '0.72rem', lineHeight: 1.55, color: '#64748b', maxWidth: '640px', whiteSpace: 'pre-line' }}>
           {FOOTER_IMPORTANT_INFO}
         </p>
+        <FooterCopyrightNotice showBottomRight={false} />
       </div>
     </footer>
   )

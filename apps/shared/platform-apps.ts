@@ -129,7 +129,7 @@ export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
     slug: 'prereg',
     name: 'Espeezy Marketing',
     tagline: 'Early access, pricing, checkout, and docs.',
-    description: 'The espeezy.com marketing app for campus launches.',
+    description: 'The espeezy.com marketing application for product launches, documentation, and checkout.',
     status: 'live',
     price_cents: 9900,
     price_currency: 'GBP',

@@ -1,25 +1,31 @@
 "use client";
 
 import React from 'react';
+import {
+  COPYRIGHT_STUDIOS_PRODUCT,
+  FOOTER_LEGAL_LINKS,
+  formatCopyrightNotice,
+} from '@shared/platform-legal';
 
 export default function GlobalFooter() {
   return (
     <footer className="global-footer">
       <div className="global-footer__content">
-        <span className="global-footer__copyright">© {new Date().getFullYear()} Espeezy Studios</span>
-        <span className="global-footer__links">
-          <a href="/privacy" rel="noopener noreferrer">
-            Privacy
-          </a>
-          <span aria-hidden>·</span>
-          <a href="/terms" rel="noopener noreferrer">
-            Terms
-          </a>
-          <span aria-hidden>·</span>
-          <a href="https://github.com/EspeezyTeam" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
-        </span>
+        <div className="global-footer__legal">
+          <span className="global-footer__copyright">
+            {formatCopyrightNotice({ product: COPYRIGHT_STUDIOS_PRODUCT })}
+          </span>
+          <span className="global-footer__links">
+            {FOOTER_LEGAL_LINKS.map(({ href, label }, index) => (
+              <React.Fragment key={href}>
+                {index > 0 ? <span aria-hidden>·</span> : null}
+                <a href={href} target="_blank" rel="noopener noreferrer">
+                  {label}
+                </a>
+              </React.Fragment>
+            ))}
+          </span>
+        </div>
       </div>
     </footer>
   );

@@ -7,17 +7,17 @@ const FEATURES = [
   {
     icon: LayoutDashboard,
     title: 'One shared board',
-    body: 'Everyone sees the same tasks, deadlines, and updates — no more “I didn’t know that was my part.”',
+    body: 'Every member sees the same tasks, deadlines, and updates, which reduces miscommunication during group assignments.',
   },
   {
     icon: Users,
     title: 'Proof of contribution',
-    body: 'Espeezy records who moved work forward, so quiet contributors get credit and teams stay fair.',
+    body: 'Espeezy records who moved work forward, so each contributor receives fair credit and instructors can review activity.',
   },
   {
     icon: FileCheck,
-    title: 'Ready for grading',
-    body: 'Export a clear summary you can share with professors, TAs, recruiters, or teammates when the project wraps.',
+    title: 'Ready for review',
+    body: 'Export a structured summary to share with professors, teaching assistants, recruiters, or teammates when the project concludes.',
   },
 ] as const
 
@@ -30,10 +30,10 @@ export default function LandingFeaturesSection() {
             Why Espeezy Kanban
           </p>
           <h2 id="features-heading" className="landing-title">
-            Group work that feels fair
+            Structured collaboration for academic teams
           </h2>
           <p className="landing-lead">
-            Built for students who are tired of carrying the project alone — and instructors who want clear evidence of who contributed.
+            Espeezy Kanban helps students coordinate group work and gives instructors a clear record of individual contribution.
           </p>
         </div>
 
