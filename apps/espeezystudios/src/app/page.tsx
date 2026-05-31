@@ -10,6 +10,7 @@ export default function HomePage() {
       title="Espeezy Studios"
       description="Welcome back — snapshot of projects, jobs, and quick actions for your studio."
       wide
+      centered
     >
       <DashboardMetrics />
       <DashboardQuickActions />
