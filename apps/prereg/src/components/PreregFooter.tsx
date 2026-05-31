@@ -12,6 +12,7 @@ import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
+  { href: '/#use-cases', label: 'Use cases' },
   { href: '/#apps', label: 'Apps' },
   { href: '/#features', label: 'Features' },
   { href: '/checkout', label: 'Pricing' },

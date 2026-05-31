@@ -8,6 +8,7 @@ import {
   type PlatformApp,
 } from '@shared/platform-apps'
 import { CHECKOUT_TEAM_NOTE } from '@shared/platform-brand'
+import { getPlatformAppUseCases } from '@shared/platform-app-use-cases'
 import { PlatformAppIcon } from './platform-app-icon'
 import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import './landing.css'
@@ -23,6 +24,7 @@ function renderMarkdownBlock(md: string) {
 
 export default function AppProductClient({ app }: Props) {
   const price = formatPlatformAppPrice(app)
+  const useCase = getPlatformAppUseCases(app.slug)
   const hasStripe = Boolean(app.stripe_payment_link?.trim())
   const hasDownload = Boolean(app.download_url?.trim())
   const isDev = app.status === 'development' || app.status === 'coming_soon'
@@ -127,6 +129,22 @@ export default function AppProductClient({ app }: Props) {
       </header>
 
       <div className="product-setup">
+        {useCase ? (
+          <>
+            <h2>Who it&apos;s for</h2>
+            <p style={{ color: '#475569', lineHeight: 1.6, margin: '0 0 1rem' }}>{useCase.audience}</p>
+            <h2>Common situations</h2>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {useCase.scenarios.map((line) => (
+                <li key={line} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', color: '#475569', fontSize: '0.9rem' }}>
+                  <Check size={16} color="var(--brand)" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
         {app.features.length > 0 && (
           <>
             <h2>What&apos;s included</h2>
