@@ -4,7 +4,7 @@ Skirmish / quiz games app (Pro tier). Supabase-authenticated Next.js app.
 
 ## Stack
 
-- Next.js 16 (App Router, `src/proxy.ts` for session + Pro tier gate)
+- Next.js 16 (App Router, `src/middleware.ts` for session + Pro tier gate)
 - Supabase Auth + Postgres
 
 ## Local development

@@ -4,7 +4,7 @@ Production kanban workspace at **https://kanban.espeezy.com**. Group projects, c
 
 ## Stack
 
-- Next.js 16 (App Router, `src/proxy.ts` for Supabase session + route guard)
+- Next.js 16 (App Router, `src/middleware.ts` for Supabase session + route guard)
 - Supabase Auth + Postgres
 - Deployed on **Cloudflare Workers** (OpenNext, server mode)
 
@@ -43,7 +43,7 @@ Required environment variables (see `src/lib/supabase/env.ts`):
 
 ## Auth
 
-Unauthenticated users are redirected to `/login`. Public routes (login, auth callbacks, docs, legal pages) are allowlisted in `src/proxy.ts`.
+Unauthenticated users are redirected to `/login`. Public routes (login, auth callbacks, docs, legal pages) are allowlisted in `src/middleware.ts`.
 
 ## Espeezy Credits (assets & marketplace)
 
