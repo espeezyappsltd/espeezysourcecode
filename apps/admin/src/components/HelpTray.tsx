@@ -120,7 +120,7 @@ export default function HelpTray() {
           >
             {HELP_TRAY_CTA_LABEL} <ArrowRight size={16} aria-hidden />
           </Link>
-          <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} showTagline />
+          <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} />
         </div>
       </div>
     </>

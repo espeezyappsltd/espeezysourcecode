@@ -64,7 +64,7 @@ export default function ArticlesSiteFooter() {
       </div>
 
       <div className="articles-footer__bar">
-        <FooterCopyrightNotice showTrademark />
+        <FooterCopyrightNotice style={{ color: '#64748b' }} />
       </div>
     </footer>
   )

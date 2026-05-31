@@ -112,7 +112,7 @@ export default function LoginClient() {
           onResetPassword={resetPassword}
         />
       </div>
-      <AppCopyrightStrip style={{ marginTop: '2rem', textAlign: 'center', color: '#64748b' }} showTagline />
+      <AppCopyrightStrip style={{ marginTop: '2rem', textAlign: 'center', color: '#64748b' }} />
     </div>
   )
 }

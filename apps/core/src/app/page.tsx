@@ -80,7 +80,7 @@ export default function LocalServerPage() {
 
         <footer className="local-server-footer">
           <p>
-            Running on <strong>apps/core</strong> · Part of the Espeezy monorepo · {formatCopyrightNotice()} · Start/stop from{' '}
+            Running on <strong>apps/core</strong> · Part of the Espeezy monorepo · {formatCopyrightNotice({ product: 'Espeezy' })} · Start/stop from{' '}
             <a href="http://localhost:3000/dashboard" style={{ color: '#f472b6', fontWeight: 700 }}>
               Dev Hub
             </a>

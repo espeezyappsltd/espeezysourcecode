@@ -114,7 +114,7 @@ export function UserGuide() {
             </table>
           </section>
 
-          <AppCopyrightStrip style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(15,23,42,0.08)', color: '#64748b' }} showTagline />
+          <AppCopyrightStrip style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(15,23,42,0.08)', color: '#64748b' }} />
         </div>
       </div>
     </div>

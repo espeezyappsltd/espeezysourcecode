@@ -54,7 +54,7 @@ export default function PreregFooter() {
         <p style={{ margin: 0, fontSize: '0.72rem', lineHeight: 1.55, color: '#64748b', maxWidth: '640px', whiteSpace: 'pre-line' }}>
           {FOOTER_IMPORTANT_INFO}
         </p>
-        <FooterCopyrightNotice showBottomRight={false} />
+        <FooterCopyrightNotice />
       </div>
     </footer>
   )

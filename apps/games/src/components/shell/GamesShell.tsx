@@ -81,7 +81,7 @@ export default function GamesShell({ children }: { children: React.ReactNode }) 
             {children}
             <footer className="games-shell__footer" aria-label="Site footer">
               <p className="games-shell__footer-tagline">{GAMES_SHELL_TAGLINE}</p>
-              <AppCopyrightStrip style={{ color: 'var(--games-muted)' }} showTagline />
+              <AppCopyrightStrip style={{ color: 'var(--games-muted)' }} />
             </footer>
           </div>
         </div>

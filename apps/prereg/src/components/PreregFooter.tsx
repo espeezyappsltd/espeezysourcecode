@@ -235,7 +235,7 @@ export default function PreregFooter() {
           margin: '0 auto',
         }}
       >
-        <FooterCopyrightNotice showTrademark />
+        <FooterCopyrightNotice style={{ color: '#475569' }} />
       </div>
     </footer>
   )

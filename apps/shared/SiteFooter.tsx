@@ -185,12 +185,12 @@ export default function SiteFooter() {
       <div
         style={{
           borderTop: '1px solid rgba(255,255,255,0.05)',
-          padding: '1.5rem clamp(1.25rem, 4vw, 2.5rem)',
+          padding: '0 clamp(1.25rem, 4vw, 2.5rem) 1.5rem',
           maxWidth: '1200px',
           margin: '0 auto',
         }}
       >
-        <FooterCopyrightNotice showTrademark />
+        <FooterCopyrightNotice style={{ color: '#475569' }} />
       </div>
     </footer>
   )

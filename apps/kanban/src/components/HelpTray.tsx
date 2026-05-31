@@ -90,7 +90,7 @@ export default function HelpTray() {
           <Link href="/docs/getting-started" className="help-tray-cta" onClick={() => setOpen(false)}>
             {HELP_TRAY_CTA_LABEL} <ArrowRight size={16} />
           </Link>
-          <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} showTagline />
+          <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} />
         </footer>
       </aside>
     </>
