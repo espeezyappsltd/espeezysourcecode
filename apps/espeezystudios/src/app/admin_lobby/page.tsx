@@ -1,41 +1,66 @@
+'use client'
 
-"use client";
+import { useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabase-client'
+import type { User } from '@supabase/supabase-js'
+import StudioPageShell from '../../components/StudioPageShell'
+import Link from 'next/link'
 
-
-import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase-client';
-import type { User } from '@supabase/supabase-js';
-
-export default function AdminLobby() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [notification, setNotification] = useState('');
+export default function AdminLobbyPage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [notification, setNotification] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-      // Example: check admin role from user metadata or fetch from backend
-      const isAdmin = Boolean(data.user && (data.user.role === 'admin' || (data.user.email && data.user.email.endsWith('@espeezy.com'))));
-      setIsAdmin(isAdmin);
-    });
-  }, []);
+      setUser(data.user)
+      const admin =
+        Boolean(data.user) &&
+        (data.user?.app_metadata?.role === 'admin' ||
+          Boolean(data.user?.email?.endsWith('@espeezy.com')))
+      setIsAdmin(admin)
+      setLoading(false)
+    })
+  }, [])
 
   function sendGlobalNotification() {
-    // Replace with actual backend call to send notification
-    setNotification('Global notification sent to all admins!');
-    setTimeout(() => setNotification(''), 3000);
+    setNotification('Global notification sent to all admins!')
+    window.setTimeout(() => setNotification(''), 3000)
   }
 
-  if (!user) return <div>Loading...</div>;
-  if (!isAdmin) return <div>Access denied. Admins only.</div>;
-
   return (
-    <div style={{ maxWidth: 600, margin: '80px auto', padding: 32, background: '#fff', borderRadius: 12 }}>
-      <h2>Admin Lobby</h2>
-      <button onClick={sendGlobalNotification} style={{ marginBottom: 16, minHeight: 44 }}>Send Global Notification</button>
-      {notification && <div role="status" style={{ color: '#1b5e20', marginBottom: 16 }}>{notification}</div>}
-      <div>Welcome, {user.email}!</div>
-      <div>One-click access to admin tools here.</div>
-    </div>
-  );
+    <StudioPageShell title="Admin" description="Staff-only tools and broadcast controls.">
+      {loading && <p className="studio-muted">Loading…</p>}
+      {!loading && !user && (
+        <div className="studio-card">
+          <p>Sign in to access the admin lobby.</p>
+          <Link href="/login" className="studio-link">
+            Login
+          </Link>
+        </div>
+      )}
+      {!loading && user && !isAdmin && (
+        <div className="studio-card" role="alert">
+          <p>Access denied. Admins only.</p>
+        </div>
+      )}
+      {!loading && user && isAdmin && (
+        <div className="studio-card">
+          <p>
+            Welcome, <strong>{user.email}</strong>
+          </p>
+          <button type="button" className="studio-btn" onClick={sendGlobalNotification}>
+            Send global notification
+          </button>
+          {notification ? (
+            <p role="status" className="studio-success">
+              {notification}
+            </p>
+          ) : null}
+          <p className="studio-muted">One-click access to admin tools — more panels coming soon.</p>
+        </div>
+      )}
+    </StudioPageShell>
+  )
 }
