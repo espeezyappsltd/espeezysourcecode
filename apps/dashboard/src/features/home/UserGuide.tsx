@@ -1,7 +1,8 @@
 'use client'
 
-import AppCopyrightStrip from '@shared/AppCopyrightStrip'
+import { useEffect, useId, useState } from 'react'
 import { X, ChevronDown, Keyboard } from 'lucide-react'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
 import { KEYBOARD_SHORTCUTS, USER_GUIDE_SECTIONS } from './content'
 
 export function UserGuide() {
