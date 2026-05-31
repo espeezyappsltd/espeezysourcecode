@@ -8,6 +8,7 @@
  * 2) fetch() — POST /send — outbound delivery from espeezystudios (SEND_EMAIL binding)
  */
 
+import type { ExecutionContext, ForwardableEmailMessage } from '@cloudflare/workers-types'
 import { AUTO_REPLY_FROM, forwardTargetForRecipient, INBOUND_FORWARD_TO, STUDIO_FROM } from './addresses'
 
 export type AttachmentPayload = {
@@ -22,25 +23,6 @@ export type SendPayload = {
   text?: string
   replyTo?: string
   attachments?: AttachmentPayload[]
-}
-
-type SendEmailBinding = {
-  send: (message: {
-    from: string
-    to: string
-    subject: string
-    text?: string
-    html?: string
-    replyTo?: string
-  }) => Promise<void>
-}
-
-type Env = {
-  SEND_EMAIL: SendEmailBinding
-  STUDIO_EMAIL_SECRET: string
-  STUDIO_FROM_EMAIL: string
-  STUDIO_REPLY_TO: string
-  INBOUND_FORWARD_TO: string
 }
 
 function corsHeaders() {
@@ -80,11 +62,7 @@ function escapeHtml(s: string) {
 
 export default {
   /** Inbound — Email Routing → this worker */
-  async email(
-    message: import('@cloudflare/workers-types').ForwardableEmailMessage,
-    env: Env,
-    ctx: import('@cloudflare/workers-types').ExecutionContext,
-  ) {
+  async email(message: ForwardableEmailMessage, env: Env, ctx: ExecutionContext) {
     const toAddress = message.to ?? ''
     const fallback = env.INBOUND_FORWARD_TO || INBOUND_FORWARD_TO
     const forwardTo = forwardTargetForRecipient(toAddress, fallback)

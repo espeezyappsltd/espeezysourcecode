@@ -55,6 +55,7 @@
     "build:apps": "npm run build:prereg && npm run build:games && npm run build:dashboard && npm run build:admin && npm run build:kanban && npm run build:core && npm run build:espeezystudios",
     "vercel-build:all": "npm run vercel-build:prereg && npm run vercel-build:games && npm run vercel-build:kanban && npm run vercel-build:admin && npm run vercel-build:espeezystudios",
     "audit:typecheck-build": "node scripts/audit-typecheck-build.mjs",
+    "typecheck:workers": "npm run typecheck --prefix workers/studio-email",
     "test": "playwright test",
     "test:critical": "playwright test tests/critical.spec.ts",
     "test:e2e:kanban": "npm --prefix apps/kanban run test:e2e:ci",
