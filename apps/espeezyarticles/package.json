@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3008",
     "build": "next build",
-    "start": "next start"
+    "stop": "node ../../scripts/stop-app-port.mjs 3008",
+    "start": "next start -p 3008"
   },
   "dependencies": {
     "@prisma/internals": "^7.8.0",

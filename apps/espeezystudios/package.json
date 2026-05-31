@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "next lint",
     "validate:studios": "node scripts/validate-studios.mjs",
-    "stop": "taskkill /f /im node.exe"
+    "stop": "node ../../scripts/stop-app-port.mjs 3007"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.19.11",

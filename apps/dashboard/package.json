@@ -9,6 +9,7 @@
     "deploy:cf": "wrangler deploy",
     "preview:cf": "opennextjs-cloudflare preview",
     "start": "npx serve out -p 3003",
+    "stop": "node ../../scripts/stop-app-port.mjs 3003",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build"
   },

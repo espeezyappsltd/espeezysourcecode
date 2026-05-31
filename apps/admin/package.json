@@ -9,6 +9,7 @@
     "deploy:cf": "wrangler deploy",
     "preview:cf": "opennextjs-cloudflare preview",
     "start": "next start -p 3004",
+    "stop": "node ../../scripts/stop-app-port.mjs 3004",
     "typecheck": "tsc --noEmit",
     "validate:admin-mobile": "node scripts/validate-admin-mobile.mjs",
     "predeploy:check": "npm run typecheck && npm run build",
