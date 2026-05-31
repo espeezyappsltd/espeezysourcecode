@@ -186,4 +186,4 @@ export function withEmbedPreviewParam(url: string): string {
   }
 }
 
-export { ESPEEZY_PANEL_APP, PANEL_VERCEL_ROOT, isPanelProductionHost } from './panel-app'
+export { ESPEEZY_PANEL_APP, PANEL_CLOUDFLARE_DEPLOY, PANEL_VERCEL_ROOT, isPanelProductionHost } from './panel-app'

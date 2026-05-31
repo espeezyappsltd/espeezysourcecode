@@ -6,8 +6,9 @@
     "dev": "next dev -p 3005",
     "stop": "taskkill /F /IM node.exe /T || killall node || true",
     "build": "next build",
-    "vercel-build:prereg": "cd ../.. && npm install && npm run build --prefix apps/prereg",
-    "vercel-build:admin": "npm run vercel-build:prereg",
+    "cf-build": "opennextjs-cloudflare build",
+    "deploy:cf": "wrangler deploy",
+    "preview:cf": "opennextjs-cloudflare preview",
     "start": "npx serve out -p 3001",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
@@ -16,7 +17,6 @@
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
-    "@vercel/analytics": "^1.6.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
     "next": "^16.2.4",
@@ -27,9 +27,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.95.0"
   }
 }

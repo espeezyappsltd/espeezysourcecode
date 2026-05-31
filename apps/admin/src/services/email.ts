@@ -1,7 +1,7 @@
 /**
  * Email service  -  Namecheap Pro Email via SMTP
  *
- * Required env vars (set in Vercel + .env.local):
+ * Required env vars (set in Cloudflare Workers + .env.local):
  *   SMTP_HOST       = mail.privateemail.com
  *   SMTP_PORT       = 465
  *   SMTP_USER       = feedback@espeezy.com   (or whichever sending mailbox)

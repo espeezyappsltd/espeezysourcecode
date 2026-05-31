@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
+    "cf-build": "opennextjs-cloudflare build",
+    "deploy:cf": "wrangler deploy",
+    "preview:cf": "opennextjs-cloudflare preview",
     "start": "npx serve out -p 3002",
     "typecheck": "tsc --noEmit",
     "predeploy:check": "npm run typecheck && npm run build",
@@ -23,9 +26,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.95.0"
   }
 }

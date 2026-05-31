@@ -57,7 +57,7 @@ export default function DashboardAnalyticsAdvanced() {
     }),
     datasets: [
       {
-        label: 'Jobs Created',
+        label: 'Projects created',
         data: jobHistory,
         borderColor: '#6366f1',
         backgroundColor: 'rgba(99,102,241,0.15)',
@@ -80,8 +80,8 @@ export default function DashboardAnalyticsAdvanced() {
   };
 
   return (
-    <StudioAnalyticsGrid label="Jobs and projects trends">
-      <StudioAnalyticsPanel title="Jobs Created (Last 14 Days)" loading={loading}>
+    <StudioAnalyticsGrid label="Project trends">
+      <StudioAnalyticsPanel title="Projects created (last 14 days)" loading={loading}>
         <Line data={lineData} options={studioBarLineChartOptions} />
       </StudioAnalyticsPanel>
       <StudioAnalyticsPanel title="Projects Status" loading={loading}>

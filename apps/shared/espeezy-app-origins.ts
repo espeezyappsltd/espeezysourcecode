@@ -79,7 +79,7 @@ export function hostnameFromOrigin(origin: string): string {
   }
 }
 
-/** All production hostnames that should resolve via DNS/Caddy/Vercel. */
+/** All production hostnames that should resolve via DNS / Cloudflare Workers custom domains. */
 export function allProductionHostnames(): string[] {
   const hosts = Object.values(ESPEEZY_APP_ORIGINS).map(hostnameFromOrigin)
   hosts.push('www.espeezy.com', 'core.espeezy.com')

@@ -22,7 +22,7 @@ This repository contains the Espeezy platform: standalone Next.js apps, shared U
 - **Auth:** Supabase (SSR cookies). Kanban and Games use `src/proxy.ts` (Next.js 16 proxy convention) for session refresh and route protection.
 - **Data:** Supabase Postgres + RLS. Server routes use service role only on the server.
 - **Prereg:** Marketing site; prereg API may proxy to shared backend routes on the root app.
-- **Deploy:** Kanban and Games target **Vercel** (`next build`, server mode). VPS/Caddy paths remain in `Caddyfile` / `docker-compose.local.yml` for self-hosted stacks.
+- **Deploy:** Production apps target **Cloudflare Workers** via OpenNext (`cf-build`, `wrangler deploy`). Docker/Caddy in `Caddyfile` remains for local/self-hosted stacks only.
 
 ## Quick start
 
@@ -67,20 +67,26 @@ npm run predeploy:apps
 npm --prefix apps/kanban run test:e2e:completion
 ```
 
-## Vercel deployment
+## Cloudflare deployment
 
-Each app is deployed as its own Vercel project with **Root Directory** set to the app folder.
+Each app is a **Cloudflare Worker** (OpenNext) with custom-domain routing on `espeezy.com`. See [`internaldocs/cloudflare-deployment.md`](cloudflare-deployment.md).
 
-| App | Root Directory | Build |
-| --- | --- | --- |
-| Kanban | `apps/kanban` | `npm run build` |
-| Games | `apps/games` | `npm run build` |
-| Prereg | `apps/prereg` | `npm run build` |
-| **Admin (Panel)** | `.` (repo root) or `apps/admin` | `npm run build:admin` from root — see [`apps/admin/README.md`](../apps/admin/README.md) |
+| App | Worker | Hostname(s) | Build |
+| --- | --- | --- | --- |
+| Kanban | `espeezy-kanban` | kanban.espeezy.com | `npm run cf-build:kanban` |
+| Games | `espeezy-games` | games.espeezy.com | `npm run cf-build:games` |
+| Prereg | `espeezy-prereg` | espeezy.com, www | `npm run cf-build:prereg` |
+| **Panel (Admin)** | `espeezy-panel` | panel.espeezy.com | `npm run cf-build:panel` |
+| Studios | `espeezy-studios` | studios.espeezy.com | `npm run cf-build:espeezystudios` |
+| Dashboard | `espeezy-dashboard` | dashboard.espeezy.com | `npm run cf-build:dashboard` |
 
-**Panel production URL:** `https://panel.espeezy.com`
+```bash
+npm run validate:cloudflare   # wrangler + routing parity
+npm run deploy:cf:kanban      # build + wrangler deploy one app
+npm run deploy:cf             # all apps (requires CLOUDFLARE_API_TOKEN)
+```
 
-Use Node **22.x**. Set Supabase env vars in the Vercel project settings. Run `npm run predeploy:kanban` locally before merging auth or schema changes.
+Use Node **22.x**. Set Supabase and app secrets as **Worker variables** in the Cloudflare dashboard (or `wrangler secret put`). Run `npm run predeploy:kanban` locally before merging auth or schema changes.
 
 ## Package READMEs
 

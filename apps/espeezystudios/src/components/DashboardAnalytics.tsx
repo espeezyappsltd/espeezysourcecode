@@ -45,7 +45,7 @@ export default function DashboardAnalytics() {
     labels: ['Pending', 'In Progress', 'Done'],
     datasets: [
       {
-        label: 'Jobs',
+        label: 'Projects',
         data: [jobStats.pending, jobStats.in_progress, jobStats.done],
         backgroundColor: ['#f59e42', '#38bdf8', '#22c55e'],
         borderRadius: 8,
@@ -65,11 +65,11 @@ export default function DashboardAnalytics() {
   };
 
   return (
-    <StudioAnalyticsGrid label="Job status overview">
-      <StudioAnalyticsPanel title="Jobs Status (Bar)" loading={loading}>
+    <StudioAnalyticsGrid label="Project status overview">
+      <StudioAnalyticsPanel title="Project status (Bar)" loading={loading}>
         <Bar data={barData} options={studioBarLineChartOptions} />
       </StudioAnalyticsPanel>
-      <StudioAnalyticsPanel title="Jobs Status (Pie)" loading={loading}>
+      <StudioAnalyticsPanel title="Project status (Pie)" loading={loading}>
         <Pie data={pieData} options={studioPieChartOptions} />
       </StudioAnalyticsPanel>
     </StudioAnalyticsGrid>

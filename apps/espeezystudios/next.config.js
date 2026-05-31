@@ -7,7 +7,7 @@ const nextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
-  // Monorepo: trace from repo root when hoisted; Vercel app-root installs still resolve this path.
+  // Monorepo: trace from repo root when hoisted; Cloudflare builds still resolve this path.
   outputFileTracingRoot: path.join(__dirname, '../..'),
   images: {
     remotePatterns: [

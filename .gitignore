@@ -95,6 +95,8 @@ next-env.d.ts
 skills-lock.json
 node-v24.15.0-linux-x64/
 .vercel
+.wrangler
+.open-next
 
 # local extracted repos
 prereg-repo/

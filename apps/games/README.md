@@ -22,20 +22,16 @@ npm run typecheck
 npm run predeploy:check            # typecheck + next build
 ```
 
-## Vercel
+## Cloudflare
 
-Use a **dedicated** Vercel project for games (not panel/prereg). Root `apps/games` picks up `apps/games/vercel.json`.
+Worker **`espeezy-games`** serves **games.espeezy.com**. Config: `apps/games/wrangler.toml`.
 
-| Setting | Value |
+| Step | Command |
 | --- | --- |
-| Root Directory | `apps/games` |
-| Framework | Next.js |
-| Build Command | *(from `vercel.json`)* `cd ../.. && npm run vercel-build:games` |
-| Install Command | *(from `vercel.json`)* `cd ../.. && npm install` |
-| Output Directory | `.next` |
-| Node | 22.x |
+| Build | `npm run cf-build` or `npm run cf-build:games` (repo root) |
+| Deploy | `npm run deploy:cf` |
 
-**Do not** use `vercel-build:panel` or root `vercel.json` on this project — that is for `panel.espeezy.com` only (`apps/admin`).
+See [`internaldocs/cloudflare-deployment.md`](../../internaldocs/cloudflare-deployment.md).
 
 Environment:
 

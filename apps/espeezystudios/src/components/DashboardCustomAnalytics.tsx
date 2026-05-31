@@ -61,7 +61,7 @@ export default function DashboardCustomAnalytics() {
     labels: userJobCounts.map(u => u.name),
     datasets: [
       {
-        label: 'Jobs per User',
+        label: 'Projects per user',
         data: userJobCounts.map(u => u.count),
         backgroundColor: '#38bdf8',
         borderRadius: 8,
@@ -107,10 +107,10 @@ export default function DashboardCustomAnalytics() {
 
   return (
     <StudioAnalyticsGrid label="Team and completion metrics">
-      <StudioAnalyticsPanel title="Jobs per User" loading={loading}>
+      <StudioAnalyticsPanel title="Projects per user" loading={loading}>
         <Bar data={barData} options={userBarOptions} />
       </StudioAnalyticsPanel>
-      <StudioAnalyticsPanel title="Avg Job Completion Time (hrs)" loading={loading}>
+      <StudioAnalyticsPanel title="Avg project completion time (hrs)" loading={loading}>
         <Line data={lineData} options={completionLineOptions} />
       </StudioAnalyticsPanel>
     </StudioAnalyticsGrid>

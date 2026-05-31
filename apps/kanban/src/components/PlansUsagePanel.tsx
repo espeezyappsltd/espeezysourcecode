@@ -68,7 +68,7 @@ export default function PlansUsagePanel() {
       >
         <p style={{ color: '#fca5a5', fontSize: '0.9rem', margin: '0 0 0.75rem', lineHeight: 1.5 }}>{error}</p>
         <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.8rem', margin: 0 }}>
-          If you are the site owner, confirm on Vercel:{' '}
+          If you are the site owner, confirm in the Cloudflare dashboard:{' '}
           <code style={{ fontSize: '0.75rem' }}>NEXT_PUBLIC_SUPABASE_URL</code>,{' '}
           <code style={{ fontSize: '0.75rem' }}>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, and that the kanban app is linked to the correct Supabase project.
         </p>

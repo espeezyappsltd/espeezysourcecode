@@ -4,7 +4,6 @@ import NavigationProgress from '@/components/NavigationProgress'
 import PreregFooter from '@/components/PreregFooter'
 import { CentralLoadingProvider } from '@shared/CentralLoadingProvider'
 import PageTransitionWrapper from '@shared/PageTransitionWrapper'
-import { Analytics } from '@vercel/analytics/next'
 import { PLATFORM_ONE_LINER } from '@shared/platform-brand'
 
 const OG_TITLE = 'Espeezy — group projects with proof of who did the work'
@@ -67,7 +66,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </PageTransitionWrapper>
           <PreregFooter />
         </CentralLoadingProvider>
-        <Analytics />
       </body>
     </html>
   )

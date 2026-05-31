@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev -p 3004",
     "build": "next build",
-    "vercel-build:panel": "cd ../.. && npm install && npm run build --prefix apps/admin",
+    "cf-build": "opennextjs-cloudflare build",
+    "deploy:cf": "wrangler deploy",
+    "preview:cf": "opennextjs-cloudflare preview",
     "start": "next start -p 3004",
     "typecheck": "tsc --noEmit",
     "validate:admin-mobile": "node scripts/validate-admin-mobile.mjs",
@@ -37,6 +39,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "@playwright/test": "^1.59.1",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
@@ -45,6 +48,7 @@
     "pg": "^8.20.0",
     "supabase": "^2.98.2",
     "typescript": "^5",
+    "wrangler": "^4.95.0",
     "zod": "^4.4.3"
   }
 }

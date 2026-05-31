@@ -80,7 +80,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Self-hosted deployment (for institutions)',
-        body: 'Universities and colleges that need to host the platform within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Supabase (PostgreSQL and GoTrue Auth), and runs on any Node 24-compatible server or Vercel/Cloudflare Workers. A Docker image is provided for easy deployment.',
+        body: 'Universities and colleges that need to host the platform within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Supabase (PostgreSQL and GoTrue Auth), and runs on Cloudflare Workers (OpenNext) or any Node 22+ server. A Docker image is provided for easy deployment.',
         items: ['Docker image available: ghcr.io/espeezy/app:latest', 'Environment variables required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY', 'SSO integration via SAML 2.0 and OAuth 2.0 (institutional IdP)'],
       },
       {
