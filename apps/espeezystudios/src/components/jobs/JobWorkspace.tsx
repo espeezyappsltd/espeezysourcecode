@@ -12,10 +12,10 @@ import {
   Mail,
   Package,
   Save,
-  Settings,
-  Trash2,
   Download,
 } from 'lucide-react'
+import { JobFormModal } from '@/components/jobs/JobFormModal'
+import { ProjectActionsMenu } from '@/components/jobs/ProjectActionsMenu'
 import { STUDIO_NOT_SET, STUDIO_STATUS } from '@/lib/studio/ui-copy'
 import { supabase } from '@/lib/supabase-client'
 import { useJobBundle } from '@/hooks/useJobBundle'
@@ -49,7 +49,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
   const { bundle, loading, error, refresh } = useJobBundle(jobId, capabilities)
   const { canEdit } = useStudioEditor()
   const [tab, setTab] = useState<JobWorkspaceTab>('overview')
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [delivering, setDelivering] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
@@ -144,19 +144,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
             <ArrowLeft size={16} /> Projects
           </Link>
           {canEdit ? (
-            <button
-              type="button"
-              className={`studio-crud__gear jobs-workspace__settings${settingsOpen ? ' is-active' : ''}`}
-              aria-expanded={settingsOpen}
-              aria-label="Project settings"
-              onClick={() => {
-                setTab('overview')
-                setSettingsOpen((open) => !open)
-              }}
-            >
-              <Settings size={18} aria-hidden />
-              <span>Settings</span>
-            </button>
+            <ProjectActionsMenu onEdit={() => setEditOpen(true)} onDelete={() => void deleteJob()} />
           ) : null}
         </div>
         <h2 className="jobs-workspace__title">{job.title}</h2>
@@ -184,6 +172,21 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
 
       {status ? <p className="studio-success" role="status">{status}</p> : null}
 
+      <JobFormModal
+        open={editOpen}
+        mode="edit"
+        job={bundle.job}
+        capabilities={caps}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => {
+          setJobForm({})
+          void refresh()
+        }}
+        onDeleted={() => {
+          window.location.href = '/jobs'
+        }}
+      />
+
       {tab === 'overview' && (
         <section className="jobs-panel">
           {showExtendedBanner ? (
@@ -192,88 +195,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
               milestones, file storage, and client delivery.
             </p>
           ) : null}
-          {canEdit && settingsOpen ? (
-            <>
-              <div className="jobs-panel__settings-head">
-                <h3>Project settings</h3>
-                <button
-                  type="button"
-                  className="studio-crud__gear-close"
-                  aria-label="Close settings"
-                  onClick={() => setSettingsOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-              <div className="jobs-form-grid">
-                <label className="studio-crud__field">
-                  <span>Title</span>
-                  <input value={job.title} onChange={(e) => setJobForm((f) => ({ ...f, title: e.target.value }))} />
-                </label>
-                <label className="studio-crud__field">
-                  <span>Status</span>
-                  <select value={job.status} onChange={(e) => setJobForm((f) => ({ ...f, status: e.target.value }))}>
-                    <option value="pending">Pending</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="review">Review</option>
-                    <option value="done">Done</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </label>
-                {caps.columns.client_name ? (
-                  <label className="studio-crud__field">
-                    <span>Client name</span>
-                    <input value={job.client_name ?? ''} onChange={(e) => setJobForm((f) => ({ ...f, client_name: e.target.value }))} />
-                  </label>
-                ) : null}
-                {caps.columns.client_email ? (
-                  <label className="studio-crud__field">
-                    <span>Client email</span>
-                    <input type="email" value={job.client_email ?? ''} onChange={(e) => setJobForm((f) => ({ ...f, client_email: e.target.value }))} />
-                  </label>
-                ) : null}
-                {caps.columns.deadline_at ? (
-                  <label className="studio-crud__field">
-                    <span>Deadline</span>
-                    <input
-                      type="datetime-local"
-                      value={job.deadline_at ? job.deadline_at.slice(0, 16) : ''}
-                      onChange={(e) => setJobForm((f) => ({ ...f, deadline_at: e.target.value ? new Date(e.target.value).toISOString() : null }))}
-                    />
-                  </label>
-                ) : null}
-                {caps.columns.budget_cents ? (
-                  <label className="studio-crud__field">
-                    <span>Budget ({currency})</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={((job.budget_cents ?? 0) / 100).toFixed(2)}
-                      onChange={(e) =>
-                        setJobForm((f) => ({ ...f, budget_cents: Math.round(parseFloat(e.target.value || '0') * 100) }))
-                      }
-                    />
-                  </label>
-                ) : null}
-              </div>
-              <label className="studio-crud__field">
-                <span>Description</span>
-                <textarea rows={4} value={job.description} onChange={(e) => setJobForm((f) => ({ ...f, description: e.target.value }))} />
-              </label>
-              <div className="jobs-workspace__actions">
-                <button type="button" className="studio-btn" disabled={saving} onClick={() => void saveJob()}>
-                  <Save size={16} /> {saving ? 'Saving…' : 'Save'}
-                </button>
-                <button type="button" className="studio-btn studio-btn--ghost" onClick={() => void deleteJob()}>
-                  <Trash2 size={16} /> Delete
-                </button>
-              </div>
-            </>
-          ) : canEdit ? (
-            <p className="studio-muted">{job.description || 'Open settings to edit this project.'}</p>
-          ) : (
-            <p>{job.description}</p>
-          )}
+          <p className="jobs-overview__description">{job.description || (canEdit ? 'No description yet.' : '')}</p>
           {(caps.tables.budget ||
             caps.tables.milestones ||
             caps.tables.timeline ||

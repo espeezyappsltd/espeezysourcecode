@@ -183,3 +183,12 @@ export function buildJobUpdatePayload(
 
   return payload
 }
+
+export function buildJobInsertPayload(
+  job: Partial<StudioJob>,
+  caps: JobSchemaCapabilities,
+): Record<string, unknown> {
+  const payload = buildJobUpdatePayload(job, caps)
+  delete payload.updated_at
+  return payload
+}
