@@ -97,7 +97,7 @@ function FeedPageContent() {
   const { confirmTransaction } = useTransactionConfirm()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const mineOnly = searchParams.get('mine') === '1'
+  const mineOnly = searchParams?.get('mine') === '1'
 
   const [composerText, setComposerText] = useState('')
   const [composerVisibility, setComposerVisibility] = useState<'public' | 'connections'>('public')

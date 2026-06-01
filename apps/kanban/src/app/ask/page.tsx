@@ -13,9 +13,9 @@ import './ask.css'
 
 function AskPageContent() {
   const searchParams = useSearchParams()
-  const q = searchParams.get('q') ?? ''
-  const category = (searchParams.get('category') ?? 'all') as AskCategoryFilter
-  const page = Math.max(1, Number(searchParams.get('page') ?? '1') || 1)
+  const q = searchParams?.get('q') ?? ''
+  const category = (searchParams?.get('category') ?? 'all') as AskCategoryFilter
+  const page = Math.max(1, Number(searchParams?.get('page') ?? '1') || 1)
 
   const filtered = useMemo(
     () => filterAskResources(ASK_RESOURCES, q, category),

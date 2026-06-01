@@ -8,7 +8,7 @@ import { createGroup, joinGroup } from '@/app/join/actions'
 
 function JoinPageContent() {
   const searchParams = useSearchParams()
-  const error = searchParams.get('error')
+  const error = searchParams?.get('error')
   const [mode, setMode] = useState<'create' | 'join'>('join')
 
   return (
