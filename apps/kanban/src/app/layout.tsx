@@ -10,6 +10,7 @@ import OnboardingWrapper from '@/components/OnboardingWrapper'
 import { KanbanProviders } from '@/components/KanbanProviders'
 import { ProfileProvider } from '@/context/ProfileContext'
 import PageTransitionWrapper from '@shared/PageTransitionWrapper'
+import ProcessedDataNavigationLoader from '@shared/ProcessedDataNavigationLoader'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 import TeamChatShell from '@/components/TeamChatShell'
@@ -100,9 +101,11 @@ function DashboardShell({
           <MobilePageControlsProvider>
             <ReferralCapture />
             <Sidebar user={user} />
-            <main className="main-content">
+            <main className="main-content main-content--data-ready">
             <ConnectionAlertTray />
-            <PageTransitionWrapper>{children}</PageTransitionWrapper>
+            <ProcessedDataNavigationLoader>
+              <PageTransitionWrapper>{children}</PageTransitionWrapper>
+            </ProcessedDataNavigationLoader>
             <PageGuideHost />
           </main>
           <GlobalAnnouncement />

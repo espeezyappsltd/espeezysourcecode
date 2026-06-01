@@ -781,6 +781,10 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
 }
 
+.main-content--data-ready {
+  position: relative;
+}
+
 .main-content {
   flex: 1;
   min-height: 0; /* Required for overflow scroll inside flex dashboard-layout */

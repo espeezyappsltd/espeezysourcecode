@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
+import ProcessedDataNavigationLoader from '@shared/ProcessedDataNavigationLoader'
+import { isStudiosProcessedDataRoute } from '@shared/processed-data-routes'
 import AppsNav from './AppsNav'
 import StudioBottomNav from './StudioBottomNav'
 import GlobalFooter from './GlobalFooter'
@@ -27,7 +29,11 @@ export default function StudioAppChrome({ children }: { children: ReactNode }) {
   return (
     <div className="studio-app-shell">
       <AppsNav />
-      <div className="studio-app-shell__main">{children}</div>
+      <div className="studio-app-shell__main studio-app-shell__main--data-ready">
+        <ProcessedDataNavigationLoader matchPath={isStudiosProcessedDataRoute}>
+          {children}
+        </ProcessedDataNavigationLoader>
+      </div>
       <StudioBottomNav />
       <GlobalFooter />
     </div>

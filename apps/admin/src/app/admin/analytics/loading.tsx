@@ -1,5 +1,5 @@
 import ProcessedDataLoadingView from '@shared/ProcessedDataLoadingView'
 
-export default function AnalyticsLoading() {
+export default function AdminAnalyticsLoading() {
   return <ProcessedDataLoadingView scope="inline" />
 }

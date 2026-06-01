@@ -10,6 +10,8 @@ import { useAdminOnboarding } from '@/context/AdminOnboardingContext'
 import { useIsMobileShell } from '@/hooks/useMobileShell'
 import HelpTray from '@/components/HelpTray'
 import AppCopyrightStrip from '@shared/AppCopyrightStrip'
+import ProcessedDataNavigationLoader from '@shared/ProcessedDataNavigationLoader'
+import { isAdminProcessedDataRoute } from '@shared/processed-data-routes'
 
 type Props = {
   children: React.ReactNode
@@ -143,9 +145,11 @@ export function AdminConsoleShell({ children, adminRole, username, displayName, 
               Sign out
             </Link>
           </header>
-          <div className="admin-console-content">
+          <div className="admin-console-content admin-console-content--data-ready">
             <AdminOnboardingBanner />
-            {children}
+            <ProcessedDataNavigationLoader matchPath={isAdminProcessedDataRoute}>
+              {children}
+            </ProcessedDataNavigationLoader>
           </div>
         </div>
       </div>

@@ -43,6 +43,17 @@
   --studio-bottom-nav-height: calc(3.75rem + env(safe-area-inset-bottom, 0px));
 }
 
+.studio-app-shell__main--data-ready {
+  position: relative;
+  min-height: 0;
+}
+
+.studio-app-shell__main--data-ready .pdl-root {
+  --pdl-surface: rgba(255, 255, 255, 0.94);
+  --pdl-text: #0f172a;
+  --pdl-muted: #64748b;
+}
+
 .studio-app-shell__main {
   flex: 1;
   display: flex;
