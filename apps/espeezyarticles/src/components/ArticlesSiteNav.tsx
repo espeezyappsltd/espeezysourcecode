@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import EspeezyAppLogo from '@shared/EspeezyAppLogo'
-import { ESPEEZY_APP_ORIGINS } from '@shared/app-url'
+import { ESPEEZY_APP_ORIGINS, buildKanbanAppUrl } from '@shared/app-url'
+import { useSessionUser } from '@shared/useSessionUser'
+import { supabase } from '@/lib/supabase-client'
 
 const NAV_LINKS = [
   { href: '/', label: 'Articles', internal: true },
@@ -14,6 +16,8 @@ const NAV_LINKS = [
 
 export default function ArticlesSiteNav() {
   const pathname = usePathname() ?? '/'
+  const { user, loading } = useSessionUser(supabase)
+  const signedIn = !loading && !!user
 
   return (
     <header className="articles-nav">
@@ -38,9 +42,20 @@ export default function ArticlesSiteNav() {
               </a>
             )
           })}
-          <a href={ESPEEZY_APP_ORIGINS.kanban} className="articles-nav__cta" target="_blank" rel="noopener noreferrer">
-            Open workspace
-          </a>
+          {signedIn ? (
+            <a href={buildKanbanAppUrl('/')} className="articles-nav__cta" target="_blank" rel="noopener noreferrer">
+              Open workspace
+            </a>
+          ) : (
+            <a
+              href={`${ESPEEZY_APP_ORIGINS.kanban}/login`}
+              className="articles-nav__cta"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Sign in
+            </a>
+          )}
         </nav>
       </div>
     </header>

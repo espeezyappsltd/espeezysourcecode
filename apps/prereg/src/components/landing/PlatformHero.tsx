@@ -2,9 +2,12 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, LayoutDashboard } from 'lucide-react'
 import { HERO_COPY_LINES, KANBAN_DEMO_LABEL, KANBAN_DEMO_URL } from '@shared/platform-brand'
 import { productionAppsForConsumerDocs } from '@shared/platform-production-catalog'
+import { buildKanbanAppUrl } from '@shared/app-url'
+import { useSessionUser } from '@shared/useSessionUser'
+import { supabase } from '@/lib/supabase-client'
 import './landing.css'
 
 const HERO_APPS = productionAppsForConsumerDocs()
@@ -16,6 +19,9 @@ type Props = {
 }
 
 export default function PlatformHero({ userCount }: Props) {
+  const { user, loading } = useSessionUser(supabase)
+  const signedIn = !loading && !!user
+
   return (
     <section id="hero" className="landing-hero" aria-labelledby="hero-heading">
       <div className="landing-hero__backdrop" aria-hidden />
@@ -61,13 +67,29 @@ export default function PlatformHero({ userCount }: Props) {
           transition={{ duration: 0.7, delay: 0.12, ease: motionEase }}
         >
           <div className="landing-hero-actions">
-            <a href="/login" className="platform-app-card__btn platform-app-card__btn--primary">
-              Log in
-              <ArrowRight size={16} aria-hidden />
-            </a>
-            <Link href="/login?mode=signup" className="platform-app-card__btn platform-app-card__btn--ghost">
-              Sign up
-            </Link>
+            {signedIn ? (
+              <a
+                href={buildKanbanAppUrl('/')}
+                className="platform-app-card__btn platform-app-card__btn--primary"
+              >
+                <LayoutDashboard size={16} aria-hidden />
+                Open dashboard
+                <ArrowRight size={16} aria-hidden />
+              </a>
+            ) : (
+              <>
+                <a href="/login" className="platform-app-card__btn platform-app-card__btn--primary">
+                  Log in
+                  <ArrowRight size={16} aria-hidden />
+                </a>
+                <Link
+                  href="/login?mode=signup"
+                  className="platform-app-card__btn platform-app-card__btn--ghost"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
 
           <nav aria-label="Quick links" className="landing-hero-quicklinks">

@@ -3,6 +3,9 @@
 import Link from 'next/link'
 import { MotionConfig } from 'framer-motion'
 import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
+import { buildKanbanAppUrl } from '@shared/app-url'
+import { useSessionUser } from '@shared/useSessionUser'
+import { supabase } from '@/lib/supabase-client'
 import LaunchDataProvider from '@/components/LaunchDataProvider'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import PlatformHero from '@/components/landing/PlatformHero'
@@ -10,6 +13,9 @@ import LandingAppsSection from '@/components/landing/LandingAppsSection'
 import '@/components/landing/landing.css'
 
 function LandingPageContent({ authUserCount }: { authUserCount: number }) {
+  const { user, loading } = useSessionUser(supabase)
+  const signedIn = !loading && !!user
+
   return (
     <>
       <nav
@@ -23,10 +29,18 @@ function LandingPageContent({ authUserCount }: { authUserCount: number }) {
           <a href="#apps" className="landing-nav-link">Apps</a>
           <Link href="/docs" className="landing-nav-link">Docs</Link>
           <Link href="/checkout" className="landing-nav-link">Pricing</Link>
-          <Link href="/login" className="landing-nav-link">Log in</Link>
-          <Link href="/login?mode=signup" className="landing-nav-link landing-nav-link--accent">
-            Sign up
-          </Link>
+          {signedIn ? (
+            <a href={buildKanbanAppUrl('/')} className="landing-nav-link landing-nav-link--accent">
+              Dashboard
+            </a>
+          ) : (
+            <>
+              <Link href="/login" className="landing-nav-link">Log in</Link>
+              <Link href="/login?mode=signup" className="landing-nav-link landing-nav-link--accent">
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 

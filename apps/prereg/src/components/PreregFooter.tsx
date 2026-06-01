@@ -4,6 +4,9 @@ import { FOOTER_BRAND_BLURB, FOOTER_SUPPORT_LINE } from '@shared/platform-brand'
 import FooterCopyrightNotice from '@shared/FooterCopyrightNotice'
 import { ESPEEZY_PUBLIC_APP_LINKS } from '@shared/espeezy-apps-catalog'
 import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
+import { buildKanbanAppUrl } from '@shared/app-url'
+import { useSessionUser } from '@shared/useSessionUser'
+import { supabase } from '@/lib/supabase-client'
 
 const PLATFORM_LINKS = [
   { href: '/', label: 'Home' },
@@ -28,6 +31,9 @@ const LEGAL_LINKS = [
 ]
 
 export default function PreregFooter() {
+  const { user, loading } = useSessionUser(supabase)
+  const signedIn = !loading && !!user
+
   return (
     <footer
       aria-label="Site footer"
@@ -37,6 +43,71 @@ export default function PreregFooter() {
         color: '#94a3b8',
       }}
     >
+      <div
+        style={{
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          padding: 'clamp(1.5rem, 3vw, 2rem) clamp(1.25rem, 4vw, 2.5rem)',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+        }}
+      >
+        <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#e2e8f0' }}>
+          {signedIn ? 'Pick up where you left off.' : 'Start collaborating with your team today.'}
+        </p>
+        {signedIn ? (
+          <a
+            href={buildKanbanAppUrl('/')}
+            style={{
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              padding: '0.6rem 1.1rem',
+              borderRadius: '8px',
+              background: '#6366f1',
+              color: '#fff',
+              textDecoration: 'none',
+            }}
+          >
+            Open your dashboard →
+          </a>
+        ) : (
+          <span style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <a
+              href="/login?mode=signup"
+              style={{
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                padding: '0.6rem 1.1rem',
+                borderRadius: '8px',
+                background: '#6366f1',
+                color: '#fff',
+                textDecoration: 'none',
+              }}
+            >
+              Create account
+            </a>
+            <a
+              href="/login"
+              style={{
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                padding: '0.6rem 1.1rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.18)',
+                color: '#e2e8f0',
+                textDecoration: 'none',
+              }}
+            >
+              Sign in
+            </a>
+          </span>
+        )}
+      </div>
+
       <div
         style={{
           maxWidth: '1200px',
