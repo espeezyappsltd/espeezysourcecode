@@ -1,0 +1,20 @@
+name = "espeezy-kanban-api"
+account_id = "6f6d20dab3acd55c37b5ff2ff5a02d95"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+[[routes]]
+pattern = "kanban.espeezy.com/api/contact*"
+zone_name = "espeezy.com"
+
+[[routes]]
+pattern = "kanban.espeezy.com/api/launch-config*"
+zone_name = "espeezy.com"
+
+[[routes]]
+pattern = "kanban.espeezy.com/api/live-metrics*"
+zone_name = "espeezy.com"
+
+[[routes]]
+pattern = "kanban.espeezy.com/api/health*"
+zone_name = "espeezy.com"
