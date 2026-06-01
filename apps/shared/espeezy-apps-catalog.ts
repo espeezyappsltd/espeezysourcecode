@@ -16,5 +16,4 @@ export const ESPEEZY_PUBLIC_APP_LINKS: EspeezyAppLink[] = [
   { href: ESPEEZY_APP_ORIGINS.studios, label: 'Espeezy Studio', external: true },
   { href: ESPEEZY_APP_ORIGINS.articles, label: 'Articles', external: true },
   { href: ESPEEZY_APP_ORIGINS.core, label: 'Dev Launch', external: true },
-  { href: ESPEEZY_APP_ORIGINS.base, label: 'Dev Hub', external: true },
 ]

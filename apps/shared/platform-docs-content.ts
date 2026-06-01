@@ -1,63 +1,18 @@
 /**
  * Informational copy and app directory for espeezy.com docs and landing.
  */
-import { ESPEEZY_APP_ORIGINS } from './espeezy-app-origins'
+import {
+  productionAppsForConsumerDocs,
+  productionAppsForDeveloperDocs,
+  type ProductionAppLink,
+} from './platform-production-catalog'
 
-export type AppInUse = {
-  key: string
-  name: string
-  href: string
-  summary: string
-  docsHref?: string
-}
+export type AppInUse = ProductionAppLink
 
-/** Primary hosted apps students and teams use today. */
-export const ESPEEZY_APPS_IN_USE: AppInUse[] = [
-  {
-    key: 'kanban',
-    name: 'Espeezy Kanban',
-    href: ESPEEZY_APP_ORIGINS.kanban,
-    summary: 'Shared boards, tasks, and contribution records for group work.',
-    docsHref: '/docs/features/kanban',
-  },
-  {
-    key: 'games',
-    name: 'Espeezy Games',
-    href: ESPEEZY_APP_ORIGINS.games,
-    summary: 'Study sessions and quiz-style rounds with classmates.',
-    docsHref: '/docs/features/skirmish',
-  },
-  {
-    key: 'studios',
-    name: 'Espeezy Studio',
-    href: ESPEEZY_APP_ORIGINS.studios,
-    summary: 'Freelance and client projects, handoffs, and delivery.',
-    docsHref: '/docs/features/studios',
-  },
-  {
-    key: 'articles',
-    name: 'Articles',
-    href: ESPEEZY_APP_ORIGINS.articles,
-    summary: 'Long-form posts and campus writing.',
-    docsHref: '/docs/features/articles',
-  },
-]
+/** Primary hosted apps students and teams use today (synced with production catalog). */
+export const ESPEEZY_APPS_IN_USE: AppInUse[] = productionAppsForConsumerDocs()
 
-export const ESPEEZY_DEVELOPER_APPS: AppInUse[] = [
-  {
-    key: 'core',
-    name: 'Dev Launch',
-    href: ESPEEZY_APP_ORIGINS.core,
-    summary: 'Self-host guides and app links for technical teams.',
-    docsHref: '/docs/features/dev-launch',
-  },
-  {
-    key: 'hub',
-    name: 'Dev Hub',
-    href: ESPEEZY_APP_ORIGINS.base,
-    summary: 'Internal developer tools and deployment access.',
-  },
-]
+export const ESPEEZY_DEVELOPER_APPS: AppInUse[] = productionAppsForDeveloperDocs()
 
 export const DOCS_HOME_INTRO =
   'Espeezy learning apps help students and teams plan work, study together, and show who contributed. Start with Kanban, then open the other apps with the same account.'

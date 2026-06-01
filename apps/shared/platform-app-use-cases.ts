@@ -27,27 +27,11 @@ export const PLATFORM_APP_USE_CASES: Record<string, PlatformAppUseCase> = {
       'Use the same Espeezy login as Kanban, one account across apps',
     ],
   },
-  admin: {
-    audience: 'Administrators running an Espeezy deployment',
-    scenarios: [
-      'Control who can access admin tools on your instance',
-      'Update public pages, pricing, and launch copy from one console',
-      'Review signups and support requests without editing code',
-    ],
-  },
-  prereg: {
-    audience: 'Teams launching Espeezy to their audience',
-    scenarios: [
-      'Collect early-access emails before you go live',
-      'Share pricing, docs, and app links from one public site',
-      'Help visitors find the right Espeezy app for their need',
-    ],
-  },
   core: {
     audience: 'Developers and technical teams',
     scenarios: [
-      'Self-host any Espeezy app on Cloudflare or your own infrastructure',
-      'Follow setup docs and open live app links from one hub',
+      'Open live links to Kanban, Games, Studio, and Articles from one page',
+      'Follow self-host and Cloudflare deployment guides',
       'Connect Supabase, domains, and branding step by step',
     ],
   },

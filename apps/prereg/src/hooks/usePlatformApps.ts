@@ -2,15 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { PLATFORM_APPS_FALLBACK, type PlatformApp } from '@shared/platform-apps'
-
-const HIDDEN_LANDING_SLUGS = new Set(['admin', 'core'])
-
-function filterLandingApps(apps: PlatformApp[]): PlatformApp[] {
-  return apps.filter((app) => !HIDDEN_LANDING_SLUGS.has(app.slug))
-}
+import { filterPublicCatalogApps } from '@shared/platform-production-catalog'
 
 export function usePlatformApps() {
-  const [apps, setApps] = useState<PlatformApp[]>(filterLandingApps(PLATFORM_APPS_FALLBACK))
+  const [apps, setApps] = useState<PlatformApp[]>(filterPublicCatalogApps(PLATFORM_APPS_FALLBACK))
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -19,7 +14,7 @@ export function usePlatformApps() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { apps?: PlatformApp[] } | null) => {
         if (!mounted || !data?.apps?.length) return
-        setApps(filterLandingApps(data.apps))
+        setApps(filterPublicCatalogApps(data.apps))
       })
       .catch(() => {
         /* keep fallback */
