@@ -32,7 +32,8 @@ export default function PlatformHero({ userCount }: Props) {
         <p className="landing-lead">{HERO_COPY_LINES[1]}</p>
         {userCount > 0 ? (
           <p style={{ margin: '0.75rem auto 0', fontSize: '0.85rem', color: '#64748b' }}>
-            <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{userCount.toLocaleString()}</span> students on Espeezy
+            <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{userCount.toLocaleString()}</span>{' '}
+            {userCount === 1 ? 'user' : 'users'} on Espeezy
           </p>
         ) : null}
       </motion.div>

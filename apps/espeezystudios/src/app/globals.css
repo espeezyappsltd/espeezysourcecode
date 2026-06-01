@@ -456,6 +456,17 @@ section {
   color: var(--studios-text);
 }
 
+.studio-auth-card__error {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #b91c1c;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
 .studio-auth-card__desc {
   margin: 0 0 1.25rem;
   color: var(--studios-muted);
@@ -473,17 +484,26 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   padding: 0.75rem 1rem;
+  border: none;
   border-radius: 10px;
   font-weight: 700;
+  font-size: 0.9rem;
   text-decoration: none;
   color: #fff;
+  cursor: pointer;
   transition: filter 0.2s;
 }
 
-.studio-auth-btn:hover {
+.studio-auth-btn:hover:not(:disabled) {
   filter: brightness(1.08);
   color: #fff;
+}
+
+.studio-auth-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .studio-auth-btn--github {
