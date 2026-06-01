@@ -1,22 +1,25 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { fetchJobRelatedData } from '@/lib/jobs/fetch-related'
+import {
+  getServerJobSchemaCapabilities,
+  type JobSchemaCapabilities,
+} from '@/lib/jobs/schema-capabilities'
 import type { JobBundle } from './types'
 
-export async function fetchJobBundle(db: SupabaseClient, jobId: string): Promise<JobBundle | null> {
+export async function fetchJobBundle(
+  db: SupabaseClient,
+  jobId: string,
+  capabilities?: JobSchemaCapabilities,
+): Promise<JobBundle | null> {
+  const caps = capabilities ?? (await getServerJobSchemaCapabilities(db))
+
   const { data: job, error } = await db.from('jobs').select('*').eq('id', jobId).maybeSingle()
   if (error || !job) return null
 
-  const [milestones, budgetEntries, timeline, deliveryLogs] = await Promise.all([
-    db.from('studio_job_milestones').select('*').eq('job_id', jobId).order('sort_order'),
-    db.from('studio_job_budget_entries').select('*').eq('job_id', jobId).order('entry_date', { ascending: false }),
-    db.from('studio_job_timeline_events').select('*').eq('job_id', jobId).order('event_at', { ascending: false }),
-    db.from('studio_job_delivery_logs').select('*').eq('job_id', jobId).order('sent_at', { ascending: false }),
-  ])
+  const related = await fetchJobRelatedData(db, jobId, caps)
 
   return {
     job,
-    milestones: milestones.data ?? [],
-    budgetEntries: budgetEntries.data ?? [],
-    timeline: timeline.data ?? [],
-    deliveryLogs: deliveryLogs.data ?? [],
+    ...related,
   }
 }
