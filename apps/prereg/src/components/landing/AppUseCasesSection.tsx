@@ -28,7 +28,7 @@ export default function AppUseCasesSection({ apps }: Props) {
             Pick the app that fits your situation
           </h2>
           <p className="landing-lead">
-            Espeezy is a family of apps. Each one handles a different job — from group assignments and exam prep to freelance delivery and self-hosting.
+            Espeezy learning apps are built for different jobs: group assignments, exam prep, freelance delivery, and self-hosting.
           </p>
         </div>
 

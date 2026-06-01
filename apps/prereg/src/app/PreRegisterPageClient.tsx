@@ -3,74 +3,46 @@
 import Link from 'next/link'
 import { MotionConfig } from 'framer-motion'
 import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
-import { HERO_ANALYTICS_CAPTION } from '@shared/platform-brand'
 import LaunchDataProvider from '@/components/LaunchDataProvider'
 import LiveChatWidget from '@/components/LiveChatWidget'
-import ScreenshotGallery from '@/components/ScreenshotGallery'
 import PlatformHero from '@/components/landing/PlatformHero'
-import AppUseCasesSection from '@/components/landing/AppUseCasesSection'
-import LandingFeaturesSection from '@/components/landing/LandingFeaturesSection'
-import { usePlatformApps } from '@/hooks/usePlatformApps'
+import LandingAppsSection from '@/components/landing/LandingAppsSection'
 import '@/components/landing/landing.css'
 
 function LandingPageContent({ authUserCount }: { authUserCount: number }) {
-  const { apps } = usePlatformApps()
-
   return (
     <>
       <nav
         aria-label="Primary navigation"
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-          height: '64px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 clamp(1rem, 4vw, 2.5rem)',
-          borderBottom: '1px solid rgba(15,23,42,0.07)',
-          backdropFilter: 'blur(16px)',
-          backgroundColor: 'rgba(255,255,255,0.92)',
-        }}
+        className="landing-nav"
       >
         <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
           <EspeezyMarketingBrand variant="nav" />
         </Link>
-        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Link href="/login" className="landing-nav-link">
-            Log in
-          </Link>
-          <Link href="/login?mode=signup" className="landing-nav-link">
+        <div className="landing-nav__links">
+          <a href="#apps" className="landing-nav-link">Apps</a>
+          <Link href="/docs" className="landing-nav-link">Docs</Link>
+          <Link href="/checkout" className="landing-nav-link">Pricing</Link>
+          <Link href="/login" className="landing-nav-link">Log in</Link>
+          <Link href="/login?mode=signup" className="landing-nav-link landing-nav-link--accent">
             Sign up
           </Link>
         </div>
       </nav>
 
       <main id="main-content">
-        <PlatformHero
-          userCount={authUserCount}
-        />
-
-        <AppUseCasesSection apps={apps} />
-
-        <LandingFeaturesSection />
-
-        <section id="gallery" className="landing-section" aria-labelledby="gallery-heading">
-          <div className="landing-inner">
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <p className="landing-eyebrow" style={{ marginBottom: '1rem' }}>
-                {HERO_ANALYTICS_CAPTION}
-              </p>
-              <h2 id="gallery-heading" className="landing-title">
-                See the workspace
-              </h2>
-              <p className="landing-lead">Screens from the live Kanban app — boards, teams, assets, and more.</p>
-            </div>
-            <ScreenshotGallery />
+        <PlatformHero userCount={authUserCount} />
+        <LandingAppsSection />
+        <section className="landing-section landing-section--compact" aria-label="More information">
+          <div className="landing-inner" style={{ textAlign: 'center' }}>
+            <p className="landing-lead" style={{ margin: 0, fontSize: '0.9rem' }}>
+              Need setup help or product screens?{' '}
+              <Link href="/docs/getting-started" className="landing-inline-link">Quick start</Link>
+              {' · '}
+              <Link href="/docs/features/kanban" className="landing-inline-link">Kanban guide</Link>
+            </p>
           </div>
         </section>
-
       </main>
 
       <LiveChatWidget appScope="prereg" />

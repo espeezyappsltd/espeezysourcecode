@@ -2,71 +2,78 @@ import Link from 'next/link'
 import {
   GETTING_STARTED_STEP_1_DESC,
   GETTING_STARTED_STEP_1_TITLE,
+  MAIN_APP_ORIGIN,
 } from '@shared/platform-brand'
+import { ESPEEZY_APPS_IN_USE } from '@shared/platform-docs-content'
+import { AppsInUseGrid } from '@/components/AppsInUseGrid'
 
 export default function GettingStartedPage() {
   const steps = [
-    {
-      step: '01',
-      title: GETTING_STARTED_STEP_1_TITLE,
-      desc: GETTING_STARTED_STEP_1_DESC,
-    },
-    {
-      step: '02',
-      title: 'Assemble Your Team',
-      desc: 'Invite teammates by sharing your team name and secure login code.',
-    },
-    {
-      step: '03',
-      title: 'Start Collaborating',
-      desc: 'Start collaborating on your project in real time. Add tasks, assign them to teammates, and start working together. Your work is being logged in real time.',
-    },
-    {
-      step: '04',
-      title: 'Track Progress',
-      desc: 'Watch real-time analytics on the project stats page in the sidebar — who is contributing what, and where the project stands.',
-    },
-    {
-      step: '05',
-      title: 'Export Your Data',
-      desc: 'Export your project data to Excel at any time and see how your team is contributing to the project.',
-    },
+    { step: '01', title: GETTING_STARTED_STEP_1_TITLE, desc: GETTING_STARTED_STEP_1_DESC },
+    { step: '02', title: 'Invite your team', desc: 'Share your team name and join code so everyone lands on the same board.' },
+    { step: '03', title: 'Add tasks and work', desc: 'Create tasks, assign them, and move cards as the project progresses.' },
+    { step: '04', title: 'Review contribution', desc: 'Use project stats and exports when you need to show who did what.' },
   ]
 
   return (
     <div className="docs-content">
-      <div style={{ color: '#10b981', fontSize: '2.5rem', marginBottom: '1.5rem' }}>⚡</div>
-      <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: '1.25rem', color: '#f3f4f6' }}>
-        Quick Start Guide
-      </h1>
-      <p style={{ fontSize: '1.1rem', color: '#9ca3af', lineHeight: 1.65, marginBottom: '3rem', maxWidth: '640px' }}>
-        Get your team collaborating with a clear contribution record in a few short steps. No credit card needed for the core platform.
+      <h1 className="docs-title">Quick start</h1>
+      <p className="docs-description">
+        Open Kanban first, then use the other apps with the same login when you need them.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '4rem' }}>
-        {steps.map((s, i) => (
-          <div key={i} style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-            <div style={{ flexShrink: 0, width: '48px', height: '48px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', color: '#10b981' }}>
+      <div className="docs-section" style={{ marginTop: '2rem' }}>
+        <h2 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.75rem', color: '#f3f4f6' }}>Apps in use</h2>
+        <AppsInUseGrid apps={ESPEEZY_APPS_IN_USE} variant="docs" />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', margin: '2.5rem 0' }}>
+        {steps.map((s) => (
+          <div key={s.step} style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
+            <div
+              style={{
+                flexShrink: 0,
+                width: '40px',
+                height: '40px',
+                background: 'rgba(16,185,129,0.1)',
+                border: '1px solid rgba(16,185,129,0.2)',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: '0.8rem',
+                color: '#10b981',
+              }}
+            >
               {s.step}
             </div>
             <div>
-              <h3 style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '0.5rem', color: '#f3f4f6' }}>{s.title}</h3>
-              <p style={{ color: '#9ca3af', lineHeight: 1.65, fontSize: '0.9rem', margin: 0 }}>{s.desc}</p>
+              <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.35rem', color: '#f3f4f6' }}>{s.title}</h3>
+              <p style={{ color: '#9ca3af', lineHeight: 1.6, fontSize: '0.9rem', margin: 0 }}>{s.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '12px', padding: '1.5rem', marginBottom: '3rem' }}>
-        <p style={{ fontWeight: 700, color: '#10b981', fontSize: '0.85rem', marginBottom: '0.5rem' }}>ELI12</p>
-        <p style={{ color: '#9ca3af', lineHeight: 1.65, fontSize: '0.9rem', margin: 0 }}>
-          It&apos;s like setting up a new base in a game. You create your character (profile), find your team, and start your first mission. Done in under 2 minutes!
-        </p>
-      </div>
+      <p style={{ marginBottom: '2rem' }}>
+        <a
+          href={MAIN_APP_ORIGIN}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#10b981', fontWeight: 700, textDecoration: 'none' }}
+        >
+          Open Espeezy Kanban →
+        </a>
+      </p>
 
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid #222', paddingTop: '2rem' }}>
-        <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>← Back to Home</Link>
-        <Link href="/docs/features/kanban" style={{ color: '#10b981', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, marginLeft: 'auto' }}>Next: Kanban Boards →</Link>
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
+        <Link href="/docs" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>
+          ← Docs home
+        </Link>
+        <Link href="/docs/features/kanban" style={{ color: '#10b981', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, marginLeft: 'auto' }}>
+          Kanban guide →
+        </Link>
       </div>
     </div>
   )

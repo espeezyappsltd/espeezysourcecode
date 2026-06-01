@@ -1,56 +1,59 @@
 import Link from 'next/link'
-import { BookOpen, Zap, Shield, Sparkles, Globe, BarChart, ShoppingBag, Briefcase, Newspaper, Cpu } from 'lucide-react'
-import { ESPEEZY_APP_ORIGINS } from '@shared/espeezy-app-origins'
+import { BookOpen, Rocket, LayoutDashboard, Package } from 'lucide-react'
+import {
+  DOCS_HOME_INTRO,
+  DOCS_ESSENTIAL_LINKS,
+  ESPEEZY_APPS_IN_USE,
+} from '@shared/platform-docs-content'
+import { AppsInUseGrid } from '@/components/AppsInUseGrid'
+
+const DOC_ICONS = [Rocket, Package, LayoutDashboard, BookOpen, BookOpen] as const
 
 export default function DocsHomePage() {
-  const sections = [
-    { icon: <Zap size={20} />, title: 'Getting Started', desc: 'Set up your workspace and invite your team in minutes.', href: '/docs/getting-started' },
-    { icon: <BookOpen size={20} />, title: 'Kanban Boards', desc: 'Visualize every task in your group project lifecycle.', href: '/docs/features/kanban' },
-    { icon: <Briefcase size={20} />, title: 'Espeezy Studio', desc: 'Premium jobs, marketplace, invoices, and client delivery.', href: '/docs/features/studios' },
-    { icon: <Newspaper size={20} />, title: 'Articles & Blog', desc: 'Campus articles at articles.espeezy.com and blog.espeezy.com.', href: '/docs/features/articles' },
-    { icon: <Cpu size={20} />, title: 'Dev Launch', desc: 'Developer docs and links to every Espeezy app.', href: '/docs/features/dev-launch' },
-    { icon: <Globe size={20} />, title: 'Peer Network', desc: 'Find collaborators and share resources across your institution.', href: '/docs/features/network' },
-    { icon: <Shield size={20} />, title: 'Infrastructure', desc: 'Stripe, Supabase sync, and real-time presence architecture.', href: '/docs/infra/payments' },
-    { icon: <BarChart size={20} />, title: 'Impact & Research', desc: 'The research on why visible contribution improves group work.', href: '/docs/impact' },
-    { icon: <ShoppingBag size={20} />, title: 'Resource Marketplace', desc: 'Share study materials and templates inside Kanban.', href: '/docs/features/marketplace' },
-    { icon: <Sparkles size={20} />, title: 'Our Vision', desc: 'Why we built Espeezy and where it is headed.', href: '/docs/vision' },
-  ]
-
   return (
     <div className="docs-content">
       <div className="docs-hero">
         <span className="docs-badge">Espeezy Docs</span>
         <h1 className="docs-title">Documentation</h1>
-        <p className="docs-description">
-          Everything you need to set up, use, and self-host Espeezy. Written for technical teams
-          and for students who want a quick path to their first workspace.
-        </p>
-        <p className="docs-description" style={{ marginTop: '0.75rem', fontSize: '0.9rem' }}>
-          Live apps: Kanban ({ESPEEZY_APP_ORIGINS.kanban.replace('https://', '')}), Games, Studio, Articles, Dev Launch, and Dev Hub.
+        <p className="docs-description">{DOCS_HOME_INTRO}</p>
+      </div>
+
+      <div className="docs-section">
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem', color: '#f3f4f6' }}>Apps in use</h2>
+        <AppsInUseGrid apps={ESPEEZY_APPS_IN_USE} variant="docs" showDocsLink={false} />
+        <p style={{ marginTop: '1rem', fontSize: '0.85rem' }}>
+          <Link href="/docs/apps" style={{ color: '#10b981', fontWeight: 600, textDecoration: 'none' }}>
+            View all apps including developer tools →
+          </Link>
         </p>
       </div>
 
       <div className="docs-section">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', color: '#f3f4f6' }}>Quick Navigation</h2>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem', color: '#f3f4f6' }}>Start here</h2>
         <div className="docs-grid">
-          {sections.map((s, i) => (
-            <Link key={i} href={s.href} style={{ textDecoration: 'none' }}>
-              <div className="docs-card">
-                <div style={{ color: '#10b981', marginBottom: '0.75rem', opacity: 0.8 }}>{s.icon}</div>
-                <h3 style={{ fontWeight: 700, marginBottom: '0.4rem', color: '#f3f4f6', fontSize: '0.95rem' }}>{s.title}</h3>
-                <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: 0 }}>{s.desc}</p>
-              </div>
-            </Link>
-          ))}
+          {DOCS_ESSENTIAL_LINKS.map((s, i) => {
+            const Icon = DOC_ICONS[i] ?? BookOpen
+            return (
+              <Link key={s.href} href={s.href} style={{ textDecoration: 'none' }}>
+                <div className="docs-card">
+                  <div style={{ color: '#10b981', marginBottom: '0.75rem', opacity: 0.8 }}>
+                    <Icon size={20} />
+                  </div>
+                  <h3 style={{ fontWeight: 700, marginBottom: '0.4rem', color: '#f3f4f6', fontSize: '0.95rem' }}>{s.title}</h3>
+                  <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: 0 }}>{s.desc}</p>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </div>
 
       <div className="docs-actions">
-        <Link href="/docs/getting-started" style={{ padding: '0.875rem 2rem', borderRadius: '10px', background: '#10b981', color: 'white', fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none' }}>
-          Start Here →
+        <Link href="/docs/getting-started" className="docs-btn-primary">
+          Quick start →
         </Link>
-        <Link href="/docs/features/kanban" style={{ padding: '0.875rem 2rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}>
-          Explore Features
+        <Link href="/" className="docs-btn-ghost">
+          Back to espeezy.com
         </Link>
       </div>
     </div>

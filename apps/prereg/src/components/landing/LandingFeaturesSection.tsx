@@ -27,13 +27,13 @@ export default function LandingFeaturesSection() {
       <div className="landing-inner">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <p className="landing-eyebrow" style={{ marginBottom: '1rem' }}>
-            Why Espeezy Kanban
+            Why Espeezy
           </p>
           <h2 id="features-heading" className="landing-title">
-            Structured collaboration for academic teams
+            Learning apps for academic teams
           </h2>
           <p className="landing-lead">
-            Espeezy Kanban helps students coordinate group work and gives instructors a clear record of individual contribution.
+            Espeezy learning apps help students coordinate group work and give instructors a clear record of individual contribution.
           </p>
         </div>
 

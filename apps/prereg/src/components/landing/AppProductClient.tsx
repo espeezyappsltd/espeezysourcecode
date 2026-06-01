@@ -88,7 +88,7 @@ export default function AppProductClient({ app }: Props) {
               style={{ padding: '0.9rem 1.5rem', fontSize: '0.95rem' }}
             >
               <ShoppingCart size={18} aria-hidden />
-              Pay &amp; download — one click
+              Pay &amp; download in one click
             </a>
           )}
           {hasDownload && (

@@ -1,3 +1,155 @@
+.landing-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  backdrop-filter: blur(16px);
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+.landing-nav__links {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.landing-nav-link--accent {
+  color: var(--brand) !important;
+  font-weight: 800 !important;
+}
+
+.landing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.landing-hero-actions .platform-app-card__btn {
+  padding: 0.85rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+.landing-hero-quicklinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.landing-hero-quicklinks a {
+  color: #64748b;
+  text-decoration: none;
+}
+
+.landing-hero-quicklinks a:hover {
+  color: var(--brand);
+}
+
+.landing-inline-link {
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.landing-inline-link:hover {
+  text-decoration: underline;
+}
+
+.landing-section--compact {
+  padding-top: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.apps-in-use {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.apps-in-use__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.landing-section--muted .apps-in-use__card {
+  background: #fff;
+}
+
+.apps-in-use--docs .apps-in-use__card {
+  background: #111;
+  border-color: #222;
+}
+
+.apps-in-use__name {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.apps-in-use--docs .apps-in-use__name {
+  color: #f3f4f6;
+}
+
+.apps-in-use__summary {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.apps-in-use--docs .apps-in-use__summary {
+  color: #9ca3af;
+}
+
+.apps-in-use__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.apps-in-use__open,
+.apps-in-use__docs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.apps-in-use__open {
+  color: var(--brand);
+}
+
+.apps-in-use__docs {
+  color: #64748b;
+}
+
+.apps-in-use--docs .apps-in-use__docs {
+  color: #10b981;
+}
+
 .landing-section {
   position: relative;
   z-index: 1;

@@ -24,7 +24,7 @@ export const PLATFORM_APP_USE_CASES: Record<string, PlatformAppUseCase> = {
     scenarios: [
       'Quiz each other on lecture notes and readings before an exam',
       'Run short competitive rounds with classmates online or in person',
-      'Use the same Espeezy login as Kanban — one account across apps',
+      'Use the same Espeezy login as Kanban, one account across apps',
     ],
   },
   admin: {
@@ -55,7 +55,7 @@ export const PLATFORM_APP_USE_CASES: Record<string, PlatformAppUseCase> = {
     audience: 'Freelancers and side-hustle builders',
     scenarios: [
       'Run a client job from first brief to final handoff in one place',
-      'Send invoices and deliverables when the work is done — get paid faster',
+      'Send invoices and deliverables when the work is done and get paid faster',
       'Keep freelance gigs separate from your school boards on Kanban',
     ],
   },

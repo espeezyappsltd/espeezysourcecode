@@ -37,12 +37,12 @@ export const PLATFORM_OPERATIONS_TAGLINE = 'Operated by a dedicated platform tea
  * One-sentence pitch for metadata, hero sections, and social cards.
  */
 export const PLATFORM_ONE_LINER =
-  'Espeezy is a group-project workspace that records who did what, so every team member receives recognition for their contribution.'
+  'Espeezy learning apps are built for students and teams: shared boards, study tools, client delivery, and publishing, with a clear record of who contributed what.'
 
 /** Marketing hero: headline and supporting sentence. */
 export const HERO_COPY_LINES = [
-  'Group projects, with proof of contribution.',
-  'Plan tasks on a shared board, track every contribution automatically, and export a record you can share with instructors, recruiters, and teammates.',
+  'Espeezy learning apps',
+  'Group boards, study tools, and client delivery. One login across the apps below.',
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Product overview'
@@ -109,18 +109,19 @@ export const PREREG_LIFETIME_FEATURES = [
 
 /** Site-wide footer brand and support information */
 export const FOOTER_BRAND_BLURB =
-  'Espeezy documents contribution in group projects and team workflows. A dedicated platform team operates production infrastructure, billing, and customer support.'
-
-export const FOOTER_TECH_BLURB =
-  'Built with Next.js and Supabase. Integrates with Canvas, Blackboard, and Moodle. Payments are processed securely through Stripe.'
+  'Espeezy learning apps for students and teams. Core collaboration stays free for verified students.'
 
 /** Business contact phone — display format and E.164 tel: link. */
 export const SUPPORT_PHONE = '01604 969068'
 export const SUPPORT_PHONE_TEL = '+441604969068'
 
-export const FOOTER_IMPORTANT_INFO = `Support: support@espeezy.com · Tel: ${SUPPORT_PHONE}
-Payments via Stripe · Operated by the Espeezy platform team (${PLATFORM_TEAM_SIZE} specialists across engineering, billing, and support).
-Core student tier remains free of charge.`
+export const FOOTER_SUPPORT_LINE = `support@espeezy.com · ${SUPPORT_PHONE}`
+
+/** @deprecated Prefer FOOTER_SUPPORT_LINE on marketing footers. */
+export const FOOTER_TECH_BLURB = 'Payments via Stripe. Built on Next.js and Supabase.'
+
+/** @deprecated Prefer FOOTER_SUPPORT_LINE on marketing footers. */
+export const FOOTER_IMPORTANT_INFO = FOOTER_SUPPORT_LINE
 
 export const FOOTER_BOTTOM_RIGHT =
   'Free for students · Privacy-first · Transparent roadmap'
