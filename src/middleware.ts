@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { HUB_SESSION_COOKIE, verifyHubSession } from '@/lib/dev-hub/auth'
+import { HUB_SESSION_COOKIE, verifyHubSessionEdge } from '@/lib/dev-hub/auth-edge'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.next({ request })
   }
@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   }
 
   const token = request.cookies.get(HUB_SESSION_COOKIE)?.value
-  if (!verifyHubSession(token)) {
+  if (!(await verifyHubSessionEdge(token))) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

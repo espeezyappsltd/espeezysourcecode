@@ -78,6 +78,8 @@
     "cf:secrets:core": "node scripts/cf-sync-secrets.mjs core",
     "cf:secrets:base": "node scripts/cf-sync-secrets.mjs base",
     "cf:verify": "node scripts/cf-verify-deployments.mjs",
+    "cf:deploy:remaining": "node scripts/cf-deploy-all-and-verify.mjs --skip=prereg,kanban,games",
+    "cf:deploy:all:verify": "node scripts/cf-deploy-all-and-verify.mjs",
     "build:core": "npm --prefix apps/core run build",
     "start": "node CUSTOMSERVERS/base/customserver.js",
     "start:dashboard": "npm --prefix apps/dashboard run start",

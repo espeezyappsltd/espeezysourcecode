@@ -20,14 +20,14 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
     uploading,
     showLobby,
     groupMembers,
-    isSearching,
-    chatSearch,
+  isSearching,
+  chatSearch,
     setChatSearch,
     messagesEndRef,
     isOnline,
     groupedMessages,
-    othersTyping,
-    teamOnlineCount,
+  othersTyping,
+  teamOnlineCount,
     joinToast,
     clearJoinToast,
     handleTyping,
@@ -43,7 +43,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
   } = useTeamChat({ groupId, user })
 
   if (!isOpen) {
-    return (
+  return (
       <>
         {joinToast && (
           <TeamJoinToast name={joinToast.name} onDismiss={clearJoinToast} />
@@ -58,21 +58,21 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
     {joinToast && (
       <TeamJoinToast name={joinToast.name} onDismiss={clearJoinToast} />
     )}
-    <div
+    <div 
       style={{
-        position: 'fixed',
-        bottom: 'calc(var(--h-mobile-bottom) + 1rem + env(safe-area-inset-bottom))',
-        right: 'min(2rem, 0.5rem)',
-        width: 'min(400px, calc(100vw - 1rem))',
-        maxHeight: 'calc(var(--vh-dynamic) - var(--h-mobile-bottom) - var(--h-nav) - 2rem)',
-        background: 'var(--surface)',
-        borderRadius: '24px',
-        boxShadow: '0 24px 48px rgba(0,0,0,0.2)',
-        border: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 5000,
-        overflow: 'hidden',
+        position: 'fixed', 
+        bottom: 'calc(var(--h-mobile-bottom) + 1rem + env(safe-area-inset-bottom))', 
+        right: 'min(2rem, 0.5rem)', 
+        width: 'min(400px, calc(100vw - 1rem))', 
+        maxHeight: 'calc(var(--vh-dynamic) - var(--h-mobile-bottom) - var(--h-nav) - 2rem)', 
+        background: 'var(--surface)', 
+        borderRadius: '24px', 
+        boxShadow: '0 24px 48px rgba(0,0,0,0.2)', 
+        border: '1px solid var(--border)', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        zIndex: 5000, 
+        overflow: 'hidden', 
         animation: 'whatsappIn 0.4s ease-out',
       }}
       className="responsive-chat"
@@ -117,7 +117,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
         onSend={handleSendMessage}
       />
 
-      <style jsx>{`
+       <style jsx>{`
           @keyframes whatsappIn { 
             from { opacity: 0; transform: translateY(40px) scale(0.9); } 
             to { opacity: 1; transform: translateY(0) scale(1); } 

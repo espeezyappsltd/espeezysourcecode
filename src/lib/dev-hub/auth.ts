@@ -1,7 +1,8 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
+import { HUB_SESSION_COOKIE } from '@/lib/dev-hub/auth-edge'
 
-export const HUB_SESSION_COOKIE = 'espeezy_hub_session'
+export { HUB_SESSION_COOKIE }
 
 function hubSecret(): string {
   return process.env.DEV_HUB_SECRET || 'espeezy-local-dev-hub-change-in-production'
