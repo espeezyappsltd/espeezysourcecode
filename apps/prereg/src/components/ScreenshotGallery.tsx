@@ -1,26 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
-import { SCREENSHOT_ASSETS } from '@shared/assets'
-    import { CategoryTabs } from '@shared/CategoryTabs'
+import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CategoryTabs } from '@shared/CategoryTabs'
 
 const SCREENSHOTS = [
-  { src: '/screenshots/assets_p.png', title: 'Assets', category: 'Core' },
-  { src: '/screenshots/data_p.png', title: 'Data', category: 'Core' },
-  { src: '/screenshots/feedback_p.png', title: 'Feedback', category: 'Feedback' },
-  { src: '/screenshots/hustle_p.png', title: 'Hustle', category: 'Hustle' },
-  { src: '/screenshots/hustle_wd.png', title: 'Hustle Wide', category: 'Hustle' },
-  { src: '/screenshots/identity_p.png', title: 'Identity', category: 'Identity' },
-  { src: '/screenshots/respurces_wd.png', title: 'Resources Wide', category: 'Resources' },
-  { src: '/screenshots/settings_p.png', title: 'Settings', category: 'Settings' },
-  { src: '/screenshots/storage_p.png', title: 'Storage', category: 'Storage' },
-  { src: '/screenshots/subscr_p.png', title: 'Subscription', category: 'Subscription' },
-  { src: '/screenshots/team_p.png', title: 'Team', category: 'Team' },
-  { src: '/screenshots/teams_p.png', title: 'Teams', category: 'Team' },
+  { src: '/screenshots/assets_p.webp', title: 'Assets', category: 'Core' },
+  { src: '/screenshots/feedback_p.webp', title: 'Feedback', category: 'Feedback' },
+  { src: '/screenshots/identity_p.webp', title: 'Identity', category: 'Identity' },
+  { src: '/screenshots/settings_p.webp', title: 'Settings', category: 'Settings' },
+  { src: '/screenshots/storage_p.webp', title: 'Storage', category: 'Storage' },
+  { src: '/screenshots/subscr_p.webp', title: 'Subscription', category: 'Subscription' },
+  { src: '/screenshots/team_p.webp', title: 'Team', category: 'Team' },
+  { src: '/screenshots/teams_p.webp', title: 'Teams', category: 'Team' },
 ]
 
 export default function ScreenshotGallery() {
@@ -90,7 +85,11 @@ export default function ScreenshotGallery() {
                 alt={img.title} 
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-                quality={75}
+                quality={65}
+                priority={filter === 'All' && i === 0}
+                loading={filter === 'All' && i === 0 ? 'eager' : 'lazy'}
+                fetchPriority={filter === 'All' && i === 0 ? 'high' : 'low'}
+                decoding="async"
                 onLoad={() => handleImageLoad(img.src)}
                 style={{ 
                   objectFit: 'cover',
@@ -245,7 +244,9 @@ export default function ScreenshotGallery() {
                   alt={SCREENSHOTS[selectedImage].title}
                   width={800} // Smaller width for faster lightbox
                   height={533}
-                  quality={60} // Slightly better but still optimized
+                  quality={65}
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     width: '100%',
                     height: 'auto',

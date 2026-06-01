@@ -1,5 +1,6 @@
 export interface Env {
-  SUPABASE_URL: string
+  SUPABASE_URL?: string
+  NEXT_PUBLIC_SUPABASE_URL?: string
   SUPABASE_SERVICE_ROLE_KEY: string
   MARKETING_ORIGIN?: string
 }
@@ -14,7 +15,9 @@ function json(data: JsonRecord, status = 200): Response {
 }
 
 function supabaseRestBase(env: Env): string {
-  return `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1`
+  const base = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL
+  if (!base) throw new Error('Supabase URL is not configured')
+  return `${base.replace(/\/$/, '')}/rest/v1`
 }
 
 function supabaseHeaders(env: Env): Record<string, string> {
