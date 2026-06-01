@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { HERO_COPY_LINES } from '@shared/platform-brand'
+import { HERO_COPY_LINES, KANBAN_DEMO_LABEL, KANBAN_DEMO_URL } from '@shared/platform-brand'
 import './landing.css'
 
 type Props = {
@@ -61,6 +61,9 @@ export default function PlatformHero({ userCount }: Props) {
         className="landing-hero-quicklinks"
       >
         <a href="#apps">Apps</a>
+        <a href={KANBAN_DEMO_URL} rel="noopener noreferrer">
+          {KANBAN_DEMO_LABEL}
+        </a>
         <Link href="/docs">Docs</Link>
         <Link href="/checkout">Pricing</Link>
         <Link href="/contact">Contact</Link>

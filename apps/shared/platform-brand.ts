@@ -3,7 +3,7 @@
  * Language is professional, educative, and globally accessible.
  */
 
-import { ESPEEZY_APP_ORIGINS } from './app-url'
+import { buildAppUrl, ESPEEZY_APP_ORIGINS } from './app-url'
 
 export {
   COPYRIGHT_HOLDER,
@@ -52,6 +52,9 @@ export const HERO_ANALYTICS_TAGLINE = HERO_COPY_LINES[1]
 
 export const KANBAN_DEMO_LABEL = 'Preview the Kanban workspace'
 export const KANBAN_DEMO_PATH = '/demo'
+export const KANBAN_DEMO_URL = buildAppUrl('kanban', KANBAN_DEMO_PATH)
+export const KANBAN_SIGNUP_PATH = '/login?signup=true'
+export const KANBAN_SIGNUP_URL = buildAppUrl('kanban', KANBAN_SIGNUP_PATH)
 
 export const PRICING_INTRO =
   'Espeezy learning applications are designed for academic and professional teams. Core collaboration features remain free for verified students.'

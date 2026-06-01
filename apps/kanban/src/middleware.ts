@@ -5,6 +5,7 @@ import { sanitizeKanbanNextPath } from '@shared/app-url'
 
 const PUBLIC_PREFIXES = [
   '/login',
+  '/demo',
   '/sso',
   '/auth',
   '/api',
