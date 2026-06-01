@@ -29,7 +29,7 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
         <div className="landing-eyebrow">
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)' }} />
-          Free tier for students
+          Informational overview
         </div>
       </motion.div>
 
@@ -95,7 +95,7 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
           className="platform-app-card__btn platform-app-card__btn--primary"
           style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}
         >
-          Start free
+          Open workspace
           <ArrowRight size={16} aria-hidden />
         </a>
         <a
@@ -107,8 +107,8 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
         >
           {KANBAN_DEMO_LABEL}
         </a>
-        <a href="#apps" className="platform-app-card__btn platform-app-card__btn--ghost" style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}>
-          Browse all apps
+        <a href="/pricing" className="platform-app-card__btn platform-app-card__btn--ghost" style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}>
+          View pricing
         </a>
       </motion.div>
     </section>

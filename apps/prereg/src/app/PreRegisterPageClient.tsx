@@ -10,12 +10,12 @@ import ScreenshotGallery from '@/components/ScreenshotGallery'
 import PlatformHero from '@/components/landing/PlatformHero'
 import AppUseCasesSection from '@/components/landing/AppUseCasesSection'
 import LandingFeaturesSection from '@/components/landing/LandingFeaturesSection'
-import AppsCatalog from '@/components/landing/AppsCatalog'
 import { usePlatformApps } from '@/hooks/usePlatformApps'
 import '@/components/landing/landing.css'
 
 function LandingPageContent({ authUserCount }: { authUserCount: number }) {
   const { apps } = usePlatformApps()
+  const kanbanRootUrl = `${MAIN_APP_ORIGIN.replace(/\/$/, '')}/`
   const kanbanDemoUrl = `${MAIN_APP_ORIGIN.replace(/\/$/, '')}${KANBAN_DEMO_PATH}`
 
   return (
@@ -49,11 +49,11 @@ function LandingPageContent({ authUserCount }: { authUserCount: number }) {
           <Link href="/#apps" className="landing-nav-link">
             Apps
           </Link>
-          <Link href="/checkout" className="landing-nav-link">
+          <Link href="/pricing" className="landing-nav-link">
             Pricing
           </Link>
-          <a href={MAIN_APP_ORIGIN} className="platform-app-card__btn platform-app-card__btn--primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.78rem' }}>
-            Start free
+          <a href={kanbanRootUrl} className="platform-app-card__btn platform-app-card__btn--primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.78rem' }}>
+            Open workspace
           </a>
         </div>
       </nav>
@@ -61,7 +61,7 @@ function LandingPageContent({ authUserCount }: { authUserCount: number }) {
       <main id="main-content">
         <PlatformHero
           apps={apps}
-          kanbanAppUrl={MAIN_APP_ORIGIN}
+          kanbanAppUrl={kanbanRootUrl}
           kanbanDemoUrl={kanbanDemoUrl}
           userCount={authUserCount}
         />
@@ -85,7 +85,6 @@ function LandingPageContent({ authUserCount }: { authUserCount: number }) {
           </div>
         </section>
 
-        <AppsCatalog apps={apps} />
       </main>
 
       <LiveChatWidget appScope="prereg" />

@@ -3,8 +3,14 @@
 import { useEffect, useState } from 'react'
 import { PLATFORM_APPS_FALLBACK, type PlatformApp } from '@shared/platform-apps'
 
+const HIDDEN_LANDING_SLUGS = new Set(['admin', 'core'])
+
+function filterLandingApps(apps: PlatformApp[]): PlatformApp[] {
+  return apps.filter((app) => !HIDDEN_LANDING_SLUGS.has(app.slug))
+}
+
 export function usePlatformApps() {
-  const [apps, setApps] = useState<PlatformApp[]>(PLATFORM_APPS_FALLBACK)
+  const [apps, setApps] = useState<PlatformApp[]>(filterLandingApps(PLATFORM_APPS_FALLBACK))
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -13,7 +19,7 @@ export function usePlatformApps() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { apps?: PlatformApp[] } | null) => {
         if (!mounted || !data?.apps?.length) return
-        setApps(data.apps)
+        setApps(filterLandingApps(data.apps))
       })
       .catch(() => {
         /* keep fallback */
