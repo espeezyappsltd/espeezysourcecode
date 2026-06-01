@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { StudioCrudPanel } from '@/components/studio/StudioCrudPanel'
-import { supabase } from '@/lib/supabase-client'
 import type { StudioJob } from '@/lib/jobs/types'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -39,36 +38,17 @@ export function ProjectsCrudPanel({ onMutate }: Props) {
         { key: 'title', label: 'Title' },
         { key: 'description', label: 'Description', type: 'textarea' },
         { key: 'status', label: 'Status', type: 'select', options: STATUS_OPTIONS },
-        { key: 'client_name', label: 'Client name', required: false },
-        { key: 'client_email', label: 'Client email', type: 'email', required: false },
-        { key: 'deadline_at', label: 'Deadline', type: 'datetime', required: false },
       ]}
       buildEmpty={() => ({
         title: '',
         description: '',
         status: 'pending',
-        client_name: '',
-        client_email: '',
-        deadline_at: null,
       })}
-      mapInsert={(payload) => ({
-        ...payload,
-        delivery_status: 'draft',
-      })}
-      onAfterCreate={async (row) => {
-        await supabase.from('studio_job_timeline_events').insert({
-          job_id: row.id,
-          title: 'Project created',
-          description: row.description,
-          kind: 'kickoff',
-        })
-      }}
       renderRow={(job) => (
         <>
           <Link href={`/jobs/${job.id}`} className="studio-link">
             {job.title}
           </Link>
-          {job.client_name ? ` · ${job.client_name}` : ''}
           {' · '}
           <span style={{ color: STATUS_COLORS[job.status] ?? 'inherit' }}>{job.status}</span>
         </>

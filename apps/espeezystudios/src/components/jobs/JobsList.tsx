@@ -70,9 +70,7 @@ export default function JobsList() {
                 <span className="jobs-pro__card-body">
                   <span className="jobs-pro__card-title">{job.title}</span>
                   <span className="jobs-pro__card-meta">
-                    {job.client_name || 'No client'} ·{' '}
                     <span style={{ color: STATUS_COLORS[job.status] ?? 'inherit' }}>{job.status}</span>
-                    {job.deadline_at ? ` · due ${new Date(job.deadline_at).toLocaleDateString()}` : ''}
                   </span>
                 </span>
                 <ChevronRight size={18} className="jobs-pro__chev" aria-hidden />
