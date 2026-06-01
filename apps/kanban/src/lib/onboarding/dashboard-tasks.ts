@@ -55,7 +55,7 @@ export const ONBOARDING_TASK_TEMPLATES: OnboardingTaskTemplate[] = [
     title: 'Tour: Files',
     description: `${ONBOARDING_MARKER_PREFIX}assets] Upload a file or save a link in Files, then mark Done.`,
     category: 'Documentation',
-    path: '/assets',
+    path: '/settings?tab=storage',
     tourButtonLabel: 'Files',
   },
   {

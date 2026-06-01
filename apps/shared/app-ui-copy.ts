@@ -1,6 +1,7 @@
 /**
  * Shared educative UI copy for in-app help surfaces (Help tray, onboarding intros).
  */
+import { espeezyDocsUrl } from './espeezy-marketing-links'
 
 export type HelpFeatureGuide = {
   title: string
@@ -21,18 +22,18 @@ export const KANBAN_HELP_GUIDES: HelpFeatureGuide[] = [
   {
     title: 'Kanban board',
     desc: 'Organize tasks, update status, assign teammates, and track project progress on a shared board.',
-    link: '/docs/features/kanban',
+    link: espeezyDocsUrl('/docs/features/kanban'),
     actionEvent: 'open-kanban-onboarding',
   },
   {
     title: 'Academic roadmap',
     desc: 'Plan milestones, set deadlines, and visualize your project timeline alongside coursework.',
-    link: '/docs/features/roadmap',
+    link: espeezyDocsUrl('/docs/features/roadmap'),
   },
   {
     title: 'Team and chat',
     desc: 'Invite teammates, manage roles, and coordinate in real time without leaving the workspace.',
-    link: '/docs/features/team',
+    link: espeezyDocsUrl('/docs/features/network'),
   },
   {
     title: 'Espeezy Studio',
@@ -42,7 +43,7 @@ export const KANBAN_HELP_GUIDES: HelpFeatureGuide[] = [
   {
     title: 'Profile and settings',
     desc: 'Update your profile, notification preferences, themes, and account security settings.',
-    link: '/docs/features/profile',
+    link: '/settings',
   },
 ]
 
@@ -50,27 +51,27 @@ export const ADMIN_HELP_GUIDES: HelpFeatureGuide[] = [
   {
     title: 'Kanban board',
     desc: 'Organize tasks, update status, assign teammates, and track project progress on a shared board.',
-    link: '/docs/features/kanban',
+    link: espeezyDocsUrl('/docs/features/kanban'),
   },
   {
     title: 'Academic roadmap',
     desc: 'Plan milestones, set deadlines, and visualize project timelines for academic teams.',
-    link: '/docs/features/roadmap',
+    link: espeezyDocsUrl('/docs/features/roadmap'),
   },
   {
     title: 'Team and chat',
     desc: 'Invite teammates, manage roles, and coordinate in real time within the workspace.',
-    link: '/docs/features/team',
+    link: espeezyDocsUrl('/docs/features/network'),
   },
   {
     title: 'Marketplace',
     desc: 'Review peer listings and support students exchanging academic resources securely.',
-    link: '/docs/features/marketplace',
+    link: espeezyDocsUrl('/docs/features/marketplace'),
   },
   {
     title: 'Profile and settings',
     desc: 'Update profile details, notification preferences, and account security settings.',
-    link: '/docs/features/profile',
+    link: espeezyDocsUrl('/docs/getting-started'),
   },
 ]
 

@@ -20,7 +20,7 @@ export function SettingsTabPanels({ vm }: { vm: SettingsPageViewModel }) {
     <div style={{ minHeight: '400px' }}>
       {activeTab === 'support' && <SettingsSupportPanel vm={vm} />}
 
-      {activeTab === ('storage' as TabName) && profile && <SettingsStoragePanel vm={vm} />}
+      {activeTab === 'storage' && profile && <SettingsStoragePanel vm={vm} />}
 
       {activeTab === 'intercom' && profile && <SettingsIntercomPanel vm={vm} />}
 

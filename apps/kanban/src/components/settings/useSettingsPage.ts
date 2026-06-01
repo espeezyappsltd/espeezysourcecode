@@ -43,6 +43,7 @@ const SETTINGS_TABS: TabName[] = [
   'workspace',
   'billing',
   'data',
+  'storage',
   'team',
   'support',
   'identity_hub',

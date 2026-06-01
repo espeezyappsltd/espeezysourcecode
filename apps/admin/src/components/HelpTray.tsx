@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { X, BookOpen, LifeBuoy, ArrowRight } from "lucide-react";
 import {
   ADMIN_HELP_GUIDES,
@@ -9,6 +8,9 @@ import {
   HELP_TRAY_TITLE,
 } from "@shared/app-ui-copy";
 import AppCopyrightStrip from "@shared/AppCopyrightStrip";
+import { espeezyDocsUrl } from "@shared/espeezy-marketing-links";
+
+const DOCS_QUICK_START = espeezyDocsUrl("/docs/getting-started");
 
 export default function HelpTray() {
   const [open, setOpen] = useState(false);
@@ -68,17 +70,19 @@ export default function HelpTray() {
             <h3 style={{ fontWeight: 800, fontSize: "1.05rem", marginBottom: "0.5rem" }}>How can we help?</h3>
             <p style={{ color: "#64748b", fontSize: "0.95rem", marginBottom: 0, lineHeight: 1.6 }}>
               Browse documentation for each feature, or open the{" "}
-              <Link href="/docs/getting-started" style={{ color: "#2563eb", fontWeight: 700 }}>
+              <a href={DOCS_QUICK_START} target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb", fontWeight: 700 }}>
                 {HELP_TRAY_CTA_LABEL} <ArrowRight size={14} style={{ verticalAlign: "middle" }} />
-              </Link>
+              </a>
               .
             </p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {ADMIN_HELP_GUIDES.map((f) => (
-              <Link
+              <a
                 key={f.title}
                 href={f.link}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   display: "block",
                   padding: "1.1rem 1.2rem",
@@ -97,13 +101,15 @@ export default function HelpTray() {
                   <span>{f.title}</span>
                 </div>
                 <div style={{ color: "#64748b", fontWeight: 500, fontSize: "0.9rem", lineHeight: 1.55 }}>{f.desc}</div>
-              </Link>
+              </a>
             ))}
           </div>
         </div>
         <div style={{ padding: "1.25rem", borderTop: "1px solid var(--border)", background: "rgba(59,130,246,0.04)" }}>
-          <Link
-            href="/docs/getting-started"
+          <a
+            href={DOCS_QUICK_START}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -119,7 +125,7 @@ export default function HelpTray() {
             onClick={() => setOpen(false)}
           >
             {HELP_TRAY_CTA_LABEL} <ArrowRight size={16} aria-hidden />
-          </Link>
+          </a>
           <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} />
         </div>
       </div>

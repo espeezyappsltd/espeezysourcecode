@@ -5,6 +5,7 @@ import { ExternalLink, FileText, Link2, PlayCircle, Wrench, type LucideIcon } fr
 import type { AskResource } from '@/lib/ask/types'
 import { ASK_CATEGORY_LABELS } from '@/lib/ask/types'
 import { askCategoryUrl } from '@/lib/nav/category-url'
+import { isExternalNavUrl, resolveKanbanNavUrl } from '@/lib/nav/resolve-nav-url'
 
 const KIND_ICON: Record<AskResource['kind'], LucideIcon> = {
   tutorial: PlayCircle,
@@ -21,7 +22,8 @@ type Props = {
 
 export function AskResourceRow({ resource, searchQuery }: Props) {
   const Icon = KIND_ICON[resource.kind]
-  const external = resource.external ?? resource.url.startsWith('http')
+  const href = resolveKanbanNavUrl(resource.url)
+  const external = resource.external ?? isExternalNavUrl(href)
   const categoryHref = askCategoryUrl(resource.category, { q: searchQuery ?? undefined })
 
   return (
@@ -34,7 +36,7 @@ export function AskResourceRow({ resource, searchQuery }: Props) {
           <h3 className="ask-row__title">
             {external ? (
               <a
-                href={resource.url}
+                href={href}
                 className="ask-row__title-link"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -43,7 +45,7 @@ export function AskResourceRow({ resource, searchQuery }: Props) {
                 <ExternalLink size={13} className="ask-row__ext" aria-hidden />
               </a>
             ) : (
-              <Link href={resource.url} className="ask-row__title-link">
+              <Link href={href} className="ask-row__title-link">
                 {resource.title}
               </Link>
             )}

@@ -2,14 +2,44 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, BookOpen, LifeBuoy, ArrowRight } from "lucide-react";
+import { X, BookOpen, LifeBuoy, ArrowRight, ExternalLink } from "lucide-react";
 import {
   HELP_TRAY_CTA_LABEL,
   HELP_TRAY_TITLE,
   KANBAN_HELP_GUIDES,
 } from "@shared/app-ui-copy";
+import { espeezyDocsUrl } from "@shared/espeezy-marketing-links";
 import AppCopyrightStrip from "@shared/AppCopyrightStrip";
+import { isExternalNavUrl } from "@/lib/nav/resolve-nav-url";
 import "./help-tray.css";
+
+const DOCS_QUICK_START = espeezyDocsUrl("/docs/getting-started");
+
+function HelpTrayLink({
+  href,
+  className,
+  onClick,
+  children,
+}: {
+  href: string
+  className: string
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  if (isExternalNavUrl(href)) {
+    return (
+      <a href={href} className={className} onClick={onClick} target="_blank" rel="noopener noreferrer">
+        {children}
+        <ExternalLink size={14} aria-hidden style={{ marginLeft: 4 }} />
+      </a>
+    )
+  }
+  return (
+    <Link href={href} className={className} onClick={onClick}>
+      {children}
+    </Link>
+  )
+}
 
 export default function HelpTray() {
   const [open, setOpen] = useState(false);
@@ -51,9 +81,9 @@ export default function HelpTray() {
           <h3 className="help-tray-lead-title">How can we help?</h3>
           <p className="help-tray-lead">
             Browse feature guides, search the <Link href="/ask">Ask directory</Link>, or open the{' '}
-            <Link href="/docs/getting-started">
+            <a href={DOCS_QUICK_START} target="_blank" rel="noopener noreferrer" className="help-tray-inline-link">
               {HELP_TRAY_CTA_LABEL} <ArrowRight size={14} style={{ verticalAlign: 'middle' }} />
-            </Link>
+            </a>
             .
           </p>
           <div className="help-tray-list">
@@ -75,21 +105,32 @@ export default function HelpTray() {
                   <p className="help-tray-card-desc">{f.desc}</p>
                 </button>
               ) : (
-                <Link key={f.title} href={f.link} className="help-tray-card" onClick={() => setOpen(false)}>
+                <HelpTrayLink
+                  key={f.title}
+                  href={f.link}
+                  className="help-tray-card"
+                  onClick={() => setOpen(false)}
+                >
                   <div className="help-tray-card-title">
                     <BookOpen size={16} />
                     <span>{f.title}</span>
                   </div>
                   <p className="help-tray-card-desc">{f.desc}</p>
-                </Link>
+                </HelpTrayLink>
               )
             )}
           </div>
         </div>
         <footer className="help-tray-footer">
-          <Link href="/docs/getting-started" className="help-tray-cta" onClick={() => setOpen(false)}>
+          <a
+            href={DOCS_QUICK_START}
+            className="help-tray-cta"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setOpen(false)}
+          >
             {HELP_TRAY_CTA_LABEL} <ArrowRight size={16} />
-          </Link>
+          </a>
           <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} />
         </footer>
       </aside>
