@@ -17,7 +17,7 @@ export default function JobsList() {
   const [jobs, setJobs] = useState<StudioJob[]>([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
-  const { canEdit } = useStudioEditor()
+  const { canEdit, loading: authLoading } = useStudioEditor()
   const { capabilities, loading: capsLoading } = useJobSchemaCapabilities()
 
   const fetchJobs = useCallback(async () => {
@@ -64,14 +64,21 @@ export default function JobsList() {
         ) : null}
       </div>
 
-      {loading ? (
+      {loading || authLoading ? (
         <p className="studio-muted">Loading projects…</p>
-      ) : jobs.length === 0 ? (
-        <p className="studio-muted">
-          No projects yet.
-          {canEdit ? ' Tap + to create one.' : ''}
-        </p>
       ) : (
+        <>
+          {!canEdit ? (
+            <div className="studio-muted" style={{ marginBottom: '1rem' }}>
+              To manage jobs, please <Link href="/login?next=/jobs">sign in</Link> with your studio account.
+            </div>
+          ) : null}
+          {jobs.length === 0 ? (
+            <p className="studio-muted">
+              No projects yet.
+              {canEdit ? ' Tap + to create one.' : ''}
+            </p>
+          ) : (
         <ul className="jobs-pro__list">
           {jobs.map((job) => (
             <li key={job.id}>
@@ -91,6 +98,8 @@ export default function JobsList() {
             </li>
           ))}
         </ul>
+          )}
+        </>
       )}
 
       {capabilities ? (

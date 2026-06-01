@@ -29,6 +29,13 @@ import {
 } from '@/lib/jobs/schema-capabilities'
 import type { JobBudgetEntry, JobMilestone, JobTimelineEvent, StudioJob } from '@/lib/jobs/types'
 import { JobDocumentsStoragePanel } from '@/components/jobs/JobDocumentsStoragePanel'
+import {
+  DEMO_FEE_CENTS,
+  MIN_CONSULT_FEE_CENTS,
+  consultationEntriesBelowMinimum,
+  jobHasDemoFee,
+  normalizeBudgetEntryAmount,
+} from '@/lib/jobs/job-form'
 
 const TAB_LABELS: Record<JobWorkspaceTab, string> = {
   overview: 'Overview',
@@ -83,6 +90,10 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
   const currency = caps.columns.currency ? job.currency || 'GBP' : 'GBP'
   const budgetTotal = bundle.budgetEntries.reduce((s, e) => s + e.amount_cents, 0)
   const showExtendedBanner = !hasExtendedJobFeatures(caps)
+  const hasDemoFee = jobHasDemoFee(bundle.budgetEntries)
+  const lowConsultationEntries = consultationEntriesBelowMinimum(bundle.budgetEntries)
+  const feeIssues = !hasDemoFee || lowConsultationEntries.length > 0
+  const [feeFixing, setFeeFixing] = useState(false)
 
   const sublineParts: string[] = []
   if (caps.columns.client_name) {
@@ -134,6 +145,31 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
     if (!confirm('Delete this project and all timeline/budget data?')) return
     await supabase.from('jobs').delete().eq('id', jobId)
     window.location.href = '/jobs'
+  }
+
+  async function fixFeeLines() {
+    setFeeFixing(true)
+
+    if (!hasDemoFee) {
+      await supabase.from('studio_job_budget_entries').insert([
+        {
+          job_id: jobId,
+          label: 'Demo fee',
+          amount_cents: DEMO_FEE_CENTS,
+          entry_type: 'estimate',
+        },
+      ])
+    }
+
+    for (const entry of lowConsultationEntries) {
+      await supabase
+        .from('studio_job_budget_entries')
+        .update({ amount_cents: MIN_CONSULT_FEE_CENTS })
+        .eq('id', entry.id)
+    }
+
+    await refresh()
+    setFeeFixing(false)
   }
 
   return (
@@ -194,6 +230,22 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
               This database has the core projects table only. Apply studio job migrations to enable timeline, budget,
               milestones, file storage, and client delivery.
             </p>
+          ) : null}
+          {feeIssues ? (
+            <div className="studio-muted" style={{ marginBottom: '1rem' }}>
+              This project should include a fixed Demo fee (£50) and a minimum Consultation fee (£20).
+              {canEdit ? (
+                <button
+                  type="button"
+                  className="studio-btn studio-btn--ghost"
+                  disabled={feeFixing}
+                  onClick={() => void fixFeeLines()}
+                  style={{ marginLeft: '1rem' }}
+                >
+                  {feeFixing ? 'Applying fees…' : 'Apply fee defaults'}
+                </button>
+              ) : null}
+            </div>
           ) : null}
           <p className="jobs-overview__description">{job.description || (canEdit ? 'No description yet.' : '')}</p>
           {(caps.tables.budget ||
@@ -442,12 +494,14 @@ function BudgetPanel({
   const [entryType, setEntryType] = useState<JobBudgetEntry['entry_type']>('estimate')
 
   async function add() {
-    const cents = Math.round(parseFloat(amount || '0') * 100)
-    if (!label.trim()) return
+    const labelText = label.trim()
+    if (!labelText) return
+    const parsedCents = Math.round(parseFloat(amount || '0') * 100)
+    const amountCents = normalizeBudgetEntryAmount(labelText, parsedCents)
     await supabase.from('studio_job_budget_entries').insert({
       job_id: jobId,
-      label: label.trim(),
-      amount_cents: cents,
+      label: labelText,
+      amount_cents: amountCents,
       entry_type: entryType,
     })
     setLabel('')
@@ -480,6 +534,11 @@ function BudgetPanel({
             Add line
           </button>
         </div>
+      ) : null}
+      {canEdit ? (
+        <p className="studio-muted" style={{ marginTop: '0.5rem' }}>
+          Demo fee lines are fixed at £50. Consultation fees are enforced at a minimum of £20.
+        </p>
       ) : null}
       <table className="jobs-table">
         <thead>
