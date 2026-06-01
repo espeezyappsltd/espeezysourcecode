@@ -9,25 +9,19 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  HelpCircle,
   Menu,
-  HardDrive,
   LayoutDashboard,
   Lock,
-  HelpCircle,
   LogOut,
-  Music,
-  Briefcase,
   Rss,
   Settings,
-  Gamepad2,
   ShieldCheck,
-  Sparkles,
   UserCircle,
   Users,
   WifiOff,
   type LucideIcon,
 } from 'lucide-react'
-import { useGamesProfileLink } from '@/hooks/useGamesProfileLink'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { usePresence } from '@/components/PresenceProvider'
 import { useConnectivity } from '@/context/ConnectivityContext'
@@ -41,33 +35,24 @@ import { MobileHeaderToolbar } from './mobile/MobileHeaderToolbar'
 import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
-import { SIDEBAR_STUDIO_BLURB } from '@shared/platform-brand'
 import AppCopyrightStrip from '@shared/AppCopyrightStrip'
 import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import './sidebar-premium.css'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
-const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats', 'Espeezy Studio'])
+const PREMIUM_LINKS = new Set(['Project Stats'])
 const subscribeToClient = () => () => {}
 
 type SidebarNavItem = {
   name: string
   path: string
   icon: LucideIcon
-  /** Opens games.espeezy.com (SSO) instead of in-app routing */
-  externalGamesProfile?: boolean
 }
 
 const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Feed', path: '/feed', icon: Rss },
   { name: 'Teammates', path: '/network', icon: Users },
-  { name: 'Files', path: '/assets', icon: HardDrive },
-  { name: 'Ask', path: '/ask', icon: HelpCircle },
-  { name: 'Espeezy Studio', path: '/studio', icon: Briefcase },
-  { name: 'Break Room', path: '/chillout', icon: Sparkles },
-  { name: 'Skirmish', path: '/games', icon: Gamepad2, externalGamesProfile: true },
-  { name: 'Jukebox', path: '/jukebox', icon: Music },
   { name: 'Project Stats', path: '/analytics', icon: BarChart3 },
   { name: 'My Profile', path: '/profile', icon: UserCircle },
   { name: 'Settings', path: '/settings', icon: Settings },
@@ -204,14 +189,11 @@ export default function Sidebar({ user }: SidebarProps) {
   const smartLoading = useSmartLoading()
   const withLoading = smartLoading?.withLoading
   const showConfirmation = smartLoading?.showConfirmation
-  const gamesProfileUrl = useGamesProfileLink()
 
   const isProfileLoaded = Boolean(profile)
   const onlineCount = globalOnlineCount
   const onlineLabel = onlineCount === 1 ? '1 ONLINE' : `${onlineCount} ONLINE`
   const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
-  const hasStudioAccess = hasFeature(profile, 'ESPEEZY_STUDIO')
-  const showStudioPromo = !hasStudioAccess
   const projectStatsPath = profile?.group_id ? `/analytics/${profile.group_id}` : '/analytics'
 
   const navLinks = useMemo(
@@ -440,25 +422,12 @@ export default function Sidebar({ user }: SidebarProps) {
               key={link.name}
               collapsed={!isOpen}
               isActive={isNavItemActive(link.path, link.name)}
-              isLocked={
-                link.name === 'Espeezy Studio'
-                  ? !hasStudioAccess
-                  : PREMIUM_LINKS.has(link.name) && !isPremiumMember
-              }
+              isLocked={PREMIUM_LINKS.has(link.name) && !isPremiumMember}
               label={link.name}
               icon={link.icon}
               onClick={() => {
-                if (link.name === 'Espeezy Studio' && !hasStudioAccess) {
-                  pushRoute('/studio')
-                  return
-                }
-                if (PREMIUM_LINKS.has(link.name) && link.name !== 'Espeezy Studio' && !isPremiumMember) {
+                if (PREMIUM_LINKS.has(link.name) && !isPremiumMember) {
                   window.location.href = APP_PRICING_PATH
-                  return
-                }
-                if (link.externalGamesProfile) {
-                  window.location.href = gamesProfileUrl
-                  if (isMobile) closeSidebar()
                   return
                 }
                 handleNavigation(link.path)
@@ -469,27 +438,6 @@ export default function Sidebar({ user }: SidebarProps) {
 
         <div className="sidebar-bottom">
           <div className="sidebar-foot">
-            {isOpen && showStudioPromo && (
-              <div className="sidebar-foot__upgrade sidebar-upgrade-card">
-                <div
-                  className="glass-card-prestige"
-                  style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
-                  onClick={() => pushRoute('/studio')}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') pushRoute('/studio') }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} aria-hidden />
-                  <div className="sidebar-foot__upgrade-eyebrow">
-                    <Briefcase size={14} aria-hidden />
-                    Premium workspace
-                  </div>
-                  <p className="sidebar-foot__upgrade-title">Espeezy Studio</p>
-                  <p className="sidebar-foot__upgrade-copy">{SIDEBAR_STUDIO_BLURB}</p>
-                </div>
-              </div>
-            )}
-
             <div className="sidebar-foot__vault" data-connected={isConnected ? 'true' : 'false'}>
               <div className="sidebar-foot__vault-icon" aria-hidden>
                 {isConnected ? <ShieldCheck size={17} /> : <WifiOff size={17} />}

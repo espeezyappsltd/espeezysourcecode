@@ -2,13 +2,10 @@
 
 import { ArrowUpRight, CreditCard, Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { AccountWalletPanel } from '@/components/AccountWalletPanel'
 import PlansUsagePanel from '@/components/PlansUsagePanel'
 import type { SettingsPageViewModel } from '../settings-types'
 import { BILLING_PANEL_SUBTITLE } from '@/lib/platform/brand-copy'
 import { APP_PRICING_PATH, planRank } from '@/lib/pricing/plan-routes'
-import { ReferralProgramPanel } from '@/components/ReferralProgramPanel'
-import '@/components/referral-panel.css'
 
 function statusLabel(status: string | null | undefined): string {
   if (!status) return 'Active'
@@ -41,10 +38,6 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
     <div className="auth-card" style={{ maxWidth: '100%' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Subscription & Billing</h2>
       <p style={{ color: 'var(--text-sub)', marginBottom: '1.25rem' }}>{BILLING_PANEL_SUBTITLE}</p>
-
-      <div style={{ marginBottom: '1.75rem' }}>
-        <ReferralProgramPanel />
-      </div>
 
       <div
         style={{
@@ -147,11 +140,6 @@ export function SettingsBillingPanel({ vm }: { vm: SettingsPageViewModel }) {
       <div style={{ marginTop: '2.5rem' }}>
         <h3 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1rem' }}>Your usage</h3>
         <PlansUsagePanel />
-      </div>
-
-      <div style={{ marginTop: '2.5rem' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1rem' }}>Marketplace wallet</h3>
-        <AccountWalletPanel />
       </div>
     </div>
   )

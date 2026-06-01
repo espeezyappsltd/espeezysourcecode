@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Bell, Rss, Briefcase, Users } from 'lucide-react'
+import { LayoutDashboard, Bell, Rss, Users, BarChart3 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 
 export default function BottomNav() {
@@ -14,7 +14,7 @@ export default function BottomNav() {
     { name: 'Board', path: '/', icon: LayoutDashboard },
     { name: 'Feed', path: '/feed', icon: Rss },
     { name: 'Team', path: '/network', icon: Users },
-    { name: 'Studio', path: '/studio', icon: Briefcase },
+    { name: 'Stats', path: '/analytics', icon: BarChart3 },
     { name: 'Inbox', path: '/notifications', icon: Bell },
   ]
 
@@ -28,7 +28,7 @@ export default function BottomNav() {
       {navLinks.map((link) => {
         const isActive =
           pathname === link.path ||
-          (link.path === '/studio' && (pathname?.startsWith('/studio') ?? false))
+          (link.path === '/analytics' && (pathname?.startsWith('/analytics') ?? false))
 
         return (
           <button

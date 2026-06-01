@@ -40,6 +40,7 @@ const SETTINGS_TABS: TabName[] = [
   'security',
   'appearance',
   'workspace',
+  'billing',
   'data',
   'team',
   'support',

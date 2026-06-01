@@ -10,6 +10,7 @@ import { SettingsIdentityPanel } from './panels/SettingsIdentityPanel'
 import { SettingsSecurityPanel } from './panels/SettingsSecurityPanel'
 import { SettingsStoragePanel } from './panels/SettingsStoragePanel'
 import { SettingsSupportPanel } from './panels/SettingsSupportPanel'
+import { SettingsBillingPanel } from './panels/SettingsBillingPanel'
 import { SettingsTeamsPanel } from './panels/SettingsTeamsPanel'
 
 export function SettingsTabPanels({ vm }: { vm: SettingsPageViewModel }) {
@@ -32,6 +33,8 @@ export function SettingsTabPanels({ vm }: { vm: SettingsPageViewModel }) {
       {activeTab === 'identity' && <SettingsIdentityPanel vm={vm} />}
 
       {activeTab === 'workspace' && <SettingsTeamsPanel vm={vm} />}
+
+      {activeTab === 'billing' && <SettingsBillingPanel vm={vm} />}
 
       {activeTab === 'appearance' && <SettingsAppearancePanel vm={vm} />}
 
