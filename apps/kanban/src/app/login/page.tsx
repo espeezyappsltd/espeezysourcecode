@@ -19,15 +19,16 @@ function LoginContent() {
     ),
   )
   const recoveryRedirectTo = buildAuthCallbackUrl(resolveClientOrigin(), { recovery: true })
+  const oauthRedirectTo = buildAuthCallbackUrl(resolveClientOrigin())
   const wantsSignup =
     searchParams?.get('signup') === 'true' ||
     (searchParams?.get('plan') != null && searchParams.get('plan') !== 'free')
   const defaultMode = wantsSignup ? 'signup' : 'signin'
 
-  const { ready, busy, error, info, signIn, signUp, resetPassword } = useSimpleAuth(
+  const { ready, busy, error, info, signIn, signUp, resetPassword, signInWithOAuth } = useSimpleAuth(
     supabase,
     redirectPath,
-    { recoveryRedirectTo, kanbanPaths: true },
+    { recoveryRedirectTo, oauthRedirectTo, kanbanPaths: true },
   )
 
   return (
@@ -43,6 +44,7 @@ function LoginContent() {
       onSignIn={signIn}
       onSignUp={signUp}
       onResetPassword={resetPassword}
+      onOAuthSignIn={async (provider) => signInWithOAuth(provider)}
     />
   )
 }

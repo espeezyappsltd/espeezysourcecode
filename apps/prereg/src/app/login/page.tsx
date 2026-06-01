@@ -16,7 +16,8 @@ function LoginContent() {
   const hasSupabaseConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   const missingConfigMessage = 'Missing local Supabase config. Create apps/prereg/.env.local first.'
 
-  const [mode, setMode] = useState<'signin' | 'signup'>('signup')
+  const initialMode = searchParams.get('mode') === 'signin' ? 'signin' : 'signup'
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [legalAccepted, setLegalAccepted] = useState(false)
@@ -115,6 +116,31 @@ function LoginContent() {
     }
 
     setSuccess('Recovery link sent. Check your inbox.')
+  }
+
+  async function handleOAuth(provider: 'google' | 'github') {
+    if (!hasSupabaseConfig) {
+      setError(missingConfigMessage)
+      return
+    }
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    const callbackUrl = new URL(
+      buildAuthCallbackUrl(resolveClientOrigin(ESPEEZY_APP_ORIGINS.prereg)),
+    )
+    callbackUrl.searchParams.set('next', next)
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: callbackUrl.toString(),
+      },
+    })
+    if (oauthError) {
+      setError(oauthError.message)
+      setLoading(false)
+    }
   }
 
   return (
@@ -332,6 +358,43 @@ function LoginContent() {
             </button>
           )}
         </form>
+
+        <div style={{ display: 'grid', gap: '0.55rem', marginTop: '0.9rem' }}>
+          <button
+            type="button"
+            onClick={() => void handleOAuth('google')}
+            disabled={loading || !hasSupabaseConfig}
+            style={{
+              padding: '0.7rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(15,23,42,0.15)',
+              background: '#fff',
+              color: '#0f172a',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: loading || !hasSupabaseConfig ? 'not-allowed' : 'pointer',
+            }}
+          >
+            Continue with Google
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleOAuth('github')}
+            disabled={loading || !hasSupabaseConfig}
+            style={{
+              padding: '0.7rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(15,23,42,0.15)',
+              background: '#fff',
+              color: '#0f172a',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: loading || !hasSupabaseConfig ? 'not-allowed' : 'pointer',
+            }}
+          >
+            Continue with GitHub
+          </button>
+        </div>
       </div>
     </div>
     </LoginAuthGate>

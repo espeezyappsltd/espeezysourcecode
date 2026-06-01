@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { MotionConfig } from 'framer-motion'
 import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
-import { HERO_ANALYTICS_CAPTION, KANBAN_DEMO_PATH, MAIN_APP_ORIGIN } from '@shared/platform-brand'
+import { HERO_ANALYTICS_CAPTION } from '@shared/platform-brand'
 import LaunchDataProvider from '@/components/LaunchDataProvider'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import ScreenshotGallery from '@/components/ScreenshotGallery'
@@ -15,8 +15,6 @@ import '@/components/landing/landing.css'
 
 function LandingPageContent({ authUserCount }: { authUserCount: number }) {
   const { apps } = usePlatformApps()
-  const kanbanRootUrl = `${MAIN_APP_ORIGIN.replace(/\/$/, '')}/`
-  const kanbanDemoUrl = `${MAIN_APP_ORIGIN.replace(/\/$/, '')}${KANBAN_DEMO_PATH}`
 
   return (
     <>
@@ -40,29 +38,17 @@ function LandingPageContent({ authUserCount }: { authUserCount: number }) {
           <EspeezyMarketingBrand variant="nav" />
         </Link>
         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Link href="/#use-cases" className="landing-nav-link">
-            Use cases
+          <Link href="/login" className="landing-nav-link">
+            Log in
           </Link>
-          <Link href="/#features" className="landing-nav-link">
-            Features
+          <Link href="/login?mode=signup" className="landing-nav-link">
+            Sign up
           </Link>
-          <Link href="/#apps" className="landing-nav-link">
-            Apps
-          </Link>
-          <Link href="/pricing" className="landing-nav-link">
-            Pricing
-          </Link>
-          <a href={kanbanRootUrl} className="platform-app-card__btn platform-app-card__btn--primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.78rem' }}>
-            Open workspace
-          </a>
         </div>
       </nav>
 
       <main id="main-content">
         <PlatformHero
-          apps={apps}
-          kanbanAppUrl={kanbanRootUrl}
-          kanbanDemoUrl={kanbanDemoUrl}
           userCount={authUserCount}
         />
 

@@ -18,6 +18,7 @@ export function useSimpleAuth(
     /** Use Kanban path rules (maps /sso and /dashboard to workspace `/`). Default false. */
     kanbanPaths?: boolean
     recoveryRedirectTo?: string
+    oauthRedirectTo?: string
     /** When true, keep the login form visible even if a session already exists. */
     skipSessionRedirect?: boolean
     /** Return false to stay on login (e.g. tier upgrade gate). */
@@ -163,6 +164,37 @@ export function useSimpleAuth(
     [supabase, options?.recoveryRedirectTo],
   )
 
+  const signInWithOAuth = useCallback(
+    async (provider: 'google' | 'github'): Promise<SimpleAuthResult> => {
+      if (!supabase) {
+        setError('OAuth sign-in is not configured. Check Supabase environment variables.')
+        return { ok: false }
+      }
+      if (!options?.oauthRedirectTo) {
+        setError('OAuth callback URL is not configured.')
+        return { ok: false }
+      }
+      setBusy(true)
+      setError(null)
+      setInfo(null)
+
+      const callback = new URL(options.oauthRedirectTo)
+      callback.searchParams.set('next', pathRef.current)
+
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: callback.toString() },
+      })
+      setBusy(false)
+      if (oauthError) {
+        setError(oauthError.message)
+        return { ok: false, message: oauthError.message }
+      }
+      return { ok: true }
+    },
+    [supabase, options?.oauthRedirectTo],
+  )
+
   return {
     ready,
     busy,
@@ -173,5 +205,6 @@ export function useSimpleAuth(
     signIn,
     signUp,
     resetPassword,
+    signInWithOAuth,
   }
 }

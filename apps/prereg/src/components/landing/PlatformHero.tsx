@@ -5,25 +5,16 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import {
   HERO_COPY_LINES,
-  KANBAN_DEMO_LABEL,
-  KANBAN_DEMO_PATH,
   PLATFORM_OPERATIONS_TAGLINE,
 } from '@shared/platform-brand'
-import { PLATFORM_APP_STATUS_LABEL, PLATFORM_HERO_INTRO, type PlatformApp } from '@shared/platform-apps'
-import { PlatformAppIcon } from './platform-app-icon'
+import { PLATFORM_HERO_INTRO } from '@shared/platform-apps'
 import './landing.css'
 
 type Props = {
-  apps: PlatformApp[]
-  kanbanAppUrl: string
-  kanbanDemoUrl: string
   userCount: number
 }
 
-export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCount }: Props) {
-  const liveApps = apps.filter((a) => a.status === 'live' || a.status === 'beta')
-  const devApps = apps.filter((a) => a.status === 'development' || a.status === 'coming_soon')
-
+export default function PlatformHero({ userCount }: Props) {
   return (
     <section id="hero" className="landing-section" style={{ textAlign: 'center', paddingTop: 'clamp(4rem, 10vw, 7rem)' }}>
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
@@ -57,27 +48,6 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
         </p>
       </motion.div>
 
-      <div className="hero-apps-strip">
-        {liveApps.map((app) => (
-          <Link key={app.slug} href={`/apps/${app.slug}`} className="hero-apps-pill">
-            <PlatformAppIcon iconKey={app.icon_key} appSlug={app.slug} size={16} color={app.accent_color} />
-            {app.name.replace(/^Espeezy\s+/i, '')}
-            <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 800 }}>
-              {PLATFORM_APP_STATUS_LABEL[app.status]}
-            </span>
-          </Link>
-        ))}
-        {devApps.map((app) => (
-          <Link key={app.slug} href={`/apps/${app.slug}`} className="hero-apps-pill hero-apps-pill--dev">
-            <PlatformAppIcon iconKey={app.icon_key} appSlug={app.slug} size={16} color={app.accent_color} />
-            {app.name.replace(/^Espeezy\s+/i, '')}
-            <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>
-              {PLATFORM_APP_STATUS_LABEL[app.status]}
-            </span>
-          </Link>
-        ))}
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -91,25 +61,16 @@ export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCo
         }}
       >
         <a
-          href={kanbanAppUrl}
+          href="/login"
           className="platform-app-card__btn platform-app-card__btn--primary"
           style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}
         >
-          Open workspace
+          Log in
           <ArrowRight size={16} aria-hidden />
         </a>
-        <a
-          href={kanbanDemoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="platform-app-card__btn platform-app-card__btn--ghost"
-          style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}
-        >
-          {KANBAN_DEMO_LABEL}
-        </a>
-        <a href="/pricing" className="platform-app-card__btn platform-app-card__btn--ghost" style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}>
-          View pricing
-        </a>
+        <Link href="/login?mode=signup" className="platform-app-card__btn platform-app-card__btn--ghost" style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}>
+          Sign up
+        </Link>
       </motion.div>
     </section>
   )
