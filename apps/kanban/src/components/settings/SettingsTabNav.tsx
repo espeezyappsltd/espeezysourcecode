@@ -42,7 +42,7 @@ export function SettingsTabNav({ vm }: { vm: SettingsPageViewModel }) {
         { id: 'identity_hub', label: 'Identity Hub', icon: ShieldAlert },
         { id: 'pulse', label: 'Presence', icon: PulseIcon },
         { id: 'activity', label: 'Activity Log', icon: History },
-        { id: 'intercom', label: 'Mail', icon: Mail },
+        { id: 'intercom', label: 'Team chat', icon: Mail },
         { id: 'workspace', label: 'Teams', icon: Users },
         { id: 'billing', label: 'Billing', icon: CreditCard },
         { id: 'appearance', label: 'Design', icon: PaletteIcon },
