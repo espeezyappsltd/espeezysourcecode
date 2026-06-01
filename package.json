@@ -1,6 +1,6 @@
 {
   "name": "espeezycodebaseserver",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -55,6 +55,10 @@
     "cf-build:core": "node scripts/cf-build-app.mjs core",
     "cf-build:base": "node scripts/cf-build-app.mjs base",
     "cf-build:all": "node scripts/cf-build-app.mjs prereg && node scripts/cf-build-app.mjs games && node scripts/cf-build-app.mjs kanban && node scripts/cf-build-app.mjs panel && node scripts/cf-build-app.mjs studios && node scripts/cf-build-app.mjs dashboard && node scripts/cf-build-app.mjs articles && node scripts/cf-build-app.mjs core && node scripts/cf-build-app.mjs base",
+    "version:stamp": "node scripts/stamp-release-version.mjs",
+    "release:v1:build": "node scripts/stamp-release-version.mjs && node scripts/audit-typecheck-build.mjs",
+    "release:v1:deploy": "node scripts/stamp-release-version.mjs && node scripts/deploy-cloudflare.mjs --all",
+    "release:v1": "node scripts/stamp-release-version.mjs && node scripts/audit-typecheck-build.mjs && node scripts/deploy-cloudflare.mjs --all",
     "deploy:cf": "node scripts/deploy-cloudflare.mjs --all",
     "deploy:cf:kanban": "node scripts/deploy-cloudflare.mjs kanban",
     "deploy:cf:kanban-api": "node scripts/deploy-cloudflare.mjs kanban-api",
