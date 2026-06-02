@@ -8,6 +8,7 @@ import {
   Users, CreditCard, Building2, Gift
 } from 'lucide-react'
 import Link from 'next/link'
+import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 import { fetchLiveMetrics } from '@/services/launch'
 import { createStripeCheckout } from '@/services/checkout'
@@ -21,14 +22,14 @@ import {
 const PLANS = {
   pro: {
     name: 'Espeezy Pro',
-    price: 'GBP 4.99',
+    price: '£4.99',
     period: '/month',
     badge: 'Best Place To Start',
     hasTrial: true,
     features: [
       'Unlimited group workspaces',
       'Deeper contribution analytics',
-      'AI Study Coach credits each month',
+      'AI Study Coach allowance each month',
       'Priority task templates and smarter planning',
       'Verified contributor badge',
       'Better export formats for proof of work',
@@ -38,7 +39,7 @@ const PLANS = {
   },
   premium: {
     name: 'Espeezy Premium',
-    price: 'GBP 14.99',
+    price: '£14.99',
     period: '/month',
     badge: 'Power Users',
     hasTrial: true,
@@ -56,7 +57,7 @@ const PLANS = {
   },
   lifetime: {
     name: LIFETIME_PLAN_NAME,
-    price: 'GBP 149.00',
+    price: '£149.00',
     period: 'one-time',
     badge: 'First 100 lifetime seats',
     hasTrial: false,
@@ -192,10 +193,7 @@ function CheckoutFlow() {
       {/* Nav */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '56px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(15,23,42,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', zIndex: 100 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-          <div style={{ width: '28px', height: '28px', background: BRAND, borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sparkles size={14} color="white" />
-          </div>
-          <span style={{ color: '#0f172a', fontWeight: 950, fontSize: '0.9rem', letterSpacing: '-0.03em' }}>Espeezy</span>
+          <EspeezyMarketingBrand variant="nav" />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'rgba(15,23,42,0.4)', fontWeight: 600 }}>
           <Lock size={12} />

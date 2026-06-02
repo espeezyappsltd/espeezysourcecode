@@ -326,7 +326,7 @@ export default function NotificationBell() {
                             const roomId = notif.metadata?.room_id
                             if (roomId) {
                               closePanel()
-                              router.push(`/chillout/room/${roomId}`)
+                              router.push(roomId ? `/network/messages/${roomId}` : '/network')
                             }
                           }}
                         >

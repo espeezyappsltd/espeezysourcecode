@@ -1,26 +1,21 @@
-
-
 import { getArticles } from '../lib/articles'
-import Link from 'next/link'
 import ArticleCard from './ArticleCard'
+import ArticlesPageHeader from '../components/ArticlesPageHeader'
+import { ARTICLES_EMPTY_STATE } from '@shared/app-ui-copy'
 
 export default async function ArticlesPage() {
   const articles = await getArticles()
 
   return (
-    <main style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
-      <h1 style={{ fontWeight: 900, fontSize: '2.5rem', marginBottom: '1.5rem' }}>Espeezy Articles</h1>
-      <p style={{ color: '#64748b', marginBottom: '2.5rem' }}>Latest articles, sorted by most recent. React, comment, and share your favorites!</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-        {articles?.length === 0 && <div>No articles found.</div>}
-        {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} />
-        ))}
-      </div>
-      <div style={{ marginTop: '3rem', textAlign: 'center' }}>
-        <Link href="/admin" style={{ color: '#6366f1', fontWeight: 700 }}>Go to Admin Panel</Link>
-      </div>
-    </main>
-  );
+    <div className="articles-page">
+      <ArticlesPageHeader />
+      <section className="articles-list" aria-label="Published articles">
+        {articles.length === 0 ? (
+          <p className="articles-empty">{ARTICLES_EMPTY_STATE}</p>
+        ) : (
+          articles.map((article) => <ArticleCard key={article.id} article={article} />)
+        )}
+      </section>
+    </div>
+  )
 }
-

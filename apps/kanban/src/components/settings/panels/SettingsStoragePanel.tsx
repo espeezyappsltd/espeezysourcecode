@@ -58,14 +58,9 @@ export function SettingsStoragePanel({ vm }: { vm: SettingsPageViewModel }) {
             <span>Quota: {profile.subscription_plan === 'premium' ? '20GB' : profile.subscription_plan === 'pro' ? '5GB' : '1GB'}</span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => (window.location.href = '/assets')}
-            className="btn btn-primary"
-            style={{ marginTop: '2rem', width: '100%' }}
-          >
-            Manage Assets
-          </button>
+          <p style={{ marginTop: '2rem', fontSize: '0.85rem', color: 'var(--text-sub)', lineHeight: 1.55 }}>
+            File uploads attach to tasks and your profile. Use the board and task modal to add evidence and assets for your team.
+          </p>
         </div>
 
         <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem' }}>

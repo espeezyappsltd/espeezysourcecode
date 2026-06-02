@@ -1,9 +1,12 @@
 'use client'
 
 import { useState, type CSSProperties, type FormEvent } from 'react'
+import EspeezyAppLogo, { type EspeezyAppLogoSlug } from './EspeezyAppLogo'
 
 export type SimpleAuthFormProps = {
   appName: string
+  /** When set, renders the SVG wordmark instead of a text heading */
+  logoApp?: EspeezyAppLogoSlug
   tagline?: string
   busy: boolean
   ready: boolean
@@ -13,6 +16,7 @@ export type SimpleAuthFormProps = {
   onSignIn: (email: string, password: string) => Promise<{ ok: boolean; needsEmailConfirm?: boolean }>
   onSignUp: (email: string, password: string) => Promise<{ ok: boolean; needsEmailConfirm?: boolean }>
   onResetPassword?: (email: string) => Promise<{ ok: boolean }>
+  onOAuthSignIn?: (provider: 'google' | 'github') => Promise<{ ok: boolean }>
 }
 
 const shell: CSSProperties = {
@@ -67,6 +71,7 @@ const btn: CSSProperties = {
 
 export function SimpleAuthForm({
   appName,
+  logoApp,
   tagline,
   busy,
   ready,
@@ -76,6 +81,7 @@ export function SimpleAuthForm({
   onSignIn,
   onSignUp,
   onResetPassword,
+  onOAuthSignIn,
 }: SimpleAuthFormProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>(defaultMode)
   const [email, setEmail] = useState('')
@@ -104,7 +110,13 @@ export function SimpleAuthForm({
   return (
     <div style={shell}>
       <div style={card}>
-        <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>{appName}</h1>
+        {logoApp ? (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: tagline ? '0.75rem' : '1.5rem' }}>
+            <EspeezyAppLogo app={logoApp} variant="login" />
+          </div>
+        ) : (
+          <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>{appName}</h1>
+        )}
         {tagline && <p style={{ margin: '0 0 1.5rem', color: '#64748b', fontSize: '0.9rem' }}>{tagline}</p>}
 
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
@@ -212,6 +224,37 @@ export function SimpleAuthForm({
             {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
           </button>
         </form>
+
+        {onOAuthSignIn && (
+          <div style={{ marginTop: '1rem', display: 'grid', gap: '0.5rem' }}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void onOAuthSignIn('google')}
+              style={{
+                ...btn,
+                background: '#fff',
+                color: '#0f172a',
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              Continue with Google
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void onOAuthSignIn('github')}
+              style={{
+                ...btn,
+                background: '#fff',
+                color: '#0f172a',
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              Continue with GitHub
+            </button>
+          </div>
+        )}
 
         <p style={{ marginTop: '1.25rem', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
           Secured with encrypted sign-in. Never share your password.

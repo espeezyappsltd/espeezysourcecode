@@ -4,9 +4,9 @@ Production kanban workspace at **https://kanban.espeezy.com**. Group projects, c
 
 ## Stack
 
-- Next.js 16 (App Router, `src/proxy.ts` for Supabase session + route guard)
+- Next.js 16 (App Router, `src/middleware.ts` for Supabase session + route guard)
 - Supabase Auth + Postgres
-- Deployed on **Vercel** (server mode — not static export)
+- Deployed on **Cloudflare Workers** (OpenNext, server mode)
 
 ## Local development
 
@@ -23,20 +23,17 @@ npm run typecheck
 npm run predeploy:check            # typecheck + next build
 ```
 
-## Vercel
+## Cloudflare
 
-Dedicated project for **kanban.espeezy.com**. Root `apps/kanban` uses `apps/kanban/vercel.json`.
+Worker **`espeezy-kanban`** serves **kanban.espeezy.com**. Config: `apps/kanban/wrangler.toml`.
 
-| Setting | Value |
+| Step | Command |
 | --- | --- |
-| Root Directory | `apps/kanban` |
-| Framework | Next.js |
-| Build Command | *(from `vercel.json`)* `cd ../.. && npm run vercel-build:kanban` |
-| Install Command | *(from `vercel.json`)* `cd ../.. && npm install` |
-| Output Directory | `.next` |
-| Node | 22.x |
+| Build OpenNext bundle | `npm run cf-build` (from this folder) or `npm run cf-build:kanban` (repo root) |
+| Deploy | `npm run deploy:cf` |
+| Preview on Workers | `npm run preview:cf` |
 
-**Do not** use `vercel-build:panel` or repo-root `vercel.json` on this project — those are for `panel.espeezy.com` only (`apps/admin`, root `.`).
+Set Supabase env vars as **Worker variables** in the Cloudflare dashboard. See [`internaldocs/cloudflare-deployment.md`](../../internaldocs/cloudflare-deployment.md).
 
 Required environment variables (see `src/lib/supabase/env.ts`):
 
@@ -46,7 +43,7 @@ Required environment variables (see `src/lib/supabase/env.ts`):
 
 ## Auth
 
-Unauthenticated users are redirected to `/login`. Public routes (login, auth callbacks, docs, legal pages) are allowlisted in `src/proxy.ts`.
+Unauthenticated users are redirected to `/login`. Public routes (login, auth callbacks, docs, legal pages) are allowlisted in `src/middleware.ts`.
 
 ## Espeezy Credits (assets & marketplace)
 

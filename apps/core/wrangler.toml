@@ -1,0 +1,17 @@
+name = "espeezy-core"
+account_id = "6f6d20dab3acd55c37b5ff2ff5a02d95"
+main = ".open-next/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+binding = "ASSETS"
+directory = ".open-next/assets"
+
+[[routes]]
+pattern = "devlaunch.espeezy.com"
+custom_domain = true
+
+[[routes]]
+pattern = "core.espeezy.com"
+custom_domain = true

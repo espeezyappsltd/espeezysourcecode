@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { Q } from '@/lib/query-columns'
 import { z } from 'zod'
 import { createClient, createAdminSupabaseClient } from '@/lib/supabase/server'
-import { rateLimit } from '../../../proxy'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 

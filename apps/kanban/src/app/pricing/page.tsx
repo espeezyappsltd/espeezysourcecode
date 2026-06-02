@@ -45,16 +45,16 @@ const PLANS: ReadonlyArray<{
   {
     id: 'pro',
     name: 'Espeezy Pro',
-    price: 'GBP 4.99 / month',
+    price: '£4.99 / month',
     tag: 'Best place to start',
     description: 'Better execution, deeper analytics, and a measurable academic edge.',
-    features: ['Unlimited workspaces', 'AI Study Coach credits', '5GB storage included'],
+    features: ['Unlimited workspaces', 'AI Study Coach allowance', '5GB storage included'],
     featured: true,
   },
   {
     id: 'premium',
     name: 'Espeezy Premium',
-    price: 'GBP 14.99 / month',
+    price: '£14.99 / month',
     tag: 'Advanced workflows',
     description: 'For team leads who need deeper analytics and intervention tools.',
     features: ['Everything in Pro', 'Advanced AI access', '20GB storage included'],
@@ -62,7 +62,7 @@ const PLANS: ReadonlyArray<{
   {
     id: 'lifetime',
     name: LIFETIME_PLAN_NAME,
-    price: 'GBP 149.00 one-time',
+    price: '£149.00 one-time',
     tag: 'First 100 only',
     description: LIFETIME_PLAN_DESCRIPTION,
     features: [...LIFETIME_FEATURES],

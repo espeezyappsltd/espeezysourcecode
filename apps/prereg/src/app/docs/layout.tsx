@@ -11,44 +11,29 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
   const sections = [
     {
-      title: 'Getting Started',
+      title: 'Start',
       items: [
         { label: 'Introduction', href: '/docs' },
-        { label: 'Quick Start', href: '/docs/getting-started' },
+        { label: 'Apps in use', href: '/docs/apps' },
+        { label: 'Quick start', href: '/docs/getting-started' },
         { label: 'Installation', href: '/docs/installation' },
       ],
     },
     {
-      title: 'Features (ELI12)',
+      title: 'Apps',
       items: [
-        { label: 'Kanban Boards', href: '/docs/features/kanban' },
-        { label: 'Academic Roadmap', href: '/docs/features/roadmap' },
-        { label: 'Peer Network', href: '/docs/features/network' },
-        { label: 'Marketplace', href: '/docs/features/marketplace' },
-        { label: 'Side Hustle', href: '/docs/features/hustle' },
-        { label: 'Skirmish Games', href: '/docs/features/skirmish' },
-        { label: 'Smart Search', href: '/docs/features/search' },
+        { label: 'Kanban', href: '/docs/features/kanban' },
+        { label: 'Studio', href: '/docs/features/studios' },
+        { label: 'Games', href: '/docs/features/skirmish' },
+        { label: 'Articles', href: '/docs/features/articles' },
       ],
     },
     {
-      title: 'Infrastructure',
+      title: 'More',
       items: [
-        { label: 'Stripe Integration', href: '/docs/infra/payments' },
-        { label: 'Supabase Sync', href: '/docs/infra/sync' },
-        { label: 'Real-time Presence', href: '/docs/infra/presence' },
-      ],
-    },
-    {
-      title: 'Legal',
-      items: [
-        { label: 'Refund Policy', href: '/docs/refund-policy' },
-      ],
-    },
-    {
-      title: 'Vision',
-      items: [
-        { label: 'Our Vision', href: '/docs/vision' },
-        { label: 'Impact Stats', href: '/docs/impact' },
+        { label: 'Dev Launch', href: '/docs/features/dev-launch' },
+        { label: 'Refund policy', href: '/docs/refund-policy' },
+        { label: 'Vision', href: '/docs/vision' },
       ],
     },
   ]
@@ -69,7 +54,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontWeight: 600 }} className="hide-mobile">
-            ← Back to site
+            ← Home
           </Link>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -83,7 +68,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       <div className="docs-layout">
         <aside className={`docs-sidebar${isSidebarOpen ? ' open' : ''}`}>
           {sections.map((section, idx) => (
-            <div key={idx} style={{ marginBottom: '2.5rem' }}>
+            <div key={idx} style={{ marginBottom: '2rem' }}>
               <h4 style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#6b7280', marginBottom: '0.875rem', margin: '0 0 0.875rem' }}>
                 {section.title}
               </h4>

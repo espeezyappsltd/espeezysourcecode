@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
   try {
     const team = await createOrSwitchTeam(userId, teamName)
     return NextResponse.json({ team })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to create/switch team' }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to create/switch team'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
 }
 

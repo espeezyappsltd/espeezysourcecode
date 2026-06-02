@@ -1,12 +1,15 @@
 /** Canonical production origins for Espeezy apps (used for auth redirects and links). */
-export const ESPEEZY_APP_ORIGINS = {
-  prereg: 'https://espeezy.com',
-  kanban: 'https://kanban.espeezy.com',
-  games: 'https://games.espeezy.com',
-  panel: 'https://panel.espeezy.com',
-} as const
+export {
+  ESPEEZY_APP_ORIGINS,
+  type EspeezyAppKey,
+  APP_FOLDER_TO_ORIGIN_KEY,
+  resolveAppOrigin,
+  buildAppUrl,
+  hostnameFromOrigin,
+  allProductionHostnames,
+} from './espeezy-app-origins'
 
-export type EspeezyAppKey = keyof typeof ESPEEZY_APP_ORIGINS
+import { buildAppUrl, ESPEEZY_APP_ORIGINS } from './espeezy-app-origins'
 
 const LOCAL_ORIGIN_PATTERN =
   /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i
@@ -14,9 +17,16 @@ const LOCAL_ORIGIN_PATTERN =
 const ALLOWED_HOSTS = new Set([
   'espeezy.com',
   'www.espeezy.com',
+  'base.espeezy.com',
   'kanban.espeezy.com',
   'panel.espeezy.com',
   'games.espeezy.com',
+  'studios.espeezy.com',
+  'devlaunch.espeezy.com',
+  'core.espeezy.com',
+  'articles.espeezy.com',
+  'blog.espeezy.com',
+  'dashboard.espeezy.com',
   'localhost',
   '127.0.0.1',
 ])
@@ -152,11 +162,8 @@ export function sanitizeKanbanNextPath(next: string | null | undefined, fallback
 
 /** Absolute URL on kanban.espeezy.com (or NEXT_PUBLIC_KANBAN_APP_URL in dev). */
 export function buildKanbanAppUrl(path = '/'): string {
-  const base = (
-    process.env.NEXT_PUBLIC_KANBAN_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.kanban
-  ).replace(/\/$/, '')
   const resolved = resolveLegacyKanbanPath(path, '/')
-  return `${base}${resolved.startsWith('/') ? resolved : `/${resolved}`}`
+  return buildAppUrl('kanban', resolved)
 }
 
 const EMBED_QUERY = 'embed'
@@ -179,4 +186,4 @@ export function withEmbedPreviewParam(url: string): string {
   }
 }
 
-export { ESPEEZY_PANEL_APP, PANEL_VERCEL_ROOT, isPanelProductionHost } from './panel-app'
+export { ESPEEZY_PANEL_APP, PANEL_CLOUDFLARE_DEPLOY, PANEL_VERCEL_ROOT, isPanelProductionHost } from './panel-app'

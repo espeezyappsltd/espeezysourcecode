@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Heart,
   Flame,
@@ -91,11 +91,13 @@ function timeAgo(date: string): string {
   return new Date(date).toLocaleDateString()
 }
 
-export default function FeedPage() {
+function FeedPageContent() {
   const { profile } = useProfile()
   const { addToast } = useNotifications()
   const { confirmTransaction } = useTransactionConfirm()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const mineOnly = searchParams?.get('mine') === '1'
 
   const [composerText, setComposerText] = useState('')
   const [composerVisibility, setComposerVisibility] = useState<'public' | 'connections'>('public')
@@ -311,7 +313,12 @@ export default function FeedPage() {
     setSubmittingComment((prev) => ({ ...prev, [postId]: false }))
   }
 
-  const storyAuthors = posts
+  const visiblePosts = useMemo(() => {
+    if (!mineOnly || !profile?.id) return posts
+    return posts.filter((p) => p.author_id === profile.id)
+  }, [mineOnly, posts, profile?.id])
+
+  const storyAuthors = visiblePosts
     .map((p) => p.author)
     .filter((a): a is PostAuthor => Boolean(a?.id))
     .filter((a, i, arr) => arr.findIndex((x) => x.id === a.id) === i)
@@ -321,13 +328,23 @@ export default function FeedPage() {
     <div className="feed-shell page-shell page-fade">
       <header className="feed-hero page-header page-header--center">
         <div className="page-header__main">
-          <h1 className="page-header__title">Academic Journeys</h1>
-          <p className="page-header__desc">Real-time signals from students building the future. Share milestones, wins, and campus life.</p>
+          <h1 className="page-header__title">{mineOnly ? 'Your posts' : 'Academic Journeys'}</h1>
+          <p className="page-header__desc">
+            {mineOnly
+              ? 'Edit or delete posts you have shared.'
+              : 'Real-time updates from students and teams. Share milestones, project progress, and learning resources.'}
+          </p>
       </div>
         {profile && (
-          <Link href="/feed/manage" className="feed-manage-link">
-            Manage your posts
-          </Link>
+          mineOnly ? (
+            <Link href="/feed" className="feed-manage-link">
+              All posts
+            </Link>
+          ) : (
+            <Link href="/feed?mine=1" className="feed-manage-link">
+              Manage your posts
+            </Link>
+          )
         )}
       </header>
 
@@ -369,7 +386,7 @@ export default function FeedPage() {
                 id="feed-composer"
                 value={composerText}
                 onChange={(e) => setComposerText(e.target.value)}
-                placeholder="Share a milestone, project update, or campus tip…"
+                placeholder="Share a milestone, project update, or study resource…"
                 rows={composerText.length > 100 ? 4 : 2}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) void submitPost()
@@ -439,15 +456,19 @@ export default function FeedPage() {
       )}
 
       {loading &&
-        posts.length === 0 &&
+        visiblePosts.length === 0 &&
         [0, 1, 2].map((i) => <div key={i} className="feed-skeleton" />)}
 
-      {!loading && posts.length === 0 && !loadError && (
+      {!loading && visiblePosts.length === 0 && !loadError && (
         <div className="feed-empty ui-panel ui-panel--dashed">
           <Globe size={40} style={{ marginBottom: '0.75rem', opacity: 0.35, color: 'var(--brand)' }} />
-          <p style={{ fontWeight: 800, marginBottom: '0.35rem' }}>No journeys yet</p>
+          <p style={{ fontWeight: 800, marginBottom: '0.35rem' }}>
+            {mineOnly ? 'You have not posted yet' : 'No journeys yet'}
+          </p>
           <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-            Be the first to share a milestone — or load sample journeys to preview the feed.
+            {mineOnly
+              ? 'Share an update from the composer above, or return to the full feed.'
+              : 'Be the first to share a milestone — or load sample journeys to preview the feed.'}
           </p>
           <button
             type="button"
@@ -462,7 +483,7 @@ export default function FeedPage() {
         </div>
       )}
 
-      {posts.map((post) => (
+      {visiblePosts.map((post) => (
         <PostCard
           key={post.id}
           post={post}
@@ -500,11 +521,19 @@ export default function FeedPage() {
 
       <div ref={sentinelRef} style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {loadingMore && <Loader2 size={20} className="feed-spin" style={{ color: 'var(--brand)' }} />}
-        {!hasMore && posts.length > 0 && (
+        {!hasMore && visiblePosts.length > 0 && (
           <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>You&apos;re all caught up</span>
         )}
       </div>
     </div>
+  )
+}
+
+export default function FeedPage() {
+  return (
+    <Suspense fallback={<div className="feed-shell page-shell page-fade">Loading feed…</div>}>
+      <FeedPageContent />
+    </Suspense>
   )
 }
 
@@ -669,7 +698,7 @@ function PostCard({
                 <button type="button" role="menuitem" onClick={onStartEdit}>
                   <Pencil size={14} /> Edit
                 </button>
-                <Link href="/feed/manage" role="menuitem" className="feed-card-menu-link" onClick={onToggleMenu}>
+                <Link href="/feed?mine=1" role="menuitem" className="feed-card-menu-link" onClick={onToggleMenu}>
                   Manage all posts
                 </Link>
                 <button

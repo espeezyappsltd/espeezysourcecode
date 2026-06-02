@@ -16,12 +16,14 @@ export default function StaffLobby() {
     <StudioCrudPanel<TeamMember>
       table="studio_team_members"
       title="team member"
+      gearToggle
+      gearLabel="Team settings"
       fields={[
         { key: 'name', label: 'Name' },
         { key: 'role', label: 'Role' },
         { key: 'sort_order', label: 'Sort order', type: 'number', min: 0 },
       ]}
-      emptyLabel="No team members yet."
+      emptyLabel="No team members yet. Add names and roles above."
       buildEmpty={() => ({ name: '', role: '', sort_order: 0 })}
       renderRow={(m) => (
         <>

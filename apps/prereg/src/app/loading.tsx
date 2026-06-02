@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import LoadingBrand from '@/components/LoadingBrand'
 
 export default function Loading() {
   return (
@@ -14,7 +14,6 @@ export default function Loading() {
         flexDirection: 'column',
         gap: '1.25rem',
       }}>
-      {/* Spinning ring */}
       <div style={{
         width: '48px',
         height: '48px',
@@ -24,23 +23,7 @@ export default function Loading() {
         animation: 'spin 0.75s linear infinite',
       }} />
 
-      {/* Brand logo + name */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: 0.6 }}>
-        <div style={{
-          width: '24px',
-          height: '24px',
-          background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
-          borderRadius: '6px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <Image src="/brand_logo2.svg" width={16} height={16} style={{ objectFit: 'contain' }} alt="" priority />
-        </div>
-        <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'rgba(15,23,42,0.5)', letterSpacing: '-0.02em' }}>
-          Espeezy
-        </span>
-      </div>
+      <LoadingBrand />
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }

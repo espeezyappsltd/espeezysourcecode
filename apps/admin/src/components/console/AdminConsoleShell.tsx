@@ -8,6 +8,10 @@ import { ADMIN_NAV_ITEMS, hasAdminPermission, type AdminStaffRole } from '@/lib/
 import { AdminOnboardingBanner } from './AdminOnboardingBanner'
 import { useAdminOnboarding } from '@/context/AdminOnboardingContext'
 import { useIsMobileShell } from '@/hooks/useMobileShell'
+import HelpTray from '@/components/HelpTray'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
+import ProcessedDataNavigationLoader from '@shared/ProcessedDataNavigationLoader'
+import { isAdminProcessedDataRoute } from '@shared/processed-data-routes'
 
 type Props = {
   children: React.ReactNode
@@ -128,6 +132,7 @@ export function AdminConsoleShell({ children, adminRole, username, displayName, 
               @{username} · {adminRole}
             </div>
             <div className="admin-console-nav-foot-email">{email}</div>
+            <AppCopyrightStrip style={{ marginTop: '0.85rem', color: 'rgba(148, 163, 184, 0.85)', fontSize: '0.68rem' }} />
           </div>
         </aside>
 
@@ -140,12 +145,15 @@ export function AdminConsoleShell({ children, adminRole, username, displayName, 
               Sign out
             </Link>
           </header>
-          <div className="admin-console-content">
+          <div className="admin-console-content admin-console-content--data-ready">
             <AdminOnboardingBanner />
-            {children}
+            <ProcessedDataNavigationLoader matchPath={isAdminProcessedDataRoute}>
+              {children}
+            </ProcessedDataNavigationLoader>
           </div>
         </div>
       </div>
+      <HelpTray />
     </div>
   )
 }

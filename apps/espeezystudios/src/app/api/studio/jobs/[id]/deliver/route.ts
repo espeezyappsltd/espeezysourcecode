@@ -4,12 +4,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { fetchJobBundle } from '@/lib/jobs/fetch-bundle'
 import {
   generateFinalReport,
-  generatePrdMarkdown,
-  generateRequirementsTxt,
   nextInvoiceNumber,
   nextReceiptNumber,
 } from '@/lib/jobs/documents'
 import { sendStudioDeliveryEmail } from '@/lib/email'
+import { resolvePrdContent, resolveRequirementsContent } from '@/lib/jobs/resolve-document-content'
 
 export async function POST(
   _req: Request,
@@ -36,8 +35,8 @@ export async function POST(
   const invoiceNumber = bundle.job.invoice_number || nextInvoiceNumber(jobId)
   const receiptNumber = bundle.job.receipt_number || nextReceiptNumber(invoiceNumber)
 
-  const requirementsTxt = generateRequirementsTxt(bundle)
-  const prdMd = bundle.job.prd_text?.trim() || generatePrdMarkdown(bundle)
+  const requirementsTxt = await resolveRequirementsContent(admin, bundle)
+  const prdMd = await resolvePrdContent(admin, bundle)
   const finalReport = generateFinalReport(bundle, invoiceNumber, receiptNumber)
 
   const currency = bundle.job.currency || 'GBP'
@@ -66,7 +65,7 @@ export async function POST(
         {
           filename: 'invoice.txt',
           content: [
-            'ESPEEZY STUDIOS — INVOICE',
+            'ESPEEZY STUDIOS: INVOICE',
             `Invoice: ${invoiceNumber}`,
             `Receipt: ${receiptNumber}`,
             `Project: ${bundle.job.title}`,
@@ -78,7 +77,7 @@ export async function POST(
         {
           filename: 'receipt.txt',
           content: [
-            'ESPEEZY STUDIOS — PAYMENT RECEIPT',
+            'ESPEEZY STUDIOS: PAYMENT RECEIPT',
             `Receipt: ${receiptNumber}`,
             `Invoice: ${invoiceNumber}`,
             `Paid by: ${bundle.job.client_name}`,

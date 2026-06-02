@@ -114,7 +114,7 @@ export function SettingsSecurityPanel({ vm }: { vm: SettingsPageViewModel }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
         {(() => {
-          const DEFAULT_TOOLS = ['React', 'Next.js', 'Tailwind', 'Node.js', 'Python', 'Firebase', 'PostgreSQL', 'AWS', 'Docker', 'Vercel', 'Figma', 'VS Code']
+          const DEFAULT_TOOLS = ['React', 'Next.js', 'Tailwind', 'Node.js', 'Python', 'Firebase', 'PostgreSQL', 'AWS', 'Docker', 'Cloudflare', 'Figma', 'VS Code']
 
           const currentAchievements = pendingAchievements || profile?.achievements || []
           const activeTools = currentAchievements.map((a: Achievement) => a.name)

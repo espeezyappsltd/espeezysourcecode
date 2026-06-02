@@ -1,6 +1,6 @@
 /**
- * Espeezy Credits economy (aligned with prereg docs + Pro billing).
- * 50 credits ≈ 1 month Pro · max listing/asset value = 2 months Pro (100 credits).
+ * Project balance display (legacy internal units map to GBP for UI).
+ * 50 units ≈ 1 month Pro · max listing value = 2 months Pro.
  */
 
 export const CREDITS_PER_PRO_MONTH = 50
@@ -21,19 +21,19 @@ export function validateCreditValue(
 ): { ok: true; value: number } | { ok: false; message: string } {
   if (raw === undefined || raw === null || raw === '') {
     if (required) {
-      return { ok: false, message: `Credit value is required (max ${MAX_ASSET_CREDIT_VALUE}).` }
+      return { ok: false, message: `Listing price is required (max ${formatCredits(MAX_ASSET_CREDIT_VALUE)}).` }
     }
     return { ok: true, value: 0 }
   }
 
   const num = typeof raw === 'number' ? raw : Number(raw)
   if (!Number.isFinite(num) || num < 0) {
-    return { ok: false, message: 'Credit value must be a non-negative number.' }
+    return { ok: false, message: 'Listing price must be a non-negative number.' }
   }
   if (num > MAX_ASSET_CREDIT_VALUE) {
     return {
       ok: false,
-      message: `Credit value cannot exceed ${MAX_ASSET_CREDIT_VALUE} (2 months of Pro credit).`,
+      message: `Listing price cannot exceed ${formatCredits(MAX_ASSET_CREDIT_VALUE)} (2 months of Pro).`,
     }
   }
   return { ok: true, value: Math.floor(num) }
@@ -45,17 +45,17 @@ export function creditsToGbpEquivalent(credits: number): number {
 }
 
 export function formatCredits(credits: number): string {
-  const v = clampCreditValue(credits)
-  return `${v} credit${v === 1 ? '' : 's'}`
+  const gbp = creditsToGbpEquivalent(credits)
+  return `£${gbp.toFixed(2)}`
 }
 
 export function formatCreditCapHint(): string {
-  return `Max ${MAX_ASSET_CREDIT_VALUE} credits (2\u00d7 Pro month)`
+  return `Max ${formatCredits(MAX_ASSET_CREDIT_VALUE)} (2× Pro month)`
 }
 
-/** Display-only GBP equivalent, e.g. "≈ £4.99" */
+/** Display-only GBP equivalent, e.g. "£4.99" */
 export function formatGbpApprox(credits: number): string {
-  return `\u2248 \u00a3${creditsToGbpEquivalent(credits).toFixed(2)}`
+  return formatCredits(credits)
 }
 
 type MetadataLike = Record<string, unknown> | null | undefined

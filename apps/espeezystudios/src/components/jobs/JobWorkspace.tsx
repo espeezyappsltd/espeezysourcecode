@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -12,16 +12,39 @@ import {
   Mail,
   Package,
   Save,
-  Trash2,
   Download,
 } from 'lucide-react'
+import { JobFormModal } from '@/components/jobs/JobFormModal'
+import { ProjectActionsMenu } from '@/components/jobs/ProjectActionsMenu'
+import { STUDIO_NOT_SET, STUDIO_STATUS } from '@/lib/studio/ui-copy'
 import { supabase } from '@/lib/supabase-client'
 import { useJobBundle } from '@/hooks/useJobBundle'
+import { useJobSchemaCapabilities } from '@/hooks/useJobSchemaCapabilities'
 import { useStudioEditor } from '@/hooks/useStudioEditor'
+import {
+  buildJobUpdatePayload,
+  hasExtendedJobFeatures,
+  jobWorkspaceTabs,
+  type JobWorkspaceTab,
+} from '@/lib/jobs/schema-capabilities'
 import type { JobBudgetEntry, JobMilestone, JobTimelineEvent, StudioJob } from '@/lib/jobs/types'
+import { JobDocumentsStoragePanel } from '@/components/jobs/JobDocumentsStoragePanel'
+import {
+  DEMO_FEE_CENTS,
+  MIN_CONSULT_FEE_CENTS,
+  consultationEntriesBelowMinimum,
+  jobHasDemoFee,
+  normalizeBudgetEntryAmount,
+} from '@/lib/jobs/job-form'
 
-const TABS = ['overview', 'timeline', 'budget', 'milestones', 'docs', 'delivery'] as const
-type Tab = (typeof TABS)[number]
+const TAB_LABELS: Record<JobWorkspaceTab, string> = {
+  overview: 'Overview',
+  timeline: 'Timeline',
+  budget: 'Budget',
+  milestones: 'Milestones',
+  docs: 'Requirements & PRD',
+  delivery: 'Delivery',
+}
 
 function money(cents: number, currency: string) {
   const sym = currency === 'GBP' ? '£' : currency === 'USD' ? '$' : `${currency} `
@@ -29,49 +52,66 @@ function money(cents: number, currency: string) {
 }
 
 export default function JobWorkspace({ jobId }: { jobId: string }) {
-  const { bundle, loading, error, refresh } = useJobBundle(jobId)
+  const { capabilities, loading: capsLoading } = useJobSchemaCapabilities()
+  const { bundle, loading, error, refresh } = useJobBundle(jobId, capabilities)
   const { canEdit } = useStudioEditor()
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useState<JobWorkspaceTab>('overview')
+  const [editOpen, setEditOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [delivering, setDelivering] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [jobForm, setJobForm] = useState<Partial<StudioJob>>({})
 
-  if (loading) {
+  const visibleTabs = useMemo(
+    () => (capabilities ? jobWorkspaceTabs(capabilities) : (['overview'] as JobWorkspaceTab[])),
+    [capabilities],
+  )
+
+  useEffect(() => {
+    if (!visibleTabs.includes(tab)) setTab('overview')
+  }, [tab, visibleTabs])
+
+  if (capsLoading || loading || !capabilities) {
     return <p className="studio-muted"><Loader2 className="spin" size={18} /> Loading project…</p>
   }
 
   if (error || !bundle) {
     return (
       <div>
-        <p className="studio-crud__error">{error ?? 'Job not found'}</p>
-        <Link href="/jobs" className="studio-link">← All jobs</Link>
+        <p className="studio-crud__error">{error ?? 'Project not found'}</p>
+        <Link href="/jobs" className="studio-link">← All projects</Link>
       </div>
     )
   }
 
+  const caps = capabilities
+
   const job = { ...bundle.job, ...jobForm }
-  const currency = job.currency || 'GBP'
+  const currency = caps.columns.currency ? job.currency || 'GBP' : 'GBP'
   const budgetTotal = bundle.budgetEntries.reduce((s, e) => s + e.amount_cents, 0)
+  const showExtendedBanner = !hasExtendedJobFeatures(caps)
+  const hasDemoFee = jobHasDemoFee(bundle.budgetEntries)
+  const lowConsultationEntries = consultationEntriesBelowMinimum(bundle.budgetEntries)
+  const feeIssues = !hasDemoFee || lowConsultationEntries.length > 0
+  const [feeFixing, setFeeFixing] = useState(false)
+
+  const sublineParts: string[] = []
+  if (caps.columns.client_name) {
+    sublineParts.push(job.client_name || 'No client')
+  }
+  if (caps.columns.client_email && job.client_email) {
+    sublineParts.push(job.client_email)
+  }
+  if (caps.columns.deadline_at && job.deadline_at) {
+    sublineParts.push(`Deadline ${new Date(job.deadline_at).toLocaleString()}`)
+  }
 
   async function saveJob() {
     setSaving(true)
     setStatus(null)
     const { error: err } = await supabase
       .from('jobs')
-      .update({
-        title: job.title,
-        description: job.description,
-        status: job.status,
-        client_name: job.client_name,
-        client_email: job.client_email,
-        budget_cents: job.budget_cents,
-        currency: job.currency,
-        deadline_at: job.deadline_at || null,
-        requirements_text: job.requirements_text,
-        prd_text: job.prd_text,
-        updated_at: new Date().toISOString(),
-      })
+      .update(buildJobUpdatePayload(job, caps))
       .eq('id', jobId)
     setSaving(false)
     if (err) setStatus(err.message)
@@ -92,7 +132,7 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
       const res = await fetch(`/api/studio/jobs/${jobId}/deliver`, { method: 'POST', credentials: 'include' })
       const data = (await res.json()) as { ok?: boolean; error?: string; invoiceNumber?: string }
       if (!res.ok) throw new Error(data.error ?? 'Delivery failed')
-      setStatus(`Delivered — invoice ${data.invoiceNumber} emailed to client.`)
+      setStatus(STUDIO_STATUS.jobDelivered(data.invoiceNumber ?? 'pending'))
       await refresh()
     } catch (e) {
       setStatus(e instanceof Error ? e.message : 'Delivery failed')
@@ -102,27 +142,57 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
   }
 
   async function deleteJob() {
-    if (!confirm('Delete this job and all timeline/budget data?')) return
+    if (!confirm('Delete this project and all timeline/budget data?')) return
     await supabase.from('jobs').delete().eq('id', jobId)
     window.location.href = '/jobs'
+  }
+
+  async function fixFeeLines() {
+    setFeeFixing(true)
+
+    if (!hasDemoFee) {
+      await supabase.from('studio_job_budget_entries').insert([
+        {
+          job_id: jobId,
+          label: 'Demo fee',
+          amount_cents: DEMO_FEE_CENTS,
+          entry_type: 'estimate',
+        },
+      ])
+    }
+
+    for (const entry of lowConsultationEntries) {
+      await supabase
+        .from('studio_job_budget_entries')
+        .update({ amount_cents: MIN_CONSULT_FEE_CENTS })
+        .eq('id', entry.id)
+    }
+
+    await refresh()
+    setFeeFixing(false)
   }
 
   return (
     <div className="jobs-workspace">
       <div className="jobs-workspace__top">
-        <Link href="/jobs" className="jobs-workspace__back">
-          <ArrowLeft size={16} /> Jobs
-        </Link>
+        <div className="jobs-workspace__top-row">
+          <Link href="/jobs" className="jobs-workspace__back">
+            <ArrowLeft size={16} /> Projects
+          </Link>
+          {canEdit ? (
+            <ProjectActionsMenu onEdit={() => setEditOpen(true)} onDelete={() => void deleteJob()} />
+          ) : null}
+        </div>
         <h2 className="jobs-workspace__title">{job.title}</h2>
-        <p className="jobs-workspace__sub">
-          {job.client_name || 'No client'}
-          {job.client_email ? ` · ${job.client_email}` : ''}
-          {job.deadline_at ? ` · Deadline ${new Date(job.deadline_at).toLocaleString()}` : ''}
-        </p>
+        {sublineParts.length > 0 ? (
+          <p className="jobs-workspace__sub">{sublineParts.join(' · ')}</p>
+        ) : (
+          <p className="jobs-workspace__sub">{job.status}</p>
+        )}
       </div>
 
       <div className="jobs-workspace__tabs" role="tablist">
-        {TABS.map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t}
             type="button"
@@ -131,166 +201,175 @@ export default function JobWorkspace({ jobId }: { jobId: string }) {
             className={`jobs-workspace__tab${tab === t ? ' is-active' : ''}`}
             onClick={() => setTab(t)}
           >
-            {t === 'docs' ? 'Requirements & PRD' : t.charAt(0).toUpperCase() + t.slice(1)}
+            {TAB_LABELS[t]}
           </button>
         ))}
       </div>
 
       {status ? <p className="studio-success" role="status">{status}</p> : null}
 
+      <JobFormModal
+        open={editOpen}
+        mode="edit"
+        job={bundle.job}
+        capabilities={caps}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => {
+          setJobForm({})
+          void refresh()
+        }}
+        onDeleted={() => {
+          window.location.href = '/jobs'
+        }}
+      />
+
       {tab === 'overview' && (
         <section className="jobs-panel">
-          {canEdit ? (
-            <>
-              <div className="jobs-form-grid">
-                <label className="studio-crud__field">
-                  <span>Title</span>
-                  <input value={job.title} onChange={(e) => setJobForm((f) => ({ ...f, title: e.target.value }))} />
-                </label>
-                <label className="studio-crud__field">
-                  <span>Status</span>
-                  <select value={job.status} onChange={(e) => setJobForm((f) => ({ ...f, status: e.target.value }))}>
-                    <option value="pending">Pending</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="review">Review</option>
-                    <option value="done">Done</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </label>
-                <label className="studio-crud__field">
-                  <span>Client name</span>
-                  <input value={job.client_name ?? ''} onChange={(e) => setJobForm((f) => ({ ...f, client_name: e.target.value }))} />
-                </label>
-                <label className="studio-crud__field">
-                  <span>Client email</span>
-                  <input type="email" value={job.client_email ?? ''} onChange={(e) => setJobForm((f) => ({ ...f, client_email: e.target.value }))} />
-                </label>
-                <label className="studio-crud__field">
-                  <span>Deadline</span>
-                  <input
-                    type="datetime-local"
-                    value={job.deadline_at ? job.deadline_at.slice(0, 16) : ''}
-                    onChange={(e) => setJobForm((f) => ({ ...f, deadline_at: e.target.value ? new Date(e.target.value).toISOString() : null }))}
-                  />
-                </label>
-                <label className="studio-crud__field">
-                  <span>Budget ({currency})</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={((job.budget_cents ?? 0) / 100).toFixed(2)}
-                    onChange={(e) =>
-                      setJobForm((f) => ({ ...f, budget_cents: Math.round(parseFloat(e.target.value || '0') * 100) }))
-                    }
-                  />
-                </label>
-              </div>
-              <label className="studio-crud__field">
-                <span>Description</span>
-                <textarea rows={4} value={job.description} onChange={(e) => setJobForm((f) => ({ ...f, description: e.target.value }))} />
-              </label>
-              <div className="jobs-workspace__actions">
-                <button type="button" className="studio-btn" disabled={saving} onClick={() => void saveJob()}>
-                  <Save size={16} /> {saving ? 'Saving…' : 'Save'}
+          {showExtendedBanner ? (
+            <p className="studio-muted" style={{ marginBottom: '1rem' }}>
+              This database has the core projects table only. Apply studio job migrations to enable timeline, budget,
+              milestones, file storage, and client delivery.
+            </p>
+          ) : null}
+          {feeIssues ? (
+            <div className="studio-muted" style={{ marginBottom: '1rem' }}>
+              This project should include a fixed Demo fee (£50) and a minimum Consultation fee (£20).
+              {canEdit ? (
+                <button
+                  type="button"
+                  className="studio-btn studio-btn--ghost"
+                  disabled={feeFixing}
+                  onClick={() => void fixFeeLines()}
+                  style={{ marginLeft: '1rem' }}
+                >
+                  {feeFixing ? 'Applying fees…' : 'Apply fee defaults'}
                 </button>
-                <button type="button" className="studio-btn studio-btn--ghost" onClick={() => void deleteJob()}>
-                  <Trash2 size={16} /> Delete
-                </button>
-              </div>
-            </>
-          ) : (
-            <p>{job.description}</p>
-          )}
-          <div className="jobs-summary-cards">
-            <div className="jobs-summary-card">
-              <DollarSign size={18} />
-              <span>Budget lines</span>
-              <strong>{money(budgetTotal, currency)}</strong>
+              ) : null}
             </div>
-            <div className="jobs-summary-card">
-              <Flag size={18} />
-              <span>Milestones</span>
-              <strong>{bundle.milestones.length}</strong>
+          ) : null}
+          <p className="jobs-overview__description">{job.description || (canEdit ? 'No description yet.' : '')}</p>
+          {(caps.tables.budget ||
+            caps.tables.milestones ||
+            caps.tables.timeline ||
+            caps.columns.delivery_status) ? (
+            <div className="jobs-summary-cards">
+              {caps.tables.budget ? (
+                <div className="jobs-summary-card">
+                  <DollarSign size={18} />
+                  <span>Budget lines</span>
+                  <strong>{money(budgetTotal, currency)}</strong>
+                </div>
+              ) : null}
+              {caps.tables.milestones ? (
+                <div className="jobs-summary-card">
+                  <Flag size={18} />
+                  <span>Milestones</span>
+                  <strong>{bundle.milestones.length}</strong>
+                </div>
+              ) : null}
+              {caps.tables.timeline ? (
+                <div className="jobs-summary-card">
+                  <Calendar size={18} />
+                  <span>Timeline events</span>
+                  <strong>{bundle.timeline.length}</strong>
+                </div>
+              ) : null}
+              {caps.columns.delivery_status ? (
+                <div className="jobs-summary-card">
+                  <Package size={18} />
+                  <span>Delivery</span>
+                  <strong>{job.delivery_status || 'draft'}</strong>
+                </div>
+              ) : null}
             </div>
-            <div className="jobs-summary-card">
-              <Calendar size={18} />
-              <span>Timeline events</span>
-              <strong>{bundle.timeline.length}</strong>
-            </div>
-            <div className="jobs-summary-card">
-              <Package size={18} />
-              <span>Delivery</span>
-              <strong>{job.delivery_status || 'draft'}</strong>
-            </div>
-          </div>
+          ) : null}
         </section>
       )}
 
-      {tab === 'timeline' && (
+      {tab === 'timeline' && caps.tables.timeline && (
         <TimelinePanel jobId={jobId} events={bundle.timeline} canEdit={canEdit} onRefresh={refresh} />
       )}
 
-      {tab === 'budget' && (
+      {tab === 'budget' && caps.tables.budget && (
         <BudgetPanel jobId={jobId} entries={bundle.budgetEntries} currency={currency} canEdit={canEdit} onRefresh={refresh} />
       )}
 
-      {tab === 'milestones' && (
+      {tab === 'milestones' && caps.tables.milestones && (
         <MilestonesPanel jobId={jobId} milestones={bundle.milestones} canEdit={canEdit} onRefresh={refresh} />
       )}
 
-      {tab === 'docs' && (
+      {tab === 'docs' && visibleTabs.includes('docs') && (
         <section className="jobs-panel">
           <h3><FileText size={18} /> Requirements & PRD</h3>
-          <p className="studio-muted">Edit source text; delivery regenerates requirements.txt and PRD.md from this content.</p>
-          {canEdit ? (
+          {caps.tables.documents ? (
             <>
-              <label className="studio-crud__field">
-                <span>Requirements (requirements.txt body)</span>
-                <textarea
-                  rows={10}
-                  className="jobs-code"
-                  value={job.requirements_text ?? ''}
-                  onChange={(e) => setJobForm((f) => ({ ...f, requirements_text: e.target.value }))}
-                  placeholder="List functional requirements, one per line…"
-                />
-              </label>
-              <label className="studio-crud__field">
-                <span>PRD (markdown)</span>
-                <textarea
-                  rows={12}
-                  className="jobs-code"
-                  value={job.prd_text ?? ''}
-                  onChange={(e) => setJobForm((f) => ({ ...f, prd_text: e.target.value }))}
-                  placeholder="# PRD…"
-                />
-              </label>
-              <button type="button" className="studio-btn" onClick={() => void saveJob()}>
-                Save documents
-              </button>
+              <JobDocumentsStoragePanel jobId={jobId} onMutate={() => void refresh()} />
+              <p className="studio-muted">Edit source text or upload files above; delivery uses the latest content.</p>
             </>
-          ) : (
-            <pre className="jobs-code">{job.requirements_text || '—'}</pre>
+          ) : null}
+          {caps.columns.requirements_text || caps.columns.prd_text ? (
+            canEdit ? (
+              <>
+                {caps.columns.requirements_text ? (
+                  <label className="studio-crud__field">
+                    <span>Requirements (requirements.txt body)</span>
+                    <textarea
+                      rows={10}
+                      className="jobs-code"
+                      value={job.requirements_text ?? ''}
+                      onChange={(e) => setJobForm((f) => ({ ...f, requirements_text: e.target.value }))}
+                      placeholder="List functional requirements, one per line…"
+                    />
+                  </label>
+                ) : null}
+                {caps.columns.prd_text ? (
+                  <label className="studio-crud__field">
+                    <span>PRD (markdown)</span>
+                    <textarea
+                      rows={12}
+                      className="jobs-code"
+                      value={job.prd_text ?? ''}
+                      onChange={(e) => setJobForm((f) => ({ ...f, prd_text: e.target.value }))}
+                      placeholder="# PRD…"
+                    />
+                  </label>
+                ) : null}
+                <button type="button" className="studio-btn" onClick={() => void saveJob()}>
+                  Save documents
+                </button>
+              </>
+            ) : (
+              <pre className="jobs-code">{job.requirements_text || STUDIO_NOT_SET}</pre>
+            )
+          ) : caps.tables.documents ? null : (
+            <p className="studio-muted">Document storage is not available on this database.</p>
           )}
-          <div className="jobs-downloads">
-            <a href={`/api/studio/jobs/${jobId}/documents?type=requirements`} className="studio-link">
-              <Download size={14} /> requirements.txt
-            </a>
-            <a href={`/api/studio/jobs/${jobId}/documents?type=prd`} className="studio-link">
-              <Download size={14} /> PRD.md
-            </a>
-          </div>
+          {(caps.columns.requirements_text || caps.columns.prd_text) ? (
+            <div className="jobs-downloads">
+              {caps.columns.requirements_text ? (
+                <a href={`/api/studio/jobs/${jobId}/documents?type=requirements`} className="studio-link">
+                  <Download size={14} /> requirements.txt
+                </a>
+              ) : null}
+              {caps.columns.prd_text ? (
+                <a href={`/api/studio/jobs/${jobId}/documents?type=prd`} className="studio-link">
+                  <Download size={14} /> PRD.md
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </section>
       )}
 
-      {tab === 'delivery' && (
+      {tab === 'delivery' && visibleTabs.includes('delivery') && (
         <section className="jobs-panel">
           <h3><Mail size={18} /> App delivery system</h3>
           <p className="studio-muted">
             Sends requirements.txt, PRD.md, final report, invoice, and receipt to the client email. Logs delivery on the timeline.
           </p>
           <ul className="jobs-delivery-meta">
-            <li>Invoice: <strong>{job.invoice_number || '— (generated on send)'}</strong></li>
-            <li>Receipt: <strong>{job.receipt_number || '—'}</strong></li>
+            <li>Invoice: <strong>{job.invoice_number || 'Generated on send'}</strong></li>
+            <li>Receipt: <strong>{job.receipt_number || STUDIO_NOT_SET}</strong></li>
             <li>Last delivered: <strong>{job.last_delivered_at ? new Date(job.last_delivered_at).toLocaleString() : 'Never'}</strong></li>
           </ul>
           {canEdit ? (
@@ -415,12 +494,14 @@ function BudgetPanel({
   const [entryType, setEntryType] = useState<JobBudgetEntry['entry_type']>('estimate')
 
   async function add() {
-    const cents = Math.round(parseFloat(amount || '0') * 100)
-    if (!label.trim()) return
+    const labelText = label.trim()
+    if (!labelText) return
+    const parsedCents = Math.round(parseFloat(amount || '0') * 100)
+    const amountCents = normalizeBudgetEntryAmount(labelText, parsedCents)
     await supabase.from('studio_job_budget_entries').insert({
       job_id: jobId,
-      label: label.trim(),
-      amount_cents: cents,
+      label: labelText,
+      amount_cents: amountCents,
       entry_type: entryType,
     })
     setLabel('')
@@ -453,6 +534,11 @@ function BudgetPanel({
             Add line
           </button>
         </div>
+      ) : null}
+      {canEdit ? (
+        <p className="studio-muted" style={{ marginTop: '0.5rem' }}>
+          Demo fee lines are fixed at £50. Consultation fees are enforced at a minimum of £20.
+        </p>
       ) : null}
       <table className="jobs-table">
         <thead>

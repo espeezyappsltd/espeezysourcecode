@@ -1,5 +1,5 @@
 
-import { createBrowserClient, createServerClient } from '@supabase/ssr'
+import { createBrowserClient, createServerClient, type CookieOptions } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveSupabaseAnonKey, resolveSupabaseUrl } from './env'
 
@@ -18,8 +18,8 @@ export function createServerSupabaseClient(): SupabaseClient {
   // Minimal no-op cookies implementation for API/server context
   const cookies = {
     get: (name: string) => undefined,
-    set: (name: string, value: string, options?: any) => {},
-    remove: (name: string, options?: any) => {},
+    set: (_name: string, _value: string, _options?: CookieOptions) => {},
+    remove: (_name: string, _options?: CookieOptions) => {},
   }
   return createServerClient(
     resolveSupabaseUrl(),

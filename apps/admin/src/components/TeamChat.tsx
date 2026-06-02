@@ -15,6 +15,7 @@ import { logActivity } from '@/utils/logging'
 import { ChatMessage, ChatPayload } from '@/types/ui'
 import { Profile } from '@/types/database' // Fixed import for Profile
 import RemoteAvatar from '@/components/common/RemoteAvatar'
+import { ESPEEZY_APP_MARK_ICON_PATH } from '@shared/espeezy-app-logo-config'
 
 type TeamChatProps = {
   groupId: string
@@ -498,7 +499,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
               if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('New Team Message', {
                   body: incoming.content || 'Sent an attachment',
-                  icon: '/brand-logo-black-gold.png'
+                  icon: ESPEEZY_APP_MARK_ICON_PATH
                 })
               }
             }

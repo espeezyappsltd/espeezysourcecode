@@ -15,10 +15,11 @@ const nextConfig = {
       { source: '/dashboard', destination: '/admin', permanent: false },
     ]
   },
-  // Deployed to Vercel — server mode (no static export)
+  // Deployed to Cloudflare Workers (OpenNext) — server mode (no static export)
   images: {
     unoptimized: true,
   },
+  output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
   // Removed unsupported 'turbo' key from experimental
 }

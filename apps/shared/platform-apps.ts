@@ -2,6 +2,9 @@
  * Platform apps catalog — types, status labels, and offline fallback seed.
  */
 
+import { normalizeGbpLabel } from './format-gbp'
+import { PRODUCTION_PLATFORM_APPS } from './platform-production-catalog'
+
 export type PlatformAppStatus = 'live' | 'beta' | 'development' | 'coming_soon'
 
 export type PlatformAppSetupSection = {
@@ -43,161 +46,17 @@ export const PLATFORM_APP_STATUS_LABEL: Record<PlatformAppStatus, string> = {
 }
 
 export const PLATFORM_HERO_INTRO =
-  'It runs in your browser today. You can also self-host any app on your own database, branding, and domain.'
+  'Open any app below with the same Espeezy login. Self-host guides live on Dev Launch for technical teams.'
 
-/** Fallback when Supabase is unavailable (matches migration seed). */
-export const PLATFORM_APPS_FALLBACK: PlatformApp[] = [
-  {
-    id: 'seed-kanban',
-    slug: 'kanban',
-    name: 'Espeezy Kanban',
-    tagline: 'The main app: shared boards that track who does the work.',
-    description:
-      'The main Espeezy workspace. Plan group projects on shared boards, keep a record of every contribution, and export it for grades and portfolios.',
-    status: 'live',
-    price_cents: 49900,
-    price_currency: 'GBP',
-    price_label: 'GBP 499 one-time · self-host license',
-    stripe_payment_link: null,
-    download_url: null,
-    live_url: 'https://kanban.espeezy.com',
-    icon_key: 'layout-dashboard',
-    accent_color: '#10b981',
-    features: [
-      'Kanban boards & drag-and-drop columns',
-      'Contribution proof & academic exports',
-      'Marketplace & hustle credits',
-      'Teams, RBAC, and institutional guards',
-    ],
-    setup_sections: [],
-    db_setup_markdown: '',
-    ui_customization_markdown: '',
-    includes_source: true,
-    sort_order: 10,
-    published: true,
-  },
-  {
-    id: 'seed-games',
-    slug: 'games',
-    name: 'Espeezy Games',
-    tagline: 'Quiz games and head-to-head study battles.',
-    description: 'Quiz games and head-to-head matches that use your Espeezy account.',
-    status: 'live',
-    price_cents: 29900,
-    price_currency: 'GBP',
-    price_label: 'GBP 299 one-time · self-host license',
-    stripe_payment_link: null,
-    download_url: null,
-    live_url: 'https://games.espeezy.com',
-    icon_key: 'gamepad-2',
-    accent_color: '#6366f1',
-    features: ['Category & game catalog', 'Skirmish sessions', 'Cross-app SSO with Kanban'],
-    setup_sections: [],
-    db_setup_markdown: '',
-    ui_customization_markdown: '',
-    includes_source: true,
-    sort_order: 20,
-    published: true,
-  },
-  {
-    id: 'seed-admin',
-    slug: 'admin',
-    name: 'Espeezy Panel',
-    tagline: 'Staff console for platform operations.',
-    description: 'Internal admin panel: RBAC staff, marketing controls, audit, and vault.',
-    status: 'beta',
-    price_cents: 19900,
-    price_currency: 'GBP',
-    price_label: 'GBP 199 one-time · self-host license',
-    stripe_payment_link: null,
-    download_url: null,
-    live_url: 'https://panel.espeezy.com',
-    icon_key: 'shield',
-    accent_color: '#0f172a',
-    features: ['Staff RBAC & TOTP', 'Launch & marketing controls', 'User analytics'],
-    setup_sections: [],
-    db_setup_markdown: '',
-    ui_customization_markdown: '',
-    includes_source: true,
-    sort_order: 30,
-    published: true,
-  },
-  {
-    id: 'seed-prereg',
-    slug: 'prereg',
-    name: 'Espeezy Marketing',
-    tagline: 'Early access, pricing, checkout, and docs.',
-    description: 'The espeezy.com marketing app for campus launches.',
-    status: 'live',
-    price_cents: 9900,
-    price_currency: 'GBP',
-    price_label: 'GBP 99 one-time · self-host license',
-    stripe_payment_link: null,
-    download_url: null,
-    live_url: 'https://espeezy.com',
-    icon_key: 'globe',
-    accent_color: '#06b6d4',
-    features: ['Landing & prereg', 'Stripe checkout', 'Docs site'],
-    setup_sections: [],
-    db_setup_markdown: '',
-    ui_customization_markdown: '',
-    includes_source: true,
-    sort_order: 40,
-    published: true,
-  },
-  {
-    id: 'seed-core',
-    slug: 'core',
-    name: 'Espeezy Core Runtime',
-    tagline: 'Local-first core services.',
-    description: 'Core runtime and dev orchestration — in active development.',
-    status: 'development',
-    price_cents: 0,
-    price_currency: 'GBP',
-    price_label: 'Early access · pricing TBA',
-    stripe_payment_link: null,
-    download_url: null,
-    live_url: null,
-    icon_key: 'cpu',
-    accent_color: '#94a3b8',
-    features: ['Dev hub orchestration', 'Shared auth bridges'],
-    setup_sections: [],
-    db_setup_markdown: '',
-    ui_customization_markdown: '',
-    includes_source: false,
-    sort_order: 50,
-    published: true,
-  },
-  {
-    id: 'seed-studios',
-    slug: 'studios',
-    name: 'Espeezy Studios',
-    tagline: 'Gallery for campus media teams.',
-    description: 'Lightweight gallery app — in development.',
-    status: 'development',
-    price_cents: 0,
-    price_currency: 'GBP',
-    price_label: 'In development',
-    stripe_payment_link: null,
-    download_url: null,
-    live_url: null,
-    icon_key: 'palette',
-    accent_color: '#f59e0b',
-    features: ['Media gallery', 'Staff lobby'],
-    setup_sections: [],
-    db_setup_markdown: '',
-    ui_customization_markdown: '',
-    includes_source: false,
-    sort_order: 60,
-    published: true,
-  },
-]
+/** Fallback when Supabase is unavailable — matches production deploys on espeezy.com. */
+export const PLATFORM_APPS_FALLBACK: PlatformApp[] = PRODUCTION_PLATFORM_APPS
 
 export function formatPlatformAppPrice(app: Pick<PlatformApp, 'price_cents' | 'price_currency' | 'price_label'>): string {
-  if (app.price_label?.trim()) return app.price_label.trim()
+  if (app.price_label?.trim()) return normalizeGbpLabel(app.price_label.trim())
   if (app.price_cents <= 0) return 'Free'
-  const major = (app.price_cents / 100).toFixed(app.price_cents % 100 === 0 ? 0 : 2)
-  return `${app.price_currency} ${major}`
+  const major = app.price_cents / 100
+  const formatted = major % 1 === 0 ? major.toFixed(0) : major.toFixed(2)
+  return `£${formatted}`
 }
 
 export function platformAppProductPath(slug: string): string {

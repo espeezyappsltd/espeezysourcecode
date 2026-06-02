@@ -1,6 +1,6 @@
 import StudioPageShell from '@/components/StudioPageShell'
+import { STUDIO_PAGE_COPY } from '@/lib/studio/ui-copy'
 import JobWorkspace from '@/components/jobs/JobWorkspace'
-
 type Props = { params: Promise<{ id: string }> }
 
 export default async function JobDetailPage({ params }: Props) {
@@ -8,7 +8,7 @@ export default async function JobDetailPage({ params }: Props) {
   return (
     <StudioPageShell
       title="Project workspace"
-      description="Timeline, budget, milestones, PRD, and client delivery."
+      description={STUDIO_PAGE_COPY.jobsWorkspace}
       wide
     >
       <JobWorkspace jobId={id} />

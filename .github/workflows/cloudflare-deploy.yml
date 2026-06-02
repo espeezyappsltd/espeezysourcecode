@@ -1,0 +1,75 @@
+name: Deploy Cloudflare Workers
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      app:
+        description: App to deploy (all, kanban, prereg, games, panel, studios, dashboard, articles, core, base)
+        required: false
+        default: all
+
+concurrency:
+  group: cloudflare-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.set.outputs.apps }}
+    steps:
+      - id: set
+        run: |
+          INPUT="${{ github.event.inputs.app }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "$INPUT" ] && [ "$INPUT" != "all" ]; then
+            case "$INPUT" in
+              admin) INPUT="panel" ;;
+              espeezystudios) INPUT="studios" ;;
+              espeezyarticles) INPUT="articles" ;;
+            esac
+            echo "apps=[\"$INPUT\"]" >> "$GITHUB_OUTPUT"
+          else
+            echo 'apps=["prereg","kanban","games","panel","studios","dashboard","articles","core","base"]' >> "$GITHUB_OUTPUT"
+          fi
+
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run validate:cloudflare
+
+  deploy:
+    name: Deploy ${{ matrix.app }}
+    needs: [validate, plan]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.plan.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build and deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/deploy-cloudflare.mjs ${{ matrix.app }}

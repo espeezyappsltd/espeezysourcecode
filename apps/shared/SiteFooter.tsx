@@ -1,7 +1,7 @@
 'use client'
 
-import Image from 'next/image'
-
+import { ESPEEZY_PUBLIC_APP_LINKS } from './espeezy-apps-catalog'
+import EspeezyMarketingBrand from './EspeezyMarketingBrand'
 
 const PLATFORM_LINKS = [
   { href: 'https://espeezy.com', label: 'Home' },
@@ -11,10 +11,7 @@ const PLATFORM_LINKS = [
   { href: 'https://espeezy.com/contact', label: 'Contact' },
 ]
 
-const APPS_LINKS = [
-  { href: 'https://games.espeezy.com', label: 'Espeezy Games' },
-  { href: 'https://kanban.espeezy.com', label: 'Espeezy Kanban' },
-]
+const APPS_LINKS = ESPEEZY_PUBLIC_APP_LINKS
 
 const DOCS_LINKS = [
   { href: 'https://espeezy.com/docs', label: 'Introduction' },
@@ -44,13 +41,12 @@ const LEGAL_LINKS = [
 
 import { useCentralLoading } from './CentralLoadingProvider'
 import {
-  FOOTER_BOTTOM_RIGHT,
   FOOTER_BRAND_BLURB,
-  FOOTER_COPYRIGHT_TAGLINE,
   FOOTER_TECH_BLURB,
   SUPPORT_PHONE,
   SUPPORT_PHONE_TEL,
 } from './platform-brand'
+import FooterCopyrightNotice from './FooterCopyrightNotice'
 
 function FooterLink({ href, children, external = false }: { href: string; children: React.ReactNode; external?: boolean }) {
   const { startLoading } = useCentralLoading();
@@ -99,21 +95,7 @@ export default function SiteFooter() {
         {/* Brand */}
         <div style={{ gridColumn: 'span 1' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Image src="https://espeezy.com/brand_logo2.svg" width={20} height={20} alt="" aria-hidden="true" />
-            </div>
-            <span style={{ fontWeight: 900, fontSize: '1rem', color: '#f1f5f9', letterSpacing: '-0.01em' }}>Espeezy</span>
+            <EspeezyMarketingBrand variant="nav" />
           </div>
 
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: '#64748b', marginBottom: '1.5rem', maxWidth: '240px' }}>
@@ -203,22 +185,12 @@ export default function SiteFooter() {
       <div
         style={{
           borderTop: '1px solid rgba(255,255,255,0.05)',
-          padding: '1.5rem clamp(1.25rem, 4vw, 2.5rem)',
+          padding: '0 clamp(1.25rem, 4vw, 2.5rem) 1.5rem',
           maxWidth: '1200px',
           margin: '0 auto',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.75rem',
         }}
       >
-        <p style={{ fontSize: '0.78rem', color: '#334155', margin: 0 }}>
-          &copy; {new Date().getFullYear()} Espeezy. All rights reserved. {FOOTER_COPYRIGHT_TAGLINE}
-        </p>
-        <p style={{ fontSize: '0.78rem', color: '#1e293b', margin: 0, fontWeight: 600 }}>
-          {FOOTER_BOTTOM_RIGHT}
-        </p>
+        <FooterCopyrightNotice style={{ color: '#475569' }} />
       </div>
     </footer>
   )

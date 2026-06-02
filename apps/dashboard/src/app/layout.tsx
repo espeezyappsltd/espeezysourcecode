@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Espeezy Kanban — Dashboard Home',
-    description: 'Your academic Kanban command center with full accessibility and user guide.',
+    description: 'Your academic Kanban command center with accessibility tools and a complete user guide.',
     url: 'https://kanban.espeezy.com',
     siteName: 'Espeezy Kanban',
     type: 'website',

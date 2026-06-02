@@ -41,7 +41,7 @@ export function MarketplaceSidebar({ categories, activeCategory, setActiveCatego
         
         <div style={{ padding: '1.25rem', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '16px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
           <div style={{ fontWeight: 950, fontSize: '0.75rem', color: 'var(--brand)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Global Sync</div>
-          <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>Results are live from the campus-wide peer registry.</p>
+          <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>Results are live from the Espeezy peer registry.</p>
         </div>
       </div>
     </aside>

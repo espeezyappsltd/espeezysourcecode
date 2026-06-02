@@ -4,13 +4,13 @@ import { TabName } from '@/types/ui'
 import type { SettingsPageViewModel } from './settings-types'
 import { SettingsActivityPanel, SettingsIntercomPanel, SettingsPresencePanel } from './panels/SettingsEmbeddedPanels'
 import { SettingsAppearancePanel } from './panels/SettingsAppearancePanel'
-import { SettingsBillingPanel } from './panels/SettingsBillingPanel'
 import { SettingsDataPanel } from './panels/SettingsDataPanel'
 import { SettingsIdentityHubPanel } from './panels/SettingsIdentityHubPanel'
 import { SettingsIdentityPanel } from './panels/SettingsIdentityPanel'
 import { SettingsSecurityPanel } from './panels/SettingsSecurityPanel'
 import { SettingsStoragePanel } from './panels/SettingsStoragePanel'
 import { SettingsSupportPanel } from './panels/SettingsSupportPanel'
+import { SettingsBillingPanel } from './panels/SettingsBillingPanel'
 import { SettingsTeamsPanel } from './panels/SettingsTeamsPanel'
 
 export function SettingsTabPanels({ vm }: { vm: SettingsPageViewModel }) {
@@ -20,9 +20,7 @@ export function SettingsTabPanels({ vm }: { vm: SettingsPageViewModel }) {
     <div style={{ minHeight: '400px' }}>
       {activeTab === 'support' && <SettingsSupportPanel vm={vm} />}
 
-      {activeTab === ('storage' as TabName) && profile && <SettingsStoragePanel vm={vm} />}
-
-      {activeTab === 'billing' && profile && <SettingsBillingPanel vm={vm} />}
+      {activeTab === 'storage' && profile && <SettingsStoragePanel vm={vm} />}
 
       {activeTab === 'intercom' && profile && <SettingsIntercomPanel vm={vm} />}
 
@@ -35,6 +33,8 @@ export function SettingsTabPanels({ vm }: { vm: SettingsPageViewModel }) {
       {activeTab === 'identity' && <SettingsIdentityPanel vm={vm} />}
 
       {activeTab === 'workspace' && <SettingsTeamsPanel vm={vm} />}
+
+      {activeTab === 'billing' && <SettingsBillingPanel vm={vm} />}
 
       {activeTab === 'appearance' && <SettingsAppearancePanel vm={vm} />}
 

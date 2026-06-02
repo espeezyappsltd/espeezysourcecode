@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+
 import { Download, FileText, BarChart2 } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase-client';
@@ -34,15 +34,15 @@ async function downloadPDF() {
 
 export default function DashboardAdvancedActions() {
   return (
-    <div style={{ display: 'flex', gap: '1.2rem', margin: '0 0 2.2rem 0', flexWrap: 'wrap', justifyContent: 'center' }}>
-      <button className="dashboard-action-btn" onClick={downloadCSV} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Download size={18} /> Download CSV
+    <div className="studio-dashboard-actions">
+      <button type="button" className="dashboard-action-btn" onClick={() => void downloadCSV()}>
+        <Download size={18} aria-hidden /> Download CSV
       </button>
-      <button className="dashboard-action-btn" onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <FileText size={18} /> Download PDF
+      <button type="button" className="dashboard-action-btn" onClick={() => void downloadPDF()}>
+        <FileText size={18} aria-hidden /> Download PDF
       </button>
-      <button className="dashboard-action-btn" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <BarChart2 size={18} /> Advanced Analytics (Coming Soon)
+      <button type="button" className="dashboard-action-btn" disabled aria-disabled="true">
+        <BarChart2 size={18} aria-hidden /> Advanced Analytics (Coming Soon)
       </button>
     </div>
   );

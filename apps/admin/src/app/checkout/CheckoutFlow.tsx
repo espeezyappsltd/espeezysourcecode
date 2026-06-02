@@ -8,19 +8,21 @@ import {
   Users, Zap, Globe, Star, CreditCard, Building2
 } from 'lucide-react'
 import Link from 'next/link'
+import EspeezyMarketingBrand from '@shared/EspeezyMarketingBrand'
 import { buildStripePaymentLink, getPlanKey } from '@/lib/stripe-payment-links'
 import {
   CHECKOUT_TEAM_NOTE,
   LIFETIME_FEATURES,
   LIFETIME_PLAN_DESCRIPTION,
   LIFETIME_PLAN_NAME,
+  CHECKOUT_TRUST_LINE,
 } from '@shared/platform-brand'
 
 // ─── Plan definitions ──────────────────────────────────────────────────────────
 const PLANS = {
   pro: {
     name: 'Pro Scholar',
-    price: '$9',
+    price: '£4.99',
     period: '/month',
     badge: 'Most Popular',
     color: '#10b981',
@@ -36,7 +38,7 @@ const PLANS = {
   },
   premium: {
     name: 'Premium Scholar',
-    price: '$19',
+    price: '£14.99',
     period: '/month',
     badge: 'Best Value',
     color: '#6366f1',
@@ -53,7 +55,7 @@ const PLANS = {
   },
   lifetime: {
     name: LIFETIME_PLAN_NAME,
-    price: '$149',
+    price: '£149',
     period: 'one-time',
     badge: 'Limited · 100 seats',
     color: '#f59e0b',
@@ -107,10 +109,7 @@ export default function CheckoutFlow() {
       {/* Nav bar */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '56px', backdropFilter: 'blur(20px)', background: 'rgba(0,0,0,0.6)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', zIndex: 100 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-          <div style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sparkles size={14} color="white" />
-          </div>
-          <span style={{ color: 'white', fontWeight: 950, fontSize: '0.9rem', letterSpacing: '-0.03em' }}>Espeezy</span>
+          <EspeezyMarketingBrand variant="nav" />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
           <Lock size={12} />
@@ -234,7 +233,7 @@ export default function CheckoutFlow() {
             </p>
             <motion.div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem', fontWeight: 600 }}>
               <Users size={13} />
-              <span>Trusted by student teams on campuses worldwide</span>
+              <span>{CHECKOUT_TRUST_LINE}</span>
             </motion.div>
           </motion.div>
         ) : (

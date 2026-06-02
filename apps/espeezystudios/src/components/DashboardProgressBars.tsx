@@ -38,17 +38,19 @@ export default function DashboardProgressBars() {
         <StudioCrudPanel<ProgressItem>
           table="studio_progress_items"
           title="progress metric"
+          gearToggle
+          gearLabel="Progress settings"
           fields={[
             { key: 'label', label: 'Label' },
-            { key: 'value', label: 'Percent (0–100)', type: 'number', min: 0, max: 100 },
+            { key: 'value', label: 'Percent (0-100)', type: 'number', min: 0, max: 100 },
             { key: 'color', label: 'Color', type: 'color' },
             { key: 'sort_order', label: 'Sort order', type: 'number', min: 0 },
           ]}
-          emptyLabel="No progress metrics."
+          emptyLabel="No progress metrics yet. Add one above to track pipeline completion."
           buildEmpty={() => ({ label: '', value: 0, color: '#6366f1', sort_order: 0 })}
           renderRow={(p) => (
             <span>
-              {p.label} — {p.value}%
+              {p.label}: {p.value}%
             </span>
           )}
           onMutate={() => void fetchItems()}
@@ -58,42 +60,22 @@ export default function DashboardProgressBars() {
       {loading ? (
         <p className="studio-muted">Loading progress…</p>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '1.2rem',
-            margin: '0 0 2.5rem 0',
-            width: '100%',
-            maxWidth: 900,
-          }}
-        >
+        <div className="studio-dashboard-progress">
           {items.map((p) => (
-            <div
-              key={p.id}
-              style={{
-                background: 'var(--studios-surface-2)',
-                borderRadius: 14,
-                padding: '1.1rem 1.2rem',
-                boxShadow: '0 1px 8px rgba(15,23,42,0.07)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-              }}
-            >
-              <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--studios-muted)' }}>{p.label}</div>
-              <div style={{ width: '100%', height: 10, background: '#e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
+            <div key={p.id} className="studio-dashboard-progress__item">
+              <div className="studio-dashboard-progress__label">{p.label}</div>
+              <div className="studio-dashboard-progress__track">
                 <div
+                  className="studio-dashboard-progress__fill"
                   style={{
                     width: `${p.value}%`,
-                    height: '100%',
                     background: p.color,
-                    borderRadius: 6,
-                    transition: 'width 0.7s cubic-bezier(.4,2,.6,1)',
                   }}
                 />
               </div>
-              <div style={{ fontWeight: 900, fontSize: '1.2rem', color: p.color }}>{p.value}%</div>
+              <div className="studio-dashboard-progress__value" style={{ color: p.color }}>
+                {p.value}%
+              </div>
             </div>
           ))}
         </div>

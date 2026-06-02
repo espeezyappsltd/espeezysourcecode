@@ -293,6 +293,11 @@ html.admin-theme-dark body {
   display: none;
 }
 
+.admin-console-content--data-ready {
+  position: relative;
+  min-height: 12rem;
+}
+
 .admin-console-content {
   flex: 1;
   padding: var(--admin-content-p) var(--admin-content-p) var(--admin-content-pb);

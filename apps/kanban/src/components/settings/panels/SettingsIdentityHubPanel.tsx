@@ -9,6 +9,7 @@ export function SettingsIdentityHubPanel({ vm }: { vm: SettingsPageViewModel }) 
     protectAvatar,
     handleToggleAvatarProtection,
     isGithubLinked,
+    isGoogleLinked,
     handleLinkIdentity,
     isPhoneVerified,
     otpStep,
@@ -148,6 +149,66 @@ export function SettingsIdentityHubPanel({ vm }: { vm: SettingsPageViewModel }) 
             )}
             {!isGithubLinked && (
               <button type="button" onClick={() => handleLinkIdentity('github.com')} className="btn btn-sm btn-primary" style={{ width: 'auto' }}>
+                Link
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: isGoogleLinked ? 'rgba(34, 197, 94, 0.03)' : 'var(--bg-sub)',
+            border: isGoogleLinked ? '1px solid var(--success)' : '1px solid var(--border)',
+            borderRadius: '24px',
+            padding: '1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: '#ea4335',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '1rem',
+                fontWeight: 900,
+              }}
+            >
+              G
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Google Identity</h3>
+              <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.7rem' }}>
+                Smart sync for profile name and avatar.
+              </p>
+            </div>
+          </div>
+          <div
+            style={{
+              marginTop: 'auto',
+              paddingTop: '1rem',
+              borderTop: '1px solid var(--border)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            {isGoogleLinked ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontWeight: 900, fontSize: '0.7rem' }}>
+                <CheckCircle2 size={14} /> CONNECTED
+              </div>
+            ) : (
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-sub)' }}>Disconnected</span>
+            )}
+            {!isGoogleLinked && (
+              <button type="button" onClick={() => handleLinkIdentity('google.com')} className="btn btn-sm btn-primary" style={{ width: 'auto' }}>
                 Link
               </button>
             )}

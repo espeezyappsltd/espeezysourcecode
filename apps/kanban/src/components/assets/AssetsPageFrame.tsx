@@ -23,7 +23,7 @@ export function AssetsPageFrame({
   return (
     <>
       <a href="#assets-main-content" className="assets-skip-link">
-        Skip to Personal Arsenal content
+        Skip to Files content
       </a>
       {statusMessage ? (
         <p

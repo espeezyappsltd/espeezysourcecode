@@ -1,3 +1,5 @@
+import { ESPEEZY_APP_ORIGINS } from '@shared/espeezy-app-origins'
+
 export type DevLink = {
   title: string
   description: string
@@ -48,6 +50,18 @@ export const LOCAL_APPS: DevLink[] = [
     title: 'Prereg',
     description: 'Marketing & early access',
     href: 'http://localhost:3005',
+    external: true,
+  },
+  {
+    title: 'Studios',
+    description: 'Marketplace & jobs',
+    href: 'http://localhost:3007/login',
+    external: true,
+  },
+  {
+    title: 'Articles',
+    description: 'Articles reader',
+    href: 'http://localhost:3008',
     external: true,
   },
 ]
@@ -190,7 +204,25 @@ export const DEV_LINK_SECTIONS: DevLinkSection[] = [
       {
         title: 'Kanban workspace (prod)',
         description: 'Live scholar product',
-        href: 'https://kanban.espeezy.com',
+        href: ESPEEZY_APP_ORIGINS.kanban,
+        external: true,
+      },
+      {
+        title: 'Dev Launch (prod)',
+        description: 'Developer launchpad',
+        href: ESPEEZY_APP_ORIGINS.core,
+        external: true,
+      },
+      {
+        title: 'Articles (prod)',
+        description: 'articles.espeezy.com / blog.espeezy.com',
+        href: ESPEEZY_APP_ORIGINS.articles,
+        external: true,
+      },
+      {
+        title: 'Dev Hub (prod)',
+        description: 'Monorepo control plane',
+        href: ESPEEZY_APP_ORIGINS.base,
         external: true,
       },
     ],

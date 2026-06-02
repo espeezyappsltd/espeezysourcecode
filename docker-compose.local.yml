@@ -7,6 +7,8 @@
 #   games    → Games app                     localhost:3002
 #   kanban   → Kanban Next.js app            localhost:3003
 #   core     → Core app                      localhost:3004
+#   articles → Articles app                  localhost:3005
+#   studios  → Espeezy Studios               localhost:3006
 #   redis    → Redis (used by core)          internal only
 #   planka   → Planka board (Kanban SaaS)    localhost:3333
 #   caddy    → Reverse proxy + auto-HTTPS    ports 80/443  [profile: proxy]
@@ -209,6 +211,66 @@ services:
       start_period: 60s
     logging: *logging
 
+  # ── Articles app (articles.espeezy.com / blog.espeezy.com) ─────────────────
+  articles:
+    build:
+      context: ./apps/espeezyarticles
+      dockerfile: Dockerfile
+    container_name: espeezy_articles
+    restart: unless-stopped
+    ports:
+      - "3005:3000"
+    volumes:
+      - ./apps/espeezyarticles:/app:cached
+      - articles_node_modules:/app/node_modules
+      - articles_next_cache:/app/.next
+    environment:
+      <<: *next-env
+      NODE_OPTIONS: "--max-old-space-size=1024"
+    env_file:
+      - path: ./apps/espeezyarticles/.env.local
+        required: false
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+
+  # ── Espeezy Studios (studios.espeezy.com) ───────────────────────────────────
+  studios:
+    build:
+      context: ./apps/espeezystudios
+      dockerfile: Dockerfile
+    container_name: espeezy_studios
+    restart: unless-stopped
+    ports:
+      - "3006:3000"
+    volumes:
+      - ./apps/espeezystudios:/app:cached
+      - studios_node_modules:/app/node_modules
+      - studios_next_cache:/app/.next
+    environment:
+      <<: *next-env
+      NODE_OPTIONS: "--max-old-space-size=1536"
+    env_file:
+      - path: ./apps/espeezystudios/.env.local
+        required: false
+    dns: ["8.8.8.8", "8.8.4.4"]
+    networks:
+      - espeezy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    logging: *logging
+
   # ── Redis (used by core) ────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
@@ -310,6 +372,10 @@ volumes:
   kanban_next_cache:
   core_node_modules:
   core_next_cache:
+  articles_node_modules:
+  articles_next_cache:
+  studios_node_modules:
+  studios_next_cache:
   redis_data:
   planka_avatars:
   planka_backgrounds:

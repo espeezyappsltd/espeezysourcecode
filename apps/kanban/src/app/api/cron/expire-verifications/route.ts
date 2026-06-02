@@ -2,7 +2,7 @@
  * GET /api/cron/expire-verifications
  * Marks student_verifications as 'expired' when expires_at has passed.
  *
- * Configured in vercel.json as a Vercel Cron Job running daily at 03:00 UTC.
+ * Configured as a Cloudflare Cron Trigger (daily 03:00 UTC) calling this route with CRON_SECRET.
  * Protected by CRON_SECRET header.
  */
 import { NextRequest, NextResponse } from 'next/server'

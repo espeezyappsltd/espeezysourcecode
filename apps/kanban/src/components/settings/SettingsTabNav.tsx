@@ -7,12 +7,12 @@ import {
   Activity as PulseIcon,
   History,
   Mail,
-  CreditCard,
   MessageSquare,
   User,
   Users,
   AlertTriangle,
   HardDrive,
+  CreditCard,
 } from 'lucide-react'
 import { TabName } from '@/types/ui'
 import type { SettingsPageViewModel } from './settings-types'
@@ -42,11 +42,11 @@ export function SettingsTabNav({ vm }: { vm: SettingsPageViewModel }) {
         { id: 'identity_hub', label: 'Identity Hub', icon: ShieldAlert },
         { id: 'pulse', label: 'Presence', icon: PulseIcon },
         { id: 'activity', label: 'Activity Log', icon: History },
-        { id: 'intercom', label: 'Mail', icon: Mail },
+        { id: 'intercom', label: 'Team chat', icon: Mail },
         { id: 'workspace', label: 'Teams', icon: Users },
+        { id: 'billing', label: 'Billing', icon: CreditCard },
         { id: 'appearance', label: 'Design', icon: PaletteIcon },
         { id: 'security', label: 'Security', icon: Shield },
-        { id: 'billing', label: 'Go Pro', icon: CreditCard },
         { id: 'storage', label: 'Storage Node', icon: HardDrive },
         { id: 'data', label: 'Privacy', icon: AlertTriangle },
         { id: 'support', label: 'Feedback', icon: MessageSquare },

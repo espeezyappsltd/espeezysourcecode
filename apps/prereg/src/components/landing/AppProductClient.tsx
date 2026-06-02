@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowLeft, Check, Download, ExternalLink, ShoppingCart } from 'lucide-react'
 import {
   formatPlatformAppPrice,
@@ -9,7 +8,9 @@ import {
   type PlatformApp,
 } from '@shared/platform-apps'
 import { CHECKOUT_TEAM_NOTE } from '@shared/platform-brand'
+import { getPlatformAppUseCases } from '@shared/platform-app-use-cases'
 import { PlatformAppIcon } from './platform-app-icon'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import './landing.css'
 
 type Props = {
@@ -23,6 +24,7 @@ function renderMarkdownBlock(md: string) {
 
 export default function AppProductClient({ app }: Props) {
   const price = formatPlatformAppPrice(app)
+  const useCase = getPlatformAppUseCases(app.slug)
   const hasStripe = Boolean(app.stripe_payment_link?.trim())
   const hasDownload = Boolean(app.download_url?.trim())
   const isDev = app.status === 'development' || app.status === 'coming_soon'
@@ -65,7 +67,7 @@ export default function AppProductClient({ app }: Props) {
             background: `${app.accent_color}18`,
           }}
         >
-          <PlatformAppIcon iconKey={app.icon_key} size={28} color={app.accent_color} />
+          <PlatformAppIcon iconKey={app.icon_key} appSlug={app.slug} size={28} color={app.accent_color} />
         </div>
         <span className={`platform-app-card__status platform-app-card__status--${app.status}`}>
           {PLATFORM_APP_STATUS_LABEL[app.status]}
@@ -86,7 +88,7 @@ export default function AppProductClient({ app }: Props) {
               style={{ padding: '0.9rem 1.5rem', fontSize: '0.95rem' }}
             >
               <ShoppingCart size={18} aria-hidden />
-              Pay &amp; download — one click
+              Pay &amp; download in one click
             </a>
           )}
           {hasDownload && (
@@ -127,6 +129,22 @@ export default function AppProductClient({ app }: Props) {
       </header>
 
       <div className="product-setup">
+        {useCase ? (
+          <>
+            <h2>Who it&apos;s for</h2>
+            <p style={{ color: '#475569', lineHeight: 1.6, margin: '0 0 1rem' }}>{useCase.audience}</p>
+            <h2>Common situations</h2>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {useCase.scenarios.map((line) => (
+                <li key={line} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', color: '#475569', fontSize: '0.9rem' }}>
+                  <Check size={16} color="var(--brand)" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
         {app.features.length > 0 && (
           <>
             <h2>What&apos;s included</h2>
@@ -178,11 +196,11 @@ export default function AppProductClient({ app }: Props) {
 
         <div style={{ marginTop: '3rem', padding: '1.5rem', background: '#f8fafc', borderRadius: 16, border: '1px solid rgba(15,23,42,0.08)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            <Image src="/brand_logo2.svg" width={28} height={28} alt="" aria-hidden />
+            <EspeezyAppLogo app="marketing" variant="mark" aria-hidden />
             <strong>Need help deploying?</strong>
           </div>
           <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6 }}>
-            Our platform team supports campus rollouts. After checkout you receive download access and can follow the steps above
+            Our platform team supports school, team, and organization deployments. After checkout you receive download access and can follow the steps above
             to point the app at your Supabase project and brand assets.
           </p>
           <Link href="/contact" style={{ display: 'inline-block', marginTop: '1rem', fontWeight: 700, color: 'var(--brand)' }}>

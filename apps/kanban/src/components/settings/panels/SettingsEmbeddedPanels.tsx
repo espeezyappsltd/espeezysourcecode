@@ -2,20 +2,20 @@
 
 import ActivityLogView from '@/components/ActivityLogView'
 import ActiveUsersList from '@/components/ActiveUsersList'
-import EmailCenter from '@/components/EmailCenter'
+import TeamChatShell from '@/components/TeamChatShell'
 import type { SettingsPageViewModel } from '../settings-types'
 
 export function SettingsIntercomPanel({ vm }: { vm: SettingsPageViewModel }) {
-  const { profile, teamMembers } = vm
+  const { profile } = vm
   if (!profile) return null
 
   return (
     <div className="auth-card" style={{ maxWidth: '100%' }}>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Direct Intercom & Mail</h2>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Team chat</h2>
       <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>
-        Management hub for automated reminders and verifiable PDF reports.
+        Real-time messages with your project team. Same channel as the board sidebar.
       </p>
-      <EmailCenter groupId={profile.group_id || ''} profile={profile} teamMembers={teamMembers} />
+      <TeamChatShell />
     </div>
   )
 }
@@ -28,7 +28,7 @@ export function SettingsActivityPanel({ vm }: { vm: SettingsPageViewModel }) {
     <div className="auth-card" style={{ maxWidth: '100%' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Activity Log</h2>
       <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>
-        Marketplace purchases, credit transactions, team updates, and all account activity — downloadable anytime.
+        Team updates, task changes, and account activity — downloadable anytime.
       </p>
       <ActivityLogView
         userId={profile.id}

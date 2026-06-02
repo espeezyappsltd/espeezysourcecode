@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Activity, Coins, HardDrive, LayoutGrid, ShoppingBag } from 'lucide-react'
+import { HardDrive, LayoutGrid } from 'lucide-react'
 
 const LINKS: Array<{
   href: string
@@ -10,18 +10,15 @@ const LINKS: Array<{
   icon: typeof LayoutGrid
   exact?: boolean
 }> = [
-  { href: '/assets', label: 'Overview', icon: LayoutGrid, exact: true },
-  { href: '/assets/storage', label: 'Storage & files', icon: HardDrive },
-  { href: '/assets/credits', label: 'Credits', icon: Coins },
-  { href: '/assets/marketplace', label: 'Marketplace', icon: ShoppingBag },
-  { href: '/assets/impact', label: 'Impact log', icon: Activity },
+  { href: '/assets/storage', label: 'Storage & files', icon: HardDrive, exact: true },
+  { href: '/assets', label: 'Overview', icon: LayoutGrid },
 ]
 
 export function AssetsSubNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="assets-subnav" aria-label="Personal Arsenal sections">
+    <nav className="assets-subnav" aria-label="Personal files sections">
       {LINKS.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname === href || pathname?.startsWith(`${href}/`)
         return (

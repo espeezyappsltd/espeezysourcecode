@@ -8,7 +8,7 @@ import type { Viewport } from 'next';
 export const metadata: Metadata = {
   metadataBase: new URL('https://panel.espeezy.com'),
   title: 'Espeezy Panel — Staff Console',
-  description: 'Espeezy staff admin console at panel.espeezy.com',
+  description: 'Staff administration console for the Espeezy platform at panel.espeezy.com.',
   icons: {
     icon: [
       { url: '/favicon.ico', type: 'image/x-icon' },

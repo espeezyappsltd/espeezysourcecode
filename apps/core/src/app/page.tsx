@@ -1,5 +1,6 @@
 import { DEV_LINK_SECTIONS, LOCAL_APPS } from '@/lib/dev-links'
-import { FOOTER_COPYRIGHT_TAGLINE } from '@/lib/platform/brand-copy'
+import { formatCopyrightNotice } from '@/lib/platform/brand-copy'
+import DevLaunchHeroLogo from '@/components/DevLaunchHeroLogo'
 import './local-server.css'
 
 type LinkItem = {
@@ -41,7 +42,8 @@ export default function LocalServerPage() {
       <div className="page-shell">
         <header className="local-server-hero">
           <div className="local-server-hero-inner">
-            <p className="local-server-eyebrow">Espeezy · Local Server</p>
+            <DevLaunchHeroLogo />
+            <p className="local-server-eyebrow">Local Server</p>
             <h1 className="local-server-title">Developer launchpad</h1>
             <p className="local-server-lead">
               Quick links to monorepo apps, official docs, web fundamentals, and curated tutorials. Bookmark this page
@@ -78,7 +80,7 @@ export default function LocalServerPage() {
 
         <footer className="local-server-footer">
           <p>
-            Running on <strong>apps/core</strong> · Part of the Espeezy monorepo · {FOOTER_COPYRIGHT_TAGLINE} · Start/stop from{' '}
+            Running on <strong>apps/core</strong> · Part of the Espeezy monorepo · {formatCopyrightNotice({ product: 'Espeezy' })} · Start/stop from{' '}
             <a href="http://localhost:3000/dashboard" style={{ color: '#f472b6', fontWeight: 700 }}>
               Dev Hub
             </a>

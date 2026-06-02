@@ -1,103 +1,144 @@
-"use client"
+'use client'
 
-import { createGroup, joinGroup } from './actions'
-import { Plus, Key } from 'lucide-react'
-import TransientError from '@/components/TransientError'
-import { useFormStatus } from 'react-dom'
-
-function SubmitButton({ label, secondary = false }: { label: string, secondary?: boolean }) {
-  const { pending } = useFormStatus()
-  return (
-    <button 
-      className={secondary ? "btn btn-secondary" : "btn btn-primary"} 
-      disabled={pending} 
-      style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-    >
-      {pending ? (
-        <>
-          <div className="spinner-mini" style={{ borderTopColor: secondary ? 'var(--brand)' : 'white' }} />
-          <span>Processing...</span>
-        </>
-      ) : label}
-    </button>
-  )
-}
-
+import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
-import { FormField } from '@/components/forms/FormField'
+import Link from 'next/link'
+import { Users } from 'lucide-react'
+import { createGroup, joinGroup } from '@/app/join/actions'
 
-
-function JoinGroupContent() {
-   const searchParams = useSearchParams()
-   const error = searchParams?.get('error')
+function JoinPageContent() {
+  const searchParams = useSearchParams()
+  const error = searchParams?.get('error')
+  const [mode, setMode] = useState<'create' | 'join'>('join')
 
   return (
-    <main className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4rem' }}>
-       {/* Error Handling Feedback Component */}
-       {error && <TransientError message={error} />}
-       
-       <div style={{ display: 'flex', gap: '2rem', width: '100%', maxWidth: '800px', flexWrap: 'wrap' }}>
-          
-          {/* Create Group Route */}
-          <div className="auth-card" style={{ flex: '1 1 300px', margin: 0, borderRadius: '24px' }}>
-             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                 <Plus size={20} color="var(--brand)" />
-                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Create Team</h2>
-             </div>
-              <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 600 }}>
-                 Start a new workspace for your academic module or project.
-              </p>
-             <form action={createGroup}>
-                <FormField label="Workspace Name:" required>
-                  <input id="name" name="name" type="text" placeholder="e.g. Apollo Project" required style={{ borderRadius: '12px' }} />
-                </FormField>
-                <FormField label="Module Code (e.g. CS50):" required>
-                  <input id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
-                </FormField>
-                <FormField label="Access Password:" required>
-                  <input id="create_join_password" name="join_password" type="password" placeholder="Set a workspace password" required style={{ borderRadius: '12px' }} />
-                </FormField>
-                <FormField label="Max Capacity:" required>
-                  <input id="capacity" name="capacity" type="number" min={2} max={100} defaultValue={5} required style={{ borderRadius: '12px' }} />
-                </FormField>
-                 <SubmitButton label="Create Workspace" />
-             </form>
-          </div>
+    <div className="page-fade page-shell page-shell--narrow" style={{ maxWidth: 520, margin: '0 auto' }}>
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <Users size={36} style={{ color: 'var(--brand)', marginBottom: '0.75rem' }} aria-hidden />
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 900, margin: '0 0 0.35rem' }}>Team workspace</h1>
+        <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem' }}>
+          Create a new group or join with your module code.
+        </p>
+      </div>
 
-          {/* Join Group Route */}
-          <div className="auth-card" style={{ flex: '1 1 300px', margin: 0, borderRadius: '24px' }}>
-             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <Key size={20} color="var(--brand)" />
-                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Join Team</h2>
-              </div>
-              <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 600 }}>
-                 Connect to an existing project team using the module code and password provided by your team lead.
-              </p>
-             <form action={joinGroup}>
-                <FormField label="Module Code:" required>
-                  <input id="create_module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
-                </FormField>
-                <FormField label="Join Password:" required>
-                  <input id="join_password" name="join_password" type="password" placeholder="Enter group password" required style={{ borderRadius: '12px' }} />
-                </FormField>
-                 <SubmitButton label="Join Team" secondary />
-             </form>
-          </div>
+      {error ? (
+        <div
+          role="alert"
+          style={{
+            marginBottom: '1rem',
+            padding: '0.75rem 1rem',
+            borderRadius: 12,
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            color: 'var(--error)',
+            fontSize: '0.85rem',
+          }}
+        >
+          {decodeURIComponent(error)}
+        </div>
+      ) : null}
 
-       </div>
-    </main>
+      <div
+        style={{
+          display: 'flex',
+          gap: '0.35rem',
+          marginBottom: '1.25rem',
+          padding: '0.35rem',
+          background: 'var(--bg-sub)',
+          borderRadius: 12,
+          border: '1px solid var(--border)',
+        }}
+      >
+        <button
+          type="button"
+          className={`btn btn-sm btn-inline${mode === 'join' ? ' btn-primary' : ' btn-ghost'}`}
+          style={{ flex: 1 }}
+          onClick={() => setMode('join')}
+        >
+          Join team
+        </button>
+        <button
+          type="button"
+          className={`btn btn-sm btn-inline${mode === 'create' ? ' btn-primary' : ' btn-ghost'}`}
+          style={{ flex: 1 }}
+          onClick={() => setMode('create')}
+        >
+          Create team
+        </button>
+      </div>
+
+      {mode === 'join' ? (
+        <form action={joinGroup} className="auth-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <label htmlFor="create_module_code" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+            Module code
+          </label>
+          <input id="create_module_code" name="module_code" required className="input" placeholder="e.g. MOD-CS101" />
+
+          <label htmlFor="join_password" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+            Join password
+          </label>
+          <input
+            id="join_password"
+            name="join_password"
+            type="password"
+            className="input"
+            placeholder="From your team lead"
+            autoComplete="current-password"
+          />
+
+          <button type="submit" className="btn btn-primary">
+            Join Team
+          </button>
+        </form>
+      ) : (
+        <form action={createGroup} className="auth-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <label htmlFor="name" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+            Team name
+          </label>
+          <input id="name" name="name" required className="input" placeholder="e.g. Alpha Project Team" />
+
+          <label htmlFor="module_code" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+            Module code
+          </label>
+          <input id="module_code" name="module_code" required className="input" placeholder="Unique code for teammates" />
+
+          <label htmlFor="create_join_password" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+            Join password
+          </label>
+          <input
+            id="create_join_password"
+            name="join_password"
+            type="password"
+            required
+            className="input"
+            placeholder="Share with your team"
+            autoComplete="new-password"
+          />
+
+          <label htmlFor="capacity" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+            Team capacity
+          </label>
+          <input id="capacity" name="capacity" type="number" min={2} max={20} defaultValue={5} className="input" />
+
+          <button type="submit" className="btn btn-primary">
+            Create Workspace
+          </button>
+        </form>
+      )}
+
+      <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.85rem' }}>
+        <Link href="/" className="landing-inline-link">
+          Back to board
+        </Link>
+      </p>
+    </div>
   )
 }
 
-export default function JoinGroupPage() {
+export default function JoinPage() {
   return (
-    <Suspense fallback={
-       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-          <div className="spinner" />
-       </div>
-    }>
-       <JoinGroupContent />
+    <Suspense fallback={<div className="page-shell page-fade">Loading…</div>}>
+      <JoinPageContent />
     </Suspense>
   )
 }

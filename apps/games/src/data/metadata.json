@@ -1,6 +1,6 @@
 {
-  "title": "Espeezy Games: Coming Soon",
-  "description": "Game-based learning is coming to Espeezy. Master subjects through competitive skirmishes, ranked leagues, and co-op challenges.",
+  "title": "Espeezy Games — interactive study sessions",
+  "description": "Structured learning through interactive study games, category-based practice, and team-friendly sessions. Sign in with your Espeezy account.",
   "manifest": "/manifest.json",
   "icons": {
     "icon": "/icon.svg",
@@ -9,13 +9,13 @@
       { "rel": "mask-icon", "url": "/icon.svg", "color": "#f59e0b" }
     ]
   },
-  "keywords": ["games", "learning", "education", "competition", "students"],
+  "keywords": ["games", "learning", "education", "study sessions", "students"],
   "authors": [{ "name": "Espeezy" }],
   "creator": "Espeezy",
   "robots": { "index": true, "follow": true },
   "openGraph": {
-    "title": "Espeezy Games: Coming Soon",
-    "description": "Compete. Learn. Dominate. Game-based education for the next generation.",
+    "title": "Espeezy Games — interactive study sessions",
+    "description": "Practice course material through structured games and study sessions designed for university and college teams.",
     "url": "https://games.espeezy.com",
     "siteName": "Espeezy Games",
     "type": "website",
@@ -24,7 +24,7 @@
   "twitter": {
     "card": "summary",
     "title": "Espeezy Games",
-    "description": "Game-based learning platform for students.",
-    "creator": "@sospeterkedogo"
+    "description": "Interactive study sessions for students and study groups.",
+    "creator": "@espeezy"
   }
 }

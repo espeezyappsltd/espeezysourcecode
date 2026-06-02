@@ -2,36 +2,44 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, BookOpen, LifeBuoy, ArrowRight } from "lucide-react";
+import { X, BookOpen, LifeBuoy, ArrowRight, ExternalLink } from "lucide-react";
+import {
+  HELP_TRAY_CTA_LABEL,
+  HELP_TRAY_TITLE,
+  KANBAN_HELP_GUIDES,
+} from "@shared/app-ui-copy";
+import { espeezyDocsUrl } from "@shared/espeezy-marketing-links";
+import AppCopyrightStrip from "@shared/AppCopyrightStrip";
+import { isExternalNavUrl } from "@/lib/nav/resolve-nav-url";
 import "./help-tray.css";
 
-const FEATURE_GUIDES = [
-  {
-    title: "Kanban Board",
-    desc: "Organize tasks, drag to reorder, assign teammates, and track progress.",
-    link: "/docs/features/kanban"
-  },
-  {
-    title: "Roadmap",
-    desc: "Plan milestones, set deadlines, and visualize your project timeline.",
-    link: "/docs/features/roadmap"
-  },
-  {
-    title: "Team & Chat",
-    desc: "Invite teammates, manage roles, and collaborate in real-time chat.",
-    link: "/docs/features/team"
-  },
-  {
-    title: "Marketplace",
-    desc: "Buy, sell, or swap resources securely with other students.",
-    link: "/docs/features/marketplace"
-  },
-  {
-    title: "Profile & Settings",
-    desc: "Customize your profile, manage notifications, and set preferences.",
-    link: "/docs/features/profile"
+const DOCS_QUICK_START = espeezyDocsUrl("/docs/getting-started");
+
+function HelpTrayLink({
+  href,
+  className,
+  onClick,
+  children,
+}: {
+  href: string
+  className: string
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  if (isExternalNavUrl(href)) {
+    return (
+      <a href={href} className={className} onClick={onClick} target="_blank" rel="noopener noreferrer">
+        {children}
+        <ExternalLink size={14} aria-hidden style={{ marginLeft: 4 }} />
+      </a>
+    )
   }
-];
+  return (
+    <Link href={href} className={className} onClick={onClick}>
+      {children}
+    </Link>
+  )
+}
 
 export default function HelpTray() {
   const [open, setOpen] = useState(false);
@@ -58,7 +66,7 @@ export default function HelpTray() {
             <span className="help-tray-header-icon" aria-hidden>
               <LifeBuoy size={20} />
             </span>
-            Help & Onboarding
+            {HELP_TRAY_TITLE}
           </div>
           <button
             type="button"
@@ -72,20 +80,22 @@ export default function HelpTray() {
         <div className="help-tray-body">
           <h3 className="help-tray-lead-title">How can we help?</h3>
           <p className="help-tray-lead">
-            Explore guides for every feature, search the{" "}
-            <Link href="/ask">Ask directory</Link>, or jump to the{" "}
-            <Link href="/docs/getting-started">Quick Start Guide <ArrowRight size={14} style={{ verticalAlign: "middle" }} /></Link>.
+            Browse feature guides, search the <Link href="/ask">Ask directory</Link>, or open the{' '}
+            <a href={DOCS_QUICK_START} target="_blank" rel="noopener noreferrer" className="help-tray-inline-link">
+              {HELP_TRAY_CTA_LABEL} <ArrowRight size={14} style={{ verticalAlign: 'middle' }} />
+            </a>
+            .
           </p>
           <div className="help-tray-list">
-            {FEATURE_GUIDES.map((f) =>
-              f.title === "Kanban Board" ? (
+            {KANBAN_HELP_GUIDES.map((f) =>
+              f.actionEvent ? (
                 <button
                   key={f.title}
                   type="button"
                   className="help-tray-card"
                   onClick={() => {
                     setOpen(false);
-                    window.dispatchEvent(new CustomEvent("open-kanban-onboarding"));
+                    window.dispatchEvent(new CustomEvent(f.actionEvent!));
                   }}
                 >
                   <div className="help-tray-card-title">
@@ -95,21 +105,33 @@ export default function HelpTray() {
                   <p className="help-tray-card-desc">{f.desc}</p>
                 </button>
               ) : (
-                <Link key={f.title} href={f.link} className="help-tray-card" onClick={() => setOpen(false)}>
+                <HelpTrayLink
+                  key={f.title}
+                  href={f.link}
+                  className="help-tray-card"
+                  onClick={() => setOpen(false)}
+                >
                   <div className="help-tray-card-title">
                     <BookOpen size={16} />
                     <span>{f.title}</span>
                   </div>
                   <p className="help-tray-card-desc">{f.desc}</p>
-                </Link>
+                </HelpTrayLink>
               )
             )}
           </div>
         </div>
         <footer className="help-tray-footer">
-          <Link href="/docs/getting-started" className="help-tray-cta" onClick={() => setOpen(false)}>
-            Quick Start Guide <ArrowRight size={16} />
-          </Link>
+          <a
+            href={DOCS_QUICK_START}
+            className="help-tray-cta"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setOpen(false)}
+          >
+            {HELP_TRAY_CTA_LABEL} <ArrowRight size={16} />
+          </a>
+          <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} />
         </footer>
       </aside>
     </>

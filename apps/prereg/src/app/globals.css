@@ -94,6 +94,26 @@
 .docs-card.small { padding: 1.25rem; }
 .docs-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
 .docs-card-text { color: #9ca3af; line-height: 1.6; font-size: 0.95rem; }
+.docs-btn-primary {
+  display: inline-block;
+  padding: 0.875rem 1.75rem;
+  border-radius: 10px;
+  background: #10b981;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+.docs-btn-ghost {
+  display: inline-block;
+  padding: 0.875rem 1.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
 .docs-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 3rem; }
 .btn-primary {
   background: var(--brand);

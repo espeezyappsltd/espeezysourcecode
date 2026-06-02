@@ -4,14 +4,13 @@ import NavigationProgress from '@/components/NavigationProgress'
 import PreregFooter from '@/components/PreregFooter'
 import { CentralLoadingProvider } from '@shared/CentralLoadingProvider'
 import PageTransitionWrapper from '@shared/PageTransitionWrapper'
-import { Analytics } from '@vercel/analytics/next'
 import { PLATFORM_ONE_LINER } from '@shared/platform-brand'
 
-const OG_TITLE = 'Espeezy — group projects with proof of who did the work'
+const OG_TITLE = 'Espeezy learning apps for students and teams'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://espeezy.com'),
-  title: 'Espeezy — group projects with proof of who did the work',
+  title: 'Espeezy learning apps for students and teams',
   description: PLATFORM_ONE_LINER,
   manifest: '/manifest.json',
   icons: {
@@ -54,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link 
           rel="preload" 
-          href="/brand_logo2.svg" 
+          href="/espeezy-app-mark.svg" 
           as="image" 
           type="image/svg+xml" 
         />
@@ -67,7 +66,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </PageTransitionWrapper>
           <PreregFooter />
         </CentralLoadingProvider>
-        <Analytics />
       </body>
     </html>
   )

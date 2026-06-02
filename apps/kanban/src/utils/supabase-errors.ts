@@ -26,7 +26,7 @@ export function friendlySupabaseError(message: string | undefined, fallback: str
     return 'Activity history is temporarily unavailable. Charts and team data should still load after a refresh.'
   }
   if (msg.includes('Invalid API key')) {
-    return 'Server configuration issue: Supabase keys on Vercel may be missing or incorrect. Ask an admin to verify NEXT_PUBLIC_SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY for the kanban project.'
+    return 'Server configuration issue: Supabase keys on Cloudflare may be missing or incorrect. Ask an admin to verify NEXT_PUBLIC_SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY for the kanban worker.'
   }
   if (msg.includes('JWT') && msg.toLowerCase().includes('expired')) {
     return 'Your session expired. Please sign in again.'

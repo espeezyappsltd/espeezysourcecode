@@ -5,12 +5,14 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   LayoutGrid, Milestone, Users, ShoppingBag,
-  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info, RotateCcw
+  Gamepad2, Search, Zap, Globe, CreditCard, Box, Eye, Flag, BarChart, Accessibility, Info, RotateCcw,
+  Briefcase, Newspaper, Cpu,
 } from 'lucide-react'
 import {
   GETTING_STARTED_ACCOUNT_BODY,
   INSTALLATION_WEB_BODY,
 } from '@shared/platform-brand'
+import { ESPEEZY_APP_ORIGINS } from '@shared/espeezy-app-origins'
 
 const BRAND = '#10b981'
 
@@ -52,14 +54,14 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Step 4: Add your first tasks',
-        body: 'Use the Kanban board to create task cards. Each card has a title, description, assignee, due date, and effort estimate. The AI will flag tasks that look unevenly distributed based on effort points compared to team size. You can add subtasks, attach files, and link tasks to roadmap milestones.',
+        body: 'Use the Kanban board to create task cards. Each card has a title, description, assignee, due date, and effort estimate. The AI will flag tasks that look unevenly distributed based on project effort compared to team size. You can add subtasks, attach files, and link tasks to roadmap milestones.',
       },
       {
         heading: 'Step 5: Record and submit',
         body: 'As tasks move through the board columns (Backlog, In Progress, Review, Done), the app logs every state change with a timestamp and the user who made it. This contribution log is your individual contribution data, which educators can optionally view. At submission time, you can export a full contribution report as a PDF or CSV.',
       },
     ],
-    eli12: 'It is like setting up a new base in a game. You create your character, find your team, give everyone a job, and start your first mission. The app keeps score of the moves you make.',
+    eli12: 'It is like setting up a new base in a game. You create your character, find your team, assign everyone a project role, and start your first mission. The app keeps score of the moves you make.',
   },
 
   'installation': {
@@ -78,7 +80,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Self-hosted deployment (for institutions)',
-        body: 'Universities and colleges that need to host the platform within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Supabase (PostgreSQL and GoTrue Auth), and runs on any Node 24-compatible server or Vercel/Cloudflare Workers. A Docker image is provided for easy deployment.',
+        body: 'Universities and colleges that need to host the platform within their own infrastructure can deploy the open-source core. The stack is Next.js 16 App Router, Supabase (PostgreSQL and GoTrue Auth), and runs on Cloudflare Workers (OpenNext) or any Node 22+ server. A Docker image is provided for easy deployment.',
         items: ['Docker image available: ghcr.io/espeezy/app:latest', 'Environment variables required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY', 'SSO integration via SAML 2.0 and OAuth 2.0 (institutional IdP)'],
       },
       {
@@ -93,7 +95,7 @@ const docsContent: Record<string, DocEntry> = {
   'features/kanban': {
     title: 'Kanban Dashboard',
     icon: <LayoutGrid size={40} />,
-    tagline: 'The main task board that you will be working on. Every contribution is visible, timestamped, and easy to review.',
+    tagline: 'The main task board that you will use. Every contribution is visible, timestamped, and easy to review.',
     sections: [
       {
         heading: 'How the board works',
@@ -106,7 +108,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Team balance summary',
-        body: 'The team balance summary runs in the background and calculates the distribution of effort points across all team members. If one person is assigned more than 40% of the total effort with more than 3 days remaining before the deadline, the system sends an automated alert to all workspace members and highlights the imbalance on the board sidebar. Educators can configure the sensitivity threshold.',
+        body: 'The team balance summary runs in the background and calculates the distribution of project effort across all team members. If one person is assigned more than 40% of the total effort with more than 3 days remaining before the deadline, the system sends an automated alert to all workspace members and highlights the imbalance on the board sidebar. Educators can configure the sensitivity threshold.',
       },
       {
         heading: 'Filters and views',
@@ -114,7 +116,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Exporting contribution data',
-        body: 'At any point, any workspace member can export a contribution report. The report includes each members total effort points, number of tasks completed, average time from In Progress to Done, and number of review comments given and received. Export formats: PDF, CSV, or JSON (for institutional systems).',
+        body: 'At any point, any workspace member can export a contribution report. The report includes each members total project effort, number of tasks completed, average time from In Progress to Done, and number of review comments given and received. Export formats: PDF, CSV, or JSON (for institutional systems).',
       },
     ],
     eli12: 'Imagine a whiteboard with sticky notes in three groups: To Do, Doing, and Done. You drag your note across when you start and finish work. Espeezy takes a photo every time someone drags a note so nobody can pretend they did more than they really did.',
@@ -167,7 +169,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Contribution rating',
-        body: 'Your contribution rating is calculated from all your completed projects. It is a number from 1 to 5 based on: effort points completed on time, peer review quality (upvotes on your review comments), and consistency across projects. This rating is visible on your profile and can be included on exported certificates.',
+        body: 'Your contribution rating is calculated from all your completed projects. It is a number from 1 to 5 based on: project effort completed on time, peer review quality (upvotes on your review comments), and consistency across projects. This rating is visible on your profile and can be included on exported certificates.',
         items: ['5.0: exceptional, consistent contributor across all projects', '4.0-4.9: strong contributor, minor inconsistencies', '3.0-3.9: average, some late or incomplete tasks', 'Below 3.0: at-risk, flagged to advisor (if institution enabled this)'],
       },
       {
@@ -183,17 +185,21 @@ const docsContent: Record<string, DocEntry> = {
   },
 
   'features/marketplace': {
-    title: 'Marketplace',
+    title: 'Resource Marketplace',
     icon: <ShoppingBag size={40} />,
-    tagline: 'A peer-to-peer resource exchange where students share study materials, templates, and tools.',
+    tagline: 'A peer-to-peer resource exchange inside Kanban for study materials, templates, and tools.',
     sections: [
+      {
+        heading: 'Where monetization lives now',
+        body: `Free resource sharing stays in Kanban. Paid gigs, professional projects, invoices, and client delivery moved to Espeezy Studio (${ESPEEZY_APP_ORIGINS.studios.replace('https://', '')}). Premium Kanban members open Studio from the workspace sidebar.`,
+      },
       {
         heading: 'What you can share',
         body: 'The Marketplace lets students publish resources for others to access. Resources can be: document templates (report structures, bibliography formats), datasets (anonymised, for analysis projects), study guides and flashcard decks, code repositories with worked examples, and design assets (presentation templates, infographics).',
       },
       {
         heading: 'Free vs. premium resources',
-        body: 'Most resources on the Marketplace are free. Students with a Pro subscription can sell premium resources for credits (Espeezy Credits, which can be redeemed for Pro subscription months). All premium resources go through a quality review before listing. The pricing cap for any resource is 50 credits (roughly equivalent to 1 month of Pro).',
+        body: 'Most resources on the Marketplace are free. Students with a Pro subscription can sell premium resources for £. All premium resources go through a quality review before listing. The pricing cap for any resource is £4.99 (one month of Pro).',
       },
       {
         heading: 'Quality and trust',
@@ -204,7 +210,7 @@ const docsContent: Record<string, DocEntry> = {
         body: 'Institutions can publish official resource packs directly to the Marketplace. These appear with a verified institution badge and are pinned to the top of search results for students enrolled at that institution. Examples: official citation guide, approved data sources list, module-specific templates.',
       },
     ],
-    eli12: 'Think of it like a jumble sale at school, but free. Students put their best notes and project templates on a virtual table. You can grab anything useful, and if someone grabs something you made, you earn points. Everyone helps each other and gets rewarded for it.',
+    eli12: 'Think of it like a jumble sale at school, but free. Students put their best notes and project templates on a virtual table. You can grab anything useful, and if someone grabs something you made, you build contribution history. Everyone helps each other and gets rewarded for it.',
   },
 
   'features/skirmish': {
@@ -214,7 +220,7 @@ const docsContent: Record<string, DocEntry> = {
     sections: [
       {
         heading: 'How a Skirmish works',
-        body: 'A Skirmish is a real-time, multiplayer quiz session. The host picks a topic (or Espeezy generates one from your module content), sets the number of rounds (5 to 25 questions), the time limit per question (10 to 60 seconds), and the point scoring mode (speed bonus or accuracy only). Up to 50 players can join a single Skirmish.',
+        body: 'A Skirmish is a real-time, multiplayer quiz session. The host picks a topic (or Espeezy generates one from your module content), sets the number of rounds (5 to 25 questions), the time limit per question (10 to 60 seconds), and the scoring mode (speed bonus or accuracy only). Up to 50 players can join a single Skirmish.',
       },
       {
         heading: 'Question sources',
@@ -222,11 +228,11 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Scoring and leaderboard',
-        body: 'Each correct answer earns base points. Answering within the first third of the time window earns a speed bonus (up to 50% extra). At the end of each round the leaderboard updates live. At the end of the Skirmish, results are saved to each players profile showing topics answered correctly and areas of weakness.',
+        body: 'Each correct answer earns base score. Answering within the first third of the time window earns a speed bonus (up to 50% extra). At the end of each round the leaderboard updates live. At the end of the Skirmish, results are saved to each players profile showing topics answered correctly and areas of weakness.',
       },
       {
         heading: 'Team Skirmish mode',
-        body: 'In Team Skirmish, players are split into two or more teams and answer together. One player answers at a time in rotation. The team with the highest cumulative score wins. Team Skirmish is designed for study groups and can be run inside a workspace so the results feed into collaboration points.',
+        body: 'In Team Skirmish, players are split into two or more teams and answer together. One player answers at a time in rotation. The team with the highest cumulative score wins. Team Skirmish is designed for study groups and can be run inside a workspace so the results feed into collaboration metrics.',
       },
       {
         heading: 'Revision analytics',
@@ -236,24 +242,89 @@ const docsContent: Record<string, DocEntry> = {
     eli12: 'It is like Kahoot but smarter. You and your friends join a live quiz about your subject. Questions pop up on screen and you have a few seconds to answer. The faster and more correct you are, the higher you score. At the end, Espeezy shows you what you need to study more.',
   },
 
+  'features/studios': {
+    title: 'Espeezy Studio',
+    icon: <Briefcase size={40} />,
+    tagline: 'Premium studio hub, projects, and client delivery at studios.espeezy.com.',
+    sections: [
+      {
+        heading: 'Who can access Studio',
+        body: 'Espeezy Studio is for Premium Kanban members. Sign in on Kanban, then open Studio from the sidebar or bottom nav. Cross-app SSO keeps one Espeezy account across Kanban, Games, and Studio.',
+        items: ['Premium plan required', 'SSO from kanban.espeezy.com', 'Shared profile and billing'],
+      },
+      {
+        heading: 'What you do in Studio',
+        body: 'Run the studio hub: list projects, manage professional projects, track milestones and budgets, generate PRD and requirements docs, and email invoices and receipts to clients.',
+        items: ['Studio hub', 'Project delivery workspace', 'Analytics for your pipeline'],
+      },
+      {
+        heading: 'Hosted URL',
+        body: `Production: ${ESPEEZY_APP_ORIGINS.studios}. Local dev default port: 3007.`,
+      },
+    ],
+    eli12: 'When your group is ready to earn from real client projects, Studio is the hub: list projects, finish them, and send the invoice.',
+  },
+
+  'features/articles': {
+    title: 'Articles & Blog',
+    icon: <Newspaper size={40} />,
+    tagline: 'Campus articles and blog posts on articles.espeezy.com and blog.espeezy.com.',
+    sections: [
+      {
+        heading: 'Two hostnames, one app',
+        body: `articles.espeezy.com is the primary reader. blog.espeezy.com is an alias to the same Articles app for blog-style URLs and sharing.`,
+      },
+      {
+        heading: 'Where articles appear',
+        body: 'Featured articles can surface on espeezy.com marketing pages. Authors and categories sync from Supabase when configured.',
+      },
+      {
+        heading: 'Hosted URLs',
+        body: `Articles: ${ESPEEZY_APP_ORIGINS.articles}. Blog alias: ${ESPEEZY_APP_ORIGINS.blog}.`,
+      },
+    ],
+    eli12: 'Think of it as the school newspaper online: short updates on the blog hostname, longer reads on the articles site.',
+  },
+
+  'features/dev-launch': {
+    title: 'Dev Launch',
+    icon: <Cpu size={40} />,
+    tagline: 'Developer launchpad with docs links and local app shortcuts.',
+    sections: [
+      {
+        heading: 'Purpose',
+        body: 'Dev Launch (devlaunch.espeezy.com) is the on-ramp for contributors: framework docs, Espeezy app links, and pointers to the monorepo dev hub at base.espeezy.com.',
+      },
+      {
+        heading: 'Related apps',
+        body: `Dev Hub control plane: ${ESPEEZY_APP_ORIGINS.base}. Dev Launch: ${ESPEEZY_APP_ORIGINS.core}. Use Dev Hub to start local apps; use Dev Launch for daily documentation lookups.`,
+      },
+    ],
+    eli12: 'It is the launch pad for people building Espeezy: one page with links to every app and the docs you need.',
+  },
+
   'features/hustle': {
     title: 'Side Hustle',
     icon: <ShoppingBag size={40} />,
-    tagline: 'A managed marketplace for academic and creative side work where students earn credits for their skills.',
+    tagline: 'Legacy Kanban hustle flows. New paid delivery runs in Espeezy Studio.',
     sections: [
+      {
+        heading: 'Current direction',
+        body: `Side Hustle UI in Kanban now redirects to Espeezy Studio (${ESPEEZY_APP_ORIGINS.studios.replace('https://', '')}) for Premium members. Use Studio for listings, gigs, invoices, and client delivery.`,
+      },
       {
         heading: 'What is the Side Hustle?',
         body: 'The Side Hustle is a curated task marketplace within Espeezy. It allows students with specific skills (research, coding, graphic design, proofreading) to find paid opportunities posted by other students or external partners. Unlike the general Marketplace which is for sharing existing resources, the Side Hustle is for active service delivery.',
       },
       {
         heading: 'How to find and accept tasks',
-        body: 'Tasks are listed in the Hustle dashboard and categorised by skill type, estimated duration, and credit reward. You can filter by "Quick Tasks" (under 30 minutes) or "Project Tasks" (multi-day). Before accepting a task, you can see the posters rating and previous feedback. Once you accept, a private workspace is created for the duration of the task.',
+        body: 'Tasks are listed in the Hustle dashboard and categorised by skill type, estimated duration, and project payout. You can filter by "Quick Tasks" (under 30 minutes) or "Project Tasks" (multi-day). Before accepting a task, you can see the posters rating and previous feedback. Once you accept, a private workspace is created for the duration of the task.',
         items: ['Skills-based task matching', 'Verified posters only', 'Secure workspace for every hustle'],
       },
       {
-        heading: 'The credit system and payouts',
-        body: 'Hustles are paid in Espeezy Credits. When a task is posted, the credits are moved into an Espeezy account. Once the task is marked as complete and the poster confirms receipt, the credits are released to the worker. Pro members can redeem these credits for cash payouts to their bank account via Stripe Connect.',
-        items: ['Secure payments for all tasks', 'Pro members can cash out to bank', 'Redeem credits for months of Espeezy Pro'],
+        heading: 'The payout system',
+        body: 'Hustles are paid in GBP. When a task is posted, funds are moved into an Espeezy account. Once the task is marked as complete and the poster confirms receipt, payment is released to the contributor. Pro members can withdraw payouts to their bank account via Stripe Connect.',
+        items: ['Secure payments for all tasks', 'Pro members can cash out to bank', 'Apply balance toward months of Espeezy Pro'],
       },
       {
         heading: 'Quality and dispute resolution',
@@ -261,7 +332,7 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Institutional tasks',
-        body: 'Universities can post "Campus Hustles" such as student ambassador roles, research assistant tasks, or peer mentoring opportunities. These are marked with a verified institution badge and often pay higher credit rates or direct cash rewards.',
+        body: 'Universities can post "Campus Hustles" such as student ambassador roles, research assistant tasks, or peer mentoring opportunities. These are marked with a verified institution badge and often pay higher payout rates or direct cash rewards.',
       },
     ],
     eli12: 'It is like having a part-time job inside Espeezy. If you are great at something, like making posters or fixing code, you can find other students who need help and get paid in points. If you have a Pro account, you can even turn those points into real money in your bank account.',
@@ -295,7 +366,7 @@ const docsContent: Record<string, DocEntry> = {
   'infra/payments': {
     title: 'Stripe Integration',
     icon: <CreditCard size={40} />,
-    tagline: 'Secure, PCI-compliant payment processing for Pro subscriptions, Marketplace credits, and institutional billing.',
+    tagline: 'Secure, PCI-compliant payment processing for Pro subscriptions, Project marketplace balance, and institutional billing.',
     sections: [
       {
         heading: 'How payments work',
@@ -310,8 +381,8 @@ const docsContent: Record<string, DocEntry> = {
         body: 'Universities can set up an institutional account that covers all enrolled students under a single annual invoice. Institutional pricing is negotiated directly with the Espeezy team and includes volume discounts. The institution billing portal shows usage per department and per student, useful for internal reporting.',
       },
       {
-        heading: 'Marketplace credits',
-        body: 'Espeezy Credits are purchased in bundles via Stripe (100 credits for $5, 500 credits for $20, 1500 credits for $50). Credits are non-refundable once spent on a Marketplace resource. Unspent credits carry over indefinitely. Credits earned from selling resources can be redeemed for Pro subscription months at a rate of 50 credits per month.',
+        heading: 'Project marketplace balance',
+        body: 'Top-ups are purchased in bundles via Stripe (£5, £20, and £50). Top-ups are non-refundable once spent on a Marketplace resource. Unused balance carries over indefinitely. Balance earned from selling resources can be applied toward Pro subscription months at £4.99 per month.',
       },
       {
         heading: 'Security and compliance',
@@ -382,11 +453,11 @@ const docsContent: Record<string, DocEntry> = {
   'refund-policy': {
     title: 'Refund Policy',
     icon: <RotateCcw size={40} />,
-    tagline: 'How refunds work for Espeezy Pro subscriptions, Marketplace credits, and other paid features.',
+    tagline: 'How refunds work for Espeezy Pro subscriptions, Project marketplace balance, and other paid features.',
     sections: [
       {
         heading: 'Overview',
-        body: 'Espeezy processes payments through Stripe. This policy explains when refunds are available, how to request one, and what is not refundable. Unless required by law, all refunds are issued to the original payment method in GBP (or the currency shown at checkout).',
+        body: 'Espeezy processes payments through Stripe. This policy explains when refunds are available, how to request one, and what is not refundable. Unless required by law, all refunds are issued to the original payment method in £.',
         items: [
           'Last updated: May 2026',
           'Applies to espeezy.com and linked Espeezy apps',
@@ -403,8 +474,8 @@ const docsContent: Record<string, DocEntry> = {
         ],
       },
       {
-        heading: 'Marketplace credits and digital goods',
-        body: 'Espeezy Credits purchased in bundles are non-refundable once spent on a Marketplace download or licence. Unspent credit balances may be refunded within 14 days of purchase if no credits from that bundle have been used.',
+        heading: 'Project marketplace balance and digital goods',
+        body: 'GBP top-ups are non-refundable once spent on a Marketplace download or licence. Unused balance may be refunded within 14 days of purchase if none of that top-up has been used.',
         items: [
           'Marketplace purchases (templates, guides, datasets) are final once downloaded',
           'If a listing is materially misdescribed or unavailable, contact support within 7 days for review',
@@ -429,7 +500,7 @@ const docsContent: Record<string, DocEntry> = {
         ],
       },
     ],
-    eli12: 'If you paid for something by mistake or something broke on our side, email support and we will sort it out. Money you already spent on downloads or used-up credits usually cannot be returned, but subscription mistakes and billing errors often can.',
+    eli12: 'If you paid for something by mistake or something broke on our side, email support and we will sort it out. Funds you already spent on downloads or used balance usually cannot be returned, but subscription mistakes and billing errors often can.',
   },
 
   'vision': {
@@ -615,12 +686,12 @@ const docsContent: Record<string, DocEntry> = {
       },
       {
         heading: 'Marketplace',
-        body: 'Exchange study materials and digital assets. Buy or sell templates, guides, and datasets using Espeezy Credits.',
+        body: 'Exchange study materials and digital assets. Buy or sell templates, guides, and datasets using GBP balance.',
         items: ['Peer-to-peer exchange', 'Resource ratings', 'Credit-based economy']
       },
       {
         heading: 'Side Hustle',
-        body: 'Earn credits by completing tasks for others. A managed marketplace for academic and creative side work.',
+        body: 'Earn project payouts by completing tasks for others. A managed marketplace for academic and creative side projects.',
         items: ['Task browsing', 'Bank connection via Stripe', 'Secure payouts']
       },
       {

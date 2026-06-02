@@ -14,6 +14,7 @@ export type Feature =
   | 'SSL_SHIELDED_ROOMS'
   | 'EARLY_ACCESS_LAB'
   | 'RESEARCHER_API'
+  | 'ESPEEZY_STUDIO'
 
 const TIER_HIERARCHY: Record<PlanTier, number> = {
   free: 0,
@@ -34,6 +35,7 @@ const FEATURE_CONFIG: Record<Feature, PlanTier> = {
   ADMIN_ANALYTICS: 'premium',
   EARLY_ACCESS_LAB: 'premium',
   RESEARCHER_API: 'premium',
+  ESPEEZY_STUDIO: 'premium',
 }
 
 /**

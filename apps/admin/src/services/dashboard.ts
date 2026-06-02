@@ -132,15 +132,19 @@ export async function fetchPendingJoinRequests(groupId: string): Promise<JoinReq
     .in('id', userIds)
   if (profileError) throw profileError
 
-  const profileMap = new Map<string, { id: string; full_name: string | null; avatar_url: string | null }>(
-    (profiles ?? []).map((profile: any) => [
-      profile.id,
-      {
-        id: profile.id,
-        full_name: profile.full_name ?? null,
-        avatar_url: profile.avatar_url ?? null,
-      },
-    ]),
+  type JoinProfileRow = { id: string; full_name: string | null; avatar_url: string | null }
+  const profileMap = new Map<string, JoinProfileRow>(
+    (profiles ?? []).map((row) => {
+      const profile = row as JoinProfileRow
+      return [
+        profile.id,
+        {
+          id: profile.id,
+          full_name: profile.full_name ?? null,
+          avatar_url: profile.avatar_url ?? null,
+        },
+      ] as const
+    }),
   )
   return requests.map((request) => ({
     ...request,
@@ -194,9 +198,9 @@ export async function fetchActivityLogByGroup(groupId: string) {
 export async function fetchNotificationSettings(userId: string): Promise<DashboardNotificationSettings> {
   const profile = await fetchProfileById(userId)
   return {
-    email_notifications: (profile as any).email_notifications ?? true,
-    push_notifications: (profile as any).push_notifications ?? true,
-    marketing_emails: (profile as any).marketing_emails ?? false,
+    email_notifications: profile.email_notifications ?? true,
+    push_notifications: profile.push_notifications ?? true,
+    marketing_emails: profile.marketing_emails ?? false,
   }
 }
 

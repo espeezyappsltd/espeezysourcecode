@@ -3,13 +3,19 @@ import {
   normalizePlatformAppRow,
   type PlatformApp,
 } from '@shared/platform-apps'
+import { filterPublicCatalogApps } from '@shared/platform-production-catalog'
 import { getSupabaseConfig, supaRest } from '@/app/api/_lib/supabase-rest'
 
 export { normalizePlatformAppRow }
 
+function resolveCatalogApps(apps: PlatformApp[]): PlatformApp[] {
+  const filtered = filterPublicCatalogApps(apps)
+  return filtered.length > 0 ? filtered : filterPublicCatalogApps(PLATFORM_APPS_FALLBACK)
+}
+
 export async function fetchPublishedPlatformApps(): Promise<PlatformApp[]> {
   const cfg = getSupabaseConfig()
-  if (!cfg) return PLATFORM_APPS_FALLBACK
+  if (!cfg) return resolveCatalogApps(PLATFORM_APPS_FALLBACK)
 
   const query = new URLSearchParams({
     select: '*',
@@ -18,9 +24,10 @@ export async function fetchPublishedPlatformApps(): Promise<PlatformApp[]> {
   })
 
   const { ok, data } = await supaRest(`platform_apps?${query}`, 'GET')
-  if (!ok || !Array.isArray(data)) return PLATFORM_APPS_FALLBACK
+  if (!ok || !Array.isArray(data)) return resolveCatalogApps(PLATFORM_APPS_FALLBACK)
 
-  return data.map((row) => normalizePlatformAppRow(row as Record<string, unknown>))
+  const apps = data.map((row) => normalizePlatformAppRow(row as Record<string, unknown>))
+  return resolveCatalogApps(apps)
 }
 
 export async function fetchPlatformAppBySlug(slug: string): Promise<PlatformApp | null> {

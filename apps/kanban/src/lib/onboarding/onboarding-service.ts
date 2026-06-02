@@ -230,8 +230,8 @@ export async function checkAndGrantOnboardingCompletion(
     user_id: userId,
     type: 'onboarding_complete',
     title: 'Onboarding complete!',
-    message: `+${ONBOARDING_CREDIT_REWARD} Espeezy credits added. Your completion report is in My Assets.`,
-    link: '/assets',
+    message: `+${ONBOARDING_CREDIT_REWARD} Espeezy credits added. Your completion report is in Files.`,
+    link: '/settings?tab=storage',
     metadata: { asset_id: asset?.id, credits: ONBOARDING_CREDIT_REWARD },
   })
 

@@ -432,7 +432,7 @@ test.describe.skip('Espeezy — Full User Journey', () => {
         console.log(`[8/10] ✓ Personal data archive verified`)
         await exportPage.close()
       } catch (err) {
-        // BotID blocked this in non-Vercel environments — acceptable, record and continue
+        // BotID blocked this outside Cloudflare Workers — acceptable, record and continue
         console.warn(`[8/10] ⚠ Personal data export blocked (likely BotID): ${rawBody.substring(0, 200)}`)
         await exportPage.close().catch(() => null)
       }

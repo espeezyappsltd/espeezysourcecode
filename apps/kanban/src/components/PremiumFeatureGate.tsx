@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { BarChart3, Gamepad2, Lock, Sparkles, Zap } from 'lucide-react'
+import { BarChart3, Briefcase, Gamepad2, Lock, Sparkles, Zap } from 'lucide-react'
 import type { Feature } from '@/utils/feature-gate'
 import { PLATFORM_OPERATIONS_TAGLINE } from '@/lib/platform/brand-copy'
 import { APP_PRICING_PATH } from '@/lib/pricing/plan-routes'
@@ -74,6 +74,13 @@ const FEATURE_META: Record<
     title: 'Researcher API',
     description: 'Programmatic access for research integrations.',
     icon: Zap,
+    planLabel: 'Premium Scholar',
+  },
+  ESPEEZY_STUDIO: {
+    title: 'Espeezy Studio',
+    description:
+      'Marketplace, professional jobs, invoices, and client delivery — monetization lives in Studio, not Kanban.',
+    icon: Briefcase,
     planLabel: 'Premium Scholar',
   },
 }

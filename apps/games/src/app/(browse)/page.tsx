@@ -26,10 +26,10 @@ export default function GamesBrowseHomePage() {
         >
           Espeezy Games
         </p>
-        <h1>Pick your lane</h1>
+        <h1>Browse study categories</h1>
         <p>
-          Browse by category — each lane groups curated games and skirmishes. Use the sidebar to jump between categories
-          and titles without losing your place.
+          Select a category to explore curated games and study sessions. Use the sidebar to move between categories
+          and individual titles.
         </p>
         <div
           style={{

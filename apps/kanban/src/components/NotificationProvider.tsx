@@ -181,7 +181,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const credits = detail.creditsAdded ?? 20
       addToast(
         'Onboarding complete!',
-        `+${credits} Espeezy credits. Your report is in My Assets.`,
+        `+${credits} Espeezy credits. Your report is in Files.`,
         'success',
       )
       void fetchNotifications()

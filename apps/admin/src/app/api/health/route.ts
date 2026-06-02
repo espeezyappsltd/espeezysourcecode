@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getDeployPlatform, getDeployRegion } from '@shared/deploy-runtime'
 
 export const dynamic = 'force-dynamic'
 
@@ -7,7 +8,8 @@ export const dynamic = 'force-dynamic'
 // live checks for DB, Auth, and Upstash Redis rate-limiter.
 // CDN edge-cached for 10s so monitors don't hammer the DB.
 export async function GET() {
-  const region = process.env.VERCEL_REGION ?? 'local'
+  const region = getDeployRegion()
+  const platform = getDeployPlatform()
   // ── Live Supabase check ───────────────────────────────────────────────────
   const t0 = Date.now()
   let dbHealthy = false
@@ -50,6 +52,7 @@ export async function GET() {
     {
       status: allHealthy ? 'ok' : 'degraded',
       region,
+      platform,
       checks,
       timestamp: new Date().toISOString(),
     },

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function SafeDepositAdmin() {
   // TODO: Fetch and display deposit submissions
-  const [deposits] = useState<any[]>([]);
+  const [deposits] = useState<Record<string, unknown>[]>([]);
   return (
     <main style={{ maxWidth: 700, margin: '2rem auto', padding: 24 }}>
       <h2>Safe Deposit Admin Panel</h2>

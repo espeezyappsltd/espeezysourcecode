@@ -9,26 +9,19 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
+  HelpCircle,
   Menu,
-  HardDrive,
   LayoutDashboard,
   Lock,
-  HelpCircle,
   LogOut,
-  Music,
   Rss,
   Settings,
-  Gamepad2,
   ShieldCheck,
-  Sparkles,
-  TrendingUp,
   UserCircle,
   Users,
   WifiOff,
   type LucideIcon,
 } from 'lucide-react'
-import { useGamesProfileLink } from '@/hooks/useGamesProfileLink'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { usePresence } from '@/components/PresenceProvider'
 import { useConnectivity } from '@/context/ConnectivityContext'
@@ -42,42 +35,34 @@ import { MobileHeaderToolbar } from './mobile/MobileHeaderToolbar'
 import NotificationBell from './NotificationBell'
 import { hasFeature } from '@/utils/feature-gate'
 import RemoteAvatar from '@/components/common/RemoteAvatar'
-import { SIDEBAR_UPGRADE_BLURB } from '@shared/platform-brand'
+import AppCopyrightStrip from '@shared/AppCopyrightStrip'
+import EspeezyAppLogo from '@shared/EspeezyAppLogo'
 import './sidebar-premium.css'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
-const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats'])
+const PREMIUM_LINKS = new Set(['Project Stats'])
 const subscribeToClient = () => () => {}
 
 type SidebarNavItem = {
   name: string
   path: string
   icon: LucideIcon
-  /** Opens games.espeezy.com (SSO) instead of in-app routing */
-  externalGamesProfile?: boolean
 }
 
 const NAV_LINKS: SidebarNavItem[] = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Feed', path: '/feed', icon: Rss },
-  { name: 'Hustle', path: '/hustle', icon: DollarSign },
   { name: 'Teammates', path: '/network', icon: Users },
-  { name: 'My Assets', path: '/assets', icon: HardDrive },
-  { name: 'Ask', path: '/ask', icon: HelpCircle },
-  { name: 'Resources', path: '/marketplace', icon: TrendingUp },
-  { name: 'Break Room', path: '/chillout', icon: Sparkles },
-  { name: 'Skirmish', path: '/games', icon: Gamepad2, externalGamesProfile: true },
-  { name: 'Jukebox', path: '/jukebox', icon: Music },
   { name: 'Project Stats', path: '/analytics', icon: BarChart3 },
   { name: 'My Profile', path: '/profile', icon: UserCircle },
   { name: 'Settings', path: '/settings', icon: Settings },
 ]
 
-function BrandWordmark() {
-  return (
-    <>
-      Espe<span style={{ color: 'var(--brand)' }}>ezy</span>
-    </>
+function BrandWordmark({ compact = false }: { compact?: boolean }) {
+  return compact ? (
+    <EspeezyAppLogo app="kanban" variant="mark" />
+  ) : (
+    <EspeezyAppLogo app="kanban" variant="nav" />
   )
 }
 
@@ -204,13 +189,11 @@ export default function Sidebar({ user }: SidebarProps) {
   const smartLoading = useSmartLoading()
   const withLoading = smartLoading?.withLoading
   const showConfirmation = smartLoading?.showConfirmation
-  const gamesProfileUrl = useGamesProfileLink()
 
   const isProfileLoaded = Boolean(profile)
   const onlineCount = globalOnlineCount
   const onlineLabel = onlineCount === 1 ? '1 ONLINE' : `${onlineCount} ONLINE`
   const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
-  const showUpgradeCard = profile?.subscription_plan === 'free' || !profile?.subscription_plan
   const projectStatsPath = profile?.group_id ? `/analytics/${profile.group_id}` : '/analytics'
 
   const navLinks = useMemo(
@@ -312,6 +295,10 @@ export default function Sidebar({ user }: SidebarProps) {
   const isNavItemActive = (path: string, name: string) => {
     if (name === 'Project Stats') {
       return (pathname ?? '').startsWith('/analytics')
+    }
+
+    if (name === 'Espeezy Studio') {
+      return (pathname ?? '').startsWith('/studio')
     }
 
     if (name === 'Skirmish') {
@@ -443,11 +430,6 @@ export default function Sidebar({ user }: SidebarProps) {
                   window.location.href = APP_PRICING_PATH
                   return
                 }
-                if (link.externalGamesProfile) {
-                  window.location.href = gamesProfileUrl
-                  if (isMobile) closeSidebar()
-                  return
-                }
                 handleNavigation(link.path)
               }}
             />
@@ -456,40 +438,19 @@ export default function Sidebar({ user }: SidebarProps) {
 
         <div className="sidebar-bottom">
           <div className="sidebar-foot">
-            {isOpen && showUpgradeCard && (
-              <div className="sidebar-foot__upgrade sidebar-upgrade-card">
-                <div
-                  className="glass-card-prestige"
-                  style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
-                  onClick={() => { window.location.href = APP_PRICING_PATH }}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { window.location.href = APP_PRICING_PATH } }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} aria-hidden />
-                  <div className="sidebar-foot__upgrade-eyebrow">
-                    <Sparkles size={14} className="shimmer-gold" aria-hidden />
-                    Team support
-                  </div>
-                  <p className="sidebar-foot__upgrade-title">Upgrade to Pro Member</p>
-                  <p className="sidebar-foot__upgrade-copy">{SIDEBAR_UPGRADE_BLURB}</p>
-                </div>
-              </div>
-            )}
-
             <div className="sidebar-foot__vault" data-connected={isConnected ? 'true' : 'false'}>
               <div className="sidebar-foot__vault-icon" aria-hidden>
                 {isConnected ? <ShieldCheck size={17} /> : <WifiOff size={17} />}
               </div>
               <div className="sidebar-foot__vault-body">
                 <div className="sidebar-foot__vault-title">
-                  {isConnected ? 'Vault Verified' : 'Uplink Offline'}
+                  {isConnected ? 'Connection verified' : 'Connection offline'}
                 </div>
                 <div className="sidebar-foot__vault-sub">
-                  {isSlow ? 'Bandwidth restricted' : 'Optimal connectivity'}
+                  {isSlow ? 'Reduced bandwidth detected' : 'Stable connection'}
                 </div>
                 <div className="sidebar-foot__vault-meta">
-                  <span>Node GF-2026-X</span>
+                  <span>Espeezy platform</span>
                   <Lock size={10} aria-hidden />
                 </div>
               </div>
@@ -542,6 +503,11 @@ export default function Sidebar({ user }: SidebarProps) {
                 </button>
               </div>
             </div>
+
+            <AppCopyrightStrip
+              className="sidebar-foot__copyright"
+              style={{ padding: '0.75rem 0.5rem 0', color: 'var(--text-sub)' }}
+            />
           </div>
         </div>
       </aside>

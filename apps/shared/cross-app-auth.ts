@@ -1,10 +1,13 @@
-import { ESPEEZY_APP_ORIGINS, sanitizeNextPath } from './app-url'
+import { resolveAppOrigin, sanitizeNextPath } from './app-url'
 
 /** Default post-SSO path on games.espeezy.com for the signed-in user. */
 export const GAMES_PROFILE_PATH = '/profile'
 
 /** Kanban workspace home (board). */
 export const KANBAN_WORKSPACE_PATH = '/'
+
+/** Default post-SSO path on Espeezy Studios (studio hub). */
+export const STUDIOS_MARKETPLACE_PATH = '/marketplace'
 
 export type CrossAppSessionTokens = {
   access_token: string
@@ -36,17 +39,27 @@ export function buildCrossAppSsoUrl(
 }
 
 export function resolveGamesAppOrigin(): string {
-  return (process.env.NEXT_PUBLIC_GAMES_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.games).replace(
-    /\/$/,
-    '',
-  )
+  return resolveAppOrigin('games')
 }
 
 export function resolveKanbanAppOrigin(): string {
-  return (process.env.NEXT_PUBLIC_KANBAN_APP_URL?.trim() || ESPEEZY_APP_ORIGINS.kanban).replace(
-    /\/$/,
-    '',
-  )
+  return resolveAppOrigin('kanban')
+}
+
+export function resolveStudiosAppOrigin(): string {
+  return resolveAppOrigin('studios')
+}
+
+export function resolveCoreAppOrigin(): string {
+  return resolveAppOrigin('core')
+}
+
+export function resolveArticlesAppOrigin(): string {
+  return resolveAppOrigin('articles')
+}
+
+export function resolveBaseAppOrigin(): string {
+  return resolveAppOrigin('base')
 }
 
 export function buildGamesProfileSsoUrl(
@@ -69,6 +82,14 @@ export function buildKanbanWorkspaceSsoUrl(
   kanbanOrigin?: string,
 ): string {
   return buildKanbanAppSsoUrl(session, KANBAN_WORKSPACE_PATH, kanbanOrigin)
+}
+
+export function buildStudiosSsoUrl(
+  session: CrossAppSessionTokens | null | undefined,
+  nextPath: string = STUDIOS_MARKETPLACE_PATH,
+  studiosOrigin?: string,
+): string {
+  return buildCrossAppSsoUrl(studiosOrigin ?? resolveStudiosAppOrigin(), nextPath, session)
 }
 
 /** Public games profile by username (no SSO). */

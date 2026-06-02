@@ -1,0 +1,58 @@
+.espeezy-app-logo {
+  display: block;
+  flex-shrink: 0;
+  color: var(--text-main, var(--studios-text, #f1f5f9));
+}
+
+.espeezy-app-logo--nav {
+  width: clamp(8.25rem, 26vw, 10.5rem);
+  height: auto;
+}
+
+.espeezy-app-logo--hero {
+  width: clamp(9.5rem, 42vw, 13.5rem);
+  height: auto;
+}
+
+.espeezy-app-logo--footer {
+  width: clamp(6.75rem, 22vw, 8.5rem);
+  height: auto;
+}
+
+.espeezy-app-logo--login {
+  width: clamp(8.5rem, 50vw, 11rem);
+  height: auto;
+}
+
+.espeezy-app-logo--mark {
+  width: 2rem;
+  height: 2rem;
+}
+
+.espeezy-app-logo--inline {
+  width: clamp(5.5rem, 18vw, 7rem);
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.espeezy-app-logo__eyebrow {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  fill: var(--text-sub, var(--studios-muted, #64748b));
+}
+
+.espeezy-app-logo__word {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  fill: currentColor;
+}
+
+.espeezy-app-logo__word--compact {
+  font-size: 15px;
+  letter-spacing: 0.05em;
+}

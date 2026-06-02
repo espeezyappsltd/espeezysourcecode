@@ -43,7 +43,7 @@ function formatSessionDate(iso: string) {
 export default function GamesProfileClient({ data }: { data: LoadedGamesProfile }) {
   const { profile, stats, storage, folders, vaultFileCount, recentSessions } = data
   const kanbanUrl = useKanbanAppLink('/')
-  const arsenalUrl = useKanbanAppLink('/assets')
+  const arsenalUrl = useKanbanAppLink('/settings?tab=storage')
 
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [bioText, setBioText] = useState(profile.biography ?? '')

@@ -1,227 +1,87 @@
 'use client'
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { HelpCircle, Search } from 'lucide-react'
+import { Suspense, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Search } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { SearchField } from '@/components/forms/SearchField'
-import { CategoryNavDropdown } from '@/components/nav/CategoryNavDropdown'
-import { OffsetPageNav } from '@/components/nav/OffsetPageNav'
 import { AskCategoryChips } from '@/components/ask/AskCategoryChips'
 import { AskResourceRow } from '@/components/ask/AskResourceRow'
 import { ASK_RESOURCES } from '@/lib/ask/resources'
 import { filterAskResources, paginateAskResources } from '@/lib/ask/search'
-import {
-  ASK_CATEGORY_LABELS,
-  ASK_CATEGORY_ORDER,
-  type AskCategoryFilter,
-} from '@/lib/ask/types'
-import {
-  askCategoryUrl,
-  askListUrl,
-  askNavContext,
-} from '@/lib/nav/category-url'
-import { useDebouncedListSearch } from '@/lib/nav/use-debounced-list-search'
-import { useMobilePageControls } from '@/components/mobile/MobilePageControlsContext'
-import '@/components/nav/list-nav.css'
+import type { AskCategoryFilter } from '@/lib/ask/types'
 import './ask.css'
 
-const VALID_CATEGORIES = new Set<string>(['all', ...ASK_CATEGORY_ORDER])
-
-function parseCategory(raw: string | null): AskCategoryFilter {
-  if (!raw || !VALID_CATEGORIES.has(raw)) return 'all'
-  return raw as AskCategoryFilter
-}
-
-function parsePage(raw: string | null | undefined): number {
-  const n = parseInt(raw ?? '1', 10)
-  return Number.isFinite(n) && n > 0 ? n : 1
-}
-
-function AskPageInner() {
+function AskPageContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
-
-  const [searchQuery, setSearchQuery] = useState(() => searchParams?.get('q') ?? '')
-  const [category, setCategory] = useState<AskCategoryFilter>(() =>
-    parseCategory(searchParams?.get('category') ?? null),
-  )
-
-  const { draft: searchDraft, setDraft: setSearchDraft, clear: clearSearch } = useDebouncedListSearch({
-    searchParams,
-    router,
-    pathname: '/ask',
-    committedQuery: searchQuery,
-    setCommittedQuery: setSearchQuery,
-  })
-
-  useEffect(() => {
-    setCategory(parseCategory(searchParams?.get('category') ?? null))
-  }, [searchParams])
-
-  const pageFromUrl = parsePage(searchParams?.get('page'))
+  const q = searchParams?.get('q') ?? ''
+  const category = (searchParams?.get('category') ?? 'all') as AskCategoryFilter
+  const page = Math.max(1, Number(searchParams?.get('page') ?? '1') || 1)
 
   const filtered = useMemo(
-    () => filterAskResources(ASK_RESOURCES, searchQuery, category),
-    [searchQuery, category],
+    () => filterAskResources(ASK_RESOURCES, q, category),
+    [q, category],
   )
-
-  const paginated = useMemo(
-    () => paginateAskResources(filtered, pageFromUrl),
-    [filtered, pageFromUrl],
+  const { items, totalPages } = useMemo(
+    () => paginateAskResources(filtered, page, 20),
+    [filtered, page],
   )
-
-  const navCtx = useMemo(() => askNavContext(category, searchQuery), [category, searchQuery])
-
-  const replaceAskUrl = useCallback(
-    (mutate: (params: URLSearchParams) => void) => {
-      const params = new URLSearchParams(searchParams?.toString() ?? '')
-      mutate(params)
-      const qs = params.toString()
-      router.replace(qs ? `/ask?${qs}` : '/ask', { scroll: false })
-    },
-    [router, searchParams],
-  )
-
-  const filterKey = `${category}|${searchQuery}`
-  const prevFilterKey = useRef(filterKey)
-
-  useEffect(() => {
-    if (prevFilterKey.current === filterKey) return
-    prevFilterKey.current = filterKey
-    if (!searchParams?.get('page')) return
-    replaceAskUrl((params) => {
-      params.delete('page')
-    })
-  }, [filterKey, replaceAskUrl, searchParams])
-
-  useEffect(() => {
-    if (paginated.page === pageFromUrl) return
-    replaceAskUrl((params) => {
-      if (paginated.page <= 1) params.delete('page')
-      else params.set('page', String(paginated.page))
-    })
-  }, [paginated.page, pageFromUrl, replaceAskUrl])
-
-  const buildPageHref = useCallback(
-    (p: number) =>
-      askListUrl({
-        category: navCtx.category,
-        q: navCtx.q,
-        page: p > 1 ? p : null,
-      }),
-    [navCtx],
-  )
-
-  const categoryNavItems = useMemo(
-    () =>
-      ASK_CATEGORY_ORDER.map((id) => ({
-        id,
-        label: ASK_CATEGORY_LABELS[id],
-        href: askCategoryUrl(id, { q: navCtx.q }),
-      })),
-    [navCtx.q],
-  )
-
-  useMobilePageControls({
-    search: {
-      value: searchDraft,
-      onChange: setSearchDraft,
-      onClear: clearSearch,
-      placeholder: 'Search resources, tutorials, links…',
-    },
-    filterPanels: [
-      {
-        id: 'category',
-        label: category === 'all' ? 'Category' : ASK_CATEGORY_LABELS[category as keyof typeof ASK_CATEGORY_LABELS],
-        content: (
-          <CategoryNavDropdown
-            items={categoryNavItems}
-            activeId={category === 'all' ? 'all' : category}
-            allHref={askListUrl({ q: navCtx.q })}
-            allLabel="All categories"
-            alwaysExpanded
-          />
-        ),
-      },
-    ],
-  })
-
   return (
-    <div className="ask-page page-shell page-fade list-page--compact">
+    <div className="page-fade page-shell page-shell--narrow">
       <PageHeader
-        variant="compact"
-        icon={HelpCircle}
-        title="Ask"
-        description="Find tutorials, docs, tools, and campus links — search once, jump fast."
+        title="Ask directory"
+        description="Search guides, docs, and tools for Espeezy Kanban."
+        icon={Search}
       />
 
-      <div className="ask-page__sticky">
-        <div className="ask-page__toolbar page-list-toolbar">
-          <SearchField
-            id="ask-search"
-            className="ask-page__search"
-            label="Search help resources"
-            placeholder="Search resources, tutorials, links…"
-            value={searchDraft}
-            onChange={setSearchDraft}
-            onClear={clearSearch}
-            leadingIcon={<Search size={18} />}
-            inputClassName="form-input ask-page__search-input"
-          />
-          <CategoryNavDropdown
-            items={categoryNavItems}
-            activeId={category === 'all' ? 'all' : category}
-            allHref={askListUrl({ q: navCtx.q })}
-            allLabel="All categories"
-          />
-        </div>
-        <AskCategoryChips active={category} searchQuery={searchQuery} />
-      </div>
+      <form
+        role="search"
+        style={{ marginBottom: '1.25rem' }}
+        onSubmit={(e) => {
+          e.preventDefault()
+          const form = e.currentTarget
+          const input = form.elements.namedItem('q') as HTMLInputElement | null
+          const next = new URLSearchParams()
+          const value = input?.value.trim()
+          if (value) next.set('q', value)
+          if (category !== 'all') next.set('category', category)
+          const qs = next.toString()
+          window.location.href = qs ? `/ask?${qs}` : '/ask'
+        }}
+      >
+        <input
+          name="q"
+          type="search"
+          defaultValue={q}
+          placeholder="Search topics, tools, or features…"
+          className="input"
+          style={{ width: '100%' }}
+          aria-label="Search Ask directory"
+        />
+      </form>
 
-      <div className="page-list-main">
-        {paginated.total === 0 ? (
-          <div className="ask-empty" role="status">
-            <p className="ask-empty__title">No matches</p>
-            <p className="ask-empty__hint">
-              Try a shorter keyword, pick another category, or clear the search.
-            </p>
-          </div>
+      <AskCategoryChips active={category} searchQuery={q} />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.25rem' }}>
+        {items.length === 0 ? (
+          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem' }}>No matches. Try another search or category.</p>
         ) : (
-          <>
-            <ul className="ask-list">
-              {paginated.items.map((resource) => (
-                <li key={resource.id}>
-                  <AskResourceRow resource={resource} searchQuery={navCtx.q} />
-                </li>
-              ))}
-            </ul>
-            <OffsetPageNav
-              page={paginated.page}
-              totalPages={paginated.totalPages}
-              from={paginated.from}
-              to={paginated.to}
-              total={paginated.total}
-              buildHref={buildPageHref}
-              itemLabel="resources"
-            />
-          </>
+          items.map((resource) => <AskResourceRow key={resource.id} resource={resource} searchQuery={q || null} />)
         )}
       </div>
+
+      {totalPages > 1 ? (
+        <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-sub)' }}>
+          Page {page} of {totalPages}
+        </p>
+      ) : null}
     </div>
   )
 }
 
 export default function AskPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="page-shell page-fade" style={{ padding: '2rem 1rem' }}>
-          <p style={{ color: 'var(--text-sub)', fontWeight: 700 }}>Loading Ask…</p>
-        </div>
-      }
-    >
-      <AskPageInner />
+    <Suspense fallback={<div className="page-shell page-fade">Loading Ask directory…</div>}>
+      <AskPageContent />
     </Suspense>
   )
 }

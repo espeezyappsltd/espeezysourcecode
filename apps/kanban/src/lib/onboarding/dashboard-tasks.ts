@@ -6,12 +6,10 @@ export const ONBOARDING_CREDIT_REWARD = 20
 export type OnboardingTaskKey =
   | 'kanban'
   | 'feed'
-  | 'hustle'
-  | 'marketplace'
+  | 'studio'
   | 'assets'
   | 'teammates'
   | 'settings'
-  | 'plans'
 
 export type OnboardingTaskTemplate = {
   key: OnboardingTaskKey
@@ -19,7 +17,6 @@ export type OnboardingTaskTemplate = {
   description: string
   category: TaskCategory
   path: string
-  /** Short CTA on Kanban cards and task modal */
   tourButtonLabel: string
 }
 
@@ -46,28 +43,20 @@ export const ONBOARDING_TASK_TEMPLATES: OnboardingTaskTemplate[] = [
     tourButtonLabel: 'Open Feed',
   },
   {
-    key: 'hustle',
-    title: 'Tour: Hustle Board',
-    description: `${ONBOARDING_MARKER_PREFIX}hustle] Open Hustle, browse a campus gig, then mark this task Done.`,
+    key: 'studio',
+    title: 'Tour: Espeezy Studio (Premium)',
+    description: `${ONBOARDING_MARKER_PREFIX}studio] Open Espeezy Studio from the sidebar. Marketplace & jobs live there for Premium members.`,
     category: 'Implementation',
-    path: '/hustle',
-    tourButtonLabel: 'Open Hustle',
-  },
-  {
-    key: 'marketplace',
-    title: 'Tour: Campus Marketplace',
-    description: `${ONBOARDING_MARKER_PREFIX}marketplace] Open Marketplace, review listings and credits checkout, then mark Done.`,
-    category: 'Implementation',
-    path: '/marketplace',
-    tourButtonLabel: 'Marketplace',
+    path: '/studio',
+    tourButtonLabel: 'Espeezy Studio',
   },
   {
     key: 'assets',
-    title: 'Tour: My Assets storage',
-    description: `${ONBOARDING_MARKER_PREFIX}assets] Upload a file or save a link in My Assets, then mark Done.`,
+    title: 'Tour: Files',
+    description: `${ONBOARDING_MARKER_PREFIX}assets] Upload a file or save a link in Files, then mark Done.`,
     category: 'Documentation',
-    path: '/assets',
-    tourButtonLabel: 'Personal',
+    path: '/settings?tab=storage',
+    tourButtonLabel: 'Files',
   },
   {
     key: 'teammates',
@@ -84,14 +73,6 @@ export const ONBOARDING_TASK_TEMPLATES: OnboardingTaskTemplate[] = [
     category: 'UX/UI Design',
     path: '/settings',
     tourButtonLabel: 'Settings',
-  },
-  {
-    key: 'plans',
-    title: 'Tour: Plans & Espeezy credits',
-    description: `${ONBOARDING_MARKER_PREFIX}plans] Open Billing in Settings to see your plan and usage, then mark Done.`,
-    category: 'Research',
-    path: '/settings?tab=billing',
-    tourButtonLabel: 'Billing',
   },
 ]
 

@@ -1,36 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { X, BookOpen, LifeBuoy, ArrowRight } from "lucide-react";
+import {
+  ADMIN_HELP_GUIDES,
+  HELP_TRAY_CTA_LABEL,
+  HELP_TRAY_TITLE,
+} from "@shared/app-ui-copy";
+import AppCopyrightStrip from "@shared/AppCopyrightStrip";
+import { espeezyDocsUrl } from "@shared/espeezy-marketing-links";
 
-const FEATURE_GUIDES = [
-  {
-    title: "Kanban Board",
-    desc: "Organize tasks, drag to reorder, assign teammates, and track progress.",
-    link: "/docs/features/kanban"
-  },
-  {
-    title: "Roadmap",
-    desc: "Plan milestones, set deadlines, and visualize your project timeline.",
-    link: "/docs/features/roadmap"
-  },
-  {
-    title: "Team & Chat",
-    desc: "Invite teammates, manage roles, and collaborate in real-time chat.",
-    link: "/docs/features/team"
-  },
-  {
-    title: "Marketplace",
-    desc: "Buy, sell, or swap resources securely with other students.",
-    link: "/docs/features/marketplace"
-  },
-  {
-    title: "Profile & Settings",
-    desc: "Customize your profile, manage notifications, and set preferences.",
-    link: "/docs/features/profile"
-  }
-];
+const DOCS_QUICK_START = espeezyDocsUrl("/docs/getting-started");
 
 export default function HelpTray() {
   const [open, setOpen] = useState(false);
@@ -44,46 +24,111 @@ export default function HelpTray() {
   if (!open) return null;
 
   return (
-    <div style={{
-      position: "fixed", right: 0, top: 0, bottom: 0, zIndex: 9999,
-      width: "min(95vw, 420px)", background: "var(--surface)",
-      borderLeft: "2px solid var(--border)", boxShadow: "-8px 0 32px rgba(0,0,0,0.12)",
-      animation: "slideInRight 0.3s cubic-bezier(0.4,0,0.2,1)",
-      display: "flex", flexDirection: "column"
-    }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.5rem 1.5rem 1rem 1.5rem", borderBottom: "1px solid var(--border)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
-          <LifeBuoy size={24} color="#2563eb" />
-          <span style={{ fontWeight: 900, fontSize: "1.25rem", color: "#2563eb" }}>Help & Onboarding</span>
+    <>
+      <button
+        type="button"
+        aria-label="Close help panel"
+        onClick={() => setOpen(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 9998,
+          background: "rgba(15, 23, 42, 0.45)",
+          border: "none",
+          cursor: "pointer",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: 9999,
+          width: "min(95vw, 420px)",
+          background: "var(--surface)",
+          borderLeft: "2px solid var(--border)",
+          boxShadow: "-8px 0 32px rgba(0,0,0,0.12)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={HELP_TRAY_TITLE}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.5rem 1.5rem 1rem", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+            <LifeBuoy size={24} color="#2563eb" aria-hidden />
+            <span style={{ fontWeight: 800, fontSize: "1.1rem", color: "#2563eb" }}>{HELP_TRAY_TITLE}</span>
+          </div>
+          <button aria-label="Close help" style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", padding: 4, borderRadius: 8 }} onClick={() => setOpen(false)}>
+            <X size={22} />
+          </button>
         </div>
-        <button aria-label="Close Help" style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", padding: 4, borderRadius: 8 }} onClick={() => setOpen(false)}>
-          <X size={22} />
-        </button>
-      </div>
-      <div style={{ padding: "1.5rem", flex: 1, overflowY: "auto" }}>
-        <div style={{ marginBottom: "2rem" }}>
-          <h3 style={{ fontWeight: 800, fontSize: "1.1rem", marginBottom: "0.5rem" }}>How can we help?</h3>
-          <p style={{ color: "#64748b", fontSize: "0.98rem", marginBottom: 0 }}>
-            Explore guides for every feature, or jump to the <Link href="/docs/getting-started" style={{ color: "#2563eb", fontWeight: 700 }}>Quick Start Guide <ArrowRight size={14} style={{ verticalAlign: "middle" }} /></Link>.
-          </p>
+        <div style={{ padding: "1.5rem", flex: 1, overflowY: "auto" }}>
+          <div style={{ marginBottom: "2rem" }}>
+            <h3 style={{ fontWeight: 800, fontSize: "1.05rem", marginBottom: "0.5rem" }}>How can we help?</h3>
+            <p style={{ color: "#64748b", fontSize: "0.95rem", marginBottom: 0, lineHeight: 1.6 }}>
+              Browse documentation for each feature, or open the{" "}
+              <a href={DOCS_QUICK_START} target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb", fontWeight: 700 }}>
+                {HELP_TRAY_CTA_LABEL} <ArrowRight size={14} style={{ verticalAlign: "middle" }} />
+              </a>
+              .
+            </p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {ADMIN_HELP_GUIDES.map((f) => (
+              <a
+                key={f.title}
+                href={f.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "block",
+                  padding: "1.1rem 1.2rem",
+                  borderRadius: 14,
+                  background: "rgba(59,130,246,0.07)",
+                  border: "1px solid rgba(59,130,246,0.13)",
+                  color: "#2563eb",
+                  fontWeight: 800,
+                  fontSize: "1rem",
+                  textDecoration: "none",
+                }}
+                onClick={() => setOpen(false)}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.3rem" }}>
+                  <BookOpen size={18} aria-hidden />
+                  <span>{f.title}</span>
+                </div>
+                <div style={{ color: "#64748b", fontWeight: 500, fontSize: "0.9rem", lineHeight: 1.55 }}>{f.desc}</div>
+              </a>
+            ))}
+          </div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          {FEATURE_GUIDES.map((f) => (
-            <Link key={f.title} href={f.link} style={{ display: "block", padding: "1.1rem 1.2rem", borderRadius: 14, background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.13)", color: "#2563eb", fontWeight: 800, fontSize: "1.05rem", textDecoration: "none", marginBottom: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.3rem" }}>
-                <BookOpen size={18} />
-                <span>{f.title}</span>
-              </div>
-              <div style={{ color: "#64748b", fontWeight: 500, fontSize: "0.97rem" }}>{f.desc}</div>
-            </Link>
-          ))}
+        <div style={{ padding: "1.25rem", borderTop: "1px solid var(--border)", background: "rgba(59,130,246,0.04)" }}>
+          <a
+            href={DOCS_QUICK_START}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.35rem",
+              fontWeight: 800,
+              fontSize: "0.95rem",
+              borderRadius: 12,
+              padding: "0.7rem 1.25rem",
+              background: "#2563eb",
+              color: "white",
+              textDecoration: "none",
+            }}
+            onClick={() => setOpen(false)}
+          >
+            {HELP_TRAY_CTA_LABEL} <ArrowRight size={16} aria-hidden />
+          </a>
+          <AppCopyrightStrip style={{ marginTop: "1rem", color: "#64748b" }} />
         </div>
       </div>
-      <div style={{ padding: "1.25rem", borderTop: "1px solid var(--border)", background: "rgba(59,130,246,0.04)", textAlign: "center" }}>
-        <Link href="/docs/getting-started" className="btn-primary" style={{ fontWeight: 900, fontSize: "1rem", borderRadius: 12, padding: "0.7rem 2rem", background: "#2563eb", color: "white", textDecoration: "none" }}>
-          Quick Start Guide <ArrowRight size={16} style={{ verticalAlign: "middle" }} />
-        </Link>
-      </div>
-    </div>
+    </>
   );
 }

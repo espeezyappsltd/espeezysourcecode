@@ -78,12 +78,16 @@ async function fetchAuthUserCount(cfg: { url: string; key: string }): Promise<nu
     })
 
     if (!res.ok) return null
+
+    const headerTotal = res.headers.get('x-total-count')
+    if (headerTotal) {
+      const parsed = Number(headerTotal)
+      if (Number.isFinite(parsed)) return parsed
+    }
+
     const data = await res.json()
     const total = (data && typeof data === 'object') ? (data as Record<string, unknown>).total : null
     if (typeof total === 'number' && Number.isFinite(total)) return total
-
-    const users = (data && typeof data === 'object') ? (data as Record<string, unknown>).users : null
-    if (Array.isArray(users)) return users.length
 
     return null
   } catch {
@@ -91,22 +95,33 @@ async function fetchAuthUserCount(cfg: { url: string; key: string }): Promise<nu
   }
 }
 
+async function resolveAuthUserCount(cfg: { url: string; key: string }): Promise<number> {
+  const authTotal = await fetchAuthUserCount(cfg)
+  if (authTotal !== null && authTotal >= 0) return authTotal
+
+  // Fallback: public profiles mirror signed-up users when Auth Admin API is unavailable.
+  const profileTotal = await fetchCount(cfg, 'profiles')
+  if (profileTotal !== null && profileTotal >= 0) return profileTotal
+
+  return 0
+}
+
 async function fetchFromSupabase(): Promise<LiveMetrics | null> {
   const cfg = getSupabaseConfig()
   if (!cfg) return null
 
-  const [preregCount, lifetimeUsed] = await Promise.all([
+  const [preregCount, lifetimeUsed, authUserCount] = await Promise.all([
     fetchCount(cfg, 'pre_registrations'),
     fetchCount(cfg, 'profiles', 'subscription_plan=eq.lifetime'),
+    resolveAuthUserCount(cfg),
   ])
 
   if (preregCount === null || lifetimeUsed === null) return null
 
   return {
-    // Registered count displayed on UI should come directly from pre_registrations.
     registered_count: preregCount,
     preregistration_count: preregCount,
-    auth_user_count: preregCount,
+    auth_user_count: authUserCount,
     lifetime_seats_used: lifetimeUsed,
     lifetime_seats_remaining: Math.max(0, 100 - lifetimeUsed),
     last_updated_at: new Date().toISOString(),
@@ -121,9 +136,11 @@ async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
   ]
 
   try {
-    const [preregisterRes, lifetimeRes] = await Promise.all([
+    const cfg = getSupabaseConfig()
+    const [preregisterRes, lifetimeRes, authUserCount] = await Promise.all([
       fetch(preregisterApi, { cache: 'no-store' }),
       fetch(lifetimeApi, { cache: 'no-store' }),
+      cfg ? resolveAuthUserCount(cfg) : Promise.resolve(0),
     ])
 
     const preregisterData = await preregisterRes.json()
@@ -139,7 +156,7 @@ async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
     return {
       registered_count: registered,
       preregistration_count: registered,
-      auth_user_count: 0,
+      auth_user_count: authUserCount,
       lifetime_seats_used: lifetimeUsed,
       lifetime_seats_remaining: Math.max(0, 100 - lifetimeUsed),
       last_updated_at: new Date().toISOString(),

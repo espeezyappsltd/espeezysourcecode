@@ -21,12 +21,13 @@ const nextConfig = {
       { source: '/donation/:path*', destination: '/pricing', permanent: true },
     ]
   },
-  // Deployed to Vercel — server mode (no static export)
+  // Deployed to Cloudflare Workers (OpenNext) — server mode (no static export)
   images: {
     qualities: [20, 40, 50, 60, 75],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+  output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
   // Removed unsupported 'turbo' key from experimental
 }

@@ -1,15 +1,19 @@
 {
   "name": "espeezystudios",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev -p 3007 --webpack",
     "build": "next build --webpack",
+    "cf-build": "opennextjs-cloudflare build",
+    "deploy:cf": "wrangler deploy",
+    "preview:cf": "opennextjs-cloudflare preview",
     "typecheck": "tsc --noEmit",
     "start": "next start",
-    "lint": "next lint",
-    "stop": "taskkill /f /im node.exe",
-    "vercel-build:panel": "npm run build"
+    "lint": "echo \"No lint configured for this repo. Install ESLint or configure Next lint if needed.\"",
+    "validate:studios": "node scripts/validate-studios.mjs",
+    "rsl": "npm run typecheck && npm run validate:studios",
+    "stop": "node ../../scripts/stop-app-port.mjs 3007"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.19.11",

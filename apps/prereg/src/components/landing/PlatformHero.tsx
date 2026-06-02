@@ -2,115 +2,134 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
-import {
-  HERO_COPY_LINES,
-  KANBAN_DEMO_LABEL,
-  KANBAN_DEMO_PATH,
-  PLATFORM_OPERATIONS_TAGLINE,
-} from '@shared/platform-brand'
-import { PLATFORM_APP_STATUS_LABEL, PLATFORM_HERO_INTRO, type PlatformApp } from '@shared/platform-apps'
-import { PlatformAppIcon } from './platform-app-icon'
+import { ArrowRight, ArrowUpRight, LayoutDashboard } from 'lucide-react'
+import { HERO_COPY_LINES, KANBAN_DEMO_LABEL, KANBAN_DEMO_URL } from '@shared/platform-brand'
+import { productionAppsForConsumerDocs } from '@shared/platform-production-catalog'
+import { buildKanbanAppUrl } from '@shared/app-url'
+import { useSessionUser } from '@shared/useSessionUser'
+import { supabase } from '@/lib/supabase-client'
 import './landing.css'
 
+const HERO_APPS = productionAppsForConsumerDocs()
+
+const motionEase = [0.22, 1, 0.36, 1] as const
+
 type Props = {
-  apps: PlatformApp[]
-  kanbanAppUrl: string
-  kanbanDemoUrl: string
   userCount: number
 }
 
-export default function PlatformHero({ apps, kanbanAppUrl, kanbanDemoUrl, userCount }: Props) {
-  const liveApps = apps.filter((a) => a.status === 'live' || a.status === 'beta')
-  const devApps = apps.filter((a) => a.status === 'development' || a.status === 'coming_soon')
+export default function PlatformHero({ userCount }: Props) {
+  const { user, loading } = useSessionUser(supabase)
+  const signedIn = !loading && !!user
 
   return (
-    <section id="hero" className="landing-section" style={{ textAlign: 'center', paddingTop: 'clamp(4rem, 10vw, 7rem)' }}>
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-        <div className="landing-eyebrow">
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 8px var(--brand)' }} />
-          Free for students
-        </div>
-      </motion.div>
+    <section id="hero" className="landing-hero" aria-labelledby="hero-heading">
+      <div className="landing-hero__backdrop" aria-hidden />
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.1 }}
-        style={{ maxWidth: 860, margin: '0 auto 1.25rem' }}
-      >
-        <h1 className="landing-title" style={{ fontSize: 'clamp(1.75rem, 4.5vw, 2.75rem)' }}>
-          {HERO_COPY_LINES[0]}
-        </h1>
-        <p className="landing-lead">{HERO_COPY_LINES[1]}</p>
-        <p className="landing-lead" style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: '#94a3b8' }}>
-          {PLATFORM_HERO_INTRO}
-        </p>
-        <p style={{ margin: '1rem auto 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
-          {PLATFORM_OPERATIONS_TAGLINE}
-          {userCount > 0 && (
-            <>
-              {' · '}
-              <span style={{ color: 'var(--brand)' }}>{userCount.toLocaleString()}</span> students using Espeezy
-            </>
-          )}
-        </p>
-      </motion.div>
+      <div className="landing-hero__inner">
+        <motion.div
+          className="landing-hero__copy"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.75, ease: motionEase }}
+        >
+          <div className="landing-eyebrow">
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: 'var(--brand)',
+                boxShadow: '0 0 8px var(--brand)',
+              }}
+              aria-hidden
+            />
+            Learning apps
+          </div>
 
-      <div className="hero-apps-strip">
-        {liveApps.map((app) => (
-          <Link key={app.slug} href={`/apps/${app.slug}`} className="hero-apps-pill">
-            <PlatformAppIcon iconKey={app.icon_key} size={16} color={app.accent_color} />
-            {app.name.replace(/^Espeezy\s+/i, '')}
-            <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 800 }}>
-              {PLATFORM_APP_STATUS_LABEL[app.status]}
-            </span>
-          </Link>
-        ))}
-        {devApps.map((app) => (
-          <Link key={app.slug} href={`/apps/${app.slug}`} className="hero-apps-pill hero-apps-pill--dev">
-            <PlatformAppIcon iconKey={app.icon_key} size={16} color={app.accent_color} />
-            {app.name.replace(/^Espeezy\s+/i, '')}
-            <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>
-              {PLATFORM_APP_STATUS_LABEL[app.status]}
-            </span>
-          </Link>
-        ))}
+          <h1 id="hero-heading" className="landing-hero__title">
+            {HERO_COPY_LINES[0]}
+          </h1>
+          <p className="landing-hero__lead">{HERO_COPY_LINES[1]}</p>
+
+          {userCount > 0 ? (
+            <p className="landing-hero__stat">
+              <strong>{userCount.toLocaleString()}</strong>{' '}
+              {userCount === 1 ? 'user' : 'users'} on Espeezy
+            </p>
+          ) : null}
+        </motion.div>
+
+        <motion.div
+          className="landing-hero__cluster"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.12, ease: motionEase }}
+        >
+          <div className="landing-hero-actions">
+            {signedIn ? (
+              <a
+                href={buildKanbanAppUrl('/')}
+                className="platform-app-card__btn platform-app-card__btn--primary"
+              >
+                <LayoutDashboard size={16} aria-hidden />
+                Open dashboard
+                <ArrowRight size={16} aria-hidden />
+              </a>
+            ) : (
+              <>
+                <a href="/login" className="platform-app-card__btn platform-app-card__btn--primary">
+                  Log in
+                  <ArrowRight size={16} aria-hidden />
+                </a>
+                <Link
+                  href="/login?mode=signup"
+                  className="platform-app-card__btn platform-app-card__btn--ghost"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
+          </div>
+
+          <nav aria-label="Quick links" className="landing-hero-quicklinks">
+            <a href="#apps">Apps</a>
+            <a href={KANBAN_DEMO_URL} rel="noopener noreferrer">
+              {KANBAN_DEMO_LABEL}
+            </a>
+            <Link href="/docs">Docs</Link>
+            <Link href="/checkout">Pricing</Link>
+            <Link href="/contact">Contact</Link>
+          </nav>
+        </motion.div>
+
+        <motion.div
+          className="landing-hero__apps"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.22, ease: motionEase }}
+        >
+          <p className="landing-hero__apps-label">Apps in use</p>
+          <ul className="landing-hero__app-grid">
+            {HERO_APPS.map((app) => (
+              <li key={app.key}>
+                <a
+                  href={app.href}
+                  className="landing-hero__app-card"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="landing-hero__app-name">
+                    {app.name}
+                    <ArrowUpRight size={14} aria-hidden style={{ marginLeft: 4, verticalAlign: 'middle' }} />
+                  </span>
+                  <span className="landing-hero__app-summary">{app.summary}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.35 }}
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-          justifyContent: 'center',
-          marginTop: '2rem',
-        }}
-      >
-        <a
-          href={kanbanAppUrl}
-          className="platform-app-card__btn platform-app-card__btn--primary"
-          style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}
-        >
-          Start free
-          <ArrowRight size={16} aria-hidden />
-        </a>
-        <a
-          href={kanbanDemoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="platform-app-card__btn platform-app-card__btn--ghost"
-          style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}
-        >
-          {KANBAN_DEMO_LABEL}
-        </a>
-        <a href="#apps" className="platform-app-card__btn platform-app-card__btn--ghost" style={{ padding: '0.85rem 1.5rem', fontSize: '0.9rem' }}>
-          Browse all apps
-        </a>
-      </motion.div>
     </section>
   )
 }

@@ -3,8 +3,7 @@ import './globals.css'
 import '@shared/theme-cycle.css'
 import '@shared/espeezy-appearance.css'
 import type { Metadata } from 'next'
-import GlobalFooter from '../components/GlobalFooter'
-import AppsNav from '../components/AppsNav'
+import StudioAppChrome from '../components/StudioAppChrome'
 import { StudiosThemeProvider } from '@/components/theme/StudiosThemeProvider'
 import { getStudiosLayoutTheme } from '@/lib/layout-theme'
 
@@ -22,9 +21,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body>
         <StudiosThemeProvider initialTheme={initialTheme} userPlan={userPlan}>
-          <AppsNav />
-          {children}
-          <GlobalFooter />
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          <StudioAppChrome>{children}</StudioAppChrome>
         </StudiosThemeProvider>
       </body>
     </html>

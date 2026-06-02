@@ -21,7 +21,7 @@ function decomposeCommand(command: string): TaskSpec[] {
 
   const isUI = /component|page|ui|design|layout|form|button|modal|style|css|frontend/i.test(cmd);
   const isAPI = /api|route|endpoint|backend|database|db|migration|sql|stripe|webhook|auth/i.test(cmd);
-  const isInfra = /deploy|ci\/cd|github action|vercel|build|environment|env|devops/i.test(cmd);
+  const isInfra = /deploy|ci\/cd|github action|cloudflare|wrangler|build|environment|env|devops/i.test(cmd);
 
   // Backend builder (Gamma)
   if (isAPI) {
@@ -75,7 +75,7 @@ function decomposeCommand(command: string): TaskSpec[] {
 
   tasks.push({
     title: 'Build verification & deployment',
-    description: `Run \`npx next build\` after all feature tasks complete for: "${command}". Ensure zero TypeScript errors, zero build errors. Coordinate Vercel deployment.`,
+    description: `Run \`npx next build\` after all feature tasks complete for: "${command}". Ensure zero TypeScript errors, zero build errors. Coordinate Cloudflare Workers deployment.`,
     agentName: 'Epsilon',
     priority: 'high',
     dependsOnIndexes: builderIndexes,
@@ -95,7 +95,7 @@ function decomposeCommand(command: string): TaskSpec[] {
   if (isInfra && !isUI && !isAPI) {
     tasks.unshift({
       title: 'Infrastructure changes',
-      description: `Implement the infrastructure/DevOps changes required for: "${command}". Update vercel.json, GitHub Actions workflows, or environment configuration as needed.`,
+      description: `Implement the infrastructure/DevOps changes required for: "${command}". Update wrangler.toml, Cloudflare routes, GitHub Actions workflows, or environment configuration as needed.`,
       agentName: 'Epsilon',
       priority: 'high',
     });

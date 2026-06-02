@@ -18,6 +18,7 @@ import { subscriptionCheckoutCopy } from '@/lib/platform/transaction-confirm-cop
 import { useProfile } from '@/context/ProfileContext'
 import { deleteAccount, createStripePortalSession } from '@/services/account'
 import { createBrowserSupabaseClient } from '@/lib/db-client'
+import { buildAuthCallbackUrl, resolveClientOrigin } from '@/lib/app-url'
 import {
   createUserFeedback,
   fetchGroupById,
@@ -40,9 +41,10 @@ const SETTINGS_TABS: TabName[] = [
   'security',
   'appearance',
   'workspace',
-  'data',
-  'team',
   'billing',
+  'data',
+  'storage',
+  'team',
   'support',
   'identity_hub',
 ]
@@ -111,6 +113,44 @@ export function useSettingsPage() {
   const getErrorMessage = (err: unknown, fallback = 'Something went wrong') => {
     return formatSupabaseError(err, fallback)
   }
+
+  const syncProfileFromLinkedIdentity = useCallback(
+    async (authUser: { id: string; user_metadata?: Record<string, unknown> }, current: Profile) => {
+      const md = authUser.user_metadata ?? {}
+      const identityName =
+        (typeof md.full_name === 'string' && md.full_name.trim()) ||
+        (typeof md.name === 'string' && md.name.trim()) ||
+        ''
+      const identityAvatar = typeof md.avatar_url === 'string' ? md.avatar_url.trim() : ''
+      const identityUsername =
+        (typeof md.user_name === 'string' && md.user_name.trim()) ||
+        (typeof md.preferred_username === 'string' && md.preferred_username.trim()) ||
+        ''
+
+      const patch: Record<string, unknown> = {}
+
+      if (identityName && (!current.full_name || current.full_name.trim().length === 0)) {
+        patch.full_name = identityName
+      }
+      if (identityUsername && (!current.username || current.username.trim().length === 0)) {
+        patch.username = identityUsername
+      }
+      if (
+        identityAvatar &&
+        !Boolean(current.protect_avatar) &&
+        (!current.avatar_url || current.avatar_url.trim() !== identityAvatar)
+      ) {
+        patch.avatar_url = identityAvatar
+      }
+
+      if (Object.keys(patch).length === 0) return current
+
+      await updateProfileById(authUser.id, patch)
+      const refreshed = (await fetchProfileById(authUser.id)) as Profile | null
+      return refreshed ?? current
+    },
+    [],
+  )
 
   const applyProfileToForm = useCallback((data: Profile) => {
     setFullName(data.full_name || '')
@@ -209,12 +249,13 @@ export function useSettingsPage() {
       }
 
       if (data) {
-        applyProfileToForm(data)
+        const synced = await syncProfileFromLinkedIdentity(user, data)
+        applyProfileToForm(synced)
 
         let groupData: Group | null = null
-        if (data.group_id) {
+        if (synced.group_id) {
           try {
-            groupData = await fetchGroupById(data.group_id)
+            groupData = await fetchGroupById(synced.group_id)
             setIsEncrypted(groupData?.is_encrypted || false)
           } catch (err) {
             console.warn('Fetch group for settings:', formatSupabaseError(err))
@@ -227,15 +268,15 @@ export function useSettingsPage() {
           console.warn('Fetch join requests:', formatSupabaseError(err))
         }
 
-        if (data.group_id) {
+        if (synced.group_id) {
           try {
-            await fetchTeam(data.group_id)
+            await fetchTeam(synced.group_id)
           } catch (err) {
             console.warn('Fetch team members:', formatSupabaseError(err))
           }
         }
 
-        setProfile({ ...data, groups: groupData } as unknown as Profile)
+        setProfile({ ...synced, groups: groupData } as unknown as Profile)
       } else if (!profile?.id) {
         setProfile({ id: user.id, email: user.email } as unknown as Profile)
       }
@@ -246,7 +287,7 @@ export function useSettingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [applyProfileToForm, fetchJoinRequests, fetchTeam, profile, setProfile])
+  }, [applyProfileToForm, fetchJoinRequests, fetchTeam, profile, setProfile, syncProfileFromLinkedIdentity])
 
   useEffect(() => {
     const initializeData = async () => {
@@ -463,8 +504,28 @@ export function useSettingsPage() {
   const handleLinkIdentity = async (provider: 'github.com' | 'google.com') => {
     setSaving(true)
     setError(null)
-    addToast('Info', 'Identity linkage is managed during the secure login sequence.', 'info')
-    setSaving(false)
+    try {
+      const supabase = createBrowserSupabaseClient()
+      const providerKey = provider === 'github.com' ? 'github' : 'google'
+      const callback = new URL(buildAuthCallbackUrl(resolveClientOrigin()))
+      callback.searchParams.set('next', '/settings?tab=identity_hub')
+
+      const { error: linkError } = await supabase.auth.linkIdentity({
+        provider: providerKey,
+        options: { redirectTo: callback.toString() },
+      })
+
+      if (linkError) {
+        throw linkError
+      }
+      addToast('Identity linking', `Continue in ${providerKey} to finish linking.`, 'info')
+    } catch (err: unknown) {
+      const message = formatSupabaseError(err, 'Could not start identity linking.')
+      setError(message)
+      addToast('Identity linking failed', message, 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleKickUser = async (userId: string) => {
@@ -698,11 +759,13 @@ export function useSettingsPage() {
     const normalizedTab = tab === 'team' ? 'workspace' : tab
     if (normalizedTab && SETTINGS_TABS.includes(normalizedTab as TabName)) {
       setActiveTab(normalizedTab as TabName)
+    } else if (normalizedTab === 'billing') {
+      setActiveTab('appearance')
     }
     if (params.get('checkout') === 'success') {
       addToast('Plan updated', 'Your subscription is active. Changes may take a moment to sync.', 'success')
       void refreshProfile()
-      window.history.replaceState({}, '', '/settings?tab=billing')
+      window.history.replaceState({}, '', '/studio')
     }
   }, [addToast, refreshProfile])
 
@@ -711,7 +774,7 @@ export function useSettingsPage() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('billing') !== 'portal') return
     void handleManageSubscription()
-    window.history.replaceState({}, '', '/settings?tab=billing')
+    window.history.replaceState({}, '', '/settings?tab=appearance')
     // eslint-disable-next-line react-hooks/exhaustive-deps -- portal deep link once profile loads
   }, [profile?.stripe_customer_id])
 

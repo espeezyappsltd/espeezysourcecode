@@ -96,10 +96,10 @@ export default function WelcomeOnboarding() {
             </div>
             
             <h1 style={{ fontSize: '2.5rem', fontWeight: 950, letterSpacing: '-0.04em', color: '#fff', marginBottom: '1rem' }}>
-              Welcome to the Hub
+              Set up your team workspace
             </h1>
             <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '3rem', lineHeight: 1.6 }}>
-              You&apos;re currently unassigned. Every great project starts with a team. Ready to build something amazing?
+              Your account is not linked to a team yet. Create a workspace for your course project, or join an existing team with an invitation code.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -170,7 +170,7 @@ export default function WelcomeOnboarding() {
             </div>
             
             <div style={{ marginTop: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: '#6ee7b7', fontSize: '0.9rem', fontWeight: 700 }}>
-              <ShieldCheck size={16} /> Secure Academic Environment
+              <ShieldCheck size={16} /> Secure academic workspace
             </div>
           </div>
         )}

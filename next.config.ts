@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
 
   // In Next.js 16, outputFileTracingRoot is a top-level property.
   // This prevents "whole project" tracing warnings during the Turbopack build.
+  output: 'standalone',
   outputFileTracingRoot: path.join(/* turbopackIgnore: true */ process.cwd()),
 
   // ── Image optimisation ───────────────────────────────────────────────────

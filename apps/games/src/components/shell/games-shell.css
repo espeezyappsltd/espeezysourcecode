@@ -340,6 +340,23 @@
   animation: fadeIn 0.35s ease;
 }
 
+.games-shell__footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--games-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.games-shell__footer-tagline {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--games-muted);
+  max-width: 40rem;
+}
+
 .games-mobile-bar {
   display: none;
   position: sticky;
