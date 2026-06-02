@@ -3,6 +3,7 @@ import {
   BarChart3,
   Briefcase,
   LayoutDashboard,
+  Bot,
   Settings,
   Shield,
   ShoppingBag,
@@ -24,6 +25,7 @@ export type StudioNavLink = {
 export const STUDIO_NAV_LINKS: StudioNavLink[] = [
   { name: 'Home', url: '/', icon: LayoutDashboard, bottomNav: true },
   { name: 'Projects', url: '/jobs', icon: Briefcase, bottomNav: true },
+  { name: 'Agent', url: '/agent', icon: Bot },
   { name: 'Studio hub', shortName: 'Hub', url: '/marketplace', icon: ShoppingBag, bottomNav: true },
   { name: 'Team', url: '/team', icon: Users },
   { name: 'Analytics', url: '/analytics', icon: BarChart3, bottomNav: true },

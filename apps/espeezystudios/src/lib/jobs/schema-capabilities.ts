@@ -96,7 +96,7 @@ export async function fetchJobSchemaCapabilities(db: SupabaseClient): Promise<Jo
 let clientCapabilitiesCache: Promise<JobSchemaCapabilities> | null = null
 let serverCapabilitiesCache: Promise<JobSchemaCapabilities> | null = null
 
-/** Cached per browser session — probes run once. */
+/** Cached per browser session - probes run once. */
 export function getClientJobSchemaCapabilities(): Promise<JobSchemaCapabilities> {
   if (!clientCapabilitiesCache) {
     clientCapabilitiesCache = fetchJobSchemaCapabilities(supabase)
@@ -104,7 +104,7 @@ export function getClientJobSchemaCapabilities(): Promise<JobSchemaCapabilities>
   return clientCapabilitiesCache
 }
 
-/** Cached per server process — avoids re-probing on every API request. */
+/** Cached per server process - avoids re-probing on every API request. */
 export function getServerJobSchemaCapabilities(db: SupabaseClient): Promise<JobSchemaCapabilities> {
   if (!serverCapabilitiesCache) {
     serverCapabilitiesCache = fetchJobSchemaCapabilities(db)

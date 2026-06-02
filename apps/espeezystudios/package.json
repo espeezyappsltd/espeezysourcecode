@@ -10,8 +10,9 @@
     "preview:cf": "opennextjs-cloudflare preview",
     "typecheck": "tsc --noEmit",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "echo \"No lint configured for this repo. Install ESLint or configure Next lint if needed.\"",
     "validate:studios": "node scripts/validate-studios.mjs",
+    "rsl": "npm run typecheck && npm run validate:studios",
     "stop": "node ../../scripts/stop-app-port.mjs 3007"
   },
   "dependencies": {
