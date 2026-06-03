@@ -108,7 +108,7 @@ export default function ActivityLogView({
     })()
 
     // Real-time synchronization for the audit log
-    const channel = db.channel(`activity_log_${groupId || 'personal'}`)
+    const channel = db.channel(`activity_log_${groupId || 'personal'}_${Date.now()}`)
       .on(
         'postgres_changes',
         { 

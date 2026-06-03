@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
-    apple: '/apple-icon.svg',
+    apple: '/icon.svg',
     other: [{ rel: 'mask-icon', url: '/icon.svg', color: '#10b981' }],
   },
 }

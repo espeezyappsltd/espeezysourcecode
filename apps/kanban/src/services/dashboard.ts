@@ -247,9 +247,9 @@ export function mapActivityLogRow(row: ActivityLogDbRow): ActivityLogRow {
 }
 
 const ACTIVITY_LOG_COLUMNS = [
-  'id, user_id, group_id, action, details, created_at, app_scope, resource_type, resource_id, status',
-  'id, user_id, group_id, action, details, created_at, status',
-  'id, user_id, group_id, action, details, created_at',
+  'id, user_id, action, details, created_at, app_scope, resource_type, resource_id, status',
+  'id, user_id, action, details, created_at, status',
+  'id, user_id, action, details, created_at',
 ] as const
 
 type ActivityLogQueryResult = {
@@ -322,7 +322,7 @@ export async function fetchActivityLogByGroup(
       const result = await db
         .from('activity_logs')
         .select(columns)
-        .eq('group_id', groupId)
+        .eq('details->>group_id', groupId)
         .order('created_at', { ascending: false })
         .limit(rowLimit)
       return result
@@ -348,11 +348,11 @@ export async function fetchActivityFeed(opts: {
     const rows = await selectActivityLogs(async (db, columns) => {
       let q = db.from('activity_logs').select(columns).order('created_at', { ascending: false }).limit(limit)
       if (opts.userId && opts.groupId) {
-        q = q.or(`user_id.eq.${opts.userId},group_id.eq.${opts.groupId}`)
+        q = q.or(`user_id.eq.${opts.userId},details->>group_id.eq.${opts.groupId}`)
       } else if (opts.userId) {
         q = q.eq('user_id', opts.userId)
       } else if (opts.groupId) {
-        q = q.eq('group_id', opts.groupId)
+        q = q.eq('details->>group_id', opts.groupId)
       }
       return await q
     })
@@ -385,7 +385,7 @@ export async function fetchTeamMarketplaceTransactions(
   ) as Record<string, string>
 
   const select =
-    'id, listing_title, credits_amount, created_at, buyer_id, seller_id, buyer_display_name, seller_display_name'
+    'id, listing_title, credits_amount, created_at, buyer_id, seller_id'
 
   const [asBuyer, asSeller] = await Promise.all([
     db

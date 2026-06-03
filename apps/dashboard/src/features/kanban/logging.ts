@@ -18,8 +18,8 @@ export const logEvent = async (eventData: Record<string, unknown>) => {
     const userIdRaw = typeof eventData.user_id === 'string' ? eventData.user_id : null       
     const userId = userIdRaw && UUID_RE.test(userIdRaw) ? userIdRaw : null
     const details =
-      eventData.details && typeof eventData.details === 'object'
-        ? eventData.details
+      eventData.details && typeof eventData.details === 'object' && !Array.isArray(eventData.details)
+        ? { ...(eventData.details as Record<string, unknown>), group_id: eventData.group_id ?? null }
         : {
             message: eventData.details ?? null,
             metadata: eventData.metadata ?? null,
@@ -28,7 +28,7 @@ export const logEvent = async (eventData: Record<string, unknown>) => {
 
     const { error } = await supabase.from('activity_logs').insert({
       user_id: userId,
-      app_scope: inferAppScope(),
+      app_scope: typeof eventData.app_scope === 'string' ? eventData.app_scope : inferAppScope(),
       action: String(eventData.action ?? 'UNKNOWN_ACTION'),
       resource_type: typeof eventData.resource_type === 'string' ? eventData.resource_type : 'system',
       resource_id: typeof eventData.resource_id === 'string' ? eventData.resource_id : null, 

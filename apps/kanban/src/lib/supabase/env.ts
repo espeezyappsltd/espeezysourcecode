@@ -43,11 +43,10 @@ export function resolveSupabaseAnonKey(): string {
 export function resolveSupabaseServiceRoleKey(): string {
   const key = pickFirstNonEmpty([
     process.env.SUPABASE_SERVICE_ROLE_KEY,
-    process.env.SECRET_KEY,
   ])
 
   if (!key) {
-    throw new Error('Missing Supabase service role key: set SUPABASE_SERVICE_ROLE_KEY (or SECRET_KEY).')
+    throw new Error('Missing Supabase service role key: set SUPABASE_SERVICE_ROLE_KEY.')
   }
 
   return key

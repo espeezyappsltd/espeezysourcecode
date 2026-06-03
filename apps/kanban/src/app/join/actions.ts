@@ -436,13 +436,23 @@ export async function switchTeamGroup(newGroupId: string | null): Promise<{ succ
 
   try {
     const adminDb = getAdminDb()
-    const { data: profile, error: profileError } = await adminDb
+    const { data: profileData, error: profileError } = await adminDb
       .from('profiles')
       .select('group_id, archived_group_id')
       .eq('id', uid)
-      .single()
+      .maybeSingle()
 
-    if (profileError || !profile) return { error: 'Profile not found' }
+    if (profileError) return { error: 'Failed to read profile data' }
+
+    let profile = profileData
+    if (!profile) {
+      const { error: insertError } = await adminDb.from('profiles').insert({
+        id: uid,
+        role: 'collaborator',
+      })
+      if (insertError) return { error: 'Failed to initialize profile' }
+      profile = { group_id: null, archived_group_id: null }
+    }
 
     const previousGroupId = profile.group_id as string | null
 

@@ -193,7 +193,7 @@ export default function ActivityLogView({
   useEffect(() => {
     void fetchLogs()
 
-    const channelName = `activity_feed_${userId ?? 'x'}_${groupId ?? 'x'}`
+    const channelName = `activity_feed_${userId ?? 'x'}_${groupId ?? 'x'}_${Date.now()}`
     const channel = db.channel(channelName)
 
     if (userId) {

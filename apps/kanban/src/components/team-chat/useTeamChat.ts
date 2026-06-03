@@ -125,7 +125,7 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
     void bootstrap()
 
     const channel = db
-      .channel(`team-messages:${groupId}`)
+      .channel(`team-messages:${groupId}-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'messages', filter: `group_id=eq.${groupId}` },
@@ -177,7 +177,7 @@ export function useTeamChat({ groupId, user }: TeamChatProps) {
     void loadMembers()
 
     const channel = db
-      .channel(`team-members:${groupId}`)
+      .channel(`team-members:${groupId}-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },

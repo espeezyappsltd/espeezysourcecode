@@ -488,7 +488,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
     loadMessages()
 
     const channel = db
-      .channel(`team-messages:${groupId}`)
+      .channel(`team-messages:${groupId}-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'messages', filter: `group_id=eq.${groupId}` },
@@ -538,7 +538,7 @@ export default function TeamChat({ groupId, user }: TeamChatProps) {
     loadMembers()
 
     const channel = db
-      .channel(`team-members:${groupId}`)
+      .channel(`team-members:${groupId}-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },

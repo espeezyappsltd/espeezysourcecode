@@ -20,7 +20,7 @@ export const logEvent = async (eventData: Record<string, unknown>) => {
     const userId = userIdRaw && UUID_RE.test(userIdRaw) ? userIdRaw : null
     const details: Record<string, unknown> =
       eventData.details && typeof eventData.details === 'object' && !Array.isArray(eventData.details)
-        ? (eventData.details as Record<string, unknown>)
+        ? { ...(eventData.details as Record<string, unknown>), group_id: eventData.group_id ?? null }
         : {
             message: eventData.details ?? null,
             metadata: eventData.metadata ?? null,
@@ -36,7 +36,6 @@ export const logEvent = async (eventData: Record<string, unknown>) => {
 
     const { error } = await db.from('activity_logs').insert({
       user_id: userId,
-      group_id: groupIdCol,
       app_scope: typeof eventData.app_scope === 'string' ? eventData.app_scope : inferAppScope(),
       action: String(eventData.action ?? 'UNKNOWN_ACTION'),
       resource_type: typeof eventData.resource_type === 'string' ? eventData.resource_type : 'system',
