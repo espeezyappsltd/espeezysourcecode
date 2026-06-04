@@ -52,12 +52,7 @@ export default function PlatformHero({ userCount }: Props) {
           </h1>
           <p className="landing-hero__lead">{HERO_COPY_LINES[1]}</p>
 
-          {userCount > 0 ? (
-            <p className="landing-hero__stat">
-              <strong>{userCount.toLocaleString()}</strong>{' '}
-              {userCount === 1 ? 'user' : 'users'} on Espeezy
-            </p>
-          ) : null}
+
         </motion.div>
 
         <motion.div

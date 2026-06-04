@@ -10,9 +10,10 @@ import LaunchDataProvider from '@/components/LaunchDataProvider'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import PlatformHero from '@/components/landing/PlatformHero'
 import LandingAppsSection from '@/components/landing/LandingAppsSection'
+import { Users, CheckSquare } from 'lucide-react'
 import '@/components/landing/landing.css'
 
-function LandingPageContent({ authUserCount }: { authUserCount: number }) {
+function LandingPageContent({ authUserCount, taskCount }: { authUserCount: number; taskCount: number }) {
   const { user, loading } = useSessionUser(supabase)
   const signedIn = !loading && !!user
 
@@ -26,6 +27,16 @@ function LandingPageContent({ authUserCount }: { authUserCount: number }) {
           <EspeezyMarketingBrand variant="nav" />
         </Link>
         <div className="landing-nav__links">
+          <div className="landing-nav-metrics">
+            <span className="landing-nav-metric" title="Total Teams">
+              <Users size={14} />
+              {authUserCount.toLocaleString()}
+            </span>
+            <span className="landing-nav-metric" title="Total Tasks">
+              <CheckSquare size={14} />
+              {taskCount.toLocaleString()}
+            </span>
+          </div>
           <a href="#apps" className="landing-nav-link">Apps</a>
           <Link href="/docs" className="landing-nav-link">Docs</Link>
           <Link href="/checkout" className="landing-nav-link">Pricing</Link>
@@ -67,7 +78,7 @@ function LandingPageContent({ authUserCount }: { authUserCount: number }) {
 export default function PreRegisterPageClient() {
   return (
     <LaunchDataProvider>
-      {({ authUserCount }) => (
+      {({ authUserCount, taskCount }) => (
         <MotionConfig reducedMotion="user">
           <a href="#main-content" className="skip-to-content">
             Skip to main content
@@ -84,7 +95,7 @@ export default function PreRegisterPageClient() {
               }}
             />
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <LandingPageContent authUserCount={authUserCount} />
+              <LandingPageContent authUserCount={authUserCount} taskCount={taskCount} />
             </div>
           </div>
         </MotionConfig>

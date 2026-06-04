@@ -11,6 +11,7 @@ type LiveMetrics = {
   registered_count: number
   preregistration_count: number
   auth_user_count: number
+  task_count: number
   lifetime_seats_used: number
   lifetime_seats_remaining: number
   last_updated_at: string
@@ -21,6 +22,7 @@ const ZERO_METRICS: LiveMetrics = {
   registered_count: 0,
   preregistration_count: 0,
   auth_user_count: 0,
+  task_count: 0,
   lifetime_seats_used: 0,
   lifetime_seats_remaining: 100,
   last_updated_at: new Date(0).toISOString(),
@@ -110,18 +112,20 @@ async function fetchFromSupabase(): Promise<LiveMetrics | null> {
   const cfg = getSupabaseConfig()
   if (!cfg) return null
 
-  const [preregCount, lifetimeUsed, authUserCount] = await Promise.all([
+  const [preregCount, lifetimeUsed, authUserCount, taskCount] = await Promise.all([
     fetchCount(cfg, 'pre_registrations'),
     fetchCount(cfg, 'profiles', 'subscription_plan=eq.lifetime'),
     resolveAuthUserCount(cfg),
+    fetchCount(cfg, 'tasks'),
   ])
 
-  if (preregCount === null || lifetimeUsed === null) return null
+  if (preregCount === null || lifetimeUsed === null || taskCount === null) return null
 
   return {
     registered_count: preregCount,
     preregistration_count: preregCount,
     auth_user_count: authUserCount,
+    task_count: taskCount,
     lifetime_seats_used: lifetimeUsed,
     lifetime_seats_remaining: Math.max(0, 100 - lifetimeUsed),
     last_updated_at: new Date().toISOString(),
@@ -137,10 +141,11 @@ async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
 
   try {
     const cfg = getSupabaseConfig()
-    const [preregisterRes, lifetimeRes, authUserCount] = await Promise.all([
+    const [preregisterRes, lifetimeRes, authUserCount, taskCount] = await Promise.all([
       fetch(preregisterApi, { cache: 'no-store' }),
       fetch(lifetimeApi, { cache: 'no-store' }),
       cfg ? resolveAuthUserCount(cfg) : Promise.resolve(0),
+      cfg ? fetchCount(cfg, 'tasks') : Promise.resolve(0),
     ])
 
     const preregisterData = await preregisterRes.json()
@@ -157,6 +162,7 @@ async function fetchFromProxy(req: Request): Promise<LiveMetrics | null> {
       registered_count: registered,
       preregistration_count: registered,
       auth_user_count: authUserCount,
+      task_count: taskCount ?? 0,
       lifetime_seats_used: lifetimeUsed,
       lifetime_seats_remaining: Math.max(0, 100 - lifetimeUsed),
       last_updated_at: new Date().toISOString(),

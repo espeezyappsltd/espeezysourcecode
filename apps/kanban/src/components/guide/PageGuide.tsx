@@ -20,14 +20,25 @@ export function PageGuide({ guide }: { guide: PageGuideConfig }) {
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
   const [showDot, setShowDot] = useState(false)
+  const [optedOut, setOptedOut] = useState(false)
   const theme = resolveTheme(guide)
 
   useEffect(() => {
     setMounted(true)
     const wasDismissed = localStorage.getItem(guideStorageKey(guide.id)) === 'true'
-    setShowDot(!wasDismissed)
-    if (!wasDismissed) {
-      const t = window.setTimeout(() => setOpen(true), 700)
+    setOptedOut(wasDismissed)
+
+    if (wasDismissed) return
+
+    const viewsKey = `${guideStorageKey(guide.id)}_views`
+    const viewCount = parseInt(localStorage.getItem(viewsKey) || '0', 10)
+    
+    setShowDot(viewCount === 0)
+    if (viewCount === 0) {
+      const t = window.setTimeout(() => {
+        setOpen(true)
+        localStorage.setItem(viewsKey, '1')
+      }, 700)
       return () => window.clearTimeout(t)
     }
     return undefined
@@ -46,18 +57,30 @@ export function PageGuide({ guide }: { guide: PageGuideConfig }) {
     }
   }, [open])
 
-  const dismiss = useCallback(() => {
+  const dismissForever = useCallback(() => {
     localStorage.setItem(guideStorageKey(guide.id), 'true')
-    setShowDot(false)
+    setOptedOut(true)
     setOpen(false)
   }, [guide.id])
 
+  const dismissOnce = useCallback(() => {
+    setShowDot(false)
+    setOpen(false)
+    localStorage.setItem(`${guideStorageKey(guide.id)}_views`, '1')
+  }, [guide.id])
+
   const toggle = () => {
-    setOpen((v) => !v)
+    setOpen((v) => {
+      const next = !v
+      if (next) {
+        localStorage.setItem(`${guideStorageKey(guide.id)}_views`, '1')
+      }
+      return next
+    })
     if (!open) setShowDot(false)
   }
 
-  if (!mounted) return null
+  if (!mounted || optedOut) return null
 
   return createPortal(
     <motion.div className="social-guide-root" aria-hidden={!open && !showDot}>
@@ -151,10 +174,10 @@ export function PageGuide({ guide }: { guide: PageGuideConfig }) {
               )}
 
               <div className="social-guide-footer">
-                <button type="button" className="social-guide-cta" onClick={dismiss}>
+                <button type="button" className="social-guide-cta" onClick={dismissOnce}>
                   Got it
                 </button>
-                <button type="button" className="social-guide-skip" onClick={dismiss}>
+                <button type="button" className="social-guide-skip" onClick={dismissForever}>
                   Don&apos;t show tips again
                 </button>
               </div>
