@@ -7,7 +7,8 @@ function getInstance(): SupabaseClient {
   if (!_instance) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-    _instance = createBrowserClient(url, key)
+    const options = typeof window === 'undefined' ? { cookies: { getAll: () => [], setAll: () => {} } } : {}
+    _instance = createBrowserClient(url, key, options)
   }
   return _instance
 }

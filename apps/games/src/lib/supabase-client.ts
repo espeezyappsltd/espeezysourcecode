@@ -18,7 +18,8 @@ export function getSupabaseClient(): SupabaseClient | null {
   const { url, anonKey } = resolveSupabaseEnv()
   if (!url || !anonKey) return null
 
-  cachedClient = createBrowserClient(url, anonKey)
+  const options = typeof window === 'undefined' ? { cookies: { getAll: () => [], setAll: () => {} } } : {}
+  cachedClient = createBrowserClient(url, anonKey, options)
   return cachedClient
 }
 

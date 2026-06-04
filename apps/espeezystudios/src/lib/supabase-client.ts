@@ -22,7 +22,12 @@ function getInstance(): SupabaseClient {
     const envKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const url = isValidHttpUrl(envUrl) ? envUrl : PLACEHOLDER_URL;
     const key = envKey && envKey !== 'your_supabase_anon_key' ? envKey : PLACEHOLDER_KEY;
-    _instance = createBrowserClient(url, key);
+    
+    const options = typeof window === 'undefined' 
+      ? { cookies: { getAll: () => [], setAll: () => {} } }
+      : {};
+      
+    _instance = createBrowserClient(url, key, options);
   }
   return _instance;
 }
