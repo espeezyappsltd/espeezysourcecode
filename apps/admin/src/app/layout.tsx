@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './prestige.css';
+import '@shared/theme-cycle.css';
+import '@shared/espeezy-appearance.css';
 import { ConnectivityProvider } from '@/context/ConnectivityContext';
 import AppRuntimeShell from '@/components/AppRuntimeShell';
 import type { Viewport } from 'next';
+import { EspeezyThemeProvider } from '@shared/EspeezyThemeProvider';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://panel.espeezy.com'),
@@ -39,11 +42,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var p=location.pathname;if(p==='/login'||p.indexOf('/admin')===0)document.documentElement.classList.add('admin-theme-dark')}catch(e){}})();`,
-          }}
-        />
         {/* Critical preconnects  -  reduce first-auth latency */}
         <link rel="preconnect" href="https://othntbcrtmemavfsslrb.db.co" />
         <link rel="dns-prefetch" href="https://othntbcrtmemavfsslrb.db.co" />
@@ -51,9 +49,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
       </head>
       <body suppressHydrationWarning>
-        <ConnectivityProvider>
-          <AppRuntimeShell>{children}</AppRuntimeShell>
-        </ConnectivityProvider>
+        <EspeezyThemeProvider rootClassName="admin-theme-bridge">
+          <ConnectivityProvider>
+            <AppRuntimeShell>{children}</AppRuntimeShell>
+          </ConnectivityProvider>
+        </EspeezyThemeProvider>
 
         {/* PREMIUM SVG FILTERS */}
         <svg style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none' }}>

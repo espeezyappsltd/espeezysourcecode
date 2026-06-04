@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import '@shared/theme-cycle.css'
+import '@shared/espeezy-appearance.css'
 import NavigationProgress from '@/components/NavigationProgress'
 import PreregFooter from '@/components/PreregFooter'
 import { CentralLoadingProvider } from '@shared/CentralLoadingProvider'
 import PageTransitionWrapper from '@shared/PageTransitionWrapper'
 import { PLATFORM_ONE_LINER } from '@shared/platform-brand'
+import { EspeezyThemeProvider } from '@shared/EspeezyThemeProvider'
 
 const OG_TITLE = 'Espeezy learning apps for students and teams'
 
@@ -49,7 +52,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link 
           rel="preload" 
@@ -59,13 +62,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <CentralLoadingProvider>
-          <NavigationProgress />
-          <PageTransitionWrapper>
-            {children}
-          </PageTransitionWrapper>
-          <PreregFooter />
-        </CentralLoadingProvider>
+        <EspeezyThemeProvider rootClassName="prereg-theme-bridge">
+          <CentralLoadingProvider>
+            <NavigationProgress />
+            <PageTransitionWrapper>
+              {children}
+            </PageTransitionWrapper>
+            <PreregFooter />
+          </CentralLoadingProvider>
+        </EspeezyThemeProvider>
       </body>
     </html>
   )

@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import '@/features/home/kanban-home.css'
+import '@shared/theme-cycle.css'
+import '@shared/espeezy-appearance.css'
 import PreregFooter from '@/components/PreregFooter'
 import { AccessibilityProvider } from '@/features/home/AccessibilityProvider'
 import { AccessibilityToolbar } from '@/features/home/AccessibilityToolbar'
 import { UserGuide } from '@/features/home/UserGuide'
+import { EspeezyThemeProvider } from '@shared/EspeezyThemeProvider'
 
 export const metadata: Metadata = {
   title: 'Espeezy Kanban — Dashboard Home',
@@ -44,14 +47,16 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <AccessibilityProvider>
-          {children}
-          <AccessibilityToolbar />
-          <UserGuide />
-        </AccessibilityProvider>
-        <PreregFooter />
+        <EspeezyThemeProvider rootClassName="dashboard-theme-bridge">
+          <AccessibilityProvider>
+            {children}
+            <AccessibilityToolbar />
+            <UserGuide />
+          </AccessibilityProvider>
+          <PreregFooter />
+        </EspeezyThemeProvider>
       </body>
     </html>
   )

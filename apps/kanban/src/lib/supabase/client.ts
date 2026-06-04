@@ -7,9 +7,11 @@ let browserInstance: SupabaseClient | null = null
 
 export function createClient(): SupabaseClient {
   if (browserInstance) return browserInstance
+  const options = typeof window === 'undefined' ? { cookies: { getAll: () => [], setAll: () => {} } } : {}
   browserInstance = createBrowserClient(
     resolveSupabaseUrl(),
     resolveSupabaseAnonKey(),
+    options
   )
   return browserInstance
 }
@@ -17,9 +19,8 @@ export function createClient(): SupabaseClient {
 export function createServerSupabaseClient(): SupabaseClient {
   // Minimal no-op cookies implementation for API/server context
   const cookies = {
-    get: (name: string) => undefined,
-    set: (_name: string, _value: string, _options?: CookieOptions) => {},
-    remove: (_name: string, _options?: CookieOptions) => {},
+    getAll: () => [],
+    setAll: () => {},
   }
   return createServerClient(
     resolveSupabaseUrl(),

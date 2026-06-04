@@ -1,6 +1,7 @@
 import { DEV_LINK_SECTIONS, LOCAL_APPS } from '@/lib/dev-links'
 import { formatCopyrightNotice } from '@/lib/platform/brand-copy'
 import DevLaunchHeroLogo from '@/components/DevLaunchHeroLogo'
+import { ThemeCycleButton } from '@shared/ThemeCycleButton'
 import './local-server.css'
 
 type LinkItem = {
@@ -40,7 +41,10 @@ export default function LocalServerPage() {
   return (
     <div className="local-server">
       <div className="page-shell">
-        <header className="local-server-hero">
+        <header className="local-server-hero" style={{ position: 'relative' }}>
+          <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+            <ThemeCycleButton showLabel={false} />
+          </div>
           <div className="local-server-hero-inner">
             <DevLaunchHeroLogo />
             <p className="local-server-eyebrow">Local Server</p>

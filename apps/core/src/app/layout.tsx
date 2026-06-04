@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import '@shared/theme-cycle.css'
+import '@shared/espeezy-appearance.css'
+import { EspeezyThemeProvider } from '@shared/EspeezyThemeProvider'
 
 export const metadata: Metadata = {
   title: 'Espeezy Dev Launch — developer launchpad',
@@ -11,8 +14,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <EspeezyThemeProvider rootClassName="core-theme-bridge">
+          {children}
+        </EspeezyThemeProvider>
+      </body>
     </html>
   )
 }
