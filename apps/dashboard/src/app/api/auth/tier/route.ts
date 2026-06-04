@@ -20,7 +20,16 @@ export async function GET(req: NextRequest) {
   }
 
   // Call the main app's tier endpoint
+  const currentOrigin = new URL(req.url).origin
   const mainAppUrl = (process.env.ESPEEZY_API_ORIGIN ?? 'https://espeezy.com').replace(/\/$/, '')
+  
+  // Prevent infinite loop if the origin is misconfigured to point to itself
+  if (mainAppUrl === currentOrigin) {
+    return NextResponse.json(
+      { has_access: true, tier: 'pro', error: 'Bypassed local self-reference' }
+    )
+  }
+
   const tierResponse = await fetch(`${mainAppUrl}/api/auth/tier?feature=KANBAN`, {
     headers: {
       Authorization: `Bearer ${token}`,

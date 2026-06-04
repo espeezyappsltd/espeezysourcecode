@@ -72,15 +72,14 @@ export function WorkspaceView() {
         </Link>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 900, margin: '0 0 0.75rem' }}>Set up your team</h1>
         <p style={{ color: 'var(--text-sub)', lineHeight: 1.6, maxWidth: '480px', margin: '0 0 1.5rem' }}>
-          Your account is ready, but you are not linked to a team workspace yet. Create or join a team in the full Kanban
-          app, then return here to use your board.
+          Your account is ready, but you are not linked to a team workspace yet. Please contact your team administrator or support to be added to a workspace.
         </p>
         <a
-          href="https://kanban.espeezy.com/join"
+          href="mailto:support@espeezy.com?subject=Join%20Team"
           className="kanban-home-btn kanban-home-btn--primary"
           style={{ display: 'inline-flex' }}
         >
-          Create or join a team
+          Contact Support
         </a>
       </div>
     )
