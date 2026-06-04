@@ -19,7 +19,8 @@ export async function createClient() {
       setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
+            if (name.startsWith('__cf') || name === 'cf_clearance') return;
+              cookieStore.set(name, value, options),
           )
         } catch {
           // Server Component — middleware/proxy refreshes session on navigations.
@@ -28,3 +29,5 @@ export async function createClient() {
     },
   })
 }
+
+

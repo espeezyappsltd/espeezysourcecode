@@ -22,9 +22,10 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }) => {
+              if (name.startsWith('__cf') || name === 'cf_clearance') return;
               cookieStore.set(name, value, options)
-            )
+            })
           } catch {
             // Called from a Server Component  -  cookies cannot be set.
             // Middleware keeps session fresh, so this is fine.
@@ -46,3 +47,5 @@ export function createAdminSupabaseClient() {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 }
+
+

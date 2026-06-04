@@ -23,7 +23,8 @@ export async function createClient() {
       setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
+            if (name.startsWith('__cf') || name === 'cf_clearance') return;
+              cookieStore.set(name, value, options),
           )
         } catch {
           // Server Component — cookies set on next navigation.
@@ -32,3 +33,5 @@ export async function createClient() {
     },
   })
 }
+
+
