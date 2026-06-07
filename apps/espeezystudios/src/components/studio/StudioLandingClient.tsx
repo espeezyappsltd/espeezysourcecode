@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Palette, LayoutDashboard, ShoppingBag, Send, ArrowRight } from 'lucide-react'
 import { useSessionUser } from '@shared/useSessionUser'
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase-client'
 import './studio-landing.css'
 
 const motionEase = [0.22, 1, 0.36, 1] as const
