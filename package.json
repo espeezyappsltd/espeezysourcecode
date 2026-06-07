@@ -128,11 +128,12 @@
     "build:kanban": "npm --prefix apps/kanban run build"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "@stripe/react-stripe-js": "^6.2.0",
     "@stripe/stripe-js": "^9.2.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
-    "@opennextjs/cloudflare": "^1.19.11",
+    "@swc/helpers": "0.5.23",
     "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
