@@ -8,7 +8,7 @@ import AppsNav from './AppsNav'
 import StudioBottomNav from './StudioBottomNav'
 import GlobalFooter from './GlobalFooter'
 
-const MINIMAL_CHROME_PATHS = new Set(['/login', '/sso'])
+const MINIMAL_CHROME_PATHS = new Set(['/', '/login', '/sso'])
 
 function usesMinimalChrome(pathname: string) {
   return MINIMAL_CHROME_PATHS.has(pathname)
