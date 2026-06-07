@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import StudioPageShell from '@/components/StudioPageShell'
-import { Briefcase, Receipt, ShoppingBag, TrendingUp } from 'lucide-react'
+import { Briefcase, Receipt, ShoppingBag, TrendingUp, LayoutDashboard } from 'lucide-react'
 
 import { STUDIO_PAGE_COPY } from '@/lib/studio/ui-copy'
 
@@ -28,6 +28,12 @@ const HUB_LINKS = [
     title: 'Team & clients',
     description: 'Manage studio team roster and client-facing project categories.',
     icon: ShoppingBag,
+  },
+  {
+    href: '/dashboard',
+    title: 'Dashboard Overview',
+    description: 'Manage applications and users in the new dashboard hub.',
+    icon: LayoutDashboard,
   },
 ] as const
 

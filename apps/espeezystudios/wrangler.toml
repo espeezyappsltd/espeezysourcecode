@@ -9,5 +9,5 @@ binding = "ASSETS"
 directory = ".open-next/assets"
 
 [[routes]]
-pattern = "studios.espeezy.com"
+pattern = "studio.espeezy.com"
 custom_domain = true

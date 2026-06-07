@@ -10,7 +10,7 @@ import LaunchDataProvider from '@/components/LaunchDataProvider'
 import LiveChatWidget from '@/components/LiveChatWidget'
 import PlatformHero from '@/components/landing/PlatformHero'
 import LandingAppsSection from '@/components/landing/LandingAppsSection'
-import { Users, CheckSquare } from 'lucide-react'
+import { User, CheckSquare } from 'lucide-react'
 import '@/components/landing/landing.css'
 
 function LandingPageContent({ authUserCount, taskCount }: { authUserCount: number; taskCount: number }) {
@@ -28,9 +28,9 @@ function LandingPageContent({ authUserCount, taskCount }: { authUserCount: numbe
         </Link>
         <div className="landing-nav__links">
           <div className="landing-nav-metrics">
-            <span className="landing-nav-metric" title="Total Teams">
-              <Users size={14} />
-              {authUserCount.toLocaleString()}
+            <span className="landing-nav-metric" title="Total Users">
+              <User size={14} />
+              #{authUserCount.toLocaleString()}
             </span>
             <span className="landing-nav-metric" title="Total Tasks">
               <CheckSquare size={14} />

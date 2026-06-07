@@ -42,7 +42,7 @@ const STRIPE_SUPPORT_PRODUCTS = [
   {
     name: LIFETIME_PLAN_NAME,
     price: '£149.00 one-time',
-    tag: 'First 100 Only - Limited',
+    tag: 'First 100 Only — Limited',
     href: PLAN_PAYMENT_LINKS.lifetime,
     cta: 'Claim Lifetime',
     description: LIFETIME_PLAN_DESCRIPTION,

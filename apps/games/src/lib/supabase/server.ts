@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { resolveSupabaseEnv } from '@/lib/supabase-env'
 
-/** Server route handler / RSC client (session in HTTP cookies). */
 export async function createClient() {
   const { url, anonKey } = resolveSupabaseEnv()
   if (!url || !anonKey) {
@@ -18,16 +17,14 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value, options }) => {
             if (name.startsWith('__cf') || name === 'cf_clearance') return;
-              cookieStore.set(name, value, options),
-          )
+            cookieStore.set(name, value, options)
+          })
         } catch {
-          // Server Component — middleware/proxy refreshes session on navigations.
+          // Server Component - middleware/proxy refreshes session on navigations.
         }
       },
     },
   })
 }
-
-

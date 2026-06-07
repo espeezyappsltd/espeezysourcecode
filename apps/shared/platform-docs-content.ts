@@ -15,7 +15,7 @@ export const ESPEEZY_APPS_IN_USE: AppInUse[] = productionAppsForConsumerDocs()
 export const ESPEEZY_DEVELOPER_APPS: AppInUse[] = productionAppsForDeveloperDocs()
 
 export const DOCS_HOME_INTRO =
-  'Espeezy learning apps help students and teams plan work, study together, and show who contributed. Start with Kanban, then open the other apps with the same account.'
+  'Espeezy learning apps help students and teams plan work, study together, manage projects via dashboard, and show who contributed. Start with Kanban, then open the other apps with the same account.'
 
 export const DOCS_ESSENTIAL_LINKS = [
   { title: 'Quick start', desc: 'Create an account and open your first board.', href: '/docs/getting-started' },

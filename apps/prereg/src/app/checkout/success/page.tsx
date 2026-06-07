@@ -76,13 +76,13 @@ const TIER_CONTENT = {
   pro: {
     label:     'Pro Plan Active',
     heading:   "You're in. Let's get to work.",
-    subheading:'Your 14-day free trial has started - no charge until it ends.',
+    subheading:'Your 14-day free trial has started — no charge until it ends.',
     body:      "Pro gives you the tools to show up better in group work: deeper analytics, AI Study Coach credits, and a verified contributor badge. Your trial runs for 14 days. Cancel any time before it ends and you won't pay a thing.",
     badge:     'Your Espeezy Pro trial is live',
     badgeSub:  'Full Pro access · Cancel any time',
     nextSteps: [
       'Log in at espeezy.com to activate your account',
-      'Invite your group members - they stay on Free',
+      'Invite your group members — they stay on Free',
       'Check your contribution dashboard after your first session',
     ],
     icon:    <Zap size={44} color="white" fill="white" />,
@@ -93,7 +93,7 @@ const TIER_CONTENT = {
   premium: {
     label:     'Premium Plan Active',
     heading:   'Premium unlocked.',
-    subheading:'Your 14-day free trial is live - cancel any time before it ends.',
+    subheading:'Your 14-day free trial is live — cancel any time before it ends.',
     body:      "You now have access to everything Espeezy Premium includes: advanced AI Study Coach, group health scores, academic integrity reports, and priority support. Use the trial to run at least one full project cycle and see the difference.",
     badge:     'Your Espeezy Premium trial is live',
     badgeSub:  'Full Premium access · Cancel any time',

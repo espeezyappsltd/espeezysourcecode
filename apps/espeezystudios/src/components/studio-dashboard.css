@@ -1,0 +1,138 @@
+.studio-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.studio-dashboard-sidebar {
+  width: 250px;
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.studio-dashboard-sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.studio-dashboard-sidebar-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.studio-dashboard-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+  gap: 0.25rem;
+}
+
+.studio-dashboard-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.studio-dashboard-nav-link:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.studio-dashboard-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.studio-dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.studio-dashboard-header h1 {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.studio-dashboard-header p {
+  margin: 0.5rem 0 0;
+  color: #64748b;
+}
+
+.studio-dashboard-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.studio-dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.studio-dashboard-table th,
+.studio-dashboard-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.studio-dashboard-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.studio-dashboard-table td {
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.studio-dashboard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.studio-dashboard-btn--primary {
+  background-color: #6366f1;
+  color: #ffffff;
+}
+
+.studio-dashboard-btn--primary:hover {
+  background-color: #4f46e5;
+}
+
+.studio-dashboard-btn--ghost {
+  background-color: transparent;
+  color: #64748b;
+}
+
+.studio-dashboard-btn--ghost:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.studio-dashboard-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; font-size: 0.875rem; color: #0f172a; }
+.studio-dashboard-muted { color: #64748b; font-size: 0.875rem; }

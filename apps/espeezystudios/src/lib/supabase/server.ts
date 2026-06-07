@@ -17,10 +17,10 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value, options }) => {
             if (name.startsWith('__cf') || name === 'cf_clearance') return;
-              cookieStore.set(name, value, options),
-          )
+            cookieStore.set(name, value, options);
+          })
         } catch {
           /* Server Component: session refreshed on navigation */
         }
@@ -28,5 +28,3 @@ export async function createClient() {
     },
   })
 }
-
-

@@ -37,12 +37,12 @@ export const PLATFORM_OPERATIONS_TAGLINE = 'Operated by a dedicated platform tea
  * One-sentence pitch for metadata, hero sections, and social cards.
  */
 export const PLATFORM_ONE_LINER =
-  'Espeezy learning apps are built for students and teams: shared boards, study tools, client delivery, and publishing, with a clear record of who contributed what.'
+  'Espeezy learning apps are built for students and teams: shared boards, study tools, client delivery, marketplace, and publishing, with a clear record of who contributed what.'
 
 /** Marketing hero: headline and supporting sentence. */
 export const HERO_COPY_LINES = [
   'Espeezy learning apps',
-  'Group boards, study tools, and client delivery. One login across the apps below.',
+  'Group boards, study tools, marketplaces, and client delivery. One login across the apps below.',
 ] as const
 
 export const HERO_ANALYTICS_CAPTION = 'Product overview'

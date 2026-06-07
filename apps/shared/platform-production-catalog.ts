@@ -84,13 +84,13 @@ export const PRODUCTION_PLATFORM_APPS: PlatformApp[] = [
   app(
     'studios',
     'Espeezy Studio',
-    'Projects, delivery, and studio operations.',
-    'Run client projects, jobs, analytics, and handoffs at studios.espeezy.com. Open from Kanban when you have Premium access.',
+    'Studio dashboard, marketplace, and operations.',
+    'Run client projects, jobs, analytics, and handoffs at studios.espeezy.com. Access the marketplace and your new studio dashboard.',
     'live',
     'studios',
     'palette',
     '#f59e0b',
-    ['Project workspace and jobs', 'Client delivery and documents', 'Studio analytics'],
+    ['Studio dashboard & analytics', 'Marketplace', 'Client delivery and documents'],
     30,
   ),
   app(
