@@ -31,7 +31,7 @@
     "libphonenumber-js": "^1.12.41",
     "lucide-react": "^1.14.0",
     "next": "^16.2.4",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^9.0.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
