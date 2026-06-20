@@ -155,7 +155,7 @@
     "recharts": "^3.8.1",
     "stripe": "^18.5.0",
     "typecheck": "^0.1.2",
-    "wrangler": "^4.95.0",
+    "wrangler": "^4.103.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
